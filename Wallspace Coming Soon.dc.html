@@ -92,6 +92,7 @@ input,select,button{font-family:inherit}
             <option>Fandoms &amp; shows</option>
             <option>Something else</option>
           </select>
+          <input ref="{{hpRef}}" data-ui="1" type="text" name="website" tabIndex="-1" autoComplete="off" aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none">
           <button type="submit" data-mv="btn" onPointerDown="{{onUiDown}}" style="padding:13px 22px;border-radius:12px;border:none;background:#221c26;color:#ffffff;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(34,28,38,0.22)" style-hover="background:#ef4d98">{{btnLabel}}</button>
         </form>
         <div data-mv="nospam" onPointerDown="{{onUiDown}}" style="font-size:12.5px;color:#a394a0">No spam — one email when the wall opens.</div>
@@ -160,6 +161,13 @@ input,select,button{font-family:inherit}
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;fakeCursors&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Canvas demo&quot;},&quot;trailEffect&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Canvas demo&quot;},&quot;seedDoodles&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Canvas demo&quot;},&quot;formEndpoint&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Waitlist&quot;}}">
+/* Google Apps Script web-app URL for waitlist signups.
+   Deploy > New deployment > Web app, "Execute as: Me", "Who has access: Anyone",
+   then paste the /exec URL here. Re-deploying after a script edit: use
+   Deploy > Manage deployments > pencil > Version: New version, so the URL stays put.
+   Not a secret — it only accepts writes and can't read the sheet back. */
+const SIGNUP_ENDPOINT = '';
+
 class Component extends DCLogic {
   state = { tool: 'move', ci: 1, shape: 'hat', pw: 1, po: 0, fo: 0, strokes: [], stickers: [], notes: [], editing: null, formStatus: 'idle', ui: {} };
   KEY = 'wallspace-wall-v4';
@@ -177,6 +185,7 @@ class Component extends DCLogic {
   ];
   heroRef = React.createRef(); inkRef = React.createRef(); fxRef = React.createRef();
   emailRef = React.createRef(); selRef = React.createRef(); editRef = React.createRef(); copyRef = React.createRef();
+  hpRef = React.createRef();
   card1Ref = React.createRef(); card2Ref = React.createRef(); card3Ref = React.createRef();
   parts = []; agents = []; cur = null; drag = null; Wc = 1200; Hc = 700;
 
@@ -717,16 +726,26 @@ class Component extends DCLogic {
     e.preventDefault();
     this.exciteFace(2);
     if (this.state.formStatus === 'sending') return;
-    const email = this.emailRef.current.value, interest = this.selRef.current.value;
+    const email = this.emailRef.current.value.trim();
+    const category = this.selRef.current.value;
+    const website = this.hpRef.current ? this.hpRef.current.value : '';
     this.setState({ formStatus: 'sending' });
     const finish = (ok) => {
       this.setState({ formStatus: ok ? 'done' : 'error' });
       if (ok) this.confetti();
     };
-    const ep = this.props.formEndpoint;
+    const ep = this.props.formEndpoint || SIGNUP_ENDPOINT;
     if (ep && /^https?:/.test(ep)) {
-      fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ email, interest }) })
-        .then(r => finish(r.ok)).catch(() => finish(false));
+      fetch(ep, {
+        method: 'POST',
+        /* text/plain keeps this a "simple" request, so the browser skips the
+           CORS preflight that Apps Script can't answer. */
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ email, category, source: 'knoll.space', website })
+      })
+        .then(r => r.json())
+        .then(d => finish(!!(d && d.ok)))
+        .catch(() => finish(false));
     } else setTimeout(() => finish(true), 650);
   };
   confetti() {
@@ -2217,7 +2236,7 @@ class Component extends DCLogic {
     }
     const hints = { move: 'drag anything around — the music player, the games, the gnomes', draw: 'pick a width and an ink, then draw anywhere', sticker: 'pick a gnome sticker, then click to stamp it', text: 'pick a font, then click anywhere to leave a note' };
     return {
-      heroRef: this.heroRef, inkRef: this.inkRef, fxRef: this.fxRef, emailRef: this.emailRef, selRef: this.selRef, editRef: this.editRef, copyRef: this.copyRef,
+      heroRef: this.heroRef, inkRef: this.inkRef, fxRef: this.fxRef, emailRef: this.emailRef, selRef: this.selRef, hpRef: this.hpRef, editRef: this.editRef, copyRef: this.copyRef,
       card1: this.card1Ref, card2: this.card2Ref, card3: this.card3Ref,
       onDown: this.onDown, onMove: this.onMove, onUp: this.onUp, onItemDown: this.onItemDown,
       onTool: this.onTool, onColor: this.onColor, onShape: this.onShape, onUndo: this.onUndo, onClear: this.onClear,
