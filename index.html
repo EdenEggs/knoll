@@ -169,7 +169,7 @@ input,select,button{font-family:inherit}
    then paste the /exec URL here. Re-deploying after a script edit: use
    Deploy > Manage deployments > pencil > Version: New version, so the URL stays put.
    Not a secret — it only accepts writes and can't read the sheet back. */
-const SIGNUP_ENDPOINT = '';
+const SIGNUP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyzyF91GruictUGhnX3_N4NwVyNuxLLpGvEUs3Thb3ObeE9MkrFerkvMrBDrPPQfcFr/exec';
 
 class Component extends DCLogic {
   state = { tool: 'move', ci: 1, shape: 'hat', pw: 1, po: 0, fo: 0, strokes: [], stickers: [], notes: [], editing: null, formStatus: 'idle', ui: {} };
