@@ -1,0 +1,2196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="logo/logo-icon.svg">
+<style>
+html,body{margin:0;padding:0}
+body{background:#faf7f9;font-family:'Public Sans',sans-serif;color:#26212a}
+a{color:#c93b82}a:hover{color:#a52c68}
+::selection{background:#f9d3e6}
+input,select,button{font-family:inherit}
+@keyframes wsPop{0%{transform:scale(0) rotate(-8deg)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+.ws-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
+@media (max-width:860px){.ws-cards{grid-template-columns:1fr}}
+@keyframes wsFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+</style>
+</helmet>
+<div ref="{{heroRef}}" onPointerDown="{{onDown}}" onPointerMove="{{onMove}}" onPointerUp="{{onUp}}" onPointerLeave="{{onUp}}" style="position:relative;height:100vh;min-height:560px;overflow:hidden;touch-action:pan-y;user-select:none;background-color:#faf7f9;background-image:radial-gradient(#e8dee5 1.2px, transparent 1.2px);background-size:24px 24px">
+  <canvas ref="{{inkRef}}" style="position:absolute;inset:0;width:100%;height:100%;z-index:1"></canvas>
+  <sc-for list="{{stickers}}" as="item" hint-placeholder-count="0">
+    <div data-drag="{{item.drag}}" onPointerDown="{{onItemDown}}" style="{{item.style}}"><canvas data-skc="{{item.id}}" style="{{item.cstyle}}"></canvas></div>
+  </sc-for>
+  <sc-for list="{{notes}}" as="item" hint-placeholder-count="0">
+    <div data-drag="{{item.drag}}" onPointerDown="{{onItemDown}}" style="{{item.style}}">{{item.text}}</div>
+  </sc-for>
+  <canvas ref="{{fxRef}}" style="position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none"></canvas>
+  <sc-if value="{{editing}}" hint-placeholder-val="{{ false }}">
+    <input ref="{{editRef}}" data-ui="1" onKeyDown="{{onEditKey}}" onBlur="{{onEditBlur}}" maxLength="60" placeholder="say something nice…" style="{{editStyle}}">
+  </sc-if>
+  <div data-ui="1" data-mv="logo" onPointerDown="{{onUiDown}}" style="position:absolute;left:28px;top:24px;z-index:6;display:flex;align-items:center;gap:9px;pointer-events:auto">
+    <svg width="34" height="28" viewBox="0 0 76 62" style="display:block;flex:none">
+      <path d="M8 58 C22 30 54 30 68 58 Z" fill="#ef4d98"></path>
+      <path d="M18 48 L18 58 L21 55.8 L23.2 60 L26 58.6 L23.8 54.6 L27.5 54.2 Z" fill="#ffffff"></path>
+      <path d="M30 36 L30 46 L33 43.8 L35.2 48 L38 46.6 L35.8 42.6 L39.5 42.2 Z" fill="#ffffff"></path>
+      <path d="M44 24 L44 34 L47 31.8 L49.2 36 L52 34.6 L49.8 30.6 L53.5 30.2 Z" fill="#221c26"></path>
+    </svg>
+    <span style="font-family:'Sora',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.5px;color:#221c26">knoll</span>
+  </div>
+  <div style="position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none;padding:0 24px 9vh 24px">
+    <div data-mv="badge" onPointerDown="{{onUiDown}}" style="pointer-events:auto;display:inline-flex;align-items:center;gap:8px;background:#ffffff;border:1px solid #eedbe6;border-radius:999px;padding:7px 16px;font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#c93b82;box-shadow:0 2px 10px rgba(201,59,130,0.08);animation:wsFloat 4s ease-in-out infinite">
+      <span style="width:8px;height:8px;border-radius:50%;background:#ef4d98"></span>
+      Coming soon
+    </div>
+    <h1 data-mv="h1" onPointerDown="{{onUiDown}}" style="pointer-events:auto;font-family:'Sora',sans-serif;font-weight:800;font-size:clamp(42px,6.5vw,84px);line-height:1.04;letter-spacing:-0.03em;margin:22px 0 0 0;color:#221c26">Every gnome<br>needs a hill.</h1>
+    <p data-mv="sub" onPointerDown="{{onUiDown}}" style="pointer-events:auto;max-width:560px;margin:18px 0 0 0;font-size:17px;line-height:1.6;color:#6d6272;text-wrap:pretty">Knoll is a shared canvas where your community draws and builds together in real time. The hill is already filling up — grab a tool below and claim your spot.</p>
+    <div ref="{{copyRef}}" style="margin-top:28px;pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:10px">
+      <sc-if value="{{showForm}}" hint-placeholder-val="{{ true }}">
+        <form data-ui="1" onSubmit="{{onSubmit}}" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:stretch">
+          <input ref="{{emailRef}}" data-mv="email" onPointerDown="{{onUiDown}}" type="email" required placeholder="you@internet.com" style="width:220px;padding:13px 16px;border-radius:12px;border:1.5px solid #e4d7df;background:#ffffff;font-size:15px;outline:none;color:#26212a" style-focus="border:1.5px solid #ef4d98">
+          <select ref="{{selRef}}" data-mv="sel" onPointerDown="{{onUiDown}}" style="padding:13px 12px;border-radius:12px;border:1.5px solid #e4d7df;background:#ffffff;font-size:15px;color:#26212a;outline:none">
+            <option>Indie games</option>
+            <option>Art &amp; illustration</option>
+            <option>Music &amp; bands</option>
+            <option>Fandoms &amp; shows</option>
+            <option>Something else</option>
+          </select>
+          <button type="submit" data-mv="btn" onPointerDown="{{onUiDown}}" style="padding:13px 22px;border-radius:12px;border:none;background:#221c26;color:#ffffff;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(34,28,38,0.22)" style-hover="background:#ef4d98">{{btnLabel}}</button>
+        </form>
+        <div data-mv="nospam" onPointerDown="{{onUiDown}}" style="font-size:12.5px;color:#a394a0">No spam — one email when the wall opens.</div>
+        <sc-if value="{{failed}}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13px;color:#c9333b;font-weight:600">Hmm, that didn't go through — try again?</div>
+        </sc-if>
+      </sc-if>
+      <sc-if value="{{done}}" hint-placeholder-val="{{ false }}">
+        <div data-ui="1" data-mv="success" onPointerDown="{{onUiDown}}" style="background:#ffffff;border:1.5px solid #ef4d98;color:#c93b82;font-weight:700;font-size:15px;padding:14px 24px;border-radius:14px;box-shadow:0 6px 20px rgba(239,77,152,0.15);animation:wsPop 0.5s ease">You're on the list — see you at the wall.</div>
+      </sc-if>
+    </div>
+  </div>
+  <div data-mv="cue" onPointerDown="{{onUiDown}}" style="position:absolute;left:24px;bottom:24px;z-index:6;font-size:12px;color:#a394a0;pointer-events:auto">scroll for what's coming ↓</div>
+  <div data-ui="1" data-mv="dock" onPointerDown="{{onUiDown}}" style="position:absolute;left:50%;bottom:26px;transform:translateX(-50%);z-index:40;display:flex;flex-direction:column;align-items:center;gap:10px">
+    <div style="font-size:12px;font-weight:600;color:#8d8090;background:rgba(250,247,249,0.85);padding:3px 10px;border-radius:999px">{{hint}}</div>
+    <sc-if value="{{showOpts}}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;max-width:calc(100vw - 20px);background:#221c26;border-radius:14px;padding:7px;box-shadow:0 10px 30px rgba(20,15,24,0.35)">
+        <sc-for list="{{optBtns}}" as="item" hint-placeholder-count="0">
+          <button data-opt="{{item.k}}" title="{{item.title}}" onClick="{{onOpt}}" style="{{item.btn}}"><canvas data-skb="{{item.sk}}" style="{{item.cvs}}"></canvas><span style="{{item.glyph}}">{{item.label}}</span></button>
+        </sc-for>
+      </div>
+    </sc-if>
+    <div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;max-width:calc(100vw - 20px);background:#221c26;border-radius:16px;padding:8px;box-shadow:0 14px 40px rgba(20,15,24,0.4)">
+      <button title="Move &amp; drag" data-tool="move" onClick="{{onTool}}" style="{{tMove}}"><svg width="18" height="18" viewBox="0 0 20 20"><path d="M5 3 L5 15.5 L8.5 12.5 L11 17.5 L13.2 16.4 L10.7 11.5 L15 11.5 Z" fill="currentColor"></path></svg></button>
+      <button title="Draw" data-tool="draw" onClick="{{onTool}}" style="{{tDraw}}"><svg width="18" height="18" viewBox="0 0 20 20"><path d="M4 16 L5 12 L13 4 L16 7 L8 15 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path></svg></button>
+      <button title="Stamp shapes" data-tool="sticker" onClick="{{onTool}}" style="{{tSticker}}"><svg width="18" height="18" viewBox="0 0 20 20"><circle cx="7" cy="7" r="4" fill="currentColor"></circle><rect x="10.5" y="10.5" width="6.5" height="6.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"></rect></svg></button>
+      <button title="Leave a note" data-tool="text" onClick="{{onTool}}" style="{{tText}}"><svg width="18" height="18" viewBox="0 0 20 20"><path d="M4.5 5.5 H15.5 M10 5.5 V16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg></button>
+      <div style="width:1px;height:24px;background:#3d3545;margin:0 3px"></div>
+      <sc-for list="{{swatches}}" as="item" hint-placeholder-count="0">
+        <button data-c="{{item.i}}" onClick="{{onColor}}" style="{{item.style}}"></button>
+      </sc-for>
+      <div style="width:1px;height:24px;background:#3d3545;margin:0 3px"></div>
+      <button onClick="{{onUndo}}" style="border:none;background:transparent;color:#9b8fa3;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;padding:8px 6px;border-radius:8px" style-hover="color:#ffffff;background:#332c3a">undo</button>
+      <button onClick="{{onClear}}" style="border:none;background:transparent;color:#9b8fa3;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;padding:8px 6px;border-radius:8px" style-hover="color:#ffffff;background:#332c3a">clear</button>
+    </div>
+  </div>
+</div>
+<div style="padding:88px 24px 72px 24px;background:#ffffff;border-top:1px solid #f1e7ee">
+  <div style="max-width:1080px;margin:0 auto">
+    <div data-mv="f-ov" onPointerDown="{{onUiDown}}" style="font-size:12px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#c93b82">What's coming</div>
+    <h2 data-mv="f-h2" onPointerDown="{{onUiDown}}" style="font-family:'Sora',sans-serif;font-weight:700;font-size:clamp(28px,3.4vw,40px);letter-spacing:-0.02em;margin:12px 0 40px 0;color:#221c26;max-width:560px;text-wrap:pretty">Every fan leaves a mark</h2>
+    <div class="ws-cards">
+      <div data-mv="card1" onPointerDown="{{onUiDown}}" style="position:relative;overflow:hidden;background:#faf7f9;border:1px solid #f1e7ee;border-radius:18px;padding:28px 28px 118px 28px">
+        <div style="width:30px;height:30px;border-radius:50%;background:#ef4d98"></div>
+        <h3 style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;margin:18px 0 8px 0;color:#221c26">The fan page, by the fans</h3>
+        <p style="margin:0;font-size:15px;line-height:1.6;color:#6d6272;text-wrap:pretty">Doodle, stamp shapes, leave notes, queue up the jukebox, or beat someone's snake high score. The best of it gets voted onto the page for good.</p>
+        <canvas ref="{{card1}}" style="position:absolute;left:14px;bottom:0;width:132px;height:126px;pointer-events:none"></canvas>
+      </div>
+      <div data-mv="card2" onPointerDown="{{onUiDown}}" style="position:relative;overflow:hidden;background:#faf7f9;border:1px solid #f1e7ee;border-radius:18px;padding:28px 28px 118px 28px">
+        <div style="width:30px;height:30px;border-radius:7px;background:#5871f5"></div>
+        <h3 style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;margin:18px 0 8px 0;color:#221c26">Built by consensus</h3>
+        <p style="margin:0;font-size:15px;line-height:1.6;color:#6d6272;text-wrap:pretty">Submit a design, let the community vote. What the hill approves becomes part of the page — forever.</p>
+        <canvas ref="{{card2}}" style="position:absolute;left:50%;transform:translateX(-50%);bottom:0;width:160px;height:126px;pointer-events:none"></canvas>
+      </div>
+      <div data-mv="card3" onPointerDown="{{onUiDown}}" style="position:relative;overflow:hidden;background:#faf7f9;border:1px solid #f1e7ee;border-radius:18px;padding:28px 28px 118px 28px">
+        <div style="width:30px;height:30px;border-radius:7px;background:#2fae76;transform:rotate(45deg) scale(0.88)"></div>
+        <h3 style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;margin:18px 0 8px 0;color:#221c26">Your hill, your rules</h3>
+        <p style="margin:0;font-size:15px;line-height:1.6;color:#6d6272;text-wrap:pretty">Pin the good stuff, tidy the mess, and keep the vibe yours with simple mod tools.</p>
+        <canvas ref="{{card3}}" style="position:absolute;right:14px;bottom:0;width:132px;height:126px;pointer-events:none"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+<div style="padding:26px 24px;background:#ffffff;border-top:1px solid #f1e7ee;text-align:center;font-size:13px;color:#a394a0">
+  <span data-mv="footer" onPointerDown="{{onUiDown}}" style="display:inline-block;font-family:'Public Sans',sans-serif"><span style="font-family:'Sora',sans-serif;font-weight:700;color:#221c26">Wallspace</span> (working title) · a shared wall for small internet communities</span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;fakeCursors&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Canvas demo&quot;},&quot;trailEffect&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Canvas demo&quot;},&quot;seedDoodles&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Canvas demo&quot;},&quot;formEndpoint&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Waitlist&quot;}}">
+class Component extends DCLogic {
+  state = { tool: 'move', ci: 1, shape: 'hat', pw: 1, po: 0, fo: 0, strokes: [], stickers: [], notes: [], editing: null, formStatus: 'idle', ui: {} };
+  KEY = 'wallspace-wall-v4';
+  PAL = ['#26212a', '#ef4d98', '#5871f5', '#2fae76', '#f59321'];
+  PALD = ['#151119', '#c93b82', '#3d55c9', '#238a5c', '#c9720f'];
+  PW = [2.5, 4.5, 8, 14];
+  PO = [1, 0.55, 0.25];
+  SK = ['hat', 'face', 'mushroom', 'beard', 'lantern'];
+  FONTS = [
+    { n: 'Sans', f: "'Public Sans',sans-serif", w: 600 },
+    { n: 'Display', f: "'Sora',sans-serif", w: 700 },
+    { n: 'Serif', f: "Georgia,'Times New Roman',serif", w: 600 },
+    { n: 'Mono', f: "ui-monospace,Consolas,monospace", w: 600 },
+    { n: 'Marker', f: "'Comic Sans MS','Segoe Print',cursive", w: 700 }
+  ];
+  heroRef = React.createRef(); inkRef = React.createRef(); fxRef = React.createRef();
+  emailRef = React.createRef(); selRef = React.createRef(); editRef = React.createRef(); copyRef = React.createRef();
+  card1Ref = React.createRef(); card2Ref = React.createRef(); card3Ref = React.createRef();
+  parts = []; agents = []; cur = null; drag = null; Wc = 1200; Hc = 700;
+
+  componentDidMount() {
+    /* measure first: the seed layout depends on the real window size */
+    this.sizeCanvases();
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(this.KEY) || 'null'); } catch (e) {}
+    if (saved && Array.isArray(saved.strokes)) {
+      this.setState({ strokes: saved.strokes, stickers: saved.stickers || [], notes: saved.notes || [], ui: saved.ui || {} }, () => { this.drawAll(); this.applyUi(); });
+    } else if (this.props.seedDoodles ?? true) {
+      this.setState(this.spreadSeeds(this.makeSeeds()), () => this.drawAll());
+    }
+    this.onResize = () => {
+      const wasMini = this.mini;
+      this.sizeCanvases();
+      /* crossing the breakpoint re-lays the top band: the deck folds/unfolds and the
+         lounge has to be re-sized to the space that leaves */
+      if (this.mini !== wasMini) { this.initPlayer(); this.initLounge(); this.faceSpot(); this.placeCar(); }
+      const P = this.playerPos;
+      if (P) { P.x = Math.max(8, Math.min(P.x, this.Wc - P.w - 8)); P.y = Math.max(8, Math.min(P.y, this.Hc - P.h - 8)); }
+      if (this.lounge) { this.lounge.x = Math.max(60, Math.min(this.lounge.x, this.Wc - 60)); this.lounge.y = Math.max(2.05 * this.lounge.sz + 14, Math.min(this.lounge.y, this.Hc - 40)); }
+      if (this.lawnGnome) { this.lawnGnome.x = Math.max(40, Math.min(this.lawnGnome.x, this.Wc - 40)); this.lawnGnome.y = Math.min(this.lawnGnome.y, this.Hc - 40); }
+      if (this.car) { const cb = this.carBand(); this.car.x = Math.max(50, Math.min(this.car.x, this.Wc - 50)); this.car.y = Math.max(cb.top, Math.min(this.car.y, cb.bottom)); this.newCarTarget(); }
+      if (this.face) { this.face.moved = false; this.faceSpot(); }
+      if (this.gamePin) this.gamePin = null;
+      this.drawAll();
+      this.applyUi();
+      this.forceUpdate();
+    };
+    window.addEventListener('resize', this.onResize);
+    this.sizeCanvases();
+    this.initPlayer();
+    this.initArt();
+    this.initGame();
+    const names = [{ n: 'mossy', c: '#2fae76' }, { n: 'pixelpete', c: '#5871f5' }, { n: 'juno~', c: '#f59321' }, { n: 'opal', c: '#ef4d98' }, { n: 'zip', c: '#26212a' }, { n: 'vinny', c: '#5871f5' }];
+    this.agents = names.map((a, i) => ({ ...a, x: Math.random() * this.Wc, y: 60 + Math.random() * this.Hc * 0.5, tx: 0, ty: 0, wait: i * 60, spd: 0.6, ph: Math.random() * 6, trail: [] }));
+    this.agents.forEach(a => this.newTarget(a));
+    this.initLounge();
+    this.lawnGnome = { x: Math.round(this.Wc * 0.24), y: Math.round(Math.min(this.Hc - 40, this.Hc * 0.85)), held: false };
+    this.lg = { st: 'idle', t: 500 + Math.random() * 400 };
+    this.gnome = { st: 'hide', t: 250 + Math.random() * 400, side: 'left', y: 300, p: 0 };
+    this.face = { hx: this.Wc * 0.5, hy: this.Hc * 0.7, s: 1.6, lx: 0, ly: 0, tx: 0, hype: 0, eager: 0, blink: 0, bt: 160, moved: false, hide: false };
+    this.car = { x: this.Wc * 0.57, y: Math.min(200, this.Hc * 0.26), tx: 0, ty: 0, vx: 1.4, vy: 0, dir: 1, spin: 0, tilt: 0, wait: 0, s: 0.85 };
+    this.faceSpot();
+    this.placeCar();
+    this.onWinMove = (e) => {
+      const h = this.heroRef.current; if (!h) return;
+      const r = h.getBoundingClientRect();
+      this.mouse = { x: e.clientX - r.left, y: e.clientY - r.top, in: e.clientY > r.top + 4 && e.clientY < r.bottom - 4 };
+    };
+    window.addEventListener('pointermove', this.onWinMove);
+    this.raf = requestAnimationFrame(this.frame);
+  }
+  componentWillUnmount() { cancelAnimationFrame(this.raf); window.removeEventListener('resize', this.onResize); window.removeEventListener('pointermove', this.onWinMove); window.removeEventListener('pointermove', this.onUiMove); window.removeEventListener('pointerup', this.onUiUp); clearTimeout(this.saveT); }
+  componentDidUpdate(prev) {
+    if (prev.seedDoodles !== this.props.seedDoodles && this.props.seedDoodles !== undefined) {
+      if (!this.props.seedDoodles) {
+        this.setState(s => ({ strokes: s.strokes.filter(x => x.ts !== 1), stickers: s.stickers.filter(x => x.ts !== 1), notes: s.notes.filter(x => x.ts !== 1) }), () => { this.drawAll(); this.save(); });
+      } else if (!this.state.strokes.some(x => x.ts === 1)) {
+        const seeds = this.spreadSeeds(this.makeSeeds());
+        this.setState(s => ({ strokes: s.strokes.concat(seeds.strokes), stickers: s.stickers.concat(seeds.stickers), notes: s.notes.concat(seeds.notes) }), () => { this.drawAll(); this.save(); });
+      }
+    }
+  }
+
+  /* keep the opening doodles off the words, whatever shape the window is */
+  spreadSeeds(sd) {
+    this.ko = this.keepOut();
+    if (!this.ko) return sd;
+    const W = this.Wc;
+    const fix = (it) => {
+      const px = it.x * W, py = it.y * W, m = 14 + (it.sz || 22) / 2;
+      if (!this.inKeepOut(px, py, m)) return it;
+      const o = this.pushOut(px, py, m);
+      return { ...it, x: o.x / W, y: o.y / W };
+    };
+    return { strokes: sd.strokes, stickers: sd.stickers.map(fix), notes: sd.notes.map(fix) };
+  }
+  makeSeeds() {
+    const P = Math.PI;
+    /* every y below is written for a wide window; ky restretches them down a tall one */
+    const ky = Math.min(4, Math.max(0.85, (this.Hc / this.Wc) / 0.62));
+    const wave = (x0, y0, len, amp, n) => Array.from({ length: n + 1 }, (_, i) => ({ x: x0 + len * i / n, y: y0 * ky + Math.sin(i / n * P * 3) * amp }));
+    const strokes = [
+      { c: '#ef4d98', w: 5, ts: 1, p: wave(0.33, 0.075, 0.12, 0.012, 30) },
+      { c: '#2fae76', w: 5, ts: 1, p: [{ x: 0.06, y: 0.47 }, { x: 0.085, y: 0.44 }, { x: 0.11, y: 0.47 }, { x: 0.135, y: 0.44 }, { x: 0.16, y: 0.47 }].map(q => ({ x: q.x, y: q.y * ky })) }
+    ];
+    const stickers = [
+      { id: 's1', ts: 1, shape: 'mushroom', c: '#f59321', x: 0.585, y: 0.075 * ky, sz: 56, rot: 0 },
+      { id: 's2', ts: 1, shape: 'hat', c: '#5871f5', x: 0.055, y: 0.34 * ky, sz: 52, rot: -8 },
+      { id: 's3', ts: 1, shape: 'lantern', c: '#ef4d98', x: 0.26, y: 0.08 * ky, sz: 50, rot: 8 }
+    ];
+    const notes = [
+      { id: 'n1', ts: 1, c: '#26212a', f: 0, x: 0.17, y: 0.1 * ky, text: 'draw on me →', rot: -3 },
+      { id: 'n2', ts: 1, c: '#5871f5', f: 4, x: 0.7, y: 0.07 * ky, text: 'hi from the internet', rot: 2 },
+      { id: 'n3', ts: 1, c: '#ef4d98', f: 1, x: 0.82, y: 0.51 * ky, text: 'first!!', rot: -2 }
+    ];
+    if (this.mini) return { strokes: [{ ...strokes[0], p: strokes[0].p.map(q => ({ x: q.x * 0.8 + 0.06, y: 0.03 + (q.y - strokes[0].p[0].y) })) }], stickers: [], notes: [] };
+    return { strokes, stickers, notes };
+  }
+
+  makeArt(kind) {
+    const P = Math.PI;
+    const ring = (cx, cy, rx, ry, a0, a1, n) => Array.from({ length: n + 1 }, (_, i) => { const t = a0 + (a1 - a0) * i / n; return [cx + Math.cos(t) * rx, cy + Math.sin(t) * ry]; });
+    const A = {
+      alien: [
+        { w: 6, p: [[0.5, 0.02], [0.72, 0.07], [0.88, 0.2], [0.92, 0.34], [0.84, 0.5], [0.7, 0.66], [0.58, 0.84], [0.5, 0.96], [0.42, 0.84], [0.3, 0.66], [0.16, 0.5], [0.08, 0.34], [0.12, 0.2], [0.28, 0.07], [0.5, 0.02]] },
+        { w: 5, p: [[0.16, 0.4], [0.28, 0.33], [0.42, 0.4], [0.45, 0.48], [0.34, 0.52], [0.2, 0.47], [0.16, 0.4]] },
+        { w: 5, p: [[0.84, 0.4], [0.72, 0.33], [0.58, 0.4], [0.55, 0.48], [0.66, 0.52], [0.8, 0.47], [0.84, 0.4]] },
+        { w: 4, p: [[0.47, 0.63], [0.475, 0.645]] },
+        { w: 4, p: [[0.53, 0.63], [0.525, 0.645]] },
+        { w: 4.5, p: [[0.43, 0.75], [0.5, 0.78], [0.57, 0.75]] },
+        { w: 4, p: [[0.305, 0.425], [0.315, 0.435]] },
+        { w: 4, p: [[0.695, 0.425], [0.685, 0.435]] },
+        { w: 4, p: [[0.34, 0.16], [0.5, 0.13], [0.66, 0.16]] },
+        { w: 4, p: [[0.3, 0.6], [0.36, 0.64]] },
+        { w: 4, p: [[0.7, 0.6], [0.64, 0.64]] },
+        { w: 4, p: [[0.46, 0.88], [0.5, 0.9], [0.54, 0.88]] },
+        { w: 3.5, p: [[0.22, 0.42], [0.3, 0.37], [0.4, 0.42]] },
+        { w: 3.5, p: [[0.78, 0.42], [0.7, 0.37], [0.6, 0.42]] },
+        { w: 3.5, p: [[0.48, 0.52], [0.47, 0.6]] },
+        { w: 3.5, p: [[0.52, 0.52], [0.53, 0.6]] },
+        { w: 3, p: [[0.14, 0.55], [0.2, 0.6]] },
+        { w: 3, p: [[0.16, 0.62], [0.22, 0.66]] },
+        { w: 3, p: [[0.2, 0.69], [0.26, 0.72]] },
+        { w: 3, p: [[0.8, 0.58], [0.74, 0.63]] },
+        { w: 3, p: [[0.78, 0.66], [0.72, 0.7]] },
+        { w: 3.5, p: [[0.37, 0.2], [0.5, 0.17], [0.63, 0.2]] },
+        { w: 3, p: [[0.97, 0.1], [0.97, 0.18]] },
+        { w: 3, p: [[0.93, 0.14], [1.01, 0.14]] },
+        { w: 3, p: [[0.03, 0.62], [0.03, 0.7]] },
+        { w: 3, p: [[-0.01, 0.66], [0.07, 0.66]] },
+        { w: 3, p: [[0.9, 0.75], [0.9, 0.81]] },
+        { w: 3, p: [[0.87, 0.78], [0.93, 0.78]] }
+      ],
+      sword: [
+        { w: 6, p: [[0.42, 0.56], [0.44, 0.12], [0.5, 0.02], [0.56, 0.12], [0.58, 0.56]] },
+        { w: 4, p: [[0.5, 0.1], [0.5, 0.54]] },
+        { w: 6, p: [[0.26, 0.62], [0.3, 0.57], [0.7, 0.57], [0.74, 0.62]] },
+        { w: 5, p: [[0.47, 0.62], [0.46, 0.8], [0.54, 0.8], [0.53, 0.62]] },
+        { w: 4, p: [[0.465, 0.66], [0.535, 0.69]] },
+        { w: 4, p: [[0.46, 0.71], [0.54, 0.74]] },
+        { w: 5, p: ring(0.5, 0.855, 0.05, 0.05, -P / 2, P * 1.5, 20) },
+        { w: 4, p: [[0.76, 0.16], [0.76, 0.28]] },
+        { w: 4, p: [[0.7, 0.22], [0.82, 0.22]] },
+        { w: 4, p: ring(0.5, 0.595, 0.028, 0.028, 0, P * 2, 12) },
+        { w: 3.5, p: [[0.47, 0.16], [0.47, 0.26]] },
+        { w: 3.5, p: [[0.53, 0.3], [0.53, 0.4]] },
+        { w: 4, p: [[0.455, 0.76], [0.545, 0.78]] },
+        { w: 4, p: [[0.5, 0.85], [0.505, 0.855]] },
+        { w: 3.5, p: [[0.47, 0.08], [0.53, 0.08]] },
+        { w: 3.5, p: [[0.455, 0.44], [0.455, 0.52]] },
+        { w: 3.5, p: [[0.545, 0.18], [0.545, 0.26]] },
+        { w: 3.5, p: [[0.33, 0.585], [0.335, 0.59]] },
+        { w: 3.5, p: [[0.67, 0.585], [0.665, 0.59]] },
+        { w: 3.5, p: [[0.3, 0.6], [0.7, 0.6]] },
+        { w: 4, p: [[0.46, 0.735], [0.54, 0.755]] },
+        { w: 3, p: ring(0.5, 0.855, 0.028, 0.028, 0, P * 2, 12) },
+        { w: 3, p: [[0.24, 0.36], [0.24, 0.44]] },
+        { w: 3, p: [[0.2, 0.4], [0.28, 0.4]] },
+        { w: 3, p: [[0.8, 0.7], [0.8, 0.78]] },
+        { w: 3, p: [[0.76, 0.74], [0.84, 0.74]] },
+        { w: 3, p: [[0.26, 0.9], [0.34, 0.88]] },
+        { w: 3, p: [[0.66, 0.88], [0.74, 0.9]] },
+        { w: 3, p: [[0.3, 0.95], [0.38, 0.94]] },
+        { w: 3, p: [[0.62, 0.94], [0.7, 0.95]] }
+      ],
+      ogre: [
+        { w: 6, p: ring(0.5, 0.52, 0.4, 0.36, -P / 2, P * 1.5, 32) },
+        { w: 5, p: [[0.13, 0.36], [0.02, 0.22], [0.16, 0.24]] },
+        { w: 5, p: [[0.87, 0.36], [0.98, 0.22], [0.84, 0.24]] },
+        { w: 4.5, p: ring(0.38, 0.45, 0.055, 0.055, 0, P * 2, 14) },
+        { w: 4.5, p: ring(0.62, 0.45, 0.055, 0.055, 0, P * 2, 14) },
+        { w: 4, p: [[0.375, 0.45], [0.385, 0.455]] },
+        { w: 4, p: [[0.615, 0.45], [0.625, 0.455]] },
+        { w: 4.5, p: [[0.28, 0.36], [0.43, 0.38]] },
+        { w: 4.5, p: [[0.57, 0.38], [0.72, 0.36]] },
+        { w: 4.5, p: [[0.43, 0.55], [0.46, 0.6], [0.54, 0.6], [0.57, 0.55]] },
+        { w: 5, p: ring(0.5, 0.62, 0.19, 0.14, P * 0.15, P * 0.85, 16) },
+        { w: 4, p: [[0.42, 0.7], [0.42, 0.76], [0.48, 0.76], [0.48, 0.71]] },
+        { w: 4, p: [[0.52, 0.7], [0.52, 0.75], [0.58, 0.75], [0.58, 0.705]] },
+        { w: 4, p: [[0.1, 0.3], [0.06, 0.235]] },
+        { w: 4, p: [[0.9, 0.3], [0.94, 0.235]] },
+        { w: 4, p: [[0.32, 0.52], [0.325, 0.525]] },
+        { w: 4, p: [[0.68, 0.52], [0.685, 0.525]] },
+        { w: 4, p: [[0.35, 0.57], [0.355, 0.575]] },
+        { w: 4, p: [[0.44, 0.86], [0.5, 0.88], [0.56, 0.86]] },
+        { w: 4.5, p: [[0.44, 0.15], [0.46, 0.1], [0.49, 0.145]] },
+        { w: 4.5, p: [[0.52, 0.145], [0.55, 0.095], [0.57, 0.15]] },
+        { w: 3.5, p: [[0.36, 0.26], [0.44, 0.23], [0.52, 0.26]] },
+        { w: 3.5, p: [[0.4, 0.31], [0.5, 0.285], [0.6, 0.31]] },
+        { w: 3.5, p: ring(0.27, 0.62, 0.035, 0.028, 0, P * 2, 12) },
+        { w: 3.5, p: ring(0.73, 0.62, 0.035, 0.028, 0, P * 2, 12) },
+        { w: 3.5, p: ring(0.62, 0.28, 0.022, 0.022, 0, P * 2, 10) },
+        { w: 3, p: [[0.625, 0.275], [0.63, 0.28]] },
+        { w: 3.5, p: [[0.44, 0.62], [0.46, 0.645]] },
+        { w: 3.5, p: [[0.56, 0.645], [0.58, 0.62]] },
+        { w: 3.5, p: [[0.4, 0.79], [0.5, 0.815], [0.6, 0.79]] },
+        { w: 3, p: [[0.3, 0.44], [0.305, 0.445]] },
+        { w: 3, p: [[0.7, 0.44], [0.705, 0.445]] },
+        { w: 3, p: [[0.24, 0.56], [0.245, 0.565]] },
+        { w: 3, p: [[0.76, 0.56], [0.765, 0.565]] },
+        { w: 3, p: [[0.05, 0.28], [0.09, 0.26]] },
+        { w: 3, p: [[0.95, 0.28], [0.91, 0.26]] }
+      ],
+      guitar: [
+        { w: 6, p: [[0.5, 0.45], [0.62, 0.46], [0.7, 0.51], [0.72, 0.58], [0.67, 0.63], [0.76, 0.7], [0.8, 0.8], [0.74, 0.91], [0.5, 0.96], [0.26, 0.91], [0.2, 0.8], [0.24, 0.7], [0.33, 0.63], [0.28, 0.58], [0.3, 0.51], [0.38, 0.46], [0.5, 0.45]] },
+        { w: 5, p: ring(0.5, 0.68, 0.085, 0.085, -P / 2, P * 1.5, 20) },
+        { w: 5, p: [[0.42, 0.86], [0.58, 0.86]] },
+        { w: 5, p: [[0.46, 0.45], [0.46, 0.1]] },
+        { w: 5, p: [[0.54, 0.45], [0.54, 0.1]] },
+        { w: 5, p: [[0.44, 0.1], [0.44, 0.01], [0.56, 0.01], [0.56, 0.1], [0.44, 0.1]] },
+        { w: 4, p: [[0.46, 0.18], [0.54, 0.18]] },
+        { w: 4, p: [[0.46, 0.26], [0.54, 0.26]] },
+        { w: 4, p: [[0.46, 0.34], [0.54, 0.34]] },
+        { w: 4, p: [[0.5, 0.1], [0.5, 0.6]] },
+        { w: 3.5, p: ring(0.5, 0.68, 0.055, 0.055, -P / 2, P * 1.5, 16) },
+        { w: 4, p: [[0.57, 0.72], [0.66, 0.78], [0.62, 0.86]] },
+        { w: 4, p: [[0.42, 0.03], [0.425, 0.035]] },
+        { w: 4, p: [[0.42, 0.055], [0.425, 0.06]] },
+        { w: 4, p: [[0.42, 0.08], [0.425, 0.085]] },
+        { w: 4, p: [[0.58, 0.03], [0.575, 0.035]] },
+        { w: 4, p: [[0.58, 0.055], [0.575, 0.06]] },
+        { w: 4, p: [[0.58, 0.08], [0.575, 0.085]] },
+        { w: 4, p: [[0.46, 0.88], [0.465, 0.885]] },
+        { w: 4, p: [[0.54, 0.88], [0.545, 0.885]] },
+        { w: 2.5, p: [[0.475, 0.115], [0.475, 0.855]] },
+        { w: 2.5, p: [[0.525, 0.115], [0.525, 0.855]] },
+        { w: 4, p: [[0.46, 0.115], [0.54, 0.115]] },
+        { w: 4, p: [[0.465, 0.22], [0.535, 0.22]] },
+        { w: 4, p: [[0.47, 0.3], [0.53, 0.3]] },
+        { w: 4, p: [[0.475, 0.38], [0.525, 0.38]] },
+        { w: 3, p: [[0.5, 0.405], [0.505, 0.41]] },
+        { w: 3.5, p: [[0.26, 0.86], [0.3, 0.9], [0.4, 0.93]] },
+        { w: 3.5, p: [[0.74, 0.86], [0.7, 0.9], [0.6, 0.93]] },
+        { w: 3.5, p: [[0.24, 0.72], [0.28, 0.68]] },
+        { w: 3.5, p: [[0.76, 0.72], [0.72, 0.68]] },
+        { w: 3, p: [[0.48, 0.035], [0.52, 0.035]] },
+        { w: 3, p: [[0.5, 0.98], [0.505, 0.985]] },
+        { w: 3, p: [[0.86, 0.55], [0.86, 0.63]] },
+        { w: 3, p: [[0.82, 0.59], [0.9, 0.59]] },
+        { w: 3, p: [[0.12, 0.78], [0.12, 0.84]] },
+        { w: 3, p: [[0.09, 0.81], [0.15, 0.81]] }
+      ]
+    };
+    return A[kind];
+  }
+  resample(pts, step) {
+    const out = [pts[0].slice()];
+    let need = step;
+    for (let i = 1; i < pts.length; i++) {
+      const ax = pts[i - 1][0], ay = pts[i - 1][1], bx = pts[i][0], by = pts[i][1];
+      const d = Math.hypot(bx - ax, by - ay);
+      let pos = 0;
+      while (pos + need <= d) { pos += need; out.push([ax + (bx - ax) * pos / d, ay + (by - ay) * pos / d]); need = step; }
+      need -= (d - pos);
+    }
+    out.push(pts[pts.length - 1].slice());
+    return out;
+  }
+  initArt() {
+    let kinds = ['alien', 'sword', 'ogre', 'guitar'];
+    try { const last = localStorage.getItem('ws-last-art'); if (last && kinds.length > 1) kinds = kinds.filter(k => k !== last); } catch (e) {}
+    const kind = kinds[Math.floor(Math.random() * kinds.length)];
+    try { localStorage.setItem('ws-last-art', kind); } catch (e) {}
+    const sc = 0.16, ax = 0.03;
+    const below = this.playerPos ? this.playerPos.y + this.playerPos.h + 44 : this.Hc * 0.21 + 50;
+    const ay = Math.min(Math.max(0.2, below / this.Wc), Math.max(0.18, this.Hc / this.Wc - 0.05 - sc));
+    const strokes = this.makeArt(kind).map(st => ({ c: '#26212a', w: st.w, p: this.resample(st.p, 0.011).map(pt => ({ x: ax + pt[0] * sc, y: ay + pt[1] * sc })) }));
+    this.art = { strokes, si: 0, pi: 0, pause: 40, done: false };
+    this.artOff = { x: 0, y: 0 };
+    this.artB = { x0: ax - 0.02, y0: ay - 0.02, x1: ax + sc + 0.02, y1: ay + sc + 0.02 };
+  }
+  sizeCanvases() {
+    const hero = this.heroRef.current; if (!hero) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    this.Wc = hero.clientWidth; this.Hc = hero.clientHeight;
+    /* below this the copy column fills the hero, so the bulkier props stand down */
+    this.mini = this.Wc < 760;
+    [this.inkRef.current, this.fxRef.current].forEach(c => {
+      if (!c) return; c.width = this.Wc * dpr; c.height = this.Hc * dpr;
+      c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+    });
+    [this.card1Ref.current, this.card2Ref.current, this.card3Ref.current].forEach(c => {
+      if (!c || !c.clientWidth) return;
+      c.width = c.clientWidth * dpr; c.height = c.clientHeight * dpr;
+      c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+    });
+  }
+  drawStroke(ctx, s) {
+    const prev = ctx.globalAlpha;
+    ctx.globalAlpha = prev * (s.o === undefined ? 1 : s.o);
+    this.strokePath(ctx, s);
+    ctx.globalAlpha = prev;
+  }
+  strokePath(ctx, s) {
+    const W = this.Wc, p = s.p; if (!p.length) return;
+    ctx.strokeStyle = s.c; ctx.fillStyle = s.c; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.lineWidth = Math.max(2, s.w * W / 1000);
+    if (p.length < 3) {
+      ctx.beginPath();
+      if (p.length === 1) { ctx.arc(p[0].x * W, p[0].y * W, ctx.lineWidth / 2, 0, 7); ctx.fill(); }
+      else { ctx.moveTo(p[0].x * W, p[0].y * W); ctx.lineTo(p[1].x * W, p[1].y * W); ctx.stroke(); }
+      return;
+    }
+    ctx.beginPath(); ctx.moveTo(p[0].x * W, p[0].y * W);
+    for (let i = 1; i < p.length - 1; i++) {
+      const mx = (p[i].x + p[i + 1].x) / 2 * W, my = (p[i].y + p[i + 1].y) / 2 * W;
+      ctx.quadraticCurveTo(p[i].x * W, p[i].y * W, mx, my);
+    }
+    ctx.stroke();
+  }
+  drawAll() {
+    const c = this.inkRef.current; if (!c) return;
+    const ctx = c.getContext('2d'); ctx.clearRect(0, 0, this.Wc, this.Hc);
+    this.state.strokes.forEach(s => this.drawStroke(ctx, s));
+    if (this.art && !this.mini) {
+      const a = this.art, off = this.artOff || { x: 0, y: 0 };
+      ctx.save(); ctx.translate(off.x, off.y);
+      a.strokes.forEach((st, i) => {
+        if (i < a.si || a.done) this.drawStroke(ctx, st);
+        else if (i === a.si) this.drawStroke(ctx, { ...st, p: st.p.slice(0, Math.max(1, a.pi)) });
+      });
+      ctx.restore();
+    }
+    if (this.cur) this.drawStroke(ctx, this.cur);
+  }
+
+  uid() { this.uidN = (this.uidN || 0) + 1; return 'u' + Date.now().toString(36) + this.uidN; }
+  pt(e) { const r = this.heroRef.current.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.width }; }
+
+  onDown = (e) => {
+    if (e.button !== 0 || e.target.closest('[data-ui]') || e.target.closest('[data-drag]')) return;
+    const { tool, ci, shape, editing } = this.state, p = this.pt(e);
+    if (editing) { this.commitEdit(); return; }
+    if (tool === 'move') {
+      const hit = this.hitCanvas(e);
+      if (hit) { this.cDrag = hit; this.heroRef.current.setPointerCapture(e.pointerId); }
+      return;
+    }
+    if (tool === 'draw') {
+      this.heroRef.current.setPointerCapture(e.pointerId);
+      this.cur = { c: this.PAL[ci], w: this.PW[this.state.pw] || 4.5, o: this.PO[this.state.po] || 1, p: [p] };
+    } else if (tool === 'sticker') {
+      const st = { id: this.uid(), ts: Date.now(), shape, c: this.PAL[ci], x: p.x, y: p.y, sz: 46 + Math.random() * 24, rot: Math.round(Math.random() * 20 - 10), pop: true };
+      this.setState(s => ({ stickers: [...s.stickers, st] }), () => this.save());
+    } else if (tool === 'text') {
+      this.setState({ editing: { x: p.x, y: p.y } });
+      setTimeout(() => this.editRef.current && this.editRef.current.focus(), 40);
+    }
+  };
+  hitCanvas(e) {
+    const r = this.heroRef.current.getBoundingClientRect();
+    const px = e.clientX - r.left, py = e.clientY - r.top;
+    const s = Math.max(0.7, this.Wc / 1400);
+    const R = this.mini ? null : this.lawnGnome;
+    if (R && Math.abs(px - R.x) < 42 * s && py > R.y - 148 * s && py < R.y + 10) return { kind: 'lawnGnome', dx: px - R.x, dy: py - R.y };
+    const L = this.lounge;
+    if (L && Math.abs(px - L.x) < 1.35 * L.sz && py > L.y - 2.05 * L.sz && py < L.y + 12) return { kind: 'lounge', dx: px - L.x, dy: py - L.y };
+    const C = this.car;
+    if (C && Math.abs(px - C.x) < 52 * C.s && py > C.y - 42 * C.s && py < C.y + 8 * C.s) return { kind: 'car', dx: px - C.x, dy: py - C.y };
+    const F = this.face;
+    if (F && !F.hide && Math.hypot(px - F.hx, (py - (F.hy - 10 * F.s)) * 1.15) < 34 * F.s) return { kind: 'face', dx: px - F.hx, dy: py - F.hy };
+    const gp = this.gpRect;
+    if (gp && px > gp.x && px < gp.x + gp.w && py > gp.y && py < gp.y + gp.h) return { kind: 'game', dx: px - gp.x, dy: py - gp.y };
+    const b = this.artB, off = this.artOff, W = this.Wc;
+    if (this.art && !this.mini && b && px > b.x0 * W + off.x && px < b.x1 * W + off.x && py > b.y0 * W + off.y && py < b.y1 * W + off.y) return { kind: 'art', dx: px - off.x, dy: py - off.y };
+    const pp = this.playerPos;
+    if (pp && px > pp.x - 4 && px < pp.x + pp.w + 4 && py > pp.y - 4 && py < pp.y + pp.h + 4) return { kind: 'player', dx: px - pp.x, dy: py - pp.y };
+    return null;
+  }
+  onMove = (e) => {
+    const p = this.pt(e);
+    if (this.cDrag) {
+      const r = this.heroRef.current.getBoundingClientRect();
+      const px = e.clientX - r.left, py = e.clientY - r.top, d = this.cDrag;
+      if (d.kind === 'lawnGnome') { this.lawnGnome.x = px - d.dx; this.lawnGnome.y = Math.min(this.Hc - 40, py - d.dy); }
+      else if (d.kind === 'lounge') { this.lounge.x = px - d.dx; this.lounge.y = Math.max(2.05 * this.lounge.sz + 14, Math.min(this.Hc - 40, py - d.dy)); }
+      else if (d.kind === 'car') { this.car.x = px - d.dx; this.car.y = py - d.dy; }
+      else if (d.kind === 'face') { this.face.moved = true; this.face.hx = px - d.dx; this.face.hy = py - d.dy; }
+      else if (d.kind === 'game') this.gamePin = { x: px - d.dx, y: py - d.dy };
+      else if (d.kind === 'art') { this.artOff = { x: px - d.dx, y: py - d.dy }; this.drawAll(); }
+      else if (d.kind === 'player') { this.playerPos.x = px - d.dx; this.playerPos.y = py - d.dy; }
+      return;
+    }
+    if ((this.props.trailEffect ?? true) && this.parts.length < 160 && !this.cur) {
+      this.parts.push({ x: e.clientX - this.heroRef.current.getBoundingClientRect().left, y: e.clientY - this.heroRef.current.getBoundingClientRect().top, vx: (Math.random() - 0.5) * 0.6, vy: -0.3 - Math.random() * 0.5, a: 0.9, r: 1.5 + Math.random() * 2, c: this.PAL[this.state.ci] });
+    }
+    if (this.cur) {
+      const last = this.cur.p[this.cur.p.length - 1];
+      if (Math.hypot(p.x - last.x, p.y - last.y) > 0.002) { this.cur.p.push(p); this.drawAll(); }
+    } else if (this.drag) {
+      const d = this.drag;
+      this.setState(s => {
+        const key = d.kind === 's' ? 'stickers' : 'notes';
+        return { [key]: s[key].map(it => it.id === d.id ? { ...it, x: p.x - d.dx, y: p.y - d.dy } : it) };
+      });
+    }
+  };
+  onUp = () => {
+    this.cDrag = null;
+    if (this.cur) {
+      const st = { ...this.cur, ts: Date.now() };
+      this.cur = null;
+      this.setState(s => ({ strokes: [...s.strokes, st] }), () => { this.drawAll(); this.save(); });
+    }
+    if (this.drag) { this.drag = null; this.save(); }
+  };
+  onItemDown = (e) => {
+    if (this.state.tool !== 'move') return;
+    e.stopPropagation();
+    const [kind, id] = e.currentTarget.dataset.drag.split(':');
+    const key = kind === 's' ? 'stickers' : 'notes';
+    const it = this.state[key].find(x => x.id === id); if (!it) return;
+    const p = this.pt(e);
+    this.drag = { kind, id, dx: p.x - it.x, dy: p.y - it.y };
+    this.heroRef.current.setPointerCapture(e.pointerId);
+  };
+
+  commitEdit() {
+    const ed = this.state.editing, el = this.editRef.current;
+    const text = el ? el.value.trim() : '';
+    if (ed && text) {
+      const n = { id: this.uid(), ts: Date.now(), c: this.PAL[this.state.ci], f: this.state.fo, x: ed.x, y: ed.y, text, rot: Math.round(Math.random() * 6 - 3) };
+      this.setState(s => ({ notes: [...s.notes, n], editing: null }), () => this.save());
+    } else this.setState({ editing: null });
+  }
+  applyUi() { this.applyUiRaw(); this.clampUi(); }
+  applyUiRaw() {
+    Object.entries(this.state.ui).forEach(([id, o]) => {
+      const el = document.querySelector(`[data-mv="${id}"]`);
+      if (!el) return;
+      if (el.__baseT === undefined) el.__baseT = el.style.transform || '';
+      if (o.x || o.y) { el.style.animation = 'none'; el.style.transform = `translate(${o.x}px,${o.y}px) ${el.__baseT}`; }
+    });
+  }
+  /* a piece parked at the edge of a big window must not end up off a small one */
+  clampUi() {
+    const hero = this.heroRef.current; if (!hero) return;
+    const hr = hero.getBoundingClientRect(), vw = document.documentElement.clientWidth;
+    const ui = { ...this.state.ui };
+    let changed = false;
+    Object.keys(ui).forEach(id => {
+      const el = document.querySelector(`[data-mv="${id}"]`); if (!el) return;
+      const r = el.getBoundingClientRect(); if (!r.width) return;
+      let dx = 0, dy = 0;
+      if (r.width < vw - 16) { if (r.left < 8) dx = 8 - r.left; else if (r.right > vw - 8) dx = vw - 8 - r.right; }
+      else dx = -r.left + 8;
+      if (r.height < hr.height - 16) { if (r.top < hr.top + 8) dy = hr.top + 8 - r.top; else if (r.bottom > hr.bottom - 8) dy = hr.bottom - 8 - r.bottom; }
+      if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) { ui[id] = { x: (ui[id].x || 0) + dx, y: (ui[id].y || 0) + dy }; changed = true; }
+    });
+    if (changed) this.setState({ ui }, () => { this.applyUiRaw(); this.save(); });
+  }
+  onUiDown = (e) => {
+    const mv = e.currentTarget.dataset.mv;
+    if (mv === 'email' || mv === 'sel') this.exciteFace(1);
+    else if (mv === 'btn') this.exciteFace(2);
+    if (this.state.tool !== 'move' || e.button !== 0) return;
+    e.stopPropagation();
+    const el = e.currentTarget, id = el.dataset.mv;
+    const cur = this.state.ui[id] || { x: 0, y: 0 };
+    if (el.__baseT === undefined) el.__baseT = el.style.transform || '';
+    this.uiDrag = { id, el, sx: e.clientX, sy: e.clientY, ox: cur.x, oy: cur.y, nx: cur.x, ny: cur.y, moved: false };
+    window.addEventListener('pointermove', this.onUiMove);
+    window.addEventListener('pointerup', this.onUiUp);
+  };
+  onUiMove = (e) => {
+    const d = this.uiDrag; if (!d) return;
+    d.nx = d.ox + (e.clientX - d.sx); d.ny = d.oy + (e.clientY - d.sy);
+    if (Math.hypot(e.clientX - d.sx, e.clientY - d.sy) > 5) d.moved = true;
+    if (d.moved) {
+      d.el.style.animation = 'none';
+      d.el.style.transform = `translate(${d.nx}px,${d.ny}px) ${d.el.__baseT}`;
+    }
+  };
+  onUiUp = () => {
+    const d = this.uiDrag; if (!d) return;
+    this.uiDrag = null;
+    window.removeEventListener('pointermove', this.onUiMove);
+    window.removeEventListener('pointerup', this.onUiUp);
+    if (d.moved) {
+      window.addEventListener('click', function block(ev) { ev.stopPropagation(); ev.preventDefault(); }, { capture: true, once: true });
+      this.setState(s => ({ ui: { ...s.ui, [d.id]: { x: d.nx, y: d.ny } } }), () => this.save());
+    }
+  };
+  onEditKey = (e) => { if (e.key === 'Enter') this.commitEdit(); if (e.key === 'Escape') this.setState({ editing: null }); };
+  onEditBlur = () => this.commitEdit();
+
+  onTool = (e) => {
+    const tool = e.currentTarget.dataset.tool;
+    this.setState({ tool });
+    const hero = this.heroRef.current;
+    if (hero) {
+      hero.style.cursor = tool === 'move' ? 'default' : 'crosshair';
+      /* only trap touch gestures while a mark-making tool is up, so phones can still scroll */
+      hero.style.touchAction = tool === 'move' ? 'pan-y' : 'none';
+    }
+  };
+  onColor = (e) => this.setState({ ci: +e.currentTarget.dataset.c });
+  onShape = (e) => this.setState({ shape: e.currentTarget.dataset.shape });
+  onOpt = (e) => {
+    const [k, v] = (e.currentTarget.dataset.opt || '').split(':');
+    if (k === 'w') this.setState({ pw: +v });
+    else if (k === 'o') this.setState({ po: +v });
+    else if (k === 'f') this.setState({ fo: +v });
+    else if (k === 's') this.setState({ shape: v });
+  };
+  onUndo = () => {
+    const { strokes, stickers, notes } = this.state;
+    const all = [...strokes.map(x => ['strokes', x.ts]), ...stickers.map(x => ['stickers', x.ts]), ...notes.map(x => ['notes', x.ts])];
+    if (!all.length) return;
+    all.sort((a, b) => b[1] - a[1]);
+    const [key, ts] = all[0];
+    this.setState(s => {
+      const arr = [...s[key]]; const i = arr.map(x => x.ts).lastIndexOf(ts); arr.splice(i, 1);
+      return { [key]: arr };
+    }, () => { this.drawAll(); this.save(); });
+  };
+  onClear = () => {
+    if (!window.confirm('Clear the whole wall?')) return;
+    this.art = null;
+    Object.keys(this.state.ui).forEach(id => {
+      const el = document.querySelector(`[data-mv="${id}"]`);
+      if (el) { el.style.transform = el.__baseT || ''; el.style.animation = ''; }
+    });
+    this.setState({ strokes: [], stickers: [], notes: [], ui: {} }, () => { this.drawAll(); this.save(); });
+  };
+  save() {
+    clearTimeout(this.saveT);
+    this.saveT = setTimeout(() => {
+      const { strokes, stickers, notes, ui } = this.state;
+      try { localStorage.setItem(this.KEY, JSON.stringify({ strokes, stickers, notes, ui })); } catch (e) {}
+    }, 350);
+  }
+
+  onSubmit = (e) => {
+    e.preventDefault();
+    this.exciteFace(2);
+    if (this.state.formStatus === 'sending') return;
+    const email = this.emailRef.current.value, interest = this.selRef.current.value;
+    this.setState({ formStatus: 'sending' });
+    const finish = (ok) => {
+      this.setState({ formStatus: ok ? 'done' : 'error' });
+      if (ok) this.confetti();
+    };
+    const ep = this.props.formEndpoint;
+    if (ep && /^https?:/.test(ep)) {
+      fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ email, interest }) })
+        .then(r => finish(r.ok)).catch(() => finish(false));
+    } else setTimeout(() => finish(true), 650);
+  };
+  confetti() {
+    const cx = this.Wc / 2, cy = this.Hc * 0.55;
+    for (let i = 0; i < 90; i++) {
+      const a = Math.random() * Math.PI * 2, v = 2 + Math.random() * 7;
+      this.parts.push({ x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 3, a: 1, r: 2 + Math.random() * 3.5, c: this.PAL[1 + Math.floor(Math.random() * 4)], g: 0.14 });
+    }
+  }
+
+  initLounge() {
+    const u = Math.max(0.7, this.Wc / 1400), narrow = this.Wc < 900;
+    const pp = this.playerPos;
+    if (this.mini) {
+      /* shares the top band with the minimised deck: shrunk to whatever is left beside it */
+      const right = pp ? pp.x + pp.w : this.Wc * 0.5;
+      /* fits the width left beside the deck, and never stands taller than the deck itself */
+      const sz = Math.max(28, Math.min(64, (this.Wc - right - 14) / 2.75, pp ? pp.h / 2.05 : 64));
+      this.lounge = {
+        x: Math.min(this.Wc - 1.35 * sz - 6, right + 6 + 1.35 * sz),
+        /* stands on the same baseline as the deck, so the two read as one top band */
+        y: pp ? pp.y + pp.h : 2.05 * sz + 20,
+        sz, tilt: 0
+      };
+    } else {
+      const sz = (narrow ? 70 : 92) * u;
+      const pb = pp ? pp.y + pp.h : this.Hc * 0.2;
+      this.lounge = narrow
+        ? { x: Math.min(this.Wc - 1.4 * sz, this.Wc * 0.7), y: Math.max(pb + 2.2 * sz, 2.1 * sz + 20), sz, tilt: 0 }
+        : { x: this.Wc - 190 * u, y: Math.max(215, Math.min(320, this.Hc * 0.36)), sz, tilt: 0 };
+    }
+    this.att = { st: 'go', t: 0, a: 0, dx: 0, dy: 0 };
+  }
+  slowTo(a, tx, ty, sp) {
+    const dx = tx - a.x, dy = ty - a.y, d = Math.hypot(dx, dy);
+    if (d > 1) { const s = Math.min(sp, d * 0.05); a.x += dx / d * s; a.y += dy / d * s; }
+  }
+  drawLounge(ctx) {
+    const L = this.lounge; if (!L) return;
+    const s = L.sz, t = this.t;
+
+    /* ---------- furniture, drawn in unit space (1 unit = s px) ---------- */
+    ctx.save();
+    ctx.translate(L.x, L.y); ctx.scale(s, s);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    const ink = (lw) => { ctx.strokeStyle = 'rgba(46,38,54,0.45)'; ctx.lineWidth = lw; ctx.stroke(); };
+    const band = (pts, w, step, cols) => {
+      ctx.lineCap = 'butt'; ctx.lineWidth = w;
+      let k = 0;
+      for (let i = 1; i < pts.length; i++) {
+        const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
+        const n = Math.max(1, Math.round(Math.hypot(x1 - x0, y1 - y0) / step));
+        for (let j = 0; j < n; j++) {
+          ctx.strokeStyle = cols[k++ % cols.length];
+          ctx.beginPath();
+          ctx.moveTo(x0 + (x1 - x0) * j / n, y0 + (y1 - y0) * j / n);
+          ctx.lineTo(x0 + (x1 - x0) * (j + 1) / n, y0 + (y1 - y0) * (j + 1) / n);
+          ctx.stroke();
+        }
+      }
+      ctx.lineCap = 'round';
+    };
+
+    /* warm sand under it all */
+    ctx.fillStyle = 'rgba(233,199,106,0.20)';
+    ctx.beginPath(); ctx.ellipse(-0.1, 0.01, 1.12, 0.15, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = 'rgba(46,38,54,0.10)';
+    ctx.beginPath(); ctx.ellipse(0, 0, 0.86, 0.10, 0, 0, 7); ctx.fill();
+
+    /* ---------- beach umbrella (pole sits behind the head end) ---------- */
+    ctx.save();
+    ctx.translate(-1.05, 0); ctx.rotate(L.tilt || 0);
+    ctx.strokeStyle = '#dcb98d'; ctx.lineWidth = 0.055;
+    ctx.beginPath(); ctx.moveTo(0, -0.02); ctx.lineTo(0.72, -1.78); ctx.stroke();
+    ctx.strokeStyle = 'rgba(46,38,54,0.25)'; ctx.lineWidth = 0.016;
+    ctx.beginPath(); ctx.moveTo(0.02, -0.02); ctx.lineTo(0.74, -1.78); ctx.stroke();
+    const hx = 0.72, hy = -1.78, R = 0.94, lip = 0.36, sag = 0.28, N = 8;
+    const rim = (i) => { const q = i / N * 2 - 1; return [hx + q * R, hy + lip + sag * q * q]; };
+    const ctl = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + 0.11];
+    const scallop = () => {
+      ctx.beginPath(); ctx.moveTo(rim(0)[0], rim(0)[1]);
+      for (let i = 0; i < N; i++) { const a = rim(i), b = rim(i + 1), c = ctl(a, b); ctx.quadraticCurveTo(c[0], c[1], b[0], b[1]); }
+    };
+    scallop(); ctx.lineTo(hx, hy); ctx.closePath();
+    ctx.fillStyle = '#ef4d98'; ctx.fill();
+    ctx.save(); ctx.clip();
+    ctx.fillStyle = '#fff1f7';
+    for (let i = 1; i < N; i += 2) {
+      const a = rim(i), b = rim(i + 1), c = ctl(a, b);
+      ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(a[0], a[1]);
+      ctx.quadraticCurveTo(c[0], c[1], b[0], b[1]); ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+    ctx.beginPath();
+    for (let i = 1; i < N; i++) { const a = rim(i); ctx.moveTo(hx, hy); ctx.lineTo(a[0], a[1]); }
+    ink(0.014);
+    scallop(); ctx.lineTo(hx, hy); ctx.closePath(); ink(0.022);
+    ctx.fillStyle = '#c93b82';
+    ctx.beginPath(); ctx.arc(hx, hy - 0.07, 0.085, 0, 7); ctx.fill(); ink(0.02);
+    ctx.restore();
+
+    /* ---------- lounger frame ---------- */
+    const rail = [[0.62, -0.30], [-0.05, -0.36], [-0.68, -0.74]];
+    ctx.strokeStyle = '#c8a26f'; ctx.lineWidth = 0.05;
+    ctx.beginPath();
+    ctx.moveTo(0.50, -0.28); ctx.lineTo(0.64, 0); ctx.moveTo(0.50, -0.28); ctx.lineTo(0.34, 0);
+    ctx.moveTo(-0.08, -0.34); ctx.lineTo(0.06, 0); ctx.moveTo(-0.08, -0.34); ctx.lineTo(-0.24, 0);
+    ctx.stroke();
+    ctx.lineWidth = 0.034;
+    ctx.beginPath(); ctx.moveTo(0.38, -0.12); ctx.lineTo(0.60, -0.12); ctx.moveTo(-0.20, -0.15); ctx.lineTo(0.02, -0.15); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-0.56, -0.62); ctx.lineTo(-0.12, -0.35); ctx.stroke();
+    /* fabric: dark edge then stripes on top */
+    ctx.strokeStyle = 'rgba(46,38,54,0.42)'; ctx.lineWidth = 0.185; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(rail[0][0], rail[0][1]); ctx.lineTo(rail[1][0], rail[1][1]); ctx.lineTo(rail[2][0], rail[2][1]); ctx.stroke();
+    band(rail, 0.155, 0.052, ['#fff4f9', '#5871f5']);
+    ctx.restore();
+
+    /* ---------- the gnome, dozing on the fabric ---------- */
+    const doze = Math.sin(t * 0.028);
+    ctx.save();
+    ctx.translate(L.x + 0.50 * s, L.y - 0.36 * s);
+    ctx.rotate(-1.2);
+    this.gnomeFigure(ctx, {
+      scale: s * 0.0100, bob: doze * 1.5,
+      armL: 2.72 + doze * 0.05, armR: -2.72 - doze * 0.05,
+      legL: 0.16, legR: -0.3 + Math.sin(t * 0.05) * 0.06,
+      tipx: -8 + Math.sin(t * 0.014) * 2, eyes: 'happy', shades: true,
+      tunic: '#f59321', tunD: '#c9720f', hat: '#ef4d98', hatD: '#c93b82'
+    });
+    ctx.restore();
+
+    /* ---------- side table, drink, and sleepy z's ---------- */
+    ctx.save();
+    ctx.translate(L.x, L.y); ctx.scale(s, s);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.strokeStyle = '#c8a26f'; ctx.lineWidth = 0.042;
+    ctx.beginPath(); ctx.moveTo(0.95, -0.48); ctx.lineTo(0.95, -0.04); ctx.stroke();
+    ctx.fillStyle = '#c8a26f';
+    ctx.beginPath(); ctx.ellipse(0.95, -0.03, 0.15, 0.048, 0, 0, 7); ctx.fill(); ink(0.018);
+    ctx.fillStyle = '#e8d9c6';
+    ctx.beginPath(); ctx.ellipse(0.95, -0.50, 0.24, 0.075, 0, 0, 7); ctx.fill(); ink(0.018);
+    const glass = () => { ctx.beginPath(); ctx.moveTo(0.862, -0.84); ctx.lineTo(1.038, -0.84); ctx.lineTo(0.996, -0.545); ctx.lineTo(0.904, -0.545); ctx.closePath(); };
+    ctx.save(); glass(); ctx.clip();
+    ctx.fillStyle = '#f59321'; ctx.fillRect(0.85, -0.77, 0.22, 0.28);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillRect(0.85, -0.84, 0.22, 0.075);
+    ctx.restore();
+    glass(); ink(0.02);
+    ctx.strokeStyle = '#ef4d98'; ctx.lineWidth = 0.032;
+    ctx.beginPath(); ctx.moveTo(0.935, -0.78); ctx.lineTo(1.085, -1.0); ctx.stroke();
+    ctx.fillStyle = '#2fae76';
+    ctx.beginPath(); ctx.arc(0.858, -0.835, 0.065, Math.PI * 0.5, Math.PI * 1.5); ctx.closePath(); ctx.fill(); ink(0.016);
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(L.x, L.y);
+    ctx.font = '700 ' + (s * 0.15).toFixed(1) + 'px "Public Sans",sans-serif';
+    for (let i = 0; i < 3; i++) {
+      const ph = (t * 0.007 + i * 0.34) % 1;
+      ctx.fillStyle = 'rgba(88,113,245,' + (0.5 * Math.sin(ph * Math.PI)).toFixed(3) + ')';
+      ctx.fillText('z', (-0.22 + ph * 0.34) * s, (-0.92 - ph * 0.42) * s);
+    }
+    ctx.restore();
+  }
+  initPlayer() {
+    const narrow = this.Wc < 760;
+    /* narrow: the deck folds up — playlist hidden, the dancer tucked in beside it — so the
+       whole lockup is only 276 units wide and the lounge can share the top band with it */
+    const units = narrow ? 276 : 430;
+    /* narrow: the band starts below the logo lockup and stops short of the COMING SOON
+       pill, so on a short screen the deck shrinks rather than colliding with the copy */
+    const top = narrow ? 60 : Math.round(Math.max(10, Math.min(this.Hc * 0.16, this.Hc - 10)));
+    let w = narrow ? Math.min(268, this.Wc * 0.46) : Math.max(230, Math.min(470, this.Wc * 0.33));
+    if (narrow) {
+      const hero = this.heroRef.current, bd = hero && hero.querySelector('[data-mv="badge"]');
+      if (bd) {
+        const room = bd.getBoundingClientRect().top - hero.getBoundingClientRect().top - 12 - top;
+        w = Math.min(w, room * units / 170);
+      }
+      w = Math.max(140, w);
+    }
+    w = Math.round(w);
+    const h = Math.round(w * 170 / units);
+    this.playerUnits = units;
+    /* opening layout: the player sits inset from the top-left corner, not flush to it */
+    this.playerPos = {
+      x: Math.round(Math.max(10, Math.min(this.Wc - w - 10, this.Wc * (narrow ? 0.03 : 0.07)))),
+      y: Math.round(Math.max(10, Math.min(this.Hc - h - 10, top))),
+      w, h
+    };
+    this.tracks = [
+      { n: 'Gnome & Circumstance', a: 'The Toadstools', d: 228 },
+      { n: 'Slow Mushroom Sunrise', a: 'Fern & Moss', d: 195 },
+      { n: 'Little Red Hat (demo)', a: 'Pebble Choir', d: 173 },
+      { n: 'Wheelbarrow Waltz', a: 'The Toadstools', d: 241 },
+      { n: 'Dew on the Petunias', a: 'Birdbath', d: 206 },
+      { n: 'Lantern, Lantern', a: 'Fern & Moss', d: 188 }
+    ];
+    this.player = { i: 0, pos: 41, beat: 0, eq: Array.from({ length: 16 }, () => Math.random()) };
+  }
+  stepPlayer() {
+    const P = this.player, pp = this.playerPos; if (!P || !pp) return;
+    /* the playhead runs on the wall clock, one second per second */
+    const now = (window.performance && performance.now) ? performance.now() : Date.now();
+    if (P.last == null) P.last = now;
+    P.acc = (P.acc || 0) + Math.min(600, now - P.last); P.last = now;
+    if (P.acc >= 1000) { P.pos += Math.floor(P.acc / 1000); P.acc %= 1000; }
+    if (P.pos >= this.tracks[P.i].d) { P.pos = 0; P.i = (P.i + 1) % this.tracks.length; }
+    P.beat += 0.055;
+    for (let i = 0; i < P.eq.length; i++) {
+      const want = 0.12 + 0.88 * Math.abs(Math.sin(this.t * (0.045 + i * 0.013) + i * 1.7));
+      P.eq[i] += (want - P.eq[i]) * 0.22;
+    }
+    if (this.t % 20 === 0) {
+      const G = ['♪', '♫', '♬', '♩'];
+      this.parts.push({
+        x: pp.x + pp.w * (0.05 + Math.random() * 0.82), y: pp.y + pp.h * (0.04 + Math.random() * 0.24),
+        vx: (Math.random() - 0.35) * 0.5, vy: -0.3 - Math.random() * 0.35, g: -0.004,
+        a: 1, r: 1.3 + Math.random() * 1.5,
+        c: this.PAL[1 + Math.floor(Math.random() * 4)], ch: G[Math.floor(Math.random() * 4)]
+      });
+    }
+  }
+  drawPlayer(ctx) {
+    const pp = this.playerPos, P = this.player; if (!pp || !P) return;
+    const u = pp.w / (this.playerUnits || 430), tr = this.tracks[P.i], t = this.t;
+    const fmt = (v) => Math.floor(v / 60) + ':' + String(Math.floor(v % 60)).padStart(2, '0');
+    const rr = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); };
+    const fit = (s, mw) => { if (ctx.measureText(s).width <= mw) return s; let q = s; while (q.length > 1 && ctx.measureText(q + '…').width > mw) q = q.slice(0, -1); return q + '…'; };
+    ctx.save();
+    ctx.translate(pp.x, pp.y); ctx.scale(u, u);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.textBaseline = 'alphabetic';
+
+    /* ---------- deck: glossy Y2K shell ---------- */
+    ctx.save();
+    ctx.shadowColor = 'rgba(28,50,98,0.32)'; ctx.shadowBlur = 22; ctx.shadowOffsetY = 8;
+    const shell = ctx.createLinearGradient(0, 0, 150, 168);
+    shell.addColorStop(0, '#ffffff'); shell.addColorStop(0.45, '#e9f2fd'); shell.addColorStop(1, '#b6cfea');
+    ctx.fillStyle = shell; rr(2, 2, 192, 166, [58, 20, 58, 20]); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = 1.4;
+    rr(3.6, 3.6, 188.8, 162.8, [56, 19, 56, 19]); ctx.stroke();
+
+    const body = ctx.createLinearGradient(20, 12, 130, 158);
+    body.addColorStop(0, '#79b0ef'); body.addColorStop(0.4, '#2f74d0'); body.addColorStop(1, '#123f85');
+    ctx.fillStyle = body; rr(11, 11, 174, 148, [48, 14, 48, 14]); ctx.fill();
+    const gloss = ctx.createLinearGradient(0, 12, 0, 86);
+    gloss.addColorStop(0, 'rgba(255,255,255,0.5)'); gloss.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = gloss; rr(16, 13, 164, 72, [44, 12, 34, 34]); ctx.fill();
+
+    /* window chrome */
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(133, 25); ctx.lineTo(141, 25); ctx.stroke();
+    ctx.beginPath(); ctx.rect(149, 21, 7, 6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(165, 21); ctx.lineTo(172, 28); ctx.moveTo(172, 21); ctx.lineTo(165, 28); ctx.stroke();
+
+    /* ---------- LCD ---------- */
+    ctx.fillStyle = '#0a2a5c'; rr(26, 34, 142, 62, [26, 10, 10, 10]); ctx.fill();
+    ctx.strokeStyle = 'rgba(150,196,255,0.45)'; ctx.lineWidth = 1;
+    rr(26.5, 34.5, 141, 61, [26, 10, 10, 10]); ctx.stroke();
+    ctx.save(); rr(27, 35, 140, 60, [25, 9, 9, 9]); ctx.clip();
+
+    ctx.fillStyle = '#5e9be0'; ctx.font = '700 6px "Public Sans",sans-serif';
+    ctx.fillText('TITLE', 32, 49);
+    const nm = tr.n + '  ·  ' + tr.a + '   —   ';
+    ctx.font = '700 8px "Public Sans",sans-serif';
+    const nw = ctx.measureText(nm).width, off = (t * 0.28) % nw;
+    ctx.save(); ctx.beginPath(); ctx.rect(58, 40, 106, 12); ctx.clip();
+    ctx.fillStyle = '#cfe6ff';
+    ctx.fillText(nm, 58 - off, 49); ctx.fillText(nm, 58 - off + nw, 49);
+    ctx.restore();
+
+    for (let i = 0; i < P.eq.length; i++) {
+      const bx = 32 + i * 8.4, bh = 2 + P.eq[i] * 15;
+      ctx.fillStyle = 'rgba(120,170,235,0.22)'; ctx.fillRect(bx, 55, 5, 17);
+      const bg = ctx.createLinearGradient(0, 72 - bh, 0, 72);
+      bg.addColorStop(0, '#8ef0d0'); bg.addColorStop(0.5, '#63c6f5'); bg.addColorStop(1, '#3f8ee0');
+      ctx.fillStyle = bg; ctx.fillRect(bx, 72 - bh, 5, bh);
+    }
+
+    ctx.fillStyle = '#5e9be0'; ctx.font = '700 6px "Public Sans",sans-serif';
+    ctx.fillText('TIME', 32, 82);
+    ctx.fillStyle = '#e8f4ff'; ctx.font = '700 15px "Public Sans",sans-serif';
+    ctx.fillText(fmt(P.pos), 32, 93);
+    ctx.fillStyle = '#5e9be0'; ctx.font = '700 6px "Public Sans",sans-serif';
+    ctx.fillText('TOTAL', 106, 82);
+    ctx.fillStyle = '#9fc9f2'; ctx.font = '700 9px "Public Sans",sans-serif';
+    ctx.fillText(fmt(tr.d), 106, 92);
+    ctx.restore();
+
+    /* right icon rail */
+    ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.moveTo(174, 44); ctx.lineTo(178, 41); ctx.lineTo(183, 41); ctx.lineTo(183, 48); ctx.lineTo(174, 48); ctx.closePath(); ctx.stroke();
+    for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(174, 56 + i * 3); ctx.lineTo(183, 56 + i * 3); ctx.stroke(); }
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    ctx.fillRect(174, 74, 2.4, 6); ctx.fillRect(177.5, 70, 2.4, 10); ctx.fillRect(181, 72, 2.4, 8);
+
+    /* ---------- seek bar ---------- */
+    const prog = Math.min(1, P.pos / tr.d);
+    ctx.fillStyle = 'rgba(9,38,82,0.55)'; rr(28, 106, 118, 6, 3); ctx.fill();
+    const sg = ctx.createLinearGradient(28, 0, 146, 0);
+    sg.addColorStop(0, '#bfe4ff'); sg.addColorStop(1, '#ffffff');
+    ctx.fillStyle = sg; rr(28, 106, Math.max(6, 118 * prog), 6, 3); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(28 + 118 * prog, 109, 5.6, 0, 7); ctx.fill();
+    ctx.strokeStyle = '#2f74d0'; ctx.lineWidth = 1.2; ctx.stroke();
+
+    /* ---------- volume knob ---------- */
+    const kx = 160, ky = 122;
+    ctx.strokeStyle = 'rgba(9,38,82,0.4)'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(kx, ky, 17, 0, 7); ctx.stroke();
+    ctx.strokeStyle = '#7ee06a'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(kx, ky, 17, -Math.PI * 0.78, -Math.PI * 0.78 + Math.PI * 1.35); ctx.stroke();
+    const kg = ctx.createLinearGradient(kx - 12, ky - 12, kx + 10, ky + 12);
+    kg.addColorStop(0, '#ffffff'); kg.addColorStop(1, '#c6ddf3');
+    ctx.fillStyle = kg; ctx.beginPath(); ctx.arc(kx, ky, 11.5, 0, 7); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.beginPath(); ctx.arc(kx - 3.5, ky - 4, 4.5, 0, 7); ctx.fill();
+
+    /* ---------- transport ---------- */
+    const btn = (bx, glyph, lit) => {
+      const bg2 = ctx.createLinearGradient(bx - 10, 130, bx + 8, 150);
+      bg2.addColorStop(0, lit ? '#f4fff0' : '#ffffff'); bg2.addColorStop(1, lit ? '#a9e79a' : '#c8ddf2');
+      ctx.fillStyle = bg2; ctx.beginPath(); ctx.arc(bx, 140, 10.5, 0, 7); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.fillStyle = lit ? '#2b7a2b' : '#2a5f9e';
+      if (glyph === 'pause') { ctx.fillRect(bx - 3.4, 136, 2.6, 8); ctx.fillRect(bx + 0.8, 136, 2.6, 8); }
+      else if (glyph === 'stop') ctx.fillRect(bx - 3.4, 136.6, 6.8, 6.8);
+      else if (glyph === 'prev') { ctx.fillRect(bx - 4.4, 136, 2, 8); ctx.beginPath(); ctx.moveTo(bx + 4, 136); ctx.lineTo(bx + 4, 144); ctx.lineTo(bx - 1.6, 140); ctx.closePath(); ctx.fill(); }
+      else { ctx.fillRect(bx + 2.4, 136, 2, 8); ctx.beginPath(); ctx.moveTo(bx - 4, 136); ctx.lineTo(bx - 4, 144); ctx.lineTo(bx + 1.6, 140); ctx.closePath(); ctx.fill(); }
+    };
+    ctx.fillStyle = 'rgba(126,224,106,' + (0.2 + 0.22 * Math.abs(Math.sin(t * 0.06))) + ')';
+    ctx.beginPath(); ctx.arc(36, 140, 15.5, 0, 7); ctx.fill();
+    btn(36, 'pause', true); btn(64, 'stop', false); btn(92, 'prev', false); btn(120, 'next', false);
+
+    /* the playlist folds away when the deck is minimised, so the lounge can sit beside it */
+    if (!this.mini) this.drawPlaylist(ctx);
+    this.drawVibeGnome(ctx);
+    ctx.restore();
+  }
+  /* ---------- playlist panel, parked to the right of the deck (greyed out) ---------- */
+  drawPlaylist(ctx) {
+    const P = this.player, t = this.t;
+    const rr = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); };
+    const fmt = (v) => Math.floor(v / 60) + ':' + String(Math.floor(v % 60)).padStart(2, '0');
+    const fit = (s, mw) => { if (ctx.measureText(s).width <= mw) return s; let q = s; while (q.length > 1 && ctx.measureText(q + '…').width > mw) q = q.slice(0, -1); return q + '…'; };
+    ctx.save();
+    ctx.shadowColor = 'rgba(40,30,50,0.16)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 6;
+    ctx.fillStyle = '#ffffff'; rr(204, 8, 136, 152, 13); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = '#e9dee7'; ctx.lineWidth = 1; rr(204.5, 8.5, 135, 151, 13); ctx.stroke();
+    ctx.fillStyle = '#bfb3bd'; ctx.font = '700 7px "Public Sans",sans-serif';
+    ctx.fillText('P L A Y L I S T', 216, 27);
+    ctx.fillStyle = '#8ea0e8'; ctx.font = '700 6px "Public Sans",sans-serif';
+    ctx.fillText('▸ now playing', 283, 27);
+    ctx.fillStyle = '#efe6ed'; ctx.fillRect(216, 33, 112, 1);
+    for (let i = 0; i < this.tracks.length; i++) {
+      const tk = this.tracks[i], y = 41 + i * 19.5, on = i === P.i;
+      if (on) { ctx.fillStyle = '#eef1fe'; rr(210, y - 1, 124, 18, 6); ctx.fill(); }
+      if (on) {
+        for (let b = 0; b < 3; b++) {
+          const bh = 3 + 6 * Math.abs(Math.sin(t * 0.09 + b * 1.3));
+          ctx.fillStyle = '#5871f5'; ctx.fillRect(215 + b * 3.2, y + 12 - bh, 2, bh);
+        }
+      } else {
+        ctx.fillStyle = '#d3c8d1'; ctx.font = '700 7px "Public Sans",sans-serif';
+        ctx.fillText(String(i + 1), 216.5, y + 11);
+      }
+      ctx.font = (on ? '700 ' : '600 ') + '8.5px "Public Sans",sans-serif';
+      ctx.fillStyle = on ? '#3d55c9' : '#c0b4be';
+      ctx.fillText(fit(tk.n, 74), 228, y + 8);
+      ctx.font = '600 6.5px "Public Sans",sans-serif';
+      ctx.fillStyle = on ? '#96a5e4' : '#d8cdd6';
+      ctx.fillText(fit(tk.a, 74), 228, y + 15);
+      ctx.font = '700 7px "Public Sans",sans-serif';
+      ctx.fillStyle = on ? '#96a5e4' : '#dcd2da';
+      const dt = fmt(tk.d); ctx.fillText(dt, 330 - ctx.measureText(dt).width, y + 11);
+    }
+  }
+  drawVibeGnome(ctx) {
+    const b = this.player.beat;
+    const bob = -Math.abs(Math.sin(b)) * 4.5;
+    ctx.save();
+    ctx.translate(this.mini ? 236 : 380, 158);
+    ctx.fillStyle = 'rgba(46,38,54,0.12)';
+    ctx.beginPath(); ctx.ellipse(0, 2, 24 + bob * 0.4, 5, 0, 0, 7); ctx.fill();
+    ctx.rotate(Math.sin(b * 0.5) * 0.08);
+    this.gnomeFigure(ctx, {
+      scale: 1.06, bob,
+      armL: 2.55 + Math.sin(b * 2) * 0.4, armR: -2.55 - Math.sin(b * 2) * 0.4,
+      legL: Math.max(0, Math.sin(b * 2)) * 0.3, legR: -Math.max(0, Math.sin(b * 2 + Math.PI)) * 0.3,
+      tipx: Math.sin(b) * 8, eyes: 'happy'
+    });
+    ctx.font = '700 12px "Public Sans",sans-serif';
+    ctx.fillStyle = 'rgba(88,113,245,' + (0.35 + 0.4 * Math.abs(Math.sin(b))) + ')';
+    ctx.fillText('♪', 26, -100 - Math.abs(Math.sin(b)) * 4);
+    ctx.fillStyle = 'rgba(239,77,152,' + (0.35 + 0.4 * Math.abs(Math.sin(b + 1.6))) + ')';
+    ctx.fillText('♫', 33, -80 + Math.sin(b + 1) * 3);
+    ctx.restore();
+  }
+  /* shared cartoon-gnome head — origin is the centre of the face */
+  gnomeHead(ctx, o) {
+    const hat = o.hat || '#ef4d98', hatD = o.hatD || '#c93b82';
+    const ink = (lw) => { ctx.strokeStyle = 'rgba(46,38,54,0.55)'; ctx.lineWidth = lw; ctx.stroke(); };
+    const rr = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); };
+    ctx.fillStyle = '#f6cdb0'; ctx.beginPath(); ctx.arc(0, 0, 15, 0, 7); ctx.fill(); ink(1.6);
+    ctx.beginPath();
+    ctx.moveTo(-14.5, -4);
+    ctx.quadraticCurveTo(-20, 16, -10, 32);
+    ctx.quadraticCurveTo(-6, 38, -2.5, 31);
+    ctx.quadraticCurveTo(0, 37, 2.5, 31);
+    ctx.quadraticCurveTo(6, 38, 10, 32);
+    ctx.quadraticCurveTo(20, 16, 14.5, -4);
+    ctx.quadraticCurveTo(8, 4, 0, 3);
+    ctx.quadraticCurveTo(-8, 4, -14.5, -4);
+    ctx.closePath();
+    ctx.fillStyle = '#fbf8f5'; ctx.fill(); ink(1.5);
+    ctx.fillStyle = '#efe8e4';
+    ctx.beginPath(); ctx.ellipse(-6.5, 6.5, 7, 4.2, -0.28, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(6.5, 6.5, 7, 4.2, 0.28, 0, 7); ctx.fill();
+    ctx.fillStyle = 'rgba(239,77,152,0.26)';
+    ctx.beginPath(); ctx.arc(-10, 0.5, 3.6, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(10, 0.5, 3.6, 0, 7); ctx.fill();
+    ctx.fillStyle = '#f1b899'; ctx.beginPath(); ctx.arc(0, 3.5, 5.5, 0, 7); ctx.fill(); ink(1.4);
+    ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.beginPath(); ctx.arc(-1.7, 1.6, 1.7, 0, 7); ctx.fill();
+    const lx = o.look || 0, ly = o.looky || 0;
+    if (o.eyes === 'happy') {
+      ctx.strokeStyle = '#2e2636'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(-5.6, -3.2, 3.2, Math.PI * 1.12, Math.PI * 1.88); ctx.stroke();
+      ctx.beginPath(); ctx.arc(5.6, -3.2, 3.2, Math.PI * 1.12, Math.PI * 1.88); ctx.stroke();
+    } else if (o.eyes === 'shut') {
+      ctx.strokeStyle = '#2e2636'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-8.4, -3.2); ctx.lineTo(-2.8, -3.2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(2.8, -3.2); ctx.lineTo(8.4, -3.2); ctx.stroke();
+    } else {
+      ctx.fillStyle = '#2e2636';
+      ctx.beginPath(); ctx.arc(-5.6 + lx, -3.4 + ly, 2.3, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(5.6 + lx, -3.4 + ly, 2.3, 0, 7); ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(-4.8 + lx, -4.3 + ly, 0.85, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(6.4 + lx, -4.3 + ly, 0.85, 0, 7); ctx.fill();
+    }
+    ctx.strokeStyle = '#e9e0dc'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-9.6, -8.6); ctx.lineTo(-2.6, -10.2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(9.6, -8.6); ctx.lineTo(2.6, -10.2); ctx.stroke();
+    if (o.shades) {
+      ctx.fillStyle = '#2e2636';
+      ctx.beginPath();
+      if (ctx.roundRect) { ctx.roundRect(-11.5, -7.4, 9.5, 7, [3.5, 2, 4, 3]); ctx.roundRect(2, -7.4, 9.5, 7, [2, 3.5, 3, 4]); }
+      else { ctx.rect(-11.5, -7.4, 9.5, 7); ctx.rect(2, -7.4, 9.5, 7); }
+      ctx.fill();
+      ctx.strokeStyle = '#2e2636'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.moveTo(-2, -6.2); ctx.lineTo(2, -6.2); ctx.moveTo(-11.5, -6.4); ctx.lineTo(-14.5, -5.6); ctx.moveTo(11.5, -6.4); ctx.lineTo(14.5, -5.6); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,0.45)'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(-9.6, -3.2); ctx.lineTo(-6.4, -6.4); ctx.moveTo(4, -3.2); ctx.lineTo(7.2, -6.4); ctx.stroke();
+    }
+    const tx = o.tipx || 0;
+    ctx.beginPath();
+    ctx.moveTo(-19, -14);
+    ctx.quadraticCurveTo(-15, -34, tx - 1, -48);
+    ctx.quadraticCurveTo(16, -32, 19, -14);
+    ctx.quadraticCurveTo(0, -21, -19, -14);
+    ctx.closePath();
+    ctx.fillStyle = hat; ctx.fill(); ink(1.6);
+    ctx.save(); ctx.clip();
+    ctx.fillStyle = hatD; ctx.globalAlpha = 0.55;
+    ctx.beginPath(); ctx.moveTo(5, -10); ctx.quadraticCurveTo(13, -30, tx, -50); ctx.lineTo(24, -8); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = hatD; rr(-21, -19, 42, 8, 4); ctx.fill(); ink(1.5);
+    ctx.fillStyle = 'rgba(255,255,255,0.28)'; rr(-17.5, -17.4, 14, 2.6, 1.3); ctx.fill();
+    ctx.fillStyle = '#fffaf6'; ctx.beginPath(); ctx.arc(tx - 1, -49, 4.3, 0, 7); ctx.fill(); ink(1.4);
+  }
+  /* shared cartoon-gnome body — origin is the ground between the boots */
+  gnomeFigure(ctx, o) {
+    const bob = o.bob || 0;
+    const tun = o.tunic || '#5871f5', tunD = o.tunD || '#3d55c9';
+    const ink = (lw) => { ctx.strokeStyle = 'rgba(46,38,54,0.55)'; ctx.lineWidth = lw; ctx.stroke(); };
+    const rr = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); };
+    ctx.save();
+    ctx.scale(o.scale || 1, o.scale || 1);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    const leg = (hx, ang) => {
+      ctx.save(); ctx.translate(hx, -20 + bob * 0.35); ctx.rotate(ang);
+      ctx.strokeStyle = '#b08c66'; ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 10); ctx.stroke();
+      ctx.fillStyle = '#4f4033'; rr(-6.5, 8, 14, 10, [4, 4, 5, 7]); ctx.fill(); ink(1.4);
+      ctx.fillStyle = 'rgba(255,255,255,0.16)'; rr(-4.5, 10, 5, 3, 1.5); ctx.fill();
+      ctx.restore();
+    };
+    leg(-7, o.legL || 0); leg(7, o.legR || 0);
+    const arm = (sx, ang, hand) => {
+      ctx.save(); ctx.translate(sx, -48 + bob); ctx.rotate(ang);
+      ctx.strokeStyle = tunD; ctx.lineWidth = 7;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 14); ctx.stroke();
+      ctx.fillStyle = '#f6cdb0';
+      if (hand === 'point') {
+        ctx.beginPath(); ctx.arc(0, 16.5, 4.4, 0, 7); ctx.fill(); ink(1.4);
+        ctx.strokeStyle = '#f6cdb0'; ctx.lineWidth = 3.8; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(0, 17); ctx.lineTo(0, 24.5); ctx.stroke();
+        ctx.strokeStyle = 'rgba(46,38,54,0.5)'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(-1.9, 18.5); ctx.lineTo(-1.9, 24.6); ctx.moveTo(1.9, 18.5); ctx.lineTo(1.9, 24.6); ctx.stroke();
+      } else if (hand === 'open') {
+        ctx.beginPath(); ctx.ellipse(0, 18, 5.8, 4.4, 0, 0, 7); ctx.fill(); ink(1.4);
+        ctx.strokeStyle = 'rgba(46,38,54,0.32)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(-2.8, 20.6); ctx.lineTo(-2.8, 16.4); ctx.moveTo(0.3, 21.2); ctx.lineTo(0.3, 15.8); ctx.moveTo(3.4, 20.3); ctx.lineTo(3.4, 16.6); ctx.stroke();
+      } else {
+        ctx.beginPath(); ctx.arc(0, 17, 4.6, 0, 7); ctx.fill(); ink(1.4);
+      }
+      ctx.restore();
+    };
+    ctx.beginPath();
+    ctx.moveTo(-10, -52 + bob);
+    ctx.quadraticCurveTo(-19, -34 + bob, -22, -17 + bob);
+    ctx.quadraticCurveTo(0, -11 + bob, 22, -17 + bob);
+    ctx.quadraticCurveTo(19, -34 + bob, 10, -52 + bob);
+    ctx.closePath();
+    ctx.fillStyle = tun; ctx.fill(); ink(1.6);
+    ctx.save(); ctx.clip();
+    ctx.fillStyle = tunD; ctx.globalAlpha = 0.5;
+    ctx.beginPath(); ctx.ellipse(21, -30 + bob, 13, 28, 0.18, 0, 7); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = '#4f4033'; rr(-19, -33 + bob, 38, 7, 3); ctx.fill(); ink(1.3);
+    ctx.fillStyle = '#f5c542'; rr(-5, -34 + bob, 10, 9, 2.5); ctx.fill(); ink(1.2);
+    if (o.armL !== null) arm(-13, o.armL === undefined ? 0.42 : o.armL, o.handL);
+    if (o.armR !== null) arm(13, o.armR === undefined ? -0.42 : o.armR, o.handR);
+    ctx.save(); ctx.translate(0, -62 + bob); this.gnomeHead(ctx, o); ctx.restore();
+    ctx.restore();
+  }
+  drawGnome(ctx) {
+    const g = this.gnome, t = this.t;
+    if (g.st === 'hide') {
+      g.t--;
+      if (g.t <= 0) {
+        g.st = 'in'; g.p = 0;
+        g.side = Math.random() < 0.5 ? 'left' : 'right';
+        for (let i = 0; i < 10; i++) {
+          g.y = 180 + Math.random() * Math.max(120, this.Hc - 360);
+          const gx = g.side === 'left' ? 60 : this.Wc - 60;
+          if (!this.inKeepOut(gx, g.y - 30, 10)) break;
+        }
+      }
+      return;
+    }
+    if (g.st === 'in') { g.p = Math.min(1, g.p + 0.008); if (g.p >= 1) { g.st = 'look'; g.t = 220 + Math.random() * 320; } }
+    else if (g.st === 'look') { g.t--; if (g.t <= 0) g.st = 'out'; }
+    else if (g.st === 'out') { g.p -= 0.01; if (g.p <= 0) { g.st = 'hide'; g.t = 450 + Math.random() * 900; g.p = 0; return; } }
+    const s = Math.max(0.75, this.Wc / 1400) * 1.05;
+    const ease = 1 - Math.pow(1 - g.p, 3);
+    ctx.save();
+    if (g.side === 'left') ctx.translate(0, g.y);
+    else { ctx.translate(this.Wc, g.y); ctx.scale(-1, 1); }
+    ctx.scale(s, s);
+    ctx.translate(-42 + ease * 68, 0);
+    ctx.rotate(0.18 + (g.st === 'look' ? Math.sin(t * 0.035) * 0.05 : 0));
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    const ink = (lw) => { ctx.strokeStyle = 'rgba(46,38,54,0.55)'; ctx.lineWidth = lw; ctx.stroke(); };
+    /* a little hand gripping the edge of the page */
+    ctx.save(); ctx.translate(-13, 27); ctx.rotate(-0.22);
+    ctx.strokeStyle = '#3d55c9'; ctx.lineWidth = 7.5;
+    ctx.beginPath(); ctx.moveTo(2, 3); ctx.lineTo(-17, 9); ctx.stroke();
+    ctx.fillStyle = '#f6cdb0';
+    ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(-4, -5, 11, 12, 4.5); else ctx.rect(-4, -5, 11, 12); ctx.fill(); ink(1.4);
+    for (let i = 0; i < 3; i++) {
+      ctx.fillStyle = '#f6cdb0';
+      ctx.beginPath(); ctx.arc(-4.5, -2.4 + i * 3.8, 2.4, 0, 7); ctx.fill(); ink(1.2);
+    }
+    ctx.restore();
+    this.gnomeHead(ctx, { eyes: 'open', look: (g.st === 'look' ? Math.sin(t * 0.03) * 1.8 : 0) + 1.6, tipx: Math.sin(t * 0.05) * 4 - 3 });
+    ctx.restore();
+  }
+  /* the centred copy column — the roaming pieces steer around it instead of
+     parking on the headline, which is what made narrow windows look busy */
+  keepOut() {
+    const hero = this.heroRef.current; if (!hero) return null;
+    const h1 = hero.querySelector('h1'), cr = this.copyRef.current;
+    if (!h1 || !cr) return null;
+    const hr = hero.getBoundingClientRect(), a = h1.getBoundingClientRect(), b = cr.getBoundingClientRect();
+    const bd = hero.querySelector('[data-mv="badge"]'), c = bd ? bd.getBoundingClientRect() : a;
+    if (!a.width || !b.width) return null;
+    const pad = 18;
+    return {
+      x0: Math.min(a.left, b.left, c.left) - hr.left - pad,
+      x1: Math.max(a.right, b.right, c.right) - hr.left + pad,
+      y0: Math.min(a.top, b.top, c.top) - hr.top - pad,
+      y1: Math.max(a.bottom, b.bottom, c.bottom) - hr.top + pad
+    };
+  }
+  inKeepOut(x, y, m) {
+    const k = this.ko; if (!k) return false;
+    m = m || 0;
+    return x > k.x0 - m && x < k.x1 + m && y > k.y0 - m && y < k.y1 + m;
+  }
+  /* nudge a point to the closest spot outside the copy column */
+  pushOut(x, y, m) {
+    const k = this.ko; if (!k || !this.inKeepOut(x, y, m)) return { x, y };
+    m = m || 0;
+    const up = y - (k.y0 - m), down = (k.y1 + m) - y, left = x - (k.x0 - m), right = (k.x1 + m) - x;
+    const best = Math.min(up, down, left, right);
+    if (best === up && k.y0 - m > 70) return { x, y: k.y0 - m };
+    if (best === down && k.y1 + m < this.Hc - 70) return { x, y: k.y1 + m };
+    if (best === left && k.x0 - m > 50) return { x: k.x0 - m, y };
+    if (best === right && k.x1 + m < this.Wc - 50) return { x: k.x1 + m, y };
+    return { x, y: k.y0 - m > 70 ? k.y0 - m : k.y1 + m };
+  }
+  pickGnomeSpot(RB) {
+    for (let i = 0; i < 14; i++) {
+      const x = 80 + Math.random() * Math.max(160, this.Wc - 180);
+      const y = Math.max(180, Math.min(this.Hc - 160, 180 + Math.random() * Math.max(100, this.Hc - 340)));
+      if (i === 13 || !this.inKeepOut(x, y - 60, 10)) { RB.dx = x; RB.dy = y; return; }
+    }
+  }
+  drawLawnGnome(ctx) {
+    const R = this.lawnGnome, t = this.t, s = Math.max(0.7, this.Wc / 1400);
+    R.y = Math.min(R.y, this.Hc - 40);
+    const held = R.held, swing = Math.sin(t * 0.05);
+    ctx.save(); ctx.translate(R.x, R.y);
+    if (!held) { ctx.fillStyle = 'rgba(38,33,42,0.16)'; ctx.beginPath(); ctx.ellipse(0, 2, 32 * s, 6 * s, 0, 0, 7); ctx.fill(); }
+    ctx.scale(s, s);
+    if (held) {
+      ctx.rotate(Math.sin(t * 0.022) * 0.16);
+      this.gnomeFigure(ctx, {
+        scale: 1.28, bob: Math.sin(t * 0.03) * 2,
+        armL: 2.0 + Math.sin(t * 0.04) * 0.2, armR: -2.0 - Math.cos(t * 0.04) * 0.2,
+        legL: -0.3 + Math.sin(t * 0.045) * 0.14, legR: 0.32 + Math.cos(t * 0.045) * 0.14,
+        tipx: Math.sin(t * 0.03) * 5, eyes: 'open', look: Math.sin(t * 0.02) * 1.6
+      });
+    } else {
+      this.gnomeFigure(ctx, {
+        scale: 1.28, bob: -Math.abs(Math.sin(t * 0.05)) * 4,
+        armL: 0.35 + swing * 0.5, armR: -0.35 - swing * 0.5,
+        legL: swing * 0.4, legR: -swing * 0.4,
+        tipx: Math.sin(t * 0.032) * 5, eyes: 'open', look: Math.sin(t * 0.018) * 1.8
+      });
+    }
+    ctx.restore();
+  }
+  /* ---------- gnome stickers, drawn into their own little canvases ---------- */
+  gnomeSticker(ctx, kind, c) {
+    const di = this.PAL.indexOf(c), cd = di >= 0 ? this.PALD[di] : c;
+    const ink = (lw) => { ctx.strokeStyle = 'rgba(46,38,54,0.55)'; ctx.lineWidth = lw; ctx.stroke(); };
+    const rr = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); };
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    if (kind === 'face') {
+      ctx.save(); ctx.translate(0, 3.6); ctx.scale(0.48, 0.48);
+      this.gnomeHead(ctx, { eyes: 'happy', hat: c, hatD: cd });
+      ctx.restore();
+      return;
+    }
+    if (kind === 'hat') {
+      ctx.beginPath();
+      ctx.moveTo(-18, 7); ctx.quadraticCurveTo(-11, -11, 1, -24);
+      ctx.quadraticCurveTo(13, -11, 18, 7); ctx.quadraticCurveTo(0, 2, -18, 7);
+      ctx.closePath(); ctx.fillStyle = c; ctx.fill(); ink(1.6);
+      ctx.save(); ctx.clip();
+      ctx.fillStyle = cd; ctx.globalAlpha = 0.5;
+      ctx.beginPath(); ctx.moveTo(4, 7); ctx.quadraticCurveTo(10, -11, 1, -24); ctx.lineTo(22, 9); ctx.closePath(); ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = cd; rr(-20, 3, 40, 8, 4); ctx.fill(); ink(1.5);
+      ctx.fillStyle = 'rgba(255,255,255,0.3)'; rr(-16, 4.6, 13, 2.4, 1.2); ctx.fill();
+      ctx.fillStyle = '#fffaf6'; ctx.beginPath(); ctx.arc(1, -25, 4.2, 0, 7); ctx.fill(); ink(1.4);
+      return;
+    }
+    if (kind === 'mushroom') {
+      ctx.fillStyle = '#fdf6ef'; rr(-6.5, -3, 13, 21, 5); ctx.fill(); ink(1.5);
+      ctx.beginPath();
+      ctx.moveTo(-21, -2); ctx.quadraticCurveTo(-19, -21, 0, -22);
+      ctx.quadraticCurveTo(19, -21, 21, -2); ctx.quadraticCurveTo(0, 5, -21, -2);
+      ctx.closePath(); ctx.fillStyle = c; ctx.fill(); ink(1.6);
+      ctx.save(); ctx.clip();
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      [[-11, -8, 3.4], [3, -13, 4], [12, -6, 3]].forEach(([x, y, r]) => { ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); });
+      ctx.restore();
+      return;
+    }
+    if (kind === 'beard') {
+      ctx.beginPath();
+      ctx.moveTo(-15, -15); ctx.quadraticCurveTo(-21, 4, -10, 19);
+      ctx.quadraticCurveTo(-5, 26, -2.5, 18); ctx.quadraticCurveTo(0, 25, 2.5, 18);
+      ctx.quadraticCurveTo(5, 26, 10, 19); ctx.quadraticCurveTo(21, 4, 15, -15);
+      ctx.quadraticCurveTo(0, -8, -15, -15); ctx.closePath();
+      ctx.fillStyle = '#fbf8f5'; ctx.fill(); ink(1.5);
+      ctx.fillStyle = '#efe8e4';
+      ctx.beginPath(); ctx.ellipse(-7, -6, 7.5, 4.4, -0.28, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(7, -6, 7.5, 4.4, 0.28, 0, 7); ctx.fill();
+      ctx.fillStyle = '#f1b899'; ctx.beginPath(); ctx.arc(0, -9.5, 5.6, 0, 7); ctx.fill(); ink(1.4);
+      ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.beginPath(); ctx.arc(-1.8, -11.5, 1.7, 0, 7); ctx.fill();
+      return;
+    }
+    /* lantern */
+    ctx.strokeStyle = '#8d8090'; ctx.lineWidth = 2.4;
+    ctx.beginPath(); ctx.arc(0, -13, 7.5, Math.PI, 0); ctx.stroke();
+    ctx.fillStyle = '#4f4033'; rr(-12, -13, 24, 5.5, 2.5); ctx.fill(); ink(1.3);
+    ctx.beginPath(); ctx.moveTo(-9, -7); ctx.lineTo(9, -7); ctx.lineTo(12, 14); ctx.lineTo(-12, 14); ctx.closePath();
+    ctx.fillStyle = c; ctx.fill(); ink(1.5);
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.beginPath(); ctx.ellipse(-2.5, 3.5, 3.6, 6.2, 0.18, 0, 7); ctx.fill();
+    ctx.fillStyle = '#f5c542'; ctx.beginPath(); ctx.arc(1, 4, 3.2, 0, 7); ctx.fill();
+    ctx.fillStyle = '#4f4033'; rr(-13, 13, 26, 5.5, 2.5); ctx.fill(); ink(1.3);
+  }
+  paintSticker(cv, kind, c, size) {
+    const key = kind + ':' + c + ':' + size;
+    if (cv.__key === key) return;
+    cv.__key = key;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.round(size * dpr); cv.height = Math.round(size * dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, size, size);
+    ctx.save(); ctx.translate(size / 2, size / 2); ctx.scale(size / 50, size / 50);
+    this.gnomeSticker(ctx, kind, c);
+    ctx.restore();
+  }
+  paintStickers() {
+    const els = document.querySelectorAll('canvas[data-skc]');
+    if (els.length) {
+      const by = {}; this.state.stickers.forEach(it => { by[it.id] = it; });
+      els.forEach(cv => { const it = by[cv.dataset.skc]; if (it) this.paintSticker(cv, it.shape, it.c, Math.round(it.sz)); });
+    }
+    if (this.state.tool === 'sticker') {
+      const c = this.PAL[this.state.ci];
+      document.querySelectorAll('canvas[data-skb]').forEach(cv => { if (cv.dataset.skb) this.paintSticker(cv, cv.dataset.skb, c, 26); });
+    }
+  }
+  /* ---------- the big gnome face that watches the cursor ---------- */
+  faceSpot() {
+    const F = this.face, hero = this.heroRef.current; if (!F || !hero) return;
+    const hr = hero.getBoundingClientRect();
+    const cr = this.copyRef.current ? this.copyRef.current.getBoundingClientRect() : null;
+    const dk = hero.querySelector('[data-mv="dock"]');
+    const dr = dk ? dk.getBoundingClientRect() : null;
+    const top = cr ? (cr.bottom - hr.top) + 6 : this.Hc * 0.62;
+    const bot = (dr ? dr.top - hr.top : this.Hc - 110) - 8;
+    const gap = bot - top;
+    /* the same strip the car uses on narrow screens — cached here so stepCar doesn't
+       have to measure the dock every frame */
+    this.band = { top, bot };
+    F.hide = gap < (this.Wc < 760 ? 64 : 34);
+    /* he fills the gap under the copy — grown from the chin up, so any spare
+       hat pokes up behind the paragraph rather than into the toolbar */
+    F.s = Math.max(0.8, Math.min(3.2, Math.min(gap * 1.1 / 91, this.Wc / 300)));
+    if (!F.moved) { F.hx = this.Wc * 0.5; F.hy = bot - 38 * F.s; }
+  }
+  /* level 1 = eager (email / interest dropdown), level 2 = full celebration (sign-up).
+     every click steps to the next routine in the set, so repeat clicks never repeat themselves. */
+  exciteFace(level) {
+    const F = this.face; if (!F) return;
+    if ((level || 1) >= 2) {
+      F.pm = ((F.pm === undefined ? -1 : F.pm) + 1) % 4;
+      F.hype = 1; F.eager = 1; F.spin = 0;
+      this.faceBurst(F.pm, true);
+    } else {
+      F.em = ((F.em === undefined ? -1 : F.em) + 1) % 4;
+      F.eager = 1;
+      this.faceBurst(F.em, false);
+    }
+  }
+  faceBurst(mv, big) {
+    const F = this.face, n = big ? 34 : 10;
+    const g = [['\u2726', '\u2727'], ['\u2605', '\u2726'], ['\u2665', '\u2665'], ['\u266a', '\u266b']][mv % 4];
+    for (let i = 0; i < n; i++) {
+      const a = big ? Math.random() * 7 : -Math.PI / 2 + (Math.random() - 0.5) * 2.4;
+      const v = big ? 1.3 + Math.random() * 2.6 : 0.6 + Math.random();
+      this.parts.push({
+        x: F.hx + Math.cos(a) * 20 * F.s, y: F.hy - 28 * F.s + Math.sin(a) * 16 * F.s,
+        vx: Math.cos(a) * v, vy: Math.sin(a) * v - (big ? 1.4 : 0.2),
+        a: 1, g: big ? 0.05 : 0, r: 1.4 + Math.random() * (big ? 1.7 : 1),
+        c: this.PAL[1 + Math.floor(Math.random() * 4)], ch: g[Math.floor(Math.random() * 2)]
+      });
+    }
+  }
+  drawBigFace(ctx) {
+    const F = this.face; if (!F) return;
+    const t = this.t;
+    if (t % 20 === 0) this.faceSpot();
+    if (F.hide) return;
+    F.hype = Math.max(0, F.hype - 0.006);
+    F.eager = Math.max(0, (F.eager || 0) - 0.0045);
+    if (--F.bt <= 0) { F.bt = 160 + Math.random() * 300; F.blink = 9; }
+    if (F.blink > 0) F.blink--;
+    const m = this.mouse;
+    let lx, ly, tilt;
+    if (m && m.in) {
+      const dx = m.x - F.hx, dy = m.y - (F.hy - 3.4 * F.s), d = Math.hypot(dx, dy) || 1;
+      const k = Math.min(1, d / (130 * F.s));
+      lx = dx / d * 3.1 * k; ly = dy / d * 2.3 * k;
+      tilt = Math.max(-8, Math.min(8, dx / (24 * F.s)));
+    } else {
+      lx = Math.sin(t * 0.013) * 2.1; ly = Math.sin(t * 0.008) * 1.1; tilt = Math.sin(t * 0.011) * 5;
+    }
+    F.lx += (lx - F.lx) * 0.18; F.ly += (ly - F.ly) * 0.18; F.tx += (tilt - F.tx) * 0.1;
+    const h = F.hype, e = Math.max(0, F.eager - h);
+    const pm = F.pm || 0, em = F.em || 0;
+    const nod = Math.sin(t * 0.26);
+    let bounce, rot, tip = F.tx, pop = 1, hands = 0;
+    if (h > 0) {
+      /* four ways to lose it completely */
+      hands = 1;
+      if (pm === 1) { F.spin = (F.spin || 0) + 0.24 * h; bounce = 6 * h; rot = F.spin; hands = 0; }
+      else if (pm === 2) { bounce = Math.abs(Math.sin(t * 0.36)) * 12 * h; rot = Math.sin(t * 0.22) * 0.06 * h; pop += h * 0.2 * (0.5 + 0.5 * Math.sin(t * 0.36)); }
+      else if (pm === 3) { bounce = Math.abs(Math.sin(t * 0.5)) * 7 * h; rot = Math.sin(t * 0.75) * 0.16 * h; tip += Math.sin(t * 0.75) * 12 * h; }
+      else { bounce = Math.abs(Math.sin(t * 0.3)) * 10 * h; rot = Math.sin(t * 0.4) * 0.11 * h; tip += Math.sin(t * 0.45) * 8 * h; }
+      if (pm !== 2) pop += h * 0.12 * (0.5 + 0.5 * Math.sin(t * 0.3));
+      if (t % (pm === 2 ? 3 : 4) === 0) {
+        const g = ['\u2726', '\u2605', '\u2665', '\u266b'][pm];
+        if (pm === 2) this.parts.push({ x: F.hx + (Math.random() - 0.5) * 44 * F.s, y: F.hy - 20 * F.s, vx: (Math.random() - 0.5) * 0.5, vy: -1.1 - Math.random() * 0.8, a: 1, r: 1.5 + Math.random() * 1.3, c: this.PAL[1 + Math.floor(Math.random() * 4)], ch: g });
+        else {
+          const a = Math.random() * 7, rr2 = (30 + Math.random() * 26) * F.s;
+          this.parts.push({ x: F.hx + Math.cos(a) * rr2, y: F.hy - 24 * F.s + Math.sin(a) * rr2 * 0.75, vx: Math.cos(a) * 0.6, vy: Math.sin(a) * 0.6 - 0.45, a: 0.95, r: 1.4 + Math.random(), c: this.PAL[1 + Math.floor(Math.random() * 4)], ch: g });
+        }
+      }
+    } else if (e > 0.02) {
+      /* four flavours of keen */
+      if (em === 1) { bounce = 1.5 * e; rot = Math.sin(t * 0.55) * 0.1 * e; tip += Math.sin(t * 0.55) * 9 * e; }
+      else if (em === 2) { bounce = Math.abs(Math.sin(t * 0.16)) * 3 * e; rot = Math.sin(t * 0.16) * 0.03 * e; pop += e * 0.2 * (0.55 + 0.45 * Math.sin(t * 0.16)); }
+      else if (em === 3) { bounce = -Math.abs(Math.sin(t * 0.31)) * 3 * e; rot = (0.12 + Math.sin(t * 0.5) * 0.05) * e; tip += Math.sin(t * 0.62) * 11 * e; }
+      else { bounce = -Math.abs(nod) * 4.5 * e; rot = nod * 0.05 * e; tip += nod * 6 * e; }
+      hands = em === 2 ? 0 : 2;
+      pop += e * 0.045;
+      if (e > 0.18 && t % 18 === 0) {
+        this.parts.push({ x: F.hx + (Math.random() - 0.5) * 30 * F.s, y: F.hy - 44 * F.s, vx: (Math.random() - 0.5) * 0.3, vy: -0.5, a: 0.85, r: 1.4, c: this.PAL[1 + Math.floor(Math.random() * 4)], ch: ['\u2727', '\u2726', '\u2665', '\u266a'][em] });
+      }
+    } else {
+      bounce = Math.sin(t * 0.026) * 2.2; rot = Math.sin(t * 0.019) * 0.022;
+    }
+    ctx.save();
+    ctx.translate(F.hx, F.hy - bounce);
+    ctx.rotate(rot);
+    ctx.scale(F.s * pop, F.s * pop);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    if (hands === 2) {
+      /* little fists, jiggling with the enthusiasm */
+      [-1, 1].forEach(sx => {
+        ctx.save(); ctx.globalAlpha = Math.min(1, e * 2.2);
+        ctx.translate(sx * 19, 15 + nod * 2.5); ctx.rotate(sx * 0.3);
+        ctx.strokeStyle = '#3d55c9'; ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.moveTo(0, 4); ctx.lineTo(0, -6); ctx.stroke();
+        ctx.fillStyle = '#f6cdb0'; ctx.beginPath(); ctx.arc(0, -9, 4.4, 0, 7); ctx.fill();
+        ctx.strokeStyle = 'rgba(46,38,54,0.55)'; ctx.lineWidth = 1.4; ctx.stroke();
+        ctx.globalAlpha = 1; ctx.restore();
+      });
+    } else if (hands === 1) {
+      const wav = Math.sin(t * 0.38);
+      [[-1, wav], [1, -wav]].forEach(([sx, w]) => {
+        ctx.save(); ctx.globalAlpha = Math.min(1, h * 2.2);
+        ctx.translate(sx * 21, 14); ctx.rotate(sx * (0.45 + w * 0.55));
+        ctx.strokeStyle = '#3d55c9'; ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -15); ctx.stroke();
+        ctx.fillStyle = '#f6cdb0'; ctx.beginPath(); ctx.arc(0, -18.5, 4.6, 0, 7); ctx.fill();
+        ctx.strokeStyle = 'rgba(46,38,54,0.55)'; ctx.lineWidth = 1.4; ctx.stroke();
+        ctx.globalAlpha = 1; ctx.restore();
+      });
+    }
+    this.gnomeHead(ctx, {
+      eyes: h > 0.14 ? 'happy' : (F.blink > 0 && e < 0.2 ? 'shut' : 'open'),
+      look: F.lx, looky: F.ly, tipx: tip
+    });
+    ctx.restore();
+  }
+  /* ---------- a gnome tearing around in a little sports car ---------- */
+  /* the strip of hero the car is allowed to use. narrow screens keep it under the copy,
+     down by the big face, so it never cuts through the deck and lounge up top */
+  carBand() {
+    if (!this.mini) return { top: 74, bottom: this.Hc - 118 };
+    const b = this.band, k = this.ko;
+    const bottom = Math.min(this.Hc - 118, b ? b.bot : this.Hc - 118);
+    const top = Math.max(this.Hc * 0.45, b ? b.top : (k ? k.y1 + 16 : this.Hc * 0.62));
+    return { top: Math.min(top, bottom - 4), bottom };
+  }
+  /* start position: parked beside the big face on narrow screens, up top otherwise */
+  placeCar() {
+    const C = this.car, F = this.face; if (!C) return;
+    const b = this.carBand();
+    if (this.mini) {
+      C.x = Math.max(60, Math.min(this.Wc - 60, F ? F.hx - (46 * F.s + 66 * C.s) : this.Wc * 0.24));
+      C.y = Math.max(b.top, Math.min(b.bottom, F ? F.hy : this.Hc - 150));
+    } else {
+      C.x = this.Wc * 0.57; C.y = Math.min(200, this.Hc * 0.26);
+    }
+    C.vx = 0; C.vy = 0;
+    this.newCarTarget();
+  }
+  newCarTarget() {
+    const C = this.car; if (!C) return;
+    const b = this.carBand(), y0 = b.top + 16, y1 = Math.max(y0 + 40, b.bottom - 52);
+    for (let i = 0; i < 16; i++) {
+      const x = 80 + Math.random() * Math.max(140, this.Wc - 160);
+      const y = y0 + Math.random() * (y1 - y0);
+      if (i === 15 || !this.inKeepOut(x, y, 30)) { C.tx = x; C.ty = y; C.wait = 0; return; }
+    }
+  }
+  stepCar() {
+    const C = this.car; if (!C) return;
+    const t = this.t;
+    C.s = Math.max(0.72, Math.min(1.2, this.Wc / 1250));
+    if (this.cDrag && this.cDrag.kind === 'car') { C.vx *= 0.85; C.vy *= 0.85; C.spin += 0.05; return; }
+    const dx = C.tx - C.x, dy = C.ty - C.y, d = Math.hypot(dx, dy) || 1;
+    if (d < 34 && --C.wait <= 0) this.newCarTarget();
+    const top = Math.min(3, 0.5 + d * 0.02);
+    C.vx += ((dx / d) * top - C.vx) * 0.045;
+    C.vy += ((dy / d) * top * 0.5 - C.vy) * 0.04;
+    C.x += C.vx; C.y += C.vy;
+    const pad = 52 * C.s;
+    if (C.x < pad) { C.x = pad; C.vx = Math.abs(C.vx); this.newCarTarget(); }
+    if (C.x > this.Wc - pad) { C.x = this.Wc - pad; C.vx = -Math.abs(C.vx); this.newCarTarget(); }
+    const band = this.carBand();
+    if (C.y < band.top) { C.y = band.top; C.vy = Math.abs(C.vy); }
+    if (C.y > band.bottom) { C.y = band.bottom; C.vy = -Math.abs(C.vy); }
+    if (this.inKeepOut(C.x, C.y, 26)) {
+      const out = this.pushOut(C.x, C.y, 26);
+      C.vx += (out.x - C.x) * 0.05; C.vy += (out.y - C.y) * 0.05;
+      if (this.inKeepOut(C.tx, C.ty, 30)) this.newCarTarget();
+    }
+    const sp = Math.hypot(C.vx, C.vy);
+    if (Math.abs(C.vx) > 0.35) C.dir = C.vx > 0 ? 1 : -1;
+    C.spin += sp * 0.11;
+    C.tilt += (Math.max(-0.16, Math.min(0.16, C.vy * 0.06)) - C.tilt) * 0.08;
+    if (sp > 1.1 && t % 7 === 0) {
+      this.parts.push({ x: C.x - C.dir * 50 * C.s, y: C.y - 11 * C.s, vx: -C.dir * 0.5 - C.vx * 0.1, vy: -0.25 - Math.random() * 0.2, a: 0.55, r: 1.8 + Math.random() * 2, c: '#c9bcc5' });
+    }
+  }
+  drawCar(ctx) {
+    const C = this.car; if (!C) return;
+    const t = this.t, s = C.s, sp = Math.hypot(C.vx, C.vy), fl = Math.min(1, sp / 2.2);
+    const ink = (lw) => { ctx.strokeStyle = 'rgba(46,38,54,0.55)'; ctx.lineWidth = lw; ctx.stroke(); };
+    const rr = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); };
+    const body = '#ef4d98', bodyD = '#c93b82';
+    ctx.save();
+    ctx.translate(C.x, C.y);
+    ctx.fillStyle = 'rgba(38,33,42,0.13)';
+    ctx.beginPath(); ctx.ellipse(0, 3 * s, 44 * s, 6.5 * s, 0, 0, 7); ctx.fill();
+    ctx.scale(C.dir * s, s);
+    ctx.rotate(C.tilt + Math.sin(t * 0.33) * 0.007 * sp);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    const wheel = (wx) => {
+      ctx.save(); ctx.translate(wx, -11);
+      ctx.fillStyle = '#2e2636'; ctx.beginPath(); ctx.arc(0, 0, 11.6, 0, 7); ctx.fill();
+      ctx.save(); ctx.rotate(C.spin);
+      ctx.fillStyle = '#efe8e4'; ctx.beginPath(); ctx.arc(0, 0, 5.6, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#c9bcc5'; ctx.lineWidth = 1.5;
+      for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * 5, Math.sin(a) * 5); ctx.stroke(); }
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(46,38,54,0.55)'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(0, 0, 11.6, 0, 7); ctx.stroke();
+      ctx.restore();
+    };
+    wheel(-26); wheel(24);
+    /* rear wing */
+    ctx.fillStyle = bodyD; rr(-56, -34, 21, 3.5, 1.75); ctx.fill(); ink(1.2);
+    ctx.strokeStyle = bodyD; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(-48, -32); ctx.lineTo(-46, -27); ctx.stroke();
+    /* body */
+    ctx.beginPath();
+    ctx.moveTo(-47, -9);
+    ctx.lineTo(-48, -22);
+    ctx.quadraticCurveTo(-46, -27.5, -36, -28.5);
+    ctx.lineTo(-20, -29);
+    ctx.quadraticCurveTo(-12, -22.5, -2, -21.5);
+    ctx.lineTo(7, -22);
+    ctx.quadraticCurveTo(16, -24, 27, -19);
+    ctx.quadraticCurveTo(40, -16, 49, -12.5);
+    ctx.quadraticCurveTo(51.5, -10.5, 48, -8.5);
+    ctx.lineTo(-44, -8.5);
+    ctx.closePath();
+    ctx.fillStyle = body; ctx.fill(); ink(1.6);
+    ctx.save(); ctx.clip();
+    ctx.fillStyle = bodyD; ctx.globalAlpha = 0.5;
+    ctx.beginPath(); ctx.rect(-52, -13.5, 108, 6); ctx.fill();
+    ctx.globalAlpha = 0.22;
+    ctx.beginPath(); ctx.ellipse(-32, -30, 17, 6, 0, 0, 7); ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = 'rgba(255,255,255,0.72)'; rr(-40, -18.4, 64, 3, 1.5); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = bodyD; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.arc(-26, -11, 13.6, Math.PI * 1.04, Math.PI * 1.96); ctx.stroke();
+    ctx.beginPath(); ctx.arc(24, -11, 13.6, Math.PI * 1.04, Math.PI * 1.96); ctx.stroke();
+    /* headlight + exhaust */
+    ctx.globalAlpha = 0.15; ctx.fillStyle = '#f5c542';
+    ctx.beginPath(); ctx.moveTo(46, -16); ctx.lineTo(84, -25); ctx.lineTo(84, -5); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#f5c542';
+    ctx.beginPath(); ctx.ellipse(43, -15.5, 4.8, 3.1, -0.25, 0, 7); ctx.fill(); ink(1.2);
+    ctx.fillStyle = '#8d8090'; rr(-53, -12.5, 7, 4, 2); ctx.fill();
+    /* steering wheel */
+    ctx.strokeStyle = '#2e2636'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(4, -25.5, 3.2, 5.8, 0.45, 0, 7); ctx.stroke();
+    /* the driver, tucked into the cockpit */
+    ctx.save();
+    ctx.beginPath(); ctx.rect(-42, -92, 84, 72); ctx.clip();
+    ctx.save();
+    ctx.translate(-6.5, -36 + Math.sin(t * 0.3) * 0.6 * fl);
+    ctx.scale(0.62, 0.62); ctx.rotate(-0.07);
+    this.gnomeHead(ctx, { eyes: 'happy', tipx: -5 - 10 * fl, hat: '#5871f5', hatD: '#3d55c9' });
+    ctx.restore();
+    ctx.restore();
+    /* scarf streaming behind him */
+    ctx.strokeStyle = '#2fae76'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(-11, -29);
+    ctx.quadraticCurveTo(-24, -33 + Math.sin(t * 0.25) * 3 * fl, -36 - 9 * fl, -29 + Math.sin(t * 0.25 + 1) * 4 * fl);
+    ctx.stroke();
+    /* hands on the wheel */
+    ctx.fillStyle = '#f6cdb0';
+    ctx.beginPath(); ctx.arc(1.5, -29.5, 3.1, 0, 7); ctx.fill(); ink(1.2);
+    ctx.beginPath(); ctx.arc(6.5, -21.8, 3.1, 0, 7); ctx.fill(); ink(1.2);
+    /* windscreen */
+    ctx.beginPath();
+    ctx.moveTo(8, -22.4); ctx.lineTo(15, -33); ctx.lineTo(19, -32.2); ctx.lineTo(13.5, -21.6);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.fill(); ink(1.3);
+    if (fl > 0.5) {
+      ctx.strokeStyle = 'rgba(155,143,163,0.45)'; ctx.lineWidth = 1.6;
+      for (let i = 0; i < 3; i++) {
+        const y = -30 + i * 8;
+        ctx.beginPath(); ctx.moveTo(-62 - i * 6, y); ctx.lineTo(-74 - i * 6 - 10 * fl, y); ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+  drawCardGnomes() {
+    const t = this.t;
+    [this.card1Ref, this.card2Ref, this.card3Ref].forEach((ref, ci) => {
+      const cv = ref.current; if (!cv || !cv.width) return;
+      const ctx = cv.getContext('2d');
+      const W = cv.clientWidth || 132, H = cv.clientHeight || 120;
+      ctx.clearRect(0, 0, W, H);
+      const sc = H / 132;
+      const breathe = Math.sin(t * 0.035 + ci * 2) * 1.6;
+      const tip = Math.sin(t * 0.028 + ci) * 4;
+      ctx.save();
+      ctx.translate(W / 2, H - 4);
+      ctx.scale(sc, sc);
+      if (ci === 0) {
+        /* pointing back up at the card copy */
+        ctx.translate(6, 0);
+        ctx.fillStyle = 'rgba(46,38,54,0.1)';
+        ctx.beginPath(); ctx.ellipse(0, 1, 24, 4.5, 0, 0, 7); ctx.fill();
+        this.gnomeFigure(ctx, {
+          scale: 0.98, bob: breathe, tipx: tip, eyes: 'open', look: -1.8,
+          armL: 2.32 + Math.sin(t * 0.05) * 0.05, handL: 'point',
+          armR: 0.34, tunic: '#ef4d98', tunD: '#c93b82', hat: '#5871f5', hatD: '#3d55c9'
+        });
+      } else if (ci === 1) {
+        /* two gnomes in a side hug — pressed together, inner arms tucked behind each other */
+        ctx.fillStyle = 'rgba(46,38,54,0.1)';
+        ctx.beginPath(); ctx.ellipse(0, 1, 38, 5, 0, 0, 7); ctx.fill();
+        ctx.save(); ctx.translate(-15.5, 0); ctx.rotate(0.08);
+        this.gnomeFigure(ctx, {
+          scale: 0.88, bob: breathe, tipx: -4 + tip * 0.5, eyes: 'happy',
+          armL: 0.5, armR: -1.12, tunic: '#5871f5', tunD: '#3d55c9'
+        });
+        ctx.restore();
+        ctx.save(); ctx.translate(15.5, 0); ctx.rotate(-0.08);
+        this.gnomeFigure(ctx, {
+          scale: 0.88, bob: -breathe, tipx: 4 - tip * 0.5, eyes: 'happy',
+          armL: null, armR: -0.5, tunic: '#2fae76', tunD: '#238a5c', hat: '#f59321', hatD: '#c9720f'
+        });
+        ctx.restore();
+        ctx.font = '700 ' + (11 + Math.sin(t * 0.06) * 1.2).toFixed(1) + 'px "Public Sans",sans-serif';
+        ctx.fillStyle = 'rgba(239,77,152,' + (0.5 + 0.3 * Math.sin(t * 0.05)) + ')';
+        ctx.fillText('♥', -4, -108 + Math.sin(t * 0.04) * 3);
+      } else {
+        /* game-show "ta-da" showcase */
+        ctx.translate(-6, 0);
+        ctx.fillStyle = 'rgba(46,38,54,0.1)';
+        ctx.beginPath(); ctx.ellipse(0, 1, 24, 4.5, 0, 0, 7); ctx.fill();
+        this.gnomeFigure(ctx, {
+          scale: 0.98, bob: breathe, tipx: tip, eyes: 'happy',
+          armL: 0.62, armR: -1.92 - Math.sin(t * 0.04) * 0.07, handR: 'open',
+          tunic: '#2fae76', tunD: '#238a5c', hat: '#f59321', hatD: '#c9720f'
+        });
+        ['✦', '✧', '✦'].forEach((g, i) => {
+          const a = 0.35 + 0.45 * Math.abs(Math.sin(t * 0.05 + i * 1.5));
+          ctx.fillStyle = 'rgba(245,147,33,' + a + ')';
+          ctx.font = '700 ' + (7 + i * 2) + 'px "Public Sans",sans-serif';
+          ctx.fillText(g, 30 + i * 8, -72 - i * 13 + Math.sin(t * 0.04 + i) * 2);
+        });
+      }
+      ctx.restore();
+    });
+  }
+  newTarget(a) {
+    a.tx = 40 + Math.random() * Math.max(100, this.Wc - 80);
+    a.ty = 40 + Math.random() * Math.max(100, this.Hc - 160);
+    a.wait = 100 + Math.random() * 280;
+    a.spd = 0.45 + Math.random() * 0.65;
+    a.ph = Math.random() * 6;
+  }
+  initGame() {
+    let kinds = ['snake', 'dino', 'pong'];
+    try { const last = localStorage.getItem('ws-last-game'); if (last && kinds.length > 1) kinds = kinds.filter(k => k !== last); } catch (e) {}
+    const pick = kinds[Math.floor(Math.random() * kinds.length)];
+    try { localStorage.setItem('ws-last-game', pick); } catch (e) {}
+    this.game = {
+      k: pick, t: 0,
+      snake: { body: [{ x: 4, y: 4 }, { x: 3, y: 4 }, { x: 2, y: 4 }], dir: { x: 1, y: 0 }, food: { x: 10, y: 5 } },
+      dino: { y: 0, vy: 0, obs: [], clouds: [{ x: 0.7, y: 0.25 }, { x: 0.3, y: 0.15 }], score: 0 },
+      pong: { bx: 0.5, by: 0.5, vx: 0.0012, vy: 0.0008, pl: 0.5, pr: 0.5, ci: 1, trail: [], sl: 0, sr: 0 }
+    };
+  }
+  updateGame(ctx) {
+    const g = this.game; if (!g) return;
+    const W = this.Wc, u = W / 1400;
+    let gh = Math.min(W < 760 ? 0.22 * W : 0.15 * W, this.Hc * 0.28), gw = gh * 1.5;
+    let fr = W * 0.5 + 320, fb = this.Hc * 0.62;
+    const cr = this.copyRef.current, hr = this.heroRef.current;
+    if (cr && hr) { const a = cr.getBoundingClientRect(), b = hr.getBoundingClientRect(); fr = a.right - b.left; fb = a.bottom - b.top; }
+    let x = W - gw - 20, y = Math.max(20, this.Hc - gh - 130);
+    if (x < fr + 16 && y < fb + 16) {
+      const gh2 = Math.min(gh, this.Hc - 140 - (fb + 20));
+      if (gh2 >= 80) { gh = gh2; gw = gh * 1.5; x = W - gw - 20; y = fb + 20; }
+      else {
+        let colR = W * 0.5 + 320;
+        const h1 = hr && hr.parentElement ? hr.querySelector('h1') : null;
+        if (h1 && hr) { const r = h1.getBoundingClientRect(), b = hr.getBoundingClientRect(); colR = Math.max(200, r.right - b.left); }
+        gw = Math.min(gw, W - 40 - colR);
+        if (gw < 90) { const pl0 = this.agents[1]; if (pl0) pl0.busy = false; return; }
+        gh = gw / 1.5; x = W - gw - 20; y = 20;
+      }
+    }
+    if (x < 10) { const pl0 = this.agents[1]; if (pl0) pl0.busy = false; return; }
+    if (this.gamePin) {
+      x = Math.max(4, Math.min(W - gw - 4, this.gamePin.x));
+      y = Math.max(4, Math.min(this.Hc - gh - 4, this.gamePin.y));
+    }
+    g.t++;
+    const gp = { x, y, w: gw, h: gh };
+    this.gpRect = gp;
+    ctx.save();
+    ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#e4d7df'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(gp.x, gp.y, gp.w, gp.h, 10 * u); else ctx.rect(gp.x, gp.y, gp.w, gp.h);
+    ctx.fill(); ctx.stroke();
+    const th = Math.max(16, 20 * u);
+    ctx.fillStyle = '#a394a0'; ctx.font = `600 ${Math.max(9, 10 * u)}px "Public Sans",sans-serif`;
+    ctx.fillText({ snake: 'snake.exe', dino: 'dino.run', pong: 'pong++' }[g.k], gp.x + 10 * u, gp.y + 13 * u);
+    ['#ef4d98', '#f59321', '#2fae76'].forEach((c, i) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(gp.x + gp.w - (10 + i * 9) * u, gp.y + 10 * u, 2.5 * u, 0, 7); ctx.fill(); });
+    ctx.strokeStyle = '#f1e7ee'; ctx.beginPath(); ctx.moveTo(gp.x, gp.y + th); ctx.lineTo(gp.x + gp.w, gp.y + th); ctx.stroke();
+    const ar = { x: gp.x + 6 * u, y: gp.y + th + 4 * u, w: gp.w - 12 * u, h: gp.h - th - 10 * u };
+    ctx.beginPath(); ctx.rect(ar.x, ar.y, ar.w, ar.h); ctx.clip();
+    let ctrl;
+    if (g.k === 'snake') ctrl = this.gSnake(ctx, ar, u);
+    else if (g.k === 'dino') ctrl = this.gDino(ctx, ar, u);
+    else ctrl = this.gPong(ctx, ar, u);
+    ctx.restore();
+    const pl = this.agents[1];
+    if (pl && ctrl) { pl.busy = true; pl.x += (ctrl.x - pl.x) * 0.08; pl.y += (ctrl.y - pl.y) * 0.08; }
+  }
+  gSnake(ctx, ar, u) {
+    const s = this.game.snake, cols = 14, rows = 8;
+    const cs = Math.min(ar.w / cols, ar.h / rows);
+    const ox = ar.x + (ar.w - cs * cols) / 2, oy = ar.y + (ar.h - cs * rows) / 2;
+    if (this.game.t % 50 === 0) {
+      const h = s.body[0], f = s.food;
+      const opts = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }]
+        .filter(d => !(d.x === -s.dir.x && d.y === -s.dir.y))
+        .filter(d => { const nx = h.x + d.x, ny = h.y + d.y; return nx >= 0 && nx < cols && ny >= 0 && ny < rows && !s.body.some(b => b.x === nx && b.y === ny); });
+      if (opts.length) {
+        opts.sort((a, b) => (Math.abs(h.x + a.x - f.x) + Math.abs(h.y + a.y - f.y)) - (Math.abs(h.x + b.x - f.x) + Math.abs(h.y + b.y - f.y)));
+        s.dir = opts[0];
+        const nh = { x: h.x + s.dir.x, y: h.y + s.dir.y };
+        s.body.unshift(nh);
+        if (nh.x === f.x && nh.y === f.y) s.food = { x: Math.floor(Math.random() * cols), y: Math.floor(Math.random() * rows) };
+        else s.body.pop();
+      } else { s.body = [{ x: 4, y: 4 }, { x: 3, y: 4 }, { x: 2, y: 4 }]; s.dir = { x: 1, y: 0 }; }
+    }
+    ctx.fillStyle = '#ef4d98';
+    const pulse = 1 + Math.sin(this.game.t * 0.15) * 0.15;
+    ctx.beginPath(); ctx.arc(ox + (s.food.x + 0.5) * cs, oy + (s.food.y + 0.5) * cs, cs * 0.32 * pulse, 0, 7); ctx.fill();
+    s.body.forEach((b, i) => {
+      ctx.fillStyle = i === 0 ? '#1d7a4f' : '#2fae76';
+      const pad = cs * 0.08;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(ox + b.x * cs + pad, oy + b.y * cs + pad, cs - pad * 2, cs - pad * 2, cs * 0.25); else ctx.rect(ox + b.x * cs, oy + b.y * cs, cs, cs);
+      ctx.fill();
+    });
+    const h = s.body[0];
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(ox + (h.x + 0.35) * cs, oy + (h.y + 0.35) * cs, cs * 0.09, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(ox + (h.x + 0.65) * cs, oy + (h.y + 0.35) * cs, cs * 0.09, 0, 7); ctx.fill();
+    return { x: ox + (h.x + 0.5) * cs, y: oy + (h.y + 0.5) * cs + 30 * u };
+  }
+  gDino(ctx, ar, u) {
+    const d = this.game.dino;
+    const gy = ar.y + ar.h - 6 * u;
+    const sc = ar.h / 70;
+    const spd = (0.4 + Math.min(0.4, this.game.t * 0.00016)) * u;
+    if (!d.obs.length || d.obs[d.obs.length - 1].x < ar.x + ar.w - (120 + Math.random() * 140) * u) d.obs.push({ x: ar.x + ar.w + 20 * u, w: (7 + Math.random() * 6) * sc, h: (14 + Math.random() * 10) * sc });
+    d.obs.forEach(o => o.x -= spd); d.obs = d.obs.filter(o => o.x > ar.x - 40 * u);
+    const dx = ar.x + 26 * u;
+    const next = d.obs.find(o => o.x + o.w > dx);
+    if (next && d.y === 0 && next.x - dx < spd * 110 + 15 * u && next.x > dx) d.vy = -0.62 * sc;
+    d.vy += 0.0064 * sc; d.y += d.vy; if (d.y > 0) { d.y = 0; d.vy = 0; }
+    d.score++;
+    d.clouds.forEach(c => { c.x -= 0.00016; if (c.x < -0.1) c.x = 1.1; });
+    ctx.fillStyle = '#efe6ec';
+    d.clouds.forEach(c => { ctx.beginPath(); ctx.ellipse(ar.x + c.x * ar.w, ar.y + c.y * ar.h, 14 * u, 5 * u, 0, 0, 7); ctx.fill(); });
+    ctx.strokeStyle = '#c9bcc5'; ctx.lineWidth = 1.5 * u;
+    ctx.beginPath(); ctx.moveTo(ar.x, gy); ctx.lineTo(ar.x + ar.w, gy); ctx.stroke();
+    ctx.fillStyle = '#2fae76';
+    d.obs.forEach(o => {
+      const r = o.w * 0.3;
+      ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(o.x, gy - o.h, o.w * 0.45, o.h, r); else ctx.rect(o.x, gy - o.h, o.w * 0.45, o.h); ctx.fill();
+      if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(o.x - o.w * 0.28, gy - o.h * 0.7, o.w * 0.28, o.h * 0.3, r); ctx.fill(); ctx.beginPath(); ctx.roundRect(o.x + o.w * 0.45, gy - o.h * 0.8, o.w * 0.28, o.h * 0.3, r); ctx.fill(); }
+    });
+    const y0 = gy + d.y;
+    const p = (x, y) => [dx + x * sc, y0 - y * sc];
+    ctx.fillStyle = '#26212a';
+    ctx.beginPath();
+    ctx.moveTo(...p(-10, 6)); ctx.lineTo(...p(-4, 10)); ctx.lineTo(...p(0, 12)); ctx.lineTo(...p(3, 16));
+    ctx.lineTo(...p(4, 21)); ctx.lineTo(...p(12, 21)); ctx.lineTo(...p(12, 17)); ctx.lineTo(...p(7.5, 17));
+    ctx.lineTo(...p(7.5, 15)); ctx.lineTo(...p(11, 15)); ctx.lineTo(...p(11, 13.5)); ctx.lineTo(...p(6, 13));
+    ctx.lineTo(...p(6, 9)); ctx.lineTo(...p(4, 6)); ctx.lineTo(...p(-2, 4)); ctx.lineTo(...p(-6, 4.5));
+    ctx.closePath(); ctx.fill();
+    const step = d.y === 0 ? Math.floor(this.game.t / 30) % 2 : 0;
+    ctx.fillRect(dx + (step ? -1 : 2) * sc, y0 - 5 * sc, 2 * sc, 5 * sc);
+    ctx.fillRect(dx + (step ? 3 : -2) * sc, y0 - 4 * sc, 2 * sc, 4 * sc);
+    ctx.fillRect(dx + 6.5 * sc, y0 - 12 * sc, 2.4 * sc, 1.2 * sc);
+    ctx.fillStyle = '#faf7f9'; ctx.beginPath(); ctx.arc(dx + 9.6 * sc, y0 - 19 * sc, 0.9 * sc, 0, 7); ctx.fill();
+    ctx.fillStyle = '#a394a0'; ctx.font = `600 ${Math.max(8, 9 * u)}px "Public Sans",sans-serif`; ctx.textAlign = 'right';
+    ctx.fillText(String(Math.floor(d.score / 30)).padStart(5, '0'), ar.x + ar.w - 4 * u, ar.y + 10 * u); ctx.textAlign = 'left';
+    return { x: dx + 40 * u, y: y0 - 30 * u - (d.y ? 10 * u : 0) };
+  }
+  gPong(ctx, ar, u) {
+    const g = this.game.pong;
+    g.bx += g.vx; g.by += g.vy;
+    if (g.by < 0.06 || g.by > 0.94) { g.vy *= -1; g.by = Math.max(0.06, Math.min(0.94, g.by)); }
+    g.pl += ((g.vx < 0 ? g.by : 0.5) - g.pl) * 0.02;
+    g.pr += ((g.vx > 0 ? g.by : 0.5) - g.pr) * 0.03;
+    if (g.bx < 0.07 && Math.abs(g.by - g.pl) < 0.16 && g.vx < 0) { g.vx = Math.abs(g.vx) * 1.04; g.vy += (g.by - g.pl) * 0.002; this.pongHit(ar, g); }
+    if (g.bx > 0.93 && Math.abs(g.by - g.pr) < 0.16 && g.vx > 0) { g.vx = -Math.abs(g.vx) * 1.04; g.vy += (g.by - g.pr) * 0.002; this.pongHit(ar, g); }
+    if (g.bx < -0.05 || g.bx > 1.05) { if (g.bx < 0) g.sr++; else g.sl++; g.bx = 0.5; g.by = 0.5; g.vx = (Math.random() < 0.5 ? 1 : -1) * 0.0012; g.vy = (Math.random() - 0.5) * 0.0016; g.trail = []; }
+    g.vx = Math.max(-0.004, Math.min(0.004, g.vx));
+    g.trail.push({ x: g.bx, y: g.by }); if (g.trail.length > 14) g.trail.shift();
+    const X = x => ar.x + x * ar.w, Y = y => ar.y + y * ar.h;
+    ctx.strokeStyle = '#f1e7ee'; ctx.lineWidth = 2 * u; ctx.setLineDash([4 * u, 5 * u]);
+    ctx.beginPath(); ctx.moveTo(X(0.5), Y(0.05)); ctx.lineTo(X(0.5), Y(0.95)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = '#c9bcc5'; ctx.font = `700 ${Math.max(10, 12 * u)}px Sora,sans-serif`; ctx.textAlign = 'center';
+    ctx.fillText(g.sl + ' · ' + g.sr, X(0.5), Y(0.2)); ctx.textAlign = 'left';
+    g.trail.forEach((t, i) => { ctx.globalAlpha = i / g.trail.length * 0.5; ctx.fillStyle = this.PAL[1 + (i % 4)]; ctx.beginPath(); ctx.arc(X(t.x), Y(t.y), 3 * u, 0, 7); ctx.fill(); });
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#26212a';
+    const pw = 5 * u, phh = ar.h * 0.14;
+    [[X(0.05) - pw / 2, g.pl], [X(0.95) - pw / 2, g.pr]].forEach(([x, py]) => {
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x, Y(py) - phh, pw, phh * 2, pw / 2); else ctx.rect(x, Y(py) - phh, pw, phh * 2);
+      ctx.fill();
+    });
+    ctx.save(); ctx.translate(X(g.bx), Y(g.by)); ctx.rotate(this.game.t * 0.02); ctx.fillStyle = this.PAL[g.ci];
+    const bs = 4.5 * u; ctx.fillRect(-bs, -bs, bs * 2, bs * 2); ctx.restore();
+    return { x: X(0.95) + 14 * u, y: Y(g.pr) };
+  }
+  pongHit(ar, g) {
+    g.ci = 1 + Math.floor(Math.random() * 4);
+    for (let i = 0; i < 8; i++) { const a = Math.random() * 7; this.parts.push({ x: ar.x + g.bx * ar.w, y: ar.y + g.by * ar.h, vx: Math.cos(a) * 1.5, vy: Math.sin(a) * 1.5, a: 0.8, r: 1.5, c: this.PAL[g.ci] }); }
+  }
+  frame = () => {
+    this.raf = requestAnimationFrame(this.frame);
+    const c = this.fxRef.current; if (!c) return;
+    this.t = (this.t || 0) + 1;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, this.Wc, this.Hc);
+    if (this.t % 20 === 1 || this.ko === undefined) this.ko = this.keepOut();
+    this.stepPlayer();
+    this.drawPlayer(ctx);
+    this.drawCardGnomes();
+    this.paintStickers();
+    this.parts = this.parts.filter(p => p.a > 0.02);
+    for (const p of this.parts) {
+      p.x += p.vx; p.y += p.vy; if (p.g) p.vy += p.g; p.a -= p.g ? 0.008 : 0.028;
+      ctx.globalAlpha = Math.max(0, p.a);
+      if (p.ch) {
+        ctx.fillStyle = p.c; ctx.font = `${Math.round(p.r * 9)}px "Public Sans",sans-serif`;
+        ctx.fillText(p.ch, p.x, p.y);
+      } else if (p.plus) {
+        ctx.strokeStyle = p.c; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(p.x - p.r * 2, p.y); ctx.lineTo(p.x + p.r * 2, p.y);
+        ctx.moveTo(p.x, p.y - p.r * 2); ctx.lineTo(p.x, p.y + p.r * 2); ctx.stroke();
+      } else {
+        ctx.fillStyle = p.c;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+    if ((this.props.fakeCursors ?? true) && !this.mini) this.updateGame(ctx); else this.gpRect = null;
+    const art = this.mini ? null : this.art, artist = this.agents[2];
+    if (art && !art.done && artist) {
+      artist.busy = true;
+      if (art.pause > 0) art.pause--;
+      else if (this.t % 10 === 0) {
+        const st = art.strokes[art.si];
+        art.pi++;
+        if (art.pi >= st.p.length) {
+          art.si++; art.pi = 0; art.pause = 20;
+          if (art.si >= art.strokes.length) { art.done = true; artist.busy = false; this.newTarget(artist); }
+        }
+        this.drawAll();
+      }
+      if (!art.done) {
+        const st = art.strokes[Math.min(art.si, art.strokes.length - 1)];
+        const p = st.p[Math.min(art.pi, st.p.length - 1)];
+        artist.x += (p.x * this.Wc + (this.artOff ? this.artOff.x : 0) - artist.x) * 0.3;
+        artist.y += (p.y * this.Wc + (this.artOff ? this.artOff.y : 0) - artist.y) * 0.3;
+      }
+    }
+    this.drawLounge(ctx);
+    this.drawBigFace(ctx);
+    this.stepCar();
+    this.drawCar(ctx);
+    if (this.props.fakeCursors ?? true) {
+      const att = this.agents[3];
+      if (att && this.lounge && !this.mini) {
+        att.busy = true;
+        const L = this.lounge, s = L.sz, A = this.att, gpr = this.gpRect;
+        L.y = Math.max(2.1 * s + 20, Math.min(L.y, this.Hc - 40));
+        if (gpr && L.x + 1.35 * s > gpr.x - 10 && L.x - 1.35 * s < gpr.x + gpr.w + 10 && L.y - 2.05 * s < gpr.y + gpr.h + 10 && L.y > gpr.y - 10) {
+          const below = gpr.y + gpr.h + 20 + 2.05 * s;
+          if (below < this.Hc - 40) L.y = below;
+        }
+        const drink = { x: L.x + 0.95 * s, y: L.y - 0.82 * s };
+        const hub = { x: L.x - 0.10 * s, y: L.y - 1.95 * s };
+        A.t--;
+        if (A.st === 'go') {
+          this.slowTo(att, drink.x + 8, drink.y - 6, 0.5);
+          if (Math.hypot(att.x - drink.x - 8, att.y - drink.y + 6) < 7) { A.st = 'serve'; A.t = 420 + Math.random() * 280; }
+        } else if (A.st === 'serve') {
+          A.a += 0.028;
+          att.x += (drink.x + 8 + Math.cos(A.a) * s * 0.16 - att.x) * 0.12;
+          att.y += (drink.y - 6 + Math.sin(A.a * 2) * s * 0.1 - att.y) * 0.12;
+          if (this.t % 16 === 0) this.parts.push({ x: drink.x + (Math.random() - 0.5) * s * 0.22, y: drink.y + Math.random() * s * 0.12, vx: (Math.random() - 0.5) * 0.28, vy: -0.28 - Math.random() * 0.28, a: 0.95, r: 1.4 + Math.random() * 1.8, c: Math.random() < 0.5 ? '#ffffff' : '#2fae76', plus: Math.random() < 0.5 });
+          if (A.t <= 0) {
+            if (Math.random() < 0.35) {
+              A.st = 'move'; A.t = 420;
+              A.dx = Math.max(Math.min(this.Wc * 0.6, this.Wc - 1.4 * s), Math.min(this.Wc - 1.4 * s, L.x + (Math.random() - 0.5) * 200));
+              A.dy = Math.max(2.1 * s + 20, Math.min(Math.max(2.1 * s + 20, Math.min(this.Hc * 0.45, (this.ko ? this.ko.y0 - 10 : this.Hc))), L.y + (Math.random() - 0.5) * 90));
+            } else { A.st = 'fan'; A.t = 300 + Math.random() * 280; }
+          }
+        } else if (A.st === 'fan') {
+          this.slowTo(att, hub.x + 10, hub.y + 14, 0.5);
+          L.tilt += (Math.sin(this.t * 0.03) * 0.055 - L.tilt) * 0.07;
+          if (A.t <= 0) A.st = 'go';
+        } else if (A.st === 'move') {
+          this.slowTo(att, A.dx, A.dy - 1.1 * s, 0.45);
+          L.x += (att.x - L.x) * 0.16; L.y += ((att.y + 1.1 * s) - L.y) * 0.16;
+          if (Math.hypot(att.x - A.dx, att.y - (A.dy - 1.1 * s)) < 6 || A.t <= 0) A.st = 'go';
+        }
+        if (A.st !== 'fan') L.tilt *= 0.96;
+        if (A.st === 'serve') {
+          ctx.save(); ctx.translate(att.x, att.y + 4); ctx.rotate(Math.sin(this.t * 0.05) * 0.25);
+          ctx.fillStyle = '#f59321';
+          ctx.beginPath(); ctx.moveTo(-4, 0); ctx.lineTo(4, 0); ctx.lineTo(2.6, 8); ctx.lineTo(-2.6, 8); ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = '#ef4d98'; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.moveTo(-1, 1); ctx.lineTo(3, -5); ctx.stroke();
+          ctx.restore();
+        }
+      }
+      const wr = this.agents[4];
+      if (wr && this.lawnGnome && !this.mini) {
+        const R = this.lawnGnome, RB = this.lg, s = Math.max(0.7, this.Wc / 1400);
+        RB.t--;
+        if (RB.st === 'idle') {
+          wr.busy = false;
+          if (RB.t <= 0) { RB.st = 'approach'; wr.busy = true; }
+        } else if (RB.st === 'approach') {
+          wr.busy = true;
+          const gx = R.x, gy2 = R.y - 140 * s;
+          this.slowTo(wr, gx, gy2, 0.55);
+          if (Math.hypot(wr.x - gx, wr.y - gy2) < 8) { RB.st = 'drag'; R.held = true; this.pickGnomeSpot(RB); }
+        } else if (RB.st === 'drag') {
+          wr.busy = true;
+          this.slowTo(wr, RB.dx, RB.dy, 0.5);
+          if (!(this.cDrag && this.cDrag.kind === 'lawnGnome')) { R.x += (wr.x - R.x) * 0.15; R.y += ((wr.y + 140 * s) - R.y) * 0.15; }
+          if (Math.hypot(wr.x - RB.dx, wr.y - RB.dy) < 6) {
+            if (Math.random() < 0.35) this.pickGnomeSpot(RB);
+            else { RB.st = 'idle'; RB.t = 450 + Math.random() * 500; R.held = false; this.newTarget(wr); wr.busy = false; }
+          }
+        }
+        if (!R.held && this.t % 45 === 0) this.parts.push({ x: R.x + (Math.random() - 0.5) * 30, y: R.y - 130 * s, vx: (Math.random() - 0.5) * 0.3, vy: -0.35, a: 1, r: 1.7, c: this.PAL[1 + Math.floor(Math.random() * 4)], ch: '♪' });
+        this.drawLawnGnome(ctx);
+      }
+      const dj = this.agents[5];
+      if (dj && this.playerPos) {
+        const pp = this.playerPos, D = this.djSpot || (this.djSpot = { t: 0, tx: pp.x, ty: pp.y });
+        if (--D.t <= 0) {
+          D.t = 170 + Math.random() * 240;
+          D.tx = pp.x + pp.w * (0.06 + Math.random() * 0.52);
+          D.ty = pp.y + pp.h * (0.3 + Math.random() * 0.55);
+        }
+        dj.busy = true;
+        dj.x += (D.tx + Math.sin(this.t * 0.05) * 5 - dj.x) * 0.05;
+        dj.y += (D.ty + Math.cos(this.t * 0.043) * 5 - dj.y) * 0.05;
+      }
+      if (this.gnome) this.drawGnome(ctx);
+      for (const a of this.agents) {
+        if (a.busy) { a.trail.length = 0; }
+        if (!a.busy) {
+          const dx = a.tx - a.x, dy = a.ty - a.y, d = Math.hypot(dx, dy);
+          if (a.wait > 0) a.wait--;
+          else if (d < 5) this.newTarget(a);
+          else {
+            const sp = Math.min(a.spd * (this.Wc / 1400 + 0.4), d * 0.03);
+            a.x += dx / d * sp + Math.sin(this.t * 0.045 + a.ph) * 0.18;
+            a.y += dy / d * sp + Math.cos(this.t * 0.038 + a.ph) * 0.18;
+          }
+        }
+        a.trail.push({ x: a.x, y: a.y }); if (a.trail.length > 26) a.trail.shift();
+        ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = a.c;
+        for (let i = 1; i < a.trail.length; i++) {
+          ctx.globalAlpha = (i / a.trail.length) * 0.22; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(a.trail[i - 1].x, a.trail[i - 1].y); ctx.lineTo(a.trail[i].x, a.trail[i].y); ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = a.c; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(a.x, a.y + 15); ctx.lineTo(a.x + 10.5, a.y + 10.5); ctx.closePath(); ctx.fill(); ctx.stroke();
+        if (this.Wc < 760) continue;
+        ctx.font = '600 11px "Public Sans", sans-serif';
+        const w = ctx.measureText(a.n).width + 14;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(a.x + 13, a.y + 15, w, 19, 9); else ctx.rect(a.x + 13, a.y + 15, w, 19);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.fillText(a.n, a.x + 20, a.y + 28);
+      }
+    }
+  };
+
+  renderVals() {
+    const s = this.state, W = this.Wc;
+    const btn = (active) => ({ width: 38, height: 38, borderRadius: 11, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? '#ffffff' : 'transparent', color: active ? '#221c26' : '#9b8fa3', transition: 'background 0.15s,color 0.15s' });
+    const shapeCss = (shape, c, sz) => {
+      const o = { width: sz, height: sz, background: c };
+      if (shape === 'circle') o.borderRadius = '50%';
+      else if (shape === 'square') o.borderRadius = Math.max(4, sz * 0.14);
+      else if (shape === 'diamond') { o.borderRadius = Math.max(3, sz * 0.1); o.transform = 'rotate(45deg) scale(0.85)'; }
+      else if (shape === 'triangle') o.clipPath = 'polygon(50% 0, 100% 100%, 0 100%)';
+      return o;
+    };
+    const pe = s.tool === 'move' ? 'auto' : 'none';
+    const stickers = s.stickers.map(it => {
+      const gn = this.SK.indexOf(it.shape) >= 0;
+      const base = { position: 'absolute', left: it.x * W, top: it.y * W, zIndex: 2, transform: `translate(-50%,-50%) rotate(${it.rot}deg)`, pointerEvents: pe, cursor: pe === 'auto' ? 'grab' : 'default', animation: it.pop ? 'wsPop 0.4s ease' : 'none' };
+      return {
+        id: it.id, drag: 's:' + it.id,
+        style: gn ? { ...base, width: it.sz, height: it.sz } : { ...base, ...shapeCss(it.shape, it.c, it.sz) },
+        cstyle: gn ? { display: 'block', width: it.sz, height: it.sz, pointerEvents: 'none' } : { display: 'none' }
+      };
+    });
+    const notes = s.notes.map(it => {
+      const ft = this.FONTS[it.f || 0] || this.FONTS[0];
+      return {
+        id: it.id, drag: 'n:' + it.id, text: it.text,
+        style: { position: 'absolute', left: it.x * W, top: it.y * W, zIndex: 3, transform: `translate(-50%,-50%) rotate(${it.rot}deg)`, pointerEvents: pe, cursor: pe === 'auto' ? 'grab' : 'default', background: '#ffffff', border: `1.5px solid ${it.c}`, color: '#26212a', borderRadius: 10, padding: '7px 12px', fontSize: 13.5, fontFamily: ft.f, fontWeight: ft.w, maxWidth: 190, boxShadow: '0 4px 14px rgba(34,28,38,0.1)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+      };
+    });
+    const swatches = this.PAL.map((c, i) => ({
+      i, style: { width: 20, height: 20, borderRadius: '50%', border: 'none', cursor: 'pointer', background: c, boxShadow: i === s.ci ? '0 0 0 2.5px #221c26, 0 0 0 4.5px #ffffff' : '0 0 0 1.5px rgba(255,255,255,0.25)', margin: '0 2px', transition: 'box-shadow 0.15s' }
+    }));
+    const NAMES = { hat: 'Pointy hat', face: 'Gnome', mushroom: 'Toadstool', beard: 'Big beard', lantern: 'Lantern' };
+    const optBtn = (active) => ({ height: 34, minWidth: 34, borderRadius: 10, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? '#ffffff' : 'transparent', color: active ? '#221c26' : '#9b8fa3', transition: 'background 0.15s,color 0.15s', padding: '0 8px' });
+    const NOCV = { display: 'none' }, NOSPAN = { display: 'none' };
+    let optBtns = [];
+    if (s.tool === 'draw') {
+      optBtns = this.PW.map((w, i) => ({
+        k: 'w:' + i, title: 'Line width', label: '', sk: '', cvs: NOCV, btn: optBtn(s.pw === i),
+        glyph: { display: 'block', width: Math.round(w * 1.5) + 3, height: Math.round(w * 1.5) + 3, borderRadius: '50%', background: s.pw === i ? '#221c26' : '#9b8fa3' }
+      })).concat([{ k: '', title: '', label: '', sk: '', cvs: NOCV, btn: { width: 1, minWidth: 1, height: 22, padding: 0, border: 'none', background: '#3d3545', pointerEvents: 'none' }, glyph: { display: 'none' } }])
+        .concat(this.PO.map((o, i) => ({
+          k: 'o:' + i, title: 'Ink opacity', label: '', sk: '', cvs: NOCV, btn: optBtn(s.po === i),
+          glyph: { display: 'block', width: 17, height: 17, borderRadius: '50%', background: this.PAL[s.ci], opacity: o, border: '1px solid rgba(255,255,255,0.35)' }
+        })));
+    } else if (s.tool === 'sticker') {
+      optBtns = this.SK.map(sh => ({
+        k: 's:' + sh, title: NAMES[sh], label: '', sk: sh, btn: { ...optBtn(s.shape === sh), width: 34 },
+        cvs: { display: 'block', width: 26, height: 26, pointerEvents: 'none' }, glyph: NOSPAN
+      }));
+    } else if (s.tool === 'text') {
+      optBtns = this.FONTS.map((f, i) => ({
+        k: 'f:' + i, title: f.n, label: f.n, sk: '', cvs: NOCV,
+        btn: { ...optBtn(s.fo === i), fontFamily: f.f, fontWeight: f.w, fontSize: 12.5, padding: '0 11px' },
+        glyph: { display: 'block', fontFamily: f.f, fontWeight: f.w }
+      }));
+    }
+    const hints = { move: 'drag anything around — the music player, the games, the gnomes', draw: 'pick a width and an ink, then draw anywhere', sticker: 'pick a gnome sticker, then click to stamp it', text: 'pick a font, then click anywhere to leave a note' };
+    return {
+      heroRef: this.heroRef, inkRef: this.inkRef, fxRef: this.fxRef, emailRef: this.emailRef, selRef: this.selRef, editRef: this.editRef, copyRef: this.copyRef,
+      card1: this.card1Ref, card2: this.card2Ref, card3: this.card3Ref,
+      onDown: this.onDown, onMove: this.onMove, onUp: this.onUp, onItemDown: this.onItemDown,
+      onTool: this.onTool, onColor: this.onColor, onShape: this.onShape, onUndo: this.onUndo, onClear: this.onClear,
+      onEditKey: this.onEditKey, onEditBlur: this.onEditBlur, onSubmit: this.onSubmit, onUiDown: this.onUiDown, onOpt: this.onOpt,
+      stickers, notes, swatches, optBtns,
+      tMove: btn(s.tool === 'move'), tDraw: btn(s.tool === 'draw'), tSticker: btn(s.tool === 'sticker'), tText: btn(s.tool === 'text'),
+      showOpts: s.tool !== 'move' && optBtns.length > 0,
+      editing: !!s.editing,
+      editStyle: s.editing ? { position: 'absolute', left: s.editing.x * W, top: s.editing.y * W, transform: 'translate(-50%,-50%)', zIndex: 30, width: 210, padding: '9px 12px', borderRadius: 10, border: `1.5px solid ${this.PAL[s.ci]}`, fontSize: 13.5, fontFamily: (this.FONTS[s.fo] || this.FONTS[0]).f, fontWeight: (this.FONTS[s.fo] || this.FONTS[0]).w, outline: 'none', boxShadow: '0 6px 20px rgba(34,28,38,0.15)' } : null,
+      hint: hints[s.tool],
+      showForm: s.formStatus !== 'done', done: s.formStatus === 'done', failed: s.formStatus === 'error',
+      btnLabel: s.formStatus === 'sending' ? 'Adding you…' : 'Join the knoll'
+    };
+  }
+}
+</script>
+</body>
+</html>
