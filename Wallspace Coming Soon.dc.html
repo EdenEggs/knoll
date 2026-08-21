@@ -865,17 +865,29 @@ class Component extends DCLogic {
     /* narrow: the deck folds up — playlist hidden, the dancer tucked in beside it — so the
        whole lockup is only 276 units wide and the lounge can share the top band with it */
     const units = narrow ? 276 : 430;
-    /* narrow: the band starts below the logo lockup and stops short of the COMING SOON
-       pill, so on a short screen the deck shrinks rather than colliding with the copy */
-    const top = narrow ? 60 : Math.round(Math.max(10, Math.min(this.Hc * 0.16, this.Hc - 10)));
+    /* narrow: the band is measured off the logo lockup rather than assumed — it clears the
+       logo by a full gap and stops short of the COMING SOON pill, so on a short screen the
+       deck shrinks to fit the room left between them instead of crowding either one */
+    const GAP_LOGO = 24, GAP_PILL = 18, MIN_W = 140;
+    const hero = narrow ? this.heroRef.current : null;
+    const heroTop = hero ? hero.getBoundingClientRect().top : 0;
+    const lg = hero && hero.querySelector('[data-mv="logo"]');
+    const logoBottom = lg ? lg.getBoundingClientRect().bottom - heroTop : 52;
+    let top = narrow ? Math.round(logoBottom + GAP_LOGO) : Math.round(Math.max(10, Math.min(this.Hc * 0.16, this.Hc - 10)));
     let w = narrow ? Math.min(268, this.Wc * 0.46) : Math.max(230, Math.min(470, this.Wc * 0.33));
     if (narrow) {
-      const hero = this.heroRef.current, bd = hero && hero.querySelector('[data-mv="badge"]');
+      const bd = hero && hero.querySelector('[data-mv="badge"]');
       if (bd) {
-        const room = bd.getBoundingClientRect().top - hero.getBoundingClientRect().top - 12 - top;
-        w = Math.min(w, room * units / 170);
+        const pillTop = bd.getBoundingClientRect().top - heroTop;
+        /* on a short screen the copy block rides up and the full gap stops fitting; give the
+           gap back before the deck does, down to the old hairline clearance, so the tight
+           layout is never worse off than it was for the sake of the roomy one */
+        if (pillTop - GAP_PILL - top < MIN_W * 170 / units) {
+          top = Math.max(Math.round(logoBottom + 8), Math.round(pillTop - GAP_PILL - MIN_W * 170 / units));
+        }
+        w = Math.min(w, (pillTop - GAP_PILL - top) * units / 170);
       }
-      w = Math.max(140, w);
+      w = Math.max(MIN_W, w);
     }
     w = Math.round(w);
     const h = Math.round(w * 170 / units);
