@@ -24,7 +24,7 @@ input,select,button{font-family:inherit}
 /* a lit lantern never sits perfectly still */
 @keyframes wsFlicker{0%,100%{filter:brightness(1)}28%{filter:brightness(1.13)}54%{filter:brightness(0.95)}76%{filter:brightness(1.07)}}
 /* the petition sketch stacks its two halves on a phone, and needs the room to do it */
-@media (max-width:640px){.ws-petition canvas{height:240px!important}.ws-petition{padding:18px 14px 12px 14px!important}[data-mv="workshop"] canvas{height:180px!important}}
+@media (max-width:640px){.ws-petition canvas{height:240px!important}.ws-petition{padding:18px 14px 12px 14px!important}.ws-workshop canvas{height:180px!important}}
 /* the shelf of smaller sketches under the two full-width ones — same chrome, half the size */
 .ws-skl{margin:34px 0 0 0;font-size:11.5px;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:#bcaebf}
 .ws-sks{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:13px}
@@ -151,22 +151,22 @@ input,select,button{font-family:inherit}
 </div>
 <div style="padding:88px 24px 72px 24px;background:#ffffff;border-top:1px solid #f1e7ee">
   <div style="max-width:1080px;margin:0 auto">
-    <div data-mv="f-ov" onPointerDown="{{onUiDown}}" style="font-size:12px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#c93b82">What's coming</div>
-    <h2 data-mv="f-h2" onPointerDown="{{onUiDown}}" style="font-family:'Sora',sans-serif;font-weight:700;font-size:clamp(28px,3.4vw,40px);letter-spacing:-0.02em;margin:12px 0 40px 0;color:#221c26;max-width:560px;text-wrap:pretty">Every fan leaves a mark</h2>
+    <div style="font-size:12px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#c93b82">What's coming</div>
+    <h2 style="font-family:'Sora',sans-serif;font-weight:700;font-size:clamp(28px,3.4vw,40px);letter-spacing:-0.02em;margin:12px 0 40px 0;color:#221c26;max-width:560px;text-wrap:pretty">A place where EVERY fan leaves a mark</h2>
     <div class="ws-cards">
-      <div data-mv="card1" onPointerDown="{{onUiDown}}" style="position:relative;overflow:hidden;background:#faf7f9;border:1px solid #f1e7ee;border-radius:18px;padding:28px 28px 118px 28px">
+      <div style="position:relative;overflow:hidden;background:#faf7f9;border:1px solid #f1e7ee;border-radius:18px;padding:28px 28px 118px 28px">
         <div style="width:30px;height:30px;border-radius:50%;background:#ef4d98"></div>
         <h3 style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;margin:18px 0 8px 0;color:#221c26">The fan page, by the fans</h3>
         <p style="margin:0;font-size:15px;line-height:1.6;color:#6d6272;text-wrap:pretty">Doodle, stamp shapes, leave notes, queue up the jukebox, or beat someone's snake high score. The best of it gets voted onto the page for good.</p>
         <canvas ref="{{card1}}" style="position:absolute;left:14px;bottom:0;width:132px;height:126px;pointer-events:none"></canvas>
       </div>
-      <div data-mv="card2" onPointerDown="{{onUiDown}}" style="position:relative;overflow:hidden;background:#faf7f9;border:1px solid #f1e7ee;border-radius:18px;padding:28px 28px 118px 28px">
+      <div style="position:relative;overflow:hidden;background:#faf7f9;border:1px solid #f1e7ee;border-radius:18px;padding:28px 28px 118px 28px">
         <div style="width:30px;height:30px;border-radius:7px;background:#5871f5"></div>
         <h3 style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;margin:18px 0 8px 0;color:#221c26">Built by consensus</h3>
         <p style="margin:0;font-size:15px;line-height:1.6;color:#6d6272;text-wrap:pretty">Submit a design, let the community vote. What the hill approves becomes part of the page — forever.</p>
         <canvas ref="{{card2}}" style="position:absolute;left:50%;transform:translateX(-50%);bottom:0;width:160px;height:126px;pointer-events:none"></canvas>
       </div>
-      <div data-mv="card3" onPointerDown="{{onUiDown}}" style="position:relative;overflow:hidden;background:#faf7f9;border:1px solid #f1e7ee;border-radius:18px;padding:28px 28px 118px 28px">
+      <div style="position:relative;overflow:hidden;background:#faf7f9;border:1px solid #f1e7ee;border-radius:18px;padding:28px 28px 118px 28px">
         <div style="width:30px;height:30px;border-radius:7px;background:#2fae76;transform:rotate(45deg) scale(0.88)"></div>
         <h3 style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;margin:18px 0 8px 0;color:#221c26">Your hill, your rules</h3>
         <p style="margin:0;font-size:15px;line-height:1.6;color:#6d6272;text-wrap:pretty">Pin the good stuff, tidy the mess, and keep the vibe yours with simple mod tools.</p>
@@ -174,7 +174,7 @@ input,select,button{font-family:inherit}
       </div>
     </div>
     <!-- ---------- the petition board: a wireframe of something that isn't built yet ---------- -->
-    <div data-mv="petition" onPointerDown="{{onUiDown}}" class="ws-petition" style="position:relative;margin:22px 0 0 0;border:1.5px dashed #e2d4df;border-radius:20px;background:repeating-linear-gradient(135deg,#fdfbfd,#fdfbfd 11px,#f8f4f8 11px,#f8f4f8 22px);padding:22px 22px 16px 22px">
+    <div class="ws-petition" style="position:relative;margin:22px 0 0 0;border:1.5px dashed #e2d4df;border-radius:20px;background:repeating-linear-gradient(135deg,#fdfbfd,#fdfbfd 11px,#f8f4f8 11px,#f8f4f8 22px);padding:22px 22px 16px 22px">
       <div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap">
         <span style="display:inline-flex;align-items:center;gap:6px;background:#ffffff;border:1px solid #eedbe6;border-radius:999px;padding:4px 11px;font-size:10.5px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:#c93b82"><span style="width:6px;height:6px;border-radius:50%;background:#dcccd7"></span>Sketch · not built yet</span>
         <span style="font-family:'Sora',sans-serif;font-weight:700;font-size:16px;color:#8b7f92">The petition board</span>
@@ -183,7 +183,7 @@ input,select,button{font-family:inherit}
       <canvas ref="{{petRef}}" style="display:block;width:100%;height:clamp(184px,18vw,202px)"></canvas>
     </div>
     <!-- ---------- the workshop shed: the roadmap, drawn as a shed ---------- -->
-    <div data-mv="workshop" onPointerDown="{{onUiDown}}" class="ws-petition" style="position:relative;margin:16px 0 0 0;border:1.5px dashed #e2d4df;border-radius:20px;background:repeating-linear-gradient(135deg,#fdfbfd,#fdfbfd 11px,#f8f4f8 11px,#f8f4f8 22px);padding:22px 22px 16px 22px">
+    <div class="ws-petition ws-workshop" style="position:relative;margin:16px 0 0 0;border:1.5px dashed #e2d4df;border-radius:20px;background:repeating-linear-gradient(135deg,#fdfbfd,#fdfbfd 11px,#f8f4f8 11px,#f8f4f8 22px);padding:22px 22px 16px 22px">
       <div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap">
         <span style="display:inline-flex;align-items:center;gap:6px;background:#ffffff;border:1px solid #eedbe6;border-radius:999px;padding:4px 11px;font-size:10.5px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:#c93b82"><span style="width:6px;height:6px;border-radius:50%;background:#dcccd7"></span>Sketch · not built yet</span>
         <span style="font-family:'Sora',sans-serif;font-weight:700;font-size:16px;color:#8b7f92">The workshop shed</span>
@@ -206,7 +206,7 @@ input,select,button{font-family:inherit}
   </div>
 </div>
 <div style="padding:26px 24px;background:#ffffff;border-top:1px solid #f1e7ee;text-align:center;font-size:13px;color:#a394a0">
-  <span data-mv="footer" onPointerDown="{{onUiDown}}" style="display:inline-block;font-family:'Public Sans',sans-serif"><span style="font-family:'Sora',sans-serif;font-weight:700;color:#221c26">Wallspace</span> (working title) · a shared wall for small internet communities</span>
+  <span style="display:inline-block;font-family:'Public Sans',sans-serif"><span style="font-family:'Sora',sans-serif;font-weight:700;color:#221c26">Wallspace</span> (working title) · a shared wall for small internet communities</span>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;fakeCursors&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Canvas demo&quot;},&quot;trailEffect&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Canvas demo&quot;},&quot;seedDoodles&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Canvas demo&quot;},&quot;formEndpoint&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Waitlist&quot;}}">
@@ -288,7 +288,7 @@ class Component extends DCLogic {
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem(this.KEY) || 'null'); } catch (e) {}
     if (saved && Array.isArray(saved.strokes)) {
-      this.setState({ strokes: saved.strokes, stickers: saved.stickers || [], notes: saved.notes || [], ui: saved.ui || {} }, () => { this.drawAll(); this.applyUi(); });
+      this.setState({ strokes: saved.strokes, stickers: saved.stickers || [], notes: saved.notes || [], ui: this.pruneUi(saved.ui) }, () => { this.drawAll(); this.applyUi(); this.save(); });
     } else if (this.props.seedDoodles ?? true) {
       this.setState(this.spreadSeeds(this.makeSeeds()), () => this.drawAll());
     }
@@ -830,6 +830,19 @@ class Component extends DCLogic {
     } else this.setState({ editing: null });
   }
   applyUi() { this.applyUiRaw(); this.clampUi(); }
+  /* a wall saved before the section below the hero was pinned down still carries
+     offsets for those pieces, so they are dropped on the way in rather than left to
+     rot in storage. The allowlist covers the hero pieces that only render on one
+     branch of the form and so cannot be found in the DOM at load. */
+  HERO_MV = ['logo', 'badge', 'h1', 'sub', 'email', 'sel', 'btn', 'nospam', 'success', 'cue', 'dock'];
+  pruneUi(ui) {
+    const hero = this.heroRef.current, out = {};
+    Object.keys(ui || {}).forEach(id => {
+      const el = document.querySelector(`[data-mv="${id}"]`);
+      if (this.HERO_MV.indexOf(id) >= 0 || (el && hero && hero.contains(el))) out[id] = ui[id];
+    });
+    return out;
+  }
   applyUiRaw() {
     Object.entries(this.state.ui).forEach(([id, o]) => {
       const el = document.querySelector(`[data-mv="${id}"]`);
@@ -846,6 +859,11 @@ class Component extends DCLogic {
     let changed = false;
     Object.keys(ui).forEach(id => {
       const el = document.querySelector(`[data-mv="${id}"]`); if (!el) return;
+      /* every bound here is measured against the hero, so a piece living outside it
+         would get dragged up into the hero on load and again on every resize — which
+         is exactly what used to pile the cards into the header. Nothing below the hero
+         is draggable any more, and this makes sure nothing new can be either. */
+      if (!hero.contains(el)) return;
       const r = el.getBoundingClientRect(); if (!r.width) return;
       let dx = 0, dy = 0;
       if (r.width < vw - 16) { if (r.left < 8) dx = 8 - r.left; else if (r.right > vw - 8) dx = vw - 8 - r.right; }
