@@ -21,6 +21,21 @@ input,select,button{font-family:inherit}
 .ws-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
 @media (max-width:860px){.ws-cards{grid-template-columns:1fr}}
 @keyframes wsFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+/* a lit lantern never sits perfectly still */
+@keyframes wsFlicker{0%,100%{filter:brightness(1)}28%{filter:brightness(1.13)}54%{filter:brightness(0.95)}76%{filter:brightness(1.07)}}
+/* the petition sketch stacks its two halves on a phone, and needs the room to do it */
+@media (max-width:640px){.ws-petition canvas{height:240px!important}.ws-petition{padding:18px 14px 12px 14px!important}[data-mv="workshop"] canvas{height:180px!important}}
+/* the shelf of smaller sketches under the two full-width ones — same chrome, half the size */
+.ws-skl{margin:34px 0 0 0;font-size:11.5px;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:#bcaebf}
+.ws-sks{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:13px}
+@media (max-width:860px){.ws-sks{grid-template-columns:1fr}}
+.ws-sk{border:1.5px dashed #e2d4df;border-radius:18px;background:repeating-linear-gradient(135deg,#fdfbfd,#fdfbfd 11px,#f8f4f8 11px,#f8f4f8 22px);padding:16px 16px 10px 16px}
+.ws-sk-h{display:flex;align-items:center;gap:9px}
+.ws-sk-tag{background:#ffffff;border:1px solid #eedbe6;border-radius:999px;padding:3px 9px;font-size:9.5px;font-weight:800;letter-spacing:0.13em;text-transform:uppercase;color:#c93b82;white-space:nowrap}
+.ws-sk h4{font-family:'Sora',sans-serif;font-weight:700;font-size:15.5px;margin:0;color:#8b7f92}
+.ws-sk p{margin:9px 0 0 0;font-size:13.5px;line-height:1.55;color:#a094a4;text-wrap:pretty;min-height:63px}
+.ws-sk canvas{display:block;width:100%;height:188px;margin-top:6px}
+@media (max-width:860px){.ws-sk p{min-height:0}}
 
 /* tablet and down: the dock is anchored at left:50% with no width of its own, so it
    could only ever be half the hero wide — which is what pushed UNDO/CLEAR onto their
@@ -54,6 +69,7 @@ input,select,button{font-family:inherit}
 </style>
 </helmet>
 <div ref="{{heroRef}}" onPointerDown="{{onDown}}" onPointerMove="{{onMove}}" onPointerUp="{{onUp}}" onPointerLeave="{{onUp}}" style="position:relative;height:100vh;min-height:560px;overflow:hidden;touch-action:pan-y;user-select:none;background-color:#faf7f9;background-image:radial-gradient(#e8dee5 1.2px, transparent 1.2px);background-size:24px 24px">
+  <canvas ref="{{skyRef}}" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none"></canvas>
   <canvas ref="{{inkRef}}" style="position:absolute;inset:0;width:100%;height:100%;z-index:1"></canvas>
   <sc-for list="{{stickers}}" as="item" hint-placeholder-count="0">
     <div data-drag="{{item.drag}}" onPointerDown="{{onItemDown}}" style="{{item.style}}"><canvas data-skc="{{item.id}}" style="{{item.cstyle}}"></canvas></div>
@@ -70,17 +86,17 @@ input,select,button{font-family:inherit}
       <path d="M8 58 C22 30 54 30 68 58 Z" fill="#ef4d98"></path>
       <path d="M18 48 L18 58 L21 55.8 L23.2 60 L26 58.6 L23.8 54.6 L27.5 54.2 Z" fill="#ffffff"></path>
       <path d="M30 36 L30 46 L33 43.8 L35.2 48 L38 46.6 L35.8 42.6 L39.5 42.2 Z" fill="#ffffff"></path>
-      <path d="M44 24 L44 34 L47 31.8 L49.2 36 L52 34.6 L49.8 30.6 L53.5 30.2 Z" fill="#221c26"></path>
+      <path d="M44 24 L44 34 L47 31.8 L49.2 36 L52 34.6 L49.8 30.6 L53.5 30.2 Z" fill="{{logoInk}}"></path>
     </svg>
-    <span style="font-family:'Sora',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.5px;color:#221c26">knoll</span>
+    <span style="{{logoTextStyle}}">knoll</span>
   </div>
   <div class="ws-copy" style="position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none;padding:0 24px 9vh 24px">
-    <div data-mv="badge" onPointerDown="{{onUiDown}}" style="pointer-events:auto;display:inline-flex;align-items:center;gap:8px;background:#ffffff;border:1px solid #eedbe6;border-radius:999px;padding:7px 16px;font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#c93b82;box-shadow:0 2px 10px rgba(201,59,130,0.08);animation:wsFloat 4s ease-in-out infinite">
+    <div data-mv="badge" onPointerDown="{{onUiDown}}" style="{{badgeStyle}}">
       <span style="width:8px;height:8px;border-radius:50%;background:#ef4d98"></span>
       Coming soon
     </div>
-    <h1 data-mv="h1" onPointerDown="{{onUiDown}}" style="pointer-events:auto;font-family:'Sora',sans-serif;font-weight:800;font-size:clamp(42px,6.5vw,84px);line-height:1.04;letter-spacing:-0.03em;margin:22px 0 0 0;color:#221c26">Every gnome<br>needs a hill.</h1>
-    <p data-mv="sub" onPointerDown="{{onUiDown}}" style="pointer-events:auto;max-width:560px;margin:18px 0 0 0;font-size:17px;line-height:1.6;color:#6d6272;text-wrap:pretty">Knoll is a shared canvas where your community draws and builds together in real time. The hill is already filling up — grab a tool below and claim your spot.</p>
+    <h1 data-mv="h1" onPointerDown="{{onUiDown}}" style="{{h1Style}}">Every gnome<br>needs a hill.</h1>
+    <p data-mv="sub" onPointerDown="{{onUiDown}}" style="{{subStyle}}">Knoll is a shared canvas where your community draws and builds together in real time. The hill is already filling up — grab a tool below and claim your spot.</p>
     <div ref="{{copyRef}}" style="margin-top:28px;pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:10px">
       <sc-if value="{{showForm}}" hint-placeholder-val="{{ true }}">
         <form data-ui="1" onSubmit="{{onSubmit}}" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:stretch">
@@ -95,7 +111,7 @@ input,select,button{font-family:inherit}
           <input ref="{{hpRef}}" data-ui="1" type="text" name="website" tabIndex="-1" autoComplete="off" aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none">
           <button type="submit" data-mv="btn" onPointerDown="{{onUiDown}}" style="padding:13px 22px;border-radius:12px;border:none;background:#221c26;color:#ffffff;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(34,28,38,0.22)" style-hover="background:#ef4d98">{{btnLabel}}</button>
         </form>
-        <div data-mv="nospam" onPointerDown="{{onUiDown}}" style="font-size:12.5px;color:#a394a0">No spam — one email when the wall opens.</div>
+        <div data-mv="nospam" onPointerDown="{{onUiDown}}" style="{{nospamStyle}}">No spam — one email when the wall opens.</div>
         <sc-if value="{{failed}}" hint-placeholder-val="{{ false }}">
           <div style="font-size:13px;color:#c9333b;font-weight:600">Hmm, that didn't go through — try again?</div>
         </sc-if>
@@ -108,9 +124,9 @@ input,select,button{font-family:inherit}
       </sc-if>
     </div>
   </div>
-  <div data-mv="cue" onPointerDown="{{onUiDown}}" style="position:absolute;left:24px;bottom:24px;z-index:6;font-size:12px;color:#a394a0;pointer-events:auto">scroll for what's coming ↓</div>
+  <div data-mv="cue" onPointerDown="{{onUiDown}}" style="{{cueStyle}}">scroll for what's coming ↓</div>
   <div data-ui="1" data-mv="dock" onPointerDown="{{onUiDown}}" style="position:absolute;left:50%;bottom:26px;transform:translateX(-50%);z-index:40;display:flex;flex-direction:column;align-items:center;gap:10px">
-    <div style="font-size:12px;font-weight:600;color:#8d8090;background:rgba(250,247,249,0.85);padding:3px 10px;border-radius:999px">{{hint}}</div>
+    <div style="{{hintStyle}}">{{hint}}</div>
     <sc-if value="{{showOpts}}" hint-placeholder-val="{{ false }}">
       <div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;max-width:calc(100vw - 20px);background:#221c26;border-radius:14px;padding:7px;box-shadow:0 10px 30px rgba(20,15,24,0.35)">
         <sc-for list="{{optBtns}}" as="item" hint-placeholder-count="0">
@@ -157,6 +173,36 @@ input,select,button{font-family:inherit}
         <canvas ref="{{card3}}" style="position:absolute;right:14px;bottom:0;width:132px;height:126px;pointer-events:none"></canvas>
       </div>
     </div>
+    <!-- ---------- the petition board: a wireframe of something that isn't built yet ---------- -->
+    <div data-mv="petition" onPointerDown="{{onUiDown}}" class="ws-petition" style="position:relative;margin:22px 0 0 0;border:1.5px dashed #e2d4df;border-radius:20px;background:repeating-linear-gradient(135deg,#fdfbfd,#fdfbfd 11px,#f8f4f8 11px,#f8f4f8 22px);padding:22px 22px 16px 22px">
+      <div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap">
+        <span style="display:inline-flex;align-items:center;gap:6px;background:#ffffff;border:1px solid #eedbe6;border-radius:999px;padding:4px 11px;font-size:10.5px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:#c93b82"><span style="width:6px;height:6px;border-radius:50%;background:#dcccd7"></span>Sketch · not built yet</span>
+        <span style="font-family:'Sora',sans-serif;font-weight:700;font-size:16px;color:#8b7f92">The petition board</span>
+      </div>
+      <p style="margin:10px 0 2px 0;max-width:640px;font-size:14.5px;line-height:1.6;color:#a094a4;text-wrap:pretty">Anyone can put a daft question to the hill. The part that matters is the last step: when yes wins it isn't a poll result, it's a pond. Here's the whole loop, on repeat.</p>
+      <canvas ref="{{petRef}}" style="display:block;width:100%;height:clamp(184px,18vw,202px)"></canvas>
+    </div>
+    <!-- ---------- the workshop shed: the roadmap, drawn as a shed ---------- -->
+    <div data-mv="workshop" onPointerDown="{{onUiDown}}" class="ws-petition" style="position:relative;margin:16px 0 0 0;border:1.5px dashed #e2d4df;border-radius:20px;background:repeating-linear-gradient(135deg,#fdfbfd,#fdfbfd 11px,#f8f4f8 11px,#f8f4f8 22px);padding:22px 22px 16px 22px">
+      <div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap">
+        <span style="display:inline-flex;align-items:center;gap:6px;background:#ffffff;border:1px solid #eedbe6;border-radius:999px;padding:4px 11px;font-size:10.5px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:#c93b82"><span style="width:6px;height:6px;border-radius:50%;background:#dcccd7"></span>Sketch · not built yet</span>
+        <span style="font-family:'Sora',sans-serif;font-weight:700;font-size:16px;color:#8b7f92">The workshop shed</span>
+      </div>
+      <p style="margin:10px 0 2px 0;max-width:660px;font-size:14.5px;line-height:1.6;color:#a094a4;text-wrap:pretty">The roadmap, except it is a shed. Whatever is being built sits on the workbench as a half-finished contraption and looks more finished as it gets closer; anything further out is a lump under a tarp with a question mark on it. When a thing ships, the gnome carries it out and screws it to the hill.</p>
+      <canvas ref="{{sk7Ref}}" style="display:block;width:100%;height:clamp(196px,19.5vw,218px)"></canvas>
+    </div>
+    <div class="ws-skl">More of the rulebook</div>
+    <div class="ws-sks">
+      <div class="ws-sk"><div class="ws-sk-h"><span class="ws-sk-tag">Sketch</span><h4>The museum</h4></div><p>Each cycle the top-voted drawing is preserved — framed, varnished, hung on a permanent gallery wall. Everything left unpreserved fades out or gets built over.</p><canvas ref="{{sk1Ref}}"></canvas></div>
+      <div class="ws-sk"><div class="ws-sk-h"><span class="ws-sk-tag">Sketch</span><h4>The naming ceremony</h4></div><p>When a new landmark turns up, the hill votes on what it is called. Names stick forever and show on hover. The pond, for the record, is called Greg.</p><canvas ref="{{sk2Ref}}"></canvas></div>
+      <div class="ws-sk"><div class="ws-sk-h"><span class="ws-sk-tag">Sketch</span><h4>Elections</h4></div><p>Once a month the hill elects a mayor gnome from whoever stands. The winner wanders the page in a tiny sash for their term. Zero power, maximum lore.</p><canvas ref="{{sk3Ref}}"></canvas></div>
+      <div class="ws-sk"><div class="ws-sk-h"><span class="ws-sk-tag">Sketch</span><h4>The law book</h4></div><p>Every petition that passes is written into a slightly absurd constitution. New visitors can read the hill’s whole legislative history, which doubles as a changelog.</p><canvas ref="{{sk4Ref}}"></canvas></div>
+    </div>
+    <div class="ws-skl">Contribution, not votes</div>
+    <div class="ws-sks">
+      <div class="ws-sk"><div class="ws-sk-h"><span class="ws-sk-tag">Sketch</span><h4>The monument</h4></div><p>A build too big for one person: it only advances when enough people each place a single block. The progress bar is the scaffolding. Finish it and the builders go on a plaque.</p><canvas ref="{{sk5Ref}}"></canvas></div>
+      <div class="ws-sk"><div class="ws-sk-h"><span class="ws-sk-tag">Sketch</span><h4>The time capsule</h4></div><p>A buried chest that opens on a fixed date. Anyone can put one drawing or note in before it seals, and nobody sees inside until the day it spills back onto the hill.</p><canvas ref="{{sk6Ref}}"></canvas></div>
+    </div>
   </div>
 </div>
 <div style="padding:26px 24px;background:#ffffff;border-top:1px solid #f1e7ee;text-align:center;font-size:13px;color:#a394a0">
@@ -171,8 +217,39 @@ input,select,button{font-family:inherit}
    Not a secret — it only accepts writes and can't read the sheet back. */
 const SIGNUP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyzyF91GruictUGhnX3_N4NwVyNuxLLpGvEUs3Thb3ObeE9MkrFerkvMrBDrPPQfcFr/exec';
 
+/* ---------- day and night, on the visitor's own clock ----------
+   NIGHT is one 0..1 dial: 0 in broad daylight, 1 after dark, ramping smoothly
+   across dawn and dusk. Everything atmospheric reads off it — the sky wash, the
+   stars, the lantern flames. Anything that would flip legibility (the copy, the
+   ink already on the wall) reads off DARK instead, which is a hard switch: fading
+   text and background past each other passes through a moment where the two match
+   and the words vanish, so those swap together in one frame or not at all.
+   ?hour=21 on the URL forces a time of day, for looking at the other half. */
+const DAY = { dawn0: 5, dawn1: 7.5, dusk0: 18.5, dusk1: 21 };
+const DARK_AT = 0.3;
+const smooth = (a, b, v) => { const q = Math.max(0, Math.min(1, (v - a) / (b - a))); return q * q * (3 - 2 * q); };
+const mix = (a, b, k) => {
+  const parts = (h) => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const A = parts(a), B = parts(b), q = Math.max(0, Math.min(1, k));
+  return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * q).toString(16).padStart(2, '0')).join('');
+};
+function clockHours() {
+  try {
+    const q = new URLSearchParams(window.location.search).get('hour');
+    if (q !== null && q !== '' && isFinite(+q)) return ((+q % 24) + 24) % 24;
+  } catch (e) {}
+  const d = new Date();
+  return d.getHours() + d.getMinutes() / 60;
+}
+function nightLevel(h) {
+  if (h < DAY.dawn0 || h >= DAY.dusk1) return 1;
+  if (h < DAY.dawn1) return 1 - smooth(DAY.dawn0, DAY.dawn1, h);
+  if (h < DAY.dusk0) return 0;
+  return smooth(DAY.dusk0, DAY.dusk1, h);
+}
+
 class Component extends DCLogic {
-  state = { tool: 'move', ci: 1, shape: 'hat', pw: 1, po: 0, fo: 0, strokes: [], stickers: [], notes: [], editing: null, formStatus: 'idle', ui: {} };
+  state = { tool: 'move', ci: 1, shape: 'hat', pw: 1, po: 0, fo: 0, strokes: [], stickers: [], notes: [], editing: null, formStatus: 'idle', ui: {}, night: nightLevel(clockHours()), dark: nightLevel(clockHours()) > DARK_AT };
   KEY = 'wallspace-wall-v4';
   PAL = ['#26212a', '#ef4d98', '#5871f5', '#2fae76', '#f59321'];
   PALD = ['#151119', '#c93b82', '#3d55c9', '#238a5c', '#c9720f'];
@@ -186,13 +263,26 @@ class Component extends DCLogic {
     { n: 'Mono', f: "ui-monospace,Consolas,monospace", w: 600 },
     { n: 'Marker', f: "'Comic Sans MS','Segoe Print',cursive", w: 700 }
   ];
-  heroRef = React.createRef(); inkRef = React.createRef(); fxRef = React.createRef();
+  heroRef = React.createRef(); inkRef = React.createRef(); fxRef = React.createRef(); skyRef = React.createRef();
   emailRef = React.createRef(); selRef = React.createRef(); editRef = React.createRef(); copyRef = React.createRef();
   hpRef = React.createRef();
-  card1Ref = React.createRef(); card2Ref = React.createRef(); card3Ref = React.createRef();
+  card1Ref = React.createRef(); card2Ref = React.createRef(); card3Ref = React.createRef(); petRef = React.createRef();
+  sk1Ref = React.createRef(); sk2Ref = React.createRef(); sk3Ref = React.createRef(); sk4Ref = React.createRef();
+  sk5Ref = React.createRef(); sk6Ref = React.createRef(); sk7Ref = React.createRef();
   parts = []; agents = []; cur = null; drag = null; Wc = 1200; Hc = 700;
 
   componentDidMount() {
+    /* the dial has to be live before the first drawAll(), because the ink already
+       on the wall is recoloured for the dark and drawAll() is what lays it down */
+    this.night = nightLevel(clockHours());
+    this.dark = this.night > DARK_AT;
+    this.gold = 4 * this.night * (1 - this.night);
+    this.lampOn = smooth(0.1, 0.55, this.night);
+    this.stars = Array.from({ length: 96 }, () => ({
+      x: Math.random(), y: Math.random() * 0.74,
+      r: 0.5 + Math.random() * 1.3, a: 0.32 + Math.random() * 0.68,
+      ph: Math.random() * 6.3, sp: 0.006 + Math.random() * 0.021
+    }));
     /* measure first: the seed layout depends on the real window size */
     this.sizeCanvases();
     let saved = null;
@@ -215,6 +305,7 @@ class Component extends DCLogic {
       if (this.car) { const cb = this.carBand(); this.car.x = Math.max(50, Math.min(this.car.x, this.Wc - 50)); this.car.y = Math.max(cb.top, Math.min(this.car.y, cb.bottom)); this.newCarTarget(); }
       if (this.face) { this.face.moved = false; this.faceSpot(); }
       if (this.gamePin) this.gamePin = null;
+      this._sky = null; this.cbox = this.copyBox();
       this.drawAll();
       this.applyUi();
       this.forceUpdate();
@@ -224,6 +315,8 @@ class Component extends DCLogic {
     this.initPlayer();
     this.initArt();
     this.initGame();
+    this.initPetition();
+    this.initSketches();
     const names = [{ n: 'mossy', c: '#2fae76' }, { n: 'pixelpete', c: '#5871f5' }, { n: 'juno~', c: '#f59321' }, { n: 'opal', c: '#ef4d98' }, { n: 'zip', c: '#26212a' }, { n: 'vinny', c: '#5871f5' }];
     this.agents = names.map((a, i) => ({ ...a, x: Math.random() * this.Wc, y: 60 + Math.random() * this.Hc * 0.5, tx: 0, ty: 0, wait: i * 60, spd: 0.6, ph: Math.random() * 6, trail: [] }));
     this.agents.forEach(a => this.newTarget(a));
@@ -469,15 +562,127 @@ class Component extends DCLogic {
     this.Wc = hero.clientWidth; this.Hc = hero.clientHeight;
     /* below this the copy column fills the hero, so the bulkier props stand down */
     this.mini = this.Wc < 760;
-    [this.inkRef.current, this.fxRef.current].forEach(c => {
+    [this.inkRef.current, this.fxRef.current, this.skyRef.current].forEach(c => {
       if (!c) return; c.width = this.Wc * dpr; c.height = this.Hc * dpr;
       c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
     });
-    [this.card1Ref.current, this.card2Ref.current, this.card3Ref.current].forEach(c => {
+    [this.card1Ref.current, this.card2Ref.current, this.card3Ref.current, this.petRef.current]
+      .concat(this.SKETCHES.map(s => this[s.ref].current)).forEach(c => {
       if (!c || !c.clientWidth) return;
       c.width = c.clientWidth * dpr; c.height = c.clientHeight * dpr;
       c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
     });
+  }
+  /* ---------- the sky ----------
+     A whole extra canvas underneath everything, so the dot-grid paper, the ink and
+     the props all keep working untouched and only the ground they sit on changes.
+     The wash, the moon, the dot grid and the scrim behind the copy are static for
+     any given minute, so they are baked once into an offscreen and blitted; only
+     the stars are redrawn, and only every other frame. */
+  copyBox() {
+    const hero = this.heroRef.current; if (!hero) return null;
+    const hr = hero.getBoundingClientRect();
+    const els = ['[data-mv="badge"]', '[data-mv="h1"]', '[data-mv="sub"]']
+      .map(q => hero.querySelector(q)).filter(Boolean);
+    if (this.copyRef.current) els.push(this.copyRef.current);
+    if (!els.length) return null;
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    for (const e of els) {
+      const r = e.getBoundingClientRect(); if (!r.width) continue;
+      x0 = Math.min(x0, r.left - hr.left); x1 = Math.max(x1, r.right - hr.left);
+      y0 = Math.min(y0, r.top - hr.top); y1 = Math.max(y1, r.bottom - hr.top);
+    }
+    if (x1 < x0) return null;
+    return { x: (x0 + x1) / 2, y: (y0 + y1) / 2, w: x1 - x0, h: y1 - y0 };
+  }
+  skyBack() {
+    const W = this.Wc, H = this.Hc, nt = this.night || 0, g = this.gold || 0, cb = this.cbox;
+    const key = [W, H, Math.round(nt * 60), Math.round(g * 60), this.dark && cb
+      ? [cb.x, cb.y, cb.w, cb.h].map(Math.round).join(',') : ''].join(':');
+    if (this._sky && this._sky.key === key) return this._sky.cv;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const cv = (this._sky && this._sky.cv) || document.createElement('canvas');
+    cv.width = Math.max(1, Math.round(W * dpr)); cv.height = Math.max(1, Math.round(H * dpr));
+    const x = cv.getContext('2d');
+    x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    x.clearRect(0, 0, W, H);
+    /* the wash */
+    const sky = x.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#140e26'); sky.addColorStop(0.55, '#241a38'); sky.addColorStop(1, '#33223f');
+    x.globalAlpha = nt; x.fillStyle = sky; x.fillRect(0, 0, W, H);
+    /* the paper's dot grid, still faintly there in the dark */
+    const tile = document.createElement('canvas');
+    tile.width = Math.round(24 * dpr); tile.height = Math.round(24 * dpr);
+    const tx = tile.getContext('2d'); tx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    tx.fillStyle = '#ffffff';
+    tx.beginPath(); tx.arc(1.2, 1.2, 1.2, 0, 7); tx.fill();
+    x.globalAlpha = nt * 0.075; x.fillStyle = x.createPattern(tile, 'repeat'); x.fillRect(0, 0, W, H);
+    /* dawn and dusk burn along the bottom of the hill */
+    if (g > 0.004) {
+      x.globalAlpha = 1;
+      const warm = x.createLinearGradient(0, H * 0.28, 0, H);
+      warm.addColorStop(0, 'rgba(239,77,152,0)');
+      warm.addColorStop(0.55, 'rgba(239,77,152,' + (0.20 * g).toFixed(3) + ')');
+      warm.addColorStop(1, 'rgba(245,147,33,' + (0.34 * g).toFixed(3) + ')');
+      x.fillStyle = warm; x.fillRect(0, 0, W, H);
+    }
+    /* a pool of deeper dark under the headline, so light copy always has something
+       dark to sit on the instant it flips */
+    if (this.dark && cb) {
+      const rx = Math.max(cb.w * 0.80, W * 0.30), ry = Math.max(cb.h * 1.00, H * 0.26);
+      x.globalAlpha = 1; x.save();
+      x.translate(cb.x, cb.y); x.scale(1, ry / rx);
+      const sg = x.createRadialGradient(0, 0, rx * 0.16, 0, 0, rx);
+      sg.addColorStop(0, 'rgba(13,8,24,0.72)');
+      sg.addColorStop(0.6, 'rgba(13,8,24,0.42)');
+      sg.addColorStop(1, 'rgba(13,8,24,0)');
+      x.fillStyle = sg; x.beginPath(); x.arc(0, 0, rx, 0, 7); x.fill();
+      x.restore();
+    }
+    /* the moon */
+    const u = Math.max(0.75, W / 1400);
+    const mx = W * 0.845, my = Math.max(56, H * 0.13), mr = 23 * u;
+    x.globalAlpha = nt;
+    const halo = x.createRadialGradient(mx, my, mr * 0.7, mx, my, mr * 4.6);
+    halo.addColorStop(0, 'rgba(255,243,208,0.22)'); halo.addColorStop(1, 'rgba(255,243,208,0)');
+    x.fillStyle = halo; x.beginPath(); x.arc(mx, my, mr * 4.6, 0, 7); x.fill();
+    x.fillStyle = '#fdf3d4'; x.beginPath(); x.arc(mx, my, mr, 0, 7); x.fill();
+    x.fillStyle = 'rgba(203,186,145,0.42)';
+    [[-0.36, -0.20, 0.18], [0.26, 0.14, 0.23], [-0.08, 0.44, 0.12]].forEach(c => {
+      x.beginPath(); x.arc(mx + c[0] * mr, my + c[1] * mr, c[2] * mr, 0, 7); x.fill();
+    });
+    x.globalAlpha = 1;
+    this._sky = { key, cv };
+    return cv;
+  }
+  drawSky() {
+    const c = this.skyRef.current; if (!c) return;
+    const ctx = c.getContext('2d'), W = this.Wc, H = this.Hc, nt = this.night || 0;
+    ctx.clearRect(0, 0, W, H);
+    if (nt < 0.004) return;
+    ctx.drawImage(this.skyBack(), 0, 0, W, H);
+    if (nt > 0.06 && this.stars) {
+      const t = this.t;
+      ctx.fillStyle = '#fff6e2';
+      for (const s of this.stars) {
+        ctx.globalAlpha = Math.min(1, nt * s.a * (0.55 + 0.45 * Math.sin(t * s.sp + s.ph)));
+        ctx.beginPath(); ctx.arc(s.x * W, s.y * H, s.r, 0, 7); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+  }
+  /* re-reads the wall clock twice a second and moves the dial */
+  tickClock() {
+    if (this.t % 30 !== 0) return;
+    this.cbox = this.copyBox();
+    const nt = nightLevel(clockHours()), dark = nt > DARK_AT;
+    if (Math.abs(nt - this.night) < 0.002 && dark === this.dark) return;
+    this.night = nt;
+    this.gold = 4 * nt * (1 - nt);
+    this.lampOn = smooth(0.1, 0.55, nt);
+    if (dark !== this.dark) { this.dark = dark; this.drawAll(); }
+    const q = Math.round(nt * 50) / 50;
+    if (q !== this.state.night || dark !== this.state.dark) this.setState({ night: q, dark });
   }
   drawStroke(ctx, s) {
     const prev = ctx.globalAlpha;
@@ -485,9 +690,16 @@ class Component extends DCLogic {
     this.strokePath(ctx, s);
     ctx.globalAlpha = prev;
   }
+  /* near-black ink vanishes against a night sky, so it lifts to a pale lilac after
+     dark. Only the two dark inks move — the bright ones read either way. */
+  inkC(c) {
+    if (!this.dark) return c;
+    return (c === '#26212a' || c === '#151119') ? mix(c, '#e7dcf2', 0.86) : c;
+  }
   strokePath(ctx, s) {
     const W = this.Wc, p = s.p; if (!p.length) return;
-    ctx.strokeStyle = s.c; ctx.fillStyle = s.c; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    const col = this.inkC(s.c);
+    ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     ctx.lineWidth = Math.max(2, s.w * W / 1000);
     if (p.length < 3) {
       ctx.beginPath();
@@ -856,6 +1068,28 @@ class Component extends DCLogic {
     scallop(); ctx.lineTo(hx, hy); ctx.closePath(); ink(0.022);
     ctx.fillStyle = '#c93b82';
     ctx.beginPath(); ctx.arc(hx, hy - 0.07, 0.085, 0, 7); ctx.fill(); ink(0.02);
+    /* a lantern strung off the low edge of the canopy — hung inside the umbrella's
+       group, so it swings whenever the attendant fans the thing */
+    const lit = this.lampOn || 0;
+    const lp = rim(0), ly = lp[1] + 0.30;
+    ctx.strokeStyle = 'rgba(46,38,54,0.4)'; ctx.lineWidth = 0.013;
+    ctx.beginPath(); ctx.moveTo(lp[0], lp[1] + 0.02); ctx.lineTo(lp[0], ly - 0.09); ctx.stroke();
+    if (lit > 0.01) {
+      const fl = lit * (0.9 + 0.1 * Math.sin(t * 0.09) + 0.05 * Math.sin(t * 0.23));
+      const gl = ctx.createRadialGradient(lp[0], ly, 0.02, lp[0], ly, 0.72);
+      gl.addColorStop(0, 'rgba(255,218,140,' + (0.52 * fl).toFixed(3) + ')');
+      gl.addColorStop(0.4, 'rgba(255,196,100,' + (0.2 * fl).toFixed(3) + ')');
+      gl.addColorStop(1, 'rgba(255,180,70,0)');
+      ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(lp[0], ly, 0.72, 0, 7); ctx.fill();
+    }
+    ctx.fillStyle = '#4f4033';
+    ctx.beginPath(); ctx.ellipse(lp[0], ly - 0.10, 0.055, 0.022, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = mix('#fff1f7', '#ffd77e', lit);
+    ctx.beginPath(); ctx.ellipse(lp[0], ly, 0.095, 0.11, 0, 0, 7); ctx.fill(); ink(0.015);
+    if (lit > 0.01) {
+      ctx.fillStyle = 'rgba(255,250,222,' + (0.85 * lit).toFixed(3) + ')';
+      ctx.beginPath(); ctx.ellipse(lp[0], ly, 0.042, 0.05, 0, 0, 7); ctx.fill();
+    }
     ctx.restore();
 
     /* ---------- lounger frame ---------- */
@@ -874,16 +1108,25 @@ class Component extends DCLogic {
     band(rail, 0.155, 0.052, ['#fff4f9', '#5871f5']);
     ctx.restore();
 
-    /* ---------- the gnome, dozing on the fabric ---------- */
+    /* ---------- the gnome on the fabric ----------
+       By day he is only sunbathing: shades on, breathing quickly, watching the sky.
+       He does not actually fall asleep until it is dark out where the visitor is. */
+    const asleep = !!this.dark;
     const doze = Math.sin(t * 0.028);
     ctx.save();
     ctx.translate(L.x + 0.50 * s, L.y - 0.36 * s);
     ctx.rotate(-1.2);
     this.gnomeFigure(ctx, {
-      scale: s * 0.0100, bob: doze * 1.5,
-      armL: 2.72 + doze * 0.05, armR: -2.72 - doze * 0.05,
-      legL: 0.16, legR: -0.3 + Math.sin(t * 0.05) * 0.06,
-      tipx: -8 + Math.sin(t * 0.014) * 2, eyes: 'happy', shades: true,
+      scale: s * 0.0100,
+      bob: asleep ? doze * 1.5 : Math.sin(t * 0.062) * 0.75,
+      armL: 2.72 + (asleep ? doze * 0.05 : Math.sin(t * 0.042) * 0.11),
+      armR: -2.72 - (asleep ? doze * 0.05 : Math.sin(t * 0.05) * 0.09),
+      legL: 0.16, legR: -0.3 + Math.sin(t * 0.05) * (asleep ? 0.06 : 0.14),
+      tipx: -8 + Math.sin(t * 0.014) * 2,
+      eyes: asleep ? 'shut' : 'open',
+      look: asleep ? 0 : Math.sin(t * 0.013) * 1.7,
+      looky: asleep ? 0 : -0.6 + Math.cos(t * 0.009),
+      shades: !asleep,
       tunic: '#f59321', tunD: '#c9720f', hat: '#ef4d98', hatD: '#c93b82'
     });
     ctx.restore();
@@ -910,15 +1153,18 @@ class Component extends DCLogic {
     ctx.beginPath(); ctx.arc(0.858, -0.835, 0.065, Math.PI * 0.5, Math.PI * 1.5); ctx.closePath(); ctx.fill(); ink(0.016);
     ctx.restore();
 
-    ctx.save();
-    ctx.translate(L.x, L.y);
-    ctx.font = '700 ' + (s * 0.15).toFixed(1) + 'px "Public Sans",sans-serif';
-    for (let i = 0; i < 3; i++) {
-      const ph = (t * 0.007 + i * 0.34) % 1;
-      ctx.fillStyle = 'rgba(88,113,245,' + (0.5 * Math.sin(ph * Math.PI)).toFixed(3) + ')';
-      ctx.fillText('z', (-0.22 + ph * 0.34) * s, (-0.92 - ph * 0.42) * s);
+    /* the z's only float up once he is genuinely asleep */
+    if (asleep) {
+      ctx.save();
+      ctx.translate(L.x, L.y);
+      ctx.font = '700 ' + (s * 0.15).toFixed(1) + 'px "Public Sans",sans-serif';
+      for (let i = 0; i < 3; i++) {
+        const ph = (t * 0.007 + i * 0.34) % 1;
+        ctx.fillStyle = 'rgba(158,176,255,' + (0.62 * Math.sin(ph * Math.PI)).toFixed(3) + ')';
+        ctx.fillText('z', (-0.22 + ph * 0.34) * s, (-0.92 - ph * 0.42) * s);
+      }
+      ctx.restore();
     }
-    ctx.restore();
   }
   initPlayer() {
     const narrow = this.Wc < 760;
@@ -1403,7 +1649,7 @@ class Component extends DCLogic {
     ctx.restore();
   }
   /* ---------- gnome stickers, drawn into their own little canvases ---------- */
-  gnomeSticker(ctx, kind, c) {
+  gnomeSticker(ctx, kind, c, lit) {
     const di = this.PAL.indexOf(c), cd = di >= 0 ? this.PALD[di] : c;
     const ink = (lw) => { ctx.strokeStyle = 'rgba(46,38,54,0.55)'; ctx.lineWidth = lw; ctx.stroke(); };
     const rr = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); };
@@ -1454,35 +1700,64 @@ class Component extends DCLogic {
       ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.beginPath(); ctx.arc(-1.8, -11.5, 1.7, 0, 7); ctx.fill();
       return;
     }
-    /* lantern */
+    /* lantern — the one sticker that has a job after dark */
+    const lt = lit || 0;
+    if (lt > 0.01) {
+      /* the spill, laid down before the body so the lantern sits inside its own light */
+      const gl = ctx.createRadialGradient(1, 3, 1, 1, 3, 36);
+      gl.addColorStop(0, 'rgba(255,214,130,' + (0.60 * lt).toFixed(3) + ')');
+      gl.addColorStop(0.42, 'rgba(255,192,92,' + (0.24 * lt).toFixed(3) + ')');
+      gl.addColorStop(1, 'rgba(255,178,66,0)');
+      ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(1, 3, 36, 0, 7); ctx.fill();
+    }
     ctx.strokeStyle = '#8d8090'; ctx.lineWidth = 2.4;
     ctx.beginPath(); ctx.arc(0, -13, 7.5, Math.PI, 0); ctx.stroke();
     ctx.fillStyle = '#4f4033'; rr(-12, -13, 24, 5.5, 2.5); ctx.fill(); ink(1.3);
-    ctx.beginPath(); ctx.moveTo(-9, -7); ctx.lineTo(9, -7); ctx.lineTo(12, 14); ctx.lineTo(-12, 14); ctx.closePath();
+    const pane = () => { ctx.beginPath(); ctx.moveTo(-9, -7); ctx.lineTo(9, -7); ctx.lineTo(12, 14); ctx.lineTo(-12, 14); ctx.closePath(); };
+    pane();
     ctx.fillStyle = c; ctx.fill(); ink(1.5);
     ctx.fillStyle = 'rgba(255,255,255,0.55)';
     ctx.beginPath(); ctx.ellipse(-2.5, 3.5, 3.6, 6.2, 0.18, 0, 7); ctx.fill();
-    ctx.fillStyle = '#f5c542'; ctx.beginPath(); ctx.arc(1, 4, 3.2, 0, 7); ctx.fill();
+    if (lt > 0.01) {
+      /* the glass warms from the inside out */
+      ctx.save(); pane(); ctx.clip();
+      const gi = ctx.createRadialGradient(1, 4, 0.5, 1, 4, 13);
+      gi.addColorStop(0, 'rgba(255,240,190,' + (0.92 * lt).toFixed(3) + ')');
+      gi.addColorStop(1, 'rgba(255,196,96,0)');
+      ctx.fillStyle = gi; ctx.fillRect(-13, -8, 26, 23);
+      ctx.restore();
+    }
+    ctx.fillStyle = '#f5c542'; ctx.beginPath(); ctx.arc(1, 4, 3.2 + 1.4 * lt, 0, 7); ctx.fill();
+    if (lt > 0.01) {
+      ctx.fillStyle = 'rgba(255,250,225,' + (0.9 * lt).toFixed(3) + ')';
+      ctx.beginPath(); ctx.arc(1, 3.4, 1.9 + 1.1 * lt, 0, 7); ctx.fill();
+    }
     ctx.fillStyle = '#4f4033'; rr(-13, 13, 26, 5.5, 2.5); ctx.fill(); ink(1.3);
   }
-  paintSticker(cv, kind, c, size) {
-    const key = kind + ':' + c + ':' + size;
+  /* a lit lantern throws light well past its own outline, so its canvas grows to
+     hold the spill while the lantern itself stays exactly the size it was. The
+     matching negative margin in renderVals keeps it centred on the same spot. */
+  static skPad(kind, lit) { return (kind === 'lantern' && (lit || 0) > 0.02) ? 1.9 : 1; }
+  paintSticker(cv, kind, c, size, lit) {
+    const key = kind + ':' + c + ':' + size + ':' + Math.round((lit || 0) * 20);
     if (cv.__key === key) return;
     cv.__key = key;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    cv.width = Math.round(size * dpr); cv.height = Math.round(size * dpr);
+    const box = Math.round(size * Component.skPad(kind, lit));
+    cv.width = Math.round(box * dpr); cv.height = Math.round(box * dpr);
     const ctx = cv.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, size, size);
-    ctx.save(); ctx.translate(size / 2, size / 2); ctx.scale(size / 50, size / 50);
-    this.gnomeSticker(ctx, kind, c);
+    ctx.clearRect(0, 0, box, box);
+    ctx.save(); ctx.translate(box / 2, box / 2); ctx.scale(size / 50, size / 50);
+    this.gnomeSticker(ctx, kind, c, lit);
     ctx.restore();
   }
   paintStickers() {
     const els = document.querySelectorAll('canvas[data-skc]');
     if (els.length) {
       const by = {}; this.state.stickers.forEach(it => { by[it.id] = it; });
-      els.forEach(cv => { const it = by[cv.dataset.skc]; if (it) this.paintSticker(cv, it.shape, it.c, Math.round(it.sz)); });
+      const lit = this.lampOn || 0;
+      els.forEach(cv => { const it = by[cv.dataset.skc]; if (it) this.paintSticker(cv, it.shape, it.c, Math.round(it.sz), lit); });
     }
     if (this.state.tool === 'sticker') {
       const c = this.PAL[this.state.ci];
@@ -1845,6 +2120,1058 @@ class Component extends DCLogic {
       ctx.restore();
     });
   }
+  /* ---------- the petition board ----------
+     Deliberately drawn in a drained palette: it is a sketch of a feature that does
+     not exist yet, so it must not look clickable. Instead of taking a real vote it
+     plays its own loop — ask, vote, pass, dig — because the idea only lands on the
+     last beat, where a vote that carries turns into an actual pond on the hill. */
+  PET = {
+    q: 'Should the hill get a pond?',
+    by: 'opened by mossy',
+    yes: 1204, no: 486, need: 0.6,
+    steps: ['someone asks', 'the hill votes', 'yes wins', 'the hill changes'],
+    ph: [['ask', 110], ['vote', 400], ['pass', 140], ['build', 180], ['hold', 280]]
+  };
+  initPetition() { this.pet = { i: 0, t: 0, yes: 0, no: 0, pond: 0, stamp: 0, pips: [], dust: [] }; }
+  stepPetition() {
+    const P = this.pet, S = this.PET; if (!P) return;
+    if (++P.t >= S.ph[P.i][1]) { P.t = 0; P.i = (P.i + 1) % S.ph.length; }
+    const key = S.ph[P.i][0], k = P.t / S.ph[P.i][1], all = S.yes + S.no;
+    if (key === 'ask') {
+      P.yes = 0; P.no = 0; P.stamp = 0;
+      /* the pond drains away again on the way round, so the loop can restart clean */
+      P.pond = Math.max(0, 1 - k * 3.4);
+      if (k < 0.03) { P.pips.length = 0; P.dust.length = 0; }
+    } else if (key === 'vote') {
+      /* turnout eases off; the yes share drifts up from a dead heat to the real number */
+      const tot = Math.round(all * (1 - Math.pow(1 - k, 2.1)));
+      const share = 0.5 + (S.yes / all - 0.5) * Math.min(1, k * 1.4);
+      P.yes = Math.round(tot * share); P.no = tot - P.yes; P.pond = 0;
+      if (P.t % 6 === 0) P.pips.push({ p: 0, sp: 0.026 + Math.random() * 0.02, s: Math.random() < S.yes / all ? 0 : 1, o: Math.random() });
+    } else if (key === 'pass') {
+      P.yes = S.yes; P.no = S.no; P.stamp = Math.min(1, k * 5);
+    } else if (key === 'build') {
+      P.yes = S.yes; P.no = S.no; P.stamp = 1;
+      P.pond = 1 - Math.pow(1 - Math.min(1, k * 1.12), 3);
+      if (P.t % 4 === 0) P.dust.push({ x: (Math.random() - 0.5) * 34, y: 0, vx: (Math.random() - 0.5) * 0.9, vy: -1.1 - Math.random() * 0.9, a: 1 });
+    } else {
+      P.yes = S.yes; P.no = S.no; P.stamp = 1; P.pond = 1;
+    }
+    P.pips = P.pips.filter(q => (q.p += q.sp) < 1);
+    P.dust = P.dust.filter(q => { q.x += q.vx; q.y += q.vy; q.vy += 0.07; q.a -= 0.021; return q.a > 0; });
+  }
+  drawPetition() {
+    const cv = this.petRef.current, P = this.pet, S = this.PET;
+    if (!cv || !cv.width || !P) return;
+    const ctx = cv.getContext('2d'), t = this.t;
+    const W = cv.clientWidth || 900, H = cv.clientHeight || 260;
+    ctx.clearRect(0, 0, W, H);
+    const u = Math.max(0.62, Math.min(1.1, W / 980));
+    const rr = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); };
+    const F = (w, sz) => { ctx.font = w + ' ' + (sz * u).toFixed(1) + 'px "Public Sans",sans-serif'; };
+    const FS = (sz) => { ctx.font = '700 ' + (sz * u).toFixed(1) + 'px "Sora",sans-serif'; };
+    const num = (v) => Math.round(v).toLocaleString('en-US');
+    /* nothing here is allowed a full-strength brand colour */
+    const INK = '#8b7f92', DIM = '#ab9fb1', FAINT = '#cfc4d2', LINE = '#e7dee9', TRACK = '#f0eaf2';
+    const YES = '#c58cb0', NO = '#a7a3c3', GRASS = '#b2c8b3', GRASSD = '#9db69f', POND = '#93b4cb';
+    const key = S.ph[P.i][0];
+    const step = { ask: 0, vote: 1, pass: 2, build: 3, hold: 3 }[key];
+    const gap = 18 * u, stack = W < 560, stepsH = 30 * u;
+    const board = { x: 0, y: 0, w: W, h: H };
+    const hill = stack ? { x: 0, y: 0, w: W, h: 0 } : { x: 0, y: 0, w: Math.max(206 * u, W * 0.33), h: H };
+    if (!stack) { hill.x = W - hill.w; board.w = hill.x - gap; }
+    const pad = 16 * u, ix = board.x + pad, iw = board.w - pad * 2;
+    /* the question sizes everything else: it shrinks to fit the column (always leaving
+       the top-right corner clear for the stamp), the card is then cut to exactly the
+       content it holds, and in the stacked layout the hill hangs off the bottom of it */
+    let qs = 21;
+    FS(qs);
+    while (qs > 11 && ctx.measureText(S.q).width > iw - 96 * u) { qs -= 0.5; FS(qs); }
+    const ch = (128 + qs) * u;
+    const cy = stack ? stepsH : stepsH + Math.max(0, (H - stepsH - ch) * 0.5);
+    if (stack) { hill.y = cy + ch + gap * 0.6; hill.h = Math.max(64, H - hill.y); }
+
+    /* ---------- the four steps, with wherever we are lit ---------- */
+    const sy = 8 * u;
+    F('700', 9.5);
+    let need = 0;
+    S.steps.forEach((q, i) => { need += 20 * u + ctx.measureText(q).width + (i < 3 ? 15 * u : 0); });
+    if (need <= board.w) {
+      let x = board.x;
+      S.steps.forEach((q, i) => {
+        const on = i === step, done = i < step;
+        ctx.fillStyle = on ? INK : (done ? FAINT : '#f1ebf2');
+        ctx.beginPath(); ctx.arc(x + 7 * u, sy + 7 * u, 7 * u, 0, 7); ctx.fill();
+        F('800', 8); ctx.fillStyle = (on || done) ? '#ffffff' : DIM;
+        ctx.textAlign = 'center';
+        ctx.fillText(done ? '✓' : String(i + 1), x + 7 * u, sy + 10.2 * u);
+        ctx.textAlign = 'left';
+        F(on ? '800' : '700', 9.5); ctx.fillStyle = on ? INK : DIM;
+        ctx.fillText(q, x + 19 * u, sy + 10.4 * u);
+        x += 20 * u + ctx.measureText(q).width;
+        if (i < 3) {
+          ctx.strokeStyle = LINE; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(x - 1 * u, sy + 7 * u); ctx.lineTo(x + 8 * u, sy + 7 * u); ctx.stroke();
+          x += 15 * u;
+        }
+      });
+    } else {
+      F('800', 10); ctx.fillStyle = INK;
+      const lead = 'STEP ' + (step + 1) + ' OF 4';
+      const lw = ctx.measureText(lead).width;
+      ctx.fillText(lead, board.x, sy + 10 * u);
+      F('700', 10); ctx.fillStyle = DIM;
+      ctx.fillText(S.steps[step], board.x + lw + 9 * u, sy + 10 * u);
+    }
+
+    /* ---------- the petition itself ---------- */
+    ctx.save();
+    ctx.shadowColor = 'rgba(40,30,50,0.10)'; ctx.shadowBlur = 13 * u; ctx.shadowOffsetY = 4 * u;
+    ctx.fillStyle = '#ffffff'; rr(board.x, cy, board.w, ch, 14 * u); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = LINE; ctx.lineWidth = 1;
+    rr(board.x + 0.5, cy + 0.5, board.w - 1, ch - 1, 14 * u); ctx.stroke();
+    F('700', 9); ctx.fillStyle = FAINT;
+    ctx.fillText('PETITION #014 · ' + S.by, ix, cy + 16 * u);
+    const qb = cy + 16 * u + (qs + 13) * u;
+    FS(qs); ctx.fillStyle = INK; ctx.fillText(S.q, ix, qb);
+
+    const tot = P.yes + P.no;
+    const bx = ix + 30 * u, bw = Math.max(54 * u, iw - 30 * u - 76 * u), bh = 11 * u;
+    const ry0 = qb + 27 * u, rowH = 25 * u;
+    const passed = step >= 2;
+    /* the line the vote has to clear — the whole point of the panel */
+    const nx = bx + bw * S.need;
+    ctx.strokeStyle = passed ? YES : FAINT; ctx.lineWidth = 1.5;
+    ctx.setLineDash([3 * u, 3 * u]);
+    ctx.beginPath(); ctx.moveTo(nx, ry0 - 8 * u); ctx.lineTo(nx, ry0 + rowH + bh + 4 * u); ctx.stroke();
+    ctx.setLineDash([]);
+    F('800', 8); ctx.fillStyle = passed ? YES : FAINT; ctx.textAlign = 'center';
+    ctx.fillText('60% TO PASS', nx, ry0 - 10 * u);
+    ctx.textAlign = 'left';
+    [['YES', P.yes, YES], ['NO', P.no, NO]].forEach((r, i) => {
+      const y = ry0 + i * rowH, base = y + bh - 1.6 * u;
+      F('800', 9.5); ctx.fillStyle = i === 0 ? INK : DIM;
+      ctx.fillText(r[0], ix, base);
+      ctx.fillStyle = TRACK; rr(bx, y, bw, bh, bh / 2); ctx.fill();
+      const fr = tot ? r[1] / tot : 0;
+      if (fr > 0.002) { ctx.fillStyle = r[2]; rr(bx, y, Math.max(bh, bw * fr), bh, bh / 2); ctx.fill(); }
+      ctx.textAlign = 'right';
+      F('700', 9.5); ctx.fillStyle = DIM;
+      ctx.fillText(num(r[1]), bx + bw + 44 * u, base);
+      F('800', 9.5); ctx.fillStyle = i === 0 ? INK : FAINT;
+      ctx.fillText(tot ? Math.round(r[1] / tot * 100) + '%' : '—', bx + bw + 74 * u, base);
+      ctx.textAlign = 'left';
+    });
+    const msg = {
+      ask: 'just posted · no votes yet',
+      vote: num(tot) + ' gnomes have voted · closes in 2 days',
+      pass: 'yes carries it — past the line, so it is binding',
+      build: 'so the hill is getting a pond. digging now.',
+      hold: 'the pond is part of the hill now. it stays.'
+    }[key];
+    F('600', 10); ctx.fillStyle = step >= 3 ? INK : DIM;
+    ctx.fillText(msg, ix, cy + ch - 12 * u);
+    if (P.stamp > 0.01) {
+      const e = P.stamp < 1 ? 1 + 1.9 * Math.pow(1 - P.stamp, 2) : 1;
+      ctx.save();
+      ctx.translate(board.x + board.w - 56 * u, cy + 26 * u);
+      ctx.rotate(-0.15); ctx.scale(e, e);
+      ctx.globalAlpha = Math.min(1, P.stamp * 1.8);
+      ctx.strokeStyle = YES; ctx.lineWidth = 2.2 * u;
+      rr(-38 * u, -13 * u, 76 * u, 26 * u, 6 * u); ctx.stroke();
+      ctx.fillStyle = YES; F('800', 12.5); ctx.textAlign = 'center';
+      ctx.fillText('PASSED', 0, 4.4 * u);
+      ctx.restore();
+    }
+
+    /* ---------- the hill, which is the thing the vote actually moves ---------- */
+    ctx.fillStyle = '#fbf8fb'; rr(hill.x, hill.y, hill.w, hill.h, 14 * u); ctx.fill();
+    ctx.strokeStyle = '#e3d6e2'; ctx.lineWidth = 1.5;
+    ctx.setLineDash([5 * u, 4 * u]);
+    rr(hill.x + 0.75, hill.y + 0.75, hill.w - 1.5, hill.h - 1.5, 14 * u); ctx.stroke();
+    ctx.setLineDash([]);
+    F('800', 8.5); ctx.fillStyle = FAINT;
+    ctx.fillText('THE HILL', hill.x + 13 * u, hill.y + 17 * u);
+    ctx.save();
+    rr(hill.x + 1, hill.y + 1, hill.w - 2, hill.h - 2, 13 * u); ctx.clip();
+    const gy = hill.y + hill.h * 0.72, hx0 = hill.x, hw = hill.w;
+    const lo = gy + 10 * u, hi = gy - 40 * u;
+    const ground = (q) => (1 - q) * (1 - q) * lo + 2 * (1 - q) * q * hi + q * q * lo;
+    ctx.fillStyle = GRASS;
+    ctx.beginPath();
+    ctx.moveTo(hx0 - 10, hill.y + hill.h);
+    ctx.lineTo(hx0 - 10, lo);
+    ctx.quadraticCurveTo(hx0 + hw * 0.5, hi, hx0 + hw + 10, lo);
+    ctx.lineTo(hx0 + hw + 10, hill.y + hill.h);
+    ctx.closePath(); ctx.fill();
+    /* the pond takes whichever runs out first — the width of the hill, or the room
+       left between the crown of the mound and the bottom of the panel */
+    const pry = Math.max(7, Math.min(hw * 0.101, (hill.h * 0.28 + 8 * u) / 2));
+    const prx = pry / 0.42;
+    const px = hx0 + hw * 0.5;
+    const py = Math.min(ground(0.5) + pry + 4 * u, hill.y + hill.h - pry - 6 * u);
+    if (P.pond > 0.004) {
+      const e = P.pond, rx = prx * e, ry = pry * e;
+      ctx.fillStyle = GRASSD;
+      ctx.beginPath(); ctx.ellipse(px, py, rx + 2.5 * u, ry + 2 * u, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = POND;
+      ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, 7); ctx.fill();
+      ctx.save();
+      ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, 7); ctx.clip();
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.2 * u;
+      for (let i = 0; i < 3; i++) {
+        const q = ((t * 0.006) + i / 3) % 1;
+        ctx.globalAlpha = (1 - q) * 0.5;
+        ctx.beginPath(); ctx.ellipse(px + rx * 0.18, py, rx * q * 0.92, ry * q * 0.92, 0, 0, 7); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.restore();
+      if (e > 0.5) {
+        ctx.globalAlpha = Math.min(1, (e - 0.5) * 3);
+        const lx = px - rx * 0.44, ly = py + ry * 0.2 + Math.sin(t * 0.03) * 0.9 * u;
+        ctx.fillStyle = '#8fb391';
+        ctx.beginPath(); ctx.ellipse(lx, ly, 9 * u, 4.4 * u, 0, 0.55, Math.PI * 2 + 0.15); ctx.fill();
+        ctx.fillStyle = '#d9a3c0';
+        ctx.beginPath(); ctx.arc(lx + 2 * u, ly - 2.8 * u, 2.5 * u, 0, 7); ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    }
+    /* spoil thrown up while it is being dug */
+    ctx.fillStyle = '#bcab95';
+    for (const d of P.dust) {
+      ctx.globalAlpha = Math.max(0, d.a) * 0.7;
+      ctx.beginPath(); ctx.arc(px + d.x * u, py + d.y * u, 1.8 * u, 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    const hop = step >= 3 ? Math.abs(Math.sin(t * 0.085)) : 0;
+    const gsc = Math.max(0.23, Math.min(0.42, hw / 206 * 0.29));
+    [[0.23, 0], [0.78, 1]].forEach(g => {
+      const q = g[0], gi = g[1];
+      ctx.save();
+      ctx.translate(hx0 + hw * q, ground(q) + 2 * u);
+      ctx.globalAlpha = 0.9;
+      this.gnomeFigure(ctx, {
+        scale: gsc, bob: -hop * 5 - Math.sin(t * 0.04 + gi * 2) * 1.1,
+        armL: gi ? 0.42 + hop * 0.9 : 2.0 - hop * 0.4, armR: -0.42 - hop * 1.5,
+        tipx: Math.sin(t * 0.03 + gi * 2) * 4,
+        eyes: step >= 2 ? 'happy' : 'open', look: gi ? -1.5 : 1.5,
+        tunic: gi ? '#a7a3c3' : '#c58cb0', tunD: gi ? '#8b87ab' : '#a8759a',
+        hat: gi ? '#b2c8b3' : '#c9b3d0', hatD: gi ? '#95ab96' : '#ab95b3'
+      });
+      ctx.restore();
+    });
+    ctx.globalAlpha = 1;
+    ctx.restore();
+
+    /* votes leaving the hill and landing in the bars */
+    for (const q of P.pips) {
+      const sx = hill.x + hill.w * (0.18 + q.o * 0.64);
+      const sy2 = hill.y + hill.h * (0.5 + ((q.o * 7) % 1) * 0.3);
+      const ex = bx + bw * (q.s === 0 ? 0.3 : 0.12), ey = ry0 + q.s * rowH + bh / 2;
+      const e = q.p * q.p * (3 - 2 * q.p);
+      ctx.globalAlpha = Math.min(1, (1 - q.p) * 2.4) * 0.8;
+      ctx.fillStyle = q.s === 0 ? YES : NO;
+      ctx.beginPath();
+      ctx.arc(sx + (ex - sx) * e, sy2 + (ey - sy2) * e - Math.sin(q.p * Math.PI) * 26 * u, 2.6 * u, 0, 7);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    if (!stack) {
+      const ax = hill.x - gap * 0.5, ay = H * 0.52;
+      ctx.strokeStyle = step >= 3 ? YES : LINE; ctx.lineWidth = 1.7 * u;
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(ax - 4 * u, ay - 5 * u); ctx.lineTo(ax + 2 * u, ay); ctx.lineTo(ax - 4 * u, ay + 5 * u);
+      ctx.stroke();
+    }
+  }
+
+  /* ---------- the sketch shelf ----------
+     Seven more previews of things that do not exist yet, all drawn the way the
+     petition board is: the same drained palette, a phase loop instead of a control,
+     and no way to touch any of it. Each one only steps while it is on screen, so the
+     story always starts at the beginning for whoever scrolls down to it. */
+  SK_PAL = {
+    INK: '#8b7f92', DIM: '#ab9fb1', FAINT: '#cfc4d2', LINE: '#e7dee9', TRACK: '#f0eaf2',
+    PINK: '#c58cb0', BLUE: '#a7a3c3', GREEN: '#b2c8b3', WOOD: '#c2a888', GOLD: '#d0ae72',
+    POND: '#93b4cb', PAPER: '#ffffff', DARK: '#6f6379'
+  };
+  SKETCHES = [
+    { id: 'museum', ref: 'sk1Ref', fn: 'skMuseum',
+      ph: [['show', 130], ['vote', 250], ['frame', 170], ['hang', 220]],
+      caps: { show: 'three drawings up this week', vote: 'the hill picks one', frame: 'framed and varnished', hang: 'hung for good — the rest fade out' } },
+    { id: 'naming', ref: 'sk2Ref', fn: 'skNaming',
+      ph: [['appear', 120], ['nominate', 190], ['vote', 220], ['crowned', 190], ['hover', 210]],
+      caps: { appear: 'a new landmark turns up unnamed', nominate: 'the hill puts names forward', vote: 'and votes on them', crowned: 'petition #015 carries', hover: 'the name sticks, and shows on hover' } },
+    { id: 'election', ref: 'sk3Ref', fn: 'skElection',
+      ph: [['stand', 150], ['poll', 240], ['win', 170], ['term', 300]],
+      caps: { stand: 'anyone can stand for mayor', poll: 'the hill votes', win: 'one sash, one month', term: 'zero power, maximum lore' } },
+    { id: 'lawbook', ref: 'sk4Ref', fn: 'skLawbook',
+      ph: [['read', 190], ['pass', 130], ['write', 160], ['settle', 150]],
+      caps: { read: 'every petition that ever passed', pass: 'another one carries', write: 'it gets written into the book', settle: 'part constitution, part changelog' } },
+    { id: 'monument', ref: 'sk5Ref', fn: 'skMonument',
+      ph: [['build', 400], ['cap', 150], ['plaque', 190], ['stand', 190]],
+      caps: { build: 'one block each — nobody can rush it', cap: 'the scaffolding comes down', plaque: 'every builder goes on the plaque', stand: 'and it is part of the hill now' } },
+    { id: 'capsule', ref: 'sk6Ref', fn: 'skCapsule',
+      ph: [['fill', 250], ['seal', 150], ['wait', 190], ['burst', 250]],
+      caps: { fill: 'one drawing or note each, then it shuts', seal: 'sealed, buried, left alone', wait: 'nobody sees inside until the date', burst: 'and then it all spills back onto the hill' } },
+    { id: 'workshop', ref: 'sk7Ref', fn: 'skWorkshop',
+      ph: [['bench', 300], ['finish', 150], ['carry', 240], ['install', 220]],
+      caps: { bench: 'whatever is being built sits on the bench', finish: 'last part goes on', carry: 'and it gets carried out of the shed', install: 'installed on the hill — next tarp comes off' } }
+  ];
+  initSketches() {
+    this.sk = {}; this.skVis = {};
+    this.SKETCHES.forEach(s => { this.sk[s.id] = { i: 0, t: 0 }; this.skVis[s.id] = false; });
+  }
+  skSeen() {
+    const vh = window.innerHeight || 800;
+    const on = (cv) => { if (!cv || !cv.clientWidth) return false; const r = cv.getBoundingClientRect(); return r.bottom > -50 && r.top < vh + 50; };
+    this.petVis = on(this.petRef.current);
+    this.SKETCHES.forEach(s => { this.skVis[s.id] = on(this[s.ref].current); });
+  }
+  drawSketches() {
+    for (const s of this.SKETCHES) {
+      const cv = this[s.ref].current, st = this.sk[s.id];
+      if (!cv || !cv.width || !this.skVis[s.id] || !st) continue;
+      if (++st.t >= s.ph[st.i][1]) { st.t = 0; st.i = (st.i + 1) % s.ph.length; }
+      const g = this.skG(cv, s, st);
+      this[s.fn](g);
+      this.skCap(g, s, st);
+    }
+  }
+  skG(cv, s, st) {
+    const ctx = cv.getContext('2d');
+    const W = cv.clientWidth || 480, H = cv.clientHeight || 188;
+    ctx.clearRect(0, 0, W, H);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.textAlign = 'left';
+    const u = Math.max(0.6, Math.min(1.14, W / 500));
+    const g = {
+      ctx, W, H, u, t: this.t, P: this.SK_PAL, st,
+      key: s.ph[st.i][0], k: st.t / s.ph[st.i][1], AH: H - 21 * u,
+      rr: (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); },
+      F: (w, sz) => { ctx.font = w + ' ' + (sz * u).toFixed(1) + 'px "Public Sans",sans-serif'; },
+      FS: (sz) => { ctx.font = '700 ' + (sz * u).toFixed(1) + 'px "Sora",sans-serif'; },
+      ink: (lw) => { ctx.strokeStyle = 'rgba(122,110,132,0.42)'; ctx.lineWidth = lw; ctx.stroke(); },
+      mid: (a, b, q) => a + (b - a) * Math.max(0, Math.min(1, q)),
+      ease: (q) => { const p = Math.max(0, Math.min(1, q)); return p * p * (3 - 2 * p); }
+    };
+    return g;
+  }
+  /* the phase dots and the running commentary along the bottom of every sketch */
+  skCap(g, s, st) {
+    const { ctx, u, H, P } = g, y = H - 6 * u;
+    let x = 3 * u;
+    for (let i = 0; i < s.ph.length; i++) {
+      ctx.fillStyle = i === st.i ? P.INK : (i < st.i ? P.FAINT : '#eee7f0');
+      ctx.beginPath(); ctx.arc(x, y - 3.6 * u, (i === st.i ? 3.5 : 2.6) * u, 0, 7); ctx.fill();
+      x += 9.5 * u;
+    }
+    g.F('700', 10); ctx.fillStyle = P.DIM;
+    ctx.fillText(s.caps[g.key], x + 1 * u, y);
+  }
+  /* a doodle, borrowed wholesale from the sticker set so the sketches and the wall
+     are visibly made of the same stuff */
+  skArt(g, kind, x, y, size, c) {
+    const { ctx } = g;
+    ctx.save(); ctx.translate(x, y); ctx.scale(size / 50, size / 50);
+    this.gnomeSticker(ctx, kind, c, 0);
+    ctx.restore();
+  }
+  skCard(g, x, y, w, h, r) {
+    const { ctx, P } = g;
+    ctx.fillStyle = P.PAPER; g.rr(x, y, w, h, r); ctx.fill();
+    ctx.strokeStyle = P.LINE; ctx.lineWidth = 1;
+    g.rr(x + 0.5, y + 0.5, w - 1, h - 1, r); ctx.stroke();
+  }
+  skBar(g, x, y, w, h, fr, c) {
+    const { ctx, P } = g;
+    ctx.fillStyle = P.TRACK; g.rr(x, y, w, h, h / 2); ctx.fill();
+    if (fr > 0.002) { ctx.fillStyle = c; g.rr(x, y, Math.max(h, w * Math.min(1, fr)), h, h / 2); ctx.fill(); }
+  }
+  skDashed(g, x, y, w, h, r, c) {
+    const { ctx, u } = g;
+    ctx.setLineDash([4 * u, 3 * u]); ctx.strokeStyle = c || g.P.LINE; ctx.lineWidth = 1;
+    g.rr(x, y, w, h, r); ctx.stroke(); ctx.setLineDash([]);
+  }
+  skFramed(g, cx, top, w, h, kind, c, alpha) {
+    const { ctx, u, P } = g;
+    ctx.save();
+    if (alpha !== undefined) ctx.globalAlpha = alpha;
+    ctx.strokeStyle = P.WOOD; ctx.lineWidth = Math.max(1, 0.9 * u);
+    ctx.beginPath(); ctx.moveTo(cx, top - 11 * u); ctx.lineTo(cx, top + 1); ctx.stroke();
+    ctx.fillStyle = P.GOLD; g.rr(cx - w / 2, top, w, h, 2.5 * u); ctx.fill();
+    ctx.fillStyle = '#fffdf7'; g.rr(cx - w / 2 + 3 * u, top + 3 * u, w - 6 * u, h - 6 * u, 1.5 * u); ctx.fill();
+    this.skArt(g, kind, cx, top + h / 2, Math.min(w, h) * 0.72, c);
+    ctx.restore();
+  }
+  /* a hill floor with an optional pond, shared by the sketches that stand on one */
+  skHill(g, x0, x1, base, lift) {
+    const { ctx, u, P } = g;
+    ctx.fillStyle = P.GREEN;
+    ctx.beginPath();
+    ctx.moveTo(x0 - 12, base + 60 * u); ctx.lineTo(x0 - 12, base + 8 * u);
+    ctx.quadraticCurveTo((x0 + x1) / 2, base - (lift || 26) * u, x1 + 12, base + 8 * u);
+    ctx.lineTo(x1 + 12, base + 60 * u); ctx.closePath(); ctx.fill();
+  }
+
+  /* ---------- 1 · the museum ---------- */
+  skMuseum(g) {
+    const { ctx, W, u, P, key, k, t } = g, A = g.AH;
+    const CAND = [['mushroom', P.PINK, 312], ['face', P.BLUE, 508], ['hat', P.GREEN, 274]];
+    const WIN = 1, gx = W - 176 * u;
+    const fill = key === 'show' ? 0 : (key === 'vote' ? 1 - Math.pow(1 - k, 2) : 1);
+    const fr = key === 'frame' ? Math.min(1, k * 1.8) : (key === 'hang' ? 1 : 0);
+    const varn = key === 'frame' ? Math.max(0, Math.min(1, (k - 0.32) * 2.4)) : 0;
+    const fly = key === 'hang' ? g.ease(k * 1.45) : 0;
+    /* the permanent wall */
+    this.skDashed(g, gx, 2 * u, W - gx - 2 * u, A - 4 * u, 10 * u);
+    g.F('800', 7.5); ctx.fillStyle = P.FAINT;
+    ctx.fillText('THE GALLERY', gx + 10 * u, 15 * u);
+    ctx.strokeStyle = P.WOOD; ctx.lineWidth = 2 * u;
+    ctx.beginPath(); ctx.moveTo(gx + 9 * u, 24 * u); ctx.lineTo(W - 9 * u, 24 * u); ctx.stroke();
+    const step = (W - gx - 42 * u) / 3, slot = (i) => gx + 21 * u + i * step;
+    ['beard', 'lantern', 'mushroom'].forEach((kd, i) =>
+      this.skFramed(g, slot(i), 34 * u, 30 * u, 34 * u, kd, [P.BLUE, P.PINK, P.GREEN][i]));
+    const dx = slot(3);
+    this.skDashed(g, dx - 15 * u, 34 * u, 30 * u, 34 * u, 2.5 * u, P.FAINT);
+    g.F('600', 8.5); ctx.fillStyle = P.FAINT;
+    ctx.fillText('12 preserved · room for more', gx + 10 * u, A - 12 * u);
+    /* this week's shortlist */
+    const cw = (gx - 14 * u) / 3, chh = Math.min(A - 12 * u, 130 * u);
+    CAND.forEach((c, i) => {
+      const won = i === WIN, x0 = 4 * u + i * (cw + 3 * u), y0 = 5 * u;
+      ctx.save();
+      if (won && fly > 0) {
+        this.skDashed(g, x0, y0, cw, chh, 8 * u, P.FAINT);
+        ctx.restore(); return;
+      }
+      if (!won) { ctx.globalAlpha = 1 - fly * 0.9; ctx.translate(0, fly * 7 * u); }
+      this.skCard(g, x0, y0, cw, chh, 8 * u);
+      this.skArt(g, c[0], x0 + cw / 2, y0 + chh * 0.36, Math.min(cw * 0.6, chh * 0.48), c[1]);
+      this.skBar(g, x0 + 10 * u, y0 + chh - 30 * u, cw - 20 * u, 7 * u, fill * c[2] / 560, c[1]);
+      g.F('800', 9.5); ctx.fillStyle = won && fill > 0.9 ? P.INK : P.DIM;
+      ctx.textAlign = 'center';
+      ctx.fillText(Math.round(c[2] * fill).toLocaleString('en-US'), x0 + cw / 2, y0 + chh - 11 * u);
+      ctx.textAlign = 'left';
+      if (won && fr > 0) {
+        /* the frame goes on, then a coat of varnish sweeps across it */
+        ctx.save(); ctx.globalAlpha = fr;
+        ctx.strokeStyle = P.GOLD; ctx.lineWidth = 3.5 * u;
+        g.rr(x0 + 2 * u, y0 + 2 * u, cw - 4 * u, chh - 4 * u, 7 * u); ctx.stroke();
+        ctx.restore();
+        if (varn > 0) {
+          ctx.save(); g.rr(x0, y0, cw, chh, 8 * u); ctx.clip();
+          const sx = x0 - cw * 0.5 + (cw * 2) * varn;
+          const gr = ctx.createLinearGradient(sx - 18 * u, 0, sx + 18 * u, 0);
+          gr.addColorStop(0, 'rgba(255,255,255,0)');
+          gr.addColorStop(0.5, 'rgba(255,255,255,0.75)');
+          gr.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.fillStyle = gr; ctx.fillRect(x0, y0, cw, chh);
+          ctx.restore();
+        }
+      }
+      ctx.restore();
+    });
+    /* the winner, on its way to the wall */
+    if (fly > 0) {
+      const from = { x: 4 * u + WIN * (cw + 3 * u) + cw / 2, y: 5 * u + chh / 2 };
+      const to = { x: dx, y: 34 * u + 17 * u };
+      const sz = g.mid(Math.min(cw, chh) * 0.86, 30 * u, fly);
+      this.skFramed(g, g.mid(from.x, to.x, fly), g.mid(from.y, to.y, fly) - sz * 0.56,
+        sz, sz * 1.13, CAND[WIN][0], CAND[WIN][1]);
+    }
+  }
+
+  /* ---------- 2 · the naming ceremony ---------- */
+  skNaming(g) {
+    const { ctx, W, u, P, key, k, t } = g, A = g.AH;
+    const NAMES = [['Greg', 1204], ['Big Wet', 402], ['Lake Steve', 288], ['Puddleton', 141]];
+    const named = key === 'crowned' || key === 'hover';
+    const gx = W - 168 * u;
+    this.skDashed(g, gx, 2 * u, W - gx - 2 * u, A - 4 * u, 10 * u);
+    ctx.save(); g.rr(gx + 1, 3 * u, W - gx - 4 * u, A - 6 * u, 9 * u); ctx.clip();
+    const cx = (gx + W) / 2 - u, base = A * 0.50;
+    this.skHill(g, gx, W, base, 20);
+    const pin = key === 'appear' ? g.ease(k * 1.7) : 1;
+    const rx = 44 * u * pin, ry = 18 * u * pin, py = base + 12 * u;
+    ctx.fillStyle = '#9db69f';
+    ctx.beginPath(); ctx.ellipse(cx, py, rx + 2.5 * u, ry + 2 * u, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = P.POND;
+    ctx.beginPath(); ctx.ellipse(cx, py, rx, ry, 0, 0, 7); ctx.fill();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.1 * u;
+    for (let i = 0; i < 2; i++) {
+      const q = ((t * 0.006) + i / 2) % 1;
+      ctx.globalAlpha = (1 - q) * 0.45;
+      ctx.beginPath(); ctx.ellipse(cx + rx * 0.15, py, rx * q * 0.85, ry * q * 0.85, 0, 0, 7); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    /* the tag: a question mark until the vote lands, a nailed-up plaque after */
+    const ty = py + ry + 14 * u;
+    if (named) {
+      const pop = key === 'crowned' ? g.ease((k - 0.3) * 3.2) : 1;
+      ctx.save(); ctx.translate(cx, ty); ctx.scale(pop, pop);
+      ctx.fillStyle = P.WOOD; g.rr(-26 * u, -9 * u, 52 * u, 18 * u, 3 * u); ctx.fill();
+      g.F('800', 10.5); ctx.fillStyle = '#fffaf3'; ctx.textAlign = 'center';
+      ctx.fillText('Greg', 0, 5 * u); ctx.textAlign = 'left';
+      ctx.restore();
+    } else {
+      this.skDashed(g, cx - 15 * u, ty - 9 * u, 30 * u, 18 * u, 3 * u, P.FAINT);
+      g.F('800', 11); ctx.fillStyle = P.FAINT; ctx.textAlign = 'center';
+      ctx.fillText('?', cx, ty + 5 * u); ctx.textAlign = 'left';
+    }
+    ctx.restore();
+    /* weeks later, somebody hovers it */
+    if (key === 'hover' && k > 0.3) {
+      const mx = cx + 14 * u, my = py - 3 * u;
+      g.F('700', 8.5);
+      const lab = 'Greg · named 12 Aug';
+      const lw = ctx.measureText(lab).width + 14 * u;
+      const lx = Math.max(gx + 6 * u, Math.min(mx - lw / 2, W - lw - 8 * u));
+      ctx.fillStyle = 'rgba(52,43,62,0.93)';
+      g.rr(lx, my - 27 * u, lw, 16 * u, 5 * u); ctx.fill();
+      ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
+      ctx.fillText(lab, lx + lw / 2, my - 16 * u); ctx.textAlign = 'left';
+      ctx.fillStyle = '#5a4c66'; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.3 * u;
+      ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(mx, my + 12 * u); ctx.lineTo(mx + 8.5 * u, my + 8.5 * u); ctx.closePath();
+      ctx.fill(); ctx.stroke();
+    }
+    /* the petition, and what the hill wants to call it */
+    g.F('800', 9.5); ctx.fillStyle = named ? P.INK : P.FAINT;
+    ctx.fillText(named ? 'PETITION #015 · THE POND SHALL BE CALLED GREG'
+                       : 'PETITION #015 · NAME THE NEW POND', 4 * u, 13 * u);
+    const shown = key === 'appear' ? 0 : (key === 'nominate' ? k * 5 : 4);
+    const fill = key === 'vote' ? 1 - Math.pow(1 - k, 2) : (shown >= 4 && key !== 'nominate' ? 1 : 0);
+    NAMES.forEach((nm, i) => {
+      const drop = Math.max(0, Math.min(1, (shown - i) * 2.4));
+      if (drop <= 0) return;
+      const y = 26 * u + i * 25 * u, won = i === 0 && named;
+      ctx.save(); ctx.globalAlpha = drop; ctx.translate(0, (1 - drop) * -8 * u);
+      g.F(won ? '800' : '700', 10); ctx.fillStyle = won ? P.INK : P.DIM;
+      ctx.fillText(nm[0], 4 * u, y + 8 * u);
+      this.skBar(g, 66 * u, y + 1 * u, gx - 108 * u, 8 * u, fill * nm[1] / 1300, i === 0 ? P.PINK : P.BLUE);
+      g.F('700', 9); ctx.fillStyle = P.FAINT; ctx.textAlign = 'right';
+      ctx.fillText(Math.round(nm[1] * fill).toLocaleString('en-US'), gx - 8 * u, y + 8 * u);
+      ctx.textAlign = 'left'; ctx.restore();
+    });
+  }
+
+  /* ---------- 3 · elections ---------- */
+  skElection(g) {
+    const { ctx, W, u, P, key, k, t } = g, A = g.AH;
+    const RUN = [
+      ['pixelpete', 402, P.BLUE, '#8b87ab', 'more mushrooms'],
+      ['mossy', 907, P.PINK, '#a8759a', 'free hats for all'],
+      ['juno~', 351, P.GREEN, '#95ab96', 'abolish tuesday']
+    ];
+    const WIN = 1;
+    const fill = key === 'stand' ? 0 : (key === 'poll' ? 1 - Math.pow(1 - k, 2) : 1);
+    const sash = key === 'win' ? g.ease(k * 2.4) : (key === 'term' ? 1 : 0);
+    const out = key === 'term' ? Math.min(1, k * 4) : 0;
+    const base = A * 0.72, sc = 0.66 * u;
+    g.F('800', 8); ctx.fillStyle = P.FAINT;
+    ctx.fillText('MAYORAL ELECTION · AUGUST · 3 STANDING', 4 * u, 11 * u);
+    if (out < 1) {
+      RUN.forEach((r, i) => {
+        const won = i === WIN, cx = W * (0.19 + i * 0.31);
+        ctx.save();
+        ctx.globalAlpha = won ? 1 : 1 - out;
+        /* the campaign promise, which is the whole point of the exercise */
+        g.F('700', 8.5);
+        const pw = ctx.measureText(r[4]).width + 13 * u;
+        ctx.fillStyle = '#ffffff'; ctx.strokeStyle = P.LINE; ctx.lineWidth = 1;
+        g.rr(cx - pw / 2, 18 * u, pw, 16 * u, 8 * u); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = P.DIM; ctx.textAlign = 'center';
+        ctx.fillText(r[4], cx, 28.5 * u);
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.moveTo(cx - 3.5 * u, 33.5 * u); ctx.lineTo(cx + 3.5 * u, 33.5 * u); ctx.lineTo(cx, 38 * u); ctx.closePath(); ctx.fill();
+        /* plinth */
+        ctx.fillStyle = P.WOOD; g.rr(cx - 25 * u, base, 50 * u, 9 * u, 2 * u); ctx.fill();
+        ctx.save(); ctx.translate(cx, base + 1);
+        const hop = won && key === 'win' ? Math.abs(Math.sin(t * 0.09)) : 0;
+        this.gnomeFigure(ctx, {
+          scale: sc, bob: -hop * 5 - Math.sin(t * 0.04 + i * 2) * 1.1,
+          armL: won && sash > 0 ? 2.1 : 0.42, armR: -0.42 - hop * 1.4,
+          tipx: Math.sin(t * 0.03 + i * 2) * 4,
+          eyes: won && sash > 0.4 ? 'happy' : 'open', look: (i - 1) * -1.4,
+          tunic: r[2], tunD: r[3], hat: i === 1 ? '#c9b3d0' : r[2], hatD: i === 1 ? '#ab95b3' : r[3]
+        });
+        if (won && sash > 0) this.skSash(g, sc, sash);
+        ctx.restore();
+        /* name and tally share a line, so the pledges get the room instead */
+        const lead = won && fill > 0.9;
+        g.F(lead ? '800' : '700', 9.5);
+        ctx.fillStyle = lead ? P.INK : P.DIM;
+        ctx.fillText(r[0] + '  ' + Math.round(r[1] * fill).toLocaleString('en-US') + (lead ? '  — mayor' : ''), cx, base + 23 * u);
+        this.skBar(g, cx - 42 * u, base + 28 * u, 84 * u, 8 * u, fill * r[1] / 1000, r[2]);
+        ctx.textAlign = 'left';
+        ctx.restore();
+      });
+    }
+    /* the term itself: one gnome, one sash, wandering */
+    if (key === 'term') {
+      const p = Math.max(0, (k - 0.22) / 0.78);
+      const mx = g.mid(W * 0.22, W * 0.8, p);
+      ctx.save(); ctx.globalAlpha = Math.min(1, out);
+      ctx.strokeStyle = P.LINE; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(6 * u, base + 10 * u); ctx.lineTo(W - 6 * u, base + 10 * u); ctx.stroke();
+      ctx.fillStyle = 'rgba(122,110,132,0.10)';
+      ctx.beginPath(); ctx.ellipse(mx, base + 9 * u, 20 * u, 4 * u, 0, 0, 7); ctx.fill();
+      ctx.save(); ctx.translate(mx, base + 10 * u);
+      const sw = Math.sin(t * 0.13);
+      this.gnomeFigure(ctx, {
+        scale: sc, bob: -Math.abs(sw) * 3,
+        armL: 0.4 + sw * 0.55, armR: -0.4 - sw * 0.55,
+        legL: sw * 0.42, legR: -sw * 0.42, tipx: Math.sin(t * 0.05) * 5,
+        eyes: 'happy', tunic: P.PINK, tunD: '#a8759a', hat: '#c9b3d0', hatD: '#ab95b3'
+      });
+      this.skSash(g, sc, 1);
+      ctx.restore();
+      g.F('700', 9.5); ctx.fillStyle = P.DIM; ctx.textAlign = 'center';
+      ctx.fillText('mossy · mayor until 1 Sep · no powers whatsoever', W / 2, base + 30 * u);
+      ctx.textAlign = 'left';
+      ctx.textAlign = 'left';
+      ctx.restore();
+    }
+  }
+  /* the sash, drawn in gnomeFigure's own coordinate space */
+  skSash(g, sc, a) {
+    const { ctx, P } = g;
+    ctx.save(); ctx.scale(sc, sc); ctx.globalAlpha = Math.max(0, Math.min(1, a));
+    ctx.fillStyle = P.PINK;
+    ctx.beginPath();
+    ctx.moveTo(-14, -50); ctx.lineTo(-6.5, -51); ctx.lineTo(16, -21); ctx.lineTo(8.5, -19);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(122,110,132,0.4)'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = '#e6bcd4'; ctx.beginPath(); ctx.arc(13, -22, 5, 0, 7); ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  /* ---------- 4 · the law book ---------- */
+  skLawbook(g) {
+    const { ctx, W, u, P, key, k, t, st } = g, A = g.AH;
+    const LAWS = [
+      'Mushrooms may not be stacked more than three high.',
+      'The pond shall be called Greg.',
+      'No gnome may wear two hats at once.',
+      'Tuesday is for doodling and nothing else.',
+      'The tall grass at the back is protected.',
+      'Hats come off inside the museum.',
+      'Greg may not be drained, dyed, or renamed.'
+    ];
+    if (key === 'settle' && st.t === 1) st.n = ((st.n || 0) + 1) % LAWS.length;
+    const nn = st.n || 0, base = 7 + nn;
+    const slide = key === 'write' ? g.ease(k * 1.5) : (key === 'settle' ? 1 : 0);
+    const stamp = key === 'pass' ? Math.min(1, k * 4) : (key === 'write' ? 1 - Math.min(1, (k - 0.5) * 3) : 0);
+    /* the pop-in overshoot belongs to the landing only — reusing it on the way out
+       made the stamp swell as it faded, straight through the text and off the card */
+    const stampS = key === 'pass' ? 1 + 1.8 * Math.pow(1 - Math.min(1, k * 4), 2) : 1;
+    /* the book */
+    const bx = 4 * u, bw = W - 8 * u, by = 4 * u, bh = A - 8 * u;
+    ctx.fillStyle = '#efe7ee'; g.rr(bx, by + 3 * u, bw, bh - 3 * u, 7 * u); ctx.fill();
+    this.skCard(g, bx, by, bw, bh - 5 * u, 7 * u);
+    const spine = bx + bw * 0.34;
+    ctx.strokeStyle = P.LINE; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(spine, by + 8 * u); ctx.lineTo(spine, by + bh - 15 * u); ctx.stroke();
+    /* left page: the cover matter */
+    g.FS(12); ctx.fillStyle = P.INK;
+    ctx.fillText('Laws of', bx + 16 * u, by + 30 * u);
+    ctx.fillText('the Hill', bx + 16 * u, by + 46 * u);
+    g.F('700', 9); ctx.fillStyle = P.FAINT;
+    ctx.fillText((base + (slide > 0.5 ? 0 : -1)) + ' laws · since 12 Aug', bx + 16 * u, by + 62 * u);
+    ctx.save(); ctx.translate(bx + 44 * u, by + bh - 22 * u);
+    this.gnomeFigure(ctx, {
+      scale: 0.44 * u, bob: Math.sin(t * 0.035) * 1.2, armL: 1.5, armR: -1.5,
+      tipx: Math.sin(t * 0.028) * 4, eyes: 'happy',
+      tunic: P.BLUE, tunD: '#8b87ab', hat: P.GREEN, hatD: '#95ab96'
+    });
+    ctx.restore();
+    /* right page: the last four, newest sliding in at the bottom */
+    const px = spine + 14 * u, pw = bx + bw - px - 14 * u;
+    const rowH = 25 * u, top = by + 20 * u;
+    ctx.save(); g.rr(px - 4 * u, by + 8 * u, pw + 8 * u, bh - 24 * u, 4 * u); ctx.clip();
+    for (let j = 0; j < 4; j++) {
+      const isNew = j === 3;
+      const a = isNew ? slide : 1;
+      if (a <= 0.01) continue;
+      const y = top + j * rowH - (isNew ? 0 : (1 - slide) * -0 ) + (1 - slide) * (isNew ? 0 : -0);
+      ctx.save();
+      ctx.globalAlpha = a;
+      if (isNew) ctx.translate((1 - slide) * pw * 0.9, 0);
+      g.F('800', 8.5); ctx.fillStyle = isNew ? P.PINK : P.FAINT;
+      ctx.fillText('LAW ' + (base - 3 + j), px, y);
+      g.F('600', 10); ctx.fillStyle = isNew && slide > 0.6 ? P.INK : P.DIM;
+      const txt = LAWS[(nn + j) % LAWS.length];
+      let s2 = txt;
+      while (ctx.measureText(s2).width > pw && s2.length > 4) s2 = s2.slice(0, -1);
+      ctx.fillText(s2 + (s2 === txt ? '' : '…'), px, y + 12 * u);
+      ctx.restore();
+    }
+    ctx.restore();
+    if (stamp > 0.01) {
+      ctx.save();
+      ctx.translate(bx + bw - 52 * u, by + bh - 34 * u);
+      ctx.rotate(-0.18); ctx.scale(stampS, stampS); ctx.globalAlpha = Math.min(1, stamp * 1.6);
+      ctx.strokeStyle = P.PINK; ctx.lineWidth = 2 * u;
+      g.rr(-32 * u, -11 * u, 64 * u, 22 * u, 5 * u); ctx.stroke();
+      g.F('800', 11); ctx.fillStyle = P.PINK; ctx.textAlign = 'center';
+      ctx.fillText('PASSED', 0, 4 * u);
+      ctx.restore();
+    }
+  }
+
+  /* ---------- 5 · the monument ---------- */
+  skMonument(g) {
+    const { ctx, W, u, P, key, k, t } = g, A = g.AH;
+    const WHO = ['mossy', 'pixelpete', 'juno~', 'opal', 'zip', 'vinny'];
+    const ROWS = 6, COLS = 4, TOTAL = ROWS * COLS;
+    const p = key === 'build' ? Math.min(0.96, k * 0.99) : 1;
+    const placed = Math.floor(TOTAL * p);
+    const scaf = key === 'cap' ? 1 - g.ease(k * 1.4) : (key === 'build' ? 1 : 0);
+    const plaque = key === 'plaque' ? g.ease(k * 2.2) : (key === 'stand' ? 1 : 0);
+    const gx = W - 168 * u;
+    this.skDashed(g, gx, 2 * u, W - gx - 2 * u, A - 4 * u, 10 * u);
+    ctx.save(); g.rr(gx + 1, 3 * u, W - gx - 4 * u, A - 6 * u, 9 * u); ctx.clip();
+    const tcx = (gx + W) / 2, floor = A - 30 * u;
+    ctx.strokeStyle = P.LINE; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(gx + 6 * u, floor); ctx.lineTo(W - 6 * u, floor); ctx.stroke();
+    const bw = 15 * u, bh = 9.5 * u, gap = 1.5 * u;
+    const tw = COLS * bw + (COLS - 1) * gap;
+    for (let i = 0; i < placed; i++) {
+      const r = Math.floor(i / COLS), c = i % COLS;
+      const justNow = (i === placed - 1 && key === 'build');
+      const bx = tcx - tw / 2 + c * (bw + gap), by = floor - (r + 1) * (bh + gap);
+      ctx.save();
+      if (justNow) { const q = (k * TOTAL) % 1; ctx.globalAlpha = Math.min(1, q * 4); ctx.translate(0, (1 - Math.min(1, q * 4)) * -12 * u); }
+      ctx.fillStyle = [P.WOOD, '#cdb497', P.GOLD][(r + c) % 3];
+      g.rr(bx, by, bw, bh, 2 * u); ctx.fill();
+      ctx.strokeStyle = 'rgba(122,110,132,0.28)'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.restore();
+    }
+    if (scaf > 0.01) {
+      ctx.save(); ctx.globalAlpha = scaf;
+      const top = floor - (ROWS + 0.6) * (bh + gap);
+      ctx.strokeStyle = P.FAINT; ctx.lineWidth = 1.6 * u;
+      ctx.setLineDash([4 * u, 3 * u]);
+      [tcx - tw / 2 - 8 * u, tcx + tw / 2 + 8 * u].forEach(x => {
+        ctx.beginPath(); ctx.moveTo(x, floor); ctx.lineTo(x, top); ctx.stroke();
+      });
+      for (let i = 1; i <= 3; i++) {
+        const y = floor - i * (floor - top) / 4;
+        ctx.beginPath(); ctx.moveTo(tcx - tw / 2 - 8 * u, y); ctx.lineTo(tcx + tw / 2 + 8 * u, y); ctx.stroke();
+      }
+      ctx.setLineDash([]); ctx.restore();
+    } else {
+      /* the flag that goes on once the last block is down */
+      const top = floor - ROWS * (bh + gap);
+      ctx.strokeStyle = P.WOOD; ctx.lineWidth = 1.5 * u;
+      ctx.beginPath(); ctx.moveTo(tcx, top); ctx.lineTo(tcx, top - 20 * u); ctx.stroke();
+      ctx.fillStyle = P.PINK;
+      ctx.beginPath(); ctx.moveTo(tcx, top - 20 * u);
+      ctx.lineTo(tcx + 16 * u + Math.sin(t * 0.07) * 2 * u, top - 15 * u);
+      ctx.lineTo(tcx, top - 10 * u); ctx.closePath(); ctx.fill();
+    }
+    if (plaque > 0.01) {
+      ctx.save(); ctx.globalAlpha = plaque;
+      const pw2 = tw + 20 * u;
+      ctx.fillStyle = P.GOLD; g.rr(tcx - pw2 / 2, floor + 3 * u, pw2, 15 * u, 3 * u); ctx.fill();
+      g.F('800', 7); ctx.fillStyle = '#5d4a33'; ctx.textAlign = 'center';
+      ctx.fillText('BUILT BY 500 GNOMES', tcx, floor + 12.5 * u);
+      ctx.textAlign = 'left'; ctx.restore();
+    }
+    ctx.restore();
+    /* the ledger on the left */
+    g.F('800', 8); ctx.fillStyle = P.FAINT;
+    ctx.fillText('THE MONUMENT · A BRIDGE OVER GREG', 4 * u, 12 * u);
+    g.FS(14); ctx.fillStyle = P.INK;
+    ctx.fillText(Math.round(500 * p) + ' / 500 blocks', 4 * u, 34 * u);
+    this.skBar(g, 4 * u, 42 * u, gx - 18 * u, 9 * u, p, P.WOOD);
+    /* a greyed-out control, to make it obvious this is not live */
+    this.skDashed(g, 4 * u, 58 * u, 96 * u, 22 * u, 6 * u, P.FAINT);
+    g.F('800', 9); ctx.fillStyle = P.FAINT; ctx.textAlign = 'center';
+    ctx.fillText(key === 'build' ? 'PLACE ONE BLOCK' : 'FINISHED', 52 * u, 72.5 * u);
+    ctx.textAlign = 'left';
+    g.F('700', 9.5); ctx.fillStyle = P.DIM;
+    for (let i = 0; i < 3; i++) {
+      const who = WHO[(placed + i * 2) % WHO.length];
+      ctx.globalAlpha = 1 - i * 0.3;
+      ctx.fillText(who + ' placed a block', 4 * u, 96 * u + i * 15 * u);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /* ---------- 6 · the time capsule ---------- */
+  skCapsule(g) {
+    const { ctx, W, u, P, key, k, t } = g, A = g.AH;
+    const KINDS = ['mushroom', 'hat', 'face', 'beard', 'lantern'];
+    const COLS = [P.PINK, P.BLUE, P.GREEN, P.WOOD, P.POND];
+    const gx = W - 176 * u;
+    this.skDashed(g, gx, 2 * u, W - gx - 2 * u, A - 4 * u, 10 * u);
+    ctx.save(); g.rr(gx + 1, 3 * u, W - gx - 4 * u, A - 6 * u, 9 * u); ctx.clip();
+    const cx = (gx + W) / 2, floor = A * 0.60;
+    this.skHill(g, gx, W, floor, 18);
+    const sink = key === 'seal' ? g.ease((k - 0.5) * 2.2)
+      : (key === 'wait' ? 1 : (key === 'burst' ? 1 - g.ease(k * 2.6) : 0));
+    const lid = key === 'fill' ? 0
+      : (key === 'seal' ? Math.min(1, k * 2.2)
+        : (key === 'burst' && k > 0.28 ? 1 - Math.min(1, (k - 0.28) * 5) : 1));
+    const cy = floor + 6 * u + sink * 30 * u;
+    /* things going in, while the lid is still up */
+    if (key === 'fill') {
+      for (let i = 0; i < 3; i++) {
+        const q = ((t * 0.013) + i * 0.34) % 1;
+        ctx.globalAlpha = Math.min(1, (1 - q) * 3.5);
+        this.skArt(g, KINDS[(i + Math.floor(t * 0.013 + i * 0.34)) % 5],
+          cx - 17 * u + i * 17 * u, 10 * u + q * (cy - 34 * u), 15 * u, COLS[(i * 2) % 5]);
+      }
+      ctx.globalAlpha = 1;
+    }
+    /* the chest */
+    ctx.save(); ctx.translate(cx, cy);
+    ctx.fillStyle = P.WOOD; g.rr(-30 * u, -14 * u, 60 * u, 25 * u, 3 * u); ctx.fill(); g.ink(1.1);
+    ctx.fillStyle = '#a98d72'; g.rr(-30 * u, -3 * u, 60 * u, 5 * u, 1.5 * u); ctx.fill();
+    ctx.save(); ctx.translate(-30 * u, -14 * u); ctx.rotate(-(1 - lid) * 0.62);
+    ctx.fillStyle = '#b1957a';
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(0, -8 * u);
+    ctx.quadraticCurveTo(30 * u, -31 * u, 60 * u, -8 * u);
+    ctx.lineTo(60 * u, 0); ctx.closePath();
+    ctx.fill(); g.ink(1.1);
+    ctx.fillStyle = P.GOLD; ctx.fillRect(27 * u, -19 * u, 6 * u, 19 * u);
+    ctx.restore();
+    if (lid > 0.85) {
+      ctx.strokeStyle = P.GOLD; ctx.lineWidth = 2 * u;
+      ctx.beginPath(); ctx.arc(0, -1 * u, 3.6 * u, Math.PI, 0); ctx.stroke();
+      ctx.fillStyle = P.GOLD; g.rr(-5 * u, -1 * u, 10 * u, 10 * u, 2 * u); ctx.fill(); g.ink(1);
+    }
+    ctx.restore();
+    /* the mound it lives under between the two dates */
+    if (sink > 0.15) {
+      ctx.save(); ctx.globalAlpha = Math.min(1, (sink - 0.15) * 2.5);
+      ctx.fillStyle = P.GREEN;
+      ctx.beginPath(); ctx.ellipse(cx, floor + 8 * u, 44 * u, 15 * u, 0, Math.PI, 0); ctx.fill();
+      ctx.fillRect(cx - 44 * u, floor + 8 * u, 88 * u, 40 * u);
+      ctx.fillStyle = '#b3a5b7'; g.rr(cx + 22 * u, floor - 8 * u, 13 * u, 19 * u, 4 * u); ctx.fill();
+      g.ink(1);
+      /* the dashed outline is the whole point of the wait: you know it is down there,
+         you just cannot look */
+      ctx.setLineDash([3 * u, 3 * u]);
+      ctx.strokeStyle = 'rgba(120,108,130,0.45)'; ctx.lineWidth = 1;
+      g.rr(cx - 30 * u, cy - 14 * u, 60 * u, 25 * u, 3 * u); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+    /* and the day it opens */
+    if (key === 'burst') {
+      const b = Math.max(0, (k - 0.25) / 0.75), q = Math.min(1.5, b * 2.1);
+      for (let i = 0; i < 8; i++) {
+        const a = -Math.PI * (0.14 + 0.72 * (i / 7)), v = (34 + (i % 3) * 13) * u;
+        ctx.globalAlpha = Math.min(1, b * 6);
+        this.skArt(g, KINDS[i % 5],
+          cx + Math.cos(a) * v * q,
+          Math.min(floor + 16 * u, cy - 22 * u + Math.sin(a) * v * q + 30 * u * q * q),
+          15 * u, COLS[i % 5]);
+      }
+      ctx.globalAlpha = 1;
+    }
+    ctx.restore();
+    /* the label */
+    const HEAD = { fill: 'SEALS IN 3 DAYS', seal: 'SEALED', wait: 'OPENS 12 AUG 2027', burst: 'OPEN' };
+    const SUB = {
+      fill: '1,204 things inside so far',
+      seal: 'nobody sees inside — not even us',
+      wait: '213 days to go',
+      burst: '1,204 things back out on the hill'
+    };
+    const BTN = { fill: 'ADD ONE DRAWING OR NOTE', seal: 'CLOSED', wait: 'CLOSED', burst: 'NEXT ONE OPENS 2028' };
+    g.F('800', 8); ctx.fillStyle = P.FAINT;
+    ctx.fillText('THE TIME CAPSULE', 4 * u, 12 * u);
+    g.FS(15); ctx.fillStyle = P.INK;
+    ctx.fillText(HEAD[key], 4 * u, 36 * u);
+    g.F('700', 10); ctx.fillStyle = P.DIM;
+    ctx.fillText(SUB[key], 4 * u, 55 * u);
+    this.skDashed(g, 4 * u, 68 * u, Math.min(150 * u, gx - 14 * u), 30 * u, 7 * u, P.FAINT);
+    g.F('800', 9); ctx.fillStyle = P.FAINT;
+    ctx.fillText(BTN[key], 15 * u, 87 * u);
+    g.F('600', 9.5); ctx.fillStyle = P.FAINT;
+    ctx.fillText('one each. that is the whole rule.', 4 * u, 116 * u);
+  }
+  /* ---------- 7 · the workshop shed ---------- */
+  skWorkshop(g) {
+    const { ctx, W, u, P, key, k, t, st } = g, A = g.AH;
+    const QUEUE = ['the petition board', 'the museum', 'the naming ceremony', 'the law book', 'the monument'];
+    if (key === 'install' && st.t === 1) st.n = ((st.n || 0) + 1) % QUEUE.length;
+    const nn = st.n || 0;
+    const carry = key === 'carry' ? g.ease(k) : (key === 'install' ? 1 : 0);
+    const land = key === 'install' ? g.ease(Math.min(1, k * 1.7)) : 0;
+    const unveil = key === 'install' ? g.ease(Math.max(0, (k - 0.32) * 2.2)) : 0;
+    const done = key === 'bench' ? g.mid(0.55, 0.9, k)
+      : (key === 'finish' ? g.mid(0.9, 1, Math.min(1, k * 1.6)) : 1);
+    /* laid out as fractions of the two panels rather than in fixed units, because this
+       one runs the full width of the page and the unit scale stops growing long before
+       the canvas does */
+    const sx = 4 * u, sw = W * 0.53;
+    const hx = sx + sw + 14 * u, pw = W - hx - 4 * u;
+    const floor = A - 14 * u, benchY = floor - 36 * u, hillY = A * 0.70;
+    const swing = Math.sin(t * 0.13), hammer = (key === 'bench' || key === 'finish');
+    const gnFrom = sx + sw * 0.40, gnTo = hx + pw * 0.66;
+    const gnx = g.mid(gnFrom, gnTo, carry), gny = g.mid(floor, hillY + 6 * u, carry);
+    /* ---- the shed, cut away so you can see in ---- */
+    ctx.fillStyle = '#fbf7fa'; g.rr(sx, 24 * u, sw, floor - 24 * u + 12 * u, 8 * u); ctx.fill();
+    ctx.strokeStyle = P.LINE; ctx.lineWidth = 1;
+    g.rr(sx + 0.5, 24.5 * u, sw - 1, floor - 24 * u + 11 * u, 8 * u); ctx.stroke();
+    ctx.fillStyle = P.WOOD;
+    ctx.beginPath();
+    ctx.moveTo(sx - 7 * u, 26 * u); ctx.lineTo(sx + sw * 0.5, 4 * u); ctx.lineTo(sx + sw + 7 * u, 26 * u);
+    ctx.lineTo(sx + sw + 7 * u, 32 * u); ctx.lineTo(sx - 7 * u, 32 * u); ctx.closePath(); ctx.fill();
+    g.F('800', 7.5); ctx.fillStyle = '#fdf7f1';
+    ctx.fillText('THE WORKSHOP', sx + 12 * u, 30 * u);
+    ctx.save(); g.rr(sx + 1, 25 * u, sw - 2, floor - 24 * u + 10 * u, 7 * u); ctx.clip();
+    /* pegboard on the back wall */
+    const pgx = sx + sw * 0.05, pgy = 42 * u;
+    ctx.fillStyle = '#f3ecf3'; g.rr(pgx, pgy, 58 * u, 38 * u, 3 * u); ctx.fill();
+    ctx.strokeStyle = P.LINE; ctx.lineWidth = 1; ctx.stroke();
+    ctx.strokeStyle = '#c9bccb'; ctx.lineWidth = 2 * u;
+    ctx.beginPath(); ctx.moveTo(pgx + 12 * u, pgy + 9 * u); ctx.lineTo(pgx + 12 * u, pgy + 26 * u); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pgx + 24 * u, pgy + 9 * u); ctx.lineTo(pgx + 31 * u, pgy + 23 * u); ctx.stroke();
+    ctx.fillStyle = '#c9bccb'; g.rr(pgx + 41 * u, pgy + 10 * u, 8 * u, 19 * u, 2 * u); ctx.fill();
+    /* the bulb over the bench */
+    const blx = sx + sw * 0.55;
+    ctx.strokeStyle = '#c9bccb'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(blx, 32 * u); ctx.lineTo(blx, 50 * u); ctx.stroke();
+    ctx.fillStyle = '#f2e2b4'; ctx.beginPath(); ctx.arc(blx, 55 * u, 6 * u, 0, 7); ctx.fill(); g.ink(1);
+    /* what is further out, still under sheets */
+    [0, 1].forEach(i => {
+      const lx = sx + sw * (i === 0 ? 0.74 : 0.91), ly = floor + 2 * u;
+      ctx.save(); ctx.globalAlpha = i === 0 ? 1 - unveil : 1;
+      ctx.fillStyle = '#d6cade';
+      ctx.beginPath();
+      ctx.moveTo(lx - 21 * u, ly);
+      ctx.quadraticCurveTo(lx - 18 * u, ly - 34 * u, lx, ly - 36 * u);
+      ctx.quadraticCurveTo(lx + 18 * u, ly - 34 * u, lx + 21 * u, ly);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(122,110,132,0.3)'; ctx.lineWidth = 1; ctx.stroke();
+      g.F('800', 13); ctx.fillStyle = '#8f8195'; ctx.textAlign = 'center';
+      ctx.fillText('?', lx, ly - 12 * u); ctx.textAlign = 'left';
+      ctx.restore();
+    });
+    /* the gnome goes down before the bench, so the bench reads as in front of them */
+    if (carry < 0.02) this.skGnomeSmith(g, gnx, gny, hammer, 0, t);
+    /* the bench */
+    const bx0 = sx + sw * 0.05, bx1 = sx + sw * 0.60, cwx = sx + sw * 0.20;
+    ctx.fillStyle = P.WOOD; ctx.fillRect(bx0, benchY, bx1 - bx0, 5 * u);
+    ctx.fillStyle = '#ab8f74';
+    ctx.fillRect(bx0 + 4 * u, benchY + 5 * u, 4 * u, floor - benchY - 5 * u);
+    ctx.fillRect(bx1 - 8 * u, benchY + 5 * u, 4 * u, floor - benchY - 5 * u);
+    /* whatever is on it: the current build, or the next one once its sheet comes off */
+    const showNext = unveil > 0.01;
+    if (carry < 0.02 || showNext) {
+      const d = showNext ? 0.15 : done;
+      ctx.save(); if (showNext) ctx.globalAlpha = unveil;
+      this.skContraption(g, cwx, benchY, 1.05, d);
+      ctx.restore();
+      /* the work order, pinned to the front of the bench where nothing else lives */
+      const tag = QUEUE[nn] + '  ' + Math.round(d * 100) + '%';
+      g.F('800', 8.5);
+      const tw = ctx.measureText(tag).width + 14 * u;
+      ctx.save(); if (showNext) ctx.globalAlpha = unveil;
+      ctx.fillStyle = '#ffffff'; ctx.strokeStyle = P.LINE; ctx.lineWidth = 1;
+      g.rr(cwx - tw / 2, floor - 6 * u, tw, 16 * u, 8 * u); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = P.DIM; ctx.textAlign = 'center';
+      ctx.fillText(tag, cwx, floor + 5 * u); ctx.textAlign = 'left';
+      ctx.restore();
+      if (hammer) {
+        for (let i = 0; i < 3; i++) {
+          const q = ((t * 0.05) + i * 0.33) % 1;
+          ctx.globalAlpha = (1 - q) * 0.7;
+          ctx.fillStyle = P.GOLD;
+          ctx.beginPath(); ctx.arc(cwx + 12 * u + q * 13 * u * (i - 1), benchY - 30 * u - q * 13 * u, 1.7 * u, 0, 7); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+    }
+    ctx.restore();
+    /* ---- the hill, where the finished ones end up ---- */
+    this.skDashed(g, hx, 24 * u, pw, A - 26 * u, 10 * u);
+    ctx.save(); g.rr(hx + 1, 25 * u, pw - 2, A - 28 * u, 9 * u); ctx.clip();
+    this.skHill(g, hx, hx + pw, hillY, 26);
+    g.F('800', 7.5); ctx.fillStyle = P.FAINT;
+    ctx.fillText('OUT ON THE HILL', hx + 12 * u, 40 * u);
+    [['lantern', P.PINK, 0.2], ['mushroom', P.GREEN, 0.42]].forEach(s2 =>
+      this.skArt(g, s2[0], hx + pw * s2[2], hillY + 2 * u, 34 * u, s2[1]));
+    if (land > 0) {
+      ctx.save(); ctx.globalAlpha = Math.min(1, land * 2);
+      this.skContraption(g, gnTo, hillY + 16 * u - (1 - land) * 30 * u, 0.72, 1);
+      ctx.restore();
+      if (land > 0.6) {
+        ctx.globalAlpha = Math.min(1, (land - 0.6) * 3.5);
+        g.F('800', 8); ctx.fillStyle = P.PINK; ctx.textAlign = 'center';
+        ctx.fillText('NEW', gnTo, hillY + 30 * u); ctx.textAlign = 'left';
+        ctx.globalAlpha = 1;
+      }
+    }
+    ctx.restore();
+    /* the gnome again once they are out in the open, drawn over both panels */
+    if (carry >= 0.02) {
+      const walking = carry < 0.98;
+      this.skGnomeSmith(g, gnx - (walking ? 0 : 44 * u), gny, false, walking ? swing : 0, t);
+      /* held out in front, and drawn after the gnome so it is not swallowed by them */
+      if (walking) this.skContraption(g, gnx + 6 * u, gny - 28 * u, 0.62, 1);
+    }
+  }
+  /* the creator gnome — slate hat and a work apron, so nobody mistakes them for a visitor */
+  skGnomeSmith(g, x, y, hammer, swing, t) {
+    const { ctx, u } = g;
+    ctx.save(); ctx.translate(x, y);
+    this.gnomeFigure(ctx, {
+      scale: 0.74 * u,
+      bob: swing ? -Math.abs(swing) * 3 : Math.sin(t * 0.04) * 1.2,
+      armL: swing ? 2.5 : (hammer ? 2.05 + Math.sin(t * 0.22) * 0.5 : 0.4),
+      armR: swing ? -2.5 : -0.5,
+      legL: swing ? swing * 0.4 : 0.1, legR: swing ? -swing * 0.4 : -0.1,
+      tipx: Math.sin(t * 0.03) * 3, eyes: 'happy',
+      tunic: '#9aa0b8', tunD: '#7c8299', hat: '#6f6379', hatD: '#544a5e'
+    });
+    ctx.restore();
+  }
+  /* the thing being built: a frame, then guts, then a case and a crank */
+  skContraption(g, x, y, sc, done) {
+    const { ctx, u, P, t } = g;
+    ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc);
+    const d = Math.max(0, Math.min(1, done));
+    /* the frame is always there */
+    ctx.strokeStyle = P.WOOD; ctx.lineWidth = 2.4 * u;
+    ctx.beginPath();
+    ctx.moveTo(-18 * u, 0); ctx.lineTo(-14 * u, -30 * u); ctx.lineTo(14 * u, -30 * u); ctx.lineTo(18 * u, 0);
+    ctx.stroke();
+    if (d > 0.25) {
+      ctx.globalAlpha = Math.min(1, (d - 0.25) * 4);
+      ctx.strokeStyle = P.BLUE; ctx.lineWidth = 1.6 * u;
+      ctx.beginPath();
+      ctx.moveTo(-11 * u, -8 * u); ctx.lineTo(4 * u, -16 * u); ctx.lineTo(-4 * u, -24 * u); ctx.stroke();
+      ctx.fillStyle = P.BLUE;
+      ctx.beginPath(); ctx.arc(9 * u, -11 * u, 3.4 * u, 0, 7); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    if (d > 0.55) {
+      ctx.globalAlpha = Math.min(1, (d - 0.55) * 3.4);
+      ctx.fillStyle = P.PINK;
+      g.rr(-15 * u, -28 * u, 30 * u, 16 * u, 3 * u); ctx.fill();
+      ctx.strokeStyle = 'rgba(122,110,132,0.32)'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    if (d > 0.88) {
+      /* the crank, which only goes on at the very end */
+      ctx.strokeStyle = P.GOLD; ctx.lineWidth = 2 * u;
+      const a = t * 0.05;
+      ctx.beginPath(); ctx.moveTo(15 * u, -20 * u);
+      ctx.lineTo(15 * u + Math.cos(a) * 7 * u, -20 * u + Math.sin(a) * 7 * u); ctx.stroke();
+      ctx.fillStyle = P.GOLD;
+      ctx.beginPath(); ctx.arc(15 * u, -20 * u, 2.4 * u, 0, 7); ctx.fill();
+    }
+    ctx.restore();
+  }
   newTarget(a) {
     a.tx = 40 + Math.random() * Math.max(100, this.Wc - 80);
     a.ty = 40 + Math.random() * Math.max(100, this.Hc - 160);
@@ -2024,12 +3351,19 @@ class Component extends DCLogic {
     this.raf = requestAnimationFrame(this.frame);
     const c = this.fxRef.current; if (!c) return;
     this.t = (this.t || 0) + 1;
+    this.tickClock();
+    if (this.t % 2 === 0) this.drawSky();
     const ctx = c.getContext('2d');
     ctx.clearRect(0, 0, this.Wc, this.Hc);
     if (this.t % 20 === 1 || this.ko === undefined) this.ko = this.keepOut();
     this.stepPlayer();
     this.drawPlayer(ctx);
     this.drawCardGnomes();
+    /* the sketches below the fold only run while they are actually on screen — cheaper,
+       and it means a visitor always catches each loop from the top rather than halfway */
+    if (this.t % 12 === 1) this.skSeen();
+    if (this.petVis) { this.stepPetition(); this.drawPetition(); }
+    if (this.t % 2 === 0) this.drawSketches();
     this.paintStickers();
     this.parts = this.parts.filter(p => p.a > 0.02);
     for (const p of this.parts) {
@@ -2191,6 +3525,13 @@ class Component extends DCLogic {
 
   renderVals() {
     const s = this.state, W = this.Wc;
+    /* the copy's night skin. Colours flip on DARK rather than fading with NIGHT —
+       see the note by the clock at the top of this file for why. */
+    const nt = s.night || 0, dk = !!s.dark;
+    const ink1 = dk ? '#f7f1fc' : '#221c26';
+    const ink2 = dk ? '#c6b6d8' : '#6d6272';
+    const ink3 = dk ? '#a496b6' : '#a394a0';
+    const halo = dk ? '0 1px 2px rgba(11,7,20,0.6), 0 0 22px rgba(11,7,20,0.5)' : 'none';
     const btn = (active) => ({ width: 38, height: 38, borderRadius: 11, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? '#ffffff' : 'transparent', color: active ? '#221c26' : '#9b8fa3', transition: 'background 0.15s,color 0.15s' });
     const shapeCss = (shape, c, sz) => {
       const o = { width: sz, height: sz, background: c };
@@ -2201,13 +3542,18 @@ class Component extends DCLogic {
       return o;
     };
     const pe = s.tool === 'move' ? 'auto' : 'none';
+    const lampOn = smooth(0.1, 0.55, nt);
     const stickers = s.stickers.map(it => {
       const gn = this.SK.indexOf(it.shape) >= 0;
+      /* a lit lantern gets a slow uneven flicker, and a bigger canvas to glow into */
+      const pad = Component.skPad(it.shape, lampOn);
+      const flame = pad > 1
+        ? { width: it.sz * pad, height: it.sz * pad, margin: -it.sz * (pad - 1) / 2, animation: 'wsFlicker ' + (2.6 + (it.sz % 7) * 0.28).toFixed(1) + 's ease-in-out infinite' } : null;
       const base = { position: 'absolute', left: it.x * W, top: it.y * W, zIndex: 2, transform: `translate(-50%,-50%) rotate(${it.rot}deg)`, pointerEvents: pe, cursor: pe === 'auto' ? 'grab' : 'default', animation: it.pop ? 'wsPop 0.4s ease' : 'none' };
       return {
         id: it.id, drag: 's:' + it.id,
         style: gn ? { ...base, width: it.sz, height: it.sz } : { ...base, ...shapeCss(it.shape, it.c, it.sz) },
-        cstyle: gn ? { display: 'block', width: it.sz, height: it.sz, pointerEvents: 'none' } : { display: 'none' }
+        cstyle: gn ? { display: 'block', width: it.sz, height: it.sz, pointerEvents: 'none', ...flame } : { display: 'none' }
       };
     });
     const notes = s.notes.map(it => {
@@ -2247,8 +3593,36 @@ class Component extends DCLogic {
     }
     const hints = { move: 'drag anything around — the music player, the games, the gnomes', draw: 'pick a width and an ink, then draw anywhere', sticker: 'pick a gnome sticker, then click to stamp it', text: 'pick a font, then click anywhere to leave a note' };
     return {
-      heroRef: this.heroRef, inkRef: this.inkRef, fxRef: this.fxRef, emailRef: this.emailRef, selRef: this.selRef, hpRef: this.hpRef, editRef: this.editRef, copyRef: this.copyRef,
-      card1: this.card1Ref, card2: this.card2Ref, card3: this.card3Ref,
+      heroRef: this.heroRef, inkRef: this.inkRef, fxRef: this.fxRef, skyRef: this.skyRef, emailRef: this.emailRef, selRef: this.selRef, hpRef: this.hpRef, editRef: this.editRef, copyRef: this.copyRef,
+      card1: this.card1Ref, card2: this.card2Ref, card3: this.card3Ref, petRef: this.petRef,
+      sk1Ref: this.sk1Ref, sk2Ref: this.sk2Ref, sk3Ref: this.sk3Ref, sk4Ref: this.sk4Ref,
+      sk5Ref: this.sk5Ref, sk6Ref: this.sk6Ref, sk7Ref: this.sk7Ref,
+      logoInk: dk ? '#f7f1fc' : '#221c26',
+      logoTextStyle: { fontFamily: "'Sora',sans-serif", fontWeight: 800, fontSize: 19, letterSpacing: '-0.5px', color: ink1, textShadow: halo },
+      badgeStyle: {
+        pointerEvents: 'auto', display: 'inline-flex', alignItems: 'center', gap: 8,
+        background: dk ? 'rgba(43,32,63,0.9)' : '#ffffff',
+        border: '1px solid ' + (dk ? '#54406f' : '#eedbe6'),
+        borderRadius: 999, padding: '7px 16px', fontSize: 12, fontWeight: 700,
+        letterSpacing: '0.14em', textTransform: 'uppercase',
+        color: dk ? '#ff9ecb' : '#c93b82',
+        boxShadow: dk ? '0 2px 18px rgba(10,6,20,0.5)' : '0 2px 10px rgba(201,59,130,0.08)',
+        animation: 'wsFloat 4s ease-in-out infinite'
+      },
+      h1Style: { pointerEvents: 'auto', fontFamily: "'Sora',sans-serif", fontWeight: 800, fontSize: 'clamp(42px,6.5vw,84px)', lineHeight: 1.04, letterSpacing: '-0.03em', margin: '22px 0 0 0', color: ink1, textShadow: halo },
+      subStyle: { pointerEvents: 'auto', maxWidth: 560, margin: '18px 0 0 0', fontSize: 17, lineHeight: 1.6, color: ink2, textWrap: 'pretty', textShadow: halo },
+      nospamStyle: { fontSize: 12.5, color: ink3, textShadow: halo },
+      /* the cue sits in the corner with no scrim under it, so at dusk — when the
+         bottom of the sky is still bright — pale text alone would vanish. It gets
+         the same little pill the tool hint has. */
+      cueStyle: {
+        position: 'absolute', left: 24, bottom: 24, zIndex: 6, fontSize: 12, pointerEvents: 'auto',
+        color: dk ? '#c9bad5' : '#a394a0',
+        background: dk ? 'rgba(24,17,38,0.55)' : 'transparent',
+        padding: dk ? '4px 10px' : 0, borderRadius: 999,
+        marginLeft: dk ? -10 : 0, marginBottom: dk ? -4 : 0
+      },
+      hintStyle: { fontSize: 12, fontWeight: 600, color: dk ? '#c3b4cf' : '#8d8090', background: dk ? 'rgba(32,23,48,0.85)' : 'rgba(250,247,249,0.85)', padding: '3px 10px', borderRadius: 999 },
       onDown: this.onDown, onMove: this.onMove, onUp: this.onUp, onItemDown: this.onItemDown,
       onTool: this.onTool, onColor: this.onColor, onShape: this.onShape, onUndo: this.onUndo, onClear: this.onClear,
       onEditKey: this.onEditKey, onEditBlur: this.onEditBlur, onSubmit: this.onSubmit, onUiDown: this.onUiDown, onOpt: this.onOpt,
