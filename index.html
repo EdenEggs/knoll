@@ -16,6 +16,9 @@ html,body{margin:0;padding:0}
 body{background:#faf7f9;font-family:'Public Sans',sans-serif;color:#26212a}
 a{color:#c93b82}a:hover{color:#a52c68}
 ::selection{background:#f9d3e6}
+/* the paper: a dot grid, and under it faint contour lines of a hill. The script
+   generates the contour tile and appends a rule that extends these two classes. */
+.ws-paper{background-image:radial-gradient(#e8dee5 1.2px,transparent 1.2px);background-size:24px 24px}
 input,select,button{font-family:inherit}
 @keyframes wsPop{0%{transform:scale(0) rotate(-8deg)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
 .ws-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
@@ -68,7 +71,7 @@ input,select,button{font-family:inherit}
 }
 </style>
 </helmet>
-<div ref="{{heroRef}}" onPointerDown="{{onDown}}" onPointerMove="{{onMove}}" onPointerUp="{{onUp}}" onPointerLeave="{{onUp}}" style="position:relative;height:100vh;min-height:560px;overflow:hidden;touch-action:pan-y;user-select:none;background-color:#faf7f9;background-image:radial-gradient(#e8dee5 1.2px, transparent 1.2px);background-size:24px 24px">
+<div ref="{{heroRef}}" class="ws-paper" onPointerDown="{{onDown}}" onPointerMove="{{onMove}}" onPointerUp="{{onUp}}" onPointerLeave="{{onUp}}" style="position:relative;height:100vh;min-height:560px;overflow:hidden;touch-action:pan-y;user-select:none;background-color:#faf7f9">
   <canvas ref="{{skyRef}}" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none"></canvas>
   <canvas ref="{{inkRef}}" style="position:absolute;inset:0;width:100%;height:100%;z-index:1"></canvas>
   <sc-for list="{{stickers}}" as="item" hint-placeholder-count="0">
@@ -149,7 +152,7 @@ input,select,button{font-family:inherit}
     </div>
   </div>
 </div>
-<div style="padding:88px 24px 72px 24px;background:#ffffff;border-top:1px solid #f1e7ee">
+<div class="ws-paper-lite" style="padding:88px 24px 72px 24px;background-color:#ffffff;border-top:1px solid #f1e7ee">
   <div style="max-width:1080px;margin:0 auto">
     <div style="font-size:12px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#c93b82">What's coming</div>
     <h2 style="font-family:'Sora',sans-serif;font-weight:700;font-size:clamp(28px,3.4vw,40px);letter-spacing:-0.02em;margin:12px 0 40px 0;color:#221c26;max-width:560px;text-wrap:pretty">A place where EVERY fan leaves a mark</h2>
@@ -206,7 +209,7 @@ input,select,button{font-family:inherit}
   </div>
 </div>
 <div style="padding:26px 24px;background:#ffffff;border-top:1px solid #f1e7ee;text-align:center;font-size:13px;color:#a394a0">
-  <span style="display:inline-block;font-family:'Public Sans',sans-serif"><span style="font-family:'Sora',sans-serif;font-weight:700;color:#221c26">Wallspace</span> (working title) · a shared wall for small internet communities</span>
+  <span style="display:inline-block;font-family:'Public Sans',sans-serif"><span style="font-family:'Sora',sans-serif;font-weight:700;color:#221c26">Knoll</span> · a shared space for internet communities</span>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;fakeCursors&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Canvas demo&quot;},&quot;trailEffect&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Canvas demo&quot;},&quot;seedDoodles&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Canvas demo&quot;},&quot;formEndpoint&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Waitlist&quot;}}">
@@ -216,6 +219,83 @@ input,select,button{font-family:inherit}
    Deploy > Manage deployments > pencil > Version: New version, so the URL stays put.
    Not a secret — it only accepts writes and can't read the sheet back. */
 const SIGNUP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyzyF91GruictUGhnX3_N4NwVyNuxLLpGvEUs3Thb3ObeE9MkrFerkvMrBDrPPQfcFr/exec';
+
+/* ---------- the hill, as a map ----------
+   Faint contour lines under everything: a seamless 720px tile of nested, wobbly
+   rings — four hills of different sizes. One geometry feeds three surfaces: the
+   hero by day (under the dot grid, via CSS), the night sky (painted into skyBack,
+   so the lines fade with the wash instead of vanishing at dusk), and the section
+   below the fold. Deterministic, so the tile is identical on every load. */
+const TOPO_S = 720;
+/* centre x, centre y, outer radius, ring count — spaced so no two hills touch,
+   counting the copies that wrap across the tile edges */
+const TOPO_HILLS = [[170, 190, 150, 5], [560, 120, 90, 3], [520, 500, 180, 6], [130, 600, 75, 3]];
+const TOPO_PATHS = (() => {
+  let seed = 7;
+  const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  const paths = [];
+  for (const [cx, cy, R, n] of TOPO_HILLS) {
+    /* three harmonics of wobble, shared by every ring of a hill so they nest */
+    const wob = [2, 3, 5].map(f => [f, 0.035 + rnd() * 0.055, rnd() * 6.2832]);
+    for (let k = 1; k <= n; k++) {
+      const r = R * (0.24 + 0.76 * (k - 1) / Math.max(1, n - 1)), pts = [];
+      for (let i = 0; i < 22; i++) {
+        const a = i / 22 * 6.2832;
+        let q = 1;
+        for (const [f, amp, ph] of wob) q += amp * Math.sin(f * a + ph + k * 0.22);
+        pts.push([cx + r * q * Math.cos(a), cy + r * q * Math.sin(a)]);
+      }
+      /* closed Catmull-Rom through the points → cubic béziers, so the rings are smooth */
+      const m = pts.length, f1 = v => v.toFixed(1);
+      let d = 'M' + f1(pts[0][0]) + ' ' + f1(pts[0][1]);
+      for (let i = 0; i < m; i++) {
+        const p0 = pts[(i - 1 + m) % m], p1 = pts[i], p2 = pts[(i + 1) % m], p3 = pts[(i + 2) % m];
+        d += 'C' + f1(p1[0] + (p2[0] - p0[0]) / 6) + ' ' + f1(p1[1] + (p2[1] - p0[1]) / 6) + ' '
+          + f1(p2[0] - (p3[0] - p1[0]) / 6) + ' ' + f1(p2[1] - (p3[1] - p1[1]) / 6) + ' '
+          + f1(p2[0]) + ' ' + f1(p2[1]);
+      }
+      paths.push(d + 'Z');
+    }
+  }
+  return paths;
+})();
+/* the tile as an SVG: the rings once in <defs>, stamped at the nine wrap offsets */
+function topoSVG(color, alpha) {
+  const S = TOPO_S;
+  let uses = '';
+  for (const dx of [-S, 0, S]) for (const dy of [-S, 0, S]) uses += "<use href='#h' x='" + dx + "' y='" + dy + "'/>";
+  return "<svg xmlns='http://www.w3.org/2000/svg' width='" + S + "' height='" + S + "'><defs><g id='h'>"
+    + TOPO_PATHS.map(p => "<path d='" + p + "'/>").join('') + "</g></defs><g fill='none' stroke='" + color
+    + "' stroke-opacity='" + alpha + "' stroke-width='1.2' stroke-linejoin='round'>" + uses + "</g></svg>";
+}
+/* the same tile as a canvas, in white, for the night sky */
+let _topoTile = null;
+function topoTile(dpr) {
+  if (_topoTile && _topoTile.dpr === dpr) return _topoTile.cv;
+  const S = TOPO_S, cv = document.createElement('canvas');
+  cv.width = Math.round(S * dpr); cv.height = Math.round(S * dpr);
+  const t = cv.getContext('2d'); t.setTransform(dpr, 0, 0, dpr, 0, 0);
+  t.strokeStyle = '#ffffff'; t.lineWidth = 1.2; t.lineJoin = 'round';
+  const paths = TOPO_PATHS.map(p => new Path2D(p));
+  for (const dx of [-S, 0, S]) for (const dy of [-S, 0, S]) {
+    t.save(); t.translate(dx, dy); for (const p of paths) t.stroke(p); t.restore();
+  }
+  _topoTile = { dpr, cv };
+  return cv;
+}
+/* the CSS half: the hero gets dots over contours, the white section contours alone
+   and fainter. The runtime moves the template's <style> into <head> at mount time,
+   which is after this runs — so the rules carry an extra 'html' to outrank the
+   static .ws-paper fallback rather than relying on order. */
+(function () {
+  if (typeof document === 'undefined' || document.getElementById('ws-topo')) return;
+  const uri = a => 'url("data:image/svg+xml;charset=utf-8,' + encodeURIComponent(topoSVG('#c93b82', a)) + '")';
+  const st = document.createElement('style'); st.id = 'ws-topo';
+  st.textContent =
+    'html .ws-paper{background-image:radial-gradient(#e8dee5 1.2px,transparent 1.2px),' + uri(0.2) + ';background-size:24px 24px,' + TOPO_S + 'px ' + TOPO_S + 'px}' +
+    'html .ws-paper-lite{background-image:' + uri(0.12) + ';background-size:' + TOPO_S + 'px ' + TOPO_S + 'px}';
+  document.head.appendChild(st);
+})();
 
 /* ---------- day and night, on the visitor's own clock ----------
    NIGHT is one 0..1 dial: 0 in broad daylight, 1 after dark, ramping smoothly
@@ -617,6 +697,10 @@ class Component extends DCLogic {
     tx.fillStyle = '#ffffff';
     tx.beginPath(); tx.arc(1.2, 1.2, 1.2, 0, 7); tx.fill();
     x.globalAlpha = nt * 0.075; x.fillStyle = x.createPattern(tile, 'repeat'); x.fillRect(0, 0, W, H);
+    /* and the contour lines, so the hill is still on the map after dark. The tile is
+       already at device resolution, so it's stamped with the transform reset. */
+    x.globalAlpha = nt * 0.09; x.fillStyle = x.createPattern(topoTile(dpr), 'repeat');
+    x.save(); x.setTransform(1, 0, 0, 1, 0, 0); x.fillRect(0, 0, cv.width, cv.height); x.restore();
     /* dawn and dusk burn along the bottom of the hill */
     if (g > 0.004) {
       x.globalAlpha = 1;
