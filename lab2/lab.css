@@ -1094,3 +1094,7 @@ body[data-wall-tool="delete"] .gz:not(.gz-copy){pointer-events:none}
 .spotlight{position:fixed;left:0;top:0;width:0;height:0;z-index:6400;pointer-events:none;border-radius:12px;
   box-shadow:0 0 0 200vmax rgba(23,18,11,0);transition:box-shadow .24s ease}
 .spotlight.on{box-shadow:0 0 0 200vmax rgba(23,18,11,.55)}
+/* the live frame's pink rim is drawn at its box's edge, which under the
+   spotlight is a line across the dark right where the paper is clipped —
+   it says "this one has the pointer", and the light already does */
+body.lab-spotlit .gz.live{outline-color:transparent}

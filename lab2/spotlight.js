@@ -117,6 +117,7 @@ window.Spotlight = (function () {
     hole.setAttribute('aria-hidden', 'true');
     document.body.appendChild(hole);
     on.hole = hole;
+    document.body.classList.add('lab-spotlit');     // the live frame's pink rim goes quiet (lab.css)
     paint();
     requestAnimationFrame(() => { if (on && on.hole === hole) hole.classList.add('on'); });   // the dark comes up, not on
     wake(p);
@@ -131,6 +132,7 @@ window.Spotlight = (function () {
     if (!on) return;
     const o = on; on = null;
     cancelAnimationFrame(o.raf);
+    document.body.classList.remove('lab-spotlit');
     try { o.doc.documentElement.removeAttribute('data-lab-spotlit'); } catch (e) {}
     if (o.hole) { o.hole.classList.remove('on'); setTimeout(() => o.hole.remove(), 260); }
     if (restore !== false) Lab.camTo(o.cam.z, o.cam.x, o.cam.y, GLIDE);
