@@ -107,8 +107,8 @@ window.Frames = (function () {
   const BOOT_PX = 480;
   let posters = null;                   // data-src → { file, w, h }, once posters/index.json is in
   let postersAsked = false;             // …and until it has answered, nothing boots: the answer is a beat away
-  /* THE EXCEPTION. A section marked data-live (index.html says which two and
-     why) is never a picture: posterOf answers null for it, so big() boots it
+  /* THE EXCEPTION. A section marked data-live (index.html says which three
+     and why) is never a picture: posterOf answers null for it, so big() boots it
      the moment it is within reach, dress() hangs nothing in its box and
      repost() never puts it away. It is the bench choosing to open on a thing
      that moves — the wizard swinging from the scroll's roller — and paying

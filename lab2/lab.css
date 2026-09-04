@@ -554,6 +554,54 @@ body.lab-banding,body.lab-banding .bench *{cursor:crosshair}
   background:var(--chip);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px;white-space:nowrap}
 .keymap hr{border:0;border-top:1.5px dashed var(--line);margin:9px 0}
 
+/* ─── THE DOCK ON A PHONE ─────────────────────────────────────────────────
+   Two pills on the floor is one pill too many when the floor is 390 wide.
+   The zoom dock is 233 across at the right-hand end of it and the tool dock
+   is 476 and middled, so on a phone they LANDED ON EACH OTHER — the zoom
+   dock over the text tool, the ink and the bin, and the tools running off
+   both edges underneath it. (They overlap on any screen under about 970;
+   a phone is only where it stops being a near miss.)
+
+   So on a narrow screen the zoom dock leaves the floor and STANDS UP THE
+   RIGHT-HAND SIDE, a column starting just under the header. The tools keep
+   the floor to themselves, and what the zoom costs the bench is 40px of its
+   edge instead of 50px of its foot — which on a screen this shape is the
+   cheaper of the two by a long way, because the thing being looked at is
+   taller than it is wide.
+
+   --head-h IS A MEASUREMENT, written by layout() in lab.js on every resize:
+   the header is one line on the deployed site and a paragraph of workbench
+   notes at home, so where the bench starts is not a number this file can
+   know. The fallback is the deployed header's own height, for the frame
+   before the first layout(). */
+@media (max-width:700px){
+  .zoom-dock{top:calc(var(--head-h,52px) + 10px);right:10px;bottom:auto;
+    flex-direction:column;gap:2px;padding:4px 3px;border-radius:12px}
+  .zoom-dock .dock-rule{width:16px;height:1px;margin:3px 0}
+  /* a finger is not a pointer: every button in the column goes up to 32 */
+  #zoom-in,#zoom-out{width:32px;height:32px;font-size:18px}
+  #zoom-fit,#zoom-keys,.vol-btn{width:32px;height:30px}
+  /* the reading is the widest thing in a row and the narrowest thing wanted
+     in a column — 46px of min-width would set the whole column's width */
+  #zoom-val{min-width:0;width:32px;height:22px;font-size:10px;letter-spacing:-.03em}
+  /* …and the slider is 52 across, which is the column again. It is already
+     off under 560; standing up, it is off for the whole of this range. */
+  .vol-slider{display:none}
+  /* the keymap comes off the SIDE of the column rather than out from under
+     it, and it is 266 wide and 728 TALL against a screen that is 390 by 780
+     — so it is told the screen's measurements as well as its own, and reads
+     down inside itself when it runs out of room. (It overflowed the bottom
+     of a phone from the corner too; standing it at the top is only where
+     that became worth saying.)
+     58 = 10 (the dock's own right) + 42 (its width) + the same 6px seam the
+     corner had (its bottom:62 was 16 + 40 + 6), or the two 2px borders abut
+     into one 4px line; 74 = 58 + the 16px left margin the clamp keeps. */
+  .keymap{top:calc(var(--head-h,52px) + 10px);right:58px;bottom:auto;
+    width:min(266px,calc(100vw - 74px));
+    max-height:calc(100dvh - var(--head-h,52px) - 20px);overflow:auto;
+    overscroll-behavior:contain}
+}
+
 /* ─── the volume in the dock ─────────────────────────────────────────────── */
 .vol-btn{width:26px;height:28px;display:inline-flex;align-items:center;justify-content:center;color:var(--mute)}
 .vol-btn:hover{background:var(--pink-soft);color:var(--pink)}

@@ -32,6 +32,7 @@
                                                 already picked
      · shift-click a feature .................. put it in the pick, or take it
                                                 out again
+     · press a feature ........................ it becomes the pick, on its own
      · drag any picked feature ................ carries the whole pick
      · click the paper, or esc ................ put the pick down
      · ctrl / ⌘ + z ........................... put the last thing back
@@ -319,8 +320,18 @@ window.Lab = (function () {
 
   function copy() {
     const from = picked.size ? [...picked] : [...world.querySelectorAll('.gz.live')];
+    /* NOTHING ASKED FOR, SO THE CLIPBOARD STANDS. ctrl+c on an empty bench is
+       not an instruction, and copy once / paste four times is the whole point
+       of a clipboard — put the pick down between pastes and the copy has to
+       survive it. */
+    if (!from.length) return false;
     const take = from.filter(el => el.dataset.src);
-    if (!take.length) return false;
+    /* ASKED FOR, AND NOT COPYABLE: the sign, or the tracing table — the two
+       with no data-src. The clipboard goes EMPTY here rather than standing,
+       because standing is how a ctrl+v that named THIS thing used to put the
+       LAST thing on the paper. A gesture that cannot be honoured must not be
+       honoured with something else. (2026-09-04) */
+    if (!take.length) { clip = null; return false; }
     clip = take.map(el => {
       const p = window.Frames && Frames.panelOf ? Frames.panelOf(el) : (window.Frames && Frames.panels.find(q => q.el === el));
       return {
@@ -1050,6 +1061,16 @@ window.Lab = (function () {
     const w = bench.clientWidth || world.offsetWidth || document.documentElement.clientWidth;
     benchH = bench.clientHeight;
     if (w > 0) { worldW = Math.round(w); world.style.width = worldW + 'px'; }
+    /* WHERE THE BENCH STARTS, published for the CSS. The zoom dock stands up
+       the right-hand side on a phone (THE DOCK ON A PHONE, in lab.css) and it
+       is fixed to the viewport, so it has to be told where the header ends —
+       and the header is one line on the deployed site and a paragraph of
+       workbench notes at home, which makes its height a measurement and not a
+       number. Written here because here is where the bench is already being
+       measured; the resize handler and the bench's own ResizeObserver both
+       come through this function. */
+    const top = Math.round(box().top);
+    if (top > 0) document.documentElement.style.setProperty('--head-h', top + 'px');
     growBench();
   }
 
@@ -1359,9 +1380,41 @@ window.Lab = (function () {
          own shiftKey line, in the click-to-wake handler). */
       if (e.shiftKey) { pick(el, !picked.has(el)); e.preventDefault(); return; }
 
-      // a press on something that is NOT in the pick puts the pick down: one
-      // press, one thing, unless you said otherwise.
-      if (!picked.has(el)) clearPick();
+      /* A PRESS ON SOMETHING THAT IS NOT IN THE PICK PUTS THE PICK DOWN AND
+         TAKES THIS ONE UP: one press, one thing, unless you said otherwise.
+
+         IT USED TO PUT THE PICK DOWN AND TAKE NOTHING UP, and that one word
+         missing was three bugs. Pressing a feature is how a person says THIS
+         ONE — but the only things that ever ended up selected were what a
+         band swept or what shift added, so a press said it and the bench
+         heard nothing. What that cost:
+
+           · ctrl+c after clicking a tree copied NOTHING. copy() reads the
+             pick, or failing that whatever is AWAKE — and a kit part never
+             wakes: there is no document in it to click into. So a tree, a
+             gnome, a village piece could not be copied by pressing it at
+             all; you had to draw a band round one thing.
+           · WORSE, copy() left the clipboard alone when it found nothing,
+             so the next ctrl+v pasted whatever was copied BEFORE — click a
+             tree, copy, paste, and last go's group of twenty landed on the
+             paper instead. (copy() has its own half of that fix.)
+           · And after a paste, when everything just made is picked, one
+             press on anything that was not in it — a neighbour's box, the
+             paper between them — emptied the pick with nothing to show for
+             it, so the next drag carried one thing and the group appeared
+             to have come apart.
+
+         Selecting what you pressed answers all three, and it is what the
+         crop marks were always for: a press now leaves the mark on the one
+         thing it was aimed at, rather than leaving the bench looking
+         unselected and behaving as though something still is.
+
+         NOT WHILE A DRAWING TOOL IS UP. Then the press is the pen's and not
+         the pointer's, and it has no opinion about what is selected — it
+         still puts the pick down, exactly as it always did, and takes
+         nothing up. Otherwise a stroke that crossed a feature would leave
+         crop marks round it. (2026-09-04) */
+      if (!picked.has(el)) { clearPick(); if (!drawTool()) pick(el, true); }
 
       const p = toWorld(e.clientX, e.clientY);
       crew = (picked.has(el) ? [...picked] : [el]).map(g => {
@@ -1507,7 +1560,32 @@ window.Lab = (function () {
        just in on the left and the banner just under the fold. On a 2560×1111
        screen it lands at 80%, which is the view it was drawn from; on a
        laptop it is the same picture, smaller. */
-    const HOME = { x: 568, y: -2190, w: 3200, h: 1390 }, pad = 24, b = box();
+    const WIDE = { x: 568, y: -2190, w: 3200, h: 1390 };
+    /* …AND A SECOND RECTANGLE, FOR A SCREEN THAT IS 390 WIDE. The rectangle
+       above is 3200 across, and on a phone the width is what binds: it landed
+       the mark at 11%, which is a MAP of the place rather than the place —
+       a thumbnail of a badge over half a screen of empty paper, with the
+       wordmark too small to read. The height was never the problem; a phone
+       has plenty of it and the wide rectangle used less than a quarter.
+
+       So a narrow screen gets a narrow rectangle: THE MARK'S OWN WIDTH, 1250
+       across the sign and the scroll, on the same vertical anchoring as the
+       wide one — same y, same height, so what a phone frames is the same band
+       of the lockup with the groves left off the sides. The height going
+       slack is the point: at 27% a 390-wide screen still shows the cards, the
+       builder and the banner above and below, because the aspect hands them
+       over for free. It lands at 27% on a 390×729 bench against the wide
+       rectangle's 11%, and the wordmark reads.
+
+       THE SWITCH IS THE BENCH'S WIDTH and not a media query, because it is
+       the bench that is being framed and the header can be a paragraph tall
+       at home. 700 is the same line lab.css stands the zoom dock up at. This
+       is a BOOT-TIME choice and nothing re-frames on resize (the resize
+       handler below only re-clamps), so turning a phone sideways moves
+       nothing — it is the same camera, in a wider window. */
+    const NARROW = { x: 1390, y: -2190, w: 1250, h: 1390 };
+    const b = box(), phone = b.width < 700;
+    const HOME = phone ? NARROW : WIDE, pad = phone ? 16 : 24;
     Z = clamp(Math.min((b.width - pad * 2) / HOME.w, (b.height - pad * 2) / HOME.h), ZMIN, 1);
     PX = Math.round((b.width - HOME.w * Z) / 2 - HOME.x * Z);
     PY = Math.round((b.height - HOME.h * Z) / 2 - HOME.y * Z);
