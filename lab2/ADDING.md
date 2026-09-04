@@ -104,6 +104,14 @@ screen and kits.js copies it into every part. Then every section whose
      `data-lab-nozoom`. The bench has its own camera; a zoom inside a frame
      scales the drawing under a measurement that never re-runs.
 
+   - **a page the machine opens to read** (the Knoll Times' issues):
+     `data-lab-reads` on the screen root, `data-lab-scrim` on the backdrop
+     it draws over itself, `data-lab-page` on the page, `data-lab-close` on
+     the button that closes it. So marked, the bench gives the page the
+     whole screen when it opens — dimmed edge to edge, the camera glided to
+     it, a click in the dark to close — see `spotlight.js`. Unmarked, the
+     page opens inside the frame's box, which is fine for a small one.
+
    Leave the `zoomUI` prop and the ctrl+= / ctrl+− handler exactly as
    exported: with the zoom pinned by CSS they are inert here, and the file
    still works opened on its own. `bare.css`, NO SECOND SHEET, is the

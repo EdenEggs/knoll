@@ -47,6 +47,7 @@ caution tape.
 | `vol.js` | the dock's speaker, and every noise the bench makes (synthesised, no audio files). |
 | `wall.js` | the tool dock — pen, stickers, notes, colours, undo. The biggest file, and self-contained. |
 | `ink.js` | ctrl held: the hitbox becomes the drawing rather than the box round it. §3 has it. |
+| `spotlight.js` | a page a frame opens to read gets the whole screen: the bench dimmed edge to edge with a hole where the page is, the camera glided to it, a click in the dark to close. The feature asks by marks in its file (`data-lab-reads`, `-scrim`, `-page`, `-close`); ADDING.md §3 has them. |
 | `cursors.js` | everybody else on the bench, as a cursor in a colour of their own: browser to browser over WebRTC, the visitors finding each other through the public Nostr relays via trystero (`vendor/trystero-nostr.js`, fetched after the page has loaded and gone idle). No server, nothing kept; what another visitor learns is your IP address, as at the other end of any WebRTC call, and where your pointer is. Its header has all of it. |
 | `keep.js` | the autosave: every 30s it posts where everything is to `serve.js`, which writes it into `index.html` as the default look. §7 has all of it. |
 | `kits.js` | the trees, the gnomes and the village pieces, drawn on the bench without a frame each — sprites on a tile far away, live svg near. §9 has it. |

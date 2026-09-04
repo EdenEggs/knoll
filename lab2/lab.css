@@ -1079,3 +1079,18 @@ body[data-wall-tool="delete"] .gz:not(.gz-copy){pointer-events:none}
   border:1.5px solid var(--c);background:color-mix(in srgb,var(--c) 18%,transparent)}
 .company-cursor svg{position:absolute;left:-3px;top:-2.5px;width:24px;height:24px;display:block;overflow:visible}
 .company-cursor path{fill:var(--c);stroke:#fff;stroke-width:1.6;stroke-linejoin:round;paint-order:stroke}
+
+/* ── THE SPOTLIGHT: a page a frame opens to read gets the whole screen ─────
+   spotlight.js. One fixed box the size of the page a frame has opened, with
+   a shadow the size of the screen round it: the dark is the shadow, the
+   hole is the box, and the box follows the page through pans and zooms
+   (left/top/width/height, written by paint()). Above the docks, which dim
+   with everything else; under the menu and the ghosts. It never answers
+   the pointer — a click in the dark is heard by spotlight.js on the
+   window, and one in the hole is the document's. The tint is the
+   document's own (the Knoll Times' scrim, rgba(23,18,11,.55)), which goes
+   clear underneath while this is up, so the frame's box does not sit in
+   the dark as a darker rectangle. */
+.spotlight{position:fixed;left:0;top:0;width:0;height:0;z-index:6400;pointer-events:none;border-radius:12px;
+  box-shadow:0 0 0 200vmax rgba(23,18,11,0);transition:box-shadow .24s ease}
+.spotlight.on{box-shadow:0 0 0 200vmax rgba(23,18,11,.55)}
