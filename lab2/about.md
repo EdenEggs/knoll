@@ -47,10 +47,11 @@ caution tape.
 | `vol.js` | the dock's speaker, and every noise the bench makes (synthesised, no audio files). |
 | `wall.js` | the tool dock — pen, stickers, notes, colours, undo. The biggest file, and self-contained. |
 | `ink.js` | ctrl held: the hitbox becomes the drawing rather than the box round it. §3 has it. |
+| `cursors.js` | everybody else on the bench, as a cursor in a colour of their own: browser to browser over WebRTC, the visitors finding each other through the public Nostr relays via trystero (`vendor/trystero-nostr.js`, fetched after the page has loaded and gone idle). No server, nothing kept; what another visitor learns is your IP address, as at the other end of any WebRTC call, and where your pointer is. Its header has all of it. |
 | `keep.js` | the autosave: every 30s it posts where everything is to `serve.js`, which writes it into `index.html` as the default look. §7 has all of it. |
 | `kits.js` | the trees, the gnomes and the village pieces, drawn on the bench without a frame each — sprites on a tile far away, live svg near. §9 has it. |
 | `posters/` | a picture of every machine, for the box to hold until the document is worth booting; built by `perf/posters.js`. §9. |
-| `fonts/`, `vendor/` | the house faces and the two React builds, served from here rather than Google and unpkg. |
+| `fonts/`, `vendor/` | the house faces, the two React builds and the trystero bundle, served from here rather than Google, unpkg or a CDN. |
 | `perf/` | the measuring kit: `measure.js` (the pan harness), `verify.js` (the gestures), `kitgeo.js` (where every kit part sits), `posters.js`, and the probes that found the numbers in §9. |
 | `../serve.js` | the local server — `npx serve` with the door `keep.js` posts through. Not deployed and not needed to *view* the bench, only to save one. |
 | `features/*.dc.html` | the 71 drawings, in 16 files — four of them serve many frames apiece, `forest.dc.html` most of all at 36, then `village.dc.html` at 23. Three of the files are KITS (forest, village, gnome) and are read by `kits.js` rather than framed; see §9. |

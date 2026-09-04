@@ -9501,5 +9501,17 @@
      Frames.panels, and a frame it asked about before frames.js had adopted
      it would report a cut nobody made. It writes this file — see keep.js. -->
 <script src="keep.js"></script>
+<!-- everybody else on the bench, as a cursor. trystero (vendor/, one
+     bundled file) finds the other visitors over the public Nostr relays and
+     the cursors go browser to browser over WebRTC — no server, which is
+     the only kind this site has. Deferred, so the bench never waits on it,
+     and the bundle is NOT loaded here: cursors.js adds that <script> itself
+     once the page has loaded and gone idle, because the bundle makes a
+     keypair the moment it runs and a deferred script runs before
+     DOMContentLoaded, which is what the bench's own start waits on. After
+     keep.js, which is the last of the bench's own: this is a passenger,
+     and everything it reads (Lab, Frames, the frames' boot messages) is up
+     long before a deferred script runs. -->
+<script defer src="cursors.js"></script>
 </body>
 </html>

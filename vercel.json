@@ -20,7 +20,8 @@
     { "source": "/kits.js", "destination": "/lab2/kits.js" },
     { "source": "/sign.js", "destination": "/lab2/sign.js" },
     { "source": "/tracer.js", "destination": "/lab2/tracer.js" },
-    { "source": "/gif.js", "destination": "/lab2/gif.js" }
+    { "source": "/gif.js", "destination": "/lab2/gif.js" },
+    { "source": "/cursors.js", "destination": "/lab2/cursors.js" }
   ],
   "headers": [
     {
