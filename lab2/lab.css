@@ -717,9 +717,16 @@ body.lab-banding,body.lab-banding .bench *{cursor:crosshair}
 .opt-gif-fine{flex-basis:100%;white-space:normal;line-height:1.4;max-width:560px}
 .opt-gif-fine a{color:inherit;text-decoration:underline}
 .opt-gif-grid{flex-basis:100%;flex-wrap:wrap;gap:4px}
-.opt-gif-hit{width:40px;height:40px;padding:0;overflow:hidden}
-.opt-gif-hit img{width:100%;height:100%;object-fit:cover;display:block;border-radius:5px}
+.opt-gif-hit{width:40px;height:40px;padding:0;overflow:hidden;cursor:grab;touch-action:none}
+.opt-gif-hit:active{cursor:grabbing}
+.opt-gif-hit img{width:100%;height:100%;object-fit:cover;display:block;border-radius:5px;pointer-events:none}
 .opt-gif-hit.opt-gif-on{box-shadow:0 0 0 2px var(--pink)}
+/* the thumbnail carried out of the row — the tracing library's ghost, in the
+   one size a strip reads at while it is in the air (see OUT OF THE ROW AND
+   ONTO THE PAPER, gif.js). It follows the pointer and takes none of it. */
+.gif-ghost{position:fixed;z-index:6600;width:120px;height:120px;margin:-60px 0 0 -60px;
+  object-fit:cover;pointer-events:none;border-radius:8px;
+  border:3px solid var(--pink);box-shadow:6px 7px 0 rgba(var(--drop-rgb),.35);opacity:.92}
 .opt-gif-mini{font-size:8px;letter-spacing:.12em;opacity:.4}
 .opt-gif-mini:hover{opacity:1}
 .opt-gif-mark{flex-basis:100%;font-family:var(--mono);font-size:8px;letter-spacing:.12em;

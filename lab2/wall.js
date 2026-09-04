@@ -513,6 +513,23 @@ window.Wall = (function () {
     return true;
   }
 
+  /* THE SAME DOOR FOR A GIF, and it needed one for the same reason the
+     tracing did: a strip can arrive three ways now — pressed onto the paper
+     with one on the pointer (below), DRAGGED out of the row and let go where
+     you want it, or clicked in the row, which puts it in the middle of what
+     you are looking at. All three are this one write, so all three land at
+     the size and fade the options row says and all three undo alike.
+
+     It takes gif.js's armed record — { url, w, h } — and not an item, so the
+     caller never has to know what an item looks like or which of IMG and PO
+     the row is on. (2026-09-04) */
+  function gifAt(g, wx, wy) {
+    if (!g || !g.url) return false;
+    add({ k: 'g', u: g.url, w: g.w || 200, h: g.h || 200,
+          o: po, x: round(wx), y: round(wy), z: IMG[iz] });
+    return true;
+  }
+
   function add(item) {
     mark('ink');
     store.update(st => {
@@ -553,11 +570,16 @@ window.Wall = (function () {
       const i = noteUnder(e.clientX, e.clientY);
       if (i >= 0) editNote(i); else askNote(p);
     } else if (tool === 'gif') {
-      // a gif on the pointer is stamped where you pressed, at the size and
-      // fade the row says, the same as a tracing; nothing on the pointer
-      // asks the row to say why
-      const g = window.Gif && Gif.armed();
-      if (g) add({ k: 'g', u: g.url, w: g.w, h: g.h, o: po, x: round(p.x), y: round(p.y), z: IMG[iz] });
+      /* a gif on the pointer is stamped where you pressed, at the size and
+         fade the row says, the same as a tracing; nothing on the pointer
+         asks the row to say why.
+
+         `armed` IS A GETTER AND NOT A METHOD, which Tracer's is — this line
+         was written from that one and read `Gif.armed()`, so every press of
+         the paper with the gif tool up threw "Gif.armed is not a function"
+         and no gif was ever put up by any route. (2026-09-04) */
+      const g = window.Gif && Gif.armed;
+      if (g) gifAt(g, p.x, p.y);
       else if (window.Gif) Gif.nudge();
     }
     e.preventDefault();
@@ -1447,6 +1469,7 @@ window.Wall = (function () {
 
   return { store, setTool, get tool() { return tool; },
            stampAt,                      // tracer.js: a tracing dragged off the library lands here
+           gifAt,                        // gif.js: …and a gif dragged off the row, or clicked in it
            syncOpts: buildOpts,          // the + tool redraws its own row through this
            paint,                        // tracer.js: a stamp is drawn from the library, so the library changing repaints
            mark,                         // …and tells undo what it just put up
