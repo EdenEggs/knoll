@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./prelude.js"></script>
+<script src="./support.js"></script>
+<!-- lab 2 shows this on its own paper — see features/bare.css -->
+<link rel="stylesheet" href="./bare.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<!-- lab 2 serves these faces itself — see SELF-HOSTED in index.html -->
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  body { margin: 0; background: #f2e9cf; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+</style>
+</helmet>
+<div data-screen-label="Sticker Sheet" style="min-height: 100vh; width: fit-content; min-width: 100%; box-sizing: border-box; background: #f2e9cf; display: flex; flex-direction: column; align-items: center; padding: 44px 40px 70px; font-family: 'Kalam', cursive; position: relative">
+  <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}">
+    <div data-lab-nopaper style="position: absolute; inset: 0; pointer-events: none; opacity: 0.06; background-image: url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22160%22%20height=%22160%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22/%3E%3C/filter%3E%3Crect%20width=%22160%22%20height=%22160%22%20filter=%22url(%23n)%22/%3E%3C/svg%3E')"></div>
+  </sc-if>
+  <div style="background: #f4ecd5; border: 5px solid #17120b; border-radius: 10px 14px 8px 12px; box-shadow: 10px 11px 0 rgba(23,18,11,0.8); padding: 4px 26px 6px; display: flex; align-items: baseline; gap: 16px; transform: rotate(-0.6deg); z-index: 1">
+    <div style="font-family: 'VT323', monospace; font-size: 42px; letter-spacing: 6px; color: #17120b">STICKER SHEET</div>
+    <div style="font-family: 'VT323', monospace; font-size: 20px; letter-spacing: 3px; color: #17120b; opacity: 0.55">&#8470; SS-0001</div>
+  </div>
+  <div style="display: flex; flex-wrap: wrap; gap: 48px 46px; justify-content: center; max-width: 1240px; margin-top: 46px; z-index: 1">
+    <div style="display: flex; flex-direction: column; align-items: center; transform: rotate(2.4deg)">
+      <div style="width: 214px; height: 196px; background: #f4ecd5; border: 4px solid #17120b; border-radius: 14px 12px 18px 10px; box-shadow: 10px 11px 0 rgba(23,18,11,0.8); display: flex; align-items: center; justify-content: center; position: relative">
+        <div style="position: relative; text-align: center">
+          <div style="font-weight: 700; font-size: 128px; line-height: 1; color: #ffd23f; text-shadow: 4px 0 #17120b, -4px 0 #17120b, 0 4px #17120b, 0 -4px #17120b, 3px 3px #17120b, -3px 3px #17120b, 3px -3px #17120b, -3px -3px #17120b, 8px 9px 0 rgba(23,18,11,0.4); transform: rotate(-4deg)">?</div>
+        </div>
+        <sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}">
+          <div style="position: absolute; bottom: -13px; left: 50%; transform: translateX(-50%) rotate(-1deg); font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 3px; color: #f4ecd5; background: #17120b; border-radius: 4px; padding: 0 10px; white-space: nowrap">HUH?</div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+
+  <div style="height: 200px"></div>
+  <div style="position: fixed; left: {{ tapeX }}; top: {{ tapeY }}; z-index: 20">
+    <div style="position: relative; transform: rotate({{ tapeRot }}); box-shadow: 10px 11px 0 rgba(23,18,11,0.8)">
+      <div style="display: flex; align-items: stretch; background: #ffd23f; border: 4px solid #17120b">
+        <div onPointerDown="{{ onPullLeft }}" title="pull to stretch left" style="width: 30px; background: repeating-linear-gradient(45deg, #17120b 0px, #17120b 11px, #ffd23f 11px, #ffd23f 22px); border-right: 3.5px solid #17120b; cursor: ew-resize; touch-action: none" style-hover="outline: 3px dashed #e8484a; outline-offset: 2px"></div>
+        <div onPointerDown="{{ onTapeDrag }}" title="drag to move the tape" style="display: flex; align-items: stretch; overflow: hidden; width: {{ tapeMidW }}; cursor: grab; touch-action: none">
+          <sc-for list="{{ tapeSegs }}" as="seg" hint-placeholder-count="6">
+            <div style="display: flex; align-items: center; gap: 14px; padding: 8px 14px 10px; border-right: 3px dashed rgba(23,18,11,0.35); flex-shrink: 0">
+              <div style="font-family: 'VT323', monospace; font-size: 34px; letter-spacing: 6px; color: #17120b; white-space: nowrap; line-height: 1">CAUTION</div>
+              <div style="width: 13px; height: 13px; background: #17120b; transform: rotate(45deg); flex-shrink: 0"></div>
+            </div>
+          </sc-for>
+        </div>
+        <div onPointerDown="{{ onPullRight }}" title="pull to stretch right" style="width: 30px; background: repeating-linear-gradient(-45deg, #17120b 0px, #17120b 11px, #ffd23f 11px, #ffd23f 22px); border-left: 3.5px solid #17120b; cursor: ew-resize; touch-action: none" style-hover="outline: 3px dashed #e8484a; outline-offset: 2px"></div>
+      </div>
+      <sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}">
+        <div style="position: absolute; bottom: -13px; left: 50%; transform: translateX(-50%) rotate(0.5deg); font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 3px; color: #f4ecd5; background: #17120b; border-radius: 4px; padding: 0 10px; white-space: nowrap; pointer-events: none">STRETCHY TAPE</div>
+      </sc-if>
+    </div>
+    <div style="font-size: 13.5px; color: #17120b; opacity: 0.55; margin-top: 24px; text-align: center">grab the striped ends and pull &middot; drag the middle to move it</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;tapeTilt&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:-1.2,&quot;min&quot;:-6,&quot;max&quot;:6,&quot;step&quot;:0.2,&quot;unit&quot;:&quot;deg&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Caution tape&quot;},&quot;captions&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Sheet&quot;},&quot;grain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Sheet&quot;}}">
+class Component extends DCLogic {
+  state = { tapeW: 640, tapePos: null };
+  SEG_W = 218; MIN_W = 240;
+  componentDidMount() {
+    try {
+      const t = JSON.parse(localStorage.getItem('stickers.tape.v1') || 'null');
+      if (t && typeof t.w === 'number') this.setState({ tapeW: t.w, tapePos: t.pos || null });
+    } catch (e) {}
+  }
+  persist() {
+    try { localStorage.setItem('stickers.tape.v1', JSON.stringify({ w: this.state.tapeW, pos: this.state.tapePos })); } catch (e) {}
+  }
+  defaultPos() {
+    const w = this.state.tapeW + 60;
+    return { x: Math.max(12, (window.innerWidth - w) / 2), y: Math.max(12, window.innerHeight - 170) };
+  }
+  track(e, move) {
+    e.preventDefault();
+    const sx = e.clientX, sy = e.clientY;
+    const mv = (ev) => move(ev.clientX - sx, ev.clientY - sy);
+    const up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); this.persist(); };
+    window.addEventListener('pointermove', mv);
+    window.addEventListener('pointerup', up);
+  }
+  pull = (dir) => (e) => {
+    const w0 = this.state.tapeW, p0 = this.state.tapePos || this.defaultPos();
+    this.track(e, (dx) => {
+      const w = Math.max(this.MIN_W, Math.min(2600, w0 + dx * dir));
+      const grew = w - w0;
+      this.setState({ tapeW: w, tapePos: dir === -1 ? { x: p0.x - grew, y: p0.y } : p0 });
+    });
+  };
+  drag = (e) => {
+    const p0 = this.state.tapePos || this.defaultPos();
+    this.track(e, (dx, dy) => this.setState({ tapePos: { x: p0.x + dx, y: p0.y + dy } }));
+  };
+  renderVals() {
+    const n = Math.ceil(this.state.tapeW / this.SEG_W) + 1;
+    const pos = this.state.tapePos || (typeof window !== 'undefined' ? this.defaultPos() : { x: 20, y: 600 });
+    return {
+      captions: this.props.captions ?? true,
+      grain: this.props.grain ?? true,
+      tapeSegs: Array.from({ length: Math.min(n, 24) }, (_, i) => ({ id: i })),
+      tapeMidW: this.state.tapeW + 'px',
+      tapeX: pos.x + 'px',
+      tapeY: pos.y + 'px',
+      tapeRot: (this.props.tapeTilt ?? -1.2) + 'deg',
+      onPullLeft: this.pull(-1),
+      onPullRight: this.pull(1),
+      onTapeDrag: this.drag,
+    };
+  }
+}
+</script>
+</body>
+</html>

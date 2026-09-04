@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./prelude.js"></script>
+<script src="./support.js"></script>
+<!-- lab 2 shows this on its own paper — see features/bare.css -->
+<link rel="stylesheet" href="./bare.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<!-- lab 2 serves these faces itself — see SELF-HOSTED in index.html -->
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  html, body { margin: 0; padding: 0; background: #EAE1ED; }
+  a { color: #C22F7C; } a:hover { color: #8A2159; }
+
+  /* THE ONE RULE THAT IS NOT THE DESIGN'S. Everything else in this file is
+     the card as it was drawn, inline and verbatim; these two declarations are
+     the BENCH's, and they are the whole of what changes when a row of three
+     becomes three things lying loose on paper.
+
+     A card was `flex: 1 1 300px; max-width: 350px` — sizing that only means
+     anything inside a row, and there is no row any more: a frame holds one
+     card and frames.js cuts the frame to whatever it measures. So the card is
+     given outright the width it settled at in the row, and it is given a
+     floor.
+
+     THE FLOOR IS WHAT KEEPS THEM A SET. In the row they stood on
+     `align-items: stretch`, so all three were the height of the tallest —
+     the first card, whose paragraph is nearly twice the third's. Apart, each
+     would be the height of its own text, and three cards of three heights
+     read as three loose cards rather than one set of three. The number is the
+     first card's own measured height, so the tallest is untouched and the
+     other two are padded up to meet it: the stretch the row was doing for
+     them, written down. */
+  [data-card] { width: 350px; min-height: 299px; }
+</style>
+</helmet>
+<div data-screen-label="Knoll Card" style="min-height: 100vh; background-color: #EAE1ED; background-image: radial-gradient(circle, rgba(46,32,58,0.10) 1.2px, transparent 1.6px); background-size: 20px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box;">
+
+  <sc-if value="{{ isFans }}" hint-placeholder-val="{{ true }}">
+    <div data-card style="position: relative; background: #F8F3E2; border: 3px solid #241A2E; border-radius: 10px 22px 12px 20px / 20px 12px 22px 10px; box-shadow: 6px 7px 0 rgba(36,26,46,0.16); padding: 44px 30px 34px; box-sizing: border-box; transform: {{ tilt1 }};">
+      <sc-if value="{{ showPins }}" hint-placeholder-val="{{ true }}">
+        <div style="position: absolute; top: -12px; left: 50%; margin-left: -11px; width: 22px; height: 22px; border-radius: 50%; background: #E64397; border: 3px solid #241A2E; box-sizing: border-box;"></div>
+        <div style="position: absolute; top: -4px; left: 50%; margin-left: -2px; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.55);"></div>
+      </sc-if>
+      <div style="position: absolute; top: 10px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background: #F0B429;"></div>
+      <div style="position: absolute; bottom: 10px; left: 10px; width: 7px; height: 7px; border-radius: 50%; background: #D6493E;"></div>
+      <h3 style="margin: 0 0 14px; font-family: 'Rye', serif; font-weight: 400; font-size: 25px; line-height: 1.25; color: #241A2E; text-align: center; text-wrap: pretty;">The fan page, by the fans</h3>
+      <div style="border-top: 2px dashed rgba(36,26,46,0.35); margin: 0 auto 18px; width: 64px;"></div>
+      <p style="margin: 0; font-family: 'Space Mono', monospace; font-size: 13.5px; line-height: 1.75; color: #4C4157; text-align: center; text-wrap: pretty;">Doodle, stamp shapes, leave notes, queue up the jukebox, or beat someone's snake high score. The best of it gets voted onto the page for good.</p>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isConsensus }}" hint-placeholder-val="{{ false }}">
+    <div data-card style="position: relative; background: #F8F3E2; border: 3px solid #241A2E; border-radius: 20px 12px 22px 10px / 10px 22px 12px 20px; box-shadow: 6px 7px 0 rgba(36,26,46,0.16); padding: 44px 30px 34px; box-sizing: border-box; transform: {{ tilt2 }};">
+      <sc-if value="{{ showPins }}" hint-placeholder-val="{{ true }}">
+        <div style="position: absolute; top: -12px; left: 50%; margin-left: -11px; width: 22px; height: 22px; border-radius: 50%; background: #5B6CE1; border: 3px solid #241A2E; box-sizing: border-box;"></div>
+        <div style="position: absolute; top: -4px; left: 50%; margin-left: -2px; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.55);"></div>
+      </sc-if>
+      <div style="position: absolute; top: 10px; left: 10px; width: 7px; height: 7px; border-radius: 50%; background: #2FA76F;"></div>
+      <div style="position: absolute; bottom: 10px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background: #F0B429;"></div>
+      <h3 style="margin: 0 0 14px; font-family: 'Rye', serif; font-weight: 400; font-size: 25px; line-height: 1.25; color: #241A2E; text-align: center; text-wrap: pretty;">Built by consensus</h3>
+      <div style="border-top: 2px dashed rgba(36,26,46,0.35); margin: 0 auto 18px; width: 64px;"></div>
+      <p style="margin: 0; font-family: 'Space Mono', monospace; font-size: 13.5px; line-height: 1.75; color: #4C4157; text-align: center; text-wrap: pretty;">Submit a design, let the community vote. What the hill approves becomes part of the page — forever.</p>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isRules }}" hint-placeholder-val="{{ false }}">
+    <div data-card style="position: relative; background: #F8F3E2; border: 3px solid #241A2E; border-radius: 12px 20px 10px 22px / 22px 10px 20px 12px; box-shadow: 6px 7px 0 rgba(36,26,46,0.16); padding: 44px 30px 34px; box-sizing: border-box; transform: {{ tilt3 }};">
+      <sc-if value="{{ showPins }}" hint-placeholder-val="{{ true }}">
+        <div style="position: absolute; top: -12px; left: 50%; margin-left: -11px; width: 22px; height: 22px; border-radius: 50%; background: #2FA76F; border: 3px solid #241A2E; box-sizing: border-box;"></div>
+        <div style="position: absolute; top: -4px; left: 50%; margin-left: -2px; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.55);"></div>
+      </sc-if>
+      <div style="position: absolute; top: 10px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background: #D6493E;"></div>
+      <div style="position: absolute; bottom: 10px; left: 10px; width: 7px; height: 7px; border-radius: 50%; background: #2FA76F;"></div>
+      <h3 style="margin: 0 0 14px; font-family: 'Rye', serif; font-weight: 400; font-size: 25px; line-height: 1.25; color: #241A2E; text-align: center; text-wrap: pretty;">Your hill, your rules</h3>
+      <div style="border-top: 2px dashed rgba(36,26,46,0.35); margin: 0 auto 18px; width: 64px;"></div>
+      <p style="margin: 0; font-family: 'Space Mono', monospace; font-size: 13.5px; line-height: 1.75; color: #4C4157; text-align: center; text-wrap: pretty;">Pin the good stuff, tidy the mess, and keep the vibe yours with simple mod tools.</p>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;card&quot;:{&quot;editor&quot;:&quot;select&quot;,&quot;default&quot;:&quot;fans&quot;,&quot;options&quot;:[&quot;fans&quot;,&quot;consensus&quot;,&quot;rules&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Card&quot;},&quot;tilt&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Cards&quot;},&quot;pins&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Cards&quot;}}">
+/* ONE FILE, THREE CARDS, THREE FEATURES — the gnomes' arrangement exactly,
+   and for the gnomes' reason. features/gnome.dc.html has the long version of
+   the argument; this is the short one, and what is different about it.
+
+   The cards were drawn as one screen with the three of them in a row, and a
+   row is a slab: it is picked up and put down in one piece. On this bench
+   each card is to be moved on its own, and a thing that moves on its own is
+   its own .gz — so the section says which card it wants on the end of its
+   data-src, features/knoll-cards.dc.html#card=consensus, and frames.js hands
+   that to the frame verbatim.
+
+   IT IS A HASH AND NOT A QUERY for the reason the gnome file spells out: a
+   static host with clean URLs answers .html with a 301 whose Location carries
+   the path and nothing else, so ?card=consensus is dropped on the way and
+   every frame would come back as the same card. A fragment never reaches the
+   server at all.
+
+   THE ROW IS STILL IN HERE, in the two things that made three cards read as
+   one set rather than three: the stagger — tilt1/2/3, three angles off one
+   prop, so the switch still turns all three straight together — and the
+   shared floor under their height, which is [data-card] up in the helmet.
+   Moved apart on the bench they still belong to each other, which is the
+   point of keeping both.
+
+   `card` is a real prop with a real default, so the file still opens as
+   itself in Design Canvas with nothing on the end of it at all. */
+class Component extends DCLogic {
+  renderVals() {
+    let card = this.props.card;
+    try {
+      const m = /(?:^|[#&?])card=([\w-]+)/.exec(location.hash + location.search);
+      if (m) card = m[1];
+    } catch (e) {}
+    card = card || 'fans';
+    const tilt = this.props.tilt ?? true;
+    return {
+      isFans: card === 'fans',
+      isConsensus: card === 'consensus',
+      isRules: card === 'rules',
+      showPins: this.props.pins ?? true,
+      tilt1: tilt ? 'rotate(-1.4deg)' : 'none',
+      tilt2: tilt ? 'rotate(0.9deg)' : 'none',
+      tilt3: tilt ? 'rotate(-0.7deg)' : 'none',
+    };
+  }
+}
+</script>
+</body>
+</html>

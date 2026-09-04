@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./prelude.js"></script>
+<script src="./support.js"></script>
+<!-- lab 2 shows this on its own paper — see features/bare.css -->
+<link rel="stylesheet" href="./bare.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<!-- lab 2 serves these faces itself — see SELF-HOSTED in index.html -->
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  body { margin: 0; background: #f2e9cf; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+
+  /* THE CLINGER, hanging off the bottom roller. The first four keyframes are
+     his own, lifted with him out of the gnome roster: a slow swing from the
+     hands, the two legs kicking out of phase, and a bead of sweat. They run
+     always — he is never still.
+
+     JIGGLE is the fifth and is not his: it is what the BENCH does to him, and
+     it runs only while something is moving him. Two things move him and they
+     come from opposite sides of the glass. Pulling the scroll open drags the
+     roller he is holding, and that is inside this document — onPullDown puts
+     data-scroll-pull on <html> for as long as the pointer is down. Dragging
+     the whole feature across the paper is OUT there, in lab 2, which cannot
+     be seen from in here at all — so frames.js mirrors the section's
+     .dragging onto this document's <html> as data-lab-drag. Same rule, two
+     attributes, and neither of them is state this component has to hold. */
+  @keyframes swing { 0%, 100% { transform: rotate(3deg); } 50% { transform: rotate(-3deg); } }
+  @keyframes kickL { 0%, 100% { transform: rotate(7deg); } 50% { transform: rotate(-9deg); } }
+  @keyframes kickR { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(7deg); } }
+  @keyframes sweatDrip { 0%, 55% { opacity: 0; transform: translateY(-4px); } 65% { opacity: 1; } 100% { opacity: 0; transform: translateY(14px); } }
+  @keyframes jiggle {
+    0%, 100% { transform: rotate(-4deg); }
+    25%      { transform: rotate(3.5deg); }
+    50%      { transform: rotate(-2.5deg); }
+    75%      { transform: rotate(4.5deg); }
+  }
+  /* the origin is his HANDS — 220x310 of gnome swinging from (110,12), the
+     point on the roller he has hold of — and he takes no pointer, so a grab
+     anywhere over him is a grab of the roller behind him or the bench under it */
+  [data-clinger] { position: absolute; left: 36px; top: 28px; width: 220px; height: 310px;
+    pointer-events: none; transform-origin: 110px 12px; }
+  html[data-lab-drag] [data-clinger],
+  html[data-scroll-pull] [data-clinger] { animation: jiggle .3s ease-in-out infinite; }
+</style>
+</helmet>
+<div data-screen-label="Scroll Sticker" style="min-height: 100vh; box-sizing: border-box; background: #f2e9cf; display: flex; align-items: flex-start; justify-content: center; padding: 60px 40px 90px; font-family: 'Kalam', cursive; position: relative">
+  <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; inset: 0; pointer-events: none; opacity: 0.06; background-image: url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22160%22%20height=%22160%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22/%3E%3C/filter%3E%3Crect%20width=%22160%22%20height=%22160%22%20filter=%22url(%23n)%22/%3E%3C/svg%3E')"></div>
+  </sc-if>
+  <div style="position: relative; width: 400px; transform: rotate({{ tilt }}); z-index: 1">
+    <div style="position: relative; height: 48px; z-index: 3">
+      <div style="position: absolute; left: -14px; top: 5px; width: 36px; height: 38px; background: #ffd23f; border: 4px solid #17120b; border-radius: 12px; box-shadow: 6px 7px 0 rgba(23,18,11,0.8); display: flex; align-items: center; justify-content: center"><div style="width: 10px; height: 10px; border: 3px solid #17120b; border-radius: 50%"></div></div>
+      <div style="position: absolute; right: -14px; top: 5px; width: 36px; height: 38px; background: #ffd23f; border: 4px solid #17120b; border-radius: 12px; box-shadow: 6px 7px 0 rgba(23,18,11,0.8); display: flex; align-items: center; justify-content: center"><div style="width: 10px; height: 10px; border: 3px solid #17120b; border-radius: 50%"></div></div>
+      <div style="position: absolute; left: 14px; right: 14px; top: 0; height: 48px; box-sizing: border-box; background: #f4ecd5; border: 4px solid #17120b; border-radius: 24px 22px 20px 24px; box-shadow: 8px 9px 0 rgba(23,18,11,0.8); overflow: hidden">
+        <div style="position: absolute; left: 8px; right: 8px; top: 8px; height: 0; border-top: 3px solid rgba(23,18,11,0.35); border-radius: 50%"></div>
+        <div style="position: absolute; left: 14px; right: 14px; bottom: 7px; height: 0; border-top: 2.5px solid rgba(23,18,11,0.2); border-radius: 50%"></div>
+      </div>
+    </div>
+    <div style="position: relative; margin: -16px 26px; background: #f4ecd5; border: 4px solid #17120b; border-radius: 6px 10px 8px 12px; box-shadow: 9px 10px 0 rgba(23,18,11,0.8); padding: 44px 30px 40px; z-index: 2">
+      <div style="height: {{ bodyH }}; overflow: hidden; transition: none">
+        <!-- Proclamation of the Knoll, scaled from its native 520px column
+             (280px available) down to fit the paper's width. Lives here,
+             not as its own gizmo, so it rides the pull-to-unroll reveal
+             instead of a drag handle of its own. -->
+        <div style="width: 520px; transform: scale(0.53); transform-origin: top left; display: flex; flex-direction: column; gap: 26px; font-family: 'Kalam', cursive">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center">
+            <div style="font-family: Rye, serif; font-size: 40px; line-height: 1.05; color: #17120b">HEAR YE, HEAR YE</div>
+            <div style="font-family: 'Kalam', cursive; font-style: italic; font-size: 16px; color: #17120b; opacity: 0.65">(or read ye, reading is fine)</div>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px">
+            <div style="width: 70px; height: 3px; background: #17120b; opacity: 0.5"></div>
+            <div style="width: 11px; height: 11px; background: #e8484a; border: 2.5px solid #17120b; transform: rotate(45deg)"></div>
+            <div style="width: 70px; height: 3px; background: #17120b; opacity: 0.5"></div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center">
+            <div style="font-family: Rye, serif; font-size: 26px; letter-spacing: 6px; color: #17120b">A PROCLAMATION</div>
+            <div style="font-family: VT323, monospace; font-size: 18px; letter-spacing: 3px; color: #17120b; opacity: 0.65">issued from atop the Knoll</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 13px; font-size: 16.5px; line-height: 1.55; color: #17120b">
+            <div><strong style="letter-spacing: 1px">WHEREAS</strong> a page kept by one person is merely a page, and a page kept by everyone is a Knoll;</div>
+            <div><strong style="letter-spacing: 1px">WHEREAS</strong> this hill has no landlord, only tenants with opinions;</div>
+            <div><strong style="letter-spacing: 1px">WHEREAS</strong> a tome ye cannot doodle in is a sad tome indeed;</div>
+            <div><strong style="letter-spacing: 1px">WHEREAS</strong> nobody asked the gnomes, and they showed up anyway;</div>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px">
+            <div style="width: 9px; height: 9px; background: #ffd23f; border: 2.5px solid #17120b; transform: rotate(45deg)"></div>
+            <div style="font-family: Rye, serif; font-size: 21px; letter-spacing: 2px; color: #17120b; text-align: center">BE IT HEREBY DECREED:</div>
+            <div style="width: 9px; height: 9px; background: #ffd23f; border: 2.5px solid #17120b; transform: rotate(45deg)"></div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 15px; font-size: 16.5px; line-height: 1.55; color: #17120b">
+            <div style="display: grid; grid-template-columns: 36px 1fr; gap: 12px"><div style="font-family: Rye, serif; font-size: 19px; text-align: right; padding-top: 1px">I.</div><div>Any soul may draw, paste, stamp, or scribble upon the hill. Skill is welcome but not required.</div></div>
+            <div style="display: grid; grid-template-columns: 36px 1fr; gap: 12px"><div style="font-family: Rye, serif; font-size: 19px; text-align: right; padding-top: 1px">II.</div><div>Nothing is added to the hill by fiat. It is added by vote, and the vote is cast by you. Yes, you. Stop looking behind you.</div></div>
+            <div style="display: grid; grid-template-columns: 36px 1fr; gap: 12px"><div style="font-family: Rye, serif; font-size: 19px; text-align: right; padding-top: 1px">III.</div><div>What the hill approves, the hill keeps. Forever. (Forever is subject to a later vote.)</div></div>
+            <div style="display: grid; grid-template-columns: 36px 1fr; gap: 12px"><div style="font-family: Rye, serif; font-size: 19px; text-align: right; padding-top: 1px">IV.</div><div>What the hill declines is not destroyed. It is thanked for its service and shown gently to the compost.</div></div>
+            <div style="display: grid; grid-template-columns: 36px 1fr; gap: 12px"><div style="font-family: Rye, serif; font-size: 19px; text-align: right; padding-top: 1px">V.</div><div>The hill is devoted to one subject at a time, chosen by the hill. Other subjects may petition for a hill of their own.</div></div>
+            <div style="display: grid; grid-template-columns: 36px 1fr; gap: 12px"><div style="font-family: Rye, serif; font-size: 19px; text-align: right; padding-top: 1px">VI.</div><div>The gnomes are not staff. They simply live here. Please do not tip them; it makes them weird.</div></div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; margin-top: 4px">
+            <div style="font-family: 'Kalam', cursive; font-style: italic; font-size: 16px; color: #17120b; opacity: 0.8">Signed in ink, mud, and one crayon,</div>
+            <div style="font-family: Rye, serif; font-size: 22px; letter-spacing: 2px; color: #17120b">THE ASSEMBLY OF THE KNOLL</div>
+            <a href="https://knoll.space" style="font-family: VT323, monospace; font-size: 18px; letter-spacing: 3px; text-decoration: none">knoll.space</a>
+            <div style="font-family: 'Kalam', cursive; font-style: italic; font-size: 14.5px; color: #17120b; opacity: 0.65; margin-top: 6px">Sealed with wax, as the glue ran out.</div>
+          </div>
+        </div>
+      </div>
+      <sc-if value="{{ seal }}" hint-placeholder-val="{{ true }}">
+        <div style="position: absolute; right: -18px; bottom: -20px; width: 58px; height: 58px; background: #e8484a; border: 4px solid #17120b; border-radius: 50% 46% 52% 48%; box-shadow: 6px 7px 0 rgba(23,18,11,0.8); display: flex; align-items: center; justify-content: center; transform: rotate(8deg)">
+          <div style="width: 34px; height: 34px; border: 2.5px dashed rgba(23,18,11,0.7); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'UnifrakturMaguntia', cursive; font-size: 22px; color: #17120b">S</div>
+        </div>
+      </sc-if>
+    </div>
+    <div onPointerDown="{{ onPullDown }}" title="pull down to unroll" style="position: relative; height: 48px; z-index: 3; cursor: ns-resize; touch-action: none">
+      <div data-clinger data-always-animate>
+        <svg width="220" height="310" sc-camel-view-box="0 0 220 310" style="display: block; overflow: visible; filter: drop-shadow(6px 7px 0 rgba(0,0,0,0.3))">
+        <g style="transform-origin: 110px 12px; animation: swing 4.5s ease-in-out infinite">
+        <path d="M74,168 L56,14" stroke="#17120b" stroke-width="23" stroke-linecap="round"></path>
+        <path d="M74,168 L56,14" stroke="#c1477a" stroke-width="13" stroke-linecap="round"></path>
+        <path d="M146,168 L164,14" stroke="#17120b" stroke-width="23" stroke-linecap="round"></path>
+        <path d="M146,168 L164,14" stroke="#c1477a" stroke-width="13" stroke-linecap="round"></path>
+        <circle cx="56" cy="12" r="12" fill="#f0cfae" stroke="#17120b" stroke-width="5"></circle>
+        <circle cx="164" cy="12" r="12" fill="#f0cfae" stroke="#17120b" stroke-width="5"></circle>
+        <g style="transform-origin: 92px 252px; animation: kickL 2.2s ease-in-out infinite">
+        <line x1="92" y1="252" x2="85" y2="290" stroke="#17120b" stroke-width="20" stroke-linecap="round"></line>
+        <line x1="92" y1="252" x2="85" y2="290" stroke="#5b4632" stroke-width="11" stroke-linecap="round"></line>
+        <ellipse cx="84" cy="297" rx="10" ry="13" transform="rotate(8 84 297)" fill="#8a6a42" stroke="#17120b" stroke-width="5"></ellipse>
+        </g>
+        <g style="transform-origin: 128px 252px; animation: kickR 2.2s ease-in-out infinite">
+        <line x1="128" y1="252" x2="135" y2="290" stroke="#17120b" stroke-width="20" stroke-linecap="round"></line>
+        <line x1="128" y1="252" x2="135" y2="290" stroke="#5b4632" stroke-width="11" stroke-linecap="round"></line>
+        <ellipse cx="136" cy="297" rx="10" ry="13" transform="rotate(-8 136 297)" fill="#8a6a42" stroke="#17120b" stroke-width="5"></ellipse>
+        </g>
+        <path d="M70,150 L150,150 L182,258 L38,258 Z" fill="#e0598c" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+        <path d="M110,150 L110,258" stroke="rgba(23,18,11,0.18)" stroke-width="3"></path>
+        <circle cx="110" cy="250" r="10" fill="#ffd23f" stroke="#17120b" stroke-width="4"></circle>
+        <ellipse cx="72" cy="116" rx="8" ry="11" fill="#f5b8c4" stroke="#17120b" stroke-width="4"></ellipse>
+        <ellipse cx="148" cy="116" rx="8" ry="11" fill="#f5b8c4" stroke="#17120b" stroke-width="4"></ellipse>
+        <circle cx="110" cy="112" r="40" fill="#f0cfae" stroke="#17120b" stroke-width="5"></circle>
+        <path d="M64,118 Q110,148 156,118 Q166,225 110,242 Q54,225 64,118 Z" fill="#f7f0df" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+        <path d="M83,95 Q92,87 100,93" fill="none" stroke="#17120b" stroke-width="4" stroke-linecap="round"></path>
+        <path d="M120,93 Q128,87 137,95" fill="none" stroke="#17120b" stroke-width="4" stroke-linecap="round"></path>
+        <circle cx="93" cy="114" r="9" fill="#ffffff" stroke="#17120b" stroke-width="4"></circle>
+        <circle cx="127" cy="114" r="9" fill="#ffffff" stroke="#17120b" stroke-width="4"></circle>
+        <circle cx="93" cy="117" r="4" fill="#17120b"></circle>
+        <circle cx="127" cy="117" r="4" fill="#17120b"></circle>
+        <ellipse cx="110" cy="145" rx="7" ry="8" fill="#5b3324" stroke="#17120b" stroke-width="4"></ellipse>
+        <ellipse cx="91" cy="136" rx="11" ry="5.5" transform="rotate(-24 91 136)" fill="#fffaf0" stroke="#17120b" stroke-width="4"></ellipse>
+        <ellipse cx="129" cy="136" rx="11" ry="5.5" transform="rotate(24 129 136)" fill="#fffaf0" stroke="#17120b" stroke-width="4"></ellipse>
+        <circle cx="110" cy="126" r="13" fill="#e8a583" stroke="#17120b" stroke-width="5"></circle>
+        <circle cx="106" cy="122" r="3.5" fill="rgba(255,255,255,0.55)"></circle>
+        <path d="M110,10 L158,90 L62,90 Z" fill="#5a8fd6" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+        <rect x="96" y="50" width="14" height="14" transform="rotate(-12 103 57)" fill="#4670a7" stroke="#17120b" stroke-width="3" stroke-dasharray="4 3"></rect>
+        <rect x="54" y="84" width="112" height="22" rx="11" fill="#4670a7" stroke="#17120b" stroke-width="5"></rect>
+        <rect x="68" y="90" width="26" height="6" rx="3" fill="rgba(255,255,255,0.35)"></rect>
+        <circle cx="110" cy="12" r="10" fill="#fdf7e3" stroke="#17120b" stroke-width="5"></circle>
+        <g style="transform-origin: 180px 84px; animation: sweatDrip 2.4s ease-in infinite">
+        <path d="M180,74 Q187,86 180,91 Q173,86 180,74 Z" fill="#bfe3f0" stroke="#17120b" stroke-width="3" stroke-linejoin="round"></path>
+        </g>
+        </g>
+        </svg>
+      </div>
+      <div style="position: absolute; left: -14px; top: 5px; width: 36px; height: 38px; background: #ffd23f; border: 4px solid #17120b; border-radius: 12px; box-shadow: 6px 7px 0 rgba(23,18,11,0.8); display: flex; align-items: center; justify-content: center"><div style="width: 10px; height: 10px; border: 3px solid #17120b; border-radius: 50%"></div></div>
+      <div style="position: absolute; right: -14px; top: 5px; width: 36px; height: 38px; background: #ffd23f; border: 4px solid #17120b; border-radius: 12px; box-shadow: 6px 7px 0 rgba(23,18,11,0.8); display: flex; align-items: center; justify-content: center"><div style="width: 10px; height: 10px; border: 3px solid #17120b; border-radius: 50%"></div></div>
+      <div style="position: absolute; left: 14px; right: 14px; top: 0; height: 48px; box-sizing: border-box; background: #f4ecd5; border: 4px solid #17120b; border-radius: 22px 24px 24px 20px; box-shadow: 8px 9px 0 rgba(23,18,11,0.8); overflow: hidden" style-hover="outline: 3px dashed #e8484a; outline-offset: 3px">
+        <div style="position: absolute; left: 8px; right: 8px; top: 8px; height: 0; border-top: 3px solid rgba(23,18,11,0.35); border-radius: 50%"></div>
+        <div style="position: absolute; left: 14px; right: 14px; bottom: 7px; height: 0; border-top: 2.5px solid rgba(23,18,11,0.2); border-radius: 50%"></div>
+      </div>
+    </div>
+    <!-- 40px of gap became 320: the gnome hangs 290 below the roller he is
+         holding, and the line used to read "gra…and pull down to unroll"
+         with him in the middle of it. It sits under his boots now. -->
+    <div style="font-size: 13.5px; color: #17120b; opacity: 0.55; margin-top: 320px; text-align: center; font-family: 'Kalam', cursive">grab the bottom roller and pull down to unroll</div>
+    <sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}">
+      <div style="position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%) rotate(-1deg); font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 3px; color: #f4ecd5; background: #17120b; border-radius: 4px; padding: 0 10px; white-space: nowrap">SHARED SCROLL</div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;tilt&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:-2,&quot;min&quot;:-8,&quot;max&quot;:8,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;deg&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Scroll&quot;},&quot;seal&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scroll&quot;},&quot;captions&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Sheet&quot;},&quot;grain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Sheet&quot;}}">
+class Component extends DCLogic {
+  state = { bodyH: 205 };
+  onPullDown = (e) => {
+    e.preventDefault();
+    const h0 = this.state.bodyH, sy = e.clientY;
+    // the gnome is holding the roller this is about to move: say so on <html>
+    // and the stylesheet shakes him for as long as the pointer is down
+    document.documentElement.setAttribute('data-scroll-pull', '');
+    const mv = (ev) => this.setState({ bodyH: Math.max(40, Math.min(1600, h0 + (ev.clientY - sy))) });
+    const up = () => {
+      document.documentElement.removeAttribute('data-scroll-pull');
+      window.removeEventListener('pointermove', mv);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', mv);
+    window.addEventListener('pointerup', up);
+  };
+  renderVals() {
+    return {
+      bodyH: this.state.bodyH + 'px',
+      onPullDown: this.onPullDown,
+      tilt: (this.props.tilt ?? -2) + 'deg',
+      grain: this.props.grain ?? true,
+      captions: this.props.captions ?? false,   // lab 2: no sheet label under the scroll
+      seal: this.props.seal ?? true,
+    };
+  }
+}
+</script>
+</body>
+</html>

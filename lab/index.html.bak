@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Knoll Lab</title>
+<link rel="icon" href="../logo/logo-icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="lab.css">
+</head>
+<body>
+
+<header class="lab-head">
+  <a class="lab-brand" href="../">
+    <img src="../logo/logo-icon.svg" alt="" width="26" height="26">
+    <span>knoll</span><span class="lab-slash">/</span><span class="lab-name">lab</span>
+  </a>
+  <p class="lab-hint">a workbench for things that aren't ready yet. the bench moves like figma's canvas: hold the <b>scroll wheel</b> (or <b>space</b>) and drag to pan, scroll to pan, <b>ctrl+scroll</b> or pinch to zoom — the <b>?</b> in the corner has the rest. drag gizmos by their handles; double-click a handle to send it home, or press its – to put it back on the shelf. switch who you're viewing as with the buttons (or keys 1 / 2 / 3).</p>
+  <div class="role-switch" role="tablist" aria-label="view as">
+    <span class="role-switch-label">VIEW AS</span>
+    <button type="button" role="tab" data-role-btn="user" aria-selected="true"><i>1</i>User</button>
+    <button type="button" role="tab" data-role-btn="moderator" aria-selected="false"><i>2</i>Moderator</button>
+    <button type="button" role="tab" data-role-btn="owner" aria-selected="false"><i>3</i>Site owner</button>
+  </div>
+  <div class="lab-tools">
+    <button type="button" id="lab-reset" class="lab-link">reset layout</button>
+    <button type="button" id="lab-reset-data" class="lab-link">reset data</button>
+    <a class="lab-link" href="../">← coming soon page</a>
+  </div>
+</header>
+
+<main id="bench" class="bench" aria-label="workbench">
+
+  <!-- role strip: what the current role will be able to do here. Anything with
+       data-roles="moderator owner" (space/comma separated) is hidden for other roles. -->
+  <div class="role-strip" id="role-strip">
+    <span class="role-badge" id="role-badge">user</span>
+    <span data-roles="user">what any visitor sees. nothing to manage yet — just the gizmos.</span>
+    <span data-roles="moderator">moderator view. review queues and flags will land here.</span>
+    <span data-roles="owner">site-owner view. settings, members and the kill-switches will land here.</span>
+  </div>
+
+  <!-- the world: everything on the bench lives in here so the whole sheet can zoom -->
+  <div id="bench-world" class="bench-world ws-paper">
+
+  <!-- ───────────────────────── GIZMO 01 · CHARACTER FORGE ───────────────────────── -->
+  <section class="gz" id="gz-forge" data-gizmo="forge" aria-label="Character Forge">
+    <div class="gz-handle" data-handle>
+      <span class="gz-grip" aria-hidden="true"></span>
+      <span class="gz-plate">CHARACTER FORGE <b>MK.I</b></span>
+      <span class="gz-serial">№ KN-0001</span>
+      <span class="gz-grip" aria-hidden="true"></span>
+    </div>
+
+    <div class="gz-body">
+
+      <!-- 01 · INTAKE -->
+      <div class="gz-col gz-intake">
+        <div class="gz-label"><i>01</i> INTAKE</div>
+        <label class="hopper" id="hopper" for="forge-file">
+          <input type="file" id="forge-file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" hidden>
+          <div class="hopper-empty">
+            <svg viewBox="0 0 48 48" width="38" height="38" aria-hidden="true">
+              <rect x="6" y="10" width="36" height="28" rx="4" fill="none" stroke="currentColor" stroke-width="2.5"/>
+              <circle cx="17" cy="20" r="3.5" fill="currentColor"/>
+              <path d="M8 34l11-10 7 7 6-5 8 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+            </svg>
+            <strong>drop a png / jpg</strong>
+            <span>or click to browse · clean backgrounds cut best</span>
+          </div>
+          <div class="hopper-full" hidden>
+            <img id="specimen" alt="specimen">
+            <span class="hopper-tag">SPECIMEN</span>
+          </div>
+          <div class="hopper-slot" aria-hidden="true"></div>
+        </label>
+        <div class="intake-row">
+          <button type="button" class="gz-btn gz-btn-sm" id="forge-sample">use a sample</button>
+          <button type="button" class="gz-btn gz-btn-sm" id="forge-eject" disabled>eject</button>
+        </div>
+        <dl class="readout" id="readout">
+          <div><dt>SEED</dt><dd data-r="seed">— — — —</dd></div>
+          <div><dt>PX</dt><dd data-r="px">— × —</dd></div>
+          <div><dt>HUE</dt><dd data-r="hue">—</dd></div>
+          <div><dt>STATUS</dt><dd data-r="status" class="readout-status">idle</dd></div>
+        </dl>
+        <p class="gz-fine">stays on your device — nothing is uploaded anywhere.</p>
+
+        <!-- the bin: drag a critter off the bench and drop it in -->
+        <div class="bin" id="forge-bin" role="button" tabindex="0" aria-label="the bin — drag a critter in, or press to empty the bench">
+          <div class="bin-stage">
+            <span class="bin-puff" aria-hidden="true"></span>
+            <svg class="bin-can" viewBox="0 0 64 76" width="62" height="74" aria-hidden="true">
+              <g class="bin-lid">
+                <rect x="24" y="4" width="16" height="6" rx="3" class="bin-knob"/>
+                <rect x="6" y="10" width="52" height="10" rx="4"/>
+              </g>
+              <path class="bin-body" d="M11 24h42l-4.5 44a5 5 0 0 1-5 4.5H20.5a5 5 0 0 1-5-4.5z"/>
+              <g class="bin-ribs">
+                <line x1="24" y1="32" x2="22.5" y2="64"/>
+                <line x1="32" y1="32" x2="32" y2="64"/>
+                <line x1="40" y1="32" x2="41.5" y2="64"/>
+              </g>
+            </svg>
+          </div>
+          <div class="bin-cap"><b>THE BIN</b><span id="forge-binned">drag a critter in</span></div>
+        </div>
+      </div>
+
+      <!-- 02 · ANALYSIS -->
+      <div class="gz-col gz-analysis">
+        <div class="gz-label"><i>02</i> ANALYSIS</div>
+        <div class="gauges">
+          <figure class="gauge" data-gauge="hue">
+            <svg viewBox="0 0 80 48" aria-hidden="true">
+              <path d="M8 44 A32 32 0 0 1 72 44" class="gauge-arc"/>
+              <g class="gauge-ticks">
+                <line x1="8" y1="44" x2="13" y2="44"/><line x1="17.4" y1="21.4" x2="21" y2="25"/>
+                <line x1="40" y1="12" x2="40" y2="17"/><line x1="62.6" y1="21.4" x2="59" y2="25"/>
+                <line x1="72" y1="44" x2="67" y2="44"/>
+              </g>
+              <line class="gauge-needle" x1="40" y1="44" x2="40" y2="16"/>
+              <circle cx="40" cy="44" r="3.5" class="gauge-pin"/>
+            </svg>
+            <figcaption>HUE</figcaption>
+          </figure>
+          <figure class="gauge" data-gauge="chaos">
+            <svg viewBox="0 0 80 48" aria-hidden="true">
+              <path d="M8 44 A32 32 0 0 1 72 44" class="gauge-arc"/>
+              <g class="gauge-ticks">
+                <line x1="8" y1="44" x2="13" y2="44"/><line x1="17.4" y1="21.4" x2="21" y2="25"/>
+                <line x1="40" y1="12" x2="40" y2="17"/><line x1="62.6" y1="21.4" x2="59" y2="25"/>
+                <line x1="72" y1="44" x2="67" y2="44"/>
+              </g>
+              <line class="gauge-needle" x1="40" y1="44" x2="40" y2="16"/>
+              <circle cx="40" cy="44" r="3.5" class="gauge-pin"/>
+            </svg>
+            <figcaption>CHAOS</figcaption>
+          </figure>
+          <figure class="gauge" data-gauge="lumen">
+            <svg viewBox="0 0 80 48" aria-hidden="true">
+              <path d="M8 44 A32 32 0 0 1 72 44" class="gauge-arc"/>
+              <g class="gauge-ticks">
+                <line x1="8" y1="44" x2="13" y2="44"/><line x1="17.4" y1="21.4" x2="21" y2="25"/>
+                <line x1="40" y1="12" x2="40" y2="17"/><line x1="62.6" y1="21.4" x2="59" y2="25"/>
+                <line x1="72" y1="44" x2="67" y2="44"/>
+              </g>
+              <line class="gauge-needle" x1="40" y1="44" x2="40" y2="16"/>
+              <circle cx="40" cy="44" r="3.5" class="gauge-pin"/>
+            </svg>
+            <figcaption>LUMEN</figcaption>
+          </figure>
+        </div>
+
+        <div class="dial-note">
+          <span>drag a needle to overrule the picture · double-click it to re-read</span>
+          <button type="button" id="forge-auto">auto</button>
+        </div>
+
+        <div class="leds" aria-hidden="true">
+          <span class="led led-green on" data-led="pwr"></span><small>PWR</small>
+          <span class="led led-amber" data-led="spec"></span><small>SPEC</small>
+          <span class="led led-pink" data-led="busy"></span><small>BUSY</small>
+          <span class="led led-blue" data-led="out"></span><small>OUT</small>
+        </div>
+
+        <div class="detail" role="group" aria-label="detail">
+          <span>DETAIL</span>
+          <button type="button" data-detail="16" aria-pressed="false">LO</button>
+          <button type="button" data-detail="24" aria-pressed="true">MID</button>
+          <button type="button" data-detail="32" aria-pressed="false">HI</button>
+          <button type="button" data-detail="48" aria-pressed="false" title="highest resolution the machine will do">EX</button>
+        </div>
+
+        <div class="forge-well">
+          <button type="button" class="forge-btn" id="forge-go" disabled>
+            <span>FORGE</span>
+          </button>
+          <div class="forge-sub">press again to re-roll the face &amp; limbs</div>
+        </div>
+
+        <div class="odometer" aria-label="batch counter">
+          <span>BATCH</span><b id="forge-count">0000</b>
+        </div>
+      </div>
+
+      <!-- 03 · OUTPUT -->
+      <div class="gz-col gz-output">
+        <div class="gz-label"><i>03</i> OUTPUT</div>
+        <div class="screen" id="screen">
+          <canvas id="forge-canvas" width="170" height="220" aria-label="forged character"></canvas>
+          <div class="screen-idle" id="screen-idle">INSERT<br>SPECIMEN<span class="cursor">▮</span></div>
+          <div class="screen-glass" aria-hidden="true"></div>
+        </div>
+        <label class="size-set" id="size-set" title="how big it walks the bench — half to double. double-click to reset.">
+          <span>SIZE</span>
+          <input type="range" id="forge-size" min="50" max="200" step="5" value="100">
+          <b id="forge-size-v">×1</b>
+        </label>
+        <div class="nameplate" id="nameplate" hidden>
+          <h3 class="name-row">
+            <input id="char-name" class="name-in" maxlength="42" spellcheck="false" autocomplete="off" aria-label="creature name" placeholder="unnamed">
+            <button type="button" id="name-roll" title="roll another name" aria-label="roll another name">⟳</button>
+          </h3>
+          <p id="char-traits">—</p>
+          <ul class="stats" id="char-stats">
+            <li><span>VIBE</span><i><b data-stat="vibe"></b></i><em></em></li>
+            <li><span>CHAOS</span><i><b data-stat="chaos"></b></i><em></em></li>
+            <li><span>GLOW</span><i><b data-stat="glow"></b></i><em></em></li>
+            <li><span>HEFT</span><i><b data-stat="heft"></b></i><em></em></li>
+          </ul>
+          <div class="out-row">
+            <button type="button" class="gz-btn gz-btn-sm" id="forge-save">save png</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 04 · WARP -->
+      <div class="gz-warp">
+        <div class="gz-label"><i>04</i> WARP BENCH</div>
+        <div class="warp-grid">
+          <label class="warp-set"><span>STRETCH</span><input type="range" data-warp="stretch" min="-100" max="100" step="1" value="0" title="squat and wide ↔ tall and thin"><b>·</b></label>
+          <label class="warp-set"><span>LEAN</span><input type="range" data-warp="lean" min="-100" max="100" step="1" value="0" title="shear it over to one side"><b>·</b></label>
+          <label class="warp-set"><span>WAVE</span><input type="range" data-warp="wave" min="0" max="100" step="1" value="0" title="ripple the rows sideways"><b>·</b></label>
+          <label class="warp-set"><span>MELT</span><input type="range" data-warp="melt" min="0" max="100" step="1" value="0" title="let the bottom drip"><b>·</b></label>
+          <label class="warp-set"><span>TWIST</span><input type="range" data-warp="twist" min="-100" max="100" step="1" value="0" title="swirl around the middle"><b>·</b></label>
+          <label class="warp-set"><span>BULGE</span><input type="range" data-warp="bulge" min="-100" max="100" step="1" value="0" title="pinch ↔ fisheye"><b>·</b></label>
+          <label class="warp-set"><span>GLITCH</span><input type="range" data-warp="glitch" min="0" max="100" step="1" value="0" title="tear it into slipped bands"><b>·</b></label>
+          <label class="warp-set"><span>BLUR</span><input type="range" data-warp="blur" min="0" max="100" step="1" value="0" title="throw it out of focus"><b>·</b></label>
+        </div>
+        <div class="warp-row">
+          <p class="gz-fine">bends the finished creature — on the screen and on the bench. double-click a slider to flatten it.</p>
+          <button type="button" id="warp-shake">shake</button>
+          <button type="button" id="warp-reset">flat</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="gz-feet" aria-hidden="true"><span></span><span></span></div>
+  </section>
+
+  <!-- ───────────────────────── GIZMO 02 · THE PETITION BOARD ───────────────────────── -->
+  <section class="gz gz-petition" id="gz-petition" data-gizmo="petition" aria-label="The petition board">
+    <div class="gz-handle" data-handle>
+      <span class="gz-grip" aria-hidden="true"></span>
+      <span class="gz-plate">THE PETITION BOARD</span>
+      <span class="gz-serial">№ KN-0002</span>
+      <span class="gz-grip" aria-hidden="true"></span>
+    </div>
+    <div class="gz-body pb-body">
+      <div class="gz-col pb-board">
+        <div class="gz-label"><i>01</i> THE BOARD</div>
+        <div class="pb-loop" id="pb-loop" aria-label="the loop">
+          <span data-phase="ask">ask</span><i>→</i><span data-phase="vote">vote</span><i>→</i><span data-phase="pass">pass</span><i>→</i><span data-phase="dig">dig</span><i>↺</i>
+        </div>
+        <form class="pb-ask" id="pb-ask" autocomplete="off">
+          <input id="pb-q" maxlength="90" placeholder="put a daft question to the hill…">
+          <button class="gz-btn gz-btn-sm" type="submit">pin it</button>
+        </form>
+        <div class="pb-review" id="pb-review"></div>
+        <ul class="pb-list" id="pb-list"></ul>
+        <p class="gz-fine" data-roles="user">one vote per question. tap your vote again to take it back.</p>
+        <p class="gz-fine" data-roles="moderator">you read new questions first, can close a vote early, and can take a question down.</p>
+        <p class="gz-fine" data-roles="owner">you can do everything a moderator can, plus dig, drain, move the line and stir the hill.</p>
+      </div>
+      <div class="gz-col pb-side">
+        <div class="gz-label"><i>02</i> THE HILL</div>
+        <div class="hill"><canvas id="pb-hill" width="300" height="150"></canvas></div>
+        <p class="hill-cap" id="pb-hill-cap"></p>
+        <div class="gz-label"><i>03</i> THE LAW BOOK</div>
+        <ol class="lawbook" id="pb-law"></ol>
+        <div class="pb-desk" data-roles="owner">
+          <div class="gz-label"><i>04</i> OWNER&#39;S DESK</div>
+          <label class="pb-range">the line <input type="range" id="pb-quorum" min="2" max="12"><b id="pb-quorum-v"></b></label>
+          <label class="pb-check"><input type="checkbox" id="pb-review-toggle"> a moderator reads new questions first</label>
+          <div class="intake-row">
+            <button type="button" class="gz-btn gz-btn-sm" id="pb-stir">stir the hill</button>
+            <button type="button" class="gz-btn gz-btn-sm" id="pb-wipe">wipe the board</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="gz-feet" aria-hidden="true"><span></span><span></span></div>
+  </section>
+
+  <!-- ───────────────────────── GIZMO 03 · THE WORKSHOP SHED ───────────────────────── -->
+  <section class="gz gz-shed" id="gz-shed" data-gizmo="shed" aria-label="The workshop shed">
+    <div class="gz-handle" data-handle>
+      <span class="gz-grip" aria-hidden="true"></span>
+      <span class="gz-plate">THE WORKSHOP SHED</span>
+      <span class="gz-serial">№ KN-0003</span>
+      <span class="gz-grip" aria-hidden="true"></span>
+    </div>
+    <div class="gz-body sh-body">
+      <div class="gz-col sh-view">
+        <div class="gz-label"><i>01</i> THE SHED</div>
+        <div class="shed"><canvas id="sh-canvas" width="380" height="230"></canvas></div>
+        <p class="hill-cap" id="sh-cap"></p>
+        <div class="gz-label"><i>02</i> SCREWED TO THE HILL</div>
+        <div class="hill"><canvas id="sh-hill" width="300" height="120"></canvas></div>
+        <p class="hill-cap" id="sh-hill-cap"></p>
+      </div>
+      <div class="gz-col sh-side">
+        <div class="gz-label"><i>03</i> THE ROADMAP</div>
+        <ul class="sh-list" id="sh-list"></ul>
+        <form class="pb-ask" id="sh-add" data-roles="owner" autocomplete="off">
+          <input id="sh-title" maxlength="60" placeholder="a new contraption…">
+          <button class="gz-btn gz-btn-sm" type="submit">under a tarp</button>
+        </form>
+        <p class="gz-fine" data-roles="user">tarps stay tarps until something is on the bench. gnome&#39;s orders.</p>
+        <p class="gz-fine" data-roles="moderator">you can peek under tarps and leave notes; only the owner moves things.</p>
+        <p class="gz-fine" data-roles="owner">slide progress, move things bench ⇄ tarp, and ship. the gnome does the rest.</p>
+      </div>
+    </div>
+    <div class="gz-feet" aria-hidden="true"><span></span><span></span></div>
+  </section>
+
+  <!-- ───────────────────────── GIZMO 04 · THE MUSEUM ───────────────────────── -->
+  <section class="gz gz-museum" id="gz-museum" data-gizmo="museum" aria-label="The museum">
+    <div class="gz-handle" data-handle>
+      <span class="gz-grip" aria-hidden="true"></span>
+      <span class="gz-plate">THE MUSEUM</span>
+      <span class="gz-serial">№ KN-0004</span>
+      <span class="gz-grip" aria-hidden="true"></span>
+    </div>
+    <div class="gz-body mu-body">
+      <div class="gz-col mu-floor">
+        <div class="gz-label"><i>01</i> THE EASELS · <b class="mu-cycle-n" id="mu-cycle">CYCLE —</b></div>
+        <ul class="mu-easels" id="mu-easels"></ul>
+        <div class="gz-label"><i>02</i> SUBMIT</div>
+        <form class="mu-submit" id="mu-form" autocomplete="off">
+          <div class="mu-pad-host" id="mu-pad-host"></div>
+          <div class="mu-fields">
+            <input id="mu-title" maxlength="40" placeholder="what is it called…" aria-label="title">
+            <input id="mu-sign" maxlength="24" placeholder="signed…" aria-label="signature">
+            <button class="gz-btn gz-btn-sm" type="submit">onto an easel</button>
+            <p class="gz-fine">unsigned work goes down as anonymous, like most of the good stuff.</p>
+          </div>
+        </form>
+        <p class="mu-status" id="mu-status" aria-live="polite">the museum is open. admission is free.</p>
+        <p class="gz-fine" data-roles="user">draw, sign, submit. one vote per drawing — tap the star again to take it back.</p>
+        <p class="gz-fine" data-roles="moderator">you can take a drawing down off its easel. the wall itself is beyond you.</p>
+        <p class="gz-fine" data-roles="owner">you close the cycle: one drawing framed forever, the rest built over. no appeals.</p>
+      </div>
+      <div class="gz-col mu-side">
+        <div class="gz-label"><i>03</i> THE WALL</div>
+        <div class="mu-wall" id="mu-wall"></div>
+        <p class="mu-fallen" id="mu-fallen">built over: —</p>
+        <div class="mu-desk" data-roles="owner">
+          <div class="gz-label"><i>04</i> OWNER&#39;S DESK</div>
+          <div class="mu-desk-row">
+            <button type="button" class="gz-btn gz-btn-sm" id="mu-close">close the cycle</button>
+            <button type="button" class="gz-btn gz-btn-sm" id="mu-dust">dust the museum</button>
+          </div>
+          <p class="gz-fine">closing frames the top-voted drawing and builds over the rest. dusting forgets the lot.</p>
+        </div>
+      </div>
+    </div>
+    <div class="gz-feet" aria-hidden="true"><span></span><span></span></div>
+  </section>
+
+  <!-- ───────────────────────── GIZMO 05 · THE NAMING CEREMONY ───────────────────────── -->
+  <section class="gz gz-naming" id="gz-naming" data-gizmo="naming" aria-label="The naming ceremony">
+    <div class="gz-handle" data-handle>
+      <span class="gz-grip" aria-hidden="true"></span>
+      <span class="gz-plate">THE NAMING CEREMONY</span>
+      <span class="gz-serial">№ KN-0005</span>
+      <span class="gz-grip" aria-hidden="true"></span>
+    </div>
+    <div class="gz-body nm-body">
+      <div class="gz-col nm-main">
+        <div class="gz-label"><i>01</i> AWAITING NAMES</div>
+        <div class="nm-banner" id="nm-banner" hidden><b>BY ORDER OF THE HILL</b><span id="nm-banner-text"></span></div>
+        <ul class="nm-list" id="nm-list"></ul>
+        <div class="gz-label"><i>02</i> THE HILL</div>
+        <div class="hill"><canvas id="nm-hill" width="300" height="140"></canvas></div>
+        <p class="hill-cap" id="nm-hill-cap"></p>
+        <p class="gz-fine" data-roles="user">one vote per landmark. putting a name forward takes your vote with it; tap another name and the vote walks over.</p>
+        <p class="gz-fine" data-roles="moderator">you can strike a name off a ballot. it stays up, crossed out, so everyone can see what was nearly allowed.</p>
+        <p class="gz-fine" data-roles="owner">you set the line, can christen a name straight through, and can make the hill mutter.</p>
+      </div>
+      <div class="gz-col nm-side">
+        <div class="gz-label"><i>03</i> THE REGISTER</div>
+        <ul class="nm-register" id="nm-register"></ul>
+        <p class="gz-fine">names stick forever. nothing here un-names.</p>
+        <div class="nm-desk" data-roles="owner">
+          <div class="gz-label"><i>04</i> OWNER&#39;S DESK</div>
+          <label class="pb-range">the line <input type="range" id="nm-line" min="2" max="8"><b id="nm-line-v"></b></label>
+          <div class="nm-desk-row">
+            <button type="button" class="gz-btn gz-btn-sm" id="nm-stir">the hill mutters</button>
+          </div>
+          <p class="gz-fine">muttering is one to three stray votes. the hill has opinions.</p>
+        </div>
+      </div>
+    </div>
+    <div class="gz-feet" aria-hidden="true"><span></span><span></span></div>
+  </section>
+
+  <!-- ───────────────────────── GIZMO 06 · THE ELECTIONS ───────────────────────── -->
+  <section class="gz gz-elections" id="gz-elections" data-gizmo="elections" aria-label="The elections">
+    <div class="gz-handle" data-handle>
+      <span class="gz-grip" aria-hidden="true"></span>
+      <span class="gz-plate">THE ELECTIONS</span>
+      <span class="gz-serial">№ KN-0006</span>
+      <span class="gz-grip" aria-hidden="true"></span>
+    </div>
+    <div class="gz-body el-body">
+      <div class="gz-col el-office">
+        <div class="gz-label"><i>01</i> THE OFFICE</div>
+        <div class="el-portrait" id="el-portrait"></div>
+        <div class="el-plaque" id="el-plaque"></div>
+        <div class="el-term" id="el-term" hidden>
+          <div class="el-term-top"><span>TERM</span><b id="el-term-txt">day — of —</b></div>
+          <div class="el-term-bar"><i id="el-term-fill"></i></div>
+        </div>
+        <p class="gz-fine">powers: none. duties: wandering. the sash is dry-clean only.</p>
+      </div>
+      <div class="gz-col el-race">
+        <div class="gz-label"><i>02</i> THE RACE</div>
+        <ul class="el-list" id="el-list"></ul>
+        <p class="hill-cap" id="el-when"></p>
+        <div class="gz-label"><i>03</i> STAND</div>
+        <form class="el-stand" id="el-stand" autocomplete="off">
+          <input id="el-name" maxlength="24" placeholder="your name…" aria-label="candidate name">
+          <input id="el-slogan" maxlength="48" placeholder="a modest promise…" aria-label="campaign slogan">
+          <button class="gz-btn gz-btn-sm" type="submit">stand for mayor</button>
+        </form>
+        <p class="el-standing" id="el-standing" hidden>you&#39;re on the ballot. straighten your hat.</p>
+        <p class="gz-fine" data-roles="user">one vote, and it moves with you. one candidacy per device. the mayor cannot help you.</p>
+        <p class="gz-fine" data-roles="moderator">you can strike a candidate off the ballot, or pardon them back on. strike sparingly — gnomes remember.</p>
+        <p class="gz-fine" data-roles="owner">you can count the ballots early, dissolve the office, and make the hill turn out.</p>
+        <div class="el-desk" data-roles="owner">
+          <div class="gz-label"><i>04</i> RETURNING OFFICER</div>
+          <div class="el-desk-row">
+            <button type="button" class="gz-btn gz-btn-sm" id="el-count">count the ballots</button>
+            <button type="button" class="gz-btn gz-btn-sm" id="el-stir">the hill turns out</button>
+            <button type="button" class="gz-btn gz-btn-sm" id="el-dissolve">dissolve the office</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="gz-feet" aria-hidden="true"><span></span><span></span></div>
+  </section>
+
+  <!-- ───────────────────────── GIZMO 07 · THE LAW BOOK ───────────────────────── -->
+  <section class="gz gz-lawbook" id="gz-lawbook" data-gizmo="lawbook" aria-label="The law book">
+    <div class="gz-handle" data-handle>
+      <span class="gz-grip" aria-hidden="true"></span>
+      <span class="gz-plate">THE LAW BOOK</span>
+      <span class="gz-serial">№ KN-0007</span>
+      <span class="gz-grip" aria-hidden="true"></span>
+    </div>
+    <div class="gz-body lb-body">
+      <div class="gz-col lb-col">
+        <div class="gz-label"><i>01</i> THE SPREAD</div>
+        <div class="lb-book">
+          <div class="lb-page lb-page-left">
+            <h4 class="lb-ph">The Law of the Hill</h4>
+            <div class="lb-scroll" aria-label="the articles">
+              <p class="lb-preamble">We, the assembled of the hill, being of sound-ish mind and one shared lawn, set down what has carried.</p>
+              <div id="lb-articles"></div>
+            </div>
+            <div class="lb-sealfoot" id="lb-sealed"></div>
+          </div>
+          <div class="lb-spine" aria-hidden="true"></div>
+          <div class="lb-page lb-page-right">
+            <h4 class="lb-ph">The Changelog</h4>
+            <ol class="lb-scroll lb-log-list" id="lb-log" aria-label="the changelog"></ol>
+          </div>
+        </div>
+        <div class="lb-desk" data-roles="owner">
+          <div class="gz-label"><i>02</i> THE WAX SEAL</div>
+          <div class="lb-seal-row">
+            <button type="button" class="lb-seal" id="lb-seal" aria-label="stamp the book"><span>SEAL</span></button>
+            <p class="gz-fine">press to stamp what has carried. press again whenever history moves — the wax doesn&#39;t mind.</p>
+          </div>
+        </div>
+        <p class="gz-fine" data-roles="user">you read. that is the whole role, and honestly the best one.</p>
+        <p class="gz-fine" data-roles="moderator">you keep the margins tidy. there is no button for this — it is more of a calling.</p>
+        <p class="gz-fine" data-roles="owner">you apply the seal. the law is exactly as binding either way.</p>
+      </div>
+    </div>
+    <div class="gz-feet" aria-hidden="true"><span></span><span></span></div>
+  </section>
+
+  <!-- ───────────────────────── GIZMO 08 · THE MONUMENT ───────────────────────── -->
+  <section class="gz gz-monument" id="gz-monument" data-gizmo="monument" aria-label="The monument">
+    <div class="gz-handle" data-handle>
+      <span class="gz-grip" aria-hidden="true"></span>
+      <span class="gz-plate">THE MONUMENT</span>
+      <span class="gz-serial">№ KN-0008</span>
+      <span class="gz-grip" aria-hidden="true"></span>
+    </div>
+    <div class="gz-body mo-body">
+      <div class="gz-col mo-site">
+        <div class="gz-label"><i>01</i> THE SITE</div>
+        <div class="mo-yard"><canvas id="mo-canvas" width="300" height="340" aria-label="the monument, mid-build"></canvas></div>
+        <p class="hill-cap" id="mo-cap"></p>
+        <div class="mo-plaque" id="mo-plaque" hidden>
+          <b class="mo-plaque-top">RAISED BY THE HILL</b>
+          <div class="mo-plaque-names" id="mo-plaque-names"></div>
+          <span class="mo-plaque-date" id="mo-plaque-date"></span>
+        </div>
+      </div>
+      <div class="gz-col mo-side">
+        <div class="gz-label"><i>02</i> THE SCAFFOLDING</div>
+        <div class="mo-bar"><i id="mo-bar-fill"></i></div>
+        <p class="mo-count" id="mo-count">— of — blocks</p>
+        <div class="gz-label"><i>03</i> YOUR BLOCK</div>
+        <div class="mo-crew">
+          <input id="mo-name" maxlength="18" placeholder="your mark…" autocomplete="off" aria-label="your mark on the block">
+          <button type="button" class="mo-btn" id="mo-place">place your block</button>
+          <p class="mo-shift" id="mo-shift"></p>
+        </div>
+        <div class="mo-safety" data-roles="moderator owner">
+          <div class="gz-label"><i>04</i> SITE SAFETY</div>
+          <button type="button" class="pb-act" id="mo-prise">prise out a wonky block</button>
+        </div>
+        <div class="mo-desk" data-roles="owner">
+          <div class="gz-label"><i>05</i> OWNER&#39;S DESK</div>
+          <div class="intake-row">
+            <button type="button" class="gz-btn gz-btn-sm" id="mo-lend">the hill lends a hand</button>
+          </div>
+          <div class="intake-row">
+            <button type="button" class="gz-btn gz-btn-sm" id="mo-next">call the next shift</button>
+            <button type="button" class="gz-btn gz-btn-sm" id="mo-raze">tear it down</button>
+          </div>
+        </div>
+        <p class="gz-fine" data-roles="user">one block per shift, signed or not. the ledger remembers either way.</p>
+        <p class="gz-fine" data-roles="moderator">you can prise out a wonky block — the last one laid. the hill pretends not to notice.</p>
+        <p class="gz-fine" data-roles="owner">you call the shifts, borrow the hill&#39;s hands, and — if it must be said — tear the whole thing down.</p>
+      </div>
+    </div>
+    <div class="gz-feet" aria-hidden="true"><span></span><span></span></div>
+  </section>
+
+  <!-- ───────────────────────── GIZMO 09 · THE TIME CAPSULE ───────────────────────── -->
+  <section class="gz gz-capsule" id="gz-capsule" data-gizmo="capsule" aria-label="The time capsule">
+    <div class="gz-handle" data-handle>
+      <span class="gz-grip" aria-hidden="true"></span>
+      <span class="gz-plate">THE TIME CAPSULE</span>
+      <span class="gz-serial">№ KN-0009</span>
+      <span class="gz-grip" aria-hidden="true"></span>
+    </div>
+    <div class="gz-body tc-body">
+      <div class="gz-col tc-site">
+        <div class="gz-label"><i>01</i> THE DIG SITE</div>
+        <div class="tc-dig" id="tc-dig"><canvas id="tc-canvas" width="340" height="230" aria-label="a cross-section of the hill, chest included"></canvas></div>
+        <p class="hill-cap" id="tc-cap"></p>
+        <div class="tc-listen" data-roles="moderator owner">
+          <button type="button" class="pb-act" id="tc-shake">give it a shake</button>
+          <span class="tc-rattle" id="tc-rattle"></span>
+        </div>
+      </div>
+      <div class="gz-col tc-post">
+        <div class="gz-label"><i>02</i> THE DEPOSIT</div>
+        <form class="tc-form" id="tc-form" autocomplete="off">
+          <div class="tc-tabs" role="group" aria-label="what goes in">
+            <button type="button" class="tc-tab" id="tc-tab-note" aria-pressed="true">a note</button>
+            <button type="button" class="tc-tab" id="tc-tab-draw" aria-pressed="false">a drawing</button>
+          </div>
+          <div class="tc-well">
+            <textarea class="tc-note" id="tc-note" maxlength="140" rows="3" placeholder="to whoever digs this up…"></textarea>
+            <div id="tc-pad" hidden></div>
+            <label class="tc-signrow"><span>SIGNED</span><input id="tc-sign" maxlength="24" placeholder="anonymous"></label>
+            <div class="tc-lower"><button type="submit" class="gz-btn gz-btn-sm" id="tc-lower-btn">lower it in</button></div>
+          </div>
+        </form>
+        <p class="tc-shut" id="tc-shut" hidden></p>
+        <p class="tc-count" id="tc-count"></p>
+        <div class="tc-desk" data-roles="owner">
+          <div class="gz-label"><i>04</i> OWNER&#39;S DESK</div>
+          <label class="tc-date"><span>the day</span><input type="date" id="tc-date"></label>
+          <div class="tc-deskrow">
+            <button type="button" class="gz-btn gz-btn-sm" id="tc-seal">seal it now</button>
+            <button type="button" class="gz-btn gz-btn-sm" id="tc-crack">crack it open early</button>
+          </div>
+          <div class="tc-deskrow"><button type="button" class="gz-btn gz-btn-sm" id="tc-fresh" hidden>bury a fresh one</button></div>
+        </div>
+        <p class="gz-fine" data-roles="user">one keepsake per device — a note or a drawing, not both. no take-backs; that is what buried means.</p>
+        <p class="gz-fine" data-roles="moderator">you can give the chest a shake and hear roughly how full it is. roughly.</p>
+        <p class="gz-fine" data-roles="owner">you set the day, seal the lid, crack it early — and after the spill, bury a fresh one.</p>
+      </div>
+      <div class="tc-spill" id="tc-spill" hidden>
+        <div class="gz-label"><i>03</i> THE SPILL</div>
+        <p class="hill-cap" id="tc-spill-cap"></p>
+        <div class="tc-spill-grid" id="tc-spill-grid"></div>
+      </div>
+    </div>
+    <div class="gz-feet" aria-hidden="true"><span></span><span></span></div>
+  </section>
+
+
+  <!-- ───────────────────────── GIZMO 10 · THE BUG FARM ───────────────────────── -->
+  <section class="gz gz-bugfarm" id="gz-bugfarm" data-gizmo="bugfarm" aria-label="The bug farm">
+    <div class="gz-handle" data-handle>
+      <span class="gz-grip" aria-hidden="true"></span>
+      <span class="gz-plate">THE BUG FARM</span>
+      <span class="gz-serial">№ KN-0010</span>
+      <span class="gz-grip" aria-hidden="true"></span>
+    </div>
+    <div class="gz-body bf-body">
+
+      <div class="gz-col bf-col-tank">
+        <div class="gz-label"><i>01</i> THE VIVARIUM</div>
+        <div class="bf-tank" id="bf-tank">
+          <canvas id="bf-canvas" width="360" height="240" aria-label="a glass tank with every reported bug in it, each one the size of how many people have hit it"></canvas>
+        </div>
+        <p class="hill-cap" id="bf-cap"></p>
+        <p class="bf-count" id="bf-count"></p>
+        <div class="pb-mod bf-jar" data-roles="owner">
+          <button type="button" class="pb-act" id="bf-shake">shake the jar</button>
+          <button type="button" class="pb-act" id="bf-empty">empty the tank</button>
+        </div>
+      </div>
+
+      <div class="gz-col bf-col-list">
+        <div class="gz-label"><i>02</i> THE LEDGER</div>
+        <ul class="bf-list" id="bf-list"></ul>
+      </div>
+
+      <div class="gz-col bf-col-report">
+        <div class="gz-label bf-board-head"><i>03</i> SEEN SOMETHING?</div>
+        <form class="bf-form" id="bf-form" autocomplete="off">
+          <textarea id="bf-what" maxlength="90" rows="2" placeholder="what went wrong? one line."></textarea>
+          <label class="bf-row"><span>WHERE</span><select id="bf-where"></select></label>
+          <label class="bf-row"><span>WHO</span><input id="bf-who" maxlength="20" placeholder="anonymous"></label>
+          <button type="submit" class="gz-btn gz-btn-sm" id="bf-let">let it loose</button>
+        </form>
+        <p class="bf-status" id="bf-status"></p>
+        <div class="gz-label bf-swat-head"><i>04</i> THE SWATTED</div>
+        <ul class="bf-swatted" id="bf-swatted"></ul>
+        <p class="gz-fine" data-roles="user">one me-too per bug — tap the bug in the tank, or the button in the ledger. every one it gets, it grows.</p>
+        <p class="gz-fine" data-roles="moderator">you can mark one <b>can’t reproduce</b>. it rolls over, stops growing, and waits to be believed.</p>
+        <p class="gz-fine" data-roles="owner">you swat them, and a swatted bug is a fixed bug — it goes up on the board with the date on it.</p>
+      </div>
+
+    </div>
+    <div class="gz-feet" aria-hidden="true"><span></span><span></span></div>
+  </section>
+
+
+  <!-- ───────────────────────── GIZMO 11 · THE DISPENSARY ───────────────────────── -->
+  <section class="gz gz-vending" id="gz-vending" data-gizmo="vending" aria-label="The dispensary">
+    <div class="gz-handle" data-handle>
+      <span class="gz-grip" aria-hidden="true"></span>
+      <span class="gz-plate">THE DISPENSARY <b>MK.I</b></span>
+      <span class="gz-serial">№ KN-0011</span>
+      <span class="gz-grip" aria-hidden="true"></span>
+    </div>
+    <div class="gz-body vm-body">
+
+      <div class="gz-col vm-col-machine">
+        <div class="gz-label"><i>01</i> THE MACHINE</div>
+        <div class="vm-machine">
+          <canvas id="vm-canvas" width="300" height="250" aria-label="a vending machine full of capsules, with a countdown to the next free one"></canvas>
+        </div>
+        <p class="vm-led" id="vm-led"></p>
+        <button type="button" class="gz-btn vm-pull" id="vm-pull">turn the knob</button>
+        <p class="bf-status" id="vm-status"></p>
+      </div>
+
+      <div class="gz-col vm-col-prize">
+        <div class="gz-label"><i>02</i> WHAT CAME OUT</div>
+        <div class="vm-prize empty" id="vm-prize"></div>
+        <p class="vm-peek" id="vm-peek" data-roles="moderator owner"></p>
+      </div>
+
+      <div class="gz-col vm-col-cabinet">
+        <div class="gz-label"><i>04</i> THE CABINET</div>
+        <ul class="vm-cabinet" id="vm-cabinet"></ul>
+        <p class="vm-have" id="vm-have"></p>
+        <div class="vm-sticker">
+          <b class="vm-odds-head">THE ODDS</b>
+          <ul class="vm-odds" id="vm-odds"></ul>
+          <p class="vm-pity" id="vm-pity"></p>
+          <p class="vm-printed">printed on the side, because we are not monsters.</p>
+        </div>
+        <div class="vm-desk" data-roles="owner">
+          <div class="gz-label"><i>05</i> THE ROUND</div>
+          <label class="bf-row"><span>EVERY</span>
+            <select id="vm-every">
+              <option value="30000">30 seconds</option>
+              <option value="90000">90 seconds</option>
+              <option value="600000">10 minutes</option>
+              <option value="3600000">an hour</option>
+              <option value="21600000">six hours</option>
+              <option value="86400000">a day</option>
+            </select></label>
+          <label class="bf-row"><span>BANKS</span>
+            <select id="vm-cap">
+              <option value="1">1 capsule</option>
+              <option value="2">2 capsules</option>
+              <option value="3">3 capsules</option>
+              <option value="5">5 capsules</option>
+            </select></label>
+          <label class="bf-row"><span>RIG</span>
+            <select id="vm-rig">
+              <option value="">the printed odds</option>
+              <option value="common">common</option>
+              <option value="uncommon">uncommon</option>
+              <option value="rare">rare</option>
+              <option value="oneoff">one of a kind</option>
+            </select></label>
+          <div class="pb-mod">
+            <button type="button" class="pb-act" id="vm-restock">restock now</button>
+            <button type="button" class="pb-act" id="vm-empty">empty their pockets</button>
+          </div>
+        </div>
+        <div class="pb-mod vm-modrow" data-roles="moderator owner">
+          <button type="button" class="pb-act" id="vm-broken">hang the out-of-order sign</button>
+        </div>
+        <p class="gz-fine" data-roles="user">it takes time, not money. one capsule every so often, a few bank up, and it keeps counting while you are away.</p>
+        <p class="gz-fine" data-roles="moderator">you can see what is loaded next, and hang the sign if it is being got at.</p>
+        <p class="gz-fine" data-roles="owner">you set the round, rig the next one, and can empty a cabinet. all three are a choice.</p>
+      </div>
+
+    </div>
+    <div class="gz-feet" aria-hidden="true"><span></span><span></span></div>
+  </section>
+
+
+  <!-- ───────────────────────── GIZMO 12 · THE SOUND DESK ───────────────────────── -->
+  <!-- staff only: a visitor gets the speaker in the zoom dock and nothing else -->
+  <section class="gz gz-sound" id="gz-sound" data-gizmo="sound" aria-label="The sound desk" data-roles="moderator owner">
+    <div class="gz-handle" data-handle>
+      <span class="gz-grip" aria-hidden="true"></span>
+      <span class="gz-plate">THE SOUND DESK <b>MK.I</b></span>
+      <span class="gz-serial">№ KN-0012</span>
+      <span class="gz-grip" aria-hidden="true"></span>
+    </div>
+    <div class="gz-body sd-body">
+
+      <div class="gz-col sd-col-deck">
+        <div class="gz-label"><i>01</i> THE DESK</div>
+        <div class="sd-deck">
+          <div class="sd-top">
+            <div class="sd-screen">
+              <b class="sd-now" id="sd-now">—</b>
+              <i class="sd-by" id="sd-by">—</i>
+              <div class="sd-prog"><span id="sd-bar"></span></div>
+              <span class="sd-time" id="sd-time">0:00 / 0:00</span>
+            </div>
+            <canvas class="sd-vu" id="sd-vu" width="104" height="58" aria-label="the level, on a needle"></canvas>
+          </div>
+          <div class="sd-knobs" id="sd-knobs"></div>
+          <div class="sd-flips" id="sd-flips"></div>
+          <div class="sd-transport">
+            <button type="button" class="sd-tp" id="sd-prev" aria-label="the one before">⏮</button>
+            <button type="button" class="sd-tp sd-tp-big" id="sd-play" aria-label="play">▶</button>
+            <button type="button" class="sd-tp" id="sd-next" aria-label="the next one">⏭</button>
+          </div>
+        </div>
+        <p class="bf-status" id="sd-status">nothing is playing. press the big one.</p>
+        <p class="gz-fine">every note is made up on the spot — there is not an audio file anywhere in this project. drag a knob, double-click it to put it back.</p>
+      </div>
+
+      <div class="gz-col sd-col-list">
+        <div class="gz-label"><i>02</i> THE PLAYLIST</div>
+        <ul class="pl-list" id="sd-list"></ul>
+        <p class="gz-fine">the same six the coming-soon page pretends to play. these ones are real, in the sense that anything generated is real.</p>
+      </div>
+
+    </div>
+    <div class="gz-feet" aria-hidden="true"><span></span><span></span></div>
+  </section>
+
+
+  </div><!-- /bench-world -->
+
+</main>
+
+<!-- the shelf: every gizmo, benched or put away. lab.js fills the list. -->
+<nav class="shelf" id="shelf" aria-label="the shelf">
+  <div class="shelf-top">
+    <b>THE SHELF</b>
+    <button type="button" id="shelf-fold" aria-label="fold the shelf away">‹</button>
+  </div>
+  <ul class="shelf-list" id="shelf-list"></ul>
+  <p class="shelf-fine">press a gizmo's – to put it back here.</p>
+</nav>
+<button type="button" class="shelf-tab" id="shelf-tab" hidden aria-label="open the shelf">SHELF</button>
+
+<!-- zoom dock -->
+<div class="zoom-dock" id="zoom-dock" aria-label="zoom">
+  <button type="button" id="zoom-fit" title="fit everything on screen (shift 1)" aria-label="fit everything on screen">⤢</button>
+  <span class="dock-rule" aria-hidden="true"></span>
+  <button type="button" id="zoom-out" title="zoom out (−)">−</button>
+  <button type="button" id="zoom-val" title="back to 100% (shift 0)">100%</button>
+  <button type="button" id="zoom-in" title="zoom in (+)">+</button>
+  <span class="dock-rule" aria-hidden="true"></span>
+  <button type="button" id="vol-btn" class="vol-btn" aria-label="the sound">
+    <svg viewBox="0 0 18 18" width="15" height="15" aria-hidden="true">
+      <path class="vol-cone" d="M3 7h3l4-3.4v10.8L6 11H3z"/>
+      <path class="vol-wave vol-w1" d="M12 6.6a3.4 3.4 0 0 1 0 4.8"/>
+      <path class="vol-wave vol-w2" d="M14.1 4.4a6.4 6.4 0 0 1 0 9.2"/>
+      <path class="vol-cross" d="M12.2 6.6l4.4 4.8M16.6 6.6l-4.4 4.8"/>
+    </svg>
+  </button>
+  <input type="range" id="vol-slider" class="vol-slider" min="0" max="100" value="70" aria-label="how loud">
+  <span class="dock-rule" aria-hidden="true"></span>
+  <button type="button" id="zoom-keys" title="how to move about" aria-label="how to move about" aria-expanded="false">?</button>
+</div>
+
+<!-- how to move about -->
+<div class="keymap" id="keymap" hidden>
+  <b>MOVING ABOUT</b>
+  <dl>
+    <dt><kbd>wheel drag</kbd></dt><dd>hold the scroll wheel down and drag — pans from anywhere</dd>
+    <dt><kbd>space</kbd><kbd>drag</kbd></dt><dd>the hand: pans over anything</dd>
+    <dt><kbd>drag</kbd></dt><dd>bare paper pans; a gizmo's handle moves the gizmo</dd>
+    <dt><kbd>scroll</kbd></dt><dd>pan up and down — <kbd>shift</kbd> for sideways</dd>
+    <dt><kbd>ctrl</kbd><kbd>scroll</kbd></dt><dd>zoom about the pointer (pinch does too)</dd>
+  </dl>
+  <hr>
+  <dl>
+    <dt><kbd>+</kbd><kbd>−</kbd></dt><dd>zoom in and out</dd>
+    <dt><kbd>shift</kbd><kbd>0</kbd></dt><dd>back to 100%</dd>
+    <dt><kbd>shift</kbd><kbd>1</kbd></dt><dd>fit everything on screen</dd>
+    <dt><kbd>h</kbd><kbd>v</kbd></dt><dd>hand tool, then back to the pointer</dd>
+    <dt><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></dt><dd>view as user, moderator, owner</dd>
+  </dl>
+</div>
+
+<script src="lab.js"></script>
+<script src="guide.js"></script>
+<script src="hill.js"></script>
+<script src="pad.js"></script>
+<script src="note.js"></script>
+<script src="fx.js"></script>
+<script src="critters.js"></script>
+<script src="forge.js"></script>
+<script src="petition.js"></script>
+<script src="workshop.js"></script>
+<script src="museum.js"></script>
+<script src="naming.js"></script>
+<script src="elections.js"></script>
+<script src="lawbook.js"></script>
+<script src="monument.js"></script>
+<script src="capsule.js"></script>
+<script src="bugfarm.js"></script>
+<script src="vending.js"></script>
+<script src="sound.js"></script>
+</body>
+</html>

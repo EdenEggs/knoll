@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./prelude.js"></script>
+<script src="./support.js"></script>
+<!-- lab 2 shows this on its own paper — see features/bare.css -->
+<link rel="stylesheet" href="./bare.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<!-- lab 2 serves these faces itself — see SELF-HOSTED in index.html -->
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  /* THE BENCH'S THREE MARKS — see features/bare.css, NO SECOND SHEET. Every
+     line below is the machine as it was exported, verbatim; the bench adds
+     three attributes and changes no declaration: data-lab-nopaper on the
+     paper grain, data-lab-sheet on the full-viewport div the export wraps
+     the drawing in (the one carrying the export's own zoom), and
+     data-lab-nozoom on the zoom widget pinned to the corner. frames.js
+     steps through the first two as sheets and bare.css draws none of the
+     three; opened on its own, the file still zooms and shows its widget.
+     Written by perf/swap-machine.js. */
+  body { margin: 0; background: #f2e9cf; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+  @keyframes paceX { from { transform: translateX(-34px); } to { transform: translateX(34px); } }
+  @keyframes legWig { from { transform: rotate(-12deg); } to { transform: rotate(14deg); } }
+  @keyframes legWigR { from { transform: rotate(12deg); } to { transform: rotate(-14deg); } }
+  @keyframes wobbleEgg { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+  @keyframes popIn { 0% { transform: scale(0); } 70% { transform: scale(1.14); } 100% { transform: scale(1); } }
+  @keyframes swatDie { 0% { transform: rotate(0deg) translateY(0); opacity: 1; } 35% { transform: rotate(180deg) translateY(-26px); opacity: 1; } 100% { transform: rotate(180deg) translateY(28px); opacity: 0; } }
+  @keyframes waveSwayL { 0%, 100% { transform: rotate(-26deg); } 50% { transform: rotate(-50deg); } }
+  @keyframes waveSwayR { 0%, 100% { transform: rotate(26deg); } 50% { transform: rotate(50deg); } }
+  @keyframes puffA { 0% { transform: translate(-50%, 0) scale(0.45); opacity: 0; } 18% { opacity: 0.95; } 100% { transform: translate(-50%, -110px) scale(1.3); opacity: 0; } }
+</style>
+</helmet>
+<div data-screen-label="The Bug Farm" style="min-height: 100vh; min-width: 100%; box-sizing: border-box; background: #f2e9cf; position: relative">
+  <sc-if value="{{ zoomUI }}" hint-placeholder-val="{{ true }}">
+    <div data-lab-nozoom style="position: fixed; right: 18px; bottom: 18px; z-index: 60; display: flex; align-items: center; gap: 7px; background: #f4ecd5; border: 4px solid #17120b; border-radius: 8px 11px 7px 10px; box-shadow: 7px 8px 0 rgba(23,18,11,0.8); padding: 5px 9px; font-family: 'VT323', monospace">
+      <button sc-camel-on-click="{{ onZoomOut }}" title="zoom out" style="font-family: 'VT323', monospace; font-size: 22px; line-height: 1; color: #17120b; background: #ffd23f; border: 3px solid #17120b; border-radius: 6px 4px 7px 5px; padding: 0 9px; cursor: pointer" style-hover="background: #ffe27a">−</button>
+      <div style="font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 2px; color: #17120b; min-width: 62px; text-align: center">{{ zoomLabel }}</div>
+      <button sc-camel-on-click="{{ onZoomIn }}" title="zoom in" style="font-family: 'VT323', monospace; font-size: 22px; line-height: 1; color: #17120b; background: #ffd23f; border: 3px solid #17120b; border-radius: 4px 6px 5px 7px; padding: 0 9px; cursor: pointer" style-hover="background: #ffe27a">+</button>
+      <div sc-camel-on-click="{{ onZoomReset }}" title="back to 100%" style="font-family: 'VT323', monospace; font-size: 14px; letter-spacing: 2px; color: #17120b; opacity: 0.6; cursor: pointer; padding-left: 2px">RESET</div>
+    </div>
+  </sc-if>
+  <div data-lab-sheet style="min-height: 100vh; width: fit-content; min-width: 100%; box-sizing: border-box; background: #f2e9cf; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 40px; font-family: 'Kalam', cursive; position: relative; zoom: {{ zoomF }}">
+  <div data-lab-nopaper style="position: absolute; inset: 0; pointer-events: none; opacity: 0.06; background-image: url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22160%22%20height=%22160%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22/%3E%3C/filter%3E%3Crect%20width=%22160%22%20height=%22160%22%20filter=%22url(%23n)%22/%3E%3C/svg%3E')"></div>
+  <div style="position: relative; width: 1460px; height: 830px; z-index: 1">
+    <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 4; display: flex; flex-direction: column; align-items: center">
+      <div style="background: #f4ecd5; border: 5px solid #17120b; border-radius: 10px 14px 8px 12px; box-shadow: 10px 11px 0 rgba(23,18,11,0.8); padding: 4px 26px 6px; display: flex; align-items: baseline; gap: 16px; transform: rotate(-0.6deg)">
+        <div style="font-family: 'VT323', monospace; font-size: 42px; letter-spacing: 6px; color: #17120b">THE BUG FARM</div>
+        <div style="font-family: 'VT323', monospace; font-size: 20px; letter-spacing: 3px; color: #17120b; opacity: 0.55">№ KN-0010</div>
+      </div>
+    </div>
+    <div style="position: absolute; top: 46px; right: 10px; background: #ffd23f; border: 4px solid #17120b; border-radius: 4px 12px 6px 14px; box-shadow: 8px 9px 0 rgba(23,18,11,0.82); padding: 24px 16px 14px; width: 196px; transform: rotate(4deg); z-index: 4">
+      <div style="position: absolute; top: -13px; left: 50%; transform: translateX(-50%) rotate(-3deg); width: 84px; height: 24px; background: rgba(244,236,205,0.95); border: 3px solid #17120b; border-radius: 3px"></div>
+      <div style="font-weight: 700; font-size: 15px; line-height: 1.4; color: #17120b">1. spot a bug in the demo<br>2. pin a wanted poster<br>3. ME-TOO it — it grows and mutates<br><span style="font-weight: 400; font-size: 13px">fixed? swat it. it hangs in the barn.</span></div>
+    </div>
+    <div style="position: absolute; bottom: 540px; left: 0; right: 0; height: 84px; z-index: 0">
+      <sc-for list="{{ backPosts }}" as="p" hint-placeholder-count="12">
+        <div style="position: absolute; left: {{ p.left }}; bottom: 0; width: 18px; height: 84px; background: #c5bba9; border: 4px solid #17120b; border-radius: 7px 7px 2px 2px"></div>
+      </sc-for>
+      <div style="position: absolute; top: 16px; left: 0; right: 0; height: 13px; background: #b8ac97; border: 4px solid #17120b; border-radius: 7px"></div>
+      <div style="position: absolute; top: 48px; left: 0; right: 0; height: 13px; background: #b8ac97; border: 4px solid #17120b; border-radius: 7px"></div>
+    </div>
+    <div style="position: absolute; left: 250px; bottom: 250px; z-index: 2; display: flex; flex-direction: column; align-items: center">
+      <div style="width: 200px; height: 86px; background: #e8484a; border: 5px solid #17120b; border-radius: 100px 100px 10px 10px; position: relative; z-index: 1; background-image: repeating-linear-gradient(90deg, transparent 0px, transparent 32px, rgba(23,18,11,0.14) 32px, rgba(23,18,11,0.14) 37px)">
+        <div style="position: absolute; top: -16px; left: 50%; transform: translateX(-50%); width: 24px; height: 20px; background: #e8484a; border: 4px solid #17120b; border-radius: 50%"></div>
+      </div>
+      <div style="width: 172px; height: 306px; background: #b8ac97; border: 5px solid #17120b; border-top-width: 0; margin-top: -8px; box-shadow: 10px 12px 0 rgba(23,18,11,0.8); background-image: repeating-linear-gradient(180deg, transparent 0px, transparent 46px, rgba(23,18,11,0.16) 46px, rgba(23,18,11,0.16) 51px); display: flex; flex-direction: column; align-items: center; padding-top: 18px; gap: 10px; box-sizing: border-box">
+        <div style="font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 2px; color: #17120b; background: #f4ecd5; border: 3px solid #17120b; border-radius: 6px 4px 7px 5px; padding: 0 9px; white-space: nowrap">04 BACKLOG</div>
+        <div style="display: flex; flex-direction: column; align-items: center; background: #17120b; border-radius: 6px; padding: 2px 14px 4px">
+          <div style="font-family: 'VT323', monospace; font-size: 32px; letter-spacing: 4px; color: #7ce38b; line-height: 1">{{ openCountPad }}</div>
+          <div style="font-family: 'VT323', monospace; font-size: 13px; letter-spacing: 3px; color: #7ce38b; opacity: 0.7">OPEN</div>
+        </div>
+        <div style="width: 30px; height: 128px; background: #f4ecd5; border: 4px solid #17120b; border-radius: 14px; position: relative; overflow: hidden">
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: {{ gaugeH }}; background: #7bc264; transition: height 0.6s ease"></div>
+        </div>
+      </div>
+    </div>
+    <div style="position: absolute; left: 420px; bottom: 250px; z-index: 2; display: flex; flex-direction: column; align-items: center">
+      <div style="width: 560px; height: 148px; background: #8a7f6a; border: 5px solid #17120b; border-radius: 72px 72px 0 0; position: relative; z-index: 1; overflow: visible; background-image: repeating-linear-gradient(180deg, transparent 0px, transparent 24px, rgba(23,18,11,0.18) 24px, rgba(23,18,11,0.18) 28px)">
+        <div style="position: absolute; top: -44px; right: 96px; width: 22px; height: 50px; background: #c5bba9; border: 4px solid #17120b; border-radius: 6px 6px 0 0">
+          <sc-if value="{{ smokeOn }}" hint-placeholder-val="{{ true }}">
+            <div style="position: absolute; top: -16px; left: 50%; width: 30px; height: 26px; background: #f4ecd5; border: 3px solid #17120b; border-radius: 55% 62% 50% 65%; opacity: 0; animation: puffA 3s ease-out infinite"></div>
+            <div style="position: absolute; top: -10px; left: 50%; width: 20px; height: 17px; background: #f4ecd5; border: 3px solid #17120b; border-radius: 60% 50% 65% 55%; opacity: 0; animation: puffA 3s ease-out 1.4s infinite"></div>
+          </sc-if>
+        </div>
+        <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 86px; height: 60px; background: #17120b; border: 4px solid #f4ecd5; border-bottom-width: 0; border-radius: 10px 10px 0 0; overflow: hidden">
+          <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 70px; height: 34px; background: #ffd23f; border: 3px solid #17120b; border-radius: 50% 50% 0 0"></div>
+        </div>
+      </div>
+      <div style="width: 520px; height: 292px; background: #e8484a; border: 5px solid #17120b; margin-top: -5px; box-shadow: 12px 14px 0 rgba(23,18,11,0.82); position: relative; background-image: repeating-linear-gradient(90deg, transparent 0px, transparent 36px, rgba(23,18,11,0.1) 36px, rgba(23,18,11,0.1) 40px)">
+        <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 13px; background: #f4ecd5; border-right: 3px solid #17120b"></div>
+        <div style="position: absolute; top: 0; bottom: 0; right: 0; width: 13px; background: #f4ecd5; border-left: 3px solid #17120b"></div>
+        <div style="position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 54px; height: 54px; background: #f4ecd5; border: 4px solid #17120b; border-radius: 50%">
+          <div style="position: absolute; top: 50%; left: 4%; right: 4%; height: 3px; margin-top: -1.5px; background: #17120b"></div>
+          <div style="position: absolute; left: 50%; top: 4%; bottom: 4%; width: 3px; margin-left: -1.5px; background: #17120b"></div>
+        </div>
+        <div sc-camel-on-click="{{ onToggleBarn }}" title="open the barn" style="position: absolute; bottom: 202px; left: 32px; z-index: 4; background: #ffd23f; border: 3px solid #17120b; border-radius: 5px 8px 4px 7px; padding: 2px 10px; transform: rotate(-3deg); cursor: pointer; box-shadow: 4px 5px 0 rgba(23,18,11,0.7)" style-hover="background: #ffe27a">
+          <div style="font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 2px; color: #17120b; line-height: 1.2; white-space: nowrap">03 THE SWATTED · {{ swatCount }}</div>
+          <div style="font-size: 11.5px; color: #17120b; opacity: 0.65; line-height: 1.3; white-space: nowrap">tap to peek inside</div>
+        </div>
+        <sc-if value="{{ barnClosed }}" hint-placeholder-val="{{ true }}">
+          <div sc-camel-on-click="{{ onToggleBarn }}" title="open the barn doors" style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 204px; height: 192px; display: flex; cursor: pointer; border: 5px solid #17120b; border-bottom-width: 0; background: #f4ecd5; box-sizing: border-box; z-index: 2" style-hover="outline: 3px dashed #ffd23f; outline-offset: 3px">
+            <div style="flex: 1; margin: 6px 3px 0 6px; background: #cf4345; position: relative; overflow: hidden; border: 3px solid #17120b">
+              <div style="position: absolute; top: 50%; left: 50%; width: 220px; height: 9px; background: #f4ecd5; border: 2.5px solid #17120b; transform: translate(-50%, -50%) rotate(60deg)"></div>
+              <div style="position: absolute; top: 50%; left: 50%; width: 220px; height: 9px; background: #f4ecd5; border: 2.5px solid #17120b; transform: translate(-50%, -50%) rotate(-60deg)"></div>
+            </div>
+            <div style="flex: 1; margin: 6px 6px 0 3px; background: #cf4345; position: relative; overflow: hidden; border: 3px solid #17120b">
+              <div style="position: absolute; top: 50%; left: 50%; width: 220px; height: 9px; background: #f4ecd5; border: 2.5px solid #17120b; transform: translate(-50%, -50%) rotate(-60deg)"></div>
+              <div style="position: absolute; top: 50%; left: 50%; width: 220px; height: 9px; background: #f4ecd5; border: 2.5px solid #17120b; transform: translate(-50%, -50%) rotate(60deg)"></div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ barnOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position: absolute; inset: 20px 22px 12px; background: #17120b; border-radius: 10px; z-index: 3; display: flex; flex-direction: column; padding: 10px 14px 8px; box-sizing: border-box; animation: popIn 0.3s ease-out">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+              <div style="font-family: 'VT323', monospace; font-size: 21px; letter-spacing: 3px; color: #7ce38b">THE SWATTED · {{ swatCount }}</div>
+              <button sc-camel-on-click="{{ onToggleBarn }}" style="font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 2px; color: #17120b; background: #f4ecd5; border: none; border-radius: 5px; padding: 1px 8px; cursor: pointer" style-hover="background: #ffd23f">CLOSE DOORS</button>
+            </div>
+            <div style="flex: 1; overflow-y: auto; margin-top: 7px; display: flex; flex-direction: column; gap: 6px; min-height: 0">
+              <sc-for list="{{ swatted }}" as="s" hint-placeholder-count="2">
+                <div style="display: flex; align-items: center; gap: 10px; background: rgba(244,236,213,0.07); border: 2px solid rgba(244,236,213,0.22); border-radius: 8px; padding: 4px 10px; flex-shrink: 0">
+                  <div style="position: relative; width: 30px; height: 30px; flex-shrink: 0">
+                    <div style="position: absolute; bottom: 2px; left: 0; right: 0; height: 18px; background: {{ s.hue }}; border: 2.5px solid #f4ecd5; border-radius: 50%"></div>
+                    <div style="position: absolute; top: 1px; left: 5px; width: 2.5px; height: 9px; background: #f4ecd5; transform: rotate(-28deg)"></div>
+                    <div style="position: absolute; top: 0; left: 12px; width: 2.5px; height: 10px; background: #f4ecd5; transform: rotate(-6deg)"></div>
+                    <div style="position: absolute; top: 0; right: 12px; width: 2.5px; height: 10px; background: #f4ecd5; transform: rotate(6deg)"></div>
+                    <div style="position: absolute; top: 1px; right: 5px; width: 2.5px; height: 9px; background: #f4ecd5; transform: rotate(28deg)"></div>
+                  </div>
+                  <div style="flex: 1; min-width: 0; font-size: 13.5px; color: #f4ecd5; text-decoration: line-through; opacity: 0.85; line-height: 1.25">{{ s.title }}</div>
+                  <div style="font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 1px; color: #7ce38b; white-space: nowrap">FIXED {{ s.fixedDate }}</div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ noSwatted }}" hint-placeholder-val="{{ false }}">
+                <div style="font-family: 'VT323', monospace; font-size: 17px; color: rgba(244,236,213,0.5); letter-spacing: 2px; padding-top: 8px">NOTHING SWATTED YET. GET FIXING.</div>
+              </sc-if>
+            </div>
+            <div style="font-size: 12px; color: rgba(244,236,213,0.55); margin-top: 4px">a swatted bug is a fixed bug. it hangs here with its fix date.</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    <sc-for list="{{ dirts }}" as="d" hint-placeholder-count="3">
+      <div style="position: absolute; left: {{ d.left }}; bottom: {{ d.bottom }}; width: {{ d.w }}; height: {{ d.h }}; background: #ddd3c0; border: 3px solid rgba(23,18,11,0.4); border-radius: 50%; z-index: 1"></div>
+    </sc-for>
+    <sc-for list="{{ tufts }}" as="t" hint-placeholder-count="6">
+      <div style="position: absolute; left: {{ t.left }}; bottom: {{ t.bottom }}; z-index: 1; display: flex; align-items: flex-end">
+        <div style="width: 10px; height: {{ t.h1 }}; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(-10deg)"></div>
+        <div style="width: 10px; height: {{ t.h2 }}; background: #7bc264; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(6deg); margin-left: -7px"></div>
+      </div>
+    </sc-for>
+    <sc-for list="{{ bugs }}" as="b" hint-placeholder-count="3">
+      <div style="position: absolute; left: {{ b.left }}; bottom: {{ b.bottom }}; z-index: {{ b.z }}">
+        <div style="position: relative; animation: paceX {{ b.dur }} ease-in-out {{ b.delay }} infinite alternate; animation-play-state: {{ b.pace }}">
+          <sc-if value="{{ b.isEgg }}" hint-placeholder-val="{{ false }}">
+            <div style="position: relative; width: 36px; height: 46px; background: #fdf7e3; border: 3.5px solid #17120b; border-radius: 50% 50% 46% 46%; animation: wobbleEgg 0.45s ease-in-out infinite; transform-origin: bottom center">
+              <div style="position: absolute; top: 42%; left: 20%; width: 28%; height: 3px; background: #17120b; transform: rotate(24deg)"></div>
+              <div style="position: absolute; top: 50%; left: 46%; width: 28%; height: 3px; background: #17120b; transform: rotate(-20deg)"></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ b.isBug }}" hint-placeholder-val="{{ true }}">
+            <div sc-camel-on-click="{{ b.onSelect }}" title="{{ b.hoverTitle }}" style="position: relative; width: {{ b.sPx }}; height: {{ b.sPx }}; cursor: pointer; transition: width 0.5s ease, height 0.5s ease; animation: {{ b.anim }}">
+              <sc-if value="{{ b.winged }}" hint-placeholder-val="{{ false }}">
+                <div style="position: absolute; top: 14%; left: -22%; width: 48%; height: 42%; background: #f4ecd5; border: 3px solid #17120b; border-radius: 60% 60% 50% 50%; transform-origin: right bottom; animation: waveSwayL 0.4s ease-in-out infinite; z-index: 0"></div>
+                <div style="position: absolute; top: 14%; right: -22%; width: 48%; height: 42%; background: #f4ecd5; border: 3px solid #17120b; border-radius: 60% 60% 50% 50%; transform-origin: left bottom; animation: waveSwayR 0.4s ease-in-out infinite; z-index: 0"></div>
+              </sc-if>
+              <div style="position: absolute; top: 36%; left: -15%; width: 32%; height: 3.5px; background: #17120b; border-radius: 2px; transform-origin: right center; animation: legWig 0.36s ease-in-out infinite alternate; z-index: 0"></div>
+              <div style="position: absolute; top: 55%; left: -17%; width: 34%; height: 3.5px; background: #17120b; border-radius: 2px; transform-origin: right center; animation: legWig 0.36s ease-in-out 0.12s infinite alternate; z-index: 0"></div>
+              <div style="position: absolute; top: 74%; left: -15%; width: 32%; height: 3.5px; background: #17120b; border-radius: 2px; transform-origin: right center; animation: legWig 0.36s ease-in-out 0.24s infinite alternate; z-index: 0"></div>
+              <div style="position: absolute; top: 36%; right: -15%; width: 32%; height: 3.5px; background: #17120b; border-radius: 2px; transform-origin: left center; animation: legWigR 0.36s ease-in-out infinite alternate; z-index: 0"></div>
+              <div style="position: absolute; top: 55%; right: -17%; width: 34%; height: 3.5px; background: #17120b; border-radius: 2px; transform-origin: left center; animation: legWigR 0.36s ease-in-out 0.12s infinite alternate; z-index: 0"></div>
+              <div style="position: absolute; top: 74%; right: -15%; width: 32%; height: 3.5px; background: #17120b; border-radius: 2px; transform-origin: left center; animation: legWigR 0.36s ease-in-out 0.24s infinite alternate; z-index: 0"></div>
+              <div style="position: absolute; left: 9%; right: 9%; top: 29%; bottom: 3%; background: {{ b.hue }}; border: 3px solid #17120b; border-radius: 48% 48% 46% 46%; z-index: 1">
+                <div style="position: absolute; top: 8%; left: 50%; transform: translateX(-50%); width: 3px; height: 80%; background: rgba(23,18,11,0.3)"></div>
+                <sc-if value="{{ b.mSpots }}" hint-placeholder-val="{{ true }}">
+                  <div style="position: absolute; top: 24%; left: 20%; width: 15%; height: 15%; background: rgba(23,18,11,0.28); border-radius: 50%"></div>
+                  <div style="position: absolute; top: 48%; right: 18%; width: 13%; height: 13%; background: rgba(23,18,11,0.28); border-radius: 50%"></div>
+                </sc-if>
+                <sc-if value="{{ b.mStripes }}" hint-placeholder-val="{{ false }}">
+                  <div style="position: absolute; top: 34%; left: 7%; right: 7%; height: 9%; background: rgba(23,18,11,0.26); border-radius: 6px"></div>
+                  <div style="position: absolute; top: 58%; left: 5%; right: 5%; height: 9%; background: rgba(23,18,11,0.26); border-radius: 6px"></div>
+                </sc-if>
+              </div>
+              <sc-if value="{{ b.spiky }}" hint-placeholder-val="{{ false }}">
+                <div style="position: absolute; top: 26%; left: 23%; width: 13%; height: 13%; background: #ffd23f; border: 3px solid #17120b; transform: rotate(45deg); z-index: 2"></div>
+                <div style="position: absolute; top: 21%; left: 43%; width: 15%; height: 15%; background: #ffd23f; border: 3px solid #17120b; transform: rotate(45deg); z-index: 2"></div>
+                <div style="position: absolute; top: 26%; left: 63%; width: 13%; height: 13%; background: #ffd23f; border: 3px solid #17120b; transform: rotate(45deg); z-index: 2"></div>
+              </sc-if>
+              <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 46%; height: 38%; background: {{ b.hue }}; border: 3px solid #17120b; border-radius: 50%; z-index: 2">
+                <div style="position: absolute; bottom: 88%; left: 16%; width: 3px; height: 42%; background: #17120b; transform: rotate(-24deg); transform-origin: bottom center"></div>
+                <div style="position: absolute; bottom: 88%; right: 16%; width: 3px; height: 42%; background: #17120b; transform: rotate(24deg); transform-origin: bottom center"></div>
+                <div style="position: absolute; top: 22%; left: 10%; width: 32%; height: 36%; background: #fdf7e3; border: 2px solid #17120b; border-radius: 50%"><div style="position: absolute; top: 28%; left: 32%; width: 38%; height: 40%; background: #17120b; border-radius: 50%"></div></div>
+                <div style="position: absolute; top: 22%; right: 10%; width: 32%; height: 36%; background: #fdf7e3; border: 2px solid #17120b; border-radius: 50%"><div style="position: absolute; top: 28%; left: 32%; width: 38%; height: 40%; background: #17120b; border-radius: 50%"></div></div>
+                <sc-if value="{{ b.threeEyed }}" hint-placeholder-val="{{ false }}">
+                  <div style="position: absolute; top: -20%; left: 50%; transform: translateX(-50%); width: 28%; height: 32%; background: #ffd23f; border: 2px solid #17120b; border-radius: 50%"><div style="position: absolute; top: 26%; left: 32%; width: 38%; height: 42%; background: #17120b; border-radius: 50%"></div></div>
+                </sc-if>
+              </div>
+            </div>
+            <sc-if value="{{ b.selected }}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; bottom: {{ b.bubbleBottom }}; left: 50%; transform: translateX({{ b.bubbleShift }}); width: 268px; background: #f4ecd5; border: 4px solid #17120b; border-radius: 12px 9px 13px 10px; box-shadow: 8px 9px 0 rgba(23,18,11,0.8); padding: 10px 12px 12px; z-index: 9">
+                <div style="display: flex; justify-content: space-between; gap: 8px; align-items: flex-start">
+                  <div style="font-weight: 700; font-size: 16px; line-height: 1.25; color: #17120b">{{ b.title }}</div>
+                  <button sc-camel-on-click="{{ b.onClose }}" style="font-family: 'VT323', monospace; font-size: 17px; color: #17120b; background: none; border: none; cursor: pointer; padding: 0; line-height: 1">✕</button>
+                </div>
+                <div style="font-family: 'VT323', monospace; font-size: 16px; letter-spacing: 1px; color: #17120b; opacity: 0.65; margin-top: 2px">{{ b.meta }}</div>
+                <div style="display: flex; gap: 7px; margin-top: 6px; align-items: center">
+                  <div style="font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 2px; color: #17120b; background: #ffd23f; border: 3px solid #17120b; border-radius: 5px 4px 6px 4px; padding: 0 8px; white-space: nowrap">{{ b.tier }}</div>
+                  <div style="font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 1px; color: #17120b; opacity: 0.55; white-space: nowrap">{{ b.nextHint }}</div>
+                </div>
+                <sc-if value="{{ b.hasImgs }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; gap: 6px; margin-top: 8px">
+                    <sc-for list="{{ b.evidence }}" as="im" hint-placeholder-count="0">
+                      {{ im.el }}
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <div style="display: flex; gap: 8px; margin-top: 10px">
+                  <button sc-camel-on-click="{{ b.onMeToo }}" style="flex: 1; font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 2px; color: #fdf3d9; background: #e8484a; border: 3px solid #17120b; border-radius: 8px 6px 9px 7px; padding: 3px 0; cursor: pointer; box-shadow: 4px 5px 0 rgba(23,18,11,0.85)" style-active="transform: translate(3px, 4px); box-shadow: 1px 1px 0 rgba(23,18,11,0.85)" style-hover="background: #f05a5c">ME TOO · {{ b.meToos }}</button>
+                  <button sc-camel-on-click="{{ b.onSwat }}" style="font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 2px; color: #f4ecd5; background: #17120b; border: 3px solid #17120b; border-radius: 7px 9px 6px 8px; padding: 3px 12px; cursor: pointer; box-shadow: 4px 5px 0 rgba(23,18,11,0.85)" style-active="transform: translate(3px, 4px); box-shadow: 1px 1px 0 rgba(23,18,11,0.85)" style-hover="color: #ffd23f">SWAT IT</button>
+                </div>
+                <div style="position: absolute; bottom: -10px; left: {{ b.tailLeft }}; width: 14px; height: 14px; background: #f4ecd5; border-right: 4px solid #17120b; border-bottom: 4px solid #17120b; transform: rotate(45deg)"></div>
+              </div>
+            </sc-if>
+          </sc-if>
+        </div>
+      </div>
+    </sc-for>
+    <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 88px; z-index: 5; pointer-events: none">
+      <sc-for list="{{ frontPosts }}" as="p" hint-placeholder-count="12">
+        <div style="position: absolute; left: {{ p.left }}; bottom: 0; width: 20px; height: 88px; background: #c5bba9; border: 4px solid #17120b; border-radius: 7px 7px 2px 2px"></div>
+      </sc-for>
+      <div style="position: absolute; top: 14px; left: 0; right: 0; height: 14px; background: #b8ac97; border: 4px solid #17120b; border-radius: 7px"></div>
+      <div style="position: absolute; top: 50px; left: 0; right: 0; height: 14px; background: #b8ac97; border: 4px solid #17120b; border-radius: 7px"></div>
+      <div style="position: absolute; top: -12px; left: 400px; font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 3px; color: #f4ecd5; background: #17120b; border-radius: 4px; padding: 0 10px">02 THE PEN</div>
+    </div>
+    <div style="position: absolute; left: {{ posterX }}; bottom: {{ posterY }}; z-index: 6; width: 306px">
+      <input type="file" accept="image/png,image/jpeg,image/webp" multiple="true" ref="{{ fileRef }}" sc-camel-on-change="{{ onFiles }}" style="display: none">
+      <div style="box-sizing: border-box; width: 100%; background: #f4ecd5; border: 4px solid #17120b; border-radius: 6px 10px 8px 12px; box-shadow: 10px 12px 0 rgba(23,18,11,0.82); padding: 28px 16px 12px; position: relative; transform: rotate(-1.6deg); display: flex; flex-direction: column; gap: 8px">
+        <div sc-camel-on-pointer-down="{{ onPosterDrag }}" title="drag to move the poster" style="position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 15px; height: 15px; background: #b8ac97; border: 3px solid #17120b; border-radius: 50%; cursor: grab"></div>
+        <div style="position: absolute; top: -13px; left: 14px; font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 3px; color: #f4ecd5; background: #17120b; border-radius: 4px; padding: 0 10px">01 SEEN SOMETHING?</div>
+        <div sc-camel-on-pointer-down="{{ onPosterDrag }}" title="drag to move the poster" style="font-family: 'VT323', monospace; font-size: 46px; letter-spacing: 14px; text-indent: 14px; color: #17120b; text-align: center; line-height: 1; border-bottom: 3px solid #17120b; padding-bottom: 5px; cursor: grab; user-select: none">WANTED</div>
+        <div sc-camel-on-pointer-down="{{ onPosterDrag }}" style="font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 4px; color: #17120b; opacity: 0.6; text-align: center; margin-top: -4px; cursor: grab; user-select: none">DEAD · NOT ALIVE</div>
+        <div style="display: flex; gap: 10px; align-items: stretch">
+          <div style="width: 118px; height: 124px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 6px; position: relative; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background-image: repeating-linear-gradient(180deg, transparent 0px, transparent 22px, rgba(23,18,11,0.08) 22px, rgba(23,18,11,0.08) 25px)">
+            <div style="position: relative; width: 76px; height: 76px; margin-bottom: 12px">
+              <div style="position: absolute; top: 38%; left: -13%; width: 30%; height: 3px; background: #17120b; border-radius: 2px; transform-origin: right center; animation: legWig 0.5s ease-in-out infinite alternate"></div>
+              <div style="position: absolute; top: 64%; left: -13%; width: 30%; height: 3px; background: #17120b; border-radius: 2px; transform-origin: right center; animation: legWig 0.5s ease-in-out 0.15s infinite alternate"></div>
+              <div style="position: absolute; top: 38%; right: -13%; width: 30%; height: 3px; background: #17120b; border-radius: 2px; transform-origin: left center; animation: legWigR 0.5s ease-in-out infinite alternate"></div>
+              <div style="position: absolute; top: 64%; right: -13%; width: 30%; height: 3px; background: #17120b; border-radius: 2px; transform-origin: left center; animation: legWigR 0.5s ease-in-out 0.15s infinite alternate"></div>
+              <div style="position: absolute; left: 9%; right: 9%; top: 29%; bottom: 3%; background: {{ formHue }}; border: 3px solid #17120b; border-radius: 48% 48% 46% 46%; z-index: 1">
+                <div style="position: absolute; top: 8%; left: 50%; transform: translateX(-50%); width: 3px; height: 80%; background: rgba(23,18,11,0.3); z-index: 1"></div>
+                <sc-if value="{{ pmSpots }}" hint-placeholder-val="{{ true }}">
+                  <div style="position: absolute; top: 24%; left: 20%; width: 15%; height: 15%; background: rgba(23,18,11,0.28); border-radius: 50%"></div>
+                  <div style="position: absolute; top: 48%; right: 18%; width: 13%; height: 13%; background: rgba(23,18,11,0.28); border-radius: 50%"></div>
+                </sc-if>
+                <sc-if value="{{ pmStripes }}" hint-placeholder-val="{{ false }}">
+                  <div style="position: absolute; top: 34%; left: 7%; right: 7%; height: 9%; background: rgba(23,18,11,0.26); border-radius: 6px"></div>
+                  <div style="position: absolute; top: 58%; left: 5%; right: 5%; height: 9%; background: rgba(23,18,11,0.26); border-radius: 6px"></div>
+                </sc-if>
+              </div>
+              <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 46%; height: 38%; background: {{ formHue }}; border: 3px solid #17120b; border-radius: 50%; z-index: 2">
+                <div style="position: absolute; bottom: 88%; left: 16%; width: 3px; height: 42%; background: #17120b; transform: rotate(-24deg); transform-origin: bottom center"></div>
+                <div style="position: absolute; bottom: 88%; right: 16%; width: 3px; height: 42%; background: #17120b; transform: rotate(24deg); transform-origin: bottom center"></div>
+                <div style="position: absolute; top: 22%; left: 10%; width: 32%; height: 36%; background: #fdf7e3; border: 2px solid #17120b; border-radius: 50%"><div style="position: absolute; top: 28%; left: 32%; width: 38%; height: 40%; background: #17120b; border-radius: 50%"></div></div>
+                <div style="position: absolute; top: 22%; right: 10%; width: 32%; height: 36%; background: #fdf7e3; border: 2px solid #17120b; border-radius: 50%"><div style="position: absolute; top: 28%; left: 32%; width: 38%; height: 40%; background: #17120b; border-radius: 50%"></div></div>
+              </div>
+            </div>
+            <div style="position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); font-family: 'VT323', monospace; font-size: 13px; letter-spacing: 2px; color: #17120b; opacity: 0.6; white-space: nowrap">THE CULPRIT</div>
+          </div>
+          <div sc-camel-on-click="{{ onPickFiles }}" sc-camel-on-drop="{{ onEvDrop }}" sc-camel-on-drag-over="{{ onEvOver }}" style="flex: 1; min-width: 0; border: 3px dashed #17120b; border-radius: 8px; background: #fdf7e3; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 8px" style-hover="background: #fffbe9">
+            <sc-if value="{{ noImgs }}" hint-placeholder-val="{{ true }}">
+              <div style="width: 32px; height: 28px; border: 3px solid #17120b; border-radius: 6px; background: #f4ecd5; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; color: #17120b">?</div>
+              <div style="font-weight: 700; font-size: 12.5px; color: #17120b; text-align: center; line-height: 1.35">pin the evidence<br><span style="font-weight: 400; font-size: 11px; opacity: 0.7">screenshots of the crime<br>click or drop · up to 3</span></div>
+            </sc-if>
+            <sc-if value="{{ hasImgs }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-wrap: wrap; gap: 7px; align-items: center; justify-content: center">
+                <sc-for list="{{ posterImgs }}" as="im" hint-placeholder-count="0">
+                  <div style="position: relative">
+                    {{ im.el }}
+                    <button sc-camel-on-click="{{ im.onRemove }}" style="position: absolute; top: -8px; right: -8px; width: 18px; height: 18px; border-radius: 50%; background: #e8484a; color: #fdf3d9; border: 2px solid #17120b; font-family: 'VT323', monospace; font-size: 11px; line-height: 1; cursor: pointer; padding: 0">✕</button>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="font-size: 11px; color: #17120b; opacity: 0.6; text-align: center">{{ evidenceHint }}</div>
+            </sc-if>
+          </div>
+        </div>
+        <input value="{{ formText }}" sc-camel-on-change="{{ onText }}" sc-camel-on-key-down="{{ onKey }}" placeholder="what did it do? one line." style="font-family: 'Kalam', cursive; font-size: 15px; color: #17120b; background: #fdf7e3; border: 3px solid {{ inputBorder }}; border-radius: 8px 6px 9px 7px; padding: 7px 10px; outline: none; width: 100%; box-sizing: border-box">
+        <div style="display: flex; gap: 7px; align-items: center">
+          <div style="font-family: 'VT323', monospace; font-size: 16px; letter-spacing: 2px; color: #17120b; opacity: 0.7; width: 58px; flex-shrink: 0">COAT:</div>
+          <sc-for list="{{ swatches }}" as="sw" hint-placeholder-count="5">
+            <div sc-camel-on-click="{{ sw.onPick }}" style="width: 21px; height: 21px; border-radius: 50%; background: {{ sw.hue }}; border: 3px solid #17120b; box-shadow: {{ sw.ring }}; cursor: pointer"></div>
+          </sc-for>
+        </div>
+        <div style="display: flex; gap: 6px; align-items: center">
+          <div style="font-family: 'VT323', monospace; font-size: 16px; letter-spacing: 2px; color: #17120b; opacity: 0.7; width: 58px; flex-shrink: 0">MARKS:</div>
+          <sc-for list="{{ markChips }}" as="mc" hint-placeholder-count="3">
+            <div sc-camel-on-click="{{ mc.onPick }}" style="font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 2px; color: {{ mc.fg }}; background: {{ mc.bg }}; border: 3px solid #17120b; border-radius: 6px 4px 7px 5px; padding: 0 8px; cursor: pointer" style-hover="background: #ffd23f; color: #17120b">{{ mc.label }}</div>
+          </sc-for>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center">
+          <div style="font-family: 'VT323', monospace; font-size: 16px; letter-spacing: 2px; color: #17120b; opacity: 0.7; width: 58px; flex-shrink: 0">WHERE:</div>
+          <sc-for list="{{ chips }}" as="c" hint-placeholder-count="5">
+            <div sc-camel-on-click="{{ c.onPick }}" style="font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 2px; color: {{ c.fg }}; background: {{ c.bg }}; border: 3px solid #17120b; border-radius: 6px 4px 7px 5px; padding: 0 8px; cursor: pointer" style-hover="background: #ffd23f; color: #17120b">{{ c.label }}</div>
+          </sc-for>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center">
+          <div style="font-family: 'VT323', monospace; font-size: 16px; letter-spacing: 2px; color: #17120b; opacity: 0.7; width: 58px; flex-shrink: 0">WHO:</div>
+          <input value="{{ formWho }}" sc-camel-on-change="{{ onWho }}" placeholder="anonymous" style="flex: 1; min-width: 0; width: 60px; font-family: 'Kalam', cursive; font-size: 14px; color: #17120b; background: #fdf7e3; border: 3px solid #17120b; border-radius: 7px 5px 8px 6px; padding: 3px 9px; outline: none">
+          <button sc-camel-on-click="{{ onLoose }}" style="font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 2px; color: #fdf3d9; background: #e8484a; border: 4px solid #17120b; border-radius: 9px 12px 8px 11px; padding: 3px 12px; cursor: pointer; box-shadow: 5px 6px 0 rgba(23,18,11,0.85); white-space: nowrap" style-active="transform: translate(4px, 5px); box-shadow: 1px 1px 0 rgba(23,18,11,0.85)" style-hover="background: #f05a5c">LET IT LOOSE</button>
+        </div>
+        <div style="font-family: 'VT323', monospace; font-size: 14px; letter-spacing: 2px; color: #17120b; opacity: 0.55; text-align: center">REWARD: ETERNAL GRATITUDE · HATCHES IN THE PEN AS A SPECK</div>
+      </div>
+    </div>
+  </div>
+  <sc-if value="{{ viewOpen }}" hint-placeholder-val="{{ false }}">
+    <div sc-camel-on-click="{{ onCloseView }}" style="position: fixed; inset: 0; background: rgba(23,18,11,0.72); z-index: 50; display: flex; align-items: center; justify-content: center; cursor: zoom-out">
+      <div style="background: #f4ecd5; border: 5px solid #17120b; border-radius: 8px 12px 6px 10px; box-shadow: 14px 16px 0 rgba(23,18,11,0.6); padding: 14px 14px 10px; transform: rotate(-1deg); max-width: 70vw">
+        {{ viewImg }}
+        <div style="font-family: 'VT323', monospace; font-size: 16px; letter-spacing: 2px; color: #17120b; opacity: 0.6; margin-top: 6px; text-align: center">EVIDENCE · TAP ANYWHERE TO CLOSE</div>
+      </div>
+    </div>
+  </sc-if>
+  <div style="display: flex; gap: 22px; margin-top: 14px; font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 2px; color: #17120b; opacity: 0.75; z-index: 1">
+    <div>{{ openCount }} BUGS IN THE PEN</div>
+    <div>·</div>
+    <div>{{ meTooTotal }} ME-TOOS BETWEEN THEM</div>
+    <div>·</div>
+    <div>{{ swatCount }} SWATTED</div>
+  </div>
+  <div style="font-size: 14px; color: #17120b; opacity: 0.55; margin-top: 2px; z-index: 1">tap a bug to read it · me-toos make it grow and mutate · swat it when it's fixed and it hangs in the barn</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;samples&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Farm&quot;},&quot;growPer&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:9,&quot;min&quot;:4,&quot;max&quot;:16,&quot;step&quot;:1,&quot;unit&quot;:&quot;px&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Farm&quot;},&quot;smoke&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Farm&quot;},&quot;zoomUI&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;View&quot;},&quot;maxZoom&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:6,&quot;min&quot;:2,&quot;max&quot;:12,&quot;step&quot;:1,&quot;unit&quot;:&quot;\u00d7&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;View&quot;}}">
+class Component extends DCLogic {
+  state = { bugs: [], swatted: [], form: { text: '', where: 'gameplay', who: '', hue: '#7bc264', marking: 'spots', imgs: [] }, formErr: false, selectedId: null, barnOpen: false, viewSrc: null, posterPos: { x: 8, y: 52 }, zoom: 1 };
+  mons = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+  hues = ['#7bc264', '#5fae4e', '#e8484a', '#7fa8c9', '#b8ac97'];
+  marks = ['spots', 'stripes', 'bare'];
+  fileRef = React.createRef();
+  today() { const d = new Date(); return d.getDate() + ' ' + this.mons[d.getMonth()]; }
+  mkBug(title, where, who, meToos, opts) {
+    const o = opts || {};
+    return { id: Date.now() + Math.random(), title, where, who: who || 'anonymous', date: this.today(), meToos: meToos || 0, x: 28 + Math.random() * 60, y: 40 + Math.random() * 130, hue: o.hue || this.hues[Math.floor(Math.random() * this.hues.length)], marking: o.marking || this.marks[Math.floor(Math.random() * 3)], imgs: o.imgs || [], dur: (5 + Math.random() * 6).toFixed(1), delay: (-Math.random() * 8).toFixed(1), egg: false, dying: false };
+  }
+  componentDidMount() {
+    try {
+      const pp = JSON.parse(localStorage.getItem('bugfarm.poster.v1') || 'null');
+      if (pp && typeof pp.x === 'number' && typeof pp.y === 'number') this.setState({ posterPos: pp });
+    } catch (e) {}
+    try {
+      const z = parseFloat(localStorage.getItem('bugfarm.zoom.v1'));
+      if (z > 0.2 && z < 20) this.setState({ zoom: z });
+    } catch (e) {}
+    window.addEventListener('keydown', this.onZoomKey);
+    let bugs = null, swatted = null;
+    try {
+      bugs = JSON.parse(localStorage.getItem('bugfarm.bugs.v1') || 'null');
+      swatted = JSON.parse(localStorage.getItem('bugfarm.swatted.v1') || 'null');
+    } catch (e) {}
+    if (!bugs && (this.props.samples ?? true)) {
+      bugs = [
+        this.mkBug('the hill eats my footsteps', 'sound', 'anonymous', 4),
+        this.mkBug('gnome clips through the well', 'gameplay', 'mara', 7),
+        this.mkBug('menu text wobbles off screen', 'ui', 'anonymous', 1),
+      ];
+      swatted = swatted && swatted.length ? swatted : [{ id: 1, title: 'save file vanished on load', hue: '#8a7f6a', who: 'anonymous', meToos: 3, fixedDate: '12 aug' }];
+    }
+    this.setState({ bugs: (bugs || []).map(b => ({ ...b, egg: false, dying: false })), swatted: swatted || [] });
+  }
+  componentWillUnmount() {
+    clearTimeout(this._eggT); clearTimeout(this._swatT); clearTimeout(this._errT);
+    window.removeEventListener('keydown', this.onZoomKey);
+  }
+  zoomTo = (z) => {
+    const max = this.props.maxZoom ?? 6;
+    const v = Math.min(max, Math.max(0.4, Math.round(z * 100) / 100));
+    this.setState({ zoom: v });
+    try { localStorage.setItem('bugfarm.zoom.v1', String(v)); } catch (e) {}
+  };
+  onZoomKey = (e) => {
+    if (!(e.metaKey || e.ctrlKey)) return;
+    if (e.key === '=' || e.key === '+') { e.preventDefault(); this.zoomTo(this.state.zoom * 1.25); }
+    else if (e.key === '-') { e.preventDefault(); this.zoomTo(this.state.zoom / 1.25); }
+    else if (e.key === '0') { e.preventDefault(); this.zoomTo(1); }
+  };
+  save(bugs, swatted) {
+    try {
+      localStorage.setItem('bugfarm.bugs.v1', JSON.stringify(bugs.map(b => ({ ...b, egg: false, dying: false }))));
+      localStorage.setItem('bugfarm.swatted.v1', JSON.stringify(swatted));
+    } catch (e) {}
+  }
+  loose = () => {
+    const t = this.state.form.text.trim();
+    if (!t) {
+      this.setState({ formErr: true });
+      this._errT = setTimeout(() => this.setState({ formErr: false }), 800);
+      return;
+    }
+    const f = this.state.form;
+    const b = { ...this.mkBug(t, f.where, f.who.trim() || 'anonymous', 0, { hue: f.hue, marking: f.marking, imgs: f.imgs }), egg: true };
+    this.setState(s => {
+      const bugs = [...s.bugs, b];
+      this.save(bugs, s.swatted);
+      return { bugs, form: { ...s.form, text: '', imgs: [] } };
+    });
+    this._eggT = setTimeout(() => this.setState(s => ({ bugs: s.bugs.map(x => x.id === b.id ? { ...x, egg: false } : x) })), 1500);
+  };
+  loadFiles = (files) => {
+    Array.from(files || []).forEach(f => {
+      if (!/^image\//.test(f.type)) return;
+      const r = new FileReader();
+      r.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const sc = Math.min(1, 560 / img.width);
+          const c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(img.width * sc));
+          c.height = Math.max(1, Math.round(img.height * sc));
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          const url = c.toDataURL('image/jpeg', 0.72);
+          this.setState(s => s.form.imgs.length >= 3 ? null : ({ form: { ...s.form, imgs: [...s.form.imgs, url] } }));
+        };
+        img.src = r.result;
+      };
+      r.readAsDataURL(f);
+    });
+  };
+  posterDown = (e) => {
+    e.preventDefault();
+    const p = this.state.posterPos;
+    this._pd = { sx: e.clientX, sy: e.clientY, x: p.x, y: p.y };
+    const mv = (ev) => {
+      if (!this._pd) return;
+      const x = Math.max(-60, Math.min(1160, this._pd.x + (ev.clientX - this._pd.sx)));
+      const y = Math.max(-16, Math.min(360, this._pd.y - (ev.clientY - this._pd.sy)));
+      this.setState({ posterPos: { x, y } });
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', mv);
+      window.removeEventListener('pointerup', up);
+      this._pd = null;
+      try { localStorage.setItem('bugfarm.poster.v1', JSON.stringify(this.state.posterPos)); } catch (err) {}
+    };
+    window.addEventListener('pointermove', mv);
+    window.addEventListener('pointerup', up);
+  };
+  swat = (id) => {
+    this.setState(s => ({ bugs: s.bugs.map(b => b.id === id ? { ...b, dying: true } : b), selectedId: null }));
+    this._swatT = setTimeout(() => this.setState(s => {
+      const b = s.bugs.find(x => x.id === id);
+      if (!b) return null;
+      const bugs = s.bugs.filter(x => x.id !== id);
+      const swatted = [{ id: b.id, title: b.title, hue: b.hue, who: b.who, meToos: b.meToos, fixedDate: this.today() }, ...s.swatted];
+      this.save(bugs, swatted);
+      return { bugs, swatted, barnOpen: true };
+    }), 950);
+  };
+  renderVals() {
+    const { bugs, swatted, form, formErr, selectedId, barnOpen, viewSrc, posterPos, zoom } = this.state;
+    const grow = this.props.growPer ?? 9;
+    const open = bugs.length;
+    const tierOf = (m) => m >= 10 ? 'WINGED TERROR' : m >= 7 ? 'THREE-EYED' : m >= 4 ? 'SPIKY' : m >= 2 ? 'A NYMPH' : 'A SPECK';
+    const bugVals = bugs.map(b => {
+      const s = Math.min(30 + b.meToos * grow, 220);
+      const sel = b.id === selectedId;
+      return {
+        id: b.id, title: b.title, hoverTitle: b.title + ' \u2014 tap it',
+        left: b.x + '%', bottom: b.y + 'px', z: sel ? 9 : 3,
+        dur: b.dur + 's', delay: b.delay + 's',
+        pace: (sel || b.egg || b.dying) ? 'paused' : 'running',
+        isEgg: !!b.egg, isBug: !b.egg,
+        sPx: s + 'px', hue: b.hue,
+        spiky: b.meToos >= 4, threeEyed: b.meToos >= 7, winged: b.meToos >= 10,
+        mSpots: (b.marking || 'spots') === 'spots', mStripes: b.marking === 'stripes',
+        hasImgs: !!(b.imgs && b.imgs.length),
+        evidence: (b.imgs || []).map(src => ({ el: React.createElement('img', { src, title: 'view evidence', onClick: (e) => { e.stopPropagation(); this.setState({ viewSrc: src }); }, style: { width: 56, height: 56, objectFit: 'cover', border: '3px solid #17120b', borderRadius: 6, cursor: 'zoom-in', background: '#fdf7e3' } }) })),
+        anim: b.dying ? 'swatDie 0.9s ease-in forwards' : 'popIn 0.45s ease-out',
+        selected: sel && !b.dying,
+        bubbleBottom: (s + 16) + 'px',
+        bubbleShift: b.x < 22 ? '-12%' : b.x > 72 ? '-88%' : '-50%',
+        tailLeft: b.x < 22 ? '10%' : b.x > 72 ? '86%' : 'calc(50% - 9px)',
+        meta: b.where + ' \u00b7 ' + b.who + ' \u00b7 ' + b.date,
+        tier: tierOf(b.meToos), meToos: b.meToos,
+        nextHint: b.meToos >= 10 ? 'FULLY MUTATED' : 'MUTATES AT ' + (b.meToos < 2 ? 2 : b.meToos < 4 ? 4 : b.meToos < 7 ? 7 : 10),
+        onSelect: () => this.setState(st => ({ selectedId: st.selectedId === b.id ? null : b.id })),
+        onClose: (e) => { e.stopPropagation(); this.setState({ selectedId: null }); },
+        onMeToo: () => this.setState(st => { const nb = st.bugs.map(x => x.id === b.id ? { ...x, meToos: x.meToos + 1 } : x); this.save(nb, st.swatted); return { bugs: nb }; }),
+        onSwat: () => this.swat(b.id),
+      };
+    });
+    const wheres = ['gameplay', 'art', 'sound', 'ui', 'crash'];
+    const chips = wheres.map(w => ({
+      label: w.toUpperCase(),
+      bg: form.where === w ? '#17120b' : '#f4ecd5',
+      fg: form.where === w ? '#f4ecd5' : '#17120b',
+      onPick: () => this.setState(s => ({ form: { ...s.form, where: w } })),
+    }));
+    return {
+      bugs: bugVals, chips, swatted, noSwatted: swatted.length === 0,
+      openCount: open, openCountPad: String(open).padStart(3, '0'),
+      meTooTotal: bugs.reduce((a, b) => a + b.meToos, 0), swatCount: swatted.length,
+      gaugeH: Math.min(6 + open * 11, 100) + '%',
+      smokeOn: this.props.smoke ?? true,
+      zoomUI: this.props.zoomUI ?? true,
+      zoomF: zoom,
+      zoomLabel: Math.round(zoom * 100) + '%',
+      onZoomIn: () => this.zoomTo(zoom * 1.25),
+      onZoomOut: () => this.zoomTo(zoom / 1.25),
+      onZoomReset: () => this.zoomTo(1),
+      barnOpen, barnClosed: !barnOpen,
+      onToggleBarn: () => this.setState(s => ({ barnOpen: !s.barnOpen })),
+      formText: form.text, formWho: form.who,
+      formHue: form.hue, pmSpots: form.marking === 'spots', pmStripes: form.marking === 'stripes',
+      swatches: this.hues.map(h => ({ hue: h, ring: form.hue === h ? '0 0 0 3px #ffd23f' : 'none', onPick: () => this.setState(s => ({ form: { ...s.form, hue: h } })) })),
+      markChips: this.marks.map(m => ({ label: m.toUpperCase(), bg: form.marking === m ? '#17120b' : '#f4ecd5', fg: form.marking === m ? '#f4ecd5' : '#17120b', onPick: () => this.setState(s => ({ form: { ...s.form, marking: m } })) })),
+      fileRef: this.fileRef,
+      onPickFiles: () => { if (this.fileRef.current) this.fileRef.current.click(); },
+      onFiles: (e) => { this.loadFiles(e.target.files); e.target.value = ''; },
+      onEvOver: (e) => e.preventDefault(),
+      onEvDrop: (e) => { e.preventDefault(); if (e.dataTransfer && e.dataTransfer.files) this.loadFiles(e.dataTransfer.files); },
+      noImgs: form.imgs.length === 0, hasImgs: form.imgs.length > 0,
+      posterImgs: form.imgs.map((src, i) => ({ el: React.createElement('img', { src, style: { width: 44, height: 44, objectFit: 'cover', border: '3px solid #17120b', borderRadius: 5, display: 'block', background: '#fdf7e3' } }), onRemove: (e) => { e.stopPropagation(); this.setState(s => ({ form: { ...s.form, imgs: s.form.imgs.filter((x, j) => j !== i) } })) } })),
+      evidenceHint: form.imgs.length < 3 ? 'tap to add more \u00b7 up to 3' : 'evidence locked in',
+      viewOpen: !!viewSrc,
+      posterX: posterPos.x + 'px', posterY: posterPos.y + 'px',
+      onPosterDrag: this.posterDown,
+      viewImg: viewSrc ? React.createElement('img', { src: viewSrc, style: { maxWidth: '100%', maxHeight: '68vh', display: 'block', border: '3px solid #17120b', borderRadius: 4, background: '#fdf7e3' } }) : null,
+      onCloseView: () => this.setState({ viewSrc: null }),
+      inputBorder: formErr ? '#e8484a' : '#17120b',
+      onText: (e) => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, text: v } })); },
+      onWho: (e) => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, who: v } })); },
+      onKey: (e) => { if (e.key === 'Enter') this.loose(); },
+      onLoose: this.loose,
+      backPosts: ['1%','10%','19%','28%','37%','46%','55%','64%','73%','82%','91%','98.2%'].map(l => ({ left: l })),
+      frontPosts: ['0.5%','9.5%','18.5%','27.5%','36.5%','45.5%','54.5%','63.5%','72.5%','81.5%','90.5%','98%'].map(l => ({ left: l })),
+      tufts: [
+        { left: '30%', bottom: '36px', h1: '40px', h2: '54px' },
+        { left: '48%', bottom: '150px', h1: '32px', h2: '44px' },
+        { left: '62%', bottom: '60px', h1: '44px', h2: '58px' },
+        { left: '76%', bottom: '170px', h1: '30px', h2: '42px' },
+        { left: '88%', bottom: '50px', h1: '38px', h2: '52px' },
+        { left: '38%', bottom: '110px', h1: '28px', h2: '40px' },
+        { left: '94%', bottom: '140px', h1: '30px', h2: '44px' },
+        { left: '55%', bottom: '30px', h1: '34px', h2: '46px' },
+      ],
+      dirts: [
+        { left: '34%', bottom: '84px', w: '70px', h: '26px' },
+        { left: '70%', bottom: '124px', w: '90px', h: '32px' },
+        { left: '84%', bottom: '38px', w: '60px', h: '22px' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# Local tooling, not the site.
+.claude/
+
+# lab 2's performance workbench: traces, captures and throwaway harnesses.
+# ~50MB, already kept off the deploy by .vercelignore — and git has no
+# .vercelignore to read, so it needs telling separately. Nothing in here is
+# needed to build, serve or understand the bench.
+lab2/perf/
+
+# The shortcuts and scratch files that live beside lab 2 on this machine.
+# Same list as .vercelignore, for the same reason.
+lab2/index.html.keep-bak
+lab2/*.tmp
+lab2/*.bat
+lab2/*.ico
+lab2/*.lnk
+
+# The little static server used to preview the site locally.
+serve.js

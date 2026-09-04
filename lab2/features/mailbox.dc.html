@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./prelude.js"></script>
+<script src="./support.js"></script>
+<!-- lab 2 shows this on its own paper — see features/bare.css -->
+<link rel="stylesheet" href="./bare.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<!-- lab 2 serves these faces itself — see SELF-HOSTED in index.html -->
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  body { margin: 0; background: #fbf8f1; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+  @keyframes popIn { 0% { transform: scale(0.5) rotate(-10deg); opacity: 0; } 70% { transform: scale(1.06) rotate(-1deg); opacity: 1; } 100% { transform: scale(1) rotate(-3deg); opacity: 1; } }
+</style>
+</helmet>
+<div data-screen-label="Coming Soon Mailbox" style="min-height: 100vh; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 40px 20px; background: #fbf8f1; font-family: 'Kalam', cursive; position: relative; overflow-x: auto">
+  <div data-lab-nopaper style="position: absolute; inset: 0; pointer-events: none; opacity: 0.04; background-image: url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22160%22%20height=%22160%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22/%3E%3C/filter%3E%3Crect%20width=%22160%22%20height=%22160%22%20filter=%22url(%23n)%22/%3E%3C/svg%3E')"></div>
+  <div style="position: relative; width: 940px; height: 445px; z-index: 1; flex-shrink: 0">
+    <div style="position: absolute; left: 30px; right: 30px; bottom: 30px; height: 5px; background: #17120b; opacity: 0.55"></div>
+    <div style="position: absolute; left: 385px; bottom: 27px; width: 10px; height: 10px; background: #e8484a; border: 2.5px solid #17120b; transform: rotate(45deg)"></div>
+    <div style="position: absolute; left: 880px; bottom: 27px; width: 10px; height: 10px; background: #e8484a; border: 2.5px solid #17120b; transform: rotate(45deg)"></div>
+    <div style="position: absolute; left: 30px; bottom: 90px; width: 320px; z-index: 2; transform: {{ envT }}; transition: {{ envTrans }}; opacity: {{ envO }}; pointer-events: {{ formPE }}; will-change: transform">
+      <div style="position: relative; width: 320px; height: 240px; box-sizing: border-box; background: #f4ecd5; border: 5px solid #17120b; border-radius: 6px; box-shadow: 8px 9px 0 rgba(0,0,0,0.45); overflow: hidden">
+        <div style="position: absolute; top: 2px; left: 3px; width: 166px; height: 3.5px; background: rgba(23,18,11,0.8); transform-origin: 0 50%; transform: rotate(20deg)"></div>
+        <div style="position: absolute; top: 2px; right: 3px; width: 166px; height: 3.5px; background: rgba(23,18,11,0.8); transform-origin: 100% 50%; transform: rotate(-20deg)"></div>
+        <div style="position: absolute; top: 10px; right: 12px; width: 56px; height: 64px; box-sizing: border-box; background: #fdf7e3; border: 2.5px dashed rgba(23,18,11,0.55); padding: 4px">
+          <div style="width: 100%; height: 100%; box-sizing: border-box; background: #ffd23f; border: 3px solid #17120b; display: flex; align-items: center; justify-content: center; font-family: 'Rye', serif; font-size: 26px; color: #17120b">B</div>
+        </div>
+        <div style="position: absolute; top: 12px; right: 72px; width: 46px; height: 46px; border: 3px solid rgba(23,18,11,0.4); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-align: center; font-family: 'VT323', monospace; font-size: 11px; line-height: 1.1; letter-spacing: 1px; color: rgba(23,18,11,0.6); transform: rotate(-12deg)">FARM<br>POST</div>
+        <div style="position: absolute; left: 22px; right: 22px; top: 66px">
+          <div style="font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 3px; color: #17120b; opacity: 0.6">TO: THE COMING-SOON LIST</div>
+          <input ref="{{ inputRef }}" sc-camel-on-key-down="{{ onKey }}" sc-camel-on-input="{{ onType }}" placeholder="yer@email.here" style="display: block; width: 100%; box-sizing: border-box; margin-top: 12px; padding: 2px 2px 6px; background: transparent; border: none; border-bottom: 3px dashed {{ inputLine }}; outline: none; font-family: 'Kalam', cursive; font-size: 22px; color: #17120b" style-focus="border-bottom: 3px dashed #e8484a">
+          <div style="position: relative; margin-top: 10px">
+            <sc-raw-select ref="{{ selectRef }}" style="display: block; width: 100%; box-sizing: border-box; padding: 2px 30px 6px 2px; background: transparent; border: none; border-bottom: 3px dashed rgba(23,18,11,0.55); outline: none; appearance: none; font-family: 'Kalam', cursive; font-size: 19px; color: #17120b; cursor: pointer" style-focus="border-bottom: 3px dashed #e8484a">
+              <option value="">what brings ya round?</option>
+              <option value="Indie games">Indie games</option>
+              <option value="Art &amp; illustration">Art &amp; illustration</option>
+              <option value="Music &amp; bands">Music &amp; bands</option>
+              <option value="Fandoms &amp; shows">Fandoms &amp; shows</option>
+              <option value="Something else">Something else</option>
+            </sc-raw-select>
+            <div style="position: absolute; right: 4px; top: 11px; width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 9px solid #17120b; pointer-events: none"></div>
+          </div>
+          <div style="font-size: 14px; color: #17120b; opacity: 0.55; font-style: italic; margin-top: 8px">we holler once — the day the gates open.</div>
+        </div>
+        <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 13px; border-top: 3px solid #17120b; background: repeating-linear-gradient(45deg, #e8484a 0px, #e8484a 9px, #f4ecd5 9px, #f4ecd5 18px)"></div>
+      </div>
+    </div>
+    <div style="position: absolute; left: 30px; bottom: 16px; width: 320px; display: flex; justify-content: center; z-index: 2; opacity: {{ formO }}; transition: opacity 0.3s ease; pointer-events: {{ formPE }}">
+      <div sc-camel-on-click="{{ onSend }}" style="font-family: 'Rye', serif; font-size: 21px; letter-spacing: 2px; color: #f4ecd5; background: #e8484a; border: 4px solid #17120b; border-radius: 6px; padding: 9px 30px 11px; box-shadow: 6px 7px 0 rgba(0,0,0,0.5); cursor: pointer; user-select: none" style-hover="transform: translate(2px, 2px); box-shadow: 4px 5px 0 rgba(0,0,0,0.5)" style-active="transform: translate(5px, 6px); box-shadow: 1px 1px 0 rgba(0,0,0,0.5)">SEND IT</div>
+    </div>
+    <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; left: 16px; bottom: 95px; width: 348px; box-sizing: border-box; z-index: 4; background: #f4ecd5; border: 5px solid #17120b; border-radius: 8px 12px 6px 10px; box-shadow: 8px 9px 0 rgba(0,0,0,0.45); padding: 22px 24px; text-align: center; animation: popIn 0.45s cubic-bezier(0.3, 1.3, 0.5, 1) forwards">
+        <div style="font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 4px; color: #17120b; opacity: 0.6">· RECEIPT OF POST ·</div>
+        <div style="font-family: 'Rye', serif; font-size: 30px; color: #17120b; margin-top: 8px">YER ON THE LIST</div>
+        <div style="display: inline-block; font-family: 'VT323', monospace; font-size: 16px; letter-spacing: 3px; color: #b8302f; border: 3px solid #b8302f; border-radius: 4px; padding: 2px 12px; transform: rotate(-5deg); margin-top: 12px">SEE YOU SOON!</div>
+      </div>
+    </sc-if>
+    <div style="position: absolute; right: 70px; bottom: 40px; width: 320px; height: 390px; z-index: 3">
+      <div style="position: absolute; left: 148px; bottom: 0; width: 30px; height: 132px; box-sizing: border-box; background: #5e4229; background-image: repeating-linear-gradient(90deg, rgba(23,18,11,0.2) 0px, rgba(23,18,11,0.2) 2px, transparent 2px, transparent 8px); border: 4px solid #17120b"></div>
+      <div style="position: absolute; left: 105px; bottom: 116px; width: 116px; height: 18px; box-sizing: border-box; background: #5e4229; background-image: repeating-linear-gradient(0deg, rgba(23,18,11,0.18) 0px, rgba(23,18,11,0.18) 2px, transparent 2px, transparent 7px); border: 4px solid #17120b; border-radius: 3px"></div>
+      <div style="position: absolute; left: 0; bottom: 130px; width: 320px; height: 170px; box-sizing: border-box; background: {{ metalBase }}; background-image: repeating-linear-gradient(0deg, rgba(23,18,11,0.07) 0px, rgba(23,18,11,0.07) 2px, transparent 2px, transparent 13px); border: 5px solid #17120b; border-radius: 85px 85px 10px 10px; box-shadow: 8px 9px 0 rgba(0,0,0,0.45)">
+        <div style="position: absolute; left: -5px; top: -5px; width: 66px; height: 170px; box-sizing: border-box; background: #241a10; border: 5px solid #17120b; border-radius: 82px 8px 8px 8px; box-shadow: inset -10px 0 0 rgba(0,0,0,0.5)"></div>
+        <div style="position: absolute; left: 74px; top: 10px; bottom: 10px; width: 3px; background: rgba(23,18,11,0.3)"></div>
+        <div style="position: absolute; left: 96px; bottom: 10px; width: 16px; height: 16px; box-sizing: border-box; background: {{ metalLite }}; border: 3px solid #17120b; border-radius: 50%; display: flex; align-items: center; justify-content: center"><div style="width: 5px; height: 5px; background: #17120b; border-radius: 50%"></div></div>
+        <div style="position: absolute; left: 160px; bottom: 10px; width: 16px; height: 16px; box-sizing: border-box; background: {{ metalLite }}; border: 3px solid #17120b; border-radius: 50%; display: flex; align-items: center; justify-content: center"><div style="width: 5px; height: 5px; background: #17120b; border-radius: 50%"></div></div>
+        <div style="position: absolute; left: 224px; bottom: 10px; width: 16px; height: 16px; box-sizing: border-box; background: {{ metalLite }}; border: 3px solid #17120b; border-radius: 50%; display: flex; align-items: center; justify-content: center"><div style="width: 5px; height: 5px; background: #17120b; border-radius: 50%"></div></div>
+        <div style="position: absolute; left: 100px; top: 34px; right: 26px; text-align: center; font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 4px; color: rgba(23,18,11,0.65)">FARM POST</div>
+        <div style="position: absolute; left: 100px; top: 58px; right: 26px; text-align: center; font-family: 'Rye', serif; font-size: 30px; letter-spacing: 3px; color: #17120b">No. 11</div>
+        <div style="position: absolute; left: -6px; top: -6px; width: 70px; height: 172px; perspective: 620px">
+          <div style="position: absolute; inset: 0; transform-origin: 50% 100%; transform-style: preserve-3d; transform: {{ doorRot }}; transition: {{ doorTrans }}; will-change: transform">
+            <div style="position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; box-sizing: border-box; background: {{ metalDark }}; border: 5px solid #17120b; border-radius: 82px 8px 8px 8px">
+              <div style="position: absolute; top: 16px; left: 50%; transform: translateX(-50%); width: 16px; height: 16px; box-sizing: border-box; background: {{ metalLite }}; border: 3px solid #17120b; border-radius: 50%"></div>
+              <div style="position: absolute; left: 10px; right: 10px; bottom: 18px; height: 3px; background: rgba(23,18,11,0.4)"></div>
+            </div>
+            <div style="position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; transform: rotateX(180deg); box-sizing: border-box; background: {{ metalBase }}; border: 5px solid #17120b; border-radius: 8px 8px 8px 82px"></div>
+          </div>
+        </div>
+      </div>
+      <div style="position: absolute; left: 208px; bottom: 294px; width: 8px; height: 84px; transform-origin: 50% 100%; transform: {{ flagRot }}; transition: {{ flagTrans }}; will-change: transform">
+        <div style="position: absolute; inset: 0; box-sizing: border-box; background: {{ metalDark }}; border: 2.5px solid #17120b; border-radius: 4px"></div>
+        <div style="position: absolute; top: -4px; left: 7px; width: 52px; height: 32px; box-sizing: border-box; background: #e8484a; border: 3.5px solid #17120b; border-radius: 3px; background-image: repeating-linear-gradient(90deg, rgba(23,18,11,0.3) 0px, rgba(23,18,11,0.3) 2px, transparent 2px, transparent 6px)"></div>
+      </div>
+      <div style="position: absolute; left: 205px; bottom: 288px; width: 14px; height: 14px; box-sizing: border-box; background: {{ metalLite }}; border: 3px solid #17120b; border-radius: 50%; z-index: 4"></div>
+    </div>
+  </div>
+  <div style="font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 3px; color: {{ hintColor }}; opacity: 0.85; z-index: 1; min-height: 24px">{{ hint }}</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;metal&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;silver&quot;,&quot;options&quot;:[&quot;silver&quot;,&quot;brass&quot;,&quot;copper&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Mailbox&quot;},&quot;animSpeed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.5,&quot;max&quot;:2,&quot;step&quot;:0.1,&quot;unit&quot;:&quot;\u00d7&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;autoReset&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+class Component extends DCLogic {
+  state = { phase: 'idle', invalid: false };
+  inputRef = React.createRef();
+  selectRef = React.createRef();
+  componentWillUnmount() { this.clearT(); }
+  clearT() { (this._t || []).forEach(clearTimeout); this._t = []; }
+  k() { return 1 / (this.props.animSpeed ?? 1); }
+  onSend = () => {
+    if (this.state.phase !== 'idle') return;
+    const v = (this.inputRef.current ? this.inputRef.current.value : '').trim();
+    if (!/^\S+@\S+\.\S+$/.test(v)) { this.setState({ invalid: true }); return; }
+    const k = this.k();
+    this.clearT();
+    this.setState({ phase: 'fly', invalid: false, filed: this.selectRef.current ? this.selectRef.current.value : '' });
+    this._t = [
+      setTimeout(() => this.setState({ phase: 'insert' }), 870 * k),
+      setTimeout(() => this.setState({ phase: 'close' }), 1330 * k),
+      setTimeout(() => this.setState({ phase: 'flag' }), 1990 * k),
+      setTimeout(() => this.setState({ phase: 'done' }), 2750 * k)
+    ];
+    if (this.props.autoReset ?? false) this._t.push(setTimeout(this.onReset, 7000 * k));
+  };
+  onReset = () => {
+    this.clearT();
+    if (this.inputRef.current) this.inputRef.current.value = '';
+    if (this.selectRef.current) this.selectRef.current.value = '';
+    this.setState({ phase: 'reset', invalid: false });
+    this._t = [setTimeout(() => this.setState({ phase: 'idle' }), 60)];
+  };
+  onType = () => { if (this.state.invalid) this.setState({ invalid: false }); };
+  onKey = (e) => { if (e.key === 'Enter') { e.preventDefault(); this.onSend(); } };
+  renderVals() {
+    const MM = {
+      brass: { base: '#c9a35a', dark: '#8a6a3b', lite: '#eed9a4' },
+      silver: { base: '#b9bec4', dark: '#7f868e', lite: '#e6eaee' },
+      copper: { base: '#c07a4e', dark: '#8a5230', lite: '#e5aa82' }
+    };
+    const M = MM[this.props.metal ?? 'silver'] || MM.silver;
+    const p = this.state.phase;
+    const k = this.k();
+    const closed = p === 'close' || p === 'flag' || p === 'done';
+    const up = p === 'flag' || p === 'done';
+    let envT = 'translate(0px, 0px) scale(1) rotate(0deg)', envTrans = 'opacity 0.35s ease', envO = 1;
+    if (p === 'fly') { envT = 'translate(290px, -45px) scale(0.5) rotate(-5deg)'; envTrans = 'transform ' + (0.85 * k) + 's cubic-bezier(0.3, 0.55, 0.25, 1)'; }
+    else if (p === 'insert') { envT = 'translate(545px, -45px) scale(0.5) rotate(0deg)'; envTrans = 'transform ' + (0.45 * k) + 's ease-in'; }
+    else if (closed) { envT = 'translate(545px, -45px) scale(0.5) rotate(0deg)'; envTrans = 'none'; envO = 0; }
+    else if (p === 'reset') { envTrans = 'none'; envO = 0; }
+    const hints = {
+      idle: this.state.invalid ? "THAT ADDRESS DON'T LOOK RIGHT" : 'SCRIBBLE AN ADDRESS \u00b7 HIT SEND',
+      fly: 'SPECIAL DELIVERY\u2026', insert: 'SPECIAL DELIVERY\u2026',
+      close: 'SHUT TIGHT.', flag: "FLAG'S UP!",
+      done: '', reset: ''
+    };
+    return {
+      selectRef: this.selectRef,
+      filedAs: (this.state.filed || 'general curiosity').toUpperCase(),
+      inputRef: this.inputRef, onSend: this.onSend, onReset: this.onReset, onType: this.onType, onKey: this.onKey,
+      metalBase: M.base, metalDark: M.dark, metalLite: M.lite,
+      envT: envT, envTrans: envTrans, envO: envO,
+      formO: p === 'idle' ? 1 : 0,
+      formPE: p === 'idle' ? 'auto' : 'none',
+      doorRot: closed ? 'rotateX(0deg)' : 'rotateX(-108deg)',
+      doorTrans: 'transform ' + (0.55 * k) + 's cubic-bezier(0.34, 1.4, 0.5, 1)',
+      flagRot: up ? 'rotate(0deg)' : 'rotate(96deg)',
+      flagTrans: 'transform ' + (0.65 * k) + 's cubic-bezier(0.3, 1.5, 0.45, 1)',
+      isDone: p === 'done',
+      hint: hints[p] || '',
+      hintColor: this.state.invalid ? '#b8302f' : '#8a7a63',
+      inputLine: this.state.invalid ? '#b8302f' : 'rgba(23,18,11,0.55)'
+    };
+  }
+}
+</script>
+</body></html>

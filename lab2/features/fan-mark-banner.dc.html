@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./prelude.js"></script>
+<script src="./support.js"></script>
+<!-- lab 2 shows this on its own paper — see features/bare.css -->
+<link rel="stylesheet" href="./bare.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<!-- lab 2 serves these faces itself — see SELF-HOSTED in index.html -->
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  body { margin: 0; background: #f2e9cf; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+</style>
+</helmet>
+<div data-screen-label="Fan Mark Banner" style="min-height: 100vh; box-sizing: border-box; background: #f2e9cf; display: flex; align-items: center; justify-content: center; padding: 80px 40px; font-family: 'Kalam', cursive; position: relative; overflow: hidden">
+  <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}">
+    <div data-lab-nopaper style="position: absolute; inset: 0; pointer-events: none; opacity: 0.06; background-image: url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22160%22%20height=%22160%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22/%3E%3C/filter%3E%3Crect%20width=%22160%22%20height=%22160%22%20filter=%22url(%23n)%22/%3E%3C/svg%3E')"></div>
+  </sc-if>
+  <div style="position: relative; width: 880px; height: 260px; transform: rotate({{ tilt }}); z-index: 1">
+    <div style="position: absolute; left: -18px; top: 96px; width: 170px; height: 86px; transform: rotate(-18deg); filter: drop-shadow(6px 7px 0 rgba(23,18,11,0.8)); z-index: 1">
+      <div style="position: absolute; inset: 0; background: #17120b; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 24% 50%)"></div>
+      <div style="position: absolute; inset: 5px; background: #f4ecd5; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 24% 50%)"></div>
+      <div style="position: absolute; left: 34%; right: 12%; top: 12px; height: 0; border-top: 2.5px solid rgba(23,18,11,0.25)"></div>
+      <div style="position: absolute; left: 34%; right: 12%; bottom: 12px; height: 0; border-top: 2.5px solid rgba(23,18,11,0.18)"></div>
+    </div>
+    <div style="position: absolute; right: -18px; top: 96px; width: 170px; height: 86px; transform: rotate(18deg); filter: drop-shadow(6px 7px 0 rgba(23,18,11,0.8)); z-index: 1">
+      <div style="position: absolute; inset: 0; background: #17120b; clip-path: polygon(0 0, 100% 0, 76% 50%, 100% 100%, 0 100%)"></div>
+      <div style="position: absolute; inset: 5px; background: #f4ecd5; clip-path: polygon(0 0, 100% 0, 76% 50%, 100% 100%, 0 100%)"></div>
+      <div style="position: absolute; left: 12%; right: 34%; top: 12px; height: 0; border-top: 2.5px solid rgba(23,18,11,0.25)"></div>
+      <div style="position: absolute; left: 12%; right: 34%; bottom: 12px; height: 0; border-top: 2.5px solid rgba(23,18,11,0.18)"></div>
+    </div>
+    <div style="position: absolute; left: 96px; top: 76px; width: 60px; height: 44px; background: #17120b; clip-path: polygon(0 0, 100% 0, 100% 100%); z-index: 2"></div>
+    <div style="position: absolute; right: 96px; top: 76px; width: 60px; height: 44px; background: #17120b; clip-path: polygon(0 0, 100% 0, 0 100%); z-index: 2"></div>
+    <div style="position: absolute; left: 58px; top: 42px; width: 220px; height: 96px; box-sizing: border-box; background: #f4ecd5; border: 4px solid #17120b; border-radius: 10px 6px 12px 8px; box-shadow: 7px 8px 0 rgba(23,18,11,0.8); transform: rotate(-13deg); z-index: 3; overflow: hidden">
+      <div style="position: absolute; left: 10px; right: 10px; top: 9px; height: 0; border-top: 3px solid rgba(23,18,11,0.3); border-radius: 50%"></div>
+      <div style="position: absolute; left: 16px; right: 16px; bottom: 8px; height: 0; border-top: 2.5px solid rgba(23,18,11,0.18); border-radius: 50%"></div>
+    </div>
+    <div style="position: absolute; right: 58px; top: 42px; width: 220px; height: 96px; box-sizing: border-box; background: #f4ecd5; border: 4px solid #17120b; border-radius: 6px 10px 8px 12px; box-shadow: 7px 8px 0 rgba(23,18,11,0.8); transform: rotate(13deg); z-index: 3; overflow: hidden">
+      <div style="position: absolute; left: 10px; right: 10px; top: 9px; height: 0; border-top: 3px solid rgba(23,18,11,0.3); border-radius: 50%"></div>
+      <div style="position: absolute; left: 16px; right: 16px; bottom: 8px; height: 0; border-top: 2.5px solid rgba(23,18,11,0.18); border-radius: 50%"></div>
+    </div>
+    <div style="position: absolute; left: 190px; top: 8px; width: 500px; height: 136px; box-sizing: border-box; background: #f4ecd5; border: 4px solid #17120b; border-radius: 48% 48% 22px 26px / 34px 34px 22px 26px; box-shadow: 9px 10px 0 rgba(23,18,11,0.8); z-index: 4; display: flex; align-items: center; justify-content: center; padding: 18px 44px 14px; text-align: center; overflow: hidden">
+      <div style="position: absolute; left: 14px; right: 14px; top: 10px; height: 0; border-top: 3px solid rgba(23,18,11,0.28); border-radius: 50%"></div>
+      <div style="position: absolute; left: 20px; right: 20px; top: 16px; height: 0; border-top: 2px dashed rgba(23,18,11,0.22); border-radius: 50%"></div>
+      <div style="position: absolute; left: 14px; right: 14px; bottom: 10px; height: 0; border-top: 3px solid rgba(23,18,11,0.28); border-radius: 50%"></div>
+      <div style="position: absolute; left: 20px; right: 20px; bottom: 16px; height: 0; border-top: 2px dashed rgba(23,18,11,0.22); border-radius: 50%"></div>
+      <div style="font-family: 'Kalam', cursive; font-weight: 700; font-size: 31px; line-height: 1.25; color: #17120b; text-wrap: balance; position: relative">A place where <sc-if value="{{ highlight }}" hint-placeholder-val="{{ true }}"><span style="background: #ffd23f; padding: 0 8px; border: 3px solid #17120b; border-radius: 6px 10px 8px 6px; display: inline-block; transform: rotate(-2deg); box-shadow: 3px 4px 0 rgba(23,18,11,0.8)">EVERY</span></sc-if><sc-if value="{{ noHighlight }}" hint-placeholder-val="{{ false }}">EVERY</sc-if> fan leaves a mark</div>
+    </div>
+    <div style="position: absolute; left: 168px; top: 22px; width: 12px; height: 12px; background: #ffd23f; border: 3px solid #17120b; transform: rotate(45deg); box-shadow: 3px 4px 0 rgba(23,18,11,0.8); z-index: 5"></div>
+    <div style="position: absolute; right: 168px; top: 22px; width: 12px; height: 12px; background: #ffd23f; border: 3px solid #17120b; transform: rotate(45deg); box-shadow: 3px 4px 0 rgba(23,18,11,0.8); z-index: 5"></div>
+    <div style="position: absolute; left: 50%; top: -22px; transform: translateX(-50%) rotate(3deg); width: 16px; height: 16px; background: #e8484a; border: 3.5px solid #17120b; border-radius: 50% 46% 52% 48%; box-shadow: 3px 4px 0 rgba(23,18,11,0.8); z-index: 5"></div>
+    <div style="position: absolute; left: 50%; top: -44px; transform: translateX(-50%) rotate(-4deg); width: 8px; height: 8px; background: #ffd23f; border: 3px solid #17120b; border-radius: 50%; box-shadow: 2px 3px 0 rgba(23,18,11,0.8); z-index: 5"></div>
+    <div style="position: absolute; left: 118px; top: -20px; transform: rotate(-14deg); font-family: 'Kalam', cursive; font-weight: 700; font-size: 26px; color: #17120b; z-index: 5">✦</div>
+    <div style="position: absolute; right: 118px; top: -20px; transform: rotate(14deg); font-family: 'Kalam', cursive; font-weight: 700; font-size: 26px; color: #17120b; z-index: 5">✦</div>
+    <div style="position: absolute; left: 44px; top: 176px; transform: rotate(-10deg); font-family: 'Kalam', cursive; font-weight: 700; font-size: 18px; color: rgba(23,18,11,0.55); z-index: 5">✦</div>
+    <div style="position: absolute; right: 44px; top: 176px; transform: rotate(10deg); font-family: 'Kalam', cursive; font-weight: 700; font-size: 18px; color: rgba(23,18,11,0.55); z-index: 5">✦</div>
+    <sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}">
+      <div style="position: absolute; bottom: -46px; left: 50%; transform: translateX(-50%) rotate(-1deg); font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 3px; color: #f4ecd5; background: #17120b; border-radius: 4px; padding: 0 10px; white-space: nowrap">FAN MARK BANNER</div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;tilt&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:-1.5,&quot;min&quot;:-8,&quot;max&quot;:8,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;deg&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Banner&quot;},&quot;highlight&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Banner&quot;},&quot;captions&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Sheet&quot;},&quot;grain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Sheet&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const hl = this.props.highlight ?? true;
+    return {
+      tilt: (this.props.tilt ?? -1.5) + 'deg',
+      grain: this.props.grain ?? true,
+      captions: this.props.captions ?? false,   // lab 2: no sheet label under the banner
+      highlight: hl,
+      noHighlight: !hl,
+    };
+  }
+}
+</script>
+</body>
+</html>

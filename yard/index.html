@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=VT323&display=swap" rel="stylesheet">
+<link rel="icon" href="../logo/logo-icon.svg">
+<style>
+  body { margin: 0; background: #ece7f1; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+  ::selection { background: #ffd23f; }
+</style>
+</helmet>
+<div data-screen-label="Your Yard" style="min-height:100vh; box-sizing:border-box; background:#ece7f1; background-image:radial-gradient(circle, rgba(90,70,110,0.13) 1.3px, transparent 1.3px); background-size:24px 24px; padding:34px 30px 56px; font-family:'VT323',monospace; color:#17120b">
+  <div style="max-width:1200px; margin:0 auto">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:32px">
+      <div style="display:flex; align-items:center; gap:20px">
+        <div aria-hidden="true" style="position:relative; width:56px; height:64px; background:#fdf7e3; border:4px solid #17120b; box-shadow:6px 7px 0 rgba(60,50,80,0.2); transform:rotate(-4deg); display:flex; align-items:center; justify-content:center; font-family:'Rye',serif; font-size:34px; flex:none">K
+          <div style="position:absolute; bottom:-9px; right:-9px; width:12px; height:12px; background:#e8484a; border:3px solid #17120b; transform:rotate(45deg)"></div>
+        </div>
+        <div>
+          <h1 style="margin:0; font-family:'Rye',serif; font-size:36px; font-weight:400; line-height:1">Your Yard</h1>
+          <div style="font-size:17px; letter-spacing:3px; color:#4a4054; opacity:0.7; margin-top:6px">· YOUR PLOT ON THE HILL · DIG IN, DRESS UP ·</div>
+        </div>
+      </div>
+      <button sc-camel-on-click="{{ openDrawer }}" aria-label="settings" title="settings" style="width:52px; height:52px; background:#fdf7e3; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; flex:none" style-hover="transform:rotate(8deg)">
+        <svg sc-camel-view-box="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="4.6" fill="none" stroke="#17120b" stroke-width="2.6"></circle><g stroke="#17120b" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="2.4" x2="12" y2="5.4"></line><line x1="12" y1="18.6" x2="12" y2="21.6"></line><line x1="2.4" y1="12" x2="5.4" y2="12"></line><line x1="18.6" y1="12" x2="21.6" y2="12"></line><line x1="5.2" y1="5.2" x2="7.3" y2="7.3"></line><line x1="16.7" y1="16.7" x2="18.8" y2="18.8"></line><line x1="5.2" y1="18.8" x2="7.3" y2="16.7"></line><line x1="16.7" y1="7.3" x2="18.8" y2="5.2"></line></g></svg>
+      </button>
+    </div>
+
+    <div style="display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:28px; align-items:start">
+
+      <div style="display:flex; flex-direction:column; gap:28px; min-width:0">
+
+        <section style="min-width:0">
+          <h2 style="margin:0 0 16px; font-family:'Rye',serif; font-size:32px; font-weight:400">Your Plot</h2>
+        </section>
+
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:28px">
+
+        <section style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate({{ rStand }})">
+          <div aria-hidden="true" style="position:absolute; top:-11px; left:-11px; width:15px; height:15px; background:#e0598c; border:3px solid #17120b; transform:rotate(45deg)"></div>
+          <h2 style="margin:0 0 12px; font-family:'Rye',serif; font-size:20px; font-weight:400">Your standing</h2>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px">
+            <div style="font-size:17px; letter-spacing:2px; color:#e8484a; border:3px solid #e8484a; padding:1px 10px; transform:rotate(-3deg); background:#fdf7e3; flex:none">REGULAR</div>
+            <div style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.75">GNOME IN GOOD STANDING</div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px 10px">
+            <sc-for list="{{ stats }}" as="st" hint-placeholder-count="4">
+              <div>
+                <div style="font-family:'Rye',serif; font-size:23px; line-height:1.1">{{ st.v }}</div>
+                <div style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.8; margin-top:2px">{{ st.k }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate({{ rBadge }})">
+          <div aria-hidden="true" style="position:absolute; bottom:-11px; left:-11px; width:16px; height:16px; background:#ffd23f; border:3px solid #17120b; border-radius:50%"></div>
+          <h2 style="margin:0; font-family:'Rye',serif; font-size:20px; font-weight:400">Badges &amp; trophies</h2>
+          <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin:2px 0 14px">PINNED TO YOUR FENCE</div>
+          <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:12px">
+            <sc-for list="{{ badges }}" as="b" hint-placeholder-count="6">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:3px; padding:12px 6px 9px; text-align:center; background:{{ b.bg }}; border:{{ b.border }}; box-shadow:{{ b.shadow }}; transform:rotate({{ b.rot }}); opacity:{{ b.op }}">
+                {{ b.art }}
+                <span style="font-size:14.5px; letter-spacing:0.5px; line-height:1.15; color:#17120b; margin-top:3px">{{ b.name }}</span>
+                <span style="font-size:12.5px; letter-spacing:0.5px; color:#4a4054; opacity:0.75">{{ b.sub }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate({{ rVisit }})">
+          <div aria-hidden="true" style="position:absolute; top:-11px; right:-11px; width:15px; height:15px; background:#7bc264; border:3px solid #17120b; transform:rotate(45deg)"></div>
+          <h2 style="margin:0 0 14px; font-family:'Rye',serif; font-size:20px; font-weight:400">Spaces you've visited</h2>
+          <div style="display:flex; flex-direction:column; gap:12px; max-height:250px; overflow-y:auto; padding-right:4px">
+            <sc-for list="{{ visited }}" as="v" hint-placeholder-count="5">
+              <div style="display:flex; align-items:center; gap:11px">
+                <div aria-hidden="true" style="flex:none; width:33px; height:33px; background:{{ v.bg }}; border:3px solid #17120b; display:flex; align-items:center; justify-content:center; font-family:'Rye',serif; font-size:15px; color:{{ v.fg }}; transform:rotate({{ v.rot }}); box-shadow:2px 3px 0 rgba(60,50,80,0.18)">{{ v.initial }}</div>
+                <div style="min-width:0">
+                  <div style="font-size:18px; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ v.name }}</div>
+                  <div style="font-size:13.5px; letter-spacing:1px; color:#4a4054; opacity:0.75; margin-top:1px">VISITED {{ v.when }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate({{ rEdit }})">
+          <div aria-hidden="true" style="position:absolute; bottom:-11px; right:-11px; width:15px; height:15px; background:#e8484a; border:3px solid #17120b; border-radius:50%"></div>
+          <h2 style="margin:0 0 14px; font-family:'Rye',serif; font-size:20px; font-weight:400">Your edits</h2>
+          <div style="display:flex; flex-direction:column; gap:13px; max-height:250px; overflow-y:auto; padding-right:4px">
+            <sc-for list="{{ edits }}" as="e" hint-placeholder-count="6">
+              <div style="display:flex; gap:10px">
+                <div aria-hidden="true" style="flex:none; width:9px; height:9px; background:{{ e.color }}; border:2px solid #17120b; transform:rotate(45deg); margin-top:7px"></div>
+                <div style="min-width:0; font-size:17px; line-height:1.25; color:#3a3342">{{ e.a }} <b style="color:#17120b">{{ e.b }}</b> {{ e.c }}
+                  <div style="font-size:13px; letter-spacing:1px; color:#4a4054; opacity:0.7; margin-top:2px">{{ e.when }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <sc-if value="{{ captionsOn }}" hint-placeholder-val="{{ true }}">
+      <div style="text-align:center; margin-top:38px; font-size:15px; letter-spacing:2px; color:#4a4054; opacity:0.65">YOUR SETTINGS ARE SAVED ON THIS DEVICE — NOTHING HERE IS UPLOADED</div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
+    <div sc-camel-on-click="{{ closeDrawer }}" style="position:fixed; inset:0; background:rgba(23,18,11,0.4); z-index:20"></div>
+    <div role="dialog" aria-modal="true" aria-label="settings" style="position:fixed; top:0; right:0; bottom:0; width:min(370px,90vw); box-sizing:border-box; background:#fdf7e3; border-left:5px solid #17120b; z-index:21; padding:26px 24px; display:flex; flex-direction:column; gap:22px; overflow-y:auto; font-family:'VT323',monospace; color:#17120b">
+      <div style="display:flex; align-items:center; justify-content:space-between">
+        <h2 style="margin:0; font-family:'Rye',serif; font-size:24px; font-weight:400">Settings</h2>
+        <button sc-camel-on-click="{{ closeDrawer }}" aria-label="close settings" style="border:none; background:none; font-family:'VT323',monospace; font-size:17px; letter-spacing:1px; color:#4a4054; text-decoration:underline; text-underline-offset:3px; cursor:pointer" style-hover="color:#e8484a">CLOSE</button>
+      </div>
+      <div>
+        <div style="font-size:15px; letter-spacing:2px; color:#4a4054; margin-bottom:8px">DISPLAY NAME</div>
+        <input value="{{ sName }}" sc-camel-on-input="{{ onSName }}" sc-camel-max-length="24" placeholder="how the hill greets you" style="box-sizing:border-box; width:100%; border:3px solid #17120b; background:#fffcf0; padding:7px 10px; font-family:'VT323',monospace; font-size:18px; color:#17120b; box-shadow:2px 3px 0 rgba(60,50,80,0.18); outline:none">
+      </div>
+      <div style="display:flex; flex-direction:column; gap:14px">
+        <label style="display:flex; align-items:center; gap:11px; font-size:17px; cursor:pointer">
+          <input type="checkbox" checked="{{ sEmail }}" sc-camel-on-change="{{ onSEmail }}" style="width:18px; height:18px; accent-color:#e8484a; flex:none">
+          <span>Email me when someone replies to my notes</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:11px; font-size:17px; cursor:pointer">
+          <input type="checkbox" checked="{{ sActivity }}" sc-camel-on-change="{{ onSActivity }}" style="width:18px; height:18px; accent-color:#e8484a; flex:none">
+          <span>Show my edits to other gnomes on this hill</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:11px; font-size:17px; cursor:pointer">
+          <input type="checkbox" checked="{{ sMotion }}" sc-camel-on-change="{{ onSMotion }}" style="width:18px; height:18px; accent-color:#e8484a; flex:none">
+          <span>Reduce motion (calmer wobbles and pops)</span>
+        </label>
+      </div>
+      <div style="margin-top:auto; border-top:3px dashed rgba(23,18,11,0.35); padding-top:18px">
+        <button sc-camel-on-click="{{ signOut }}" style="border:3px solid #17120b; background:#17120b; color:#fdf7e3; font-family:'VT323',monospace; font-size:18px; letter-spacing:1px; padding:8px 18px; cursor:pointer; box-shadow:3px 4px 0 rgba(60,50,80,0.25)" style-hover="background:#3a3342">SIGN OUT</button>
+        <sc-if value="{{ signoutNote }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:14.5px; letter-spacing:0.5px; color:#4a4054; margin-top:10px; line-height:1.35">there's no account system yet — nothing to sign out of.</div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{
+  &quot;jitter&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Look&quot;, &quot;description&quot;: &quot;Slight sticker tilt on cards and tiles&quot;},
+  &quot;captions&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Look&quot;, &quot;description&quot;: &quot;Show the VT323 helper captions&quot;},
+  &quot;showLockedBadges&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Badges&quot;, &quot;description&quot;: &quot;Show not-yet-earned badges as dashed slots&quot;}
+}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.C = { INK: '#17120b', CREAM: '#fdf7e3', RED: '#e8484a', YEL: '#ffd23f', GRN: '#7bc264', BLU: '#5a8fd6', PNK: '#e0598c' };
+    this.K = { settings: 'knoll-yard:settings' };
+    const load = (k, f) => { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : f; } catch (e) { return f; } };
+    this.state = {
+      settings: Object.assign({ displayName: '', emailReplies: false, showActivity: true, reduceMotion: false }, load(this.K.settings, {})),
+      drawerOpen: false, signoutNote: false
+    };
+  }
+  save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  componentDidMount() {
+    this._key = (e) => {
+      if (e.key === 'Escape' && this.state.drawerOpen) this.setState({ drawerOpen: false, signoutNote: false });
+    };
+    window.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this._key);
+  }
+  setSettings(patch) {
+    const settings = Object.assign({}, this.state.settings, patch);
+    this.setState({ settings });
+    this.save(this.K.settings, settings);
+  }
+  badgeIcon(kind) {
+    const h = React.createElement, C = this.C, INK = C.INK;
+    let kids = [];
+    if (kind === 'trophy') kids = [
+      h('path', { key: 1, d: 'M18,12 h24 v12 q0,12 -12,15 q-12,-3 -12,-15 z', fill: C.YEL, stroke: INK, strokeWidth: 3, strokeLinejoin: 'round' }),
+      h('path', { key: 2, d: 'M18,16 h-7 q-3,9 7,11', fill: 'none', stroke: INK, strokeWidth: 3 }),
+      h('path', { key: 3, d: 'M42,16 h7 q3,9 -7,11', fill: 'none', stroke: INK, strokeWidth: 3 }),
+      h('rect', { key: 4, x: 27, y: 39, width: 6, height: 7, fill: C.YEL, stroke: INK, strokeWidth: 3 }),
+      h('rect', { key: 5, x: 19, y: 46, width: 22, height: 7, fill: C.YEL, stroke: INK, strokeWidth: 3 })];
+    else if (kind === 'star') kids = [
+      h('polygon', { key: 1, points: '30,10 34.4,23.9 47.1,24.4 37.1,32.3 40.6,44.6 30,37.5 19.4,44.6 22.9,32.3 12.9,24.4 25.6,23.9', fill: C.GRN, stroke: INK, strokeWidth: 3, strokeLinejoin: 'round' })];
+    else if (kind === 'flame') kids = [
+      h('path', { key: 1, d: 'M30,8 Q45,26 42,38 Q40,50 30,53 Q20,50 18,38 Q15,26 30,8 z', fill: C.RED, stroke: INK, strokeWidth: 3, strokeLinejoin: 'round' }),
+      h('path', { key: 2, d: 'M30,26 Q37,34 34,43 Q32,48 30,49 Q28,48 26,43 Q23,34 30,26 z', fill: C.YEL })];
+    else if (kind === 'pencil') kids = [
+      h('g', { key: 1, transform: 'rotate(40 30 30)' },
+        h('rect', { x: 24, y: 4, width: 12, height: 6, fill: C.PNK, stroke: INK, strokeWidth: 3 }),
+        h('rect', { x: 24, y: 10, width: 12, height: 28, fill: C.BLU, stroke: INK, strokeWidth: 3 }),
+        h('path', { d: 'M24,38 h12 l-6,13 z', fill: C.CREAM, stroke: INK, strokeWidth: 3, strokeLinejoin: 'round' }))];
+    else kids = [
+      h('rect', { key: 1, x: 20, y: 28, width: 20, height: 18, rx: 3, fill: '#b9b2c0', stroke: INK, strokeWidth: 3 }),
+      h('path', { key: 2, d: 'M24,28 v-7 a6,6 0 0 1 12,0 v7', fill: 'none', stroke: INK, strokeWidth: 3 }),
+      h('circle', { key: 3, cx: 30, cy: 36, r: 2.5, fill: INK })];
+    return h('svg', { width: 38, height: 38, viewBox: '0 0 60 60', 'aria-hidden': true, style: { display: 'block' } }, kids);
+  }
+  renderVals() {
+    const C = this.C;
+    const { settings, drawerOpen, signoutNote } = this.state;
+    const jitter = this.props.jitter ?? true;
+    const showLocked = this.props.showLockedBadges ?? true;
+    const captionsOn = this.props.captions ?? true;
+    const rot = (v) => jitter ? v : '0deg';
+    const badgeTile = (b) => Object.assign({
+      bg: '#fffcf0', border: '3px solid #17120b', shadow: '4px 5px 0 rgba(60,50,80,0.18)', op: 1
+    }, b, { rot: rot(b.rot) });
+    const lockedTile = (b) => Object.assign({
+      bg: 'rgba(23,18,11,0.04)', border: '3px dashed rgba(23,18,11,0.4)', shadow: 'none', op: 0.7,
+      art: this.badgeIcon('lock')
+    }, b, { rot: '0deg' });
+    let badges = [
+      badgeTile({ name: 'HILL TENDER', sub: 'kept a plot 30 days', art: this.badgeIcon('trophy'), rot: '-2deg' }),
+      badgeTile({ name: 'FIRST PLANTING', sub: 'earned apr 2026', art: this.badgeIcon('star'), rot: '1.5deg' }),
+      badgeTile({ name: '18-DAY STREAK', sub: 'still burning', art: this.badgeIcon('flame'), rot: '-1deg' }),
+      badgeTile({ name: 'WALL SCRIBBLER', sub: 'left 10 notes', art: this.badgeIcon('pencil'), rot: '2deg' }),
+      lockedTile({ name: '100 EDITS', sub: '58 to go' }),
+      lockedTile({ name: "FOUNDER'S PIN", sub: 'how? nobody knows' })
+    ];
+    if (!showLocked) badges = badges.filter(b => b.op === 1);
+    return {
+      rStand: rot('-0.8deg'), rBadge: rot('0.7deg'), rVisit: rot('-0.5deg'), rEdit: rot('0.6deg'),
+      captionsOn,
+      stats: [
+        { v: '142', k: 'CONTRIBUTIONS' }, { v: '3', k: 'HILLS JOINED' },
+        { v: '18d', k: 'CURRENT STREAK' }, { v: 'Apr 2026', k: 'MEMBER SINCE' }
+      ],
+      badges,
+      visited: [
+        { initial: 'M', name: "Mossy's Hollow", when: 'TODAY', bg: C.PNK, fg: C.CREAM, rot: rot('-2deg') },
+        { initial: 'T', name: 'The Toadstool Ring', when: '2 DAYS AGO', bg: C.RED, fg: C.CREAM, rot: rot('1.5deg') },
+        { initial: 'J', name: "Juno's Patch", when: '5 DAYS AGO', bg: C.BLU, fg: C.CREAM, rot: rot('-1deg') },
+        { initial: 'B', name: 'Bramblewick', when: '3 WEEKS AGO', bg: C.GRN, fg: C.CREAM, rot: rot('2deg') },
+        { initial: 'O', name: 'Opal Fen', when: '2 MONTHS AGO', bg: C.YEL, fg: C.INK, rot: rot('-1.5deg') }
+      ],
+      edits: [
+        { a: 'drew', b: '"the pond at dusk"', c: 'in The Museum', when: '3 HOURS AGO', color: C.RED },
+        { a: 'voted YES on', b: '"should Tuesdays be cancelled?"', c: '', when: 'YESTERDAY', color: C.BLU },
+        { a: 'placed a block on', b: 'The Monument', c: '', when: '2 DAYS AGO', color: C.GRN },
+        { a: 'put a name forward in', b: 'The Naming Ceremony', c: '', when: '4 DAYS AGO', color: C.PNK },
+        { a: 'left a note on', b: 'The Wall', c: '', when: '1 WEEK AGO', color: C.YEL },
+        { a: 'pinned a bug in', b: 'The Bug Farm', c: '', when: '2 WEEKS AGO', color: C.RED }
+      ],
+      drawerOpen,
+      openDrawer: () => this.setState({ drawerOpen: true, signoutNote: false }),
+      closeDrawer: () => this.setState({ drawerOpen: false, signoutNote: false }),
+      sName: settings.displayName,
+      onSName: (e) => this.setSettings({ displayName: e.target.value.slice(0, 24) }),
+      sEmail: settings.emailReplies,
+      onSEmail: (e) => this.setSettings({ emailReplies: e.target.checked }),
+      sActivity: settings.showActivity,
+      onSActivity: (e) => this.setSettings({ showActivity: e.target.checked }),
+      sMotion: settings.reduceMotion,
+      onSMotion: (e) => this.setSettings({ reduceMotion: e.target.checked }),
+      signOut: () => this.setState({ signoutNote: true }),
+      signoutNote
+    };
+  }
+}
+</script>
+
+
+</body></html>

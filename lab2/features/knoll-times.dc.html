@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./prelude.js"></script>
+<script src="./support.js"></script>
+<!-- lab 2 shows this on its own paper — see features/bare.css -->
+<link rel="stylesheet" href="./bare.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<!-- lab 2 serves these faces itself — see SELF-HOSTED in index.html -->
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  /* THE BENCH'S THREE MARKS — see features/bare.css, NO SECOND SHEET. Every
+     line below is the machine as it was exported, verbatim; the bench adds
+     three attributes and changes no declaration: data-lab-nopaper on the
+     paper grain, data-lab-sheet on the full-viewport div the export wraps
+     the drawing in (the one carrying the export's own zoom), and
+     data-lab-nozoom on the zoom widget pinned to the corner. frames.js
+     steps through the first two as sheets and bare.css draws none of the
+     three; opened on its own, the file still zooms and shows its widget.
+     Written by perf/swap-machine.js. */
+  body { margin: 0; background: #f2e9cf; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+  @keyframes spinGear { to { transform: rotate(360deg); } }
+  @keyframes stampPress { 0%, 50% { transform: translateY(0); } 62%, 72% { transform: translateY(20px); } 84%, 100% { transform: translateY(0); } }
+  @keyframes blinkLight { 0%, 60% { opacity: 1; } 61%, 100% { opacity: 0.2; } }
+  @keyframes popIn { 0% { transform: scale(0); } 70% { transform: scale(1.1); } 100% { transform: scale(1); } }
+  @keyframes tagSway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(3deg); } }
+  @keyframes needleBob { 0%, 50%, 100% { transform: rotate(-28deg); } 66% { transform: rotate(30deg); } }
+  @keyframes counterBob { 0%, 50%, 100% { transform: translateY(0); } 66% { transform: translateY(14px); } }
+</style>
+</helmet>
+<div data-screen-label="Knoll Times Printing Press" style="min-height: 100vh; box-sizing: border-box; background: #f2e9cf; position: relative">
+  <sc-if value="{{ zoomUI }}" hint-placeholder-val="{{ true }}">
+    <div data-lab-nozoom style="position: fixed; right: 18px; bottom: 18px; z-index: 60; display: flex; align-items: center; gap: 7px; background: #f4ecd5; border: 4px solid #17120b; border-radius: 8px 11px 7px 10px; box-shadow: 7px 8px 0 rgba(23,18,11,0.8); padding: 5px 9px; font-family: 'VT323', monospace">
+      <button sc-camel-on-click="{{ onZoomOut }}" title="zoom out" style="font-family: 'VT323', monospace; font-size: 22px; line-height: 1; color: #17120b; background: #ffd23f; border: 3px solid #17120b; border-radius: 6px 4px 7px 5px; padding: 0 9px; cursor: pointer" style-hover="background: #ffe27a">−</button>
+      <div style="font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 2px; color: #17120b; min-width: 62px; text-align: center">{{ zoomLabel }}</div>
+      <button sc-camel-on-click="{{ onZoomIn }}" title="zoom in" style="font-family: 'VT323', monospace; font-size: 22px; line-height: 1; color: #17120b; background: #ffd23f; border: 3px solid #17120b; border-radius: 4px 6px 5px 7px; padding: 0 9px; cursor: pointer" style-hover="background: #ffe27a">+</button>
+      <div sc-camel-on-click="{{ onZoomReset }}" title="back to 100%" style="font-family: 'VT323', monospace; font-size: 14px; letter-spacing: 2px; color: #17120b; opacity: 0.6; cursor: pointer; padding-left: 2px">RESET</div>
+    </div>
+  </sc-if>
+  <div data-lab-sheet style="min-height: 100vh; box-sizing: border-box; background: #f2e9cf; font-family: 'Kalam', cursive; position: relative; overflow-x: auto; zoom: {{ zoomF }}; padding: 34px 40px 40px">
+  <div data-lab-nopaper style="position: absolute; inset: 0; pointer-events: none; opacity: 0.06; background-image: url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22160%22%20height=%22160%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22/%3E%3C/filter%3E%3Crect%20width=%22160%22%20height=%22160%22%20filter=%22url(%23n)%22/%3E%3C/svg%3E')"></div>
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; position: relative; z-index: 1">
+    <div style="display: flex; align-items: center; gap: 16px">
+      <div style="font-family: 'VT323', monospace; font-size: 30px; letter-spacing: 4px; color: #17120b; background: #f4ecd5; border: 4px solid #17120b; border-radius: 10px 5px 11px 6px; box-shadow: 7px 8px 0 rgba(23,18,11,0.85); padding: 2px 22px 0; white-space: nowrap">KNOLL TIMES PRINTING PRESS</div>
+      <div style="display: flex; gap: 9px; align-items: center">
+        <div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid #17120b; background: #ffd23f; animation: {{ lightAnim }}"></div>
+        <div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid #17120b; background: #e8484a; animation: {{ lightAnim }}; animation-delay: 0.3s"></div>
+        <div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid #17120b; background: #7bc264; animation: {{ lightAnim }}; animation-delay: 0.6s"></div>
+      </div>
+    </div>
+    <div style="font-size: 16px; color: #17120b; opacity: 0.65">the official dispatch rig of knoll studio · one paper per milestone, sealed in wax</div>
+  </div>
+  <div style="display: flex; justify-content: center; align-items: flex-start; gap: 54px; margin-top: 36px; position: relative; z-index: 1">
+    <div style="display: flex; flex-direction: column; align-items: center; position: relative">
+      <div style="position: relative; width: 580px; height: 545px">
+        <div style="position: absolute; left: 200px; top: -6px; width: 180px; height: 180px; z-index: 1; animation: spinGear {{ wheelDur }} linear infinite">
+          <div style="position: absolute; left: 83px; top: 0; width: 14px; height: 180px; background: #b08a58; border: 4px solid #17120b; border-radius: 8px; box-sizing: border-box"></div>
+          <div style="position: absolute; left: 83px; top: 0; width: 14px; height: 180px; background: #b08a58; border: 4px solid #17120b; border-radius: 8px; box-sizing: border-box; transform: rotate(45deg)"></div>
+          <div style="position: absolute; left: 83px; top: 0; width: 14px; height: 180px; background: #b08a58; border: 4px solid #17120b; border-radius: 8px; box-sizing: border-box; transform: rotate(90deg)"></div>
+          <div style="position: absolute; left: 83px; top: 0; width: 14px; height: 180px; background: #b08a58; border: 4px solid #17120b; border-radius: 8px; box-sizing: border-box; transform: rotate(135deg)"></div>
+          <div style="position: absolute; inset: 62px; background: #8a6a45; border: 4px solid #17120b; border-radius: 50%"></div>
+        </div>
+        <div style="position: absolute; left: 276px; top: 168px; width: 28px; height: 160px; box-sizing: border-box; background: repeating-linear-gradient(35deg, #c5bba9 0px, #c5bba9 6px, #8a7f6a 6px, #8a7f6a 12px); border: 4px solid #17120b; z-index: 1"></div>
+        <div style="position: absolute; left: 90px; top: 140px; width: 46px; height: 372px; box-sizing: border-box; background: #9c7648; border: 5px solid #17120b; border-radius: 6px; z-index: 1">
+          <div style="position: absolute; top: 40px; left: 6px; width: 8px; height: 8px; border-radius: 50%; background: #17120b; opacity: 0.5"></div>
+          <div style="position: absolute; top: 150px; left: 6px; width: 8px; height: 8px; border-radius: 50%; background: #17120b; opacity: 0.5"></div>
+          <div style="position: absolute; top: 260px; left: 6px; width: 8px; height: 8px; border-radius: 50%; background: #17120b; opacity: 0.5"></div>
+        </div>
+        <div style="position: absolute; left: 444px; top: 140px; width: 46px; height: 372px; box-sizing: border-box; background: #9c7648; border: 5px solid #17120b; border-radius: 6px; z-index: 1">
+          <div style="position: absolute; top: 40px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: #17120b; opacity: 0.5"></div>
+          <div style="position: absolute; top: 150px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: #17120b; opacity: 0.5"></div>
+          <div style="position: absolute; top: 260px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: #17120b; opacity: 0.5"></div>
+        </div>
+        <div style="position: absolute; left: 60px; top: 128px; width: 460px; height: 48px; box-sizing: border-box; background: #8a6a45; border: 5px solid #17120b; border-radius: 10px; box-shadow: 8px 9px 0 rgba(23,18,11,0.55); z-index: 2; display: flex; align-items: center; justify-content: center">
+          <div style="font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 3px; color: #f4ecd5; background: #17120b; border-radius: 4px; padding: 0 12px; white-space: nowrap">KNOLL PRESS NO.1 · EST. 2026</div>
+        </div>
+        <div style="position: absolute; left: 180px; top: 296px; width: 220px; height: 32px; box-sizing: border-box; background: #7a5a36; border: 5px solid #17120b; border-radius: 6px; z-index: 2; animation: {{ stampAnim }}">
+          <div style="position: absolute; left: 50%; top: -14px; transform: translateX(-50%); width: 60px; height: 16px; background: #7a5a36; border: 4px solid #17120b; border-radius: 5px 5px 0 0; box-sizing: border-box"></div>
+        </div>
+        <div style="position: absolute; left: 235px; top: 352px; width: 150px; height: 46px; box-sizing: border-box; background: #fdf7e3; border: 4px solid #17120b; border-radius: 3px; z-index: 2">
+          <div style="position: absolute; inset: 7px; background: repeating-linear-gradient(180deg, rgba(23,18,11,0) 0px, rgba(23,18,11,0) 6px, rgba(23,18,11,0.45) 6px, rgba(23,18,11,0.45) 8px)"></div>
+        </div>
+        <div style="position: absolute; left: 158px; top: 362px; width: 46px; height: 36px; box-sizing: border-box; background: #17120b; border-radius: 5px 5px 10px 10px; z-index: 2">
+          <div style="position: absolute; top: 6px; left: 8px; right: 8px; height: 7px; background: #e8484a; border-radius: 3px"></div>
+        </div>
+        <div style="position: absolute; left: 70px; top: 396px; width: 440px; height: 38px; box-sizing: border-box; background: #9c7648; border: 5px solid #17120b; border-radius: 8px; box-shadow: 8px 9px 0 rgba(23,18,11,0.55); z-index: 2"></div>
+        <div style="position: absolute; left: 150px; top: 430px; width: 280px; height: 76px; box-sizing: border-box; background: repeating-linear-gradient(180deg, #8a6a45 0px, #8a6a45 12px, #7a5a36 12px, #7a5a36 16px); border: 5px solid #17120b; z-index: 1"></div>
+        <div style="position: absolute; left: 30px; top: 500px; width: 520px; height: 34px; box-sizing: border-box; background: #b08a58; border: 5px solid #17120b; border-radius: 8px 10px 12px 9px; box-shadow: 10px 11px 0 rgba(23,18,11,0.8); z-index: 2"></div>
+        <div style="position: absolute; left: 62px; top: 296px; width: 60px; height: 60px; z-index: 1; animation: spinGear {{ gearDur }} linear infinite">
+          <div style="position: absolute; left: 24px; top: 0; width: 12px; height: 60px; background: #c5bba9; border: 3px solid #17120b; border-radius: 5px; box-sizing: border-box"></div>
+          <div style="position: absolute; left: 24px; top: 0; width: 12px; height: 60px; background: #c5bba9; border: 3px solid #17120b; border-radius: 5px; box-sizing: border-box; transform: rotate(60deg)"></div>
+          <div style="position: absolute; left: 24px; top: 0; width: 12px; height: 60px; background: #c5bba9; border: 3px solid #17120b; border-radius: 5px; box-sizing: border-box; transform: rotate(120deg)"></div>
+          <div style="position: absolute; inset: 16px; background: #f4ecd5; border: 3px solid #17120b; border-radius: 50%; box-sizing: border-box"></div>
+        </div>
+        <div style="position: absolute; left: 100px; top: 346px; width: 52px; height: 52px; z-index: 1; animation: spinGear {{ gearDur }} linear infinite reverse">
+          <div style="position: absolute; left: 20px; top: 0; width: 12px; height: 52px; background: #c5bba9; border: 3px solid #17120b; border-radius: 5px; box-sizing: border-box"></div>
+          <div style="position: absolute; left: 20px; top: 0; width: 12px; height: 52px; background: #c5bba9; border: 3px solid #17120b; border-radius: 5px; box-sizing: border-box; transform: rotate(60deg)"></div>
+          <div style="position: absolute; left: 20px; top: 0; width: 12px; height: 52px; background: #c5bba9; border: 3px solid #17120b; border-radius: 5px; box-sizing: border-box; transform: rotate(120deg)"></div>
+          <div style="position: absolute; inset: 14px; background: #f4ecd5; border: 3px solid #17120b; border-radius: 50%; box-sizing: border-box"></div>
+        </div>
+        <div style="position: absolute; left: 92px; top: 194px; width: 42px; height: 42px; box-sizing: border-box; background: #f4ecd5; border: 4px solid #17120b; border-radius: 50%; box-shadow: 4px 5px 0 rgba(23,18,11,0.45); z-index: 2">
+          <div style="position: absolute; top: 8px; left: 50%; width: 3px; height: 6px; background: #17120b; transform: translateX(-50%)"></div>
+          <div style="position: absolute; top: 14px; left: 8px; width: 3px; height: 6px; background: #17120b; transform: rotate(-46deg)"></div>
+          <div style="position: absolute; top: 14px; right: 8px; width: 3px; height: 6px; background: #e8484a; transform: rotate(46deg)"></div>
+          <div style="position: absolute; bottom: 50%; left: 50%; width: 4px; height: 13px; margin-left: -2px; background: #e8484a; border-radius: 2px; transform-origin: bottom center; transform: rotate(-28deg); animation: {{ needleAnim }}"></div>
+          <div style="position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #17120b; border-radius: 50%"></div>
+        </div>
+        <div style="position: absolute; left: 496px; top: 400px; width: 34px; height: 96px; box-sizing: border-box; background: #b8ac97; border: 4px solid #17120b; border-radius: 8px 8px 4px 4px; z-index: 2">
+          <div style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 44px; height: 14px; background: #c5bba9; border: 3px solid #17120b; border-radius: 5px; box-sizing: border-box"></div>
+          <div style="position: absolute; inset: 8px 7px; background: #17120b; border-radius: 4px; overflow: hidden">
+            <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 62%; background: #e8484a"></div>
+            <div style="position: absolute; left: 0; right: 0; top: 30%; height: 2px; background: #17120b"></div>
+            <div style="position: absolute; left: 0; right: 0; top: 60%; height: 2px; background: #17120b"></div>
+          </div>
+          <div style="position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-family: 'VT323', monospace; font-size: 12px; letter-spacing: 1px; color: #17120b; opacity: 0.6; white-space: nowrap">INK</div>
+        </div>
+        <div style="position: absolute; left: 410px; top: 176px; width: 14px; height: 116px; z-index: 1; display: flex; flex-direction: column; align-items: center">
+          <div style="width: 8px; height: 100%; background: #8a7f6a; border: 3px solid #17120b; box-sizing: border-box"></div>
+          <div style="position: absolute; bottom: -6px; width: 22px; height: 22px; background: #ffd23f; border: 3px solid #17120b; border-radius: 50%; box-sizing: border-box; animation: {{ bobAnim }}"></div>
+        </div>
+        <div style="position: absolute; left: 452px; top: 196px; width: 26px; height: 100px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 2; background: #d9d0c1; border: 4px solid #17120b; border-radius: 7px 5px 8px 6px; padding: 6px 0">
+          <div style="width: 12px; height: 12px; border-radius: 50%; border: 3px solid #17120b; background: #ffd23f; box-sizing: border-box; animation: {{ lightAnim }}"></div>
+          <div style="width: 12px; height: 12px; border-radius: 50%; border: 3px solid #17120b; background: #e8484a; box-sizing: border-box; animation: {{ lightAnim }}; animation-delay: 0.4s"></div>
+          <div style="width: 12px; height: 12px; border-radius: 50%; border: 3px solid #17120b; background: #7bc264; box-sizing: border-box; animation: {{ lightAnim }}; animation-delay: 0.8s"></div>
+          <div style="width: 14px; height: 20px; background: #17120b; border-radius: 3px; position: relative">
+            <div style="position: absolute; left: 2px; right: 2px; top: {{ switchTop }}; height: 7px; background: #e8484a; border-radius: 2px; transition: top 0.2s"></div>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: flex-end; gap: 22px; margin-top: 26px">
+        <div sc-camel-on-click="{{ onOpenLatest }}" style="position: relative; width: 250px; box-sizing: border-box; background: #f6eed8; border: 4px solid #17120b; border-radius: 6px 9px 5px 8px; box-shadow: 8px 9px 0 rgba(23,18,11,0.55); padding: 14px 16px 12px; cursor: pointer; transform: rotate(-1.5deg)" style-hover="transform: rotate(0deg) translateY(-5px)">
+          <div style="position: absolute; top: -16px; right: -22px; font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 2px; color: #17120b; background: #ffd23f; border: 3px solid #17120b; border-radius: 6px 4px 7px 5px; padding: 1px 10px 0; animation: tagSway 2.6s ease-in-out infinite; z-index: 2">HOT OFF THE PRESS</div>
+          <div style="font-family: 'Pirata One', serif; font-size: 26px; text-align: center; color: #17120b; line-height: 1">Knoll Times</div>
+          <div style="border-top: 3px solid #17120b; margin-top: 5px"></div>
+          <div style="border-top: 2px solid #17120b; margin-top: 2px; opacity: 0.6"></div>
+          <div style="display: flex; justify-content: space-between; font-family: 'VT323', monospace; font-size: 14px; letter-spacing: 1px; color: #17120b; margin-top: 4px"><span>NO. {{ latest.no3 }}</span><span>{{ latest.dateShort }}</span></div>
+          <div style="font-weight: 700; font-size: 17px; line-height: 1.25; color: #17120b; margin-top: 3px">{{ latest.headline }}</div>
+          <div style="height: 26px; margin-top: 8px; background: repeating-linear-gradient(180deg, rgba(23,18,11,0) 0px, rgba(23,18,11,0) 5px, rgba(23,18,11,0.3) 5px, rgba(23,18,11,0.3) 7px)"></div>
+          <div style="position: absolute; bottom: 8px; right: 10px; width: 30px; height: 30px; background: radial-gradient(circle at 38% 32%, #b23438 0%, #8f2430 70%); border: 3px solid #17120b; border-radius: 52% 60% 55% 48%; box-sizing: border-box; display: flex; align-items: center; justify-content: center">
+            <div style="font-family: 'Pirata One', serif; font-size: 14px; color: #d9a94e">{{ sealLetter }}</div>
+          </div>
+          <div style="position: absolute; left: 0; right: 0; top: 58%; border-top: 3px dashed rgba(23,18,11,0.25)"></div>
+        </div>
+        <div style="font-size: 15px; color: #17120b; opacity: 0.6; max-width: 170px; line-height: 1.35; padding-bottom: 6px">← the fresh issue. click any paper to unfold it.</div>
+      </div>
+    </div>
+    <div style="width: 430px; flex-shrink: 0; display: flex; flex-direction: column; position: relative">
+      <div style="height: 44px; box-sizing: border-box; background: repeating-linear-gradient(90deg, #e8484a 0px, #e8484a 34px, #f4ecd5 34px, #f4ecd5 68px); border: 5px solid #17120b; border-radius: 12px 14px 6px 6px; box-shadow: 8px 8px 0 rgba(23,18,11,0.6); position: relative; z-index: 2"></div>
+      <div style="align-self: center; margin-top: -14px; font-family: 'VT323', monospace; font-size: 24px; letter-spacing: 4px; color: #17120b; background: #ffd23f; border: 4px solid #17120b; border-radius: 8px 4px 9px 5px; box-shadow: 5px 6px 0 rgba(23,18,11,0.7); padding: 1px 18px 0; position: relative; z-index: 3">THE NEWSSTAND</div>
+      <div style="box-sizing: border-box; background: #d9d0c1; border: 5px solid #17120b; border-radius: 6px 6px 14px 16px; box-shadow: 12px 14px 0 rgba(23,18,11,0.8); margin-top: -12px; padding: 34px 24px 20px; position: relative; z-index: 1">
+        <div style="position: absolute; top: 16px; left: 16px; font-family: 'VT323', monospace; font-size: 16px; letter-spacing: 3px; color: #f4ecd5; background: #17120b; border-radius: 4px; padding: 0 9px">PAST ISSUES</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px 22px; margin-top: 16px">
+          <sc-for list="{{ pastIssues }}" as="p" hint-placeholder-count="4">
+            <div sc-camel-on-click="{{ p.onOpen }}" style="position: relative; box-sizing: border-box; background: #f6eed8; border: 4px solid #17120b; border-radius: 5px 8px 4px 7px; box-shadow: 6px 7px 0 rgba(23,18,11,0.5); padding: 11px 12px 9px; cursor: pointer; transform: rotate({{ p.tilt }})" style-hover="transform: rotate(0deg) translateY(-5px)">
+              <div style="position: absolute; top: -13px; left: 50%; transform: translateX(-50%); width: 16px; height: 20px; background: #b08a58; border: 3px solid #17120b; border-radius: 4px 4px 2px 2px; box-sizing: border-box"></div>
+              <div style="font-family: 'Pirata One', serif; font-size: 19px; text-align: center; color: #17120b; line-height: 1">Knoll Times</div>
+              <div style="border-top: 2px solid #17120b; margin-top: 4px"></div>
+              <div style="display: flex; justify-content: space-between; font-family: 'VT323', monospace; font-size: 12px; letter-spacing: 1px; color: #17120b; margin-top: 3px"><span>NO. {{ p.no3 }}</span><span>{{ p.dateShort }}</span></div>
+              <div style="font-weight: 700; font-size: 13px; line-height: 1.25; color: #17120b; margin-top: 2px; min-height: 33px">{{ p.headline }}</div>
+              <div style="height: 16px; margin-top: 5px; background: repeating-linear-gradient(180deg, rgba(23,18,11,0) 0px, rgba(23,18,11,0) 4px, rgba(23,18,11,0.3) 4px, rgba(23,18,11,0.3) 5px)"></div>
+              <div style="position: absolute; bottom: 5px; right: 6px; width: 20px; height: 20px; background: radial-gradient(circle at 38% 32%, #b23438 0%, #8f2430 70%); border: 2px solid #17120b; border-radius: 52% 60% 55% 48%; box-sizing: border-box; display: flex; align-items: center; justify-content: center">
+                <div style="font-family: 'Pirata One', serif; font-size: 10px; color: #d9a94e">{{ sealLetter }}</div>
+              </div>
+              <div style="position: absolute; left: 0; right: 0; top: 60%; border-top: 2px dashed rgba(23,18,11,0.25)"></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 2px; color: #17120b; opacity: 0.5; text-align: center; margin-top: 18px">EVERY DISPATCH EVER PRINTED · FREE</div>
+      </div>
+      <div style="position: absolute; right: -24px; bottom: -20px; display: flex; align-items: flex-end">
+        <div style="width: 11px; height: 44px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(-12deg); box-sizing: border-box"></div>
+        <div style="width: 11px; height: 58px; background: #7bc264; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(-3deg); margin-left: -7px; box-sizing: border-box"></div>
+        <div style="width: 11px; height: 38px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(10deg); margin-left: -7px; box-sizing: border-box"></div>
+      </div>
+    </div>
+  </div>
+  <div style="position: absolute; top: 96px; left: 44px; background: #ffd23f; border: 4px solid #17120b; border-radius: 4px 12px 6px 14px; box-shadow: 8px 9px 0 rgba(23,18,11,0.82); padding: 24px 16px 14px; width: 172px; transform: rotate(-5deg); z-index: 2">
+    <div style="position: absolute; top: -13px; left: 50%; transform: translateX(-50%) rotate(-4deg); width: 84px; height: 24px; background: rgba(244,236,205,0.95); border: 3px solid #17120b; border-radius: 3px; box-sizing: border-box"></div>
+    <div style="font-weight: 700; font-size: 15px; line-height: 1.4; color: #17120b">dev updates,<br>printed the old way.<br><span style="font-weight: 400; font-size: 13px">new issue every milestone. grab one off the press or browse the stand →</span></div>
+  </div>
+  </div>
+  <sc-if value="{{ isOpen }}" hint-placeholder-val="{{ false }}">
+    <div sc-camel-on-click="{{ onClose }}" style="position: fixed; inset: 0; z-index: 100; background: rgba(23,18,11,0.55); display: flex; align-items: flex-start; justify-content: center; padding: 44px 20px 60px; overflow: auto">
+      <div sc-camel-on-click="{{ stopProp }}" style="position: relative; width: 780px; max-width: 94vw; perspective: 1600px; animation: popIn 0.3s ease-out; transform: rotate(-0.4deg)">
+        <button sc-camel-on-click="{{ onClose }}" style="position: absolute; top: -18px; right: -18px; z-index: 6; width: 44px; height: 44px; background: #e8484a; border: 4px solid #17120b; border-radius: 50%; box-shadow: 4px 5px 0 rgba(23,18,11,0.7); cursor: pointer; font-family: 'VT323', monospace; font-size: 26px; color: #fdf3d9; line-height: 1; padding: 0" style-hover="background: #f05a5c" style-active="transform: translate(3px, 4px); box-shadow: 0 0 0 rgba(23,18,11,0.7)">X</button>
+        <div style="position: relative; box-sizing: border-box; background: #f6eed8; border: 5px solid #17120b; border-bottom: none; border-radius: 10px 12px 0 0; box-shadow: 14px 0 0 rgba(23,18,11,0.5); padding: 30px 38px 20px; z-index: 2">
+          <div style="position: relative; padding: 0 70px">
+            <div style="position: absolute; left: 0; top: 8px; font-family: 'VT323', monospace; font-size: 16px; letter-spacing: 2px; color: #17120b; line-height: 1.3">VOL. I<br>NO. {{ cur.no3 }}</div>
+            <div style="font-family: 'Pirata One', serif; font-size: 62px; text-align: center; color: #17120b; line-height: 1">Knoll Times</div>
+            <div style="position: absolute; right: -28px; top: -22px; width: 96px; height: 96px; background: radial-gradient(circle at 38% 32%, #b23438 0%, #8f2430 72%); border: 4px solid #17120b; border-radius: 52% 60% 55% 48%; box-sizing: border-box; box-shadow: 5px 6px 0 rgba(23,18,11,0.45); transform: rotate(9deg); z-index: 3; display: flex; align-items: center; justify-content: center">
+              <div style="width: 62px; height: 62px; border: 3px solid #d9a94e; border-radius: 50%; box-sizing: border-box; display: flex; align-items: center; justify-content: center">
+                <div style="font-family: 'Pirata One', serif; font-size: 34px; color: #d9a94e; text-shadow: 2px 2px 0 rgba(23,18,11,0.4)">{{ sealLetter }}</div>
+              </div>
+            </div>
+          </div>
+          <div style="border-top: 4px solid #17120b; margin-top: 10px"></div>
+          <div style="border-top: 2px solid #17120b; margin-top: 3px"></div>
+          <div style="display: flex; justify-content: space-between; font-family: 'VT323', monospace; font-size: 16px; letter-spacing: 2px; color: #17120b; margin-top: 6px"><span>{{ cur.date }}</span><span>THE OFFICIAL DISPATCH OF KNOLL STUDIO</span><span>PRICE: FREE</span></div>
+          <div style="border-top: 2px solid #17120b; margin-top: 6px"></div>
+          <div style="font-weight: 700; font-size: 40px; line-height: 1.1; color: #17120b; margin-top: 16px; text-wrap: pretty">{{ cur.headline }}</div>
+          <div style="font-size: 17px; color: #17120b; opacity: 0.65; margin-top: 4px">{{ cur.kicker }}</div>
+          <div style="display: flex; flex-direction: column; gap: 2px; margin-top: 14px; padding-left: 4px">
+            <sc-for list="{{ curVerse }}" as="v" hint-placeholder-count="4">
+              <div style="font-size: 18px; line-height: 1.5; color: #17120b; font-style: italic">{{ v.text }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="transform-origin: top center; transform: {{ flapTf }}; transition: transform {{ flapDur }} cubic-bezier(0.32, 1.15, 0.42, 1); box-sizing: border-box; background: #f6eed8; border: 5px solid #17120b; border-top: none; border-radius: 0 0 12px 10px; box-shadow: 14px 14px 0 rgba(23,18,11,0.5); padding: 4px 38px 26px; position: relative; z-index: 1">
+          <div style="border-top: 3px dashed rgba(23,18,11,0.25); margin: 0 -12px"></div>
+          <div style="display: flex; justify-content: center; margin-top: 16px">
+            <div style="font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 3px; color: #f4ecd5; background: #17120b; border-radius: 4px; padding: 0 10px">CONTINUED IN VERSE</div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 38px; margin-top: 16px">
+            <sc-for list="{{ curStanzas }}" as="st" hint-placeholder-count="2">
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <sc-for list="{{ st.lines }}" as="l" hint-placeholder-count="4">
+                  <div style="font-size: 16px; line-height: 1.5; color: #17120b; font-style: italic">{{ l.text }}</div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+<div style="font-family: 'VT323', monospace; font-size: 14px; letter-spacing: 2px; color: #17120b; opacity: 0.5; text-align: center; margin-top: 18px">PRINTED BY HAND ON KNOLL PRESS NO.1 · ISSUE NO. {{ cur.no3 }}</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;pressRunning&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Machine&quot;},&quot;unfoldSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.9,&quot;min&quot;:0.3,&quot;max&quot;:2,&quot;step&quot;:0.1,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Paper&quot;},&quot;sealLetter&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;K&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Paper&quot;},&quot;zoomUI&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;View&quot;},&quot;maxZoom&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:6,&quot;min&quot;:2,&quot;max&quot;:12,&quot;step&quot;:1,&quot;unit&quot;:&quot;\u00d7&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;View&quot;}}">
+class Component extends DCLogic {
+  state = { open: null, unfolded: false, zoom: 1 };
+  ISSUES = [
+    { no: 5, date: 'AUGUST 29, 2026', dateShort: 'AUG 29', headline: 'SPAWN-O-MATIC MK.II ROARS TO LIFE', kicker: 'ode to the second boiler',
+      verse: ['We fed it soot, we fed it solder,', 'we fed it every spare screw;', 'it hummed a note a half-step colder', 'and made the herd anew.'],
+      stanzas: [
+        ['The belt goes round, the chamber fills,', 'the gauge climbs up to nine \u2014', 'a hundred critters, hundred wills,', 'all stamped, and none quite mine.'],
+        ['So spin, you second boiler, spin,', 'you patient iron lung;', 'the herd you press from soot and tin', 'is barely two weeks young.'],
+      ] },
+    { no: 4, date: 'AUGUST 14, 2026', dateShort: 'AUG 14', headline: 'WARP BENCH: BEND YOUR CRITTERS', kicker: 'eight sliders, in verse',
+      verse: ['Stretch me thin, then lean me over,', 'melt me halfway to the floor;', 'I was an ordinary rover', 'ten seconds before.'],
+      stanzas: [
+        ['The wave arrives and sets me swaying', 'like weather in a jar;', 'the glitch decides what hue I am playing', 'and never asks how far.'],
+        ['Double-click and I am returned,', 'unbent, unmelted, plain.', 'The bench forgets. The critter learned.', 'We will do it all again.'],
+      ] },
+    { no: 3, date: 'JULY 30, 2026', dateShort: 'JUL 30', headline: 'STICKER CHAT TERMINAL GOES LIVE', kicker: 'the terminal speaks',
+      verse: ['Ask it where the roadmap goes,', 'it answers in green light;', 'it knows the lore, it knows the prose,', 'it knows one joke, told right.'],
+      stanzas: [
+        ['It signs its letters "the boiler"', 'though the boiler cannot write;', 'we have given up the correction \u2014', 'the error reads polite.'],
+        ['The cursor blinks, the scanlines crawl,', 'the monitor leans near;', 'it will not tell you much at all,', 'but says it very clear.'],
+      ] },
+    { no: 2, date: 'JULY 11, 2026', dateShort: 'JUL 11', headline: 'CHARACTER FORGE OPENS ITS DOORS', kicker: 'forge rules, rhymed',
+      verse: ['Bring a shape, bring one bold hue,', 'bring a hand that does not shake;', 'whatever crooked thing you drew,', 'the forge will let it wake.'],
+      stanzas: [
+        ['Thick ink lines and wonky corners,', 'one drop shadow, honest, low \u2014', 'the law applies to all new-comers,', 'including those who know.'],
+        ['A trackpad makes an anxious critter,', 'a mouse a steadier one;', 'the forge accepts them either way', 'and calls the drawing done.'],
+      ] },
+    { no: 1, date: 'JUNE 20, 2026', dateShort: 'JUN 20', headline: 'THE PRESS IS RUNNING', kicker: 'vol. I, no. 1 \u2014 hello from the knoll',
+      verse: ['We built a press to say out loud', 'the things we said in passing \u2014', 'a page you fold, a page you hold,', 'a note worth outlasting.'],
+      stanzas: [
+        ['Two days to carve, one day to ink,', 'a wax seal, warm and red;', 'it takes far longer than you would think', 'to print what could be said.'],
+        ['So take one off the drying line,', 'still damp, and read it slow;', 'to subscribe you simply come again.', 'The press will let you know.'],
+      ] },
+  ];
+  componentDidMount() {
+    try {
+      const z = parseFloat(localStorage.getItem('knolltimes.zoom.v1'));
+      if (z > 0.2 && z < 20) this.setState({ zoom: z });
+    } catch (e) {}
+    this._onKey = (e) => {
+      if (e.key === 'Escape') { this.setState({ open: null }); return; }
+      if (!(e.metaKey || e.ctrlKey)) return;
+      if (e.key === '=' || e.key === '+') { e.preventDefault(); this.zoomTo(this.state.zoom * 1.25); }
+      else if (e.key === '-') { e.preventDefault(); this.zoomTo(this.state.zoom / 1.25); }
+      else if (e.key === '0') { e.preventDefault(); this.zoomTo(1); }
+    };
+    window.addEventListener('keydown', this._onKey);
+  }
+  zoomTo = (z) => {
+    const max = this.props.maxZoom ?? 6;
+    const v = Math.min(max, Math.max(0.4, Math.round(z * 100) / 100));
+    this.setState({ zoom: v });
+    try { localStorage.setItem('knolltimes.zoom.v1', String(v)); } catch (e) {}
+  };
+  componentWillUnmount() { window.removeEventListener('keydown', this._onKey); clearTimeout(this._t); }
+  openIssue = (i) => {
+    clearTimeout(this._t);
+    this.setState({ open: i, unfolded: false });
+    this._t = setTimeout(() => this.setState({ unfolded: true }), 120);
+  };
+  renderVals() {
+    const { open, unfolded, zoom } = this.state;
+    const running = this.props.pressRunning ?? true;
+    const sealLetter = this.props.sealLetter ?? 'K';
+    const secs = this.props.unfoldSeconds ?? 0.9;
+    const pad = (n) => String(n).padStart(3, '0');
+    const cur = open != null ? this.ISSUES[open] : {};
+    const tilts = ['-2.2deg', '1.6deg', '2.4deg', '-1.4deg', '1.1deg', '-2deg'];
+    return {
+      zoomUI: this.props.zoomUI ?? true,
+      zoomF: zoom,
+      zoomLabel: Math.round(zoom * 100) + '%',
+      onZoomIn: () => this.zoomTo(zoom * 1.25),
+      onZoomOut: () => this.zoomTo(zoom / 1.25),
+      onZoomReset: () => this.zoomTo(1),
+      lightAnim: running ? 'blinkLight 1.4s steps(1) infinite' : 'none',
+      gearDur: running ? '5s' : '9999s',
+      needleAnim: running ? 'needleBob 2.6s ease-in-out infinite' : 'none',
+      bobAnim: running ? 'counterBob 2.6s ease-in-out infinite' : 'none',
+      switchTop: running ? '2px' : '11px',
+      wheelDur: running ? '9s' : '9999s',
+
+      stampAnim: running ? 'stampPress 2.6s ease-in-out infinite' : 'none',
+      sealLetter,
+      latest: { no3: pad(this.ISSUES[0].no), dateShort: this.ISSUES[0].dateShort, headline: this.ISSUES[0].headline },
+      onOpenLatest: () => this.openIssue(0),
+      pastIssues: this.ISSUES.slice(1).map((p, i) => ({
+        no3: pad(p.no), dateShort: p.dateShort, headline: p.headline,
+        tilt: tilts[i % tilts.length],
+        onOpen: () => this.openIssue(i + 1),
+      })),
+      isOpen: open != null,
+      cur: { no3: cur.no != null ? pad(cur.no) : '', date: cur.date, headline: cur.headline, kicker: cur.kicker },
+      curVerse: (cur.verse || []).map(t => ({ text: t })),
+      curStanzas: (cur.stanzas || []).map(st => ({ lines: st.map(t => ({ text: t })) })),
+      flapTf: unfolded ? 'rotateX(0deg)' : 'rotateX(-89deg)',
+      flapDur: secs + 's',
+      onClose: () => this.setState({ open: null }),
+      stopProp: (e) => e.stopPropagation(),
+    };
+  }
+}
+</script>
+</body>
+</html>

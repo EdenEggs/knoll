@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=VT323&display=swap" rel="stylesheet">
+<link rel="icon" href="../logo/logo-icon.svg">
+<style>
+  body { margin: 0; background: #ece7f1; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+  ::selection { background: #ffd23f; }
+</style>
+</helmet>
+<div data-screen-label="Owner Dashboard" style="min-height:100vh; box-sizing:border-box; background:#ece7f1; background-image:radial-gradient(circle, rgba(90,70,110,0.13) 1.3px, transparent 1.3px); background-size:24px 24px; padding:34px 30px 56px; font-family:'VT323',monospace; color:#17120b">
+  <div style="max-width:1200px; margin:0 auto">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:30px">
+      <div style="display:flex; align-items:center; gap:20px">
+        <div aria-hidden="true" style="position:relative; width:56px; height:64px; background:#fdf7e3; border:4px solid #17120b; box-shadow:6px 7px 0 rgba(60,50,80,0.2); transform:rotate(-4deg); display:flex; align-items:center; justify-content:center; font-family:'Rye',serif; font-size:34px; flex:none">K
+          <div style="position:absolute; bottom:-9px; right:-9px; width:12px; height:12px; background:#e8484a; border:3px solid #17120b; transform:rotate(45deg)"></div>
+        </div>
+        <div>
+          <h1 style="margin:0; font-family:'Rye',serif; font-size:36px; font-weight:400; line-height:1">Owner Dashboard</h1>
+          <div style="font-size:17px; letter-spacing:3px; color:#4a4054; opacity:0.7; margin-top:6px">· EVERY VISITOR COUNTED BY HAND · GNOME-CERTIFIED ·</div>
+        </div>
+      </div>
+      <div style="font-size:17px; letter-spacing:1px; background:#fdf7e3; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:6px 14px; transform:rotate({{ rChip }})">YOUR HILL · <b>knoll.space/yourhill</b></div>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:28px">
+      <div style="font-size:15px; letter-spacing:2px; color:#4a4054; opacity:0.8">SHOW ME</div>
+      <sc-for list="{{ ranges }}" as="rb" hint-placeholder-count="4">
+        <button sc-camel-on-click="{{ rb.pick }}" style="font-family:'VT323',monospace; font-size:18px; letter-spacing:1px; border:4px solid #17120b; background:{{ rb.bg }}; color:#17120b; padding:5px 14px; cursor:pointer; box-shadow:4px 5px 0 rgba(60,50,80,0.2); transform:rotate({{ rb.rot }})" style-hover="transform:translate(-2px,-2px)">{{ rb.label }}</button>
+      </sc-for>
+    </div>
+
+    <section aria-label="key numbers" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:22px; margin-bottom:30px">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+        <div style="position:relative; background:#fdf7e3; border:4px solid #17120b; box-shadow:7px 8px 0 rgba(60,50,80,0.2); padding:14px 16px 12px; transform:rotate({{ k.rot }}); transition:transform 0.15s" style-hover="transform:rotate(0deg)">
+          <div aria-hidden="true" style="position:absolute; top:-9px; right:-9px; width:12px; height:12px; background:{{ k.pip }}; border:3px solid #17120b; transform:rotate(45deg)"></div>
+          <div style="font-size:14px; letter-spacing:2px; color:#4a4054; opacity:0.85">{{ k.label }}</div>
+          <div style="display:flex; align-items:center; gap:10px; margin:7px 0 9px; flex-wrap:wrap">
+            <div style="font-family:'Rye',serif; font-size:29px; line-height:1">{{ k.value }}</div>
+            <div style="font-size:14px; letter-spacing:1px; color:{{ k.deltaColor }}; border:3px solid {{ k.deltaColor }}; padding:0 7px; transform:rotate(-2deg); background:#fffcf0; flex:none">{{ k.delta }}</div>
+          </div>
+          <svg sc-camel-view-box="0 0 100 28" sc-camel-preserve-aspect-ratio="none" aria-hidden="true" style="display:block; width:100%; height:30px">
+            <polyline points="{{ k.spark }}" fill="none" stroke="#17120b" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" opacity="0.45"></polyline>
+            <circle cx="{{ k.dotX }}" cy="{{ k.dotY }}" r="2.6" fill="#e8484a"></circle>
+          </svg>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="display:grid; grid-template-columns:minmax(0,2fr) minmax(280px,1fr); gap:26px; margin-bottom:30px; align-items:start">
+
+      <div style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate({{ rTrend }}); min-width:0">
+        <div aria-hidden="true" style="position:absolute; top:-11px; left:-11px; width:15px; height:15px; background:#5a8fd6; border:3px solid #17120b; transform:rotate(45deg)"></div>
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px">
+          <div>
+            <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Residents over time</h2>
+            <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin-top:3px">{{ trendSub }}</div>
+          </div>
+          <button sc-camel-on-click="{{ toggleTrend }}" style="font-family:'VT323',monospace; font-size:15px; letter-spacing:1px; border:3px solid #17120b; background:{{ trendBtnBg }}; color:#17120b; padding:2px 10px; cursor:pointer; box-shadow:3px 4px 0 rgba(60,50,80,0.2); flex:none" style-hover="transform:translate(-1px,-1px)">{{ trendBtn }}</button>
+        </div>
+        <sc-if value="{{ trendChartOn }}" hint-placeholder-val="{{ true }}">
+          <div style="position:relative">
+            <svg sc-camel-view-box="0 0 640 240" role="img" aria-label="Total residents over time" style="display:block; width:100%; height:auto">
+              <sc-for list="{{ grid }}" as="g" hint-placeholder-count="5">
+                <g><line x1="48" x2="628" y1="{{ g.y }}" y2="{{ g.y }}" stroke="rgba(23,18,11,0.16)" stroke-width="2" stroke-dasharray="2 5"></line><text x="40" y="{{ g.ty }}" text-anchor="end" font-family="VT323, monospace" font-size="14" fill="#4a4054">{{ g.label }}</text></g>
+              </sc-for>
+              <line x1="48" x2="628" y1="210" y2="210" stroke="#17120b" stroke-width="3"></line>
+              <path d="{{ areaPath }}" fill="rgba(90,143,214,0.28)"></path>
+              <path d="{{ linePath }}" fill="none" stroke="#17120b" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"></path>
+              <path d="{{ linePath }}" fill="none" stroke="#5a8fd6" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"></path>
+              <circle cx="{{ endX }}" cy="{{ endY }}" r="5" fill="#e8484a" stroke="#17120b" stroke-width="3"></circle>
+              <text x="{{ endLX }}" y="{{ endLY }}" font-family="VT323, monospace" font-size="17" fill="#17120b" font-weight="bold">{{ endLabel }}</text>
+              <sc-for list="{{ xLabels }}" as="xl" hint-placeholder-count="4">
+                <text x="{{ xl.x }}" y="234" text-anchor="middle" font-family="VT323, monospace" font-size="14" fill="#4a4054">{{ xl.t }}</text>
+              </sc-for>
+              <sc-if value="{{ tipOn }}" hint-placeholder-val="{{ false }}">
+                <line x1="{{ tipX }}" x2="{{ tipX }}" y1="14" y2="210" stroke="#17120b" stroke-width="2" stroke-dasharray="4 4"></line>
+              </sc-if>
+              <rect x="48" y="14" width="580" height="196" fill="transparent" style="pointer-events:all; cursor:crosshair" sc-camel-on-pointer-move="{{ trendMove }}" sc-camel-on-pointer-leave="{{ trendLeave }}"></rect>
+            </svg>
+            <sc-if value="{{ tipOn }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute; left:{{ tipLeft }}%; top:{{ tipTop }}%; transform:translate(-50%,-118%); background:#17120b; color:#fdf7e3; padding:6px 11px; font-size:15px; line-height:1.35; white-space:nowrap; pointer-events:none; box-shadow:4px 5px 0 rgba(60,50,80,0.3); z-index:5">
+                <div style="letter-spacing:1px; opacity:0.8">{{ tipDate }}</div>
+                <div style="font-size:17px"><b>{{ tipTotal }}</b> RESIDENTS</div>
+                <div style="opacity:0.75">{{ tipGained }} THAT DAY</div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+        <sc-if value="{{ trendTableOn }}" hint-placeholder-val="{{ false }}">
+          <div style="max-height:290px; overflow-y:auto; border:3px solid #17120b; background:#fffcf0">
+            <div style="display:grid; grid-template-columns:1.5fr 1fr 1fr; padding:6px 12px; font-size:14px; letter-spacing:2px; border-bottom:3px solid #17120b; position:sticky; top:0; background:#ffd23f; z-index:2"><div>DATE</div><div>TOTAL</div><div>NEW</div></div>
+            <sc-for list="{{ trendRows }}" as="row" hint-placeholder-count="8">
+              <div style="display:grid; grid-template-columns:1.5fr 1fr 1fr; padding:3px 12px; font-size:17px; border-bottom:2px dashed rgba(23,18,11,0.18)" style-hover="background:rgba(255,210,63,0.3)"><div>{{ row.date }}</div><div>{{ row.total }}</div><div><b>{{ row.gained }}</b></div></div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 14px; transform:rotate({{ rContrib }})">
+        <div aria-hidden="true" style="position:absolute; top:-11px; right:-11px; width:16px; height:16px; background:#ffd23f; border:3px solid #17120b; border-radius:50%"></div>
+        <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Top contributors</h2>
+        <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin:3px 0 15px">THIS PERIOD</div>
+        <sc-for list="{{ contributors }}" as="cb" hint-placeholder-count="6">
+          <div style="display:flex; align-items:center; gap:11px; margin-bottom:13px; padding:2px 4px" style-hover="background:rgba(255,210,63,0.3)">
+            <div style="font-family:'Rye',serif; font-size:19px; width:18px; flex:none; text-align:center">{{ cb.rank }}</div>
+            <div aria-hidden="true" style="flex:none; width:33px; height:33px; background:{{ cb.bg }}; border:3px solid #17120b; display:flex; align-items:center; justify-content:center; font-family:'Rye',serif; font-size:15px; color:{{ cb.fg }}; transform:rotate({{ cb.rot }}); box-shadow:2px 3px 0 rgba(60,50,80,0.18)">{{ cb.initial }}</div>
+            <div style="flex:1; min-width:0; font-size:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ cb.name }}</div>
+            <div style="font-size:15px; color:#4a4054; flex:none"><b style="color:#17120b; font-size:17px">{{ cb.val }}</b> CONTRIB.</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="margin-bottom:30px">
+      <div style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate({{ rHeat }})">
+        <div aria-hidden="true" style="position:absolute; bottom:-11px; left:-11px; width:15px; height:15px; background:#7bc264; border:3px solid #17120b; transform:rotate(45deg)"></div>
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px">
+          <div>
+            <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Where the work happens</h2>
+            <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin-top:3px">INTERACTIONS BY ZONE &amp; TIME OF DAY · LAST 30 DAYS</div>
+          </div>
+          <button sc-camel-on-click="{{ toggleHeat }}" style="font-family:'VT323',monospace; font-size:15px; letter-spacing:1px; border:3px solid #17120b; background:{{ heatBtnBg }}; color:#17120b; padding:2px 10px; cursor:pointer; box-shadow:3px 4px 0 rgba(60,50,80,0.2); flex:none" style-hover="transform:translate(-1px,-1px)">{{ heatBtn }}</button>
+        </div>
+        <sc-if value="{{ heatChartOn }}" hint-placeholder-val="{{ true }}">
+          <div style="overflow-x:auto; padding-bottom:4px">
+            <div ref="{{ heatRef }}" style="position:relative; min-width:680px">
+              <div style="display:grid; grid-template-columns:130px repeat(8,1fr); gap:4px; margin-bottom:5px">
+                <div></div>
+                <sc-for list="{{ hours }}" as="hb" hint-placeholder-count="8">
+                  <div style="text-align:center; font-size:14px; letter-spacing:1px; color:#4a4054">{{ hb }}</div>
+                </sc-for>
+              </div>
+              <sc-for list="{{ heatRows }}" as="hrow" hint-placeholder-count="8">
+                <div style="display:grid; grid-template-columns:130px repeat(8,1fr); gap:4px; margin-bottom:4px; align-items:stretch">
+                  <div style="font-size:16px; text-align:right; padding-right:12px; align-self:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ hrow.zone }}</div>
+                  <sc-for list="{{ hrow.cells }}" as="cell" hint-placeholder-count="8">
+                    <div tabindex="0" style="height:30px; background:{{ cell.bg }}; border:2px solid #17120b; cursor:pointer; outline:none; transition:transform 0.1s" sc-camel-on-pointer-enter="{{ cell.enter }}" sc-camel-on-pointer-leave="{{ cell.leave }}" sc-camel-on-focus="{{ cell.enter }}" sc-camel-on-blur="{{ cell.leave }}" style-hover="transform:scale(1.15)" style-focus="box-shadow:0 0 0 3px #ffd23f"></div>
+                  </sc-for>
+                </div>
+              </sc-for>
+              <sc-if value="{{ heatTipOn }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute; left:{{ heatTipX }}px; top:{{ heatTipY }}px; transform:translate(-50%,-112%); background:#17120b; color:#fdf7e3; padding:6px 11px; font-size:15px; line-height:1.35; white-space:nowrap; pointer-events:none; box-shadow:4px 5px 0 rgba(60,50,80,0.3); z-index:5">
+                  <div style="font-size:17px"><b>{{ heatTipZone }}</b></div>
+                  <div style="opacity:0.8; letter-spacing:1px">{{ heatTipHour }}</div>
+                  <div style="opacity:0.85">{{ heatTipV }} INTERACTIONS</div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:10px; font-size:14px; letter-spacing:2px; color:#4a4054">LOW <div style="width:130px; height:12px; border:2px solid #17120b; background:linear-gradient(90deg, {{ rampLo }}, {{ rampHi }})"></div> HIGH</div>
+        </sc-if>
+        <sc-if value="{{ heatTableOn }}" hint-placeholder-val="{{ false }}">
+          <div style="overflow-x:auto">
+            <div style="min-width:680px; border:3px solid #17120b; background:#fffcf0">
+              <div style="display:grid; grid-template-columns:150px repeat(8,1fr); padding:6px 12px; font-size:14px; letter-spacing:1px; border-bottom:3px solid #17120b; background:#ffd23f"><div>ZONE</div>
+                <sc-for list="{{ hours }}" as="hb2" hint-placeholder-count="8"><div style="text-align:right">{{ hb2 }}</div></sc-for>
+              </div>
+              <sc-for list="{{ heatTableRows }}" as="ht" hint-placeholder-count="8">
+                <div style="display:grid; grid-template-columns:150px repeat(8,1fr); padding:3px 12px; font-size:17px; border-bottom:2px dashed rgba(23,18,11,0.18)" style-hover="background:rgba(255,210,63,0.3)"><div>{{ ht.zone }}</div>
+                  <sc-for list="{{ ht.cells }}" as="hv" hint-placeholder-count="8"><div style="text-align:right">{{ hv }}</div></sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </section>
+
+    <section style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:26px; margin-bottom:30px; align-items:start">
+      <sc-for list="{{ rankedCards }}" as="rc" hint-placeholder-count="3">
+        <div style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 12px; transform:rotate({{ rc.rot }})">
+          <div aria-hidden="true" style="position:absolute; top:-11px; left:-11px; width:14px; height:14px; background:{{ rc.pip }}; border:3px solid #17120b; transform:rotate(45deg)"></div>
+          <h2 style="margin:0; font-family:'Rye',serif; font-size:20px; font-weight:400">{{ rc.title }}</h2>
+          <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin:3px 0 14px">{{ rc.sub }}</div>
+          <sc-for list="{{ rc.rows }}" as="r" hint-placeholder-count="4">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:11px; padding:2px 3px" style-hover="background:rgba(255,210,63,0.3)">
+              <div style="width:78px; font-size:17px; flex:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ r.label }}</div>
+              <div style="flex:1; height:20px; border:3px solid #17120b; background:#fffcf0; position:relative; min-width:40px">
+                <div style="position:absolute; left:0; top:0; bottom:0; width:{{ r.w }}%; box-sizing:border-box; background:{{ r.color }}; border-right:3px solid #17120b"></div>
+              </div>
+              <div style="width:50px; text-align:right; font-size:17px; flex:none"><b>{{ r.val }}</b></div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="margin-bottom:30px">
+      <div style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 22px; transform:rotate({{ rLooks }})">
+        <div aria-hidden="true" style="position:absolute; top:-11px; right:-11px; width:15px; height:15px; background:#e0598c; border:3px solid #17120b; border-radius:50%"></div>
+        <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Past looks of your page</h2>
+        <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin:3px 0 16px">EVERY SAVED SNAPSHOT OF THE HERO, NEWEST FIRST · CLICK ONE TO PEEK</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:20px">
+          <sc-for list="{{ looks }}" as="lk" hint-placeholder-count="6">
+            <div sc-camel-on-click="{{ lk.open }}" role="button" tabindex="0" style="background:#fdf7e3; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.18); padding:9px 9px 11px; transform:rotate({{ lk.rot }}); cursor:pointer; transition:transform 0.15s" style-hover="transform:rotate(0deg) scale(1.05)">
+              {{ lk.art }}
+              <div style="font-size:16px; margin-top:8px; letter-spacing:0.5px"><b>{{ lk.date }}</b></div>
+              <div style="font-size:14px; color:#4a4054; opacity:0.8; margin-top:1px; line-height:1.25">{{ lk.note }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <div style="text-align:center; margin-top:38px; font-size:15px; letter-spacing:2px; color:#4a4054; opacity:0.65">MOCK DATA FOR NOW — THIS BENCH ISN'T WIRED TO A REAL HILL YET</div>
+  </div>
+
+  <sc-if value="{{ lookOpen }}" hint-placeholder-val="{{ false }}">
+    <div sc-camel-on-click="{{ closeLook }}" style="position:fixed; inset:0; background:rgba(23,18,11,0.45); z-index:30"></div>
+    <div role="dialog" aria-modal="true" aria-label="snapshot" style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-0.6deg); width:min(540px,92vw); box-sizing:border-box; background:#fdf7e3; border:5px solid #17120b; box-shadow:12px 13px 0 rgba(23,18,11,0.35); z-index:31; padding:18px 18px 20px">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
+        <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">{{ lookDate }}</h2>
+        <button sc-camel-on-click="{{ closeLook }}" aria-label="close" style="border:3px solid #17120b; background:#fdf7e3; width:32px; height:32px; font-family:'VT323',monospace; font-size:20px; line-height:1; cursor:pointer; padding:0" style-hover="background:#ffd23f">×</button>
+      </div>
+      {{ lookBigArt }}
+      <div style="font-size:17px; margin-top:12px; line-height:1.3">{{ lookNote }}</div>
+      <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.7; margin-top:6px">SNAPSHOT SAVED AUTOMATICALLY WHEN THE HERO CHANGED</div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{
+  &quot;jitter&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Look&quot;, &quot;description&quot;: &quot;Slight sticker tilt on cards and chips&quot;},
+  &quot;heatRamp&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;pond blue&quot;, &quot;options&quot;: [&quot;pond blue&quot;, &quot;gnome red&quot;, &quot;grass green&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Look&quot;, &quot;description&quot;: &quot;Heatmap color ramp&quot;},
+  &quot;defaultRange&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;30&quot;, &quot;options&quot;: [&quot;1&quot;, &quot;7&quot;, &quot;30&quot;, &quot;90&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Data&quot;, &quot;description&quot;: &quot;Date range shown before you click a filter&quot;}
+}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.C = { INK: '#17120b', CREAM: '#fdf7e3', PAPER: '#fffcf0', RED: '#e8484a', YEL: '#ffd23f', GRN: '#7bc264', BLU: '#5a8fd6', PNK: '#e0598c', MUT: '#4a4054' };
+    this.mulberry32 = seed => () => {
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    const rng = this.mulberry32(0x5EED01);
+    this.HIST = 180; this.TODAY = new Date(2026, 7, 31);
+    this.DOW = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    this.MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    const gen = o => {
+      const out = []; let lv = o.base;
+      for (let i = 0; i < this.HIST; i++) {
+        const dow = this.dateFor(i).getDay();
+        const wk = (dow === 0 || dow === 6) ? o.wm : 1;
+        lv += o.drift * (0.4 + rng() * 1.2);
+        const noise = 1 + (rng() - 0.5) * o.noise;
+        const spike = rng() > o.sc ? o.ss * rng() : 0;
+        out.push(Math.max(o.floor, lv * wk * noise + spike));
+      }
+      return out;
+    };
+    this.signups = gen({ base: 3.2, drift: 0.045, wm: 1.35, noise: 0.9, sc: 0.95, ss: 18, floor: 0 }).map(Math.round);
+    this.totalRes = []; { let t = 40; this.signups.forEach(s => { t += s; this.totalRes.push(t); }); }
+    this.active = gen({ base: 30, drift: 0.35, wm: 1.2, noise: 0.5, sc: 0.9, ss: 25, floor: 4 }).map(Math.round);
+    this.avgMin = gen({ base: 7, drift: 0.01, wm: 1.15, noise: 0.4, sc: 0.92, ss: 6, floor: 1.5 });
+    this.contrib = gen({ base: 14, drift: 0.12, wm: 1.3, noise: 0.6, sc: 0.93, ss: 20, floor: 0 }).map(Math.round);
+    this.ZONES = ['The Wall', 'The Music Deck', 'The Arcade', 'The Lounge', 'Sports Car Lane', 'Signup Form', 'Big Gnome Face', 'Lawn Gnome'];
+    this.HOURS = ['12–3a', '3–6a', '6–9a', '9a–12p', '12–3p', '3–6p', '6–9p', '9p–12a'];
+    const PROF = [
+      { peak: 5.4, spread: 2.3, base: 1.00 }, { peak: 6.2, spread: 1.3, base: 0.55 },
+      { peak: 6.0, spread: 1.2, base: 0.60 }, { peak: 5.0, spread: 1.8, base: 0.42 },
+      { peak: 4.0, spread: 2.4, base: 0.30 }, { peak: 3.1, spread: 1.7, base: 0.34 },
+      { peak: 5.8, spread: 2.0, base: 0.30 }, { peak: 4.4, spread: 2.6, base: 0.24 }
+    ];
+    this.heat = PROF.map(p => this.HOURS.map((_, col) => {
+      const d = Math.min(Math.abs(col - p.peak), 8 - Math.abs(col - p.peak));
+      const g = Math.exp(-(d * d) / (2 * p.spread * p.spread));
+      return Math.round(p.base * g * (0.65 + rng() * 0.6) * 340);
+    }));
+    this.heatMax = Math.max(...this.heat.map(r => Math.max(...r)), 1);
+    const C = this.C;
+    const f3 = () => 0.85 + rng() * 0.3, f2 = () => 0.9 + rng() * 0.2;
+    this.cat = {
+      tools: [{ label: 'DRAW', base: 1120, f: f3(), color: C.RED }, { label: 'STICKER', base: 860, f: f3(), color: C.BLU }, { label: 'TEXT', base: 430, f: f3(), color: C.GRN }, { label: 'PICTURE', base: 310, f: f3(), color: C.PNK }],
+      genres: [{ label: 'KNOLL', base: 58, f: f2(), color: C.RED }, { label: 'HORROR', base: 19, f: f2(), color: C.BLU }, { label: 'ADVENTURE', base: 15, f: f2(), color: C.GRN }, { label: 'SHOOTER', base: 8, f: f2(), color: C.PNK }],
+      devices: [{ label: 'DESKTOP', base: 620, f: f2(), color: C.RED }, { label: 'MOBILE', base: 410, f: f2(), color: C.BLU }, { label: 'TABLET', base: 74, f: f2(), color: C.GRN }]
+    };
+    const POOL = ['mossy', 'pixelpete', 'juno', 'opal', 'zip', 'vinny', 'fern', 'clover', 'bramble', 'lichen', 'dewy', 'cobble', 'thistle', 'hazel', 'bracken'];
+    const AV = [C.PNK, C.RED, C.BLU, C.GRN, C.YEL];
+    this.people = POOL.map((name, i) => ({ name, weight: Math.pow(rng(), 2.2), bg: AV[i % 5], fg: AV[i % 5] === C.YEL ? C.INK : C.CREAM }));
+    this.LOOKS = [
+      { daysAgo: 0, note: 'WALL REPAINTED, 3 NEW STICKERS' },
+      { daysAgo: 6, note: 'SPORTS CAR LANE ADDED' },
+      { daysAgo: 19, note: 'SIGNUP FORM REDESIGNED' },
+      { daysAgo: 33, note: 'ARCADE CABINET SWAPPED TO SNAKE' },
+      { daysAgo: 58, note: 'NIGHT MODE SHIPPED' },
+      { daysAgo: 91, note: 'FIRST VERSION OF THE HERO' }
+    ];
+    this.state = { range: null, trendTable: false, heatTable: false, tip: null, heatTip: null, look: null };
+  }
+  componentDidMount() {
+    this._key = (e) => { if (e.key === 'Escape' && this.state.look != null) this.setState({ look: null }); };
+    window.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); }
+  dateFor(i) { const d = new Date(this.TODAY); d.setDate(d.getDate() - (this.HIST - 1 - i)); return d; }
+  fmtDate(i, withYear) {
+    const d = this.dateFor(i);
+    return this.DOW[d.getDay()] + ' ' + this.MON[d.getMonth()] + ' ' + d.getDate() + (withYear ? ', ' + d.getFullYear() : '');
+  }
+  fmt(n) {
+    const s = n < 0 ? '-' : ''; n = Math.abs(n);
+    if (n < 1000) return s + Math.round(n).toLocaleString('en-US');
+    if (n < 1e6) return s + (n / 1000).toFixed(n < 10000 ? 1 : 0) + 'K';
+    return s + (n / 1e6).toFixed(1) + 'M';
+  }
+  fmtMin(m) { if (m < 60) return m.toFixed(1) + 'm'; return Math.floor(m / 60) + 'h ' + Math.round(m % 60) + 'm'; }
+  niceMax(v) {
+    if (v <= 0) return 10;
+    const mag = Math.pow(10, Math.floor(Math.log10(v)));
+    const norm = v / mag;
+    return (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * mag;
+  }
+  sample12(a) {
+    if (a.length <= 12) return a;
+    const out = [];
+    for (let i = 0; i < 12; i++) out.push(a[Math.round(i * (a.length - 1) / 11)]);
+    return out;
+  }
+  mix(a, b, t) {
+    const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+    const ch = s => Math.round(((pa >> s) & 255) + (((pb >> s) & 255) - ((pa >> s) & 255)) * t);
+    return 'rgb(' + ch(16) + ',' + ch(8) + ',' + ch(0) + ')';
+  }
+  lookArt(i) {
+    const h = React.createElement, C = this.C;
+    const r = this.mulberry32(0x1000 + i);
+    const bases = [C.PNK, C.BLU, C.GRN, C.YEL, C.RED];
+    const base = bases[i % 5];
+    const dots = [];
+    for (let k = 0; k < 5; k++) dots.push({ x: 16 + r() * 156, y: 42 + r() * 58, rr: 4 + r() * 6, c: bases[Math.floor(r() * 5)] });
+    return h('svg', { key: 'a', viewBox: '0 0 190 110', 'aria-hidden': true, style: { display: 'block', width: '100%', height: 'auto', background: '#fffcf0', border: '3px solid #17120b', boxSizing: 'border-box' } },
+      h('rect', { key: 'hd', width: 190, height: 26, fill: base, opacity: 0.45 }),
+      h('rect', { key: 'ln', y: 24, width: 190, height: 3, fill: '#17120b' }),
+      h('rect', { key: 'av', x: 8, y: 6, width: 14, height: 14, fill: base, stroke: '#17120b', strokeWidth: 3 }),
+      h('rect', { key: 'tt', x: 30, y: 9, width: 64, height: 8, fill: '#17120b', opacity: 0.5 }),
+      dots.map((d, k) => h('circle', { key: k, cx: d.x.toFixed(0), cy: d.y.toFixed(0), r: d.rr.toFixed(1), fill: d.c, stroke: '#17120b', strokeWidth: 3 }))
+    );
+  }
+  renderVals() {
+    const C = this.C, S = this.state, H = this.HIST;
+    const jitter = this.props.jitter ?? true;
+    const rot = v => jitter ? v : '0deg';
+    const range = S.range ?? (+(this.props.defaultRange ?? 30) || 30);
+    const slice = a => a.slice(H - range);
+    const prev = a => a.slice(Math.max(0, H - range * 2), H - range);
+    const sum = a => a.reduce((x, y) => x + y, 0);
+    const avg = a => a.length ? sum(a) / a.length : 0;
+
+    const defs = [{ label: 'TODAY', d: 1 }, { label: 'LAST 7 DAYS', d: 7 }, { label: 'LAST 30 DAYS', d: 30 }, { label: 'LAST 90 DAYS', d: 90 }];
+    const ranges = defs.map((r, i) => ({
+      label: r.label, bg: r.d === range ? C.YEL : C.CREAM,
+      rot: rot(i % 2 ? '1deg' : '-1deg'),
+      pick: () => this.setState({ range: r.d, tip: null })
+    }));
+
+    const dl = (curr, prevV, always) => {
+      if (!prevV && !curr) return { t: '—', c: '#4a4054' };
+      if (!prevV) return { t: '+' + this.fmt(curr), c: '#3c7a2e' };
+      const p = (curr - prevV) / prevV * 100;
+      const c = always ? '#3c7a2e' : (Math.abs(p) < 1 ? '#4a4054' : p > 0 ? '#3c7a2e' : '#b8302f');
+      return { t: (p > 0 ? '+' : '') + p.toFixed(0) + '%', c };
+    };
+    const spark = a => {
+      const pts = this.sample12(a);
+      const max = Math.max(...pts, 1), min = Math.min(...pts, 0);
+      const X = i => 2 + (pts.length === 1 ? 48 : (i / (pts.length - 1)) * 96);
+      const Y = v => 26 - ((v - min) / (max - min || 1)) * 22;
+      return { pts: pts.map((v, i) => X(i).toFixed(1) + ',' + Y(v).toFixed(1)).join(' '), dx: +X(pts.length - 1).toFixed(1), dy: +Y(pts[pts.length - 1]).toFixed(1) };
+    };
+    const rActive = avg(slice(this.active)), rActiveP = avg(prev(this.active));
+    const rTime = avg(slice(this.avgMin)), rTimeP = avg(prev(this.avgMin));
+    const rContrib = sum(slice(this.contrib)), rContribP = sum(prev(this.contrib));
+    const gainedTotal = sum(slice(this.signups));
+    const kpiDefs = [
+      { label: 'TOTAL RESIDENTS', value: this.fmt(this.totalRes[H - 1]), d: { t: '+' + this.fmt(gainedTotal) + ' THIS PERIOD', c: '#3c7a2e' }, sp: spark(slice(this.totalRes)), pip: C.PNK },
+      { label: 'ACTIVE RESIDENTS (AVG/DAY)', value: this.fmt(Math.round(rActive)), d: dl(rActive, rActiveP), sp: spark(slice(this.active)), pip: C.BLU },
+      { label: 'AVG. TIME ON THE HILL', value: this.fmtMin(rTime), d: dl(rTime, rTimeP), sp: spark(slice(this.avgMin)), pip: C.GRN },
+      { label: 'TOTAL CONTRIBUTIONS', value: this.fmt(rContrib), d: dl(rContrib, rContribP), sp: spark(slice(this.contrib)), pip: C.RED }
+    ];
+    const kpis = kpiDefs.map((k, i) => ({
+      label: k.label, value: k.value, delta: k.d.t, deltaColor: k.d.c, pip: k.pip,
+      spark: k.sp.pts, dotX: k.sp.dx, dotY: k.sp.dy,
+      rot: rot(['-0.7deg', '0.6deg', '-0.5deg', '0.8deg'][i])
+    }));
+
+    const data = slice(this.totalRes), gained = slice(this.signups);
+    const n = data.length, maxY = this.niceMax(Math.max(...data));
+    const PL = 48, W = 640, plotW = W - PL - 12, plotH = 196, PT = 14;
+    const X = i => PL + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW);
+    const Y = v => PT + plotH - (v / maxY) * plotH;
+    const grid = [];
+    for (let t = 0; t <= 4; t++) {
+      const val = maxY / 4 * t, gy = +Y(val).toFixed(1);
+      grid.push({ y: gy, ty: gy + 4, label: this.fmt(val) });
+    }
+    const linePts = data.map((v, i) => X(i).toFixed(1) + ',' + Y(v).toFixed(1)).join(' L ');
+    const linePath = 'M ' + linePts;
+    const areaPath = 'M ' + X(0).toFixed(1) + ',210 L ' + linePts + ' L ' + X(n - 1).toFixed(1) + ',210 Z';
+    const labelCount = Math.min(n, 6);
+    const xLabels = [];
+    for (let l = 0; l < labelCount; l++) {
+      const i = Math.round(l * (n - 1) / Math.max(1, labelCount - 1));
+      xLabels.push({ x: +X(i).toFixed(1), t: this.fmtDate(H - range + i, false) });
+    }
+    const endX = +X(n - 1).toFixed(1), endY = +Y(data[n - 1]).toFixed(1);
+    const tipI = S.tip;
+    const trendMove = (e) => {
+      const r = e.currentTarget.getBoundingClientRect();
+      let i = Math.round((e.clientX - r.left) / r.width * (n - 1));
+      i = Math.max(0, Math.min(n - 1, i));
+      if (i !== this.state.tip) this.setState({ tip: i });
+    };
+    const trendRows = data.map((v, i) => ({
+      date: this.fmtDate(H - range + i, true), total: this.fmt(v),
+      gained: (gained[i] >= 0 ? '+' : '') + gained[i]
+    })).reverse();
+
+    const DEEPS = { 'pond blue': '#2f4f8f', 'gnome red': '#9c2a2a', 'grass green': '#3c6b2f' };
+    const deep = DEEPS[this.props.heatRamp] || DEEPS['pond blue'];
+    const heatRows = this.ZONES.map((z, r) => ({
+      zone: z,
+      cells: this.HOURS.map((hb, c) => {
+        const v = this.heat[r][c];
+        const t = Math.pow(v / this.heatMax, 0.8);
+        return {
+          bg: this.mix('#fffbea', deep, Math.min(1, t * 0.95 + 0.03)),
+          enter: (e) => {
+            const cr = e.currentTarget.getBoundingClientRect();
+            const wr = this._heat ? this._heat.getBoundingClientRect() : cr;
+            this.setState({ heatTip: { x: cr.left - wr.left + cr.width / 2, y: cr.top - wr.top, z, hb, v } });
+          },
+          leave: () => this.setState({ heatTip: null })
+        };
+      })
+    }));
+    const heatTableRows = this.ZONES.map((z, r) => ({ zone: z, cells: this.heat[r].map(String) }));
+
+    const scale = range / 30;
+    const mkRows = list => {
+      const rows = list.map(it => ({ label: it.label, v: it.base * scale * it.f, color: it.color }));
+      const mx = Math.max(...rows.map(r => r.v), 1);
+      rows.sort((a, b) => b.v - a.v);
+      return rows.map(r => ({ label: r.label, val: this.fmt(Math.round(r.v)), color: r.color, w: Math.max(2, Math.round(r.v / mx * 100)) }));
+    };
+    const rankedCards = [
+      { title: 'Tools people reach for', sub: 'THIS PERIOD', rows: mkRows(this.cat.tools), rot: rot('-0.6deg'), pip: C.RED },
+      { title: 'Genre skins in use', sub: 'CURRENT SESSIONS', rows: mkRows(this.cat.genres), rot: rot('0.5deg'), pip: C.BLU },
+      { title: 'How they visit', sub: 'THIS PERIOD', rows: mkRows(this.cat.devices), rot: rot('-0.4deg'), pip: C.GRN }
+    ];
+
+    const pool = sum(slice(this.contrib));
+    const wTotal = sum(this.people.map(p => p.weight));
+    const contributors = this.people
+      .map(p => ({ name: p.name, bg: p.bg, fg: p.fg, v: Math.round(pool * p.weight / wTotal) }))
+      .sort((a, b) => b.v - a.v).slice(0, 6)
+      .map((p, i) => ({
+        rank: i + 1, name: p.name, initial: p.name[0].toUpperCase(),
+        bg: p.bg, fg: p.fg, val: this.fmt(p.v),
+        rot: rot(i % 2 ? '2deg' : '-2deg')
+      }));
+
+    const looks = this.LOOKS.map((l, i) => ({
+      art: this.lookArt(i),
+      date: this.fmtDate(H - 1 - l.daysAgo, true),
+      note: l.note,
+      rot: rot(['-1.2deg', '0.9deg', '-0.7deg', '1.1deg', '-1deg', '0.8deg'][i]),
+      open: () => this.setState({ look: i })
+    }));
+    const lk = S.look != null ? this.LOOKS[S.look] : null;
+
+    return {
+      rChip: rot('1.2deg'), rTrend: rot('-0.4deg'), rContrib: rot('0.6deg'),
+      rHeat: rot('0.3deg'), rLooks: rot('-0.3deg'),
+      ranges, kpis,
+      trendSub: range === 1 ? 'TODAY' : 'CUMULATIVE, LAST ' + range + ' DAYS',
+      trendChartOn: !S.trendTable, trendTableOn: S.trendTable,
+      trendBtn: S.trendTable ? 'VIEW AS CHART' : 'VIEW AS TABLE',
+      trendBtnBg: S.trendTable ? C.YEL : C.CREAM,
+      toggleTrend: () => this.setState({ trendTable: !S.trendTable, tip: null }),
+      grid, xLabels, linePath, areaPath, endX, endY,
+      endLX: Math.min(endX + 10, W - 48), endLY: Math.max(endY - 10, 16),
+      endLabel: this.fmt(data[n - 1]),
+      tipOn: tipI != null, tipX: tipI != null ? +X(tipI).toFixed(1) : 0,
+      tipLeft: tipI != null ? +(X(tipI) / W * 100).toFixed(2) : 0,
+      tipTop: tipI != null ? +(Y(data[tipI]) / 240 * 100).toFixed(2) : 0,
+      tipDate: tipI != null ? this.fmtDate(H - range + tipI, true) : '',
+      tipTotal: tipI != null ? this.fmt(data[tipI]) : '',
+      tipGained: tipI != null ? (gained[tipI] >= 0 ? '+' : '') + gained[tipI] : '',
+      trendMove, trendLeave: () => this.setState({ tip: null }),
+      trendRows,
+      hours: this.HOURS, heatRows, heatTableRows,
+      heatRef: (el) => { this._heat = el; },
+      heatChartOn: !S.heatTable, heatTableOn: S.heatTable,
+      heatBtn: S.heatTable ? 'VIEW AS CHART' : 'VIEW AS TABLE',
+      heatBtnBg: S.heatTable ? C.YEL : C.CREAM,
+      toggleHeat: () => this.setState({ heatTable: !S.heatTable, heatTip: null }),
+      heatTipOn: !!S.heatTip,
+      heatTipX: S.heatTip ? Math.round(S.heatTip.x) : 0,
+      heatTipY: S.heatTip ? Math.round(S.heatTip.y) : 0,
+      heatTipZone: S.heatTip ? S.heatTip.z : '', heatTipHour: S.heatTip ? S.heatTip.hb : '',
+      heatTipV: S.heatTip ? S.heatTip.v : '',
+      rampLo: this.mix('#fffbea', deep, 0.03), rampHi: this.mix('#fffbea', deep, 0.98),
+      rankedCards, contributors, looks,
+      lookOpen: S.look != null,
+      lookBigArt: S.look != null ? this.lookArt(S.look) : null,
+      lookDate: lk ? this.fmtDate(H - 1 - lk.daysAgo, true) : '',
+      lookNote: lk ? lk.note : '',
+      closeLook: () => this.setState({ look: null })
+    };
+  }
+}
+</script>
+
+
+
+</body></html>

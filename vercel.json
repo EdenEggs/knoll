@@ -1,0 +1,54 @@
+{
+  "cleanUrls": false,
+  "rewrites": [
+    { "source": "/", "destination": "/lab2/index.html" },
+    { "source": "/coming-soon", "destination": "/coming-soon.html" },
+
+    { "source": "/features/:path*", "destination": "/lab2/features/:path*" },
+    { "source": "/fonts/:path*", "destination": "/lab2/fonts/:path*" },
+    { "source": "/posters/:path*", "destination": "/lab2/posters/:path*" },
+    { "source": "/vendor/:path*", "destination": "/lab2/vendor/:path*" },
+
+    { "source": "/lab.css", "destination": "/lab2/lab.css" },
+    { "source": "/lab.js", "destination": "/lab2/lab.js" },
+    { "source": "/frames.js", "destination": "/lab2/frames.js" },
+    { "source": "/wall.js", "destination": "/lab2/wall.js" },
+    { "source": "/vol.js", "destination": "/lab2/vol.js" },
+    { "source": "/tape.js", "destination": "/lab2/tape.js" },
+    { "source": "/ink.js", "destination": "/lab2/ink.js" },
+    { "source": "/keep.js", "destination": "/lab2/keep.js" },
+    { "source": "/kits.js", "destination": "/lab2/kits.js" },
+    { "source": "/sign.js", "destination": "/lab2/sign.js" },
+    { "source": "/tracer.js", "destination": "/lab2/tracer.js" },
+    { "source": "/gif.js", "destination": "/lab2/gif.js" }
+  ],
+  "headers": [
+    {
+      "source": "/lab2/features/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/lab2/(.*)\\.(js|css)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/lab2/(posters|fonts|vendor)/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, stale-while-revalidate=604800"
+        }
+      ]
+    }
+  ]
+}

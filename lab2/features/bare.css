@@ -1,0 +1,120 @@
+/* ─── NO PAPER ─────────────────────────────────────────────────────────────
+   Each of these features was drawn as a whole SCREEN, so each carries a
+   full-bleed sheet of its own — cream for ten of them, a dark brown vignette
+   for the rule book. On a page that is a page, that is right. On lab 2's bench
+   they are twenty rectangles drawn round twenty pieces of artwork — the ten
+   gnomes were drawn without a sheet at all and need none of this — and the
+   bench has its own paper for them to sit on. So the sheet comes off, in the
+   three places it is painted:
+
+     html, body ............ the helmet stylesheet's background
+     the screen root ....... an inline background on [data-screen-label]
+     the grain ............. a full-bleed overlay of paper noise, marked in
+                             each file with data-lab-nopaper
+
+   WHY THIS IS A FILE AND NOT A FEW LINES OF JAVASCRIPT
+     frames.js does the same three things by reaching into each frame, and for
+     a while that was the whole of it — it kept these exports untouched, which
+     seemed the polite thing to do with somebody's design. But a frame can only
+     be reached into when it is SAME-ORIGIN, and a page opened straight off the
+     disk is not: file:// documents are strangers to each other, so index.html
+     could not see inside its own iframes and every feature kept its cream.
+     Opened off a server it worked; double-clicked it did not, silently.
+
+     So the rule lives in here, loaded by each feature itself, and works
+     wherever the file is opened from. frames.js still does its version, which
+     is what catches a feature that gets re-exported out of Design Canvas and
+     comes back without the <link>.
+
+   This file is lab 2's, not the features'. Opened on its own, a .dc.html still
+   looks like what was designed — bar this one stylesheet, which is one line in
+   its <head> and easy to lift back out. */
+
+html, body { background: transparent !important; }
+[data-screen-label] { background: transparent !important; }
+[data-lab-nopaper] { display: none !important; }
+
+/* ─── AND NO BARS ──────────────────────────────────────────────────────────
+   The same argument, for the same reason. frames.js cuts every frame to the
+   drawing inside it and scales the drawing to whatever box the corner has
+   been dragged to, so nothing is ever over the edge and no feature has
+   anything to scroll to — and it writes this rule into each frame itself as
+   it goes. But it can only do that where it can REACH IN, and the three
+   moments it cannot are exactly the ones a bar turns up in: off the disk,
+   where the frames are cross-origin and nothing out there can touch them; in
+   the beat between a document arriving and its runtime booting, before there
+   is a drawing to measure; and in a stale tab still running the frames.js
+   from before any of this. So the rule lives in here as well, where the
+   feature carries it itself.
+
+   ON html AND NOT ON body, which is the difference between hiding a scrollbar
+   and cropping a drawing: the viewport takes its bars from the ROOT, so
+   hidden here is enough for both of them, while hidden on the body would also
+   clip the body's own children — and some of these hang art outside it on
+   purpose, the rule book's back board by 217px. */
+html { overflow: hidden !important; }
+
+/* ─── AND NOTHING MOVES OFF-BENCH ──────────────────────────────────────────
+   frames.js writes data-lab-paused onto this document's <html> while its
+   panel is out of view, and takes it off as the panel comes back — the same
+   door data-lab-drag comes through. A held animation keeps its pose and
+   resumes mid-stride, so nothing snaps; it just stops costing anything while
+   nobody can see it. Same-origin only, like the rest: off the disk this
+   attribute never arrives and every animation runs the way it always did. */
+html[data-lab-paused] *,
+html[data-lab-paused] *::before,
+html[data-lab-paused] *::after { animation-play-state: paused !important; }
+
+/* ─── AND IN A CROWD, NOTHING MOVES ON THE MAIN THREAD ─────────────────────
+   frames.js writes data-lab-crowd onto every document's <html> while more
+   than a few dozen documents are warm on the bench — zoomed out, or a wide
+   screen — and takes it off as the crowd thins. Under it, every animation
+   on an SVG CHILD is held. Not the roots: a sway or a bob on an <svg> itself
+   is run by the compositor and costs the page nothing, but a <g> inside one
+   never gets a layer of its own, so its every frame is a main-thread change
+   that makes Chrome work out the layers of the whole bench again — at 25%
+   that was eighty milliseconds a frame, for one waving arm. prelude.js
+   holds the timers under the same attribute. THE CROWD, in frames.js, is
+   the argument; the exemption for the live panel is there too. */
+html[data-lab-crowd] svg *,
+html[data-lab-crowd] svg *::before,
+html[data-lab-crowd] svg *::after { animation-play-state: paused !important; }
+
+/* ─── EXCEPT THE ONES WHO ARE NEVER STILL ───────────────────────────────────
+   A handful of SVG-child animations are a character's own signature motion,
+   not incidental background sway, and freezing them under a crowd reads as
+   broken rather than restful — a gnome mid-hammer-swing, arm frozen in the
+   air, until you happen to click him. A feature marks the wrapper around
+   that motion with data-always-animate (see gnome.dc.html, scroll-sticker.
+   dc.html) to opt out. One selector-step more specific than the rule above,
+   so it wins under !important on specificity alone regardless of source
+   order — same as the live panel already being exempt from the rule.
+   Deliberately NOT exempt from data-lab-paused: gone from the screen is
+   still gone from the screen, opt-in or not. */
+html[data-lab-crowd] [data-always-animate],
+html[data-lab-crowd] [data-always-animate] * { animation-play-state: running !important; }
+
+/* ─── AND NO SECOND SHEET, AND NO SECOND ZOOM ──────────────────────────────
+   The six machines exported on 2026-09-04 (spawner, prize-o-tron,
+   ballot-o-tron, bug-farm, knoll-times, chat-terminal) leave the screen root
+   as a bare positioning box and put the drawing inside a SECOND full-viewport
+   div — cream again, min-height 100vh — beside a zoom widget pinned to the
+   corner (position: fixed; +, −, RESET, and ctrl+= / ctrl+− on the keyboard)
+   that scales the inner div with CSS `zoom`. On a page that is a page, that
+   is a viewer. On the bench it is a rectangle round the machine and a camera
+   inside a camera: frames.js measures every element that is not a sheet
+   (THE MEASUREMENT, in frames.js), so the inner div would report the drawing
+   as the size of its viewport; and a zoom inside the frame changes the
+   drawing under a measurement that only re-runs when the screen root changes
+   size, which it never does.
+
+   So each file marks them, the way it marks the grain — data-lab-sheet on the
+   inner div, data-lab-nozoom on the widget (perf/swap-machine.js writes the
+   three) — and this takes them off: the inner sheet goes transparent and is
+   pinned at zoom 1 (a stylesheet's !important beats the inline zoom the
+   widget writes, whatever the widget or a stale localStorage says), and the
+   widget is not drawn. The zoomUI prop and the key handler are left exactly
+   as exported: inert here, alive when the file is opened on its own.
+   frames.js's isSheet steps through data-lab-sheet like the screen root. */
+[data-lab-sheet] { background: transparent !important; zoom: 1 !important; }
+[data-lab-nozoom] { display: none !important; }

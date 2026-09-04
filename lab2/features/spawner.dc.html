@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./prelude.js"></script>
+<script src="./support.js"></script>
+<!-- lab 2 shows this on its own paper — see features/bare.css -->
+<link rel="stylesheet" href="./bare.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<!-- lab 2 serves these faces itself — see SELF-HOSTED in index.html -->
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  /* THE BENCH'S THREE MARKS — see features/bare.css, NO SECOND SHEET. Every
+     line below is the machine as it was exported, verbatim; the bench adds
+     three attributes and changes no declaration: data-lab-nopaper on the
+     paper grain, data-lab-sheet on the full-viewport div the export wraps
+     the drawing in (the one carrying the export's own zoom), and
+     data-lab-nozoom on the zoom widget pinned to the corner. frames.js
+     steps through the first two as sheets and bare.css draws none of the
+     three; opened on its own, the file still zooms and shows its widget.
+     Written by perf/swap-machine.js. */
+  body { margin: 0; background: #f2e9cf; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+  @keyframes spinGear { to { transform: rotate(360deg); } }
+  @keyframes blinkLight { 0%, 60% { opacity: 1; } 61%, 100% { opacity: 0.2; } }
+  @keyframes puffA { 0% { transform: translate(-50%, 0) scale(0.45); opacity: 0; } 18% { opacity: 0.95; } 100% { transform: translate(-50%, -110px) scale(1.3); opacity: 0; } }
+  @keyframes flick { 0%, 100% { transform: scaleY(1) rotate(2deg); } 50% { transform: scaleY(0.72) rotate(-4deg); } }
+  @keyframes needleBusy { 0%, 100% { transform: rotate(-38deg); } 30% { transform: rotate(24deg); } 55% { transform: rotate(-8deg); } 80% { transform: rotate(38deg); } }
+  @keyframes popIn { 0% { transform: scale(0); } 70% { transform: scale(1.14); } 100% { transform: scale(1); } }
+  @keyframes shakeM { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-2px, 1px); } 50% { transform: translate(2px, -1px); } 75% { transform: translate(-1px, -2px); } }
+  @keyframes landIn { 0% { transform: translateY(-60px); opacity: 0; } 60% { transform: translateY(6px); opacity: 1; } 100% { transform: translateY(0); } }
+  @keyframes beltMove { from { background-position: 0 0; } to { background-position: 36px 0; } }
+  @keyframes rideBelt { from { left: -4px; } to { left: 238px; } }
+  @keyframes waveSway { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+</style>
+</helmet>
+<div data-screen-label="Steam Character Spawner" style="min-height: 100vh; min-width: 100%; box-sizing: border-box; background: #f2e9cf; position: relative">
+  <sc-if value="{{ zoomUI }}" hint-placeholder-val="{{ true }}">
+    <div data-lab-nozoom style="position: fixed; right: 18px; bottom: 18px; z-index: 60; display: flex; align-items: center; gap: 7px; background: #f4ecd5; border: 4px solid #17120b; border-radius: 8px 11px 7px 10px; box-shadow: 7px 8px 0 rgba(23,18,11,0.8); padding: 5px 9px; font-family: 'VT323', monospace">
+      <button sc-camel-on-click="{{ onZoomOut }}" title="zoom out" style="font-family: 'VT323', monospace; font-size: 22px; line-height: 1; color: #17120b; background: #ffd23f; border: 3px solid #17120b; border-radius: 6px 4px 7px 5px; padding: 0 9px; cursor: pointer" style-hover="background: #ffe27a">−</button>
+      <div style="font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 2px; color: #17120b; min-width: 62px; text-align: center">{{ zoomLabel }}</div>
+      <button sc-camel-on-click="{{ onZoomIn }}" title="zoom in" style="font-family: 'VT323', monospace; font-size: 22px; line-height: 1; color: #17120b; background: #ffd23f; border: 3px solid #17120b; border-radius: 4px 6px 5px 7px; padding: 0 9px; cursor: pointer" style-hover="background: #ffe27a">+</button>
+      <div sc-camel-on-click="{{ onZoomReset }}" title="back to 100%" style="font-family: 'VT323', monospace; font-size: 14px; letter-spacing: 2px; color: #17120b; opacity: 0.6; cursor: pointer; padding-left: 2px">RESET</div>
+    </div>
+  </sc-if>
+  <div data-lab-sheet style="min-height: 100vh; width: fit-content; min-width: 100%; box-sizing: border-box; background: #f2e9cf; display: flex; align-items: center; justify-content: center; padding: 70px 40px 30px; font-family: 'Kalam', cursive; position: relative; zoom: {{ zoomF }}">
+  <div data-lab-nopaper style="position: absolute; inset: 0; pointer-events: none; opacity: 0.06; background-image: url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22160%22%20height=%22160%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22/%3E%3C/filter%3E%3Crect%20width=%22160%22%20height=%22160%22%20filter=%22url(%23n)%22/%3E%3C/svg%3E')"></div>
+  <input type="file" accept="image/png,image/jpeg,image/webp" ref="{{ fileRef }}" sc-camel-on-change="{{ onFile }}" style="display: none">
+  <div style="display: flex; flex-direction: column; align-items: center; position: relative; z-index: 1">
+    <div style="display: flex; align-items: flex-end; position: relative; animation: {{ machineAnim }}">
+      <div style="position: absolute; top: -66px; left: 214px; width: 460px; display: flex; justify-content: center; gap: 30px; z-index: 0">
+        <div style="position: relative; width: 40px; height: 104px; display: flex; flex-direction: column; align-items: center; align-self: flex-end">
+          <sc-if value="{{ steamOn }}" hint-placeholder-val="{{ true }}">
+            <div style="position: absolute; top: -20px; left: 50%; width: 32px; height: 28px; background: #f4ecd5; border: 3px solid #17120b; border-radius: 55% 62% 50% 65%; opacity: 0; animation: puffA 3s ease-out infinite"></div>
+            <div style="position: absolute; top: -14px; left: 50%; width: 22px; height: 19px; background: #f4ecd5; border: 3px solid #17120b; border-radius: 60% 50% 65% 55%; opacity: 0; animation: puffA 3s ease-out infinite; animation-delay: 1.5s"></div>
+          </sc-if>
+          <sc-if value="{{ chugging }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: -24px; left: 50%; width: 44px; height: 38px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 50% 65% 55% 60%; opacity: 0; animation: puffA 1.1s ease-out infinite; animation-delay: 0.3s"></div>
+          </sc-if>
+          <div style="width: 52px; height: 13px; background: #b8ac97; border: 4px solid #17120b; border-radius: 5px; position: relative; z-index: 1"></div>
+          <div style="width: 34px; height: 95px; background: #b8ac97; border: 4px solid #17120b; border-top-width: 0; margin-top: -2px"></div>
+        </div>
+        <div style="position: relative; width: 40px; height: 132px; display: flex; flex-direction: column; align-items: center; align-self: flex-end">
+          <sc-if value="{{ steamOn }}" hint-placeholder-val="{{ true }}">
+            <div style="position: absolute; top: -22px; left: 50%; width: 36px; height: 31px; background: #f4ecd5; border: 3px solid #17120b; border-radius: 62% 50% 58% 52%; opacity: 0; animation: puffA 2.6s ease-out infinite; animation-delay: 0.7s"></div>
+          </sc-if>
+          <sc-if value="{{ chugging }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: -28px; left: 50%; width: 52px; height: 44px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 58% 52% 62% 50%; opacity: 0; animation: puffA 1s ease-out infinite"></div>
+          </sc-if>
+          <div style="width: 52px; height: 13px; background: #b8ac97; border: 4px solid #17120b; border-radius: 5px; position: relative; z-index: 1"></div>
+          <div style="width: 34px; height: 123px; background: #b8ac97; border: 4px solid #17120b; border-top-width: 0; margin-top: -2px"></div>
+        </div>
+        <div style="position: relative; width: 40px; height: 88px; display: flex; flex-direction: column; align-items: center; align-self: flex-end">
+          <sc-if value="{{ steamOn }}" hint-placeholder-val="{{ true }}">
+            <div style="position: absolute; top: -18px; left: 50%; width: 26px; height: 23px; background: #f4ecd5; border: 3px solid #17120b; border-radius: 52% 60% 55% 62%; opacity: 0; animation: puffA 3.4s ease-out infinite; animation-delay: 2.1s"></div>
+          </sc-if>
+          <sc-if value="{{ chugging }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: -22px; left: 50%; width: 40px; height: 34px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 55% 60% 50% 64%; opacity: 0; animation: puffA 1.2s ease-out infinite; animation-delay: 0.6s"></div>
+          </sc-if>
+          <div style="width: 52px; height: 13px; background: #b8ac97; border: 4px solid #17120b; border-radius: 5px; position: relative; z-index: 1"></div>
+          <div style="width: 34px; height: 79px; background: #b8ac97; border: 4px solid #17120b; border-top-width: 0; margin-top: -2px"></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; position: relative; z-index: 1; margin-right: -6px">
+        <div style="position: absolute; top: -58px; left: -44px; width: 132px; height: 132px; z-index: -1; animation: spinGear {{ gearDur }} linear infinite">
+          <div style="position: absolute; top: 50%; left: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; background: #c5bba9; border: 4px solid #17120b; border-radius: 6px; transform: rotate(0deg) translateY(-62px)"></div>
+          <div style="position: absolute; top: 50%; left: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; background: #c5bba9; border: 4px solid #17120b; border-radius: 6px; transform: rotate(45deg) translateY(-62px)"></div>
+          <div style="position: absolute; top: 50%; left: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; background: #c5bba9; border: 4px solid #17120b; border-radius: 6px; transform: rotate(90deg) translateY(-62px)"></div>
+          <div style="position: absolute; top: 50%; left: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; background: #c5bba9; border: 4px solid #17120b; border-radius: 6px; transform: rotate(135deg) translateY(-62px)"></div>
+          <div style="position: absolute; top: 50%; left: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; background: #c5bba9; border: 4px solid #17120b; border-radius: 6px; transform: rotate(180deg) translateY(-62px)"></div>
+          <div style="position: absolute; top: 50%; left: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; background: #c5bba9; border: 4px solid #17120b; border-radius: 6px; transform: rotate(225deg) translateY(-62px)"></div>
+          <div style="position: absolute; top: 50%; left: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; background: #c5bba9; border: 4px solid #17120b; border-radius: 6px; transform: rotate(270deg) translateY(-62px)"></div>
+          <div style="position: absolute; top: 50%; left: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; background: #c5bba9; border: 4px solid #17120b; border-radius: 6px; transform: rotate(315deg) translateY(-62px)"></div>
+          <div style="position: absolute; inset: 14px; background: #c5bba9; border: 5px solid #17120b; border-radius: 50%"></div>
+          <div style="position: absolute; inset: 48px; background: #f4ecd5; border: 4px solid #17120b; border-radius: 50%"></div>
+        </div>
+        <div sc-camel-on-drop="{{ onBoilerDrop }}" sc-camel-on-drag-over="{{ onBoilerOver }}" style="width: 280px; height: 410px; background: #b8ac97; border: 5px solid #17120b; border-radius: 70px 70px 20px 20px; box-shadow: 12px 14px 0 rgba(23,18,11,0.82); position: relative; outline: {{ boilerOutline }}; outline-offset: 7px">
+          <div style="position: absolute; top: 46px; left: 16px; right: 16px; height: 0; border-top: 4px solid #17120b; opacity: 0.55"></div>
+          <div style="position: absolute; top: 90px; left: 12px; width: 9px; height: 9px; border-radius: 50%; background: #17120b; opacity: 0.55"></div>
+          <div style="position: absolute; top: 190px; left: 12px; width: 9px; height: 9px; border-radius: 50%; background: #17120b; opacity: 0.55"></div>
+          <div style="position: absolute; top: 290px; left: 12px; width: 9px; height: 9px; border-radius: 50%; background: #17120b; opacity: 0.55"></div>
+          <div style="position: absolute; top: 90px; right: 12px; width: 9px; height: 9px; border-radius: 50%; background: #17120b; opacity: 0.55"></div>
+          <div style="position: absolute; top: 190px; right: 12px; width: 9px; height: 9px; border-radius: 50%; background: #17120b; opacity: 0.55"></div>
+          <div style="position: absolute; top: 290px; right: 12px; width: 9px; height: 9px; border-radius: 50%; background: #17120b; opacity: 0.55"></div>
+          <div style="position: absolute; top: 68px; left: 50%; transform: translateX(-50%); width: 116px; height: 116px; background: #f4ecd5; border: 4px solid #17120b; border-radius: 50%; box-shadow: 5px 6px 0 rgba(23,18,11,0.45)">
+            <div style="position: absolute; top: 12px; left: 50%; width: 4px; height: 10px; background: #17120b; transform: translateX(-50%)"></div>
+            <div style="position: absolute; top: 26px; left: 20px; width: 4px; height: 9px; background: #17120b; transform: rotate(-48deg)"></div>
+            <div style="position: absolute; top: 26px; right: 20px; width: 4px; height: 9px; background: #e8484a; transform: rotate(48deg)"></div>
+            <div style="position: absolute; bottom: 50%; left: 50%; width: 5px; height: 42px; margin-left: -2.5px; background: #e8484a; border-radius: 3px; transform-origin: bottom center; transform: rotate(-34deg); animation: {{ needleAnim }}"></div>
+            <div style="position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; background: #17120b; border-radius: 50%"></div>
+          </div>
+          <div style="position: absolute; top: 196px; left: 50%; transform: translateX(-50%); font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 3px; color: #17120b; background: #f4ecd5; border: 3px solid #17120b; border-radius: 6px 4px 7px 5px; padding: 0 10px">BOILER</div>
+          <div style="position: absolute; bottom: 96px; left: 50%; transform: translateX(-50%); width: 128px; height: 96px; background: #d9d0c1; border: 4px solid #17120b; border-radius: 12px 10px 11px 13px">
+            <div style="position: absolute; top: 8px; left: 8px; width: 8px; height: 8px; border-radius: 50%; background: #17120b; opacity: 0.6"></div>
+            <div style="position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: #17120b; opacity: 0.6"></div>
+            <div style="position: absolute; bottom: 8px; left: 8px; width: 8px; height: 8px; border-radius: 50%; background: #17120b; opacity: 0.6"></div>
+            <div style="position: absolute; bottom: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: #17120b; opacity: 0.6"></div>
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 46px; height: 12px; background: #b8ac97; border: 3px solid #17120b; border-radius: 6px"></div>
+          </div>
+          <div style="position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); width: 150px; height: 62px; background: #17120b; border-radius: 10px 10px 6px 6px; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; gap: 4px">
+            <div style="width: 30px; height: 40px; background: #e8484a; border-radius: 50% 50% 8px 8px; transform-origin: bottom center; animation: flick 0.5s ease-in-out infinite"></div>
+            <div style="width: 24px; height: 52px; background: #ffd23f; border-radius: 50% 50% 6px 6px; transform-origin: bottom center; animation: flick 0.4s ease-in-out infinite; animation-delay: 0.15s"></div>
+            <div style="width: 28px; height: 34px; background: #e8484a; border-radius: 50% 50% 8px 8px; transform-origin: bottom center; animation: flick 0.55s ease-in-out infinite; animation-delay: 0.28s"></div>
+            <sc-if value="{{ burning }}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 64px; height: 58px; background: #ffd23f; border-radius: 50% 50% 8px 8px; transform-origin: bottom center; animation: flick 0.16s ease-in-out infinite"></div>
+              <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 100%, rgba(255,210,63,0.55) 0%, rgba(232,72,74,0.4) 55%, rgba(23,18,11,0) 82%)"></div>
+            </sc-if>
+          </div>
+        </div>
+        <div style="width: 236px; height: 16px; background: #c5bba9; border: 4px solid #17120b; margin-top: -4px"></div>
+        <div style="width: 268px; height: 16px; background: #b8ac97; border: 4px solid #17120b; margin-top: -4px"></div>
+        <div style="width: 300px; height: 18px; background: #c5bba9; border: 4px solid #17120b; border-radius: 6px 6px 10px 10px; margin-top: -4px; box-shadow: 10px 10px 0 rgba(23,18,11,0.8)"></div>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2">
+        <div style="width: 470px; box-sizing: border-box; background: #d9d0c1; border: 5px solid #17120b; border-radius: 22px 26px 14px 18px; box-shadow: 14px 16px 0 rgba(23,18,11,0.85); padding: 16px 18px; display: flex; flex-direction: column; gap: 13px; position: relative">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+            <div style="font-family: 'VT323', monospace; font-size: 24px; letter-spacing: 3px; color: #17120b; background: #f4ecd5; border: 3px solid #17120b; border-radius: 8px 4px 9px 5px; padding: 1px 14px 0; white-space: nowrap">SPAWN-O-MATIC MK.II</div>
+            <div style="display: flex; gap: 9px; align-items: center">
+              <div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid #17120b; background: #ffd23f; opacity: {{ light1Op }}; animation: {{ lightAnim }}"></div>
+              <div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid #17120b; background: #e8484a; opacity: {{ light2Op }}; animation: {{ lightAnim }}; animation-delay: 0.25s"></div>
+              <div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid #17120b; background: #7bc264; opacity: {{ light3Op }}; animation: {{ lightAnim }}; animation-delay: 0.5s"></div>
+            </div>
+          </div>
+          <div style="height: 24px; border: 3px solid #17120b; border-radius: 6px; background: repeating-linear-gradient(90deg, #b8ac97 0px, #b8ac97 8px, #17120b 8px, #17120b 12px)"></div>
+          <div sc-camel-on-click="{{ onHopper }}" sc-camel-on-drop="{{ onDrop }}" sc-camel-on-drag-over="{{ onDragOver }}" sc-camel-on-drag-leave="{{ onDragLeave }}" style="border: 3px dashed {{ hopperBorder }}; border-radius: 12px; background: {{ hopperBg }}; min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; position: relative" style-hover="background: #fdf7e3">
+            <div style="position: absolute; top: -12px; left: 14px; font-family: 'VT323', monospace; font-size: 18px; letter-spacing: 3px; color: #f4ecd5; background: #17120b; border-radius: 4px; padding: 0 10px">01 INTAKE HOPPER</div>
+            <sc-if value="{{ hasChar }}" hint-placeholder-val="{{ false }}">
+              <div style="height: 96px; width: 200px; display: flex; align-items: center; justify-content: center">{{ hopperImg }}</div>
+              <div style="display: flex; align-items: center; gap: 10px">
+                <div style="font-family: 'VT323', monospace; font-size: 18px; letter-spacing: 2px; color: #17120b; background: #ffd23f; border: 3px solid #17120b; border-radius: 6px 4px 7px 5px; padding: 0 10px">SPECIMEN LOADED</div>
+                <button sc-camel-on-click="{{ onEject }}" style="font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 2px; color: #f4ecd5; background: #17120b; border: 3px solid #17120b; border-radius: 6px; padding: 0 10px; cursor: pointer" style-hover="background: #e8484a">EJECT</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noChar }}" hint-placeholder-val="{{ true }}">
+              <div style="width: 46px; height: 40px; border: 3px solid #17120b; border-radius: 8px; background: #fdf7e3; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #17120b">?</div>
+              <div style="font-weight: 700; font-size: 17px; color: #17120b; text-align: center; line-height: 1.3">drop your critter png here<br><span style="font-weight: 400; font-size: 14px; opacity: 0.7">straight from the character forge · or click to browse</span></div>
+            </sc-if>
+          </div>
+          <div style="display: flex; gap: 9px">
+            <div style="flex: 1; min-width: 0; background: #f4ecd5; border: 3px solid #17120b; border-radius: 10px 6px 9px 7px; padding: 8px 6px 5px; display: flex; flex-direction: column; align-items: center; gap: 3px">
+              <div style="width: 46px; height: 46px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 50%; position: relative">
+                <div style="position: absolute; bottom: 50%; left: 50%; width: 4px; height: 17px; margin-left: -2px; background: #e8484a; border-radius: 2px; transform-origin: bottom center; transform: rotate(-30deg); animation: {{ needleAnim }}"></div>
+                <div style="position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #17120b; border-radius: 50%"></div>
+              </div>
+              <div style="font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 2px; color: #17120b; white-space: nowrap">PSI</div>
+            </div>
+            <div style="flex: 1; min-width: 0; background: #f4ecd5; border: 3px solid #17120b; border-radius: 7px 9px 6px 10px; padding: 8px 6px 5px; display: flex; flex-direction: column; align-items: center; gap: 3px">
+              <div style="width: 46px; height: 46px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 50%; position: relative">
+                <div style="position: absolute; bottom: 50%; left: 50%; width: 4px; height: 17px; margin-left: -2px; background: #e8484a; border-radius: 2px; transform-origin: bottom center; transform: rotate(15deg); animation: {{ needleAnim }}; animation-delay: 0.2s"></div>
+                <div style="position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #17120b; border-radius: 50%"></div>
+              </div>
+              <div style="font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 2px; color: #17120b; white-space: nowrap">CHAOS</div>
+            </div>
+            <div style="flex: 1; min-width: 0; background: #f4ecd5; border: 3px solid #17120b; border-radius: 9px 6px 10px 7px; padding: 8px 6px 5px; display: flex; flex-direction: column; align-items: center; gap: 3px">
+              <div style="width: 46px; height: 46px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 50%; position: relative">
+                <div style="position: absolute; bottom: 50%; left: 50%; width: 4px; height: 17px; margin-left: -2px; background: #e8484a; border-radius: 2px; transform-origin: bottom center; transform: rotate(-8deg); animation: {{ needleAnim }}; animation-delay: 0.4s"></div>
+                <div style="position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #17120b; border-radius: 50%"></div>
+              </div>
+              <div style="font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 2px; color: #17120b; white-space: nowrap">HEAT</div>
+            </div>
+            <div style="flex: 1; min-width: 0; background: #f4ecd5; border: 3px solid #17120b; border-radius: 6px 10px 7px 9px; padding: 8px 6px 5px; display: flex; flex-direction: column; align-items: center; gap: 3px">
+              <div style="width: 46px; height: 46px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 50%; position: relative">
+                <div style="position: absolute; bottom: 50%; left: 50%; width: 4px; height: 17px; margin-left: -2px; background: #e8484a; border-radius: 2px; transform-origin: bottom center; transform: rotate(22deg); animation: {{ needleAnim }}; animation-delay: 0.6s"></div>
+                <div style="position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #17120b; border-radius: 50%"></div>
+              </div>
+              <div style="font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 2px; color: #17120b; white-space: nowrap">SMOOTHING</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 14px; align-items: stretch">
+            <button sc-camel-on-click="{{ onSpawn }}" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 16px; background: #e8484a; border: 4px solid #17120b; border-radius: 12px 16px 10px 14px; padding: 10px 12px; cursor: pointer; box-shadow: 6px 7px 0 rgba(23,18,11,0.85)" style-active="transform: translate(5px, 6px); box-shadow: 1px 1px 0 rgba(23,18,11,0.85)" style-hover="background: #f05a5c">
+              <div style="width: 14px; height: 58px; background: #17120b; border-radius: 7px; position: relative">
+                <div style="position: absolute; left: 50%; top: 4px; width: 8px; height: 50px; margin-left: -4px; background: #b8ac97; border: 2px solid #17120b; border-radius: 5px; transform-origin: bottom center; transform: rotate({{ leverAngle }}); transition: transform 0.3s">
+                  <div style="position: absolute; top: -13px; left: 50%; width: 22px; height: 22px; margin-left: -11px; background: #ffd23f; border: 3px solid #17120b; border-radius: 50%"></div>
+                </div>
+              </div>
+              <div style="font-family: 'VT323', monospace; font-size: 34px; letter-spacing: 4px; color: #fdf3d9">{{ spawnLabel }}</div>
+            </button>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: #f4ecd5; border: 3px solid #17120b; border-radius: 8px 11px 7px 10px; padding: 6px 14px">
+              <div style="font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 3px; color: #17120b">BATCH</div>
+              <div style="font-family: 'VT323', monospace; font-size: 27px; letter-spacing: 4px; color: #7ce38b; background: #17120b; border-radius: 5px; padding: 0 10px">{{ countText }}</div>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 210px">
+          <div style="width: 60px; height: 26px; background: #b8ac97; border: 5px solid #17120b; border-top-width: 0; box-shadow: 8px 8px 0 rgba(23,18,11,0.8)"></div>
+          <div style="width: 60px; height: 26px; background: #b8ac97; border: 5px solid #17120b; border-top-width: 0; box-shadow: 8px 8px 0 rgba(23,18,11,0.8)"></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; position: relative; z-index: 1; margin-left: -6px">
+        <div style="width: 66px; height: 64px; border: 4px solid #17120b; background: repeating-linear-gradient(180deg, #b8ac97 0px, #b8ac97 8px, #8a7f6a 8px, #8a7f6a 12px); border-radius: 8px 8px 0 0; margin-bottom: -5px; position: relative; z-index: 1">
+          <div style="position: absolute; top: -14px; left: -8px; right: -8px; height: 14px; background: #c5bba9; border: 4px solid #17120b; border-radius: 6px"></div>
+        </div>
+        <div style="width: 310px; height: 380px; background: #17120b; border: 5px solid #17120b; border-radius: 18px; box-shadow: 12px 14px 0 rgba(23,18,11,0.82); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center">
+          <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, #262010 0%, #17120b 70%)"></div>
+          <sc-if value="{{ showChamberText }}" hint-placeholder-val="{{ true }}">
+            <div style="position: relative; display: flex; align-items: center; gap: 8px; padding: 0 24px">
+              <div style="font-family: 'VT323', monospace; font-size: 30px; letter-spacing: 4px; line-height: 1.3; color: {{ chamberColor }}; text-align: center; white-space: pre-line">{{ chamberText }}</div>
+              <div style="width: 12px; height: 24px; background: #7ce38b; animation: blinkLight 1s steps(1) infinite"></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ showChamberChar }}" hint-placeholder-val="{{ false }}">
+            <div style="position: relative; animation: popIn 0.45s ease-out">
+              <div style="height: 230px; width: 250px; display: flex; align-items: flex-end; justify-content: center; transform: {{ warpTf }}; transform-origin: bottom center">{{ chamberImg }}</div>
+            </div>
+          </sc-if>
+          <div style="position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(180deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, rgba(0,0,0,0) 3px, rgba(0,0,0,0) 4px)"></div>
+          <div style="position: absolute; top: 10px; left: 12px; font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 3px; color: #7ce38b; opacity: 0.8">02 SPAWN CHAMBER</div>
+        </div>
+        <div style="width: 330px; height: 26px; background: #c5bba9; border: 5px solid #17120b; border-radius: 8px 8px 12px 12px; margin-top: -6px; box-shadow: 10px 11px 0 rgba(23,18,11,0.8); position: relative">
+          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120px; height: 8px; background: #17120b; border-radius: 4px; opacity: 0.5"></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; align-self: flex-end; position: relative; z-index: 0; margin-left: -12px">
+        <div style="position: relative; width: 320px; height: 156px">
+          <sc-if value="{{ riding }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; bottom: 96px; left: -4px; animation: rideBelt 1.4s linear forwards">
+              <div style="height: 92px; width: 92px; display: flex; align-items: flex-end; justify-content: center; transform: {{ warpTf }}; transform-origin: bottom center">{{ rideImg }}</div>
+            </div>
+          </sc-if>
+          <div style="position: absolute; bottom: 52px; left: 0; width: 320px; height: 44px; box-sizing: border-box; border: 5px solid #17120b; border-radius: 24px; background: repeating-linear-gradient(90deg, #b8ac97 0px, #b8ac97 14px, #17120b 14px, #17120b 18px); box-shadow: 10px 11px 0 rgba(23,18,11,0.8); animation: beltMove {{ beltDur }} linear infinite"></div>
+          <div style="position: absolute; bottom: 60px; left: 10px; width: 28px; height: 28px; background: #f4ecd5; border: 4px solid #17120b; border-radius: 50%; animation: spinGear {{ beltSpinDur }} linear infinite">
+            <div style="position: absolute; top: 3px; left: 50%; width: 6px; height: 6px; margin-left: -3px; background: #17120b; border-radius: 50%"></div>
+          </div>
+          <div style="position: absolute; bottom: 60px; right: 10px; width: 28px; height: 28px; background: #f4ecd5; border: 4px solid #17120b; border-radius: 50%; animation: spinGear {{ beltSpinDur }} linear infinite">
+            <div style="position: absolute; top: 3px; left: 50%; width: 6px; height: 6px; margin-left: -3px; background: #17120b; border-radius: 50%"></div>
+          </div>
+          <div style="position: absolute; bottom: 0; left: 46px; width: 16px; height: 52px; background: #b8ac97; border: 4px solid #17120b"></div>
+          <div style="position: absolute; bottom: 0; right: 46px; width: 16px; height: 52px; background: #b8ac97; border: 4px solid #17120b"></div>
+          <div style="position: absolute; bottom: 0; left: 26px; width: 64px; height: 12px; background: #c5bba9; border: 4px solid #17120b; border-radius: 4px"></div>
+          <div style="position: absolute; bottom: 0; right: 26px; width: 64px; height: 12px; background: #c5bba9; border: 4px solid #17120b; border-radius: 4px"></div>
+        </div>
+      </div>
+    </div>
+    <div style="width: 1180px; box-sizing: border-box; background: #d9d0c1; border: 5px solid #17120b; border-radius: 16px 20px 14px 18px; box-shadow: 12px 14px 0 rgba(23,18,11,0.85); padding: 20px 20px 12px; margin-top: 34px; transform: rotate(-0.4deg); position: relative">
+      <div style="position: absolute; top: -14px; left: 20px; font-family: 'VT323', monospace; font-size: 18px; letter-spacing: 3px; color: #f4ecd5; background: #17120b; border-radius: 4px; padding: 0 10px">03 WARP BENCH</div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px 14px">
+        <sc-for list="{{ warps }}" as="w" hint-placeholder-count="8">
+          <div style="display: flex; align-items: center; gap: 10px; background: #f4ecd5; border: 3px solid #17120b; border-radius: 9px 6px 8px 7px; padding: 5px 12px">
+            <div style="font-family: 'VT323', monospace; font-size: 18px; letter-spacing: 2px; color: #17120b; width: 76px; flex-shrink: 0">{{ w.label }}</div>
+            <input type="range" min="0" max="100" value="{{ w.val }}" sc-camel-on-change="{{ w.onChange }}" sc-camel-on-double-click="{{ w.onReset }}" style="flex: 1; min-width: 0; accent-color: #e8484a; cursor: pointer">
+          </div>
+        </sc-for>
+      </div>
+      <div style="font-size: 14px; color: #17120b; opacity: 0.6; margin-top: 8px">bends every spawned critter — on the belt, in the chamber and on the ground. double-click a slider to flatten it.</div>
+    </div>
+    <div style="position: relative; width: 1380px; height: 158px; margin-top: 6px">
+      <div style="position: absolute; left: 20px; bottom: 8px; display: flex; align-items: flex-end">
+        <div style="width: 11px; height: 42px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(-14deg)"></div>
+        <div style="width: 11px; height: 56px; background: #7bc264; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(-4deg); margin-left: -7px"></div>
+        <div style="width: 11px; height: 38px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(9deg); margin-left: -7px"></div>
+      </div>
+      <div style="position: absolute; right: 36px; bottom: 8px; display: flex; align-items: flex-end">
+        <div style="width: 10px; height: 48px; background: #7bc264; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(5deg)"></div>
+        <div style="width: 10px; height: 34px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(16deg); margin-left: -7px"></div>
+      </div>
+      <div style="position: absolute; left: 44%; bottom: 4px; display: flex; align-items: flex-end">
+        <div style="width: 9px; height: 30px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(-10deg)"></div>
+        <div style="width: 9px; height: 40px; background: #7bc264; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(4deg); margin-left: -6px"></div>
+      </div>
+      <sc-for list="{{ critters }}" as="c" hint-placeholder-count="0">
+        <div draggable="true" sc-camel-on-drag-start="{{ c.onDrag }}" sc-camel-on-drag-end="{{ c.onDragEnd }}" style="position: absolute; bottom: 8px; left: {{ c.left }}; animation: landIn 0.5s ease-out; cursor: grab">
+          <div style="animation: {{ waveAnim }}">
+            <div style="height: {{ c.h }}px; width: {{ c.h }}px; display: flex; align-items: flex-end; justify-content: center; transform: {{ c.tf }}; transform-origin: bottom center">{{ c.img }}</div>
+          </div>
+        </div>
+      </sc-for>
+      <div style="position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 2px; color: #17120b; opacity: 0.5">the herd lives here · pull the lever to grow it · drag a critter into the boiler to melt it down</div>
+    </div>
+  </div>
+  <div style="position: absolute; top: 54px; left: 40px; background: #ffd23f; border: 4px solid #17120b; border-radius: 4px 12px 6px 14px; box-shadow: 8px 9px 0 rgba(23,18,11,0.82); padding: 26px 16px 16px; width: 178px; transform: rotate(-5deg); z-index: 2">
+    <div style="position: absolute; top: -13px; left: 50%; transform: translateX(-50%) rotate(-4deg); width: 84px; height: 24px; background: rgba(244,236,205,0.95); border: 3px solid #17120b; border-radius: 3px"></div>
+    <div style="font-weight: 700; font-size: 16px; line-height: 1.35; color: #17120b">1. forge a critter<br>2. feed the hopper<br>3. PULL THE LEVER<br><span style="font-weight: 400; font-size: 14px">rejects? drag 'em into the boiler.</span></div>
+  </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;steam&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Machine&quot;},&quot;chugSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2.5,&quot;min&quot;:1,&quot;max&quot;:6,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Machine&quot;},&quot;maxCritters&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:8,&quot;min&quot;:1,&quot;max&quot;:20,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Machine&quot;},&quot;zoomUI&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;View&quot;},&quot;maxZoom&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:6,&quot;min&quot;:2,&quot;max&quot;:12,&quot;step&quot;:1,&quot;unit&quot;:&quot;\u00d7&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;View&quot;}}">
+class Component extends DCLogic {
+  state = { charSrc: null, phase: 'idle', dragging: false, count: 0, critters: [], chamberChar: null, rideChar: null, burning: false, dragCritter: false, zoom: 1, warp: { stretch: 50, lean: 50, wave: 0, melt: 0, twist: 50, bulge: 50, glitch: 0, blur: 0 } };
+  fileRef = React.createRef();
+  componentDidMount() {
+    try {
+      const z = parseFloat(localStorage.getItem('spawnomatic.zoom.v1'));
+      if (z > 0.2 && z < 20) this.setState({ zoom: z });
+    } catch (e) {}
+    window.addEventListener('keydown', this.onZoomKey);
+    try {
+      const s = localStorage.getItem('spawnomatic.char.v1');
+      const c = parseInt(localStorage.getItem('spawnomatic.count.v1') || '0', 10);
+      if (s || c) this.setState({ charSrc: s || null, count: c || 0 });
+    } catch (e) {}
+  }
+  componentWillUnmount() {
+    clearTimeout(this._t1); clearTimeout(this._t2); clearTimeout(this._t3); clearTimeout(this._t4);
+    window.removeEventListener('keydown', this.onZoomKey);
+  }
+  zoomTo = (z) => {
+    const max = this.props.maxZoom ?? 6;
+    const v = Math.min(max, Math.max(0.4, Math.round(z * 100) / 100));
+    this.setState({ zoom: v });
+    try { localStorage.setItem('spawnomatic.zoom.v1', String(v)); } catch (e) {}
+  };
+  onZoomKey = (e) => {
+    if (!(e.metaKey || e.ctrlKey)) return;
+    if (e.key === '=' || e.key === '+') { e.preventDefault(); this.zoomTo(this.state.zoom * 1.25); }
+    else if (e.key === '-') { e.preventDefault(); this.zoomTo(this.state.zoom / 1.25); }
+    else if (e.key === '0') { e.preventDefault(); this.zoomTo(1); }
+  };
+  loadFile = (file) => {
+    if (!file || !/^image\//.test(file.type)) return;
+    const r = new FileReader();
+    r.onload = () => {
+      this.setState({ charSrc: r.result, dragging: false });
+      try { localStorage.setItem('spawnomatic.char.v1', r.result); } catch (e) {}
+    };
+    r.readAsDataURL(file);
+  };
+  spawn = () => {
+    if (this.state.phase !== 'idle') return;
+    if (!this.state.charSrc) {
+      this.setState({ phase: 'nofuel' });
+      this._t1 = setTimeout(() => this.setState({ phase: 'idle' }), 1400);
+      return;
+    }
+    const secs = this.props.chugSeconds ?? 2.5;
+    this.setState({ phase: 'chug' });
+    this._t1 = setTimeout(() => {
+      this.setState(s => ({ phase: 'reveal', chamberChar: s.charSrc, count: s.count + 1 }), () => {
+        try { localStorage.setItem('spawnomatic.count.v1', String(this.state.count)); } catch (e) {}
+      });
+      this._t2 = setTimeout(() => {
+        this.setState(s => ({ phase: 'ride', rideChar: s.chamberChar, chamberChar: null }));
+        this._t3 = setTimeout(() => {
+          const max = this.props.maxCritters ?? 8;
+          this.setState(s => ({
+            critters: [...s.critters, {
+              id: Date.now(),
+              src: s.rideChar,
+              x: 4 + Math.random() * 86,
+              rot: Math.random() * 20 - 10,
+              h: 70 + Math.round(Math.random() * 60),
+              flip: Math.random() < 0.5,
+            }].slice(-max),
+            rideChar: null,
+            phase: 'idle',
+          }));
+        }, 1400);
+      }, 1500);
+    }, secs * 1000);
+  };
+  renderVals() {
+    const { charSrc, phase, dragging, count, critters, chamberChar, rideChar, burning, dragCritter, warp, zoom } = this.state;
+    const chug = phase === 'chug';
+    const busyBelt = chug || phase === 'ride';
+    const cs = (warp.stretch - 50) / 50, cl = (warp.lean - 50) / 50, ct = (warp.twist - 50) / 50, cb = (warp.bulge - 50) / 50;
+    const m = warp.melt / 100, g = warp.glitch / 100, b = warp.blur / 100, wv = warp.wave / 100;
+    const sy = ((1 + cs * 0.5) * (1 - m * 0.45)).toFixed(3);
+    const sx = ((1 + cb * 0.5) * (1 + m * 0.35)).toFixed(3);
+    const warpTf = 'scale(' + sx + ',' + sy + ') skewX(' + (cl * 20).toFixed(1) + 'deg) rotate(' + (ct * 22).toFixed(1) + 'deg)';
+    const warpFx = (g ? 'hue-rotate(' + Math.round(g * 300) + 'deg) saturate(' + (1 + g * 1.5).toFixed(2) + ') ' : '') + (b ? 'blur(' + (b * 3).toFixed(1) + 'px) ' : '');
+    const waveAnim = wv > 0.02 ? 'waveSway ' + (2.6 - wv * 1.9).toFixed(2) + 's ease-in-out infinite' : 'none';
+    const warpLabels = { stretch: 'STRETCH', lean: 'LEAN', wave: 'WAVE', melt: 'MELT', twist: 'TWIST', bulge: 'BULGE', glitch: 'GLITCH', blur: 'BLUR' };
+    const warpDefaults = { stretch: 50, lean: 50, wave: 0, melt: 0, twist: 50, bulge: 50, glitch: 0, blur: 0 };
+    const warps = Object.keys(warpLabels).map(k => ({
+      key: k, label: warpLabels[k], val: warp[k],
+      onChange: (e) => { const v = Number(e.target.value); this.setState(s => ({ warp: { ...s.warp, [k]: v } })); },
+      onReset: () => this.setState(s => ({ warp: { ...s.warp, [k]: warpDefaults[k] } })),
+    }));
+    let chamberText = '';
+    let chamberColor = '#7ce38b';
+    if (phase === 'nofuel') { chamberText = 'NO SPECIMEN!\nFEED THE HOPPER'; chamberColor = '#e8484a'; }
+    else if (phase === 'chug') { chamberText = 'SPAWNING...'; }
+    else if (phase === 'idle') { chamberText = charSrc ? 'READY' : 'INSERT\nSPECIMEN'; }
+    const blank = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+    const mkImg = (src, filter) => src ? React.createElement('img', { src, style: { maxHeight: '100%', maxWidth: '100%', objectFit: 'contain', filter, pointerEvents: 'none' } }) : null;
+    return {
+      zoomUI: this.props.zoomUI ?? true,
+      zoomF: zoom,
+      zoomLabel: Math.round(zoom * 100) + '%',
+      onZoomIn: () => this.zoomTo(zoom * 1.25),
+      onZoomOut: () => this.zoomTo(zoom / 1.25),
+      onZoomReset: () => this.zoomTo(1),
+      fileRef: this.fileRef,
+      steamOn: this.props.steam ?? true,
+      chugging: chug,
+      machineAnim: chug ? 'shakeM 0.18s linear infinite' : 'none',
+      gearDur: chug ? '1.1s' : '9s',
+      needleAnim: chug ? 'needleBusy 0.65s ease-in-out infinite' : 'none',
+      lightAnim: chug ? 'blinkLight 0.55s steps(1) infinite' : 'none',
+      light1Op: chug ? 1 : 0.3,
+      light2Op: chug ? 1 : 0.3,
+      light3Op: chug ? 1 : 1,
+      leverAngle: chug ? '30deg' : '-26deg',
+      spawnLabel: chug ? 'CHUGGING...' : 'SPAWN',
+      hasChar: !!charSrc,
+      noChar: !charSrc,
+      hopperImg: mkImg(charSrc, 'drop-shadow(4px 5px 0 rgba(23,18,11,0.35))'),
+      hopperBorder: dragging ? '#e8484a' : '#17120b',
+      hopperBg: dragging ? '#fdf7e3' : '#f4ecd5',
+      countText: String(count).padStart(4, '0'),
+      showChamberText: !!chamberText,
+      showChamberChar: phase === 'reveal' && !!chamberChar,
+      chamberImg: mkImg(chamberChar, warpFx + 'drop-shadow(0 0 16px rgba(124,227,139,0.55))'),
+      chamberText,
+      chamberColor,
+      critters: critters.map(c => ({
+        ...c,
+        img: mkImg(c.src, warpFx + 'drop-shadow(5px 6px 0 rgba(23,18,11,0.35))'),
+        left: c.x + '%',
+        tf: 'rotate(' + c.rot + 'deg)' + (c.flip ? ' scaleX(-1)' : '') + ' ' + warpTf,
+        onDrag: (e) => { this._dragId = c.id; this.setState({ dragCritter: true }); try { e.dataTransfer.setData('text/plain', 'critter'); } catch (err) {} },
+        onDragEnd: () => { this._dragId = null; this.setState({ dragCritter: false }); },
+      })),
+      warps,
+      warpTf,
+      waveAnim,
+      warpFilterGlow: warpFx + 'drop-shadow(0 0 16px rgba(124,227,139,0.55))',
+      warpFilterShadow: warpFx + 'drop-shadow(5px 6px 0 rgba(23,18,11,0.35))',
+      riding: phase === 'ride' && !!rideChar,
+      rideImg: mkImg(rideChar, warpFx + 'drop-shadow(5px 6px 0 rgba(23,18,11,0.35))'),
+      beltDur: busyBelt ? '0.55s' : '2.6s',
+      beltSpinDur: busyBelt ? '0.8s' : '4s',
+      burning,
+      boilerOutline: dragCritter ? '4px dashed #e8484a' : 'none',
+      onBoilerOver: (e) => { if (this._dragId != null) e.preventDefault(); },
+      onBoilerDrop: (e) => {
+        e.preventDefault();
+        const id = this._dragId;
+        if (id == null) return;
+        this._dragId = null;
+        this.setState(s => ({ critters: s.critters.filter(c => c.id !== id), dragCritter: false, burning: true }));
+        clearTimeout(this._t4);
+        this._t4 = setTimeout(() => this.setState({ burning: false }), 1000);
+      },
+      onHopper: () => { if (this.fileRef.current) this.fileRef.current.click(); },
+      onFile: (e) => { this.loadFile(e.target.files && e.target.files[0]); e.target.value = ''; },
+      onDrop: (e) => { e.preventDefault(); this.loadFile(e.dataTransfer.files && e.dataTransfer.files[0]); },
+      onDragOver: (e) => { e.preventDefault(); if (!this.state.dragging) this.setState({ dragging: true }); },
+      onDragLeave: () => this.setState({ dragging: false }),
+      onEject: (e) => {
+        e.stopPropagation();
+        this.setState({ charSrc: null });
+        try { localStorage.removeItem('spawnomatic.char.v1'); } catch (err) {}
+      },
+      onSpawn: this.spawn,
+    };
+  }
+}
+</script>
+</body>
+</html>

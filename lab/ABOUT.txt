@@ -1,0 +1,1761 @@
+════════════════════════════════════════════════════════════════════════════
+  KNOLL — THE COMING-SOON PAGE AND THE LAB
+  a plain-text tour of what this thing is and everything in it
+════════════════════════════════════════════════════════════════════════════
+
+  This file covers two separate pieces that live in the same folder:
+
+    site/index.html   the public coming-soon page for knoll.space
+    site/lab/         a private workbench where the features get built
+
+  Written for whoever opens this in six months and needs to remember how
+  any of it works. Nothing here is a spec — it describes what is actually
+  built and running today.
+
+
+────────────────────────────────────────────────────────────────────────────
+  1 · WHAT KNOLL IS
+────────────────────────────────────────────────────────────────────────────
+
+Knoll is a shared space for internet communities — a fan page that the fans
+themselves build, rather than one that a single admin maintains and everyone
+else comments on.
+
+The one-line pitch on the page:
+
+    "Every gnome needs a Knoll."
+    Knoll is a shared canvas where your community draws and builds
+    together in real time.
+
+The central metaphor is a hill (a knoll). A community gets a hill. Members
+draw on it, stamp things onto it, leave notes, and vote on what stays. What
+the community approves stops being a poll result and becomes part of the
+place — a pond gets dug, a landmark gets named, an article gets written into
+the law book. The gimmick that holds it together is that group decisions have
+physical consequences on a shared piece of ground, and those consequences are
+permanent.
+
+Three claims the page makes:
+
+    The fan page, by the fans
+        Doodle, stamp shapes, leave notes, queue up the jukebox, or beat
+        someone's snake high score. The best of it gets voted onto the page
+        for good.
+
+    Built by consensus
+        Submit a design, let the community vote. What the hill approves
+        becomes part of the page — forever.
+
+    Your hill, your rules
+        Pin the good stuff, tidy the mess, and keep the vibe yours with
+        simple mod tools.
+
+The tone throughout is deliberately silly-but-earnest: gnomes, toadstools,
+lanterns, a mayor with no powers, a pond named Greg. The mechanics
+underneath are real; the framing is a joke that everyone is in on.
+
+
+────────────────────────────────────────────────────────────────────────────
+  2 · THE COMING-SOON PAGE  (site/index.html)
+────────────────────────────────────────────────────────────────────────────
+
+  What it is ..... the live marketing page at knoll.space, with a working
+                   waitlist form and a playable demo of the wall
+  Built with ..... Design Canvas — the page is an <x-dc> component driven by
+                   support.js. LEAVE THE STRUCTURE ALONE unless you are
+                   editing it in Design Canvas; it is not hand-written HTML
+                   in the usual sense.
+  Deploys ........ Vercel, automatically on push
+  Files .......... index.html (page + all logic), support.js (the Design
+                   Canvas runtime), logo/, apps-script/ (the signup backend)
+
+────────────────────────────────────────────────────────────
+  2.1  The hero: a wall you can actually draw on
+────────────────────────────────────────────────────────────
+
+The top of the page is not a screenshot. It is a live canvas — the product,
+running, with the marketing copy sitting on top of it. Everything you make is
+saved to your own browser and is still there when you come back.
+
+  THE TOOL DOCK (bottom centre, dark pill)
+
+    Move        drag anything already on the wall
+    Draw        freehand ink
+                  · 4 pen widths (2.5 / 4.5 / 8 / 14)
+    Sticker     stamp a shape
+                  · 5 stamps: pointy hat, gnome, toadstool, big beard,
+                    lantern
+                  · 3 opacities (100% / 55% / 25%)
+    Text        leave a note
+                  · 5 fonts: Sans, Display, Serif, Mono, Marker
+
+    5 colours   ink, pink, blue, green, orange
+                  (a second, darker palette swaps in after dark so nothing
+                   glows off the night sky)
+    Undo        step back one piece
+    Clear       wipe your wall
+
+  A second row of option buttons appears above the dock whenever the chosen
+  tool has options (widths, stamps, fonts). It hides itself in Move mode.
+
+  PERSISTENCE
+    Everything lives in localStorage under the key 'wallspace-wall-v4'.
+    Strokes, stickers, notes and their positions all come back on reload.
+    Nothing is uploaded. There is no account and no server for the wall.
+
+  RESPONSIVE BEHAVIOUR
+    Below ~760px the page enters "mini" mode: the music deck folds up, the
+    playlist hides, the roaming props are re-placed so they stop covering the
+    headline, and the tool dock collapses to a single row. Crossing the
+    breakpoint re-lays the whole top band rather than just scaling it.
+
+────────────────────────────────────────────────────────────
+  2.2  The things living on the hero
+────────────────────────────────────────────────────────────
+
+The wall is populated so it never looks empty. All of this is fake — there
+are no other users yet — but it is all animated in real time, not looped
+video.
+
+  SIX GHOST CURSORS
+    Named peers wandering the wall with colour-coded trails:
+    mossy, pixelpete, juno~, opal, zip, vinny.
+    They are not just cursors — three of them have jobs:
+      · one is an ARTIST who draws a full piece onto the wall, stroke by
+        stroke, while you watch
+      · one ATTENDS THE LOUNGE and steers around whatever is in the way
+      · one PLAYS THE ARCADE CABINET
+
+  THE ARCADE CABINET
+    A little machine on the wall running one of three toy games — snake,
+    dino or pong — actually simulated, not a picture of a game. It picks a
+    different one from last time (remembered in 'ws-last-game').
+
+  THE MUSIC DECK
+    A glossy Y2K jukebox with a scrubbing progress bar, a bouncing EQ and a
+    greyed-out playlist panel of six invented tracks:
+      Gnome & Circumstance ....... The Toadstools
+      Slow Mushroom Sunrise ...... Fern & Moss
+      Little Red Hat (demo) ...... Pebble Choir
+      Wheelbarrow Waltz .......... The Toadstools
+      Dew on the Petunias ........ Birdbath
+      Lantern, Lantern ........... Fern & Moss
+    A small gnome dances beside it.
+
+  THE BIG GNOME FACE
+    An oversized gnome head that tracks your cursor with its eyes and blinks.
+    It reacts to the signup form in two stages — eager when you touch the
+    email field or the interest dropdown, full celebration once you actually
+    sign up.
+
+  THE SPORTS CAR
+    A gnome tearing around a strip of the hero in a tiny car, tilting into
+    corners. On narrow screens its lane moves so it stops cutting through the
+    deck and the lounge.
+
+  THE LOUNGE
+    A parasol with a lantern strung off the canopy, and an attendant.
+
+  THE LAWN GNOME
+    Stands on the hill. Can be picked up and moved. In the sketches further
+    down the page, this is the gnome who wears the mayor's sash.
+
+  DAY AND NIGHT
+    The page reads your own clock and dresses itself accordingly.
+      dawn  05:00 → 07:30      dusk  18:30 → 21:00
+    A single 0..1 "night" dial drives the sky wash, the stars and the lantern
+    flames, ramping smoothly. Anything where legibility matters — the copy,
+    the ink already on the wall — uses a hard switch instead (at 26% night),
+    because cross-fading text and background passes through a moment where
+    the two match and the words disappear.
+      Add ?hour=21 to the URL to force a time of day and inspect the other
+      half without waiting for evening.
+
+  THE PAPER
+    Under everything is a dot grid, and under that, faint contour lines — a
+    seamless 720px tile of four nested wobbly hills, generated the same way
+    every time,
+    so it is identical on every load. The same geometry feeds three surfaces:
+    the hero by day (via CSS), the night sky (painted in, so the lines fade
+    with the wash instead of vanishing), and the white section below the fold.
+
+────────────────────────────────────────────────────────────
+  2.3  The waitlist form
+────────────────────────────────────────────────────────────
+
+  Fields      email (required) + an interest dropdown:
+                Indie games / Art & illustration / Music & bands /
+                Fandoms & shows / Something else
+  Anti-spam   a hidden honeypot field named "website"
+  Copy        "No spam — one email when the wall opens."
+  Success     "You're on the list — see you at the wall."
+  Failure     "Hmm, that didn't go through — try again?"
+
+  WHERE IT GOES
+    POSTs to a Google Apps Script web app (the SIGNUP_ENDPOINT constant near
+    the top of the page script), which appends the row to a Google Sheet.
+    The URL is not a secret — the script only accepts writes and cannot read
+    the sheet back. The deployment source lives in site/apps-script/.
+
+    Re-deploying after editing the script: Deploy > Manage deployments >
+    pencil > Version: New version, so the /exec URL stays the same.
+
+    If SIGNUP_ENDPOINT is left empty the form runs in DEMO MODE — it shows
+    the success state and warns, in amber, that nothing was saved.
+
+────────────────────────────────────────────────────────────
+  2.4  "What's coming" — the section below the fold
+────────────────────────────────────────────────────────────
+
+Headline: "A place where EVERY fan leaves a mark"
+
+Three feature cards (the three claims in section 1), each with its own small
+animated canvas of gnomes.
+
+Then a set of SKETCHES — wireframes of things that are not built yet, each
+labelled "Sketch · not built yet" and drawn as a live animated canvas rather
+than a static mockup. Every one of these has since been prototyped for real
+in the lab (section 3), which is the point of the lab.
+
+  Full width:
+    THE PETITION BOARD   the ask → vote → pass → dig loop, on repeat
+    THE WORKSHOP SHED    the roadmap, drawn as a shed
+
+  "More of the rulebook":
+    THE MUSEUM             one drawing preserved per cycle, forever
+    THE NAMING CEREMONY    the space votes on what a landmark is called
+    ELECTIONS              a monthly mayor with zero power, maximum lore
+    THE LAW BOOK           passed petitions as an absurd constitution
+
+  "Contribution, not votes":
+    THE MONUMENT           only advances when many people each lay one block
+    THE TIME CAPSULE       a buried chest that opens on a fixed date
+
+Footer: "Knoll · a shared space for internet communities"
+
+
+────────────────────────────────────────────────────────────────────────────
+  3 · THE LAB  (site/lab/)
+────────────────────────────────────────────────────────────────────────────
+
+  What it is ..... a workbench for things that aren't ready yet. Every
+                   sketch from the coming-soon page, built for real and
+                   playable, so the idea can be judged by using it rather
+                   than by looking at a drawing of it.
+  Not deployed ... lab/ is untracked in git, so it does not ship with the
+                   site. It is a local tool. Open lab/index.html (or serve
+                   the site folder) to use it.
+  Storage ........ everything is localStorage, per device, prefixed
+                   'knoll-lab:'. No server, no accounts, nothing leaves the
+                   machine.
+  Shape .......... one HTML page, three CSS files (lab.css draws it, themes.css
+                   dresses it, sticker.css cuts the newer machines out of a
+                   different kind of paper), one small framework (lab.js), a
+                   genre-skin switcher (theme.js), a tool dock that draws on
+                   the bench (wall.js), shared modules, and sixteen
+                   independent gizmos.
+
+────────────────────────────────────────────────────────────
+  3.1  The workbench itself  (lab.js + lab.css)
+────────────────────────────────────────────────────────────
+
+The lab is an infinite canvas with fourteen machines sitting on it. Each machine
+("gizmo") is a self-contained panel with a dark handle bar, a name plate and
+a serial number, that you can drag anywhere.
+
+  THE CAMERA — the canvas moves like Figma's
+
+    The page itself never scrolls. #bench is a fixed viewport and
+    #bench-world is the frame everything hangs in; a camera (pan x/y + zoom)
+    slides and scales that frame underneath you.
+
+    There is no sheet. The world used to be painted — a page of dot-grid
+    paper with an edge and a drop shadow — which read as one big box sitting
+    on the bench, and gave the canvas a boundary it does not really have. The
+    world is now invisible, and the bench's own grid, showing through it, IS
+    the paper.
+
+      hold the SCROLL WHEEL and drag ..... pan, from anywhere, even over a
+                                           gizmo
+      SPACE (or press H) and drag ........ pan — the hand tool; V or Esc
+                                           goes back to the pointer
+      drag the bare paper ................ pan (a small twitch is still a
+                                           click, so buttons keep working)
+      scroll / two-finger swipe .......... pan up and down
+      SHIFT + scroll ..................... pan sideways
+      CTRL/⌘ + scroll, or pinch .......... zoom about the pointer
+      + / − .............................. zoom in and out
+      0 or SHIFT+0 ....................... back to 100%
+      SHIFT+1 or HOME .................... fit everything on screen
+      ⤢ − 100% + ? ....................... the dock, bottom right; the ?
+                                           opens a card with all of this
+
+    Zoom runs from 2% to 400%. A list inside a gizmo keeps the wheel while it
+    still has somewhere to scroll, and hands it back to the canvas when it
+    hits the end. Dragging a gizmo to the edge of the screen pans the camera
+    along with it. The camera position and zoom are remembered between
+    visits.
+
+    On touch: one finger drags to pan anywhere that isn't a control, a
+    handle or a scrollable list. Pinch is the browser's own zoom.
+
+    THE GRID RIDES THE CAMERA
+      The squares under everything were wallpaper once: the same size and in
+      the same place whatever the camera did, so they read as a texture on the
+      glass rather than as the ground the work sits on — at 20% zoom a whole
+      gizmo was the size of one square. The pattern is now a function of the
+      camera. A cell is GRID_UNIT (20) WORLD units, so it scales with the
+      zoom, and it is laid out from world 0,0, so it slides with the pan.
+
+      lab.js writes three custom properties onto #bench and every skin's
+      bench is cut from them: --gs (one cell, in screen pixels), --gs2 (five
+      of them, for the heavier rule the map room and the armory draw) and
+      --gx/--gy (where world 0,0 has got to). Nothing else has to know.
+
+      A ladder keeps it usable at both ends: while a cell would land under
+      GRID_MIN (10) screen pixels the step doubles, so far out you are looking
+      at every 2nd, 4th or 16th line instead of a grey wash.
+
+      Lab.grid(n) re-cuts the paper to a different cell. The dock's pixel tool
+      is the one caller: choosing a pixel size rules the bench at that size,
+      so the squares you can see are the squares you fill.
+
+    STAYING SHARP WHEN YOU ZOOM IN
+      will-change:transform hands the sheet to the compositor, which is what
+      makes panning cheap — but a composited layer is rasterised ONCE and then
+      stretched by the GPU. Left on permanently it means zooming in blows the
+      old texture up instead of redrawing at the new scale: the paper, the ink
+      and every gizmo went soft, and stayed soft until something else forced a
+      repaint — which is why clicking a gizmo used to bring it into focus.
+
+      So the promotion is a MOOD, not a setting. lab.js puts the hint on while
+      the camera is moving (and on pointerdown, before it moves) and takes it
+      off 140ms after the last camera frame, along with the 3d in the
+      transform: translate3d(x,y,0) becomes translate(x,y). The two are the
+      same matrix, so nothing shifts at the swap — the sheet is simply redrawn
+      at the scale you landed on. Confirmed with the LayerTree: at 3× with the
+      hint on, #bench-world is its own 984×8689 layer being scaled 3×; with it
+      off there is no layer for it at all, so it paints at 3× and the drawings
+      are drawn as vectors rather than blown up as pixels.
+
+      Anything that keeps a layer of its own — the critters, the mayor, the
+      gnome's sparkles — is animating every frame, so its hint is honest and
+      is left alone. If one of those ever looks soft at high zoom, this is why.
+
+    AND THE CANVASES  (Lab.hidpi)
+      That only helps things the browser can redraw. A <canvas> is a bitmap:
+      at 300% there are three screen pixels for every one the gizmo painted,
+      and no amount of re-rasterising invents the other eight. Only whoever
+      painted it can draw it again, bigger.
+
+      So a gizmo hands its canvas over once:
+
+        Lab.hidpi(canvas, () => draw())
+
+      The canvas keeps the size it was written at as its LOGICAL size — the
+      coordinates every drawing function already works in — and Lab fits the
+      BACKING STORE to the pixels actually on screen (the canvas's displayed
+      width, which for a width:100% canvas is not its attribute width, times
+      the device pixel ratio), gives the 2d context a matching base transform
+      so no drawing code changes, and calls redraw().
+
+      Three things make it safe to hand over anything:
+        · a canvas with no CSS size of its own would grow its gizmo when the
+          bitmap grows, so hidpi probes for that once — widen the bitmap, see
+          whether the box follows — and pins the CSS size if it does
+        · only what is ON SCREEN gets the big bitmap (one IntersectionObserver
+          on the bench); a gizmo parked off the sheet drops back to 1×, so a
+          bench at 400% is not a bench full of sixteen-megapixel bitmaps
+        · entries whose canvas has left the page are dropped on the next fit,
+          so a gizmo may hand over a canvas from inside its own render loop
+          (the dispensary does, for the trinket thumbnails)
+
+      Refits wait for the zoom to SETTLE, and a ResizeObserver catches layout
+      changes (a role switch, a narrower column) that the camera never sees.
+
+      Handed over: both hill views and the third, the shed, the monument, the
+      dig, the pen (which swaps its own logical size when it turns into the
+      tank — hence hidpi.resize), the machine and its trinkets, the level
+      meter, and the drawing pad.
+
+      NOT handed over, deliberately: the forge screen and the critters, which
+      are image-rendering:pixelated on purpose — hard pixels, sharp at any
+      zoom, and a bigger bitmap would only smooth away the point of them.
+
+      One thing this does NOT fix: pictures already saved as data-urls (the
+      museum's frames, the capsule's drawings) are 128px bitmaps and there is
+      nothing to redraw them from. The pad itself is now crisp to draw on, but
+      what leaves it is still size×size, because the museum and the capsule
+      keep those in localStorage and tripling them is a different decision.
+
+  GIZMOS
+    · drag by the handle bar
+    · double-click a handle to send that gizmo back to its home position
+    · press the – on a handle to put it back on the shelf
+    · positions are saved per gizmo and survive reloads
+    · gizmos can be dragged off the side of the sheet; the camera can always
+      find them again
+
+  MACHINES WITH NO HANDLE BAR
+    Not every gizmo is a panel. The sticker-press machines (KN-0001, 0002,
+    0010, 0014, 0015) have no case, no handle bar, no name plate and no feet:
+    they are OBJECTS lying on the bench — a boiler, a barn, a monitor, a
+    press — and an object has no window round it.
+
+    So they are picked up by themselves. register() takes
+
+        el.querySelector('[data-handle]') || el
+
+    which means a gizmo that contains no handle bar IS its own handle: the
+    drag, the double-click home and the – all hang off the machine. It also
+    gets .gz-loose, which is only there to set the cursor.
+
+    WHAT A DRAG MUST NOT START ON is one list, NODRAG at the top of lab.js:
+
+        button, a, input, select, textarea, [data-nodrag]
+
+    The first four are every control the lab has. data-nodrag is the opt-out
+    for everything else that owns its own pointer or wants to be read rather
+    than grabbed — a scrollable list, the chat log, the wanted poster, the
+    forge's draggable needles, the ballot (which has its own drag), the help
+    gnome's speech bubble. The same list guards the double-click home, or a
+    double-click meant to flatten a warp slider would fling the whole machine
+    back to where it started.
+
+    The – still exists on these: it floats at the machine's top-left corner
+    and only shows itself when the pointer is near. The name is not missing
+    either — each of these designs prints its own name ON the machine, which
+    is where a real one would have it. The serial stays in the markup,
+    hidden, because the shelf reads it off .gz-serial.
+
+  THE SHELF (left side panel)
+    Lists every gizmo with its serial and a status dot. Click a live one to
+    fly the camera to it; click a shelved one to bring it back out. The
+    whole shelf folds away to a tab (it starts folded on small screens).
+
+  ROLES — view the bench as somebody else
+    Buttons top right, or keys 1 / 2 / 3:
+
+      1  USER        what any visitor sees
+      2  MODERATOR   review queues, strikes, take-downs
+      3  OWNER       settings, the lines, the kill-switches
+
+    A strip across the top of the bench says what the current role can do.
+    Any element marked data-roles="moderator owner" simply disappears for
+    other roles, so every gizmo can be inspected from all three seats
+    without logging in as anyone.
+
+  GENRE SKINS — what the place is dressed as
+    Buttons next to VIEW AS, or shift+G to cycle. Knoll gives a community a
+    hill, and a community is usually about something; for an indie game that
+    something has a genre, and the place should not turn up dressed as a
+    craft fair when the game is about a haunted basement.
+
+      KNOLL       the house style — cream paper, aubergine ink, pink
+      HORROR      the cellar — soot, bone type, one wound of red. A high
+                    serif for names and a typewriter for the serials; grain
+                    and a vignette over the whole bench; the name plates
+                    flicker like a strip light on its way out
+      ADVENTURE   the map room — parchment, oiled leather handles, brass
+                    plates and brass rivets, engraved Roman caps. The dot
+                    grid becomes a chart graticule and the sheet picks up
+                    two soft stains
+      SHOOTER     the armory — gunmetal, squared corners, hazard tape on
+                    every grip, name plates lit amber, a fine technical
+                    grid and a scanline over the bench
+
+    HOW IT IS BUILT
+      lab.css draws everything out of the token sheet in its :root — about
+      eighty names covering paper, ink, the chassis, the plates, the rivets,
+      the gnome. Nothing in lab.css knows a theme exists. themes.css re-points
+      those same tokens under a [data-theme] on <html>, and adds a short
+      second half per skin for what a token cannot say: the texture of the
+      paper, the shape of a corner, whether the light flickers.
+
+      Adding a skin is one block of tokens. Two things to know: --pink is THE
+      accent and has to be legible as text AND take white type as a fill, so
+      neons fail; and in a dark skin --ink (the type) goes pale while --ink-2
+      (the chassis) goes darker than the paper, so a gizmo reads as a
+      silhouette.
+
+      The choice is applied inline in <head> before the first paint — put it
+      any later and the page flashes cream on its way to being dark — and
+      remembered in 'knoll-lab:theme'.
+
+    THE ONE GAP
+      Everything painted into a <canvas> — the hill, the shed, the monument
+      yard, the dig, the bug farm, the vending machine — is drawn by JS in its
+      own colours, and no token reaches inside a canvas. Rather than fork six
+      painters, each skin GRADES them: one CSS filter over the finished frame,
+      the way a film is graded. A blue sky goes cold, or goes to rot, but it
+      is still the same sky. Teach a gizmo to listen for 'lab:theme' and
+      repaint properly, and its selector comes off the grade list in
+      themes.css. The drawing pad, the framed drawings and the arcade screen
+      are deliberately never graded — you are making something on the pad and
+      the ink must be the colour you picked.
+
+  THE TOOL DOCK — drawing on the bench itself  (wall.js)
+    The dock from the coming-soon hero, on the workbench: a dark pill at the
+    bottom centre, and a second pill above it that carries whatever options
+    the chosen tool has and is simply not there in Move mode.
+
+      Move       drag anything already on the paper · reshape a note by the
+                   tab on its right edge
+      Draw       freehand ink · 4 widths (2.5 / 4.5 / 8 / 14)
+                   · 4 pixel settings (off, 10, 20, 40)
+      Sticker    stamp a shape · 5 stamps (pointy hat, gnome, toadstool,
+                   big beard, lantern) · 3 opacities (100% / 55% / 25%)
+      Text       leave a note · 5 fonts (Sans, Display, Serif, Mono, Marker)
+                   · 5 stickies (none, yellow, pink, blue, green)
+                   · a width, dragged, that the words wrap to
+      Picture +  put a picture up: one off your own machine, or a gif
+                   searched out of KLIPY. See below.
+      5 colours  ink, pink, blue, green, orange — and any five you mix
+      Undo       step back one piece      Clear  wipe the paper (it asks)
+      Escape     shut the picture sheet, then put the pen down, back to Move
+
+    THE + TOOL — a picture on the paper  (picture.js)
+      The fifth thing on the dock. Press it and a sheet comes up over the
+      bench with two ways in, and whatever you choose lands where you asked
+      for it and then STAYS ON THE POINTER, so a second click on the paper
+      puts up another. Click the bare paper with nothing on the pointer and
+      the sheet opens remembering that spot, so what you pick lands there.
+
+      IT KEEPS NO SECOND LIST OF PICTURES
+        Pictures on this bench already have a home — THE ZOETROPE (KN-0013)
+        holds them, drags them, dresses them up, takes them down, and gives
+        the owner the size they land at and the switch that locks the drum.
+        So the + tool owns none of that. It is a way IN: the sheet, the
+        search, the key. Everything it finds is handed to Zoetrope.take or
+        .takeRemote and becomes an ordinary pin. The drum's list shows it,
+        the drum's × takes it down, its lock refuses it, and fx.js dresses
+        it up like anything else made here.
+
+      TWO KINDS OF PICTURE, KEPT TWO WAYS
+        A file off this machine is read, shrunk and kept as a data-url,
+        because there is nowhere to upload it to. A gif out of KLIPY is not
+        copied here at all: what is kept is the URL they answered with, and
+        the browser fetches the strip from them each time it is looked at.
+        That is their terms as much as our storage — a provider's media is
+        linked, never re-hosted — and it is why a 3MB strip that could never
+        be kept costs about sixty characters. The drum's list says "from
+        KLIPY" rather than a byte count for those, because saying "62 B" of a
+        three-megabyte gif would be a true number about the wrong thing.
+
+      WHY KLIPY, AND WHY IT WANTS A KEY
+        Tenor's public API shut down in June 2026. GIPHY charges for a
+        production key and its old public beta one (dc6zaTOxFJmzC) is banned
+        — asked in August 2026 it answers 403 BANNED. KLIPY is ex-Tenor
+        people with a near-identical API: free, 100 calls an hour on a test
+        key and uncapped once you ask them for a production one. So there is
+        no key to ship and none is pretended — paste your own into the sheet
+        and it is kept in Lab.store('picture'), on this device.
+
+        A key in a page with no server is readable by anyone using that
+        browser. That is the honest place for a capped test key and the wrong
+        place for anything else, and the sheet says exactly that.
+
+        Their terms shape three things: the request goes straight from the
+        visitor's own browser and is never proxied (KLIPY REQUIRE that, which
+        is also why every call carries a per-window customer_id — a throwaway
+        id, not a name, an email or a fingerprint); results are rendered in
+        THE ORDER THEY ARRIVE with no filtering of our own; and their mark is
+        on the sheet whenever their results are.
+
+        The answer is unwrapped rather than assumed: providers move a list
+        about between .data, .data.data and .result over the years, so the
+        reader takes the first array of objects it recognises, and picks a
+        rendition by walking sm/md/hd for a gif, webp or png — never an mp4,
+        which an <img> will not play — with a last-resort walk of the object
+        for anything that looks like a still. Being defensive about a shape
+        we cannot test against is cheaper than being confidently wrong.
+
+        ONE THING WORTH KNOWING: a cross-origin fetch that fails tells the
+        page almost nothing — one opaque error whether the wire is down, the
+        reply carried no CORS header, or the key was wrong. KLIPY's own "that
+        key is invalid" comes back as a 404 with no CORS header at all, so a
+        bad key lands exactly there. The sheet therefore says the key first
+        and the connection second, rather than inventing a diagnosis.
+
+      WHAT UNDO TAKES BACK
+        Ink is kept in Lab.store('wall') and pictures in the drum's own
+        store, so "the last thing put down" is not one list to pop. wall.js
+        keeps a session-long note of which of the two each piece went into,
+        in the order they were made, and undo reads it backwards — so a
+        picture put up between two strokes is taken back between them too.
+        It is not saved: after a reload undo pops ink, exactly as it always
+        did, which is the right amount of memory for a button whose whole
+        promise is "the thing you just did".
+
+    THE PIXEL PEN — the grid is the picture
+      Off, 10, 20 or 40. Squared off, a stroke is not a line but a set of
+      CELLS: the pointer is floored to the grid and that square is added to
+      one path, each cell only once however many times it is crossed, and a
+      fast drag has the gap between two reported points walked so a quick
+      line does not come out dotted. The whole drag is one piece, so undo
+      takes the shape you drew rather than the last square of it.
+
+      Choosing a size calls Lab.grid(), which rules the bench at exactly that
+      cell — what you can see is what you will fill. The skins whose bench is
+      dotted (the knoll, the cellar) rule themselves into lines while pixel
+      mode is on, via body.wall-pixel; the two that already draw lines keep
+      their own. Moving a piece afterwards snaps by whole cells, because
+      pixel art nudged half a cell is no longer pixel art.
+
+    A NOTE IS A BOX, NOT A LINE
+      A note has a WIDTH, and the words fall onto as many lines as that width
+      needs. SVG will not wrap text — a <text> runs off in a straight line for
+      ever — so wall.js works the lines out itself and hands them over one
+      <tspan> each, measuring on a canvas in the note's own face, weight and
+      size (the face is a token, so it is resolved through the skin first).
+      A word longer than the whole box overhangs rather than being chopped.
+
+      You write into a box of that same width, in that same face and size,
+      growing downwards as it wraps — so nothing rearranges itself when you
+      press enter. ENTER pins it, SHIFT+ENTER breaks a line by hand, ESCAPE
+      throws it away, and losing focus pins it too (which is why the grip
+      has to preventDefault on the way down, or reshaping would file it).
+
+      The tab on the right edge sets the width, while writing and again
+      afterwards with the Move tool. Reshaping edits the item where it sits
+      and repaints, and tells the store once on let go: a store write is a
+      JSON round-trip of the whole wall, which is not a thing to do sixty
+      times a second. Notes written before any of this hold no width and
+      stay one line, as they were.
+
+    Deliberately the same numbers as the hero, so the two feel like one thing.
+    The stickies are the one exception: the hero has no such thing, and a note
+    written before they existed simply has none, which is what index 0 is.
+
+    THE STICKIES — something to write on that is not the paper
+      Under the fonts, a second group of five: none, and four pads — yellow,
+      pink, blue, green. Pick one and the note is written on it. (These stood
+      in for five scrolls until August 2026 — a scrap, a roll, a banner, a
+      sealed charter. Same slot, same index 0, same cut-to-fit machinery; a
+      note written on scroll 2 is now on the pink pad.)
+
+      Each one is CUT TO FIT. Nothing is a fixed picture: the words go down
+      first, are measured with getComputedTextLength(), and the pad is then
+      drawn around whatever width they came out — so 'x' gets a little square
+      and a full line gets a long one, with the same margins on both. Since a
+      note can wrap, stickyArt() takes a HEIGHT as well: the block is as wide
+      as its longest line and as tall as it has lines, and the pad is cut to
+      that. Left out, the height is one line's worth, which is what every
+      caller wanted before notes could wrap.
+      paint() reads every width first and writes every sticky after, which is
+      one layout pass for the lot rather than one per note.
+
+      What sells it as paper rather than a rectangle: the bottom-right corner
+      is CUT AWAY and that same triangle drawn back over the diagonal in the
+      underside colour, which is a fold; a band of glue across the top, where
+      it is on the real thing; and a shadow of the whole shape offset a couple
+      of units, so it lies ON the bench rather than being printed into it. The
+      fold is kept in proportion, so a one-word sticky is not mostly fold.
+
+      None of them is TILTED, and that is deliberate rather than an oversight:
+      dragging a piece sets style.transform on it, a CSS transform beats a
+      transform attribute, and the words are drawn straight in world units by
+      the caller. A rotated pad would need the words rotated with it and would
+      leap to the corner the moment you picked it up.
+
+      Because the width is measured rather than stored, it has to be measured
+      again whenever the words could have moved: once when the web fonts land
+      (the first paint runs on fallback metrics) and again on every 'lab:theme'
+      (a genre swaps --display and --mono for a different pair). Both are wired
+      to paint at the bottom of wall.js.
+
+      The pad is --sticky-a…d and the fold --sticky-edge, so it follows the
+      genre like every other colour here — a pad has to be a paper the SKIN's
+      own ink reads on, which means proper lemon and rose under the knoll and
+      something dim and dirty down in the cellar, or a pale ink would vanish
+      into it. stickyArt() also draws the dock's own little previews, at note
+      size, so a button is a sample of the thing rather than a symbol for it.
+
+      That leaves one problem the scrolls did not have: four nearly-black pads
+      on a near-black pill is a colour picker you cannot see the colours in.
+      So on the DOCK ONLY, lab.css (.opt-sc) pins the four to fixed washes
+      that keep their hue and read on the dark — the artwork is untouched,
+      only the tokens under it are swapped, the same trick the stamps use.
+
+    WHAT IT DRAWS ON
+      One <svg> inside #bench-world, in world units, so ink pans and zooms
+      with the paper and stays crisp at 400% instead of going to porridge the
+      way a bitmap would. Everything on it is one of four plain records — a
+      stroke, a squared-off stroke, a stamp, a note — and that is also exactly
+      what is saved, so the wall is a list of primitives, not an image.
+      Kept in Lab.store('wall').
+
+      HOW FAR THE INK REACHES
+        The layer is the size of the world, and the world used to be a sheet
+        with a visible edge, so ink stopping at that edge made sense. The
+        paper has no edge any more, and an invisible one you cannot draw past
+        would be worse than the box that was taken away — so the layer carries
+        a transparent square far bigger than the world. It is PAINTED, which
+        is what makes it answer a pointer, and the svg is overflow:visible,
+        which is what lets it be rendered outside its own box. It is not a
+        .wall-item, so in Move mode it goes as inert as the rest of the layer
+        and clicks fall through to the paper underneath.
+
+    COLOUR FOLLOWS THE PAPER
+      The hero keeps two palettes and swaps to the darker one after dark,
+      because ink that suits cream paper disappears on a night sky. The bench
+      has that problem four times over, one per genre skin, so a colour is
+      stored as a TOKEN NAME and resolved when it is painted. Draw in horror,
+      switch to adventure, and the ink follows the paper rather than vanishing
+      into it. The five are --ink, --pink-2, --blue, --green, --amber, which
+      are the hero's five day colours exactly.
+
+      … UNLESS YOU MIX YOUR OWN
+        The five swatches are pots, not fixtures. Press the one already
+        chosen and the system colour picker opens on it, loaded with the
+        colour that swatch is ACTUALLY painted — read off it a moment before
+        the dialog opens, so mixing in the cellar starts from the ink the
+        cellar uses. Alt-click puts the house colour back.
+
+        An ink is therefore one of two things, and a saved mark can hold
+        either: a NUMBER, which is an index into the five and so re-mixes
+        itself with the skin, or a HEX STRING, which is meant to stay exactly
+        that colour wherever it is looked at. Everything drawn before the
+        picker existed holds a number, so nothing had to be migrated, and a
+        mix applies to NEW marks only — what is already on the paper keeps
+        the colour it was made with. The mixes live in the wall's own store,
+        beside the drawing.
+
+        The picker itself is ONE <input type="color"> shared by all five,
+        parked under the swatches: it cannot live inside a <button>, and five
+        of them would be five more tab stops for something a click already
+        opens.
+
+    THREE THINGS THAT WILL BREAK IT IF FORGOTTEN
+      · '.wall-ink' has to stay in lab.js's onPaper and HANDS_OFF lists, next
+        to .critter and .zt-pin, or a drag on bare paper pans the camera
+        instead of leaving a line. The layer also drops its pointer events
+        whenever the hand tool is up, so panning always beats drawing.
+      · shutNote() lets go of its reference BEFORE removing the input, because
+        removing a focused element fires blur synchronously and blur is what
+        commits a note. The other way round, escape behaves like enter and
+        silently keeps the note you just cancelled.
+      · a sticky is drawn in WORLD coordinates, not inside a translated <g>.
+        Dragging a piece sets style.transform on it, and a CSS transform beats
+        a transform ATTRIBUTE — give the group one and the whole pad leaps to
+        the top-left corner the moment it is picked up. It is also why no pad
+        is tilted: the tilt would have to go on that same attribute.
+
+  THE TWO RESET BUTTONS (top right)
+    reset layout   puts every gizmo home and re-centres the camera
+    reset data     wipes everything saved on this device — petitions,
+                   drawings, ballots, blocks, the lot. It asks first.
+
+────────────────────────────────────────────────────────────
+  3.2  Shared parts every gizmo can use
+────────────────────────────────────────────────────────────
+
+  THE HILL  (hill.js)
+    One hill, drawn on as many canvases as want it. Gizmos register a source
+    of items; every attached canvas shows the union of all of them. So the
+    pond the petition board digs is the same pond the naming ceremony names,
+    the same pond the shed ships next to, and the same hill the time capsule
+    is buried in.
+
+      item kinds: pond, tree, flag, bench, sign, stone, contraption
+      things born in the last ~1.5s grow in with a little bounce
+      hover any item and its label appears in the caption under the canvas
+      named things answer with their name first, then what they are
+      while someone holds the office of mayor, the lawn gnome wears the sash
+
+  THE DRAWING PAD  (pad.js)
+    A pocket sketching surface any gizmo can bolt on — a small square canvas,
+    five pots of ink, a rubber and a wipe. Used by the museum and the time
+    capsule. Hands back a PNG data-url on request. Always white paper, never
+    transparent. Stays on the device.
+
+  CRITTERS  (critters.js)
+    Whatever the forge stamps out is dropped loose onto the bench and wanders
+    around: amble somewhere, stop, look about, amble somewhere else. Four
+    pre-rendered sprite frames per creature. They startle and scurry if you
+    swipe the cursor at them, but hold still if you rest on one — then you
+    can pick it up and carry it. Drop one in a registered bin and it is gone.
+    Nine at most, or the bench becomes a zoo.
+
+  THE LITTLE NOTE  (note.js)
+    A speech bubble that hangs off a point on the bench. Gizmos use it when
+    the thing you clicked is painted into a canvas and so cannot hold a panel
+    of its own — a bug crawling round the farm, a trinket in the dispensary's
+    case. Screen space, so it stays legible at any zoom, and it follows the
+    thing while the camera moves under it. One open at a time; Escape, a click
+    outside, or opening another closes it.
+
+      Note.open({ at: () => ({x, y}), html, cls, on: {sel: fn}, onShut })
+
+    The anchor is a FUNCTION on purpose — whatever it points at is usually
+    moving. Return null from it and the note closes itself.
+
+  DRESSING THINGS UP  (fx.js)
+    Click anything somebody made — a creature loose on the bench, a drawing on
+    an easel or hung on the wall, a keepsake out of the time capsule — and a
+    small card offers five animations and five effects. Hover one to try it on
+    the real thing; click to keep it. One of each at a time, so they stack.
+
+      ANIMATE   bob      floats gently up and down
+                hop      little springy jumps, squashes on the landing
+                wobble   rocks side to side, like it might go over
+                shimmer  the hand-drawn boil — stepped, so it snaps between
+                         drawings instead of sliding
+                spin     turns all the way round, edge-on halfway
+
+      EFFECTS   lantern  a warm halo that never sits quite still
+                ghost    see-through, softly blurred, slowly breathing
+                neon     a sign-tube glow in pink and blue, bad contact
+                         included
+                sticker  a white die-cut edge, lifted off the page
+                stone    grey, cool and chiselled
+
+    Wiring a gizmo in is one attribute: data-fx="<a stable key>" on the
+    element that should be clickable, which must have one child holding the
+    picture. The outer element is the STAGE and carries the animation (a
+    transform, so it must not have one of its own); the first child is the
+    SKIN and carries the effect (a filter). Two elements, because both an
+    animation and an animated effect want the `animation` property and one
+    element only has the one.
+
+    The card lives in screen space, not bench space — it stays the same size
+    whatever the camera is zoomed to, and follows its creation while the
+    canvas moves under it. Re-render a list as often as you like; a
+    MutationObserver re-dresses whatever comes back. Creature costumes are
+    dropped at boot, since the creature will not be there either.
+
+  THE CAUTION TAPE  (tape.js)
+    Strips of hazard tape you string across the bench to cordon off whatever
+    is not finished. A prop, not a gizmo: no panel, no serial, no place on the
+    shelf. Add one from the TAPE button on the dock.
+
+    IT SPANS TWO POINTS, not a width. The design it came from only stretched
+    left and right, which is fine on a page and useless on a bench where the
+    thing you want to cordon off is diagonally across from you — so each end
+    is a handle you drag, and the length AND the angle fall out of where the
+    two ends are. Drag the printed middle to move the whole strip.
+
+    It is pinned to the SHEET, not the screen, so it stays over the gizmo it
+    is about while the camera pans and zooms. Hover a strip for its ✕.
+
+  THE HELP GNOME  (guide.js)
+    A baffled-looking gnome stands in the corner of every gizmo. He does not
+    know how the thing works either, but he has read the label — click him
+    and he explains the gizmo in a speech bubble: what it is for, the steps,
+    who can do what, and a closing tip. One bubble open at a time; Escape, a
+    click outside, or another gnome closes it.
+
+────────────────────────────────────────────────────────────
+  3.2b  Two faces: the place, and the workbench
+────────────────────────────────────────────────────────────
+
+Most gizmos look the same to everybody and just hide their staff buttons. Two
+of them go further, and change SHAPE by role — because a visitor should meet
+a place, not a control panel:
+
+  (THE BUG FARM used to be the third of these. It is not any more: after the
+  rebuild it is a farm for everybody, and staff get a ledger UNDER the field
+  rather than a different room. One face, one shape, two sets of buttons.)
+
+  THE SOUND DESK   user: not there at all. The whole panel is gated, and the
+                     only sound control a visitor has is the speaker in the
+                     zoom dock. A gated gizmo also drops off the shelf, or
+                     the row would be a button that goes nowhere.
+
+  THE DISPENSARY   user: one machine. A dark chassis with the vending machine
+                     on the left and a glass case of your trinkets bolted to
+                     its side, the odds stuck on the front.
+                   staff: the machine opens out into its panels — what came
+                     out, the odds, the case, and the owner's desk.
+
+HOW IT IS DONE. Not by swapping markup — one DOM, restyled under
+body[data-role="user"], which is the switch the lab already had.
+
+Clicking a trinket opens a NOTE (note.js) rather than a panel, since it is
+painted into a canvas and cannot hold a panel of its own. The bug farm used
+to do the same; its animals are DOM now, so a tapped bug opens an ordinary
+bubble of its own instead, and holds still while it is open rather than
+pacing out from under it.
+
+────────────────────────────────────────────────────────────
+  3.3  The sixteen gizmos
+────────────────────────────────────────────────────────────
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  № KN-0001   THE SPAWN-O-MATIC  MK.II                                    │
+└──────────────────────────────────────────────────────────────────────────┘
+A picture goes in, a small creature comes out and walks off onto the bench.
+The creature IS your picture — read, cut out and pixelated. Entirely
+client-side; nothing is uploaded.
+
+  The MK.I was a workbench panel. The MK.II is a steam engine: a boiler on
+  the left, a console in the middle, a spawn chamber on the right, a belt
+  running out the end and a warp bench bolted underneath. It is the SAME
+  ENGINE — forge.js is untouched apart from three small hooks — wearing a
+  different chassis. Every id the pipeline reaches for (the hopper, the three
+  dials, the screen, the eight warp sliders, the bin) is still there.
+
+  01 INTAKE HOPPER
+      Drop a PNG/JPG on the hopper, click to browse, or press "use a sample"
+      for a gnome (a different sort each press). "eject" empties it.
+      A readout strip shows SEED, pixel size, dominant HUE and status.
+
+  THE THREE DIALS
+      The machine reads the pixels: a seed (a hash of the picture), the main
+      hue, how busy it is (chaos) and how bright (lumen). Drag a needle to
+      overrule a reading, double-click it to hand it back, "auto" to hand
+      them all back.
+      The big dial on the boiler is decoration and only ever says "hot". The
+      design called the three small ones PSI / CHAOS / HEAT; they are labelled
+      HUE / CHAOS / LUMEN here, because unlike the design's they are wired to
+      something and a wired control should not lie about what it does.
+
+  DETAIL
+      How many cells across the creature is cut at — 24 / 40 / 64 / 100 — and
+      with it how many colours the palette is allowed and how hard they are
+      pushed.
+
+  PULL THE LEVER
+      The big red SPAWN button. The backdrop is lifted, the colours are cut
+      down to a small palette, then eyes, a mouth and stubby limbs are planted
+      on the real silhouette. While it works the whole rig shakes, the stacks
+      chuff harder, the belt runs fast and the lamps blink — all of which is
+      hung off the BUSY lamp, so the chassis cannot disagree with the machine.
+      Press again to re-roll just the face and limbs — the body stays yours.
+
+  02 SPAWN CHAMBER
+      The dark screen. Static, then the creature drawn in row by row.
+
+  WHAT CAME OUT
+      A name and four stats. Type over the name, ⟳ rolls another, "save png"
+      writes it out at 680×880. SIZE sets how big it walks the bench, half to
+      double. The creature also wanders off onto the bench.
+
+  03 WARP BENCH
+      The plank under the machine. Bends the finished creature, on screen and
+      on the bench: stretch, lean, wave, melt, twist, bulge, glitch, blur.
+      Double-click a slider to flatten it, "flat" for the lot, "shake" rolls
+      them, "reset" puts the whole machine back to how it came out of the
+      crate.
+
+  THE BOILER
+      This is the bin. Drag a critter off the bench into the firebox and it
+      goes up as fuel — the fire flares for a second each time — or press it
+      to send the whole herd in one after another.
+
+  Tip: clean, flat backdrops cut out best. Busy photos come out as confetti —
+  which is sometimes the point.
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  № KN-0002   THE BALLOT-O-TRON 3000                                      │
+└──────────────────────────────────────────────────────────────────────────┘
+Put a daft question to the hill, then vote on it the proper way: mark a paper
+ballot and post it into a machine. If enough people say yes it stops being a
+poll result and becomes a THING — dug into the hill and written into the law
+book.
+
+  VOTING MOVED INTO THE MACHINE. It used to be two buttons on a card. The
+  cards still show the tally, but they no longer take a vote; they have a
+  "put it on the machine" button instead. Nothing about the vote itself
+  changed — posting a ballot calls the same Petition.vote() the buttons did,
+  so the line, the carrying, the digging and the Article all still happen.
+
+  01 THE ISSUE     what is on the reader, and how many are queued behind it.
+  02 THE BALLOT    tick YES or NO. The ballot lifts and glows once marked.
+  POSTING IT       drag the ballot into the slot. It is a POINTER drag, not
+                   HTML5 drag-and-drop: the bench is a transformed, zoomable
+                   surface and a native drag image comes adrift of the sheet
+                   at any zoom but 100%. The slot also takes a plain click.
+  03 TALLY SCREEN  the machine counts for a beat, then prints where the
+                   question stands, how far from the line, and which way you
+                   voted. If your ballot carried it, the screen says so.
+  04 BALLOT SLOT   the ballot is sucked in. BALLOTS CAST counts what this
+                   device has posted.
+  05 THE BOARD     everything pinned, with tallies; asking; the review queue.
+  06/07/08         the hill, the law book, and the owner's desk, as before.
+
+  One ballot per question. Post another to change your mind; post the same
+  way twice and it takes your vote back.
+
+  user       asks, posts ballots, reads
+  moderator  sees the review queue, can close a vote early, can take a
+             question down
+  owner      also sets the line, digs and drains, and stirs the hill
+
+  NOT WIRED HERE: the mayoral race (KN-0006) keeps its own ballot. This
+  machine has two boxes marked YES and NO; an election is a choice between
+  candidates, and pretending otherwise would have made the machine lie.
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  № KN-0003   THE WORKSHOP SHED                                           │
+└──────────────────────────────────────────────────────────────────────────┘
+The roadmap, except it is a shed. No dates, no quarters — just how far along
+a thing looks.
+
+  The shed        whatever is being built sits on the workbench as a
+                  half-finished contraption and gains parts as it gets closer
+                  to done
+  The tarps       anything further out is a lump under a tarp with a question
+                  mark on it. That is all a tarp will ever tell you.
+  The roadmap     the same things as cards: bench, tarp or shipped, with a
+                  progress bar for the ones on the bench
+  Shipping        when a thing ships the gnome carries it out the door and
+                  screws it to the hill, where it stays
+
+  user       sees the shed; tarps stay tarps
+  moderator  can peek under a tarp and leave a note
+  owner      adds things, slides progress, moves them bench ⇄ tarp, ships
+             and scraps
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  № KN-0004   THE MUSEUM                                                  │
+└──────────────────────────────────────────────────────────────────────────┘
+The hill draws, the hill votes, and each cycle exactly one drawing is
+PRESERVED — framed, varnished, hung on the wall for good. Everything else
+gets built over. That is the whole arrangement.
+
+  01 The easels   this cycle's drawings, each on its own easel with a title,
+                  a signature and a star. Tap the star to vote; tap again to
+                  take it back. One vote per drawing per device.
+  02 Submit       draw on the pad, name it, sign it or don't — unsigned work
+                  goes down as "anonymous". Blank paper is refused.
+  03 The wall     the permanent collection. Everything framed here won its
+                  cycle and can never be taken down. The brass plaque says
+                  what, who and which cycle.
+  Closing         the owner closes the cycle: the top-voted drawing gets the
+                  varnish (a tie goes to whichever arrived first), the rest
+                  fade where they stand, and the quiet count under the wall —
+                  "built over: N works" — goes up by that many.
+
+  user       draws, signs, votes
+  moderator  can take a drawing off its easel before the vote settles
+  owner      closes the cycle, can dust the whole museum back to nothing
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  № KN-0005   THE NAMING CEREMONY                                         │
+└──────────────────────────────────────────────────────────────────────────┘
+When a new landmark turns up on the hill it gets a ceremony: names are put
+forward, votes are cast, and the first name to reach THE LINE sticks.
+Forever. The pond, for the record, is called Greg.
+
+  The ballot      every unnamed landmark gets a card — what it is, the names
+                  so far, and how far the front-runner is from the line. Four
+                  show at a time; the rest wait their turn.
+  Proposing       24 letters at most, the plate is small. Putting a name
+                  forward takes your vote with it; proposing a name already
+                  up just votes for it.
+  Voting          one vote per landmark per device. Tap another name and your
+                  vote walks over; tap your own again to take it back.
+  The hill        hover a landmark and it answers — named ones give their
+                  name first, unnamed ones just describe what happened to
+                  them.
+  The register    every name that ever carried, newest first. Nothing
+                  un-names — even if the landmark is later drained, the
+                  register remembers.
+
+  user       proposes and votes
+  moderator  can STRIKE a name off a ballot — it stays up, crossed out,
+             unvotable
+  owner      sets the line, can CHRISTEN a name straight through, and can
+             make the hill mutter: one to three stray votes turn up, with
+             opinions
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  № KN-0006   THE ELECTIONS                                               │
+└──────────────────────────────────────────────────────────────────────────┘
+Once a month the hill elects a mayor from whoever stands. The winner gets the
+pink sash and wanders the page for a 30-day term.
+POWERS: NONE. DUTIES: WANDERING.
+
+  01 The office   portrait, sash, slogan, and a term bar counting day
+                  such-and-such of 30. When nobody holds it the sash hangs on
+                  its nail.
+  02 The race     the ballot. One vote across the whole race; it moves with
+                  you if you change your mind, tap again to take it back.
+  03 Standing     a name, a modest promise, and "stand for mayor". One
+                  candidacy per device — after that there is no dignified way
+                  off the ballot.
+  The count       when the term runs out the ballots count themselves: most
+                  votes wins, ties go to whoever stood first. If nobody
+                  stood, the incumbent stays on, grumbling, another 30 days.
+  The wanderer    while anyone holds office a small sashed gnome ambles about
+                  the bench. Hover it to be reminded who, and for how much
+                  longer. The lawn gnome on the hill wears the sash too.
+
+  user       votes and stands
+  moderator  can strike a candidate off the ballot, or pardon them back on
+  owner      counts the ballots early, dissolves the office, and can make the
+             hill turn out to vote
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  № KN-0007   THE LAW BOOK                                                │
+└──────────────────────────────────────────────────────────────────────────┘
+Every petition that carries is written into a slightly absurd constitution.
+New visitors can read the hill's whole legislative history, which is also, if
+you squint, a changelog.
+
+  Left page       the law of the hill. Every question that carried becomes an
+                  ARTICLE, in order, each closed with the clause its kind
+                  demands — a pond is damp in perpetuity, a flag flaps as it
+                  sees fit.
+  Right page      the changelog, newest first:
+                    §  carried
+                    ✕  repealed
+                    ✦  shipped from the shed and screwed to the hill
+  Repeals         drain a pond next door and its Article stays in the book,
+                  struck through. The law does not forget — it just crosses
+                  things out.
+  The wax seal    the owner can press the red wax to stamp the book. It
+                  changes nothing, legally. It is extremely satisfying.
+
+  The book writes itself — it watches the petition board and the workshop
+  shed. It has no opinions, only records.
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  № KN-0008   THE MONUMENT                                                │
+└──────────────────────────────────────────────────────────────────────────┘
+A stone gnome too big for anyone to build alone. Nobody votes on it — it goes
+up one block at a time, and only if ENOUGH DIFFERENT PEOPLE each bother to
+lay one.
+
+  The site        a dashed outline is the plan — a great stone gnome, boots
+                  first, hat last. Hover a laid block to see whose it is and
+                  how long it has sat there.
+  Your block      write your mark (or don't — the ledger just says "a passing
+                  gnome") and press "place your block". One block per shift.
+                  No exceptions, not even the owner.
+  Shifts          a shift is everyone getting one block each. The owner can
+                  call the next shift; a shift left out for more than a day
+                  goes stale and the next visitor starts a fresh one without
+                  meaning to.
+  Scaffolding     poles and planks climb with the build; a wooden bar keeps
+                  the tally — blocks laid, and how many different hands laid
+                  them.
+  The plaque      lay the last block and the scaffolding comes down, the site
+                  glitters, and every builder goes on a brass plaque in the
+                  order they first turned up. Repeat offenders get a ×n.
+
+  user       lays one block a shift
+  moderator  can prise out a wonky block — the last one laid
+  owner      calls shifts, can have "the hill lend a hand" (three to seven
+             gnomes go up the scaffolding while you watch), and can tear the
+             whole thing down
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  № KN-0009   THE TIME CAPSULE                                            │
+└──────────────────────────────────────────────────────────────────────────┘
+A chest, buried in the hill, with a date on the sign. Anyone can put ONE
+thing in before it seals — a note or a drawing — and nobody sees inside until
+the day it spills.
+
+  01 Dig site     a cross-section of the hill: sky, grass, soil, chest. The
+                  sign keeps the countdown; the worm keeps its own counsel.
+                  Click the chest to knock, if it helps.
+  02 Deposit      pick "a note" or "a drawing", sign it — or don't,
+                  "anonymous" is a respectable signature — and press "lower
+                  it in". One keepsake per device, and NO TAKE-BACKS. That is
+                  what buried means.
+  The waiting     the count under the form says how many somethings are
+                  inside, never which.
+  03 The spill    on the day — or when the owner cracks it early — the lid
+                  comes up and everything lands below on paper scraps and in
+                  little frames, each signed and dated. Only then.
+
+  user       lowers one keepsake in and waits like everybody else
+  moderator  can "give it a shake" and hear roughly how full it is — roughly
+  owner      sets the day, seals it early, cracks it open early, and — once
+             it has spilled — buries a fresh one
+
+  The chest on the shared hill is this chest. Hover it there and it gives you
+  the date and nothing else.
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  № KN-0010   THE BUG FARM                                                │
+└──────────────────────────────────────────────────────────────────────────┘
+A bug tracker where the bug is a BUG. Everything reported hatches and paces
+about a fenced field, and its SIZE is how many people have hit it. Nobody
+reads a list to find out what matters — the one that matters is the enormous
+winged thing lumbering across the pen.
+
+  IT IS A PLACE NOW, FOR EVERYBODY. The old farm had two faces: a paddock for
+  visitors and a glass vivarium for staff. It has one. A red barn behind a
+  fenced field is what everybody meets; staff simply get a ledger and the
+  tools underneath it. The two-faced CSS in lab.css went with the vivarium.
+
+  THE ANIMALS ARE DOM, NOT A CANVAS. A bug has to sprout six legs, then
+  spikes, then a third eye, then wings as it mutates, and CSS grows limbs far
+  more cheaply than a bitmap redraw does. It also means a bug can be tabbed to
+  and read aloud, which a painted one never could.
+
+  THE PEN IS A SANDWICH. Back fence, then the ground dressing, then the barn
+  and silo, then the animals, then the FRONT fence last — so the bugs are
+  genuinely between the two. A bug you have tapped lifts above the front rail
+  so its bubble clears it.
+
+  01 SEEN SOMETHING?
+      The WANTED poster nailed to the gate. One line on what it did, a COAT
+      and MARKS so you can tell yours apart, WHERE it happened, your name if
+      you want it on there, and up to three screenshots as evidence. Press
+      LET IT LOOSE and an egg appears in the field, wobbles, and hatches.
+      Drag the poster by its pin or by the word WANTED; where you leave it is
+      remembered.
+
+  02 THE PEN
+      Tap any bug for a bubble: what went wrong, who found it, how big it has
+      got, what it mutates into next, the evidence, and ME TOO.
+
+  MUTATION
+      a speck → A NYMPH at 2 → SPIKY at 4 → THREE-EYED at 7 → A WINGED TERROR
+      at 10. The tier and the size are read from one table, so the shape and
+      the number can never disagree.
+
+  03 THE SWATTED
+      The owner swats a bug when it is fixed. It rolls onto its back, drops
+      out of the field, and hangs inside the barn with its fix date on it —
+      a changelog nobody had to write. Tap the doors to look in.
+
+  04 BACKLOG
+      The silo: how many are still out there, and a gauge that fills with the
+      field.
+
+  05 THE LEDGER  (staff)
+      The same animals as a list, biggest first, with FIND IT (which picks
+      that bug out in the field), CAN'T REPRO and SWAT. Below it, the owner's
+      SHAKE THE PEN and EMPTY IT.
+
+  user       reports, says me-too, watches them grow
+  moderator  + can't reproduce — it rolls over and stops growing until
+             somebody believes it again
+  owner      + swat, shake, empty
+
+  THE EVIDENCE COSTS SOMETHING. Screenshots are boxed down to 420px and kept
+  as jpeg data-urls in this device's localStorage — nothing is uploaded, and
+  nothing else could be true without a server. Three per bug, and an oversized
+  one is squeezed again rather than quietly filling the drawer. It is still
+  the one part of the lab that can eat real storage; if the browser ever
+  refuses a write, Lab.store swallows it and the newest bug is the one that
+  goes missing.
+
+  WHAT CARRIED OVER: a farm saved before this rebuild still opens. The stored
+  fields are the ones the tank used — what/where/by/votes/my/born/swatted/dead
+  — and coat, marking and evidence are filled in from the bug's own id when
+  they are missing, so an old farm comes up in five colours rather than five
+  identical greens.
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  № KN-0011   THE DISPENSARY  MK.I                                        │
+└──────────────────────────────────────────────────────────────────────────┘
+A vending machine that does not take money — it takes TIME. It restocks itself
+one capsule every so often, a few bank up while you are away, and the little
+red display counts down whether or not anybody is watching.
+
+  The machine      a visitor gets it as one DEVICE — the machine with a
+                   glass case bolted to its side. Staff get it opened out
+                   into panels. See 3.2b. The display counts down to the next
+                   capsule; the green lamps under it are how many are banked.
+                   Turn the knob — the button, or the knob itself — and one
+                   rattles into the tray.
+  The tray         a capsule sits there until you twist it open, and it is
+                   still there tomorrow if you leave it.
+  What came out    twist the capsule and a note pops off the tray with the
+                   trinket in it, its tier and a line about it. If you had one
+                   already it says so, and how many you are now sitting on.
+  03 The odds      printed on the side of the machine, in full, where anyone
+                   can read them.
+  The case         sixteen trinkets, sixteen slots; the ones you have not
+                   found are dashed question marks, duplicates stack with a
+                   ×n. Click one you own and it says what it is, and offers to
+                   DRESS IT UP with the same animations and effects as
+                   everything else on the bench. (That button is why the click
+                   is not simply handed to the fx picker — two features wanted
+                   the same click, so the note arbitrates.)
+
+  THE ROUND
+      one capsule every 30s / 90s / 10m / 1h / 6h / a day (owner sets it)
+      banking up to 1, 2, 3 or 5 before it stops filling
+    A day is what it would be out in the world; the short intervals are so you
+    can watch it work. A FULL MACHINE BANKS NO TIME — the countdown restarts
+    when a capsule is spent, not while it sits full.
+
+  THE DROP TABLE
+      common 58%  ·  uncommon 27%  ·  rare 12%  ·  one of a kind 3%
+    Measured over 20,000 rolls: 58.3 / 26.3 / 12.3 / 3.1. Every tenth capsule
+    is a guaranteed rare or better, so nobody goes home with ten pebbles.
+    THE ROLL HAPPENS WHEN THE MACHINE RESTOCKS, not when you press — which is
+    why a moderator can look in the hopper and say what is coming. By the time
+    you touch the knob it is already decided.
+
+  THE SIXTEEN
+    common      a nice pebble · a bottle cap · a bent nail · an acorn ·
+                a spare button
+    uncommon    a toadstool · a tin whistle · a pocket lantern ·
+                a wooden duck · a spare beard
+    rare        a pointy hat · a jar of pond water · a brass door knob ·
+                a key to nothing
+    one of a kind   the mayor's spare sash · Greg, in miniature
+
+  user       turns the knob, twists capsules open, fills the cabinet
+  moderator  can see what is loaded next, and hang the OUT-OF-ORDER sign
+  owner      sets the round, restocks by hand, can RIG the next capsule to any
+             tier, and can empty a cabinet. All three are a choice, and the
+             machine does not tell anyone when the third one is used.
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  № KN-0012   THE SOUND DESK  MK.I                                        │
+└──────────────────────────────────────────────────────────────────────────┘
+The six tracks the coming-soon page pretends to play, actually playing.
+THERE IS NOT AN AUDIO FILE ANYWHERE IN THIS PROJECT — every note is generated
+with Web Audio and seeded off the track name, so a track sounds like itself
+every time without a byte being shipped.
+
+  STAFF ONLY. The panel is gated to moderator and owner. A visitor gets the
+  small speaker and slider in the zoom dock, and nothing else — the sound of
+  a place is not something every visitor should be able to redesign.
+
+  01 The desk      six knobs, four switches, and a VU needle reading the
+                   analyser, not faking it. Drag a knob up and down; double-
+                   click to reset; tab to it and use the arrow keys.
+  The knobs        LEVEL · BASS (lowshelf 220Hz) · TREBLE (highshelf 2.8k) ·
+                   TONE (lowpass, 300Hz–15.6k) · REVERB (wet/dry) ·
+                   SPEED (0.5×–2×, tempo only)
+  The switches     TAPE   pitch follows the speed knob, the way tape does
+                   CRUNCH a tanh waveshaper, driven until the edges go
+                   WOBBLE an LFO on the gain — a slow, unsure tremolo
+                   HALL   a much longer generated impulse for the reverb
+  02 The playlist  the same six, with artist and running time. Click one to
+                   go there; the little bars mark what is playing.
+
+  THE CHAIN
+      voices → crunch → bass → treble → tone → wobble ─┬→ dry ──→ level
+                                                       └→ hall → level → out
+    The reverb impulse is generated too — decaying noise, 1.1s normally and
+    3.6s with HALL on. Nothing is fetched.
+
+  HOW A TRACK IS MADE
+    Each track carries a tonic in Hz, a scale in semitones, a tempo and a
+    mood. A seeded LCG over a hash of the TITLE lays out 48 or 64 steps of
+    scale degrees with plenty of rests, and that pattern loops. Same title,
+    same tune, every load. Wheelbarrow Waltz is in three, which is why its
+    pattern is 48 steps and its accent falls on beat four of six.
+
+  NOTHING STARTS ON ITS OWN. Browsers refuse audio until somebody presses
+  something. The desk restores every knob from the store but never begins by
+  itself, and the dock speaker doubles as the start button for a visitor.
+
+  moderator  the desk, the switches, the playlist
+  owner      the same
+  user       the speaker in the dock: press to start or mute, slider for how
+             loud. It drives the very same LEVEL knob.
+
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  № KN-0013   THE ZOETROPE                                                 │
+└───────────────────────────────────────────────────────────────────────┘
+A zoetrope is the Victorian drum that spins a strip of stills until they move.
+This one takes YOUR OWN picture — off your machine, not off the internet — and
+tacks it to the paper, where it can be dragged about, dressed up with the usual
+fx card, and taken down again. A gif turns. A still sits there.
+
+  01 THE DRUM
+      Three ways in, all the same road: "choose a picture", a file dropped on
+      the drum, or paste. png, jpeg, gif, webp, avif, svg.
+
+      Dropped on the BARE PAPER it lands exactly where it was let go; any other
+      way it lands in the middle of whatever the camera is looking at. A file
+      dropped on a gizmo is left to that gizmo — the forge has an intake of its
+      own and has to keep it — and a paste into a field being typed in is left
+      alone too.
+
+  02 ON THE PAPER
+      Everything up, newest first, with what each one weighs. "find" flies the
+      camera to one and flashes it; "take down" unpins it. You get your own; a
+      moderator gets everyone's.
+
+  03 THE WORKS  (owner)
+      How big pictures land (130 / 190 / 280 across), whether the drum is open
+      to visitors, how much is being kept on this device, and "clear the paper".
+
+  WHAT HAPPENS TO A PICTURE  — nothing leaves the device
+      It is read with FileReader, shrunk here, and kept as a data-url in
+      Lab.store('zoetrope'). There is no server to upload it to and none is
+      pretended.
+
+        · a STILL is redrawn down to 900px on its long side and re-encoded as
+          webp (png where webp cannot be written, so transparency survives) —
+          a 4.5MB png measured at 28KB going in, and identical at pin size
+        · a GIF is kept byte for byte. Putting one through a canvas keeps frame
+          one and throws the rest of the strip away, so instead of quietly
+          ruining it the drum refuses anything over 900KB and says why
+        · an SVG is kept as it is: small already, and the one kind that stays
+          sharp however far the camera goes in
+
+  THE ROOM IS MEASURED, NOT ASSUMED
+      localStorage is a few megabytes for the WHOLE bench, and Lab.store
+      swallows a write that fails. So before a picture is promised, the drum
+      RESERVES the characters it needs under a scratch key and hands them
+      straight back. Without that, a picture would pin, look fine, and be gone
+      on the next reload — the worst of both, since you would have believed it.
+      With storage deliberately filled to the brim, the drum says there is no
+      room and pins nothing.
+
+  THE SEARCH CAME BACK, SOMEWHERE ELSE
+      This gizmo used to crank a word at a gif provider itself, and for a
+      while that half was gone entirely. It is back — but as the + on the TOOL
+      DOCK (picture.js, documented in 3.1), not as a panel here. The searching,
+      the key and the sheet of results live there; what it finds comes back
+      through takeRemote() and is pinned like anything else. So this file still
+      talks to nobody and keeps no key. It only knows that a picture may be a
+      link rather than a copy.
+
+      The provider notes, since that list churns and finding it out again is
+      the expensive part: Tenor's public API shut down on 30 June 2026 and
+      stopped issuing keys that January. GIPHY charges for a production key,
+      and the free beta key everyone used (dc6zaTOxFJmzC) is now banned — it
+      answered 403 BANNED in August 2026. KLIPY — ex-Tenor people, near-
+      identical API — is free: 100/hour on a test key, uncapped once you ask
+      for production, attribution required, and it REQUIRES that requests come
+      from the end user's browser rather than through a proxy, which suits a
+      page with no server exactly.
+
+      A FOURTH WAY IN, and what it changed here
+      take() now takes an ECHO as well, so every message it makes is repeated
+      to whoever asked — the + tool has a line of its own to report on, and
+      this gizmo may well be on the shelf while it is used. take() and pin()
+      also hand the pin BACK, because the + tool needs to know which picture
+      it just put up: which one to take down if undo is pressed, and which one
+      is still on the pointer.
+
+  user       puts pictures up, drags them, takes down their own
+  moderator  takes down anybody's
+  owner      the size they land at, the switch, the broom
+
+      A LINKED PICTURE WEIGHS A URL
+      takeRemote() runs the same gates as take() — the lock, the count, the
+      room, the pin — and refuses anything that is not on https. What it does
+      NOT do is read, shrink or cap, because there is nothing here to shrink:
+      sixty characters of URL is the whole of what this device keeps. The size
+      comes from the rendition the provider quoted, and is only measured off
+      the picture if they did not say.
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  № KN-0014   THE CHATTER-TRON 2000                                       │
+└──────────────────────────────────────────────────────────────────────────┘
+A big putty-coloured monitor from about 1987 sitting on the bench, with a
+board running on it that everybody looking at the page can type into, and
+sticky notes taped down the side of the case that only staff may write on.
+
+  "EVERYBODY ON THE PAGE" IS NOT A FIGURE OF SPEECH HERE
+      There is no server behind this bench and none is pretended anywhere
+      else in the lab, so a chat board is the one gizmo that would have to
+      fake it. This one does not. Two WINDOWS of the page open on this
+      machine are two people, and they really do talk to each other:
+
+        storage           the board itself. localStorage fires a 'storage'
+                          event in every OTHER window the moment one of them
+                          writes, so a line typed here is read back and
+                          redrawn there. That is the whole sync, and it is
+                          real. (Lab.store holds its copy in memory and would
+                          otherwise go on believing it, which is why the new
+                          value is read back over the top rather than merged.)
+        BroadcastChannel  who is on. Each window shouts a short hello every
+                          four seconds and answers anybody else's; one not
+                          heard from in fifteen seconds drops off the list,
+                          and one closed properly says so on the way out. It
+                          also carries a nudge when somebody speaks, so the
+                          board updates on the instant rather than on the
+                          next event.
+
+      Open the lab in a second window and watch the list grow and the power
+      lamp light. What it will NOT do is reach another machine — that needs a
+      server, and the panel says so rather than implying otherwise.
+
+  A WINDOW IS A PERSON, A DEVICE IS NOT
+      Every other gizmo keeps its identity in Lab.store, which is per DEVICE.
+      That is right for a drawing and wrong here: two windows would be one
+      person talking to themselves. So the handle lives in sessionStorage,
+      which is per WINDOW — a second window is somebody else, and a reload is
+      still you. You get a name off the shelf (mossy gnome, kettle crow) and
+      can type over it; the badge beside it shows which role you are wearing
+      while you speak.
+
+  01 THE SET
+      The monitor: a deep hood with the glass sunk into it, vents across the
+      case, a neck, and the slab of a keyboard under it that you actually
+      type the board into. The last 120 lines are kept and the oldest scroll
+      off the top. A board that is at the bottom stays at the bottom when a
+      line lands, and stays put if you have scrolled up to read something.
+      The case is --crt-shell, which the skins re-point, so it is putty on
+      the knoll and grim in the cellar rather than beige everywhere and wrong
+      three times; the glass is the same --screen-deep and the same scanlines
+      the forge's screen uses, because they are the same make of machine.
+
+  THE STICKIES DOWN THE SIDE
+      Three notes taped to the case, the way they are on every monitor that
+      has ever been in an office. They are the board's standing text — the
+      rules, a notice, whatever the place needs saying — so a visitor may
+      READ them and nothing else. A moderator writes on them and cycles a
+      note's colour; the owner may also add and take them away, up to five.
+
+      A visitor gets the same box, readonly, rather than a different one:
+      nothing shifts when the role changes, and it is plainly not theirs to
+      type in. They are the dock's own four pads (--sticky-a…d and the glue
+      strip), so the bench has one idea of what a sticky note looks like.
+
+      A note is written where it sits and told to the store on the way OUT of
+      the box — a store write is a trip to localStorage, a redraw of every
+      note and a shout at every other window, which is not a thing to do per
+      keystroke, and a redraw mid-sentence would take the caret with it. The
+      event is 'focusout', not 'blur': blur does not bubble, and delegating
+      from the list means catching it on an ancestor.
+
+  02 WHO'S ON
+      Your handle, and everybody the channel has heard from. You are marked,
+      and a moderator or owner wears their badge here as well as on the board.
+
+  03 THE WORKS  (owner)
+      The board can be locked — moderators and the owner may still type, and
+      everybody can still read. Add a note to the case, or wipe the board (it
+      asks). Nothing said here leaves the browser.
+
+  user       reads the notes, types on the board, takes back their own lines
+  moderator  writes the notes and their colours, takes back anybody's line
+  owner      adds and removes notes, locks the board, wipes it
+
+  THE SAME BOARD, A DIFFERENT SET. The monitor was restyled into the sticker
+  press: a wide putty case, a blue screen, and the notes moved to the LEFT of
+  the case. A line is a SPEECH BUBBLE now rather than a ledger row — yours
+  cream and on the right, everybody else's yellow and on the left, which is
+  the one thing the old row could not say at a glance. The sync underneath is
+  untouched; crt.js gained two lines, for the "N ONLINE" readout in the bezel.
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  № KN-0015   THE KNOLL TIMES PRESS                                       │
+└──────────────────────────────────────────────────────────────────────────┘
+The bench's own history, printed the old way. Nothing here is written by
+hand: the press READS every other gizmo and sets the news itself.
+
+  HOW AN ISSUE HAPPENS
+      Nobody presses anything, and there is no PRINT button — the news is not
+      a thing you make, it is a thing that has already happened. Everything on
+      the bench is stamped with a date, the events are grouped into the DAYS
+      they fell on, and every day that had news is one issue. The newest sits
+      on the press; the rest go on the newsstand, newest first.
+
+  WHAT COUNTS AS NEWS
+      A petition carried or repealed, a thing shipped out of the shed, a mayor
+      elected, a drawing varnished, a landmark named, a bug swatted. Each is
+      ranked, and the loudest that day takes the headline, the next two get
+      columns, and the rest go in the PATCH NOTES at the bottom. RANK, at the
+      top of press.js, is the whole editorial policy; nothing else reads it.
+
+  READING ONE
+      Click any paper. It lands folded and the bottom half drops open on a
+      hinge. Escape, the ✕, or a click outside folds it away.
+
+  ISSUE No. 001
+      Always "THE PRESS IS RUNNING", dated the day before the oldest thing on
+      the bench, so the stand is never empty and the numbering has somewhere
+      to start.
+
+  THE WAX  (owner)
+      The letter in the seal. It is stamped on every paper on the stand, so
+      changing it re-stamps the lot.
+
+  IT READS, IT NEVER WRITES. Every neighbour is reached for defensively and
+  all of them are optional — a lab with the museum shelved still prints a
+  paper, it just has less in it. press.js must load after the gizmos it
+  reads. Its own state is one letter of wax.
+
+
+────────────────────────────────────────────────────────────
+  3.4  How it all joins up
+────────────────────────────────────────────────────────────
+
+The gizmos are not sixteen separate demos. They are wired into each other,
+which is the actual thesis of the product:
+
+    petition carries  ─→  something is dug into THE HILL
+                      ─→  an Article appears in THE LAW BOOK, by itself
+
+    a new landmark    ─→  THE NAMING CEREMONY opens a ballot on it
+                      ─→  the name it wins shows on every hill on the bench
+
+    the shed ships    ─→  the thing is screwed to THE HILL
+                      ─→  a ✦ line lands in THE LAW BOOK
+
+    a mayor is voted  ─→  the sashed gnome wanders the whole bench
+                      ─→  the lawn gnome on every hill wears the sash
+
+    the forge stamps  ─→  the creature walks loose on the bench until
+      out a creature       somebody bins it
+
+    anything a person ─→  can be clicked and dressed up: bob, hop, wobble,
+      made                 shimmer, spin, and lantern, ghost, neon,
+                           sticker, stone
+
+    the dock's + puts   ─→  it is a pin in THE ZOETROPE'S list, with the
+      a picture up          drum's lock, its ×, its size and its dressing-up
+
+    a second window     ─→  is a second person on THE TERMINAL, and the two
+      of the page           boards really do talk
+
+    a bug is agreed   ─→  it grows in THE BUG FARM tank, and at fifteen
+      with                 me-toos it cracks the glass
+
+    a capsule is      ─→  the trinket lands in THE DISPENSARY cabinet, where
+      twisted open         it can be dressed up like anything else made here
+
+    the coming-soon   ─→  are the six THE SOUND DESK actually plays, down to
+      page's six           the running times printed on the card
+      invented tracks
+
+    a ballot is       ─→  the vote is the SAME vote the old buttons cast, so
+      posted into          the hill is dug and THE LAW BOOK is written while
+      THE BALLOT-O-TRON    the tally screen is still printing
+
+    anything at all   ─→  turns up in tomorrow's KNOLL TIMES. The press reads
+      happening            the petitions, the shed, the elections, the museum,
+                           the naming ceremony and the bug farm, sorts it into
+                           days, and sets the front page itself. Pass a
+                           petition and the paper on the press has already
+                           changed.
+
+Pass a petition in one panel and watch three other panels react without
+being touched. That is the demo.
+
+
+────────────────────────────────────────────────────────────────────────────
+  4 · FILES
+────────────────────────────────────────────────────────────────────────────
+
+  site/
+    index.html ................ the coming-soon page, all of it
+    support.js ................ the Design Canvas runtime
+    apps-script/ .............. the Google Apps Script that receives signups
+    logo/ ..................... logo mark
+    uploads/ .................. assets
+    Wallspace Coming Soon.dc.html ... the Design Canvas source document
+
+  site/lab/
+    index.html ................ the bench and all sixteen gizmo panels
+    lab.css ................... every style in the lab, except the press
+    sticker.css ............... THE STICKER PRESS: the cream-and-hard-black
+                                art direction the newer machines are cut
+                                from, its tokens, its parts bin, and the five
+                                machines built out of them. Loads LAST, and
+                                deliberately: where it and lab.css disagree
+                                about how a machine should look, it wins.
+                                Anything wearing .gz-st is one of its own —
+                                and themes.css steps around .gz-st for the
+                                same reason.
+    lab.js .................... the framework: camera, gizmos, shelf, roles,
+                                storage helper
+    guide.js .................. the help gnome and all his explanations
+    hill.js ................... the shared hill, drawn on many canvases
+    pad.js .................... the bolt-on drawing pad
+    note.js ................... the anchored speech bubble, for things
+                                painted into a canvas
+    fx.js ..................... dressing up: five animations, five effects,
+                                and the picker card that offers them
+    critters.js ............... creatures loose on the bench
+    forge.js .................. KN-0001  spawn-o-matic mk.ii (the engine;
+                                the MK.II chassis is markup + sticker.css)
+    petition.js ............... KN-0002  the board behind the ballot-o-tron
+    ballot.js ................. KN-0002  the ballot-o-tron itself — the front
+                                panel, not a second set of books
+    workshop.js ............... KN-0003  workshop shed
+    museum.js ................. KN-0004  museum
+    naming.js ................. KN-0005  naming ceremony
+    elections.js .............. KN-0006  elections
+    lawbook.js ................ KN-0007  law book
+    monument.js ............... KN-0008  monument
+    capsule.js ................ KN-0009  time capsule
+    bugfarm.js ................ KN-0010  bug farm
+    vending.js ................ KN-0011  dispensary
+    sound.js .................. KN-0012  sound desk (and the dock volume)
+    zoetrope.js ............... KN-0013  the zoetrope (your own pictures, pinned)
+    crt.js .................... KN-0014  the chatter-tron (the board, the notes)
+    press.js .................. KN-0015  the knoll times — reads every other
+                                gizmo and sets the news itself
+    tape.js ................... the caution tape: a prop on the bench, no
+                                panel and no serial
+    picture.js ................ the dock's + tool: a picture off this machine,
+                                or a gif out of KLIPY. Pins through KN-0013.
+    wall.js ................... the tool dock, and the ink on the paper
+    theme.js .................. the genre-skin switcher
+    themes.css ................ the four skins
+    ABOUT.txt ................. this file
+
+
+────────────────────────────────────────────────────────────────────────────
+  5 · PRACTICAL NOTES
+────────────────────────────────────────────────────────────────────────────
+
+  RUNNING IT
+    Serve the site folder over http (file:// will trip some of it up):
+
+        npx serve C:/Users/bobb9/Desktop/site
+
+    then open  /          for the coming-soon page
+               /lab/      for the workbench
+
+  STORAGE KEYS
+    wallspace-wall-v4 ......... the hero wall's drawing
+    ws-last-art, ws-last-game . so the demo doesn't repeat itself
+    knoll-lab:cam ............. camera position and zoom
+    knoll-lab:pos:<gizmo> ..... where each gizmo sits
+    knoll-lab:shelved ......... which gizmos are on the shelf
+    knoll-lab:shelf-folded .... whether the shelf is folded away
+    knoll-lab:role ............ user / moderator / owner
+    knoll-lab:fx .............. what is dressed in what
+    knoll-lab:sound ........... every knob, switch and which track
+    knoll-lab:<gizmo> ......... each gizmo's own saved state
+    knoll-lab:ballot .......... how many ballots this device has posted
+    knoll-lab:press ........... the letter in the wax
+    knoll-lab:tape ............ where every strip of caution tape is strung
+    knoll-lab:bugfarm-poster .. where the WANTED poster was left
+
+    "reset data" in the lab clears the gizmo states. Clearing site data in
+    the browser clears the lot, including the hero wall.
+
+  THINGS TO BE CAREFUL WITH
+    · The coming-soon page is a Design Canvas document. Editing index.html
+      by hand fights the tool — make structural changes in Design Canvas.
+    · The site auto-deploys to Vercel on push. The lab is untracked and
+      does not ship; keep it that way unless that changes on purpose.
+    · Nothing in either page has a backend except the signup form. Every
+      vote, drawing, block, ballot, bug and trinket is per-device and
+      vanishes with the browser's storage. That is fine for a prototype
+      and NOT fine for the real thing — all sixteen gizmos assume a
+      shared server later.
+    · The bug farm's evidence photos are the one thing on the bench that can
+      eat real storage: three jpegs per bug, in localStorage. They are boxed
+      down hard, but a farm full of screenshots will hit the browser's few
+      megabytes before anything else does.
+    · The lab now runs two art directions side by side on purpose. lab.css is
+      the original — cream paper, aubergine ink, pink, and every gizmo in a
+      case with a handle bar on it. sticker.css is the press: cream, one hard
+      black line, one hard shadow, Kalam and VT323, and NO case at all —
+      those five are objects on the bench rather than panels. KN-0001, 0002,
+      0010, 0014 and 0015 are the press; the other eleven are not, and the
+      bench looks like two shops until the rest are brought across. That is a
+      decision, not an oversight.
+    · Because the press machines have no case, the space around them inside
+      their section box is still theirs — an invisible margin that drags the
+      machine rather than panning the bench. It is a generous grab area, but
+      if a machine ever feels like it starts too far out, that is why.
+
+════════════════════════════════════════════════════════════════════════════

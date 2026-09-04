@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./prelude.js"></script>
+<script src="./support.js"></script>
+<!-- lab 2 shows this on its own paper — see features/bare.css -->
+<link rel="stylesheet" href="./bare.css">
+<!-- the think/type cycle below runs on setTimeout, which prelude.js freezes
+     under a crowded bench like every other clock on it — except this one:
+     it IS the feature, not incidental motion, so it opts out of the crowd
+     half of that freeze (data-lab-paused, offscreen or tiny, still applies). -->
+<script>document.documentElement.setAttribute('data-lab-always-animate', '');</script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<!-- lab 2 serves these faces itself — see SELF-HOSTED in index.html -->
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  body { margin: 0; background: #f5f1ea; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+  @keyframes hammerSwing { 0%, 55%, 100% { transform: rotate(0deg); } 8% { transform: rotate(-16deg); } 16% { transform: rotate(3deg); } 24% { transform: rotate(-16deg); } 32% { transform: rotate(3deg); } 40% { transform: rotate(-16deg); } 48% { transform: rotate(0deg); } }
+  @keyframes popIn { 0% { opacity: 0; transform: scale(0.6) rotate(-2deg); } 70% { transform: scale(1.06) rotate(1deg); } 100% { opacity: 1; transform: scale(1) rotate(0deg); } }
+  @keyframes trailPop { 0% { opacity: 0; transform: scale(0.3); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes dotThink { 0%, 100% { transform: translateY(0); opacity: 0.35; } 30% { transform: translateY(-9px); opacity: 1; } }
+  @keyframes cursorBlink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+</style>
+</helmet>
+<div data-screen-label="Gnome Bubbles" style="min-height: 100vh; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 32px 16px; background: radial-gradient(ellipse at 50% 30%, #fdfaf4 0%, #f4eee4 55%, #e9e1d3 100%); position: relative; overflow: hidden">
+  <div data-lab-nopaper style="position: absolute; inset: 0; pointer-events: none; opacity: 0.05; background-image: url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22160%22%20height=%22160%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22/%3E%3C/filter%3E%3Crect%20width=%22160%22%20height=%22160%22%20filter=%22url%28%23n%29%22/%3E%3C/svg%3E')"></div>
+  <div style="position: relative; z-index: 1; width: 760px; max-width: 100%; height: 280px">
+    <sc-if value="{{ isThinking }}" hint-placeholder-val="{{ true }}">
+      <div style="position: absolute; top: 46px; left: 50%; margin-left: -60px; z-index: 3">
+        <div style="background: #fdf7e3; border: 5px solid #17120b; border-radius: 48px; box-shadow: 8px 9px 0 rgba(0,0,0,0.45); padding: 26px 38px; display: flex; gap: 14px; align-items: center; transform-origin: bottom left; animation: popIn 0.35s ease-out both">
+          <div style="width: 16px; height: 16px; border-radius: 50%; background: #17120b; animation: dotThink 1.2s ease-in-out infinite"></div>
+          <div style="width: 16px; height: 16px; border-radius: 50%; background: #17120b; animation: dotThink 1.2s ease-in-out infinite 0.18s"></div>
+          <div style="width: 16px; height: 16px; border-radius: 50%; background: #17120b; animation: dotThink 1.2s ease-in-out infinite 0.36s"></div>
+        </div>
+        <div style="position: absolute; left: -8px; bottom: -38px; width: 30px; height: 30px; border-radius: 50%; background: #fdf7e3; border: 5px solid #17120b; box-shadow: 5px 6px 0 rgba(0,0,0,0.4); animation: trailPop 0.3s ease-out 0.12s both"></div>
+        <div style="position: absolute; left: -38px; bottom: -74px; width: 17px; height: 17px; border-radius: 50%; background: #fdf7e3; border: 4px solid #17120b; box-shadow: 4px 5px 0 rgba(0,0,0,0.4); animation: trailPop 0.3s ease-out both"></div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isTalking }}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; top: 42px; left: 50%; transform: translateX(-50%); width: 560px; max-width: 92%; z-index: 3">
+        <div style="position: relative; background: #fdf7e3; border: 5px solid #17120b; box-shadow: 8px 9px 0 rgba(0,0,0,0.45); padding: 24px 30px; min-height: 100px; box-sizing: border-box; transform-origin: bottom center; animation: popIn 0.3s ease-out both">
+          <div style="position: absolute; bottom: -22px; left: 96px; width: 34px; height: 34px; background: #fdf7e3; border-right: 5px solid #17120b; border-bottom: 5px solid #17120b; transform: rotate(45deg)"></div>
+          <div style="position: relative; font-family: 'VT323', monospace; font-size: 38px; line-height: 1.2; letter-spacing: 2px; color: #17120b">{{ typed }}<span style="display: inline-block; width: 16px; height: 28px; margin-left: 4px; vertical-align: -3px; background: #e8484a; animation: cursorBlink 0.95s steps(1) infinite"></span></div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;message&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Come check out what we're building!&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Speech&quot;},
+  &quot;typingSpeed&quot;: {&quot;editor&quot;: &quot;range&quot;, &quot;default&quot;: 62, &quot;min&quot;: 25, &quot;max&quot;: 150, &quot;step&quot;: 1, &quot;unit&quot;: &quot;ms&quot;, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Speech&quot;},
+  &quot;loop&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Scene&quot;}
+}">
+/* THE ONE FEATURE ON THIS BENCH WHOSE DRAWING IS NEVER THE SAME TWICE. It
+   runs a cycle on its own clock — think for 2.4s, type the line a character
+   at a time, hold four seconds, start again — and the two phases are two
+   different shapes: a round thought bubble with a trail of beads, and a
+   square speech bubble with a tail and a blinking cursor.
+
+   WHICH IS A PROBLEM FOR A BENCH THAT CUTS EACH FRAME TO ITS DRAWING, and it
+   is worth saying how it is not one here. frames.js measures at boot, again
+   when the fonts land, and once more 700ms later — all three of them inside
+   the opening think, so a frame cut to what is PAINTED would be cut to the
+   thought bubble and would crop the speech bubble off when it arrived. It
+   watches the screen root for a size change after that, and the root is
+   min-height:100vh: it never changes.
+
+   What saves it is the drawing's own STAGE — `width: 760px; height: 280px`,
+   the relative box both phases are positioned inside. It is a real element
+   with a real rect, so it is what gets measured, and it is the same 760 × 280
+   whichever bubble is up. Neither phase reaches outside it (the think
+   bubble's lowest bead lands at 203, the speech tail at about 220), so the
+   cut is stable and the bubbles move about inside a box that does not.
+   That stage is load-bearing on this bench: take the height off it and the
+   frame starts re-cutting itself every few seconds.
+
+   `message`, `typingSpeed` and `loop` are left as props at their drawn
+   defaults, so the line is changed on the canvas rather than in here. */
+class Component extends DCLogic {
+  state = { phase: 'think', typed: '' };
+  componentDidMount() {
+    this.startCycle();
+  }
+  componentWillUnmount() {
+    clearTimeout(this._t);
+  }
+  startCycle() {
+    clearTimeout(this._t);
+    this.setState({ phase: 'think', typed: '' });
+    this._t = setTimeout(() => this.startTyping(), 2400);
+  }
+  startTyping() {
+    const msg = this.props.message ?? "Come check out what we're building!";
+    const speed = this.props.typingSpeed ?? 62;
+    this.setState({ phase: 'talk', typed: '' });
+    let i = 0;
+    const step = () => {
+      i++;
+      this.setState({ typed: msg.slice(0, i) });
+      if (i < msg.length) {
+        let d = speed + Math.random() * 45;
+        const ch = msg[i - 1];
+        if (',.!?'.includes(ch)) d += 300;
+        else if (ch === ' ') d += 35;
+        this._t = setTimeout(step, d);
+      } else {
+        this.setState({ phase: 'hold' });
+        if (this.props.loop ?? true) this._t = setTimeout(() => this.startCycle(), 4200);
+      }
+    };
+    this._t = setTimeout(step, 420);
+  }
+  renderVals() {
+    const { phase, typed } = this.state;
+    return {
+      isThinking: phase === 'think',
+      isTalking: phase === 'talk' || phase === 'hold',
+      mouthOpen: phase === 'talk',
+      typed,
+    };
+  }
+}
+</script>
+</body>
+</html>

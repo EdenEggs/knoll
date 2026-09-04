@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script src="./prelude.js"></script>
+<link rel="stylesheet" href="./bare.css">
+<title>Rope</title>
+<style>
+  html, body { margin: 0; background: transparent; }
+  /* The garland is one absolutely-positioned SVG laid over the WHOLE asset
+     sheet (inset:0, overflow:visible) — it doesn't own a tidy little box of
+     its own, it just draws wherever its two flags happen to be dragged to.
+     So this window is sized to the sheet's own full extent rather than a
+     tight crop around the default rope, or dragging a flag far enough would
+     walk the curve straight out of a smaller frame and it would seem to
+     vanish. The other five props drawn on the same sheet get hidden in the
+     script below instead of cropped out, which is what makes a window this
+     size safe to use here without them reappearing. */
+  #crop { position: relative; width: 900px; height: 900px; overflow: hidden; }
+  #crop iframe { position: absolute; left: 0; top: 0; width: 900px; height: 900px; border: 0; }
+</style>
+</head>
+<body>
+<div id="crop"><iframe src="connective-elements.html" title="Rope garland" scrolling="no"></iframe></div>
+<script>
+  // frames.js waits up to 20s for a real dc-runtime boot signal from its
+  // direct iframe before it gives up and shows "no runtime — needs the
+  // network" (see frames.js's stall()/up()). This wrapper carries no
+  // dc-runtime of its own, so nothing would ever send that signal — send
+  // it ourselves, once we exist, so the panel reads as booted.
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: '__dc_booted', rootName: 'connective-rope', propsMeta: null, preview: null }, '*');
+  }
+
+  // connective-elements.html is a self-unpacking export: the moment its own
+  // loader script runs, it throws away and rebuilds its <head> from the
+  // bundle, so a <link>/<style> WE put there (bare.css included) is gone
+  // before the real page ever exists — there is no way to hand it a
+  // stylesheet from outside. What survives is the DOM itself, same-origin,
+  // reachable through contentDocument — so instead of styling that page we
+  // reach in directly: strip the white sheet the "Asset Sheet" screen paints
+  // itself, and hide the five other props drawn on it (signpost, pond,
+  // campfire, mailbox, mushrooms — each already its own gz-art piece on the
+  // bench) so a crop window big enough for the rope doesn't put them back on
+  // the paper a second time. Both are React-owned — the sheet's background
+  // is part of its own inline style, and dragging a flag re-renders it — so
+  // this runs from a MutationObserver, not once at boot, or either fix would
+  // just get painted over on the next render.
+  var innerFrame = document.querySelector('#crop iframe');
+  innerFrame.addEventListener('load', function () {
+    var doc;
+    try { doc = innerFrame.contentDocument; } catch (e) { return; }
+    if (!doc) return;
+
+    function fix() {
+      var root = doc.documentElement, body = doc.body;
+      if (root) root.style.setProperty('background', 'transparent', 'important');
+      if (body) body.style.setProperty('background', 'transparent', 'important');
+      var sheet = doc.querySelector('[data-screen-label]');
+      if (!sheet) return null;
+      sheet.style.setProperty('background', 'transparent', 'important');
+      // The rope's own SVG is the one drawn position:absolute over the whole
+      // sheet; the other props are ordinary grid children. That is a sturdier
+      // way to tell them apart than DOM order.
+      [].forEach.call(sheet.children, function (el) {
+        if (el.tagName === 'svg' || el.tagName === 'SVG') {
+          if (doc.defaultView.getComputedStyle(el).position !== 'absolute') {
+            el.style.setProperty('display', 'none', 'important');
+          }
+        }
+      });
+      return sheet;
+    }
+
+    // The sheet root doesn't exist yet the instant the shell loads — the
+    // bundle is still unpacking React into it — so watch for it same as we'd
+    // watch for anything else arriving async, and once it's there watch ITS
+    // style attribute specifically for the re-renders a drag causes.
+    var watchingStyle = false;
+    var mo = new MutationObserver(function () {
+      var sheet = fix();
+      if (sheet && !watchingStyle) {
+        watchingStyle = true;
+        new MutationObserver(fix).observe(sheet, { attributes: true, attributeFilter: ['style'] });
+      }
+    });
+    mo.observe(doc.documentElement, { childList: true, subtree: true });
+    fix();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+/* ─── knoll / lab — genre skins ────────────────────────────────────────────
+   Knoll gives a community a hill. A community is usually a community ABOUT
+   something, and for indie games that something has a genre — so the place
+   should not arrive dressed as a craft fair when the game is about a haunted
+   basement. This file is the wardrobe.
+
+   HOW IT WORKS
+     lab.css draws everything out of the token sheet in its :root. Nothing in
+     it knows a theme exists. Here we re-point those same tokens under a
+     [data-theme] on <html>, and each block gets a short second half for the
+     handful of things a token cannot say — the texture of the paper, the
+     shape of a corner, whether the light flickers.
+
+   THE RULES OF A NEW SKIN
+     1. Re-point tokens first. Reach for a selector only when the change is
+        structural (a grid becomes a graticule, a corner squares off).
+     2. --pink is THE accent and it is asked to do two jobs: be legible AS
+        text on the paper, and sit UNDER white text as a fill. Pick a
+        mid-saturation colour that survives both — bright neons fail the
+        second job. --pink-soft is the wash BEHIND --pink text, so it goes
+        dark in a dark skin, not light.
+     3. --ink is the text colour and --ink-2 is the gizmo chassis. In a dark
+        skin those two swap roles: --ink goes pale and --ink-2 goes darker
+        than the paper, so a gizmo reads as a silhouette on it.
+     4. Everything hand-painted into a <canvas> — the hill, the shed, the
+        bug farm, the arcade — is drawn by JS and is NOT themed by this file.
+        The frames around them are.
+
+   Themes are applied by theme.js and remembered per device. No theme
+   attribute at all is the same as knoll. */
+
+
+/* ═══ 0 · knoll — the house style ═══════════════════════════════════════════
+   No tokens: the default lives in lab.css :root. Naming it here means the
+   switcher has something to point at, and a skin can be deleted without
+   leaving a hole. */
+:root[data-theme="knoll"]{color-scheme:light}
+:root[data-theme="adventure"]{color-scheme:light}
+/* the dark skins tell the browser so, or its own furniture — scrollbars, the
+   date picker the time capsule opens — arrives in the wrong colours */
+:root[data-theme="horror"],:root[data-theme="shooter"]{color-scheme:dark}
+
+/* Bare form controls have no rule of their own in lab.css and fall back to the
+   browser's white. Harmless on cream paper, a hole punched in a dark skin. */
+input:not([type]),input[type="text"],input[type="search"],input[type="email"],
+input[type="number"],input[type="date"],input[type="url"],textarea,select{
+  background:var(--field);color:var(--ink);
+}
+
+
+/* ═══ 1 · HORROR — the cellar ═══════════════════════════════════════════════
+   The bench got left in a basement and the lamps went out. Paper the colour
+   of soot, type the colour of bone, and one wound of red. Warm dark, not cold
+   — cold dark is science fiction, warm dark is dread. */
+:root[data-theme="horror"]{
+  /* paper and ink — inverted: the ink is pale, the chassis is darker than
+     the paper so every gizmo reads as a silhouette */
+  --paper:#15110f; --paper-2:#1c1715; --card:#1e1917; --card-2:#241e1b;
+  --ink:#e8dfd0; --ink-2:#0d0a09; --ink-3:#cbbfae;
+  --mute:#8a7d6d; --mute-2:#5d5348; --line:#302823;
+
+  /* the wound. #d8443c clears 5:1 on the soot and still takes white type */
+  --pink:#d8443c; --pink-2:#ef5a4a; --pink-soft:#3a1512;
+  --blue:#5a7f9e; --green:#7d9142; --amber:#d19a3a;
+  --green-soft:#17251a; --red-soft:#2a1412; --red-soft-2:#331512;
+  --amber-soft:#2a2013; --amber-ink:#c9a05a;
+
+  /* type — a high-contrast serif for the names, a typewriter for the data.
+     Every serial on the bench now looks like it was filed by somebody. */
+  --display:'Cormorant Garamond',Georgia,serif;
+  --mono:'Special Elite',ui-monospace,Consolas,monospace;
+
+  /* surfaces */
+  --field:#211b18; --field-2:#1c1714;
+  --tint:#2b1a17; --tint-2:#2b1a17;
+  --chip:#241e1a; --trough:#241e1a;
+  --desk-a:#1b1613; --desk-b:#221b17;
+  --ring:#241d1a; --off:#3a322c; --hard-edge:#000;
+  --parchment:#241d15; --parchment-line:#4a3c28;
+  --sticky-a:#3a3220; --sticky-b:#3a2222; --sticky-c:#1f2c37; --sticky-d:#253320;
+  --sticky-edge:rgba(232,223,208,.11);
+  --crt-shell:#3a322c; --crt-shell-2:#29231f; --crt-vent:#1a1512; --crt-ink:#a2957f;
+  --strip-bg:rgba(21,17,15,.88);
+  --screen-bg:#0f0c0b; --screen-deep:#0a0807;
+  --board:#241b12; --board-line:#4a3625;
+  --wall:#1e1815; --wall-line:#171310; --wall-sill:#0f0c0a;
+  --tank:#181f1a;
+  --book-a:#3a2f1e;
+
+  /* the bench */
+  --bench-bg:#0a0807;
+  --bench-dot:rgba(214,196,170,.055);
+  --sheet-dot:#262019;
+  --drop-rgb:0,0,0;
+
+  /* the chassis — squarer than knoll's, because nothing down here is cosy */
+  --gz-radius:16px; --gz-radius-in:14px;
+  --gz-face:#221c19; --gz-face-2:#171310;
+  --gz-sheen:rgba(255,255,255,.05);
+  --gz-handle-bg:#0d0a09; --gz-handle-ink:#cdbfa8;
+  --grip:#2a221d;
+  --plate-bg:#1a1512; --plate-ink:#d8cbb6;
+  --plate-line:#3a302a; --plate-shade:#0c0908;
+  --serial-ink:#6b5f52;
+  --rivet-hi:#55483d; --rivet-lo:#241d18; --rivet-line:#0a0807;
+  --min-bg:#1e1815; --min-line:#3a302a; --min-ink:#a89584;
+
+  /* the world */
+  --sky-a:#1b1f26; --sky-b:#10131a;    /* a dead sky behind the hill */
+  --timber:#241b14;
+  --gn-boot:#2a211a; --gn-coat:#4a4238;      /* the help gnome, drained */
+  --gn-skin:#b09a86; --gn-nose:#a08a76; --gn-beard:#cfc4b4;
+  --gn-hat:#7d2420; --gn-brim:#5c1a17;
+}
+
+/* the paper is grained and the corners are dark. One overlay does both, over
+   the whole bench including the gizmos, because grain that stops at the edge
+   of a panel stops being grain. */
+:root[data-theme="horror"] .bench::after{
+  content:"";position:absolute;inset:0;z-index:4200;pointer-events:none;
+  background:
+    radial-gradient(120% 90% at 50% 45%,transparent 38%,rgba(0,0,0,.42) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  background-size:100% 100%,160px 160px;
+  mix-blend-mode:soft-light;opacity:.85;
+}
+/* the vignette must not be soft-lit away, so it gets its own pass */
+:root[data-theme="horror"] .bench::before{
+  content:"";position:absolute;inset:0;z-index:4201;pointer-events:none;
+  background:radial-gradient(125% 95% at 50% 40%,transparent 45%,rgba(0,0,0,.55) 100%);
+}
+
+/* the strip light over the bench is on its way out */
+/* :not(.gz-st *) throughout: the sticker press keeps its own chassis in
+   every skin — see the note by the shooter plate list below. */
+:root[data-theme="horror"] .gz-plate:not(.gz-st *){animation:cellarFlicker 6.5s linear infinite}
+@keyframes cellarFlicker{
+  0%,52%,100%{opacity:1}
+  53%{opacity:.55} 54%{opacity:1} 57%{opacity:.4} 58%{opacity:1}
+  78%{opacity:1}  79%{opacity:.62} 80%{opacity:1}
+}
+/* a seam of red where the handle meets the case */
+:root[data-theme="horror"] .gz-handle:not(.gz-st *){border-bottom-color:rgba(216,68,60,.45)}
+:root[data-theme="horror"] .gz:not(.gz-st){border-color:#0a0807}
+
+
+/* ═══ 2 · ADVENTURE — the map room ══════════════════════════════════════════
+   The bench is a cartographer's table. Sun-bleached parchment, oiled leather
+   handles, brass plates and brass rivets, route-red for anything that wants
+   attention. The one skin of the three that stays light. */
+:root[data-theme="adventure"]{
+  --paper:#f4e8d2; --paper-2:#eadcc0; --card:#fbf3e2; --card-2:#f2e6cd;
+  --ink:#33261a; --ink-2:#3d2d1d; --ink-3:#52402c;
+  --mute:#8a7458; --mute-2:#b8a382; --line:#d9c6a2;
+
+  /* sealing wax — reads as route-red on the map and takes white type cleanly */
+  --pink:#b4472c; --pink-2:#d4603f; --pink-soft:#f3ddc8;
+  --blue:#3f6e8c; --green:#4a7a44; --amber:#c8912c;
+  --green-soft:#e3eed6; --red-soft:#f6ddd2; --red-soft-2:#f0cec1;
+  --amber-soft:#f8ecd0; --amber-ink:#8a6320;
+
+  /* engraved Roman caps for the plates and the names */
+  --display:'Cinzel',Georgia,serif;
+
+  --field:#fdf8ec; --field-2:#fdfaf0;
+  --tint:#f8ead4; --tint-2:#faeedb;
+  --chip:#f4e9d4; --trough:#e6d7ba;
+  --desk-a:#fbf3e2; --desk-b:#f2e5cc;
+  --ring:#e6d5b4; --off:#cbb794; --hard-edge:#2a1e12;
+  --parchment:#f8eed6; --parchment-line:#cbb389;
+  --sticky-a:#f0d385; --sticky-b:#e8ab9c; --sticky-c:#a8c6d2; --sticky-d:#b8ce97;
+  --sticky-edge:rgba(58,40,20,.17);
+  --crt-shell:#e3d3b4; --crt-shell-2:#c9b48d; --crt-vent:#a8905f; --crt-ink:#5a4526;
+  --strip-bg:rgba(251,243,226,.88);
+  --screen-bg:#33261a; --screen-deep:#241a11;
+  --board:#e6cfa6; --board-line:#a8845a;
+  --wall:#efe2c8; --wall-line:#e6d6b6; --wall-sill:#d8c39a;
+  --tank:#e8efdd;
+  --book-a:#c9a86a;
+
+  --bench-bg:#d9c9a8;
+  --bench-dot:rgba(90,64,36,.13);
+  --sheet-dot:#e2d2b2;
+  --drop-rgb:74,52,30;
+
+  --gz-radius:20px; --gz-radius-in:18px;
+  --gz-face:#fbf3e2; --gz-face-2:#efe0c4;
+  --gz-sheen:#fffaf0;
+  --gz-handle-bg:#3d2d1d; --gz-handle-ink:#f2e3c6;   /* tooled leather */
+  --grip:#5c4630;
+  --plate-bg:#d9b45e; --plate-ink:#3b2a15;           /* a brass plate */
+  --plate-line:#a8842f; --plate-shade:#a8842f;
+  --serial-ink:#9d8760;
+  --rivet-hi:#f6dfa4; --rivet-lo:#b08a34; --rivet-line:#6d5416;
+  --min-bg:#4e3a26; --min-line:#6d5335; --min-ink:#e0cba4;
+
+  --sky-a:#dff0f6; --sky-b:#f6fbfd;    /* a clear morning to set out in */
+  --timber:#e2c99f;
+  --gn-boot:#4a3524; --gn-coat:#3f6b4a;              /* the gnome, kitted */
+  --gn-skin:#f0c9a4; --gn-nose:#e2b391; --gn-beard:#f6efe0;
+  --gn-hat:#b4472c; --gn-brim:#8e3320;
+}
+
+/* the table is ruled like a chart, not dotted like a notebook: a graticule
+   with a heavier line every fifth square. --gs/--gs2/--gx/--gy come from the
+   camera (lab.js), so the ruling belongs to the map rather than the screen. */
+:root[data-theme="adventure"] .bench{
+  background-image:
+    linear-gradient(rgba(120,88,44,.16) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(120,88,44,.16) 1px,transparent 1px),
+    linear-gradient(var(--bench-dot) 1px,transparent 1px),
+    linear-gradient(90deg,var(--bench-dot) 1px,transparent 1px);
+  background-size:var(--gs2,100px) var(--gs2,100px),var(--gs2,100px) var(--gs2,100px),
+                  var(--gs,20px) var(--gs,20px),var(--gs,20px) var(--gs,20px);
+  background-position:var(--gx,0) var(--gy,0);
+}
+/* the plate is struck brass — lit from the top-left, worn along the bottom */
+:root[data-theme="adventure"] .gz-plate:not(.gz-st *){
+  background:linear-gradient(160deg,#f0d99a 0%,#d9b45e 42%,#c39c43 100%);
+  box-shadow:inset 0 1px 0 rgba(255,248,220,.75),inset 0 -2px 0 var(--plate-shade);
+  text-shadow:0 1px 0 rgba(255,248,220,.5);
+}
+
+
+/* ═══ 3 · SHOOTER — the armory ══════════════════════════════════════════════
+   Gunmetal under strip lights. Everything squares off, the grips go hazard,
+   the name plates light up amber and a cold grid sits under the whole thing.
+   Cold dark, so it never gets mistaken for the cellar. */
+:root[data-theme="shooter"]{
+  --paper:#191d22; --paper-2:#14181c; --card:#1f242a; --card-2:#252b32;
+  --ink:#dfe6ec; --ink-2:#0d1114; --ink-3:#b9c4ce;
+  --mute:#7d8994; --mute-2:#55606a; --line:#2c343c;
+
+  /* flare orange. Hazard amber is the louder colour but white type dies on
+     it, and the accent has to carry white type — so amber does the warnings
+     and the flare does the accenting. */
+  --pink:#e2542a; --pink-2:#ff6a3c; --pink-soft:#3a1c11;
+  --blue:#3fa7d6; --green:#46c07a; --amber:#ffb020;
+  --green-soft:#13251b; --red-soft:#2a1512; --red-soft-2:#331711;
+  --amber-soft:#2a2113; --amber-ink:#d9a13c;
+
+  --display:'Chakra Petch',ui-sans-serif,sans-serif;
+
+  --field:#202730; --field-2:#1b2128;
+  --tint:#2c1d16; --tint-2:#2c1d16;
+  --chip:#242b33; --trough:#232a31;
+  --desk-a:#1c2229; --desk-b:#232a32;
+  --ring:#232a32; --off:#39424b; --hard-edge:#05070a;
+  --parchment:#1e242b; --parchment-line:#39444e;
+  --sticky-a:#3a3524; --sticky-b:#3a2620; --sticky-c:#1e2f3c; --sticky-d:#22362a;
+  --sticky-edge:rgba(226,236,244,.12);
+  --crt-shell:#39424b; --crt-shell-2:#28303a; --crt-vent:#1a2027; --crt-ink:#9fb0bf;
+  --strip-bg:rgba(14,17,20,.88);
+  --screen-bg:#0b1013; --screen-deep:#05090c;
+  --board:#1e252c; --board-line:#3b4753;
+  --wall:#1d232a; --wall-line:#171d23; --wall-sill:#10151a;
+  --tank:#1a2229;
+  --book-a:#2b333c;
+
+  --bench-bg:#0e1114;
+  --bench-dot:rgba(120,200,220,.10);
+  --sheet-dot:#2b333b;
+  --drop-rgb:0,4,8;
+
+  /* corners come off everything */
+  --gz-radius:4px; --gz-radius-in:3px;
+  --gz-face:#232a32; --gz-face-2:#171c22;
+  --gz-sheen:rgba(255,255,255,.06);
+  --gz-handle-bg:#0d1114; --gz-handle-ink:#cfd8e0;
+  --grip:#2e3841;
+  --plate-bg:#12171c; --plate-ink:#ffb020;           /* a lit readout */
+  --plate-line:#39444e; --plate-shade:#05070a;
+  --serial-ink:#5b6772;
+  --rivet-hi:#6d7b87; --rivet-lo:#1b2128; --rivet-line:#05070a;
+  --min-bg:#1b222a; --min-line:#37424c; --min-ink:#9aa7b3;
+
+  --sky-a:#22303c; --sky-b:#17202a;
+  --timber:#2a3138;
+  --gn-boot:#23282d; --gn-coat:#3f4a35;              /* the gnome, in kit */
+  --gn-skin:#c99b76; --gn-nose:#b98a68; --gn-beard:#cdd4da;
+  --gn-hat:#e2542a; --gn-brim:#a83a19;
+}
+
+/* a technical grid: a fine rule every cell, a brighter one every fifth — both
+   cut from the camera's --gs, so the whole thing is drawn at the scale you are
+   looking at instead of at a fixed screen size */
+:root[data-theme="shooter"] .bench{
+  background-image:
+    linear-gradient(rgba(120,200,220,.16) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(120,200,220,.16) 1px,transparent 1px),
+    linear-gradient(var(--bench-dot) 1px,transparent 1px),
+    linear-gradient(90deg,var(--bench-dot) 1px,transparent 1px);
+  background-size:var(--gs2,100px) var(--gs2,100px),var(--gs2,100px) var(--gs2,100px),
+                  var(--gs,20px) var(--gs,20px),var(--gs,20px) var(--gs,20px);
+  background-position:var(--gx,0) var(--gy,0);
+}
+/* the strip lights, and the faintest scanline */
+:root[data-theme="shooter"] .bench::after{
+  content:"";position:absolute;inset:0;z-index:4200;pointer-events:none;
+  background:repeating-linear-gradient(180deg,rgba(140,215,235,.05) 0 1px,transparent 1px 3px);
+}
+/* the ribbed grips become hazard tape — the loudest thing on the bench, and
+   the reason you can tell this skin from the others at a glance */
+:root[data-theme="shooter"] .gz-grip:not(.gz-st *){
+  background:repeating-linear-gradient(-45deg,#ffb020 0 7px,#0d1114 7px 14px);
+  opacity:.5;border-radius:2px;
+}
+/* the plate is a lit readout, not an engraving */
+:root[data-theme="shooter"] .gz-plate:not(.gz-st *){
+  border-radius:2px;text-shadow:0 0 9px rgba(255,176,32,.55);
+  box-shadow:inset 0 0 0 1px #05070a,inset 0 -2px 0 var(--plate-shade),0 0 12px rgba(255,176,32,.16);
+}
+:root[data-theme="shooter"] .gz-plate:not(.gz-st *) b{color:var(--pink-2)}
+/* everything that was a rounded card is now a cut plate.
+   :not(.gz-st *) holds the line at the sticker press — those machines are
+   their own art direction and wear the same corners in every skin, and
+   several names on this list (.hopper, .screen, .pb-card, .readout…) now
+   belong to them. Without it a skin would square off half of sticker.css. */
+:root[data-theme="shooter"] :is(
+  .gz-btn,.hopper,.gauge,.leds,.odometer,.detail,.nameplate,.hill,.shed,.screen,
+  .pb-card,.sh-card,.mu-easel,.nm-card,.el-plaque,.el-card,.el-portrait,
+  .mo-yard,.mo-btn,.tc-dig,.tc-well,.tc-frame,.vm-machine,
+  .readout,.shelf,.shelf-tab,.zoom-dock,.keymap,.gnome-say,.bin,.size-set,
+  .pb-vote,.mu-vote,.nm-vote,.el-vote,.tc-tab,.fx-chip,.pb-act,.warp-set
+):not(.gz-st *){border-radius:3px}
+:root[data-theme="shooter"] .gz-feet:not(.gz-st *) span{border-radius:0 0 2px 2px}
+
+
+/* ═══ the painted world ═════════════════════════════════════════════════════
+   The hill, the shed, the monument yard, the dig, the bug farm and the vending
+   machine are painted by their own gizmos in their own colours, and no token
+   reaches inside a <canvas>. Rather than fork six painters, each skin grades
+   them the way a film is graded — one filter over the finished frame. It is a
+   wash, not a repaint: a blue sky goes cold or goes to rot, but it is still
+   the same sky. When a gizmo is eventually taught to read `lab:theme` and
+   paint itself properly, delete its selector from this list.
+
+   Deliberately NOT graded: the drawing pad (you are making something on it and
+   the ink must be the colour you picked), the framed drawings, the arcade
+   screen (already its own lit thing) and the VU meter. */
+:root[data-theme="horror"] :is(.hill,.shed,.mo-yard,.tc-dig,.bf-farm,.vm-machine) canvas{
+  filter:sepia(.55) saturate(.75) hue-rotate(-12deg) brightness(.47) contrast(1.15);
+}
+:root[data-theme="adventure"] :is(.hill,.shed,.mo-yard,.tc-dig,.bf-farm,.vm-machine) canvas{
+  filter:sepia(.42) saturate(.9) hue-rotate(-8deg) brightness(1.02) contrast(.97);
+}
+:root[data-theme="shooter"] :is(.hill,.shed,.mo-yard,.tc-dig,.bf-farm,.vm-machine) canvas{
+  filter:grayscale(.55) sepia(.35) hue-rotate(165deg) saturate(1.15) brightness(.58) contrast(1.1);
+}
+
+
+/* ═══ the switcher in the header ════════════════════════════════════════════
+   Sits beside VIEW AS and is built the same way, so the two read as one pair
+   of controls: who is looking, and what the place is dressed as. */
+.genre-switch{display:inline-flex;align-items:center;gap:0;border:1.5px solid var(--ink-2);border-radius:10px;
+  background:var(--field);padding:3px;box-shadow:0 2px 0 var(--ink-2)}
+.genre-switch-label{font-size:9.5px;font-weight:800;letter-spacing:.18em;color:var(--mute-2);padding:0 8px 0 6px}
+.genre-switch button{border:0;background:none;border-radius:7px;padding:6px 10px;font-size:12px;font-weight:700;
+  color:var(--mute);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .12s,color .12s}
+.genre-switch button em{font-style:normal;font-size:12px;line-height:1}
+.genre-switch button:hover{color:var(--ink);background:var(--tint)}
+.genre-switch button[aria-selected="true"]{background:var(--pink);color:#fff}
+.genre-switch button[aria-selected="true"]:hover{background:var(--pink)}
+
+/* the whole page eases between skins rather than snapping. Only the paper and
+   the type move — anything with a transform (a dragged gizmo, the camera) is
+   left alone, or dragging would go rubbery. */
+.lab-head,.bench,.bench-world,.gz,.gz-handle,.gz-plate,.shelf,.zoom-dock,.gz-btn{
+  transition:background-color .3s ease,color .3s ease,border-color .3s ease}
+.gz.dragging,.gz.going,.gz.coming{transition:none}
+
+@media (prefers-reduced-motion:reduce){
+  :root[data-theme="horror"] .gz-plate{animation:none}
+  .lab-head,.bench,.bench-world,.gz,.gz-handle,.gz-plate,.shelf,.zoom-dock,.gz-btn{transition:none}
+}

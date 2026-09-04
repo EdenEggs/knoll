@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=VT323&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #ece7f1; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+</style>
+</helmet>
+<div data-screen-label="Knoll Wordmark" style="min-height: 100vh; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; background: #ece7f1; background-image: radial-gradient(circle, rgba(90,70,110,0.13) 1.3px, transparent 1.3px); background-size: 24px 24px; position: relative; overflow: hidden">
+  <div style="position: relative; z-index: 1; width: {{ fitW }}px; height: {{ fitH }}px">
+  <div style="position: absolute; top: 0; left: 0; width: 1600px; display: flex; flex-direction: column; align-items: center; transform: scale({{ fitScale }}); transform-origin: top left">
+  <div style="display: flex; align-items: flex-end; gap: 40px; padding-top: 250px">
+    <div style="position: relative; width: 400px; height: 470px; margin-bottom: 20px; flex-shrink: 0">
+      <svg width="220" height="300" sc-camel-view-box="0 0 220 300" style="position: absolute; top: 194px; left: 90px; overflow: visible; filter: drop-shadow(5px 6px 0 rgba(60,50,80,0.18)); opacity: {{ gnomeOpacity }}; transition: opacity 0.15s ease; pointer-events: none">
+        <line x1="66" y1="170" x2="{{ handLx }}" y2="{{ handLy }}" stroke="#17120b" stroke-width="23" stroke-linecap="round"></line>
+        <line x1="154" y1="170" x2="{{ handRx }}" y2="{{ handRy }}" stroke="#17120b" stroke-width="23" stroke-linecap="round"></line>
+        <line x1="66" y1="170" x2="{{ handLx }}" y2="{{ handLy }}" stroke="#4a72d4" stroke-width="13" stroke-linecap="round"></line>
+        <line x1="154" y1="170" x2="{{ handRx }}" y2="{{ handRy }}" stroke="#4a72d4" stroke-width="13" stroke-linecap="round"></line>
+        <ellipse cx="76" cy="264" rx="20" ry="12" fill="#8a6a42" stroke="#17120b" stroke-width="5"></ellipse>
+        <ellipse cx="144" cy="264" rx="20" ry="12" fill="#8a6a42" stroke="#17120b" stroke-width="5"></ellipse>
+        <path d="M70,150 L150,150 L182,258 L38,258 Z" fill="#4a72d4" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+        <path d="M110,150 L110,258" stroke="rgba(23,18,11,0.18)" stroke-width="3"></path>
+        <ellipse cx="72" cy="116" rx="8" ry="11" fill="#f5b8c4" stroke="#17120b" stroke-width="4"></ellipse>
+        <ellipse cx="148" cy="116" rx="8" ry="11" fill="#f5b8c4" stroke="#17120b" stroke-width="4"></ellipse>
+        <circle cx="110" cy="112" r="40" fill="#f0cfae" stroke="#17120b" stroke-width="5"></circle>
+        <path d="M64,118 Q110,148 156,118 Q166,225 110,242 Q54,225 64,118 Z" fill="#f7f0df" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+        <rect x="101" y="241" width="18" height="18" transform="rotate(45 110 250)" fill="#ffd23f" stroke="#17120b" stroke-width="4"></rect>
+        <line x1="83" y1="99" x2="100" y2="104" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line>
+        <line x1="137" y1="99" x2="120" y2="104" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line>
+        <circle cx="93" cy="115" r="7" fill="#17120b"></circle>
+        <circle cx="127" cy="115" r="7" fill="#17120b"></circle>
+        <circle cx="95.5" cy="112.5" r="2.4" fill="#ffffff"></circle>
+        <circle cx="129.5" cy="112.5" r="2.4" fill="#ffffff"></circle>
+        <ellipse cx="93" cy="136" rx="15" ry="7" transform="rotate(-14 93 136)" fill="#fffaf0" stroke="#17120b" stroke-width="4"></ellipse>
+        <ellipse cx="127" cy="136" rx="15" ry="7" transform="rotate(14 127 136)" fill="#fffaf0" stroke="#17120b" stroke-width="4"></ellipse>
+        <circle cx="110" cy="126" r="13" fill="#e8a583" stroke="#17120b" stroke-width="5"></circle>
+        <circle cx="106" cy="122" r="3.5" fill="rgba(255,255,255,0.55)"></circle>
+        <path d="M110,10 L158,90 L62,90 Z" fill="{{ hatColor }}" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+        <rect x="120" y="48" width="14" height="14" transform="rotate(14 127 55)" fill="{{ hatBrim }}" stroke="#17120b" stroke-width="3" stroke-dasharray="4 3"></rect>
+        <rect x="54" y="84" width="112" height="22" rx="11" fill="{{ hatBrim }}" stroke="#17120b" stroke-width="5"></rect>
+        <rect x="68" y="90" width="26" height="6" rx="3" fill="rgba(255,255,255,0.35)"></rect>
+        <circle cx="110" cy="12" r="10" fill="#fdf7e3" stroke="#17120b" stroke-width="5"></circle>
+      </svg>
+      <div sc-camel-on-click="{{ lift }}" style="position: absolute; top: 0; left: 0; width: 400px; height: 470px; box-sizing: border-box; background: #fdf7e3; border: 7px solid #17120b; box-shadow: 12px 14px 0 rgba(60,50,80,0.2); transform: translateY({{ kY }}px) rotate({{ kRot }}); cursor: pointer; z-index: 2">
+        <div style="position: absolute; inset: 10px; border: 3px solid rgba(23,18,11,0.7); pointer-events: none"></div>
+        <div style="position: absolute; top: 16px; left: 16px; right: 16px; height: 46px; background: repeating-linear-gradient(105deg, rgba(23,18,11,0.8) 0px, rgba(23,18,11,0.8) 5px, transparent 5px, transparent 18px); border-bottom: 5px solid #17120b"></div>
+        <div style="position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 72px; height: 36px; background: #ffd23f; border: 6px solid #17120b; border-radius: 0 0 72px 72px"></div>
+        <div style="position: absolute; left: 0; right: 0; top: 62px; bottom: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Rye', serif; font-size: 250px; color: #17120b">K</div>
+        <div style="position: absolute; bottom: -14px; right: -14px; width: 22px; height: 22px; background: #e8484a; border: 4px solid #17120b; transform: rotate(45deg)"></div>
+      </div>
+      <svg width="220" height="300" sc-camel-view-box="0 0 220 300" style="position: absolute; top: 194px; left: 90px; overflow: visible; pointer-events: none; opacity: {{ gnomeOpacity }}; transition: opacity 0.15s ease; z-index: 3">
+        <circle cx="{{ sleeveLx }}" cy="{{ sleeveLy }}" r="10" fill="#3a5cb0" stroke="#17120b" stroke-width="4"></circle>
+        <circle cx="{{ sleeveRx }}" cy="{{ sleeveRy }}" r="10" fill="#3a5cb0" stroke="#17120b" stroke-width="4"></circle>
+        <circle cx="{{ handLx }}" cy="{{ handLy }}" r="13" fill="#f0cfae" stroke="#17120b" stroke-width="5"></circle>
+        <circle cx="{{ handRx }}" cy="{{ handRy }}" r="13" fill="#f0cfae" stroke="#17120b" stroke-width="5"></circle>
+      </svg>
+    </div>
+    <sc-for list="{{ letters }}" as="c" hint-placeholder-count="4">
+      <div sc-camel-on-click="{{ lift }}" style="position: relative; width: 260px; height: 305px; box-sizing: border-box; margin-bottom: 20px; background: #fdf7e3; border: 6px solid #17120b; box-shadow: 10px 12px 0 rgba(60,50,80,0.2); transform: rotate({{ c.rot }}); flex-shrink: 0; cursor: pointer">
+        <div style="position: absolute; inset: 8px; border: 3px solid rgba(23,18,11,0.7); pointer-events: none"></div>
+        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Rye', serif; font-size: 150px; color: #17120b; padding-bottom: 12px">{{ c.ch }}</div>
+        <div style="position: absolute; top: -12px; right: -12px; width: 18px; height: 18px; background: {{ c.accent }}; border: 3px solid #17120b; border-radius: 50%"></div>
+      </div>
+    </sc-for>
+  </div>
+  <sc-if value="{{ showCaption }}" hint-placeholder-val="{{ true }}">
+    <div style="margin-top: 44px; display: flex; align-items: center; gap: 16px">
+      <div style="font-family: 'VT323', monospace; font-size: 18px; letter-spacing: 4px; color: #4a4054; opacity: 0.65">· K IS FOR KNOLL · CLICK A LETTER TO HOIST ·</div>
+      <div style="font-family: 'VT323', monospace; font-size: 16px; letter-spacing: 3px; color: #e8484a; border: 3px solid #e8484a; border-radius: 4px; padding: 1px 10px; transform: rotate(-4deg)">GNOME-CERTIFIED</div>
+    </div>
+  </sc-if>
+  </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{
+  &quot;hatColor&quot;: {&quot;editor&quot;: &quot;color&quot;, &quot;default&quot;: &quot;#e0598c&quot;, &quot;options&quot;: [&quot;#e0598c&quot;, &quot;#e8484a&quot;, &quot;#5a8fd6&quot;, &quot;#7bc264&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Gnome&quot;},
+  &quot;jitter&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Stickers&quot;, &quot;description&quot;: &quot;Slight tilt on the sticker tiles&quot;},
+  &quot;showCaption&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Stickers&quot;}
+}">
+class Component extends DCLogic {
+  state = { active: false, t: 0 };
+  componentDidMount() {
+    this._onResize = () => this.forceUpdate();
+    window.addEventListener('resize', this._onResize);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._onResize);
+    clearTimeout(this._raf);
+    clearTimeout(this._timer);
+  }
+  _animate(from, to, dur, ease, done) {
+    const t0 = performance.now();
+    const step = () => {
+      const p = Math.min(1, (performance.now() - t0) / dur);
+      this.setState({ t: from + (to - from) * ease(p) });
+      if (p < 1) this._raf = setTimeout(step, 16);
+      else if (done) done();
+    };
+    step();
+  }
+  renderVals() {
+    const fitScale = Math.min(1, (window.innerWidth - 64) / 1600, (window.innerHeight - 96) / 860);
+    const easeOutBack = (p) => { const c = 1.2; const q = p - 1; return 1 + (c + 1) * q * q * q + c * q * q; };
+    const easeInOut = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+    const lift = () => {
+      if (this._busy) return;
+      this._busy = true;
+      this.setState({ active: true, t: 0 });
+      this._timer = setTimeout(() => {
+        this._animate(0, 1, 700, easeOutBack, () => {
+          this._timer = setTimeout(() => {
+            this._animate(1, 0, 650, easeInOut, () => {
+              this._timer = setTimeout(() => {
+                this.setState({ active: false });
+                this._busy = false;
+              }, 250);
+            });
+          }, 2000);
+        });
+      }, 220);
+    };
+    const t = this.state.t;
+    const r = (v) => Math.round(v * 10) / 10;
+    // Hands stay glued to the K's bottom edge (tile bottom = 470, gnome svg top = 194)
+    const handLy = r(276 - 220 * t), handRy = handLy;
+    const handLx = r(58 - 26 * t), handRx = r(162 + 26 * t);
+    const sleeveLx = r(66 + 0.86 * (handLx - 66)), sleeveLy = r(170 + 0.86 * (handLy - 170));
+    const sleeveRx = r(154 + 0.86 * (handRx - 154)), sleeveRy = r(170 + 0.86 * (handRy - 170));
+    const hat = this.props.hatColor ?? '#e0598c';
+    const jitter = this.props.jitter ?? true;
+    const darken = (hex, f) => {
+      const n = parseInt(hex.slice(1), 16);
+      const ch = (s) => Math.round(((n >> s) & 255) * f).toString(16).padStart(2, '0');
+      return '#' + ch(16) + ch(8) + ch(0);
+    };
+    const pal = ['#ffd23f', '#7bc264', '#e8484a', '#ffd23f'];
+    const rots = ['1.4deg', '-1.8deg', '1deg', '-1.5deg'];
+    return {
+      fitScale,
+      fitW: Math.round(1600 * fitScale),
+      fitH: Math.round(860 * fitScale),
+      lift,
+      gnomeOpacity: this.state.active ? 1 : 0,
+      kY: r(-220 * t),
+      handLx, handLy, handRx, handRy,
+      sleeveLx, sleeveLy, sleeveRx, sleeveRy,
+      hatColor: hat,
+      hatBrim: darken(hat, 0.78),
+      kRot: jitter ? '-4deg' : '0deg',
+      letters: [...'noll'].map((ch, i) => ({ ch, accent: pal[i], rot: jitter ? rots[i] : '0deg' })),
+      showCaption: this.props.showCaption ?? true,
+    };
+  }
+}
+</script>
+
+
+
+</body></html>

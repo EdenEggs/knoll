@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./prelude.js"></script>
+<script src="./support.js"></script>
+<!-- lab 2 shows this on its own paper — see features/bare.css -->
+<link rel="stylesheet" href="./bare.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<!-- lab 2 serves these faces itself — see SELF-HOSTED in index.html -->
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  /* THE BENCH'S THREE MARKS — see features/bare.css, NO SECOND SHEET. Every
+     line below is the machine as it was exported, verbatim; the bench adds
+     three attributes and changes no declaration: data-lab-nopaper on the
+     paper grain, data-lab-sheet on the full-viewport div the export wraps
+     the drawing in (the one carrying the export's own zoom), and
+     data-lab-nozoom on the zoom widget pinned to the corner. frames.js
+     steps through the first two as sheets and bare.css draws none of the
+     three; opened on its own, the file still zooms and shows its widget.
+     Written by perf/swap-machine.js. */
+  body { margin: 0; background: #f2e9cf; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+  @keyframes blinkLight { 0%, 60% { opacity: 1; } 61%, 100% { opacity: 0.2; } }
+  @keyframes shakeM { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-2px, 1px); } 50% { transform: translate(2px, -1px); } 75% { transform: translate(-1px, -2px); } }
+  @keyframes popIn { 0% { transform: scale(0); } 70% { transform: scale(1.14); } 100% { transform: scale(1); } }
+  @keyframes landIn { 0% { transform: translateY(-40px) rotate(1.2deg); opacity: 0; } 60% { transform: translateY(5px) rotate(1.2deg); opacity: 1; } 100% { transform: translateY(0) rotate(1.2deg); } }
+  @keyframes slotSuck { 0% { transform: translate(-50%, -66px) scaleY(1); opacity: 1; } 75% { opacity: 1; } 100% { transform: translate(-50%, -6px) scaleY(0.15); opacity: 0; } }
+  @keyframes puffA { 0% { transform: translate(-50%, 0) scale(0.45); opacity: 0; } 18% { opacity: 0.95; } 100% { transform: translate(-50%, -90px) scale(1.3); opacity: 0; } }
+  @keyframes stampIn { 0% { transform: rotate(-14deg) scale(2.4); opacity: 0; } 60% { transform: rotate(-8deg) scale(0.92); opacity: 1; } 100% { transform: rotate(-8deg) scale(1); } }
+</style>
+</helmet>
+<div data-screen-label="Ballot-O-Tron" style="min-height: 100vh; min-width: 100%; box-sizing: border-box; background: #f2e9cf; position: relative">
+  <sc-if value="{{ zoomUI }}" hint-placeholder-val="{{ true }}">
+    <div data-lab-nozoom style="position: fixed; right: 18px; bottom: 18px; z-index: 60; display: flex; align-items: center; gap: 7px; background: #f4ecd5; border: 4px solid #17120b; border-radius: 8px 11px 7px 10px; box-shadow: 7px 8px 0 rgba(23,18,11,0.8); padding: 5px 9px; font-family: 'VT323', monospace">
+      <button sc-camel-on-click="{{ onZoomOut }}" title="zoom out" style="font-family: 'VT323', monospace; font-size: 22px; line-height: 1; color: #17120b; background: #ffd23f; border: 3px solid #17120b; border-radius: 6px 4px 7px 5px; padding: 0 9px; cursor: pointer" style-hover="background: #ffe27a">−</button>
+      <div style="font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 2px; color: #17120b; min-width: 62px; text-align: center">{{ zoomLabel }}</div>
+      <button sc-camel-on-click="{{ onZoomIn }}" title="zoom in" style="font-family: 'VT323', monospace; font-size: 22px; line-height: 1; color: #17120b; background: #ffd23f; border: 3px solid #17120b; border-radius: 4px 6px 5px 7px; padding: 0 9px; cursor: pointer" style-hover="background: #ffe27a">+</button>
+      <div sc-camel-on-click="{{ onZoomReset }}" title="back to 100%" style="font-family: 'VT323', monospace; font-size: 14px; letter-spacing: 2px; color: #17120b; opacity: 0.6; cursor: pointer; padding-left: 2px">RESET</div>
+    </div>
+  </sc-if>
+  <div data-lab-sheet style="min-height: 100vh; width: fit-content; min-width: 100%; box-sizing: border-box; background: #f2e9cf; display: flex; align-items: center; justify-content: center; padding: 60px 40px 40px; font-family: 'Kalam', cursive; position: relative; zoom: {{ zoomF }}">
+  <div data-lab-nopaper style="position: absolute; inset: 0; pointer-events: none; opacity: 0.06; background-image: url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22160%22%20height=%22160%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22/%3E%3C/filter%3E%3Crect%20width=%22160%22%20height=%22160%22%20filter=%22url(%23n)%22/%3E%3C/svg%3E')"></div>
+  <div style="display: flex; align-items: flex-end; gap: 56px; position: relative; z-index: 1">
+    <div style="display: flex; flex-direction: column; gap: 34px; width: 430px; padding-bottom: 26px">
+      <div style="background: #d9d0c1; border: 5px solid #17120b; border-radius: 18px 22px 14px 20px; box-shadow: 12px 14px 0 rgba(23,18,11,0.85); padding: 24px 22px 18px; position: relative; transform: rotate(-0.6deg)">
+        <div style="position: absolute; top: -14px; left: 18px; font-family: 'VT323', monospace; font-size: 18px; letter-spacing: 3px; color: #f4ecd5; background: #17120b; border-radius: 4px; padding: 0 10px">01 THE ISSUE</div>
+        <div style="position: absolute; top: -14px; right: 18px; font-family: 'VT323', monospace; font-size: 18px; letter-spacing: 2px; color: #17120b; background: #ffd23f; border: 3px solid #17120b; border-radius: 6px 4px 7px 5px; padding: 0 10px">{{ issueNum }} / {{ issueTotal }}</div>
+        <div style="font-weight: 700; font-size: 27px; line-height: 1.3; color: #17120b">{{ issueText }}</div>
+      </div>
+      <div style="min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative">
+        <sc-if value="{{ showBallot }}" hint-placeholder-val="{{ true }}">
+          <div sc-camel-on-pointer-down="{{ onBallotDown }}" style="width: 340px; box-sizing: border-box; background: #f4ecd5; border: 4px solid #17120b; border-radius: 10px 6px 12px 8px; padding: 26px 22px 16px; position: relative; z-index: {{ ballotZ }}; animation: landIn 0.45s ease-out; transform: translate({{ ballotDX }}, {{ ballotDY }}) rotate({{ ballotRot }}) scale({{ ballotScale }}); cursor: {{ ballotCursor }}; opacity: {{ ballotOp }}; box-shadow: {{ ballotShadow }}; transition: {{ ballotTrans }}">
+            <div style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 3px; color: #f4ecd5; background: #17120b; border-radius: 4px; padding: 0 12px; white-space: nowrap">02 OFFICIAL BALLOT</div>
+            <div style="display: flex; flex-direction: column; gap: 4px; align-items: center; margin: 2px 0 10px; opacity: {{ gripOp }}">
+              <div style="width: 120px; height: 5px; background: #17120b; border-radius: 3px; opacity: 0.35"></div>
+              <div style="width: 120px; height: 5px; background: #17120b; border-radius: 3px; opacity: 0.35"></div>
+              <div style="width: 120px; height: 5px; background: #17120b; border-radius: 3px; opacity: 0.35"></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px">
+              <div sc-camel-on-click="{{ onYes }}" style="display: flex; align-items: center; gap: 14px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 9px 6px 8px 7px; padding: 8px 14px; cursor: pointer" style-hover="background: #fffcef">
+                <div style="width: 42px; height: 42px; flex-shrink: 0; background: #ffffff; border: 3px solid #17120b; border-radius: 6px 4px 7px 5px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 36px; line-height: 1; color: #e8484a">{{ yesMark }}</div>
+                <div style="font-weight: 700; font-size: 24px; color: #17120b">YES</div>
+                <div style="margin-left: auto; width: 20px; height: 20px; border-radius: 50%; border: 3px solid #17120b; background: #7bc264"></div>
+              </div>
+              <div sc-camel-on-click="{{ onNo }}" style="display: flex; align-items: center; gap: 14px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 7px 9px 6px 10px; padding: 8px 14px; cursor: pointer" style-hover="background: #fffcef">
+                <div style="width: 42px; height: 42px; flex-shrink: 0; background: #ffffff; border: 3px solid #17120b; border-radius: 5px 7px 4px 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 36px; line-height: 1; color: #e8484a">{{ noMark }}</div>
+                <div style="font-weight: 700; font-size: 24px; color: #17120b">NO</div>
+                <div style="margin-left: auto; width: 20px; height: 20px; border-radius: 50%; border: 3px solid #17120b; background: #e8484a"></div>
+              </div>
+            </div>
+            <div style="border-top: 3px dashed rgba(23,18,11,0.35); margin-top: 14px; padding-top: 8px; text-align: center; font-size: 15px; font-weight: {{ hintWeight }}; color: {{ hintColor }}; opacity: {{ hintOp }}">{{ ballotHint }}</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ showCastingNote }}" hint-placeholder-val="{{ false }}">
+          <div style="font-family: 'VT323', monospace; font-size: 22px; letter-spacing: 3px; color: #17120b; opacity: 0.6">BALLOT IN THE MACHINE...</div>
+        </sc-if>
+        <sc-if value="{{ showRecorded }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 26px">
+            <div style="font-family: 'VT323', monospace; font-size: 30px; letter-spacing: 4px; color: #e8484a; border: 4px solid #e8484a; border-radius: 8px 5px 9px 6px; padding: 6px 20px 3px; animation: stampIn 0.4s ease-out forwards; transform: rotate(-8deg)">VOTE RECORDED</div>
+            <button sc-camel-on-click="{{ onNext }}" style="font-family: 'VT323', monospace; font-size: 30px; letter-spacing: 4px; color: #fdf3d9; background: #e8484a; border: 4px solid #17120b; border-radius: 12px 16px 10px 14px; padding: 10px 28px 7px; cursor: pointer; box-shadow: 6px 7px 0 rgba(23,18,11,0.85)" style-hover="background: #f05a5c" style-active="transform: translate(5px, 6px); box-shadow: 1px 1px 0 rgba(23,18,11,0.85)">NEXT ISSUE →</button>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: center; position: relative">
+      <div style="position: relative; width: 40px; height: 60px; display: flex; flex-direction: column; align-items: center; align-self: flex-start; margin-left: 70px">
+        <sc-if value="{{ steamOn }}" hint-placeholder-val="{{ true }}">
+          <div style="position: absolute; top: -20px; left: 50%; width: 32px; height: 28px; background: #f4ecd5; border: 3px solid #17120b; border-radius: 55% 62% 50% 65%; opacity: 0; animation: puffA 3s ease-out infinite"></div>
+          <div style="position: absolute; top: -14px; left: 50%; width: 22px; height: 19px; background: #f4ecd5; border: 3px solid #17120b; border-radius: 60% 50% 65% 55%; opacity: 0; animation: puffA 3s ease-out infinite; animation-delay: 1.5s"></div>
+        </sc-if>
+        <sc-if value="{{ casting }}" hint-placeholder-val="{{ false }}">
+          <div style="position: absolute; top: -24px; left: 50%; width: 46px; height: 40px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 50% 65% 55% 60%; opacity: 0; animation: puffA 1s ease-out infinite; animation-delay: 0.2s"></div>
+        </sc-if>
+        <div style="width: 52px; height: 13px; background: #b8ac97; border: 4px solid #17120b; border-radius: 5px; position: relative; z-index: 1"></div>
+        <div style="width: 34px; height: 51px; background: #b8ac97; border: 4px solid #17120b; border-top-width: 0; margin-top: -2px"></div>
+      </div>
+      <div ref="{{ slotRef }}" style="width: 470px; box-sizing: border-box; background: #d9d0c1; border: 5px solid #17120b; border-radius: 22px 26px 14px 18px; box-shadow: 14px 16px 0 rgba(23,18,11,0.85); padding: 16px 18px; display: flex; flex-direction: column; gap: 13px; position: relative; z-index: 1; margin-top: -5px; animation: {{ machineAnim }}">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+          <div style="font-family: 'VT323', monospace; font-size: 24px; letter-spacing: 3px; color: #17120b; background: #f4ecd5; border: 3px solid #17120b; border-radius: 8px 4px 9px 5px; padding: 1px 14px 0; white-space: nowrap">BALLOT-O-TRON 3000</div>
+          <div style="display: flex; gap: 9px; align-items: center">
+            <div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid #17120b; background: #ffd23f; opacity: {{ light1Op }}; animation: {{ lightAnim }}"></div>
+            <div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid #17120b; background: #e8484a; opacity: {{ light2Op }}; animation: {{ lightAnim }}; animation-delay: 0.25s"></div>
+            <div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid #17120b; background: #7bc264; opacity: 1; animation: {{ lightAnim }}; animation-delay: 0.5s"></div>
+          </div>
+        </div>
+        <div style="height: 24px; border: 3px solid #17120b; border-radius: 6px; background: repeating-linear-gradient(90deg, #b8ac97 0px, #b8ac97 8px, #17120b 8px, #17120b 12px)"></div>
+        <div style="height: 262px; background: #17120b; border: 4px solid #17120b; border-radius: 14px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center">
+          <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, #262010 0%, #17120b 70%)"></div>
+          <div style="position: absolute; top: 10px; left: 12px; font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 3px; color: #7ce38b; opacity: 0.8">03 TALLY SCREEN</div>
+          <sc-if value="{{ showScreenText }}" hint-placeholder-val="{{ true }}">
+            <div style="position: relative; display: flex; align-items: center; gap: 8px; padding: 0 24px">
+              <div style="font-family: 'VT323', monospace; font-size: 30px; letter-spacing: 4px; line-height: 1.3; color: {{ screenColor }}; text-align: center; white-space: pre-line">{{ screenText }}</div>
+              <div style="width: 12px; height: 24px; background: #7ce38b; animation: blinkLight 1s steps(1) infinite"></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ showResults }}" hint-placeholder-val="{{ false }}">
+            <div style="position: relative; width: 100%; box-sizing: border-box; padding: 40px 24px 16px; display: flex; flex-direction: column; gap: 16px; animation: popIn 0.35s ease-out">
+              <div style="font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 3px; color: #7ce38b; opacity: 0.7">LIVE TALLY · ISSUE {{ issueNum }}</div>
+              <div style="display: flex; align-items: center; gap: 12px">
+                <div style="width: 46px; font-family: 'VT323', monospace; font-size: 24px; letter-spacing: 2px; color: #7ce38b">YES</div>
+                <div style="flex: 1; height: 24px; background: #2a2416; border: 2px solid #4a4130; border-radius: 4px; overflow: hidden">
+                  <div style="height: 100%; background: #7ce38b; width: {{ yesPctW }}; transition: width 0.8s ease-out"></div>
+                </div>
+                <div style="width: 104px; text-align: right; font-family: 'VT323', monospace; font-size: 24px; color: #7ce38b">{{ yesCount }}</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px">
+                <div style="width: 46px; font-family: 'VT323', monospace; font-size: 24px; letter-spacing: 2px; color: #e8484a">NO</div>
+                <div style="flex: 1; height: 24px; background: #2a2416; border: 2px solid #4a4130; border-radius: 4px; overflow: hidden">
+                  <div style="height: 100%; background: #e8484a; width: {{ noPctW }}; transition: width 0.8s ease-out"></div>
+                </div>
+                <div style="width: 104px; text-align: right; font-family: 'VT323', monospace; font-size: 24px; color: #e8484a">{{ noCount }}</div>
+              </div>
+              <div style="text-align: center; font-family: 'VT323', monospace; font-size: 26px; letter-spacing: 4px; color: #ffd23f; margin-top: 4px">{{ verdictText }}</div>
+              <div style="text-align: center; font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 2px; color: #7ce38b; opacity: 0.55">YOUR VOTE: {{ yourVote }}</div>
+            </div>
+          </sc-if>
+          <div style="position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(180deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, rgba(0,0,0,0) 3px, rgba(0,0,0,0) 4px)"></div>
+        </div>
+        <div style="position: relative; padding-top: 10px">
+          <div style="position: absolute; top: -3px; left: 12px; font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 3px; color: #f4ecd5; background: #17120b; border-radius: 4px; padding: 0 10px; z-index: 2">04 BALLOT SLOT</div>
+          <div style="height: 58px; background: #b8ac97; border: 4px solid #17120b; border-radius: 10px 8px 11px 9px; position: relative; display: flex; align-items: center; justify-content: center; outline: {{ slotOutline }}; outline-offset: 5px">
+            <sc-if value="{{ casting }}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; left: 50%; top: 22px; width: 190px; height: 56px; background: #f4ecd5; border: 3px solid #17120b; border-radius: 6px 4px 7px 5px; transform-origin: bottom center; animation: slotSuck 0.7s ease-in forwards; z-index: 0"></div>
+            </sc-if>
+            <div style="width: 260px; height: 14px; background: #17120b; border-radius: 7px; position: relative; z-index: 1"></div>
+            <div style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 2px; color: #17120b; opacity: 0.55">INSERT ↓</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 14px; align-items: center; justify-content: space-between">
+          <div style="display: flex; align-items: center; gap: 10px; background: #f4ecd5; border: 3px solid #17120b; border-radius: 8px 11px 7px 10px; padding: 6px 14px">
+            <div style="font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 3px; color: #17120b">BALLOTS CAST</div>
+            <div style="font-family: 'VT323', monospace; font-size: 27px; letter-spacing: 4px; color: #7ce38b; background: #17120b; border-radius: 5px; padding: 0 10px">{{ castText }}</div>
+          </div>
+          <div style="font-size: 14px; color: #17120b; opacity: 0.55; text-align: right; line-height: 1.3">one ballot per issue<br>tallies update live</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 250px">
+        <div style="width: 60px; height: 26px; background: #b8ac97; border: 5px solid #17120b; border-top-width: 0; box-shadow: 8px 8px 0 rgba(23,18,11,0.8)"></div>
+        <div style="width: 60px; height: 26px; background: #b8ac97; border: 5px solid #17120b; border-top-width: 0; box-shadow: 8px 8px 0 rgba(23,18,11,0.8)"></div>
+      </div>
+    </div>
+  </div>
+  <div style="position: absolute; top: 44px; left: 40px; background: #ffd23f; border: 4px solid #17120b; border-radius: 4px 12px 6px 14px; box-shadow: 8px 9px 0 rgba(23,18,11,0.82); padding: 26px 16px 16px; width: 178px; transform: rotate(-5deg); z-index: 2">
+    <div style="position: absolute; top: -13px; left: 50%; transform: translateX(-50%) rotate(-4deg); width: 84px; height: 24px; background: rgba(244,236,205,0.95); border: 3px solid #17120b; border-radius: 3px"></div>
+    <div style="font-weight: 700; font-size: 16px; line-height: 1.35; color: #17120b">1. read the issue<br>2. mark your ballot<br>3. DRAG it into the slot<br><span style="font-weight: 400; font-size: 14px">the machine counts the rest.</span></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;steam&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Machine&quot;},&quot;countSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1.6,&quot;min&quot;:0.5,&quot;max&quot;:5,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Machine&quot;},&quot;zoomUI&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;View&quot;},&quot;maxZoom&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:6,&quot;min&quot;:2,&quot;max&quot;:12,&quot;step&quot;:1,&quot;unit&quot;:&quot;\u00d7&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;View&quot;}}">
+class Component extends DCLogic {
+  ISSUES = [
+    { q: 'four-day work week for everyone?', y: 812, n: 347 },
+    { q: 'pineapple on pizza: perfectly legal?', y: 466, n: 521 },
+    { q: 'dogs allowed in the office, every day?', y: 903, n: 88 },
+    { q: 'replace every meeting with a memo?', y: 640, n: 612 },
+    { q: 'a hot dog is, officially, a sandwich.', y: 389, n: 402 },
+  ];
+  state = { idx: 0, choice: null, phase: 'mark', draggingBallot: false, overSlot: false, votes: [], cast: 0, lastVote: null, zoom: 1, dragDX: 0, dragDY: 0 };
+  componentDidMount() {
+    try {
+      const s = JSON.parse(localStorage.getItem('ballototron.v1') || 'null');
+      if (s) this.setState({ votes: s.votes || [], cast: s.cast || 0, idx: s.idx || 0 });
+    } catch (e) {}
+    try {
+      const z = parseFloat(localStorage.getItem('ballototron.zoom.v1'));
+      if (z > 0.2 && z < 20) this.setState({ zoom: z });
+    } catch (e) {}
+    window.addEventListener('keydown', this.onZoomKey);
+  }
+  componentWillUnmount() {
+    clearTimeout(this._t1);
+    window.removeEventListener('keydown', this.onZoomKey);
+  }
+  zoomTo = (z) => {
+    const max = this.props.maxZoom ?? 6;
+    const v = Math.min(max, Math.max(0.4, Math.round(z * 100) / 100));
+    this.setState({ zoom: v });
+    try { localStorage.setItem('ballototron.zoom.v1', String(v)); } catch (e) {}
+  };
+  onZoomKey = (e) => {
+    if (!(e.metaKey || e.ctrlKey)) return;
+    if (e.key === '=' || e.key === '+') { e.preventDefault(); this.zoomTo(this.state.zoom * 1.25); }
+    else if (e.key === '-') { e.preventDefault(); this.zoomTo(this.state.zoom / 1.25); }
+    else if (e.key === '0') { e.preventDefault(); this.zoomTo(1); }
+  };
+  slotRef = React.createRef();
+  ballotDown = (e) => {
+    if (this.state.phase !== 'mark' || !this.state.choice) return;
+    if (e.button) return;
+    const sx = e.clientX, sy = e.clientY;
+    const z = this.state.zoom || 1;
+    let started = false;
+    const mv = (ev) => {
+      const rdx = ev.clientX - sx, rdy = ev.clientY - sy;
+      if (!started) {
+        if (Math.abs(rdx) < 4 && Math.abs(rdy) < 4) return;
+        started = true;
+        document.body.style.userSelect = 'none';
+      }
+      let over = false;
+      const slot = this.slotRef.current;
+      if (slot) {
+        const r = slot.getBoundingClientRect();
+        over = ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom;
+      }
+      this.setState({ draggingBallot: true, dragDX: rdx / z, dragDY: rdy / z, overSlot: over });
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', mv);
+      window.removeEventListener('pointerup', up);
+      document.body.style.userSelect = '';
+      if (!started) return;
+      if (this.state.overSlot) { this.cast(); return; }
+      this.setState({ draggingBallot: false, overSlot: false, dragDX: 0, dragDY: 0 });
+    };
+    window.addEventListener('pointermove', mv);
+    window.addEventListener('pointerup', up);
+  };
+  save = () => {
+    try { localStorage.setItem('ballototron.v1', JSON.stringify({ votes: this.state.votes, cast: this.state.cast, idx: this.state.idx })); } catch (e) {}
+  };
+  cast = () => {
+    if (this.state.phase !== 'mark' || !this.state.choice) return;
+    this.setState({ phase: 'casting', draggingBallot: false, overSlot: false, dragDX: 0, dragDY: 0 });
+    const secs = this.props.countSeconds ?? 1.6;
+    this._t1 = setTimeout(() => {
+      this.setState(s => {
+        const votes = s.votes.slice();
+        const v = votes[s.idx] || { y: 0, n: 0 };
+        votes[s.idx] = s.choice === 'yes' ? { y: v.y + 1, n: v.n } : { y: v.y, n: v.n + 1 };
+        return { votes, cast: s.cast + 1, phase: 'results', lastVote: s.choice };
+      }, this.save);
+    }, secs * 1000);
+  };
+  renderVals() {
+    const { idx, choice, phase, draggingBallot, overSlot, cast, votes, lastVote, zoom, dragDX, dragDY } = this.state;
+    const issue = this.ISSUES[idx];
+    const user = votes[idx] || { y: 0, n: 0 };
+    const yes = issue.y + user.y, no = issue.n + user.n;
+    const yesPct = Math.round((yes / (yes + no)) * 100);
+    const casting = phase === 'casting';
+    let screenText = '', screenColor = '#7ce38b';
+    if (casting) screenText = 'COUNTING\nYOUR BALLOT...';
+    else if (phase === 'mark') screenText = choice ? 'BALLOT MARKED\nDRAG IT INTO\nTHE SLOT' : 'MARK YOUR\nBALLOT';
+    const margin = Math.abs(yes - no);
+    const verdictText = phase !== 'results' ? '' : (yes === no ? 'DEAD HEAT' : (yes > no ? 'YES LEADS BY ' + margin : 'NO LEADS BY ' + margin));
+    return {
+      steamOn: this.props.steam ?? true,
+      zoomUI: this.props.zoomUI ?? true,
+      zoomF: zoom,
+      zoomLabel: Math.round(zoom * 100) + '%',
+      onZoomIn: () => this.zoomTo(zoom * 1.25),
+      onZoomOut: () => this.zoomTo(zoom / 1.25),
+      onZoomReset: () => this.zoomTo(1),
+      casting,
+      machineAnim: casting ? 'shakeM 0.18s linear infinite' : 'none',
+      lightAnim: casting ? 'blinkLight 0.55s steps(1) infinite' : 'none',
+      light1Op: casting ? 1 : 0.3,
+      light2Op: casting ? 1 : 0.3,
+      issueNum: idx + 1,
+      issueTotal: this.ISSUES.length,
+      issueText: issue.q,
+      showBallot: phase === 'mark',
+      showCastingNote: casting,
+      showRecorded: phase === 'results',
+      slotRef: this.slotRef,
+      onBallotDown: this.ballotDown,
+      ballotDX: dragDX + 'px',
+      ballotDY: dragDY + 'px',
+      ballotZ: draggingBallot ? 50 : 'auto',
+      ballotRot: draggingBallot ? '3.5deg' : '1.2deg',
+      ballotTrans: draggingBallot ? 'box-shadow 0.2s' : 'transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.25), box-shadow 0.2s',
+      ballotCursor: draggingBallot ? 'grabbing' : (choice ? 'grab' : 'default'),
+      ballotOp: 1,
+      gripOp: choice ? 1 : 0.5,
+      ballotScale: overSlot ? '0.88' : (draggingBallot ? '1.05' : (choice ? '1.03' : '1')),
+      ballotShadow: draggingBallot
+        ? (overSlot ? '10px 12px 0 rgba(23,18,11,0.35), 0 0 0 6px #7bc264' : '24px 28px 0 rgba(23,18,11,0.45)')
+        : (choice ? '14px 16px 0 rgba(23,18,11,0.82), 0 0 0 5px #ffd23f' : '10px 11px 0 rgba(23,18,11,0.82)'),
+      yesMark: choice === 'yes' ? '\u2717' : '',
+      noMark: choice === 'no' ? '\u2717' : '',
+      ballotHint: choice ? 'grab me! drag me into the slot \u2192' : 'mark one box to vote',
+      hintWeight: choice ? 700 : 400,
+      hintColor: choice ? '#e8484a' : '#17120b',
+      hintOp: choice ? 1 : 0.75,
+      onYes: () => this.setState({ choice: 'yes' }),
+      onNo: () => this.setState({ choice: 'no' }),
+      slotOutline: overSlot ? '5px solid #7bc264' : (draggingBallot ? '4px dashed #e8484a' : 'none'),
+      showScreenText: !!screenText,
+      screenText,
+      screenColor,
+      showResults: phase === 'results',
+      yesPctW: yesPct + '%',
+      noPctW: (100 - yesPct) + '%',
+      yesCount: yes.toLocaleString(),
+      noCount: no.toLocaleString(),
+      verdictText,
+      yourVote: lastVote ? lastVote.toUpperCase() : '',
+      castText: String(cast).padStart(4, '0'),
+      onNext: () => this.setState(s => ({ idx: (s.idx + 1) % this.ISSUES.length, choice: null, phase: 'mark', lastVote: null }), this.save),
+    };
+  }
+}
+</script>
+</body>
+</html>

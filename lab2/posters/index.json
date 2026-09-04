@@ -1,0 +1,78 @@
+{
+  "at": "2026-09-04T14:48:17.810Z",
+  "scale": 2,
+  "posters": {
+    "features/spawner.dc.html": {
+      "file": "spawner.png",
+      "w": 1477,
+      "h": 962,
+      "label": "Steam Character Spawner"
+    },
+    "features/prize-o-tron.dc.html": {
+      "file": "prize-o-tron.png",
+      "w": 1058,
+      "h": 930,
+      "label": "Prize-O-Tron"
+    },
+    "features/ballot-o-tron.dc.html": {
+      "file": "ballot-o-tron.png",
+      "w": 978,
+      "h": 676,
+      "label": "Ballot-O-Tron"
+    },
+    "features/bug-farm.dc.html": {
+      "file": "bug-farm.png",
+      "w": 1464,
+      "h": 890,
+      "label": "The Bug Farm"
+    },
+    "features/knoll-times.dc.html": {
+      "file": "knoll-times.png",
+      "w": 1423,
+      "h": 864,
+      "label": "Knoll Times Printing Press"
+    },
+    "features/rule-book.dc.html": {
+      "file": "rule-book.png",
+      "w": 1196,
+      "h": 704,
+      "label": "Rule Book"
+    },
+    "features/chat-terminal.dc.html": {
+      "file": "chat-terminal.png",
+      "w": 1493,
+      "h": 1161,
+      "label": "Sticker Chat Terminal"
+    },
+    "features/fan-mark-banner.dc.html": {
+      "file": "fan-mark-banner.png",
+      "w": 941,
+      "h": 317,
+      "label": "Fan Mark Banner"
+    },
+    "features/knoll-cards.dc.html#card=consensus": {
+      "file": "knoll-cards-consensus.png",
+      "w": 362,
+      "h": 319,
+      "label": "Built by consensus"
+    },
+    "features/knoll-cards.dc.html#card=rules": {
+      "file": "knoll-cards-rules.png",
+      "w": 360,
+      "h": 318,
+      "label": "Your hill, your rules"
+    },
+    "features/knoll-cards.dc.html#card=fans": {
+      "file": "knoll-cards-fans.png",
+      "w": 364,
+      "h": 320,
+      "label": "The fan page, by the fans"
+    },
+    "features/gnome-bubbles.dc.html": {
+      "file": "gnome-bubbles.png",
+      "w": 760,
+      "h": 280,
+      "label": "Gnome Bubbles"
+    }
+  }
+}

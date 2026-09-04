@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./prelude.js"></script>
+<script src="./support.js"></script>
+<!-- lab 2 shows this on its own paper — see features/bare.css -->
+<link rel="stylesheet" href="./bare.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<!-- lab 2 serves these faces itself — see SELF-HOSTED in index.html -->
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  /* THE BENCH'S THREE MARKS — see features/bare.css, NO SECOND SHEET. Every
+     line below is the machine as it was exported, verbatim; the bench adds
+     three attributes and changes no declaration: data-lab-nopaper on the
+     paper grain, data-lab-sheet on the full-viewport div the export wraps
+     the drawing in (the one carrying the export's own zoom), and
+     data-lab-nozoom on the zoom widget pinned to the corner. frames.js
+     steps through the first two as sheets and bare.css draws none of the
+     three; opened on its own, the file still zooms and shows its widget.
+     Written by perf/swap-machine.js. */
+  body { margin: 0; background: #f2e9cf; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+  @keyframes blinkLight { 0%, 60% { opacity: 1; } 61%, 100% { opacity: 0.25; } }
+</style>
+</helmet>
+<div data-screen-label="Sticker Chat Terminal" style="min-height: 100vh; min-width: 100%; box-sizing: border-box; background: #f2e9cf; position: relative">
+  <sc-if value="{{ zoomUI }}" hint-placeholder-val="{{ true }}">
+    <div data-lab-nozoom style="position: fixed; right: 18px; bottom: 18px; z-index: 60; display: flex; align-items: center; gap: 7px; background: #f4ecd5; border: 4px solid #17120b; border-radius: 8px 11px 7px 10px; box-shadow: 7px 8px 0 rgba(23,18,11,0.8); padding: 5px 9px; font-family: 'VT323', monospace">
+      <button sc-camel-on-click="{{ onZoomOut }}" title="zoom out" style="font-family: 'VT323', monospace; font-size: 22px; line-height: 1; color: #17120b; background: #ffd23f; border: 3px solid #17120b; border-radius: 6px 4px 7px 5px; padding: 0 9px; cursor: pointer" style-hover="background: #ffe27a">−</button>
+      <div style="font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 2px; color: #17120b; min-width: 62px; text-align: center">{{ zoomLabel }}</div>
+      <button sc-camel-on-click="{{ onZoomIn }}" title="zoom in" style="font-family: 'VT323', monospace; font-size: 22px; line-height: 1; color: #17120b; background: #ffd23f; border: 3px solid #17120b; border-radius: 4px 6px 5px 7px; padding: 0 9px; cursor: pointer" style-hover="background: #ffe27a">+</button>
+      <div sc-camel-on-click="{{ onZoomReset }}" title="back to 100%" style="font-family: 'VT323', monospace; font-size: 14px; letter-spacing: 2px; color: #17120b; opacity: 0.6; cursor: pointer; padding-left: 2px">RESET</div>
+    </div>
+  </sc-if>
+  <div data-lab-sheet style="min-height: 100vh; width: fit-content; min-width: 100%; box-sizing: border-box; background: #f2e9cf; display: flex; align-items: center; justify-content: center; padding: 56px 40px; font-family: 'Kalam', cursive; position: relative; zoom: {{ zoomF }}">
+  <div data-lab-nopaper style="position: absolute; inset: 0; pointer-events: none; opacity: 0.06; background-image: url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22160%22%20height=%22160%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%222%22/%3E%3C/filter%3E%3Crect%20width=%22160%22%20height=%22160%22%20filter=%22url(%23n)%22/%3E%3C/svg%3E')"></div>
+  <div style="display: flex; align-items: flex-start; position: relative; z-index: 1">
+    <div style="display: flex; flex-direction: column; gap: 30px; margin-top: 34px; margin-right: -22px; position: relative; z-index: 2">
+      <div style="background: #ffd23f; border: 4px solid #17120b; border-radius: 4px 12px 6px 14px; box-shadow: 8px 9px 0 rgba(23,18,11,0.82); padding: 26px 16px 18px; width: 186px; transform: rotate(-5deg); position: relative">
+        <div style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%) rotate(-4deg); width: 84px; height: 24px; background: rgba(244,236,205,0.95); border: 3px solid #17120b; border-radius: 3px"></div>
+        <div style="font-weight: 700; font-size: 17px; line-height: 1.35; color: #17120b">HOUSE RULES:<br>be weird.<br>be kind.</div>
+      </div>
+      <div style="background: #8fd0ff; border: 4px solid #17120b; border-radius: 12px 5px 14px 6px; box-shadow: 8px 9px 0 rgba(23,18,11,0.82); padding: 26px 16px 18px; width: 186px; transform: rotate(4deg); position: relative">
+        <div style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%) rotate(3deg); width: 84px; height: 24px; background: rgba(244,236,205,0.95); border: 3px solid #17120b; border-radius: 3px"></div>
+        <div style="font-weight: 700; font-size: 17px; line-height: 1.35; color: #17120b">psst...<br>the aliens read everything.</div>
+      </div>
+      <div style="background: #ff8f7a; border: 4px solid #17120b; border-radius: 6px 14px 4px 12px; box-shadow: 8px 9px 0 rgba(23,18,11,0.82); padding: 26px 16px 18px; width: 186px; transform: rotate(-3deg); position: relative">
+        <div style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%) rotate(-2deg); width: 84px; height: 24px; background: rgba(244,236,205,0.95); border: 3px solid #17120b; border-radius: 3px"></div>
+        <div style="font-weight: 700; font-size: 17px; line-height: 1.35; color: #17120b">type below,<br>hit SEND ↓</div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: center">
+      <div style="background: #d9d0c1; border: 5px solid #17120b; border-radius: 38px 34px 26px 24px; box-shadow: 15px 17px 0 rgba(23,18,11,0.85); padding: 24px 26px 16px; width: 1200px; box-sizing: border-box; position: relative">
+        <div style="background: #b8ac97; border: 4px solid #17120b; border-radius: 24px 20px 22px 26px; padding: 12px">
+        <div style="position: relative; border: 4px solid #17120b; border-radius: 16px 12px 14px 18px; overflow: hidden; background: #1b2a6b">
+          <div ref="{{ chatRef }}" style="height: 780px; overflow-y: auto; padding: 18px 16px 14px; box-sizing: border-box">
+            <sc-for list="{{ messages }}" as="m" hint-placeholder-count="4">
+              <div style="display: flex; justify-content: {{ m.justify }}; margin-bottom: 13px">
+                <div style="max-width: 78%; display: flex; flex-direction: column; align-items: {{ m.align }}">
+                  <div style="font-family: 'VT323', monospace; font-size: 16px; letter-spacing: 2px; color: {{ m.nameColor }}; margin: 0 6px 3px">{{ m.name }}</div>
+                  <div style="background: {{ m.bg }}; border: 3px solid #17120b; border-radius: {{ m.radius }}; box-shadow: 5px 6px 0 rgba(9,7,25,0.6); padding: 7px 14px 6px; font-family: 'VT323', monospace; font-size: 22px; line-height: 1.2; color: #17120b; overflow-wrap: anywhere">{{ m.text }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ scanlines }}" hint-placeholder-val="{{ true }}">
+            <div style="position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(180deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, rgba(0,0,0,0) 3px, rgba(0,0,0,0) 4px); border-radius: 10px"></div>
+          </sc-if>
+        </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding: 0 8px">
+          <div style="width: 104px; height: 22px; border: 3px solid #17120b; border-radius: 6px; background: repeating-linear-gradient(90deg, #b8ac97 0px, #b8ac97 7px, #17120b 7px, #17120b 10px)"></div>
+          <div style="font-family: 'VT323', monospace; font-size: 22px; letter-spacing: 3px; color: #17120b; background: #f4ecd5; border: 3px solid #17120b; border-radius: 8px 4px 9px 5px; padding: 1px 14px 0">CHATTER-TRON 2000</div>
+          <div style="display: flex; gap: 10px; align-items: center">
+            <div style="display: flex; align-items: center; gap: 8px; background: #17120b; border: 3px solid #17120b; border-radius: 9px 5px 8px 6px; padding: 3px 12px 2px">
+              <div style="width: 10px; height: 10px; border-radius: 50%; background: #7ce38b; box-shadow: 0 0 6px #7ce38b"></div>
+              <div style="font-family: 'VT323', monospace; font-size: 20px; letter-spacing: 2px; color: #7ce38b">{{ onlineCount }} ONLINE</div>
+            </div>
+            <div style="width: 16px; height: 16px; border-radius: 50%; background: #e8484a; border: 3px solid #17120b; animation: blinkLight 1.6s steps(1) infinite"></div>
+          </div>
+        </div>
+      </div>
+      <div style="width: 240px; height: 44px; background: #c5bba9; border: 5px solid #17120b; border-top-width: 0; box-shadow: 12px 12px 0 rgba(23,18,11,0.8)"></div>
+      <div style="width: 480px; height: 36px; background: #d9d0c1; border: 5px solid #17120b; border-radius: 10px 12px 16px 14px; box-shadow: 13px 14px 0 rgba(23,18,11,0.82)"></div>
+      <div style="margin-top: 32px; width: 1080px; box-sizing: border-box; background: #d9d0c1; border: 5px solid #17120b; border-radius: 16px 20px 22px 18px; box-shadow: 12px 14px 0 rgba(23,18,11,0.85); padding: 14px 16px; transform: rotate(-0.6deg); position: relative">
+        <div style="position: absolute; left: -98px; bottom: -10px; display: flex; align-items: flex-end">
+          <div style="width: 11px; height: 42px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(-14deg)"></div>
+          <div style="width: 11px; height: 56px; background: #7bc264; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(-4deg); margin-left: -7px"></div>
+          <div style="width: 11px; height: 38px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(9deg); margin-left: -7px"></div>
+          <div style="display: flex; flex-direction: column; align-items: center; margin-left: -6px">
+            <div style="width: 50px; height: 30px; background: #e8484a; border: 3px solid #17120b; border-radius: 26px 26px 8px 8px; position: relative; z-index: 1">
+              <div style="position: absolute; top: 7px; left: 10px; width: 9px; height: 9px; border-radius: 50%; background: #fdf3d9"></div>
+              <div style="position: absolute; top: 11px; left: 28px; width: 6px; height: 6px; border-radius: 50%; background: #fdf3d9"></div>
+            </div>
+            <div style="width: 16px; height: 15px; background: #f4ecd5; border: 3px solid #17120b; border-top-width: 0; border-radius: 0 0 6px 6px; margin-top: -2px"></div>
+          </div>
+        </div>
+        <div style="position: absolute; right: -98px; bottom: -8px; display: flex; align-items: flex-end">
+          <div style="display: flex; flex-direction: column; align-items: center; margin-right: -8px">
+            <div style="width: 38px; height: 24px; background: #ffd23f; border: 3px solid #17120b; border-radius: 20px 20px 7px 7px; position: relative; z-index: 1">
+              <div style="position: absolute; top: 6px; left: 8px; width: 7px; height: 7px; border-radius: 50%; background: #fdf3d9"></div>
+              <div style="position: absolute; top: 9px; left: 22px; width: 5px; height: 5px; border-radius: 50%; background: #fdf3d9"></div>
+            </div>
+            <div style="width: 13px; height: 12px; background: #f4ecd5; border: 3px solid #17120b; border-top-width: 0; border-radius: 0 0 5px 5px; margin-top: -2px"></div>
+          </div>
+          <div style="width: 11px; height: 48px; background: #7bc264; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(5deg)"></div>
+          <div style="width: 11px; height: 36px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(16deg); margin-left: -7px"></div>
+        </div>
+        <div style="position: absolute; left: -148px; bottom: -4px; display: flex; align-items: flex-end">
+          <div style="width: 9px; height: 26px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(-18deg)"></div>
+          <div style="width: 9px; height: 34px; background: #7bc264; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(-6deg); margin-left: -6px"></div>
+        </div>
+        <div style="position: absolute; left: 210px; bottom: -18px; z-index: 2; display: flex; align-items: flex-end">
+          <div style="width: 8px; height: 22px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(-8deg)"></div>
+          <div style="width: 8px; height: 30px; background: #7bc264; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(6deg); margin-left: -5px"></div>
+        </div>
+        <div style="position: absolute; right: 34px; bottom: -24px; z-index: 2; display: flex; align-items: flex-end">
+          <div style="width: 10px; height: 44px; background: #7bc264; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(-5deg)"></div>
+          <div style="width: 10px; height: 32px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(10deg); margin-left: -7px"></div>
+          <div style="width: 9px; height: 24px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(19deg); margin-left: -6px"></div>
+        </div>
+        <div style="position: absolute; right: -132px; bottom: -12px; display: flex; align-items: flex-end">
+          <div style="width: 10px; height: 52px; background: #7bc264; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(-3deg)"></div>
+          <div style="width: 10px; height: 38px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(9deg); margin-left: -7px"></div>
+          <div style="width: 9px; height: 28px; background: #7bc264; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(17deg); margin-left: -6px"></div>
+        </div>
+        <div style="position: absolute; left: 74px; bottom: -22px; z-index: 2; display: flex; align-items: flex-end">
+          <div style="width: 9px; height: 30px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(-12deg)"></div>
+          <div style="width: 9px; height: 40px; background: #7bc264; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(-2deg); margin-left: -6px"></div>
+          <div style="width: 9px; height: 28px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(11deg); margin-left: -6px"></div>
+        </div>
+        <div style="position: absolute; right: 120px; bottom: -20px; z-index: 2; display: flex; align-items: flex-end">
+          <div style="display: flex; flex-direction: column; align-items: center; margin-right: -6px">
+            <div style="width: 32px; height: 21px; background: #e8484a; border: 3px solid #17120b; border-radius: 17px 17px 6px 6px; position: relative; z-index: 1">
+              <div style="position: absolute; top: 5px; left: 7px; width: 6px; height: 6px; border-radius: 50%; background: #fdf3d9"></div>
+              <div style="position: absolute; top: 8px; left: 19px; width: 4px; height: 4px; border-radius: 50%; background: #fdf3d9"></div>
+            </div>
+            <div style="width: 11px; height: 10px; background: #f4ecd5; border: 3px solid #17120b; border-top-width: 0; border-radius: 0 0 5px 5px; margin-top: -2px"></div>
+          </div>
+          <div style="width: 9px; height: 34px; background: #7bc264; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(8deg)"></div>
+          <div style="width: 9px; height: 26px; background: #5fae4e; border: 3px solid #17120b; border-radius: 60% 60% 20% 20% / 90% 90% 5% 5%; transform: rotate(15deg); margin-left: -6px"></div>
+        </div>
+        <div style="display: flex; gap: 12px">
+          <input value="{{ draft }}" sc-camel-on-change="{{ onDraft }}" sc-camel-on-key-down="{{ onKey }}" placeholder="type to the aliens..." style="flex: 1; min-width: 0; background: #f4ecd5; border: 4px solid #17120b; border-radius: 12px 8px 10px 8px; padding: 8px 14px 6px; font-family: 'VT323', monospace; font-size: 22px; color: #17120b; outline: none; box-shadow: 4px 5px 0 rgba(23,18,11,0.55) inset" style-focus="background: #fdf7e3">
+          <button sc-camel-on-click="{{ onSend }}" style="background: #e8484a; color: #fdf3d9; border: 4px solid #17120b; border-radius: 10px 14px 8px 12px; padding: 6px 24px 4px; font-family: 'VT323', monospace; font-size: 26px; letter-spacing: 3px; cursor: pointer; box-shadow: 5px 6px 0 rgba(23,18,11,0.85)" style-active="transform: translate(4px, 5px); box-shadow: 1px 1px 0 rgba(23,18,11,0.85)" style-hover="background: #f05a5c">SEND</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;scanlines&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Screen&quot;},&quot;alienReplies&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;zoomUI&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;View&quot;},&quot;maxZoom&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:6,&quot;min&quot;:2,&quot;max&quot;:12,&quot;step&quot;:1,&quot;unit&quot;:&quot;\u00d7&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;View&quot;}}">
+class Component extends DCLogic {
+  state = {
+    draft: '',
+    zoom: 1,
+    online: 7,
+    messages: [
+      { name: 'ZORP', text: 'greetings, earth unit. the can has been opened.', side: 'left' },
+      { name: 'YOU', text: 'who left the lid up??', side: 'right' },
+      { name: 'MOOP', text: 'not me. i was in sleep mode.', side: 'left' },
+      { name: 'ZORP', text: 'type below. we are listening.', side: 'left' },
+    ],
+  };
+  chatRef = React.createRef();
+  replies = [
+    { name: 'ZORP', text: 'fascinating. tell us more.', side: 'left' },
+    { name: 'MOOP', text: 'noted in the mothership log.', side: 'left' },
+    { name: 'ZORP', text: 'your transmission smells of sardines. we approve.', side: 'left' },
+    { name: 'MOOP', text: 'beep. processing... ok, cool.', side: 'left' },
+  ];
+  componentDidMount() {
+    this.scrollDown();
+    try {
+      const z = parseFloat(localStorage.getItem('stickerchat.zoom.v1'));
+      if (z > 0.2 && z < 20) this.setState({ zoom: z });
+    } catch (e) {}
+    window.addEventListener('keydown', this.onZoomKey);
+    this._online = setInterval(() => {
+      this.setState(s => ({ online: Math.max(2, s.online + (Math.random() < 0.5 ? -1 : 1)) }));
+    }, 7000);
+  }
+  componentWillUnmount() {
+    clearTimeout(this._t);
+    clearInterval(this._online);
+    window.removeEventListener('keydown', this.onZoomKey);
+  }
+  zoomTo = (z) => {
+    const max = this.props.maxZoom ?? 6;
+    const v = Math.min(max, Math.max(0.4, Math.round(z * 100) / 100));
+    this.setState({ zoom: v });
+    try { localStorage.setItem('stickerchat.zoom.v1', String(v)); } catch (e) {}
+  };
+  onZoomKey = (e) => {
+    if (!(e.metaKey || e.ctrlKey)) return;
+    if (e.key === '=' || e.key === '+') { e.preventDefault(); this.zoomTo(this.state.zoom * 1.25); }
+    else if (e.key === '-') { e.preventDefault(); this.zoomTo(this.state.zoom / 1.25); }
+    else if (e.key === '0') { e.preventDefault(); this.zoomTo(1); }
+  };
+  scrollDown() {
+    const el = this.chatRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }
+  send = () => {
+    const t = this.state.draft.trim();
+    if (!t) return;
+    this.setState(s => ({ draft: '', messages: [...s.messages, { name: 'YOU', text: t, side: 'right' }] }), () => this.scrollDown());
+    if (this.props.alienReplies ?? true) {
+      clearTimeout(this._t);
+      this._t = setTimeout(() => {
+        const r = this.replies[Math.floor(Math.random() * this.replies.length)];
+        this.setState(s => ({ messages: [...s.messages, r] }), () => this.scrollDown());
+      }, 900);
+    }
+  };
+  renderVals() {
+    const messages = this.state.messages.map(m => ({
+      ...m,
+      justify: m.side === 'right' ? 'flex-end' : 'flex-start',
+      align: m.side === 'right' ? 'flex-end' : 'flex-start',
+      bg: m.side === 'right' ? '#f4ecd5' : '#ffd23f',
+      nameColor: m.side === 'right' ? '#8fd0ff' : '#7ce38b',
+      radius: m.side === 'right' ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
+    }));
+    const zoom = this.state.zoom;
+    return {
+      zoomUI: this.props.zoomUI ?? true,
+      zoomF: zoom,
+      zoomLabel: Math.round(zoom * 100) + '%',
+      onZoomIn: () => this.zoomTo(zoom * 1.25),
+      onZoomOut: () => this.zoomTo(zoom / 1.25),
+      onZoomReset: () => this.zoomTo(1),
+      messages,
+      draft: this.state.draft,
+      chatRef: this.chatRef,
+      onDraft: (e) => this.setState({ draft: e.target.value }),
+      onKey: (e) => { if (e.key === 'Enter') this.send(); },
+      onSend: this.send,
+      scanlines: this.props.scanlines ?? true,
+      onlineCount: this.state.online,
+    };
+  }
+}
+</script>
+</body>
+</html>
