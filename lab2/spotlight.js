@@ -18,6 +18,14 @@
    when it closes. The document's own scrim goes clear while the bench
    holds the light (one rule, injected into the document the way bare.css
    is), so the frame's box does not sit in the dark as a darker rectangle.
+   THE HOLE IS THE PAPER AND NOTHING ELSE: the first cut took in the
+   document's close button, which hangs off the paper's corner, and the
+   paper's drop shadow, and the strips of daylight that left round the
+   paper were the first thing anyone saw. So the hole is the paper's own
+   box, the document's X is hidden while the light is on, and the bench
+   draws an X of its own at the paper's corner, above the dark, in the
+   document's own red and hand — which also makes the X a button on THIS
+   side of the glass, live or not.
 
    THE MARKS. A document asks for this by marking its export — marked in
    the file, never found by shape, like bare.css's three: data-lab-reads
@@ -53,30 +61,36 @@ window.Spotlight = (function () {
 
   const GLIDE = 300;    // ms, there and back — jumpTo's neighbourhood
   const AIR   = 0.9;    // how much of the screen the page may take, either way
-  const SPILL = 14;     // document px: the paper's own drop shadow, which the hole includes
 
-  let on = null;        // { p, doc, f, hole, cam, rect, raf } while a page is lit
+  let on = null;        // { p, doc, f, hole, x, cam, rect, raf } while a page is lit
   let swallow = 0;      // a click that follows a pointerdown taken in the dark is taken too
 
   const box = () => bench.getBoundingClientRect();
 
+  /* the tool dock lies across the foot of the screen, in the hole's way if
+     the page is centred on the whole height — so the strip it takes, plus
+     a breath, is left out of the middle. On a phone the dock stands up the
+     side instead (lab.css: THE DOCK ON A PHONE) and takes nothing here. */
+  function dockStrip(b) {
+    const d = document.querySelector('.tool-dock');
+    if (!d) return 0;
+    const r = d.getBoundingClientRect();
+    if (!r.width || r.top < b.top + b.height / 2) return 0;
+    return Math.max(0, b.top + b.height - r.top + 12);
+  }
+
   /* the page's box in WORLD units — laid out inside the scrim (its
      offsetParent, being position:fixed), less what the scrim has scrolled,
-     grown to take in the close button hanging off its corner and the
-     shadow off its far edges, then clipped to the frame */
+     then clipped to the frame. The paper's box and nothing else (THE HOLE
+     IS THE PAPER, above). */
   function measure() {
     const { doc, f } = on;
     const scrim = doc.querySelector('[data-lab-scrim]'), page = doc.querySelector('[data-lab-page]');
     if (!scrim || !page || page.offsetParent !== scrim) return null;
     const fr = f.getBoundingClientRect(), win = f.contentWindow;
     const k = win && win.innerWidth ? fr.width / win.innerWidth : 1;       // page px per document px
-    const pl = page.offsetLeft - scrim.scrollLeft, pt = page.offsetTop - scrim.scrollTop;
-    let l = pl, t = pt, r = pl + page.offsetWidth + SPILL, b = pt + page.offsetHeight + SPILL;
-    const x = page.querySelector('[data-lab-close]');
-    if (x && x.offsetParent === page) {
-      l = Math.min(l, pl + x.offsetLeft); t = Math.min(t, pt + x.offsetTop);
-      r = Math.max(r, pl + x.offsetLeft + x.offsetWidth); b = Math.max(b, pt + x.offsetTop + x.offsetHeight);
-    }
+    const l = page.offsetLeft - scrim.scrollLeft, t = page.offsetTop - scrim.scrollTop;
+    const r = l + page.offsetWidth, b = t + page.offsetHeight;
     const L = Math.max(fr.left + l * k, fr.left), T = Math.max(fr.top + t * k, fr.top);
     const R = Math.min(fr.left + r * k, fr.right), B = Math.min(fr.top + b * k, fr.bottom);
     if (R - L < 8 || B - T < 8) return null;
@@ -84,12 +98,15 @@ window.Spotlight = (function () {
     return { x: a.x, y: a.y, w: z.x - a.x, h: z.y - a.y };
   }
 
-  // the hole, where the page is on screen right now
+  // the hole, where the page is on screen right now — and the X at its corner
+  const XR = 20;        // the bench's X is a 40px disc, its centre 4px in from the paper's top-right corner, as the document's is
   function paint() {
     if (!on || !on.hole) return;
-    const s = Lab.toScreen(on.rect.x, on.rect.y), z = Lab.zoom, st = on.hole.style;
+    const s = Lab.toScreen(on.rect.x, on.rect.y), z = Lab.zoom, st = on.hole.style, w = on.rect.w * z, h = on.rect.h * z;
     st.left = s.x.toFixed(1) + 'px'; st.top = s.y.toFixed(1) + 'px';
-    st.width = (on.rect.w * z).toFixed(1) + 'px'; st.height = (on.rect.h * z).toFixed(1) + 'px';
+    st.width = w.toFixed(1) + 'px'; st.height = h.toFixed(1) + 'px';
+    const xs = on.x.style;
+    xs.left = (s.x + w - 4 - XR).toFixed(1) + 'px'; xs.top = (s.y + 4 - XR).toFixed(1) + 'px';
   }
 
   // …every frame through a glide; after it, the scroll and zoom listeners below have it
@@ -108,7 +125,7 @@ window.Spotlight = (function () {
 
   function open(p, doc, f) {
     if (on) close(false);
-    on = { p, doc, f, hole: null, cam: { z: Lab.zoom, x: Lab.pan.x, y: Lab.pan.y }, rect: null, raf: 0 };
+    on = { p, doc, f, hole: null, x: null, cam: { z: Lab.zoom, x: Lab.pan.x, y: Lab.pan.y }, rect: null, raf: 0 };
     doc.documentElement.setAttribute('data-lab-spotlit', '');
     on.rect = measure();
     if (!on.rect) { doc.documentElement.removeAttribute('data-lab-spotlit'); on = null; return; }
@@ -117,14 +134,22 @@ window.Spotlight = (function () {
     hole.setAttribute('aria-hidden', 'true');
     document.body.appendChild(hole);
     on.hole = hole;
+    const x = document.createElement('button');
+    x.type = 'button';
+    x.className = 'spotlight-x';
+    x.setAttribute('aria-label', 'close');
+    x.textContent = 'x';
+    x.addEventListener('click', shut);              // a keyboard press; a pointer press is heard on the window like any in the dark
+    document.body.appendChild(x);
+    on.x = x;
     document.body.classList.add('lab-spotlit');     // the live frame's pink rim goes quiet (lab.css)
     paint();
     requestAnimationFrame(() => { if (on && on.hole === hole) hole.classList.add('on'); });   // the dark comes up, not on
     wake(p);
     // the camera: the page in the middle of the screen, at a zoom that shows the whole of it
-    const b = box(), r = on.rect;
-    const z = Math.min(b.width * AIR / r.w, b.height * AIR / r.h);
-    Lab.camTo(z, (b.width - r.w * z) / 2 - r.x * z, (b.height - r.h * z) / 2 - r.y * z, GLIDE);
+    const b = box(), r = on.rect, H = b.height - dockStrip(b);
+    const z = Math.min(b.width * AIR / r.w, H * AIR / r.h);
+    Lab.camTo(z, (b.width - r.w * z) / 2 - r.x * z, (H - r.h * z) / 2 - r.y * z, GLIDE);
     follow(GLIDE + 100);
   }
 
@@ -134,6 +159,7 @@ window.Spotlight = (function () {
     cancelAnimationFrame(o.raf);
     document.body.classList.remove('lab-spotlit');
     try { o.doc.documentElement.removeAttribute('data-lab-spotlit'); } catch (e) {}
+    if (o.x) o.x.remove();
     if (o.hole) { o.hole.classList.remove('on'); setTimeout(() => o.hole.remove(), 260); }
     if (restore !== false) Lab.camTo(o.cam.z, o.cam.x, o.cam.y, GLIDE);
   }
@@ -182,7 +208,8 @@ window.Spotlight = (function () {
     const hook = () => {
       const st = doc.createElement('style');
       st.id = 'lab-spotlight';
-      st.textContent = 'html[data-lab-spotlit] [data-lab-scrim]{background:transparent!important}';
+      st.textContent = 'html[data-lab-spotlit] [data-lab-scrim]{background:transparent!important}'
+        + 'html[data-lab-spotlit] [data-lab-close]{visibility:hidden!important}';   // the bench draws the X, above the dark
       (doc.head || doc.documentElement).appendChild(st);
       new MutationObserver(() => {
         const lit = !!doc.querySelector('[data-lab-scrim]');

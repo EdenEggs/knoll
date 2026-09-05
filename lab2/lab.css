@@ -1094,7 +1094,17 @@ body[data-wall-tool="delete"] .gz:not(.gz-copy){pointer-events:none}
 .spotlight{position:fixed;left:0;top:0;width:0;height:0;z-index:6400;pointer-events:none;border-radius:12px;
   box-shadow:0 0 0 200vmax rgba(23,18,11,0);transition:box-shadow .24s ease}
 .spotlight.on{box-shadow:0 0 0 200vmax rgba(23,18,11,.55)}
+/* the X, drawn on this side of the glass at the paper's corner — the
+   document's own is hidden while the light is on — in the document's own
+   red, border, drop and hand, so nothing looks to have changed */
+.spotlight-x{position:fixed;left:0;top:0;z-index:6401;width:40px;height:40px;padding:0;margin:0;cursor:pointer;
+  background:#e8484a;border:4px solid #17120b;border-radius:50%;box-shadow:4px 5px 0 rgba(23,18,11,.7);
+  color:#fdf3d9;font-family:'VT323',monospace;font-size:24px;line-height:1;text-transform:none}
+.spotlight-x:hover{background:#f05a5c}
+.spotlight-x:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
 /* the live frame's pink rim is drawn at its box's edge, which under the
    spotlight is a line across the dark right where the paper is clipped —
    it says "this one has the pointer", and the light already does */
 body.lab-spotlit .gz.live{outline-color:transparent}
+/* …and the dashed corners of a picked one, for the same reason */
+body.lab-spotlit .gz.picked::after{visibility:hidden}

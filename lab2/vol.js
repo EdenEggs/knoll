@@ -21,9 +21,17 @@
    the speaker shows muted rather than pretending otherwise.
 
    The features themselves are silent — they are drawings, not machines — so
-   this governs the bench and only the bench. Kept in knoll-lab2:vol. */
+   this governs the bench and only the bench. Kept in knoll-lab2:vol.
+
+   QUIET FOR NOW (2026-09-04). Every noise is off at the source — play() is
+   a no-op and no context is ever built — whatever the slider remembers,
+   and the speaker in the dock shows muted and is put out of use, since a
+   control that governs nothing is a lie on the furniture (above). One
+   word turns it back on: OFF. Nothing else was taken out, so the four
+   noises, the slider and the memory of a level are all still here. */
 
 window.Vol = (function () {
+  const OFF = true;                            // the bench is quiet for now — see QUIET FOR NOW
   const $ = id => document.getElementById(id);
   const btn = $('vol-btn'), slider = $('vol-slider');
 
@@ -37,6 +45,7 @@ window.Vol = (function () {
   // before — an AudioContext made at load is a suspended one the browser
   // grumbles about, and one made on a click is simply allowed
   function wake() {
+    if (OFF) return null;                      // quiet for now: no context is ever built
     if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return ctx; }
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
@@ -93,7 +102,7 @@ window.Vol = (function () {
     rip:   () => noise(260, 2100, 0.7, 0.13, 'highpass')
   };
 
-  const play = k => { const f = SOUNDS[k]; if (f) f(); };
+  const play = k => { if (OFF) return; const f = SOUNDS[k]; if (f) f(); };
 
   // ── the speaker and its slider ──────────────────────────────────────────
   function setLevel(v, remember) {
@@ -106,6 +115,15 @@ window.Vol = (function () {
   }
 
   function paint() {
+    if (OFF) {                                 // muted, and not a button: the bench is quiet for now
+      if (slider) slider.style.display = 'none';
+      if (!btn) return;
+      btn.classList.add('muted'); btn.classList.remove('humming');
+      btn.disabled = true;
+      btn.setAttribute('aria-label', 'the bench is quiet for now');
+      btn.title = 'the bench is quiet for now';
+      return;
+    }
     const s = store.get(), on = s.level > 0.001;
     if (slider) slider.value = String(Math.round(s.level * 100));
     if (!btn) return;
@@ -118,6 +136,7 @@ window.Vol = (function () {
 
   if (btn) btn.addEventListener('click', e => {
     e.stopPropagation();
+    if (OFF) return;
     const s = store.get();
     if (s.level > 0.001) setLevel(0, false);
     else { setLevel(s.last || 0.7, false); play('click'); }
