@@ -168,13 +168,20 @@ things; for a family of things, make a kit.
   `perf/results/baseline` and `perf/results/after3`.
 - **Serve it** (`node serve.js`), never `file://`: kits.js fetches the sheets
   and frames.js reaches into the frames; neither works off the disk.
-- **A new file at lab2's ROOT needs a line in `../vercel.json`.** The deployed
-  site serves this bench at `/`, by rewrite rather than redirect: the URL bar
-  says `knoll.space/` while the files still live under `/lab2/`, so the page
-  asks for `/lab.css` and a rewrite points it at `/lab2/lab.css`. The four
-  folders are covered by wildcards (`features`, `fonts`, `posters`, `vendor`)
-  and need nothing; every top-level `.js` and `.css` is listed by name. Add a
-  `whatsit.js` beside `lab.js` and it is a 404 in production until it is
-  listed too — locally, at `/lab2/`, it will work fine and hide the mistake.
-  A wildcard would spare the list, but only by making every unknown path on
-  the whole site fall through to this bench.
+- **A new file at lab2's ROOT needs two lines in `../vercel.json`.** The
+  deployed site serves this bench at `/`, by rewrite rather than redirect:
+  the URL bar says `knoll.space/` while the files still live under `/lab2/`,
+  so the page asks for `/lab.css` and a rewrite points it at `/lab2/lab.css`.
+  The four folders are covered by wildcards (`features`, `fonts`, `posters`,
+  `vendor`) and need nothing; every top-level `.js` and `.css` is listed by
+  name, twice: once among the `rewrites`, and once in the `headers` rule that
+  names them all in one bracket. Vercel matches a header rule against the
+  path the browser asked for, not the one the rewrite hands back, so the
+  rules keyed on `/lab2/...` never see `/lab.js`, and without its own line
+  the file goes out with no cache time at all. Add a `whatsit.js` beside
+  `lab.js` and it is a 404 in production until it is in the rewrites, and
+  fetched afresh on every visit until it is in the bracket — locally, at
+  `/lab2/`, it will work fine and hide both mistakes. A wildcard would spare
+  the lists, but only by making every unknown path on the whole site fall
+  through to this bench, and by putting the bench's cache times on files
+  that are not the bench's (`support.js` sits at the site's own root).

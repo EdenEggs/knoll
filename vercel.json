@@ -51,6 +51,34 @@
           "value": "public, max-age=3600, stale-while-revalidate=604800"
         }
       ]
+    },
+
+    {
+      "source": "/features/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/(lab\\.css|lab\\.js|frames\\.js|wall\\.js|vol\\.js|tape\\.js|ink\\.js|keep\\.js|kits\\.js|sign\\.js|tracer\\.js|gif\\.js|cursors\\.js|spotlight\\.js)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/(posters|fonts|vendor)/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, stale-while-revalidate=604800"
+        }
+      ]
     }
   ]
 }
