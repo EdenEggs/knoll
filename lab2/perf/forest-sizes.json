@@ -1,0 +1,5131 @@
+{
+  "_about": "per kind: natW natH inkX inkY viewW viewH are what frames.js measures for a fresh 400×460 forest section of that part with the sway paused at rotate(0) (see geometry.js, THE PHASE). inSitu holds the numbers found on the standing trees as they were (the phase is whatever it was when the last of the three fits ran); adopt holds the uncontrolled first fit, the rest fit, the port's measurement at six phases, the envelope over all of them, and the svg's own facts.",
+  "recordedAt": "2026-09-04T11:41:52.145Z",
+  "tag": "before",
+  "kinds": {
+    "the-elder": {
+      "natW": 306,
+      "natH": 353,
+      "inkX": 50,
+      "inkY": 57,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 2,
+        "measured": 2,
+        "from": "gz-forest-the-elder",
+        "canonical": {
+          "natW": 313,
+          "natH": 359,
+          "inkX": 44,
+          "inkY": 54,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 313,
+            "natH": 359,
+            "inkX": 44,
+            "inkY": 54,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 2,
+            "ids": [
+              "gz-forest-the-elder",
+              "gz-forest-the-elder-copy-mtj26g514ip8t"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 313,
+          "natH": 359,
+          "inkX": 44,
+          "inkY": 54,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 313,
+          "height": 359,
+          "dim": "313 × 359"
+        },
+        "restFit": {
+          "natW": 306,
+          "natH": 353,
+          "inkX": 50,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 306,
+          "height": 353,
+          "dim": "306 × 353"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 50,
+            "y1": 57,
+            "x2": 356,
+            "y2": 410,
+            "elements": 16,
+            "inkX": 50,
+            "inkY": 57,
+            "natW": 306,
+            "natH": 353,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 43.26991653442383,
+            "y1": 53.92946243286133,
+            "x2": 356.4501838684082,
+            "y2": 413.13628005981445,
+            "elements": 16,
+            "inkX": 43,
+            "inkY": 53,
+            "natW": 314,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 49.549800872802734,
+            "y1": 53.92946243286133,
+            "x2": 362.7300682067871,
+            "y2": 413.13628005981445,
+            "elements": 16,
+            "inkX": 49,
+            "inkY": 53,
+            "natW": 314,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 50,
+            "y1": 57,
+            "x2": 356,
+            "y2": 410,
+            "elements": 16,
+            "inkX": 50,
+            "inkY": 57,
+            "natW": 306,
+            "natH": 353,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 43.26991653442383,
+            "y1": 53.92946243286133,
+            "x2": 356.4501838684082,
+            "y2": 413.13628005981445,
+            "elements": 16,
+            "inkX": 43,
+            "inkY": 53,
+            "natW": 314,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 49.549800872802734,
+            "y1": 53.92946243286133,
+            "x2": 362.7300682067871,
+            "y2": 413.13628005981445,
+            "elements": 16,
+            "inkX": 49,
+            "inkY": 53,
+            "natW": 314,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 43.26991653442383,
+          "y1": 53.92946243286133,
+          "x2": 362.7300682067871,
+          "y2": 413.13628005981445,
+          "inkX": 43,
+          "inkY": 53,
+          "natW": 320,
+          "natH": 361
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 6200,
+            "delay": 0,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "300",
+              "height": "346",
+              "viewBox": "0 0 260 300",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 50% 93.333%; animation: 6.2s ease-in-out 0s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "150px 322.932px",
+              "animation": {
+                "name": "sway",
+                "duration": "6.2s",
+                "delay": "0s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 50,
+                "y": 57,
+                "w": 300,
+                "h": 346
+              },
+              "bytes": 2086,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "the-younger": {
+      "natW": 256,
+      "natH": 349,
+      "inkX": 75,
+      "inkY": 59,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 1,
+        "measured": 1,
+        "from": "gz-forest-the-younger",
+        "canonical": {
+          "natW": 264,
+          "natH": 355,
+          "inkX": 68,
+          "inkY": 56,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 264,
+            "natH": 355,
+            "inkX": 68,
+            "inkY": 56,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 1,
+            "ids": [
+              "gz-forest-the-younger"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 264,
+          "natH": 353,
+          "inkX": 68,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 264,
+          "height": 353,
+          "dim": "264 × 353"
+        },
+        "restFit": {
+          "natW": 256,
+          "natH": 349,
+          "inkX": 75,
+          "inkY": 59,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 256,
+          "height": 349,
+          "dim": "256 × 349"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 75,
+            "y1": 59.5,
+            "x2": 331,
+            "y2": 407.5,
+            "elements": 12,
+            "inkX": 75,
+            "inkY": 59,
+            "natW": 256,
+            "natH": 349,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 68.36216735839844,
+            "y1": 56.95199966430664,
+            "x2": 331.44871520996094,
+            "y2": 410.1128273010254,
+            "elements": 12,
+            "inkX": 68,
+            "inkY": 56,
+            "natW": 264,
+            "natH": 355,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 74.55130004882812,
+            "y1": 56.95199966430664,
+            "x2": 337.6378479003906,
+            "y2": 410.1128273010254,
+            "elements": 12,
+            "inkX": 74,
+            "inkY": 56,
+            "natW": 264,
+            "natH": 355,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 75,
+            "y1": 59.5,
+            "x2": 331,
+            "y2": 407.5,
+            "elements": 12,
+            "inkX": 75,
+            "inkY": 59,
+            "natW": 256,
+            "natH": 349,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 68.36216735839844,
+            "y1": 56.95199966430664,
+            "x2": 331.44871520996094,
+            "y2": 410.1128273010254,
+            "elements": 12,
+            "inkX": 68,
+            "inkY": 56,
+            "natW": 264,
+            "natH": 355,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 74.55130004882812,
+            "y1": 56.95199966430664,
+            "x2": 337.6378479003906,
+            "y2": 410.1128273010254,
+            "elements": 12,
+            "inkX": 74,
+            "inkY": 56,
+            "natW": 264,
+            "natH": 355,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 68.36216735839844,
+          "y1": 56.95199966430664,
+          "x2": 337.6378479003906,
+          "y2": 410.1128273010254,
+          "inkX": 68,
+          "inkY": 56,
+          "natW": 270,
+          "natH": 355
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 5800,
+            "delay": 400,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "250",
+              "height": "341",
+              "viewBox": "0 0 220 300",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 50% 93.333%; animation: 5.8s ease-in-out 0.4s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "125px 318.266px",
+              "animation": {
+                "name": "sway",
+                "duration": "5.8s",
+                "delay": "0.4s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 75,
+                "y": 59.5,
+                "w": 250,
+                "h": 341
+              },
+              "bytes": 1584,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "the-broad": {
+      "natW": 326,
+      "natH": 351,
+      "inkX": 40,
+      "inkY": 58,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 1,
+        "measured": 1,
+        "from": "gz-forest-the-broad",
+        "canonical": {
+          "natW": 326,
+          "natH": 351,
+          "inkX": 40,
+          "inkY": 58,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 326,
+            "natH": 351,
+            "inkX": 40,
+            "inkY": 58,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 1,
+            "ids": [
+              "gz-forest-the-broad"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 326,
+          "natH": 351,
+          "inkX": 40,
+          "inkY": 58,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 326,
+          "height": 351,
+          "dim": "326 × 351"
+        },
+        "restFit": {
+          "natW": 326,
+          "natH": 351,
+          "inkX": 40,
+          "inkY": 58,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 326,
+          "height": 351,
+          "dim": "326 × 351"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 40,
+            "y1": 58.5,
+            "x2": 366,
+            "y2": 408.5,
+            "elements": 13,
+            "inkX": 40,
+            "inkY": 58,
+            "natW": 326,
+            "natH": 351,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 33.33074951171875,
+            "y1": 55.21942138671875,
+            "x2": 366.4438171386719,
+            "y2": 411.84576416015625,
+            "elements": 13,
+            "inkX": 33,
+            "inkY": 55,
+            "natW": 334,
+            "natH": 357,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 39.556182861328125,
+            "y1": 55.21942138671875,
+            "x2": 372.66925048828125,
+            "y2": 411.84576416015625,
+            "elements": 13,
+            "inkX": 39,
+            "inkY": 55,
+            "natW": 334,
+            "natH": 357,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 40,
+            "y1": 58.5,
+            "x2": 366,
+            "y2": 408.5,
+            "elements": 13,
+            "inkX": 40,
+            "inkY": 58,
+            "natW": 326,
+            "natH": 351,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 33.33074951171875,
+            "y1": 55.21942138671875,
+            "x2": 366.4438171386719,
+            "y2": 411.84576416015625,
+            "elements": 13,
+            "inkX": 33,
+            "inkY": 55,
+            "natW": 334,
+            "natH": 357,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 39.556182861328125,
+            "y1": 55.21942138671875,
+            "x2": 372.66925048828125,
+            "y2": 411.84576416015625,
+            "elements": 13,
+            "inkX": 39,
+            "inkY": 55,
+            "natW": 334,
+            "natH": 357,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 33.33074951171875,
+          "y1": 55.21942138671875,
+          "x2": 372.66925048828125,
+          "y2": 411.84576416015625,
+          "inkX": 33,
+          "inkY": 55,
+          "natW": 340,
+          "natH": 357
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 7400,
+            "delay": 1200,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "320",
+              "height": "343",
+              "viewBox": "0 0 280 300",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 50% 93.333%; animation: 7.4s ease-in-out 1.2s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "160px 320.132px",
+              "animation": {
+                "name": "sway",
+                "duration": "7.4s",
+                "delay": "1.2s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 40,
+                "y": 58.5,
+                "w": 320,
+                "h": 343
+              },
+              "bytes": 1759,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "the-ancient": {
+      "natW": 326,
+      "natH": 363,
+      "inkX": 40,
+      "inkY": 52,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 1,
+        "measured": 1,
+        "from": "gz-forest-the-ancient",
+        "canonical": {
+          "natW": 326,
+          "natH": 363,
+          "inkX": 40,
+          "inkY": 52,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 326,
+            "natH": 363,
+            "inkX": 40,
+            "inkY": 52,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 1,
+            "ids": [
+              "gz-forest-the-ancient"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 326,
+          "natH": 363,
+          "inkX": 40,
+          "inkY": 52,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 326,
+          "height": 363,
+          "dim": "326 × 363"
+        },
+        "restFit": {
+          "natW": 326,
+          "natH": 363,
+          "inkX": 40,
+          "inkY": 52,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 326,
+          "height": 363,
+          "dim": "326 × 363"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 40,
+            "y1": 52,
+            "x2": 366,
+            "y2": 415,
+            "elements": 20,
+            "inkX": 40,
+            "inkY": 52,
+            "natW": 326,
+            "natH": 363,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 33.0766487121582,
+            "y1": 48.722084045410156,
+            "x2": 366.46196365356445,
+            "y2": 418.34558868408203,
+            "elements": 20,
+            "inkX": 33,
+            "inkY": 48,
+            "natW": 334,
+            "natH": 371,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 39.53803253173828,
+            "y1": 48.722084045410156,
+            "x2": 372.92334747314453,
+            "y2": 418.34558868408203,
+            "elements": 20,
+            "inkX": 39,
+            "inkY": 48,
+            "natW": 334,
+            "natH": 371,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 40,
+            "y1": 52,
+            "x2": 366,
+            "y2": 415,
+            "elements": 20,
+            "inkX": 40,
+            "inkY": 52,
+            "natW": 326,
+            "natH": 363,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 33.0766487121582,
+            "y1": 48.722084045410156,
+            "x2": 366.46196365356445,
+            "y2": 418.34558868408203,
+            "elements": 20,
+            "inkX": 33,
+            "inkY": 48,
+            "natW": 334,
+            "natH": 371,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 39.53803253173828,
+            "y1": 48.722084045410156,
+            "x2": 372.92334747314453,
+            "y2": 418.34558868408203,
+            "elements": 20,
+            "inkX": 39,
+            "inkY": 48,
+            "natW": 334,
+            "natH": 371,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 33.0766487121582,
+          "y1": 48.722084045410156,
+          "x2": 372.92334747314453,
+          "y2": 418.34558868408203,
+          "inkX": 33,
+          "inkY": 48,
+          "natW": 340,
+          "natH": 371
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 8200,
+            "delay": 2400,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "320",
+              "height": "356",
+              "viewBox": "0 0 280 300",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 50% 93.333%; animation: 8.2s ease-in-out 2.4s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "160px 332.265px",
+              "animation": {
+                "name": "sway",
+                "duration": "8.2s",
+                "delay": "2.4s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 40,
+                "y": 52,
+                "w": 320,
+                "h": 356
+              },
+              "bytes": 2620,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "the-pine": {
+      "natW": 276,
+      "natH": 375,
+      "inkX": 65,
+      "inkY": 46,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 1,
+        "measured": 1,
+        "from": "gz-forest-the-pine",
+        "canonical": {
+          "natW": 276,
+          "natH": 375,
+          "inkX": 65,
+          "inkY": 46,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 276,
+            "natH": 375,
+            "inkX": 65,
+            "inkY": 46,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 1,
+            "ids": [
+              "gz-forest-the-pine"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 276,
+          "natH": 375,
+          "inkX": 65,
+          "inkY": 46,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 276,
+          "height": 375,
+          "dim": "276 × 375"
+        },
+        "restFit": {
+          "natW": 276,
+          "natH": 375,
+          "inkX": 65,
+          "inkY": 46,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 276,
+          "height": 375,
+          "dim": "276 × 375"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 65,
+            "y1": 46,
+            "x2": 341,
+            "y2": 421,
+            "elements": 15,
+            "inkX": 65,
+            "inkY": 46,
+            "natW": 276,
+            "natH": 375,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 57.83660888671875,
+            "y1": 43.24810028076172,
+            "x2": 341.48419189453125,
+            "y2": 423.8218307495117,
+            "elements": 15,
+            "inkX": 57,
+            "inkY": 43,
+            "natW": 285,
+            "natH": 381,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 64.51579284667969,
+            "y1": 43.24810028076172,
+            "x2": 348.1633758544922,
+            "y2": 423.8218307495117,
+            "elements": 15,
+            "inkX": 64,
+            "inkY": 43,
+            "natW": 285,
+            "natH": 381,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 65,
+            "y1": 46,
+            "x2": 341,
+            "y2": 421,
+            "elements": 15,
+            "inkX": 65,
+            "inkY": 46,
+            "natW": 276,
+            "natH": 375,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 57.83660888671875,
+            "y1": 43.24810028076172,
+            "x2": 341.48419189453125,
+            "y2": 423.8218307495117,
+            "elements": 15,
+            "inkX": 57,
+            "inkY": 43,
+            "natW": 285,
+            "natH": 381,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 64.51579284667969,
+            "y1": 43.24810028076172,
+            "x2": 348.1633758544922,
+            "y2": 423.8218307495117,
+            "elements": 15,
+            "inkX": 64,
+            "inkY": 43,
+            "natW": 285,
+            "natH": 381,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 57.83660888671875,
+          "y1": 43.24810028076172,
+          "x2": 348.1633758544922,
+          "y2": 423.8218307495117,
+          "inkX": 57,
+          "inkY": 43,
+          "natW": 292,
+          "natH": 381
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 7100,
+            "delay": 800,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "270",
+              "height": "368",
+              "viewBox": "0 0 220 300",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 50% 93.333%; animation: 7.1s ease-in-out 0.8s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "135px 343.465px",
+              "animation": {
+                "name": "sway",
+                "duration": "7.1s",
+                "delay": "0.8s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 65,
+                "y": 46,
+                "w": 270,
+                "h": 368
+              },
+              "bytes": 2373,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "slim-pine": {
+      "natW": 216,
+      "natH": 357,
+      "inkX": 95,
+      "inkY": 55,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 18,
+        "measured": 18,
+        "from": "gz-forest-slim-pine",
+        "canonical": {
+          "natW": 224,
+          "natH": 363,
+          "inkX": 88,
+          "inkY": 52,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 224,
+            "natH": 363,
+            "inkX": 88,
+            "inkY": 52,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 18,
+            "ids": [
+              "gz-forest-slim-pine",
+              "gz-forest-west-5",
+              "gz-forest-east-5",
+              "gz-forest-east-5-copy-mtj259op11c0m",
+              "gz-forest-east-5-copy-mtj25geo2fa8o",
+              "gz-forest-east-5-copy-mtj25in43xp2",
+              "gz-forest-west-5-copy-mtj2b3q1bfbfs",
+              "gz-forest-west-5-copy-mtj2b778ce9k3",
+              "gz-forest-west-5-copy-mtj2baigdceqg",
+              "gz-forest-west-5-copy-mtj2cemej6l2l",
+              "gz-forest-west-5-copy-mtj2cg86kdfq3",
+              "gz-forest-east-5-copy-mtj2d5mymjycd",
+              "gz-forest-east-5-copy-mtj2d89onf8l8",
+              "gz-forest-east-5-copy-mtj2kqzz1215ig",
+              "gz-forest-east-5-copy-mtj2kssk13b6dj",
+              "gz-forest-east-5-copy-mtj2lfto143ejd",
+              "gz-forest-slim-pine-copy-mtj2lqwb159ljx",
+              "gz-forest-east-5-copy-mtj2lqx419cuzf"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 224,
+          "natH": 363,
+          "inkX": 88,
+          "inkY": 52,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 224,
+          "height": 363,
+          "dim": "224 × 363"
+        },
+        "restFit": {
+          "natW": 216,
+          "natH": 357,
+          "inkX": 95,
+          "inkY": 55,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 216,
+          "height": 357,
+          "dim": "216 × 357"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 95,
+            "y1": 55,
+            "x2": 311,
+            "y2": 412,
+            "elements": 11,
+            "inkX": 95,
+            "inkY": 55,
+            "natW": 216,
+            "natH": 357,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 88.1818618774414,
+            "y1": 52.87268829345703,
+            "x2": 311.4656753540039,
+            "y2": 414.19385528564453,
+            "elements": 11,
+            "inkX": 88,
+            "inkY": 52,
+            "natW": 224,
+            "natH": 363,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 94.53434753417969,
+            "y1": 52.87268829345703,
+            "x2": 317.8181457519531,
+            "y2": 414.19385528564453,
+            "elements": 11,
+            "inkX": 94,
+            "inkY": 52,
+            "natW": 224,
+            "natH": 363,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 95,
+            "y1": 55,
+            "x2": 311,
+            "y2": 412,
+            "elements": 11,
+            "inkX": 95,
+            "inkY": 55,
+            "natW": 216,
+            "natH": 357,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 88.1818618774414,
+            "y1": 52.87268829345703,
+            "x2": 311.4656753540039,
+            "y2": 414.19385528564453,
+            "elements": 11,
+            "inkX": 88,
+            "inkY": 52,
+            "natW": 224,
+            "natH": 363,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 94.53434753417969,
+            "y1": 52.87268829345703,
+            "x2": 317.8181457519531,
+            "y2": 414.19385528564453,
+            "elements": 11,
+            "inkX": 94,
+            "inkY": 52,
+            "natW": 224,
+            "natH": 363,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 88.1818618774414,
+          "y1": 52.87268829345703,
+          "x2": 317.8181457519531,
+          "y2": 414.19385528564453,
+          "inkX": 88,
+          "inkY": 52,
+          "natW": 230,
+          "natH": 363
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 6400,
+            "delay": 600,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "210",
+              "height": "350",
+              "viewBox": "0 0 180 300",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 50% 93.333%; animation: 6.4s ease-in-out 0.6s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "105px 326.665px",
+              "animation": {
+                "name": "sway",
+                "duration": "6.4s",
+                "delay": "0.6s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 95,
+                "y": 55,
+                "w": 210,
+                "h": 350
+              },
+              "bytes": 1661,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "the-spruce": {
+      "natW": 306,
+      "natH": 353,
+      "inkX": 50,
+      "inkY": 57,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 19,
+        "measured": 19,
+        "from": "gz-forest-the-spruce",
+        "canonical": {
+          "natW": 306,
+          "natH": 353,
+          "inkX": 50,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 306,
+            "natH": 353,
+            "inkX": 50,
+            "inkY": 57,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 19,
+            "ids": [
+              "gz-forest-the-spruce",
+              "gz-forest-west-1",
+              "gz-forest-west-3",
+              "gz-forest-west-4",
+              "gz-forest-west-6",
+              "gz-forest-east-1",
+              "gz-forest-east-2",
+              "gz-forest-east-3",
+              "gz-forest-east-4",
+              "gz-forest-the-spruce-copy-mtj2bce4eg9yt",
+              "gz-forest-the-spruce-copy-mtj2boh2f4u5m",
+              "gz-forest-the-spruce-copy-mtj2brunga5du",
+              "gz-forest-the-spruce-copy-mtj2bu9ahhsdc",
+              "gz-forest-the-spruce-copy-mtj2c4k0ignao",
+              "gz-forest-east-2-copy-mtj2cvcbla5rh",
+              "gz-forest-east-2-copy-mtj2hpbqvhcok",
+              "gz-forest-east-2-copy-mtj2i9lewi64k",
+              "gz-forest-west-6-copy-mtj2lqwh169g4l",
+              "gz-forest-east-1-copy-mtj2lqwv18kyv7"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 306,
+          "natH": 353,
+          "inkX": 50,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 306,
+          "height": 353,
+          "dim": "306 × 353"
+        },
+        "restFit": {
+          "natW": 306,
+          "natH": 353,
+          "inkX": 50,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 306,
+          "height": 353,
+          "dim": "306 × 353"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 50,
+            "y1": 57,
+            "x2": 356,
+            "y2": 410,
+            "elements": 10,
+            "inkX": 50,
+            "inkY": 57,
+            "natW": 306,
+            "natH": 353,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 43.26991653442383,
+            "y1": 53.92946243286133,
+            "x2": 356.4501838684082,
+            "y2": 413.13628005981445,
+            "elements": 10,
+            "inkX": 43,
+            "inkY": 53,
+            "natW": 314,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 49.549800872802734,
+            "y1": 53.92946243286133,
+            "x2": 362.7300682067871,
+            "y2": 413.13628005981445,
+            "elements": 10,
+            "inkX": 49,
+            "inkY": 53,
+            "natW": 314,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 50,
+            "y1": 57,
+            "x2": 356,
+            "y2": 410,
+            "elements": 10,
+            "inkX": 50,
+            "inkY": 57,
+            "natW": 306,
+            "natH": 353,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 43.26991653442383,
+            "y1": 53.92946243286133,
+            "x2": 356.4501838684082,
+            "y2": 413.13628005981445,
+            "elements": 10,
+            "inkX": 43,
+            "inkY": 53,
+            "natW": 314,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 49.549800872802734,
+            "y1": 53.92946243286133,
+            "x2": 362.7300682067871,
+            "y2": 413.13628005981445,
+            "elements": 10,
+            "inkX": 49,
+            "inkY": 53,
+            "natW": 314,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 43.26991653442383,
+          "y1": 53.92946243286133,
+          "x2": 362.7300682067871,
+          "y2": 413.13628005981445,
+          "inkX": 43,
+          "inkY": 53,
+          "natW": 320,
+          "natH": 361
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 7800,
+            "delay": 1800,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "300",
+              "height": "346",
+              "viewBox": "0 0 260 300",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 50% 93.333%; animation: 7.8s ease-in-out 1.8s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "150px 322.932px",
+              "animation": {
+                "name": "sway",
+                "duration": "7.8s",
+                "delay": "1.8s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 50,
+                "y": 57,
+                "w": 300,
+                "h": 346
+              },
+              "bytes": 1608,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "bent-pine": {
+      "natW": 256,
+      "natH": 349,
+      "inkX": 75,
+      "inkY": 59,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 5,
+        "measured": 5,
+        "from": "gz-forest-bent-pine",
+        "canonical": {
+          "natW": 256,
+          "natH": 349,
+          "inkX": 75,
+          "inkY": 59,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 256,
+            "natH": 349,
+            "inkX": 75,
+            "inkY": 59,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 5,
+            "ids": [
+              "gz-forest-bent-pine",
+              "gz-forest-west-2",
+              "gz-forest-west-7",
+              "gz-forest-east-6",
+              "gz-forest-west-7-copy-mtj2lqwn17ie1y"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 256,
+          "natH": 349,
+          "inkX": 75,
+          "inkY": 59,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 256,
+          "height": 349,
+          "dim": "256 × 349"
+        },
+        "restFit": {
+          "natW": 256,
+          "natH": 349,
+          "inkX": 75,
+          "inkY": 59,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 256,
+          "height": 349,
+          "dim": "256 × 349"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 75,
+            "y1": 59.5,
+            "x2": 331,
+            "y2": 407.5,
+            "elements": 12,
+            "inkX": 75,
+            "inkY": 59,
+            "natW": 256,
+            "natH": 349,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 68.36216735839844,
+            "y1": 56.95199966430664,
+            "x2": 331.44871520996094,
+            "y2": 410.1128273010254,
+            "elements": 12,
+            "inkX": 68,
+            "inkY": 56,
+            "natW": 264,
+            "natH": 355,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 74.55130004882812,
+            "y1": 56.95199966430664,
+            "x2": 337.6378479003906,
+            "y2": 410.1128273010254,
+            "elements": 12,
+            "inkX": 74,
+            "inkY": 56,
+            "natW": 264,
+            "natH": 355,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 75,
+            "y1": 59.5,
+            "x2": 331,
+            "y2": 407.5,
+            "elements": 12,
+            "inkX": 75,
+            "inkY": 59,
+            "natW": 256,
+            "natH": 349,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 68.36216735839844,
+            "y1": 56.95199966430664,
+            "x2": 331.44871520996094,
+            "y2": 410.1128273010254,
+            "elements": 12,
+            "inkX": 68,
+            "inkY": 56,
+            "natW": 264,
+            "natH": 355,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 74.55130004882812,
+            "y1": 56.95199966430664,
+            "x2": 337.6378479003906,
+            "y2": 410.1128273010254,
+            "elements": 12,
+            "inkX": 74,
+            "inkY": 56,
+            "natW": 264,
+            "natH": 355,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 68.36216735839844,
+          "y1": 56.95199966430664,
+          "x2": 337.6378479003906,
+          "y2": 410.1128273010254,
+          "inkX": 68,
+          "inkY": 56,
+          "natW": 270,
+          "natH": 355
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 6900,
+            "delay": 1100,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "250",
+              "height": "341",
+              "viewBox": "0 0 220 300",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 50% 93.333%; animation: 6.9s ease-in-out 1.1s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "125px 318.266px",
+              "animation": {
+                "name": "sway",
+                "duration": "6.9s",
+                "delay": "1.1s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 75,
+                "y": 59.5,
+                "w": 250,
+                "h": 341
+              },
+              "bytes": 1972,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "the-sapling": {
+      "natW": 256,
+      "natH": 383,
+      "inkX": 75,
+      "inkY": 42,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 3,
+        "measured": 3,
+        "from": "gz-forest-the-sapling",
+        "canonical": {
+          "natW": 256,
+          "natH": 383,
+          "inkX": 75,
+          "inkY": 42,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 256,
+            "natH": 383,
+            "inkX": 75,
+            "inkY": 42,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 3,
+            "ids": [
+              "gz-forest-the-sapling",
+              "gz-forest-the-sapling-copy-mtj27x3y68vvg",
+              "gz-forest-the-sapling-copy-mtj28bwl75v03"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 256,
+          "natH": 383,
+          "inkX": 75,
+          "inkY": 42,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 256,
+          "height": 383,
+          "dim": "256 × 383"
+        },
+        "restFit": {
+          "natW": 256,
+          "natH": 383,
+          "inkX": 75,
+          "inkY": 42,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 256,
+          "height": 383,
+          "dim": "256 × 383"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 75,
+            "y1": 42.5,
+            "x2": 331,
+            "y2": 424.5,
+            "elements": 17,
+            "inkX": 75,
+            "inkY": 42,
+            "natW": 256,
+            "natH": 383,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 67.69759368896484,
+            "y1": 39.95895767211914,
+            "x2": 331.49617767333984,
+            "y2": 427.11230850219727,
+            "elements": 17,
+            "inkX": 67,
+            "inkY": 39,
+            "natW": 265,
+            "natH": 389,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 74.50382995605469,
+            "y1": 39.95895767211914,
+            "x2": 338.3024139404297,
+            "y2": 427.11230850219727,
+            "elements": 17,
+            "inkX": 74,
+            "inkY": 39,
+            "natW": 265,
+            "natH": 389,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 75,
+            "y1": 42.5,
+            "x2": 331,
+            "y2": 424.5,
+            "elements": 17,
+            "inkX": 75,
+            "inkY": 42,
+            "natW": 256,
+            "natH": 383,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 67.69759368896484,
+            "y1": 39.95895767211914,
+            "x2": 331.49617767333984,
+            "y2": 427.11230850219727,
+            "elements": 17,
+            "inkX": 67,
+            "inkY": 39,
+            "natW": 265,
+            "natH": 389,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 74.50382995605469,
+            "y1": 39.95895767211914,
+            "x2": 338.3024139404297,
+            "y2": 427.11230850219727,
+            "elements": 17,
+            "inkX": 74,
+            "inkY": 39,
+            "natW": 265,
+            "natH": 389,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 67.69759368896484,
+          "y1": 39.95895767211914,
+          "x2": 338.3024139404297,
+          "y2": 427.11230850219727,
+          "inkX": 67,
+          "inkY": 39,
+          "natW": 272,
+          "natH": 389
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 5400,
+            "delay": 1400,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          },
+          {
+            "name": "leafFall",
+            "duration": 3400,
+            "delay": 0,
+            "easing": "linear",
+            "iterations": null,
+            "target": "g",
+            "targetIsRoot": false
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "250",
+              "height": "375",
+              "viewBox": "0 0 200 300",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 50% 93.333%; animation: 5.4s ease-in-out 1.4s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "125px 349.999px",
+              "animation": {
+                "name": "sway",
+                "duration": "5.4s",
+                "delay": "1.4s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 75,
+                "y": 42.5,
+                "w": 250,
+                "h": 375
+              },
+              "bytes": 2473,
+              "animatedDescendants": 1
+            }
+          ]
+        }
+      }
+    },
+    "the-leaner": {
+      "natW": 256,
+      "natH": 383,
+      "inkX": 75,
+      "inkY": 42,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 5,
+        "measured": 5,
+        "from": "gz-forest-the-leaner",
+        "canonical": {
+          "natW": 256,
+          "natH": 383,
+          "inkX": 75,
+          "inkY": 42,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 2,
+        "variants": [
+          {
+            "natW": 256,
+            "natH": 383,
+            "inkX": 75,
+            "inkY": 42,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 1,
+            "ids": [
+              "gz-forest-the-leaner"
+            ]
+          },
+          {
+            "natW": 265,
+            "natH": 388,
+            "inkX": 67,
+            "inkY": 40,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 4,
+            "ids": [
+              "gz-forest-the-leaner-copy-mtj28jwz836tf",
+              "gz-forest-the-leaner-copy-mtj28ovv93u0g",
+              "gz-forest-the-leaner-copy-mtj28r82af9b1",
+              "gz-forest-the-leaner-copy-mtj2k0blxb2pt"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 256,
+          "natH": 383,
+          "inkX": 75,
+          "inkY": 42,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 256,
+          "height": 383,
+          "dim": "256 × 383"
+        },
+        "restFit": {
+          "natW": 256,
+          "natH": 383,
+          "inkX": 75,
+          "inkY": 42,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 256,
+          "height": 383,
+          "dim": "256 × 383"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 75,
+            "y1": 42.5,
+            "x2": 331,
+            "y2": 424.5,
+            "elements": 15,
+            "inkX": 75,
+            "inkY": 42,
+            "natW": 256,
+            "natH": 383,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 67.70033264160156,
+            "y1": 40.22073745727539,
+            "x2": 331.49891662597656,
+            "y2": 427.3740882873535,
+            "elements": 15,
+            "inkX": 67,
+            "inkY": 40,
+            "natW": 265,
+            "natH": 388,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 74.5065689086914,
+            "y1": 39.69717788696289,
+            "x2": 338.3051528930664,
+            "y2": 426.850528717041,
+            "elements": 15,
+            "inkX": 74,
+            "inkY": 39,
+            "natW": 265,
+            "natH": 388,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 75,
+            "y1": 42.5,
+            "x2": 331,
+            "y2": 424.5,
+            "elements": 15,
+            "inkX": 75,
+            "inkY": 42,
+            "natW": 256,
+            "natH": 383,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 67.70033264160156,
+            "y1": 40.22073745727539,
+            "x2": 331.49891662597656,
+            "y2": 427.3740882873535,
+            "elements": 15,
+            "inkX": 67,
+            "inkY": 40,
+            "natW": 265,
+            "natH": 388,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 74.5065689086914,
+            "y1": 39.69717788696289,
+            "x2": 338.3051528930664,
+            "y2": 426.850528717041,
+            "elements": 15,
+            "inkX": 74,
+            "inkY": 39,
+            "natW": 265,
+            "natH": 388,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 67.70033264160156,
+          "y1": 39.69717788696289,
+          "x2": 338.3051528930664,
+          "y2": 427.3740882873535,
+          "inkX": 67,
+          "inkY": 39,
+          "natW": 272,
+          "natH": 389
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 5900,
+            "delay": 700,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          },
+          {
+            "name": "leafFall",
+            "duration": 3800,
+            "delay": 500,
+            "easing": "linear",
+            "iterations": null,
+            "target": "g",
+            "targetIsRoot": false
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "250",
+              "height": "375",
+              "viewBox": "0 0 200 300",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 55% 93.333%; animation: 5.9s ease-in-out 0.7s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "137.5px 349.999px",
+              "animation": {
+                "name": "sway",
+                "duration": "5.9s",
+                "delay": "0.7s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 75,
+                "y": 42.5,
+                "w": 250,
+                "h": 375
+              },
+              "bytes": 2185,
+              "animatedDescendants": 1
+            }
+          ]
+        }
+      }
+    },
+    "the-twins": {
+      "natW": 256,
+      "natH": 383,
+      "inkX": 75,
+      "inkY": 42,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 4,
+        "measured": 4,
+        "from": "gz-forest-the-twins",
+        "canonical": {
+          "natW": 256,
+          "natH": 383,
+          "inkX": 75,
+          "inkY": 42,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 256,
+            "natH": 383,
+            "inkX": 75,
+            "inkY": 42,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 4,
+            "ids": [
+              "gz-forest-the-twins",
+              "gz-forest-the-twins-copy-mtj27u6h5avub",
+              "gz-forest-the-twins-copy-mtj2k93qy5ble",
+              "gz-forest-the-twins-copy-mtj2kcb2zifq3"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 256,
+          "natH": 383,
+          "inkX": 75,
+          "inkY": 42,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 256,
+          "height": 383,
+          "dim": "256 × 383"
+        },
+        "restFit": {
+          "natW": 256,
+          "natH": 383,
+          "inkX": 75,
+          "inkY": 42,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 256,
+          "height": 383,
+          "dim": "256 × 383"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 75,
+            "y1": 42.5,
+            "x2": 331,
+            "y2": 424.5,
+            "elements": 15,
+            "inkX": 75,
+            "inkY": 42,
+            "natW": 256,
+            "natH": 383,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 67.69759368896484,
+            "y1": 39.95895767211914,
+            "x2": 331.49617767333984,
+            "y2": 427.11230850219727,
+            "elements": 15,
+            "inkX": 67,
+            "inkY": 39,
+            "natW": 265,
+            "natH": 389,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 74.50382995605469,
+            "y1": 39.95895767211914,
+            "x2": 338.3024139404297,
+            "y2": 427.11230850219727,
+            "elements": 15,
+            "inkX": 74,
+            "inkY": 39,
+            "natW": 265,
+            "natH": 389,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 75,
+            "y1": 42.5,
+            "x2": 331,
+            "y2": 424.5,
+            "elements": 15,
+            "inkX": 75,
+            "inkY": 42,
+            "natW": 256,
+            "natH": 383,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 67.69759368896484,
+            "y1": 39.95895767211914,
+            "x2": 331.49617767333984,
+            "y2": 427.11230850219727,
+            "elements": 15,
+            "inkX": 67,
+            "inkY": 39,
+            "natW": 265,
+            "natH": 389,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 74.50382995605469,
+            "y1": 39.95895767211914,
+            "x2": 338.3024139404297,
+            "y2": 427.11230850219727,
+            "elements": 15,
+            "inkX": 74,
+            "inkY": 39,
+            "natW": 265,
+            "natH": 389,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 67.69759368896484,
+          "y1": 39.95895767211914,
+          "x2": 338.3024139404297,
+          "y2": 427.11230850219727,
+          "inkX": 67,
+          "inkY": 39,
+          "natW": 272,
+          "natH": 389
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 6600,
+            "delay": 1300,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "250",
+              "height": "375",
+              "viewBox": "0 0 200 300",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 50% 93.333%; animation: 6.6s ease-in-out 1.3s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "125px 349.999px",
+              "animation": {
+                "name": "sway",
+                "duration": "6.6s",
+                "delay": "1.3s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 75,
+                "y": 42.5,
+                "w": 250,
+                "h": 375
+              },
+              "bytes": 2083,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "the-sprout": {
+      "natW": 206,
+      "natH": 307,
+      "inkX": 100,
+      "inkY": 80,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 3,
+        "measured": 3,
+        "from": "gz-forest-the-sprout",
+        "canonical": {
+          "natW": 212,
+          "natH": 311,
+          "inkX": 95,
+          "inkY": 78,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 2,
+        "variants": [
+          {
+            "natW": 212,
+            "natH": 311,
+            "inkX": 95,
+            "inkY": 78,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 2,
+            "ids": [
+              "gz-forest-the-sprout",
+              "gz-forest-the-sprout-copy-mtj2kesg10ankz"
+            ]
+          },
+          {
+            "natW": 213,
+            "natH": 311,
+            "inkX": 94,
+            "inkY": 78,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 1,
+            "ids": [
+              "gz-forest-the-sprout-copy-mtj2kgte117b1w"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 212,
+          "natH": 311,
+          "inkX": 95,
+          "inkY": 78,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 212,
+          "height": 311,
+          "dim": "212 × 311"
+        },
+        "restFit": {
+          "natW": 206,
+          "natH": 307,
+          "inkX": 100,
+          "inkY": 80,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 206,
+          "height": 307,
+          "dim": "206 × 307"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 100,
+            "y1": 80,
+            "x2": 306,
+            "y2": 387,
+            "elements": 12,
+            "inkX": 100,
+            "inkY": 80,
+            "natW": 206,
+            "natH": 307,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 94.26274871826172,
+            "y1": 77.96607208251953,
+            "x2": 306.5016098022461,
+            "y2": 389.08875274658203,
+            "elements": 12,
+            "inkX": 94,
+            "inkY": 77,
+            "natW": 213,
+            "natH": 313,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 99.4983901977539,
+            "y1": 77.96607208251953,
+            "x2": 311.7372512817383,
+            "y2": 389.08875274658203,
+            "elements": 12,
+            "inkX": 99,
+            "inkY": 77,
+            "natW": 213,
+            "natH": 313,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 100,
+            "y1": 80,
+            "x2": 306,
+            "y2": 387,
+            "elements": 12,
+            "inkX": 100,
+            "inkY": 80,
+            "natW": 206,
+            "natH": 307,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 94.26274871826172,
+            "y1": 77.96607208251953,
+            "x2": 306.5016098022461,
+            "y2": 389.08875274658203,
+            "elements": 12,
+            "inkX": 94,
+            "inkY": 77,
+            "natW": 213,
+            "natH": 313,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 99.4983901977539,
+            "y1": 77.96607208251953,
+            "x2": 311.7372512817383,
+            "y2": 389.08875274658203,
+            "elements": 12,
+            "inkX": 99,
+            "inkY": 77,
+            "natW": 213,
+            "natH": 313,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 94.26274871826172,
+          "y1": 77.96607208251953,
+          "x2": 311.7372512817383,
+          "y2": 389.08875274658203,
+          "inkX": 94,
+          "inkY": 77,
+          "natW": 218,
+          "natH": 313
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 4600,
+            "delay": 300,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "200",
+              "height": "300",
+              "viewBox": "0 0 160 240",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 50% 91.667%; animation: 4.6s ease-in-out 0.3s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "100px 275.001px",
+              "animation": {
+                "name": "sway",
+                "duration": "4.6s",
+                "delay": "0.3s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 100,
+                "y": 80,
+                "w": 200,
+                "h": 300
+              },
+              "bytes": 1734,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "the-oak": {
+      "natW": 316,
+      "natH": 353,
+      "inkX": 45,
+      "inkY": 57,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 1,
+        "measured": 1,
+        "from": "gz-forest-the-oak",
+        "canonical": {
+          "natW": 316,
+          "natH": 353,
+          "inkX": 45,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 316,
+            "natH": 353,
+            "inkX": 45,
+            "inkY": 57,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 1,
+            "ids": [
+              "gz-forest-the-oak"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 316,
+          "natH": 353,
+          "inkX": 45,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 316,
+          "height": 353,
+          "dim": "316 × 353"
+        },
+        "restFit": {
+          "natW": 316,
+          "natH": 353,
+          "inkX": 45,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 316,
+          "height": 353,
+          "dim": "316 × 353"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 45,
+            "y1": 57,
+            "x2": 361,
+            "y2": 410,
+            "elements": 17,
+            "inkX": 45,
+            "inkY": 57,
+            "natW": 316,
+            "natH": 353,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 38.27101135253906,
+            "y1": 53.82474899291992,
+            "x2": 361.44911193847656,
+            "y2": 413.24103927612305,
+            "elements": 17,
+            "inkX": 38,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 44.550899505615234,
+            "y1": 53.82474899291992,
+            "x2": 367.7289695739746,
+            "y2": 413.24103927612305,
+            "elements": 17,
+            "inkX": 44,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 45,
+            "y1": 57,
+            "x2": 361,
+            "y2": 410,
+            "elements": 17,
+            "inkX": 45,
+            "inkY": 57,
+            "natW": 316,
+            "natH": 353,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 38.27101135253906,
+            "y1": 53.82474899291992,
+            "x2": 361.44911193847656,
+            "y2": 413.24103927612305,
+            "elements": 17,
+            "inkX": 38,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 44.550899505615234,
+            "y1": 53.82474899291992,
+            "x2": 367.7289695739746,
+            "y2": 413.24103927612305,
+            "elements": 17,
+            "inkX": 44,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 38.27101135253906,
+          "y1": 53.82474899291992,
+          "x2": 367.7289695739746,
+          "y2": 413.24103927612305,
+          "inkX": 38,
+          "inkY": 53,
+          "natW": 330,
+          "natH": 361
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 6800,
+            "delay": 2000,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "310",
+              "height": "346",
+              "viewBox": "0 0 270 300",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 50% 93.333%; animation: 6.8s ease-in-out 2s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "155px 322.932px",
+              "animation": {
+                "name": "sway",
+                "duration": "6.8s",
+                "delay": "2s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 45,
+                "y": 57,
+                "w": 310,
+                "h": 346
+              },
+              "bytes": 2732,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "the-acorn": {
+      "natW": 316,
+      "natH": 353,
+      "inkX": 45,
+      "inkY": 57,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 1,
+        "measured": 1,
+        "from": "gz-forest-the-acorn",
+        "canonical": {
+          "natW": 316,
+          "natH": 353,
+          "inkX": 45,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 316,
+            "natH": 353,
+            "inkX": 45,
+            "inkY": 57,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 1,
+            "ids": [
+              "gz-forest-the-acorn"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 316,
+          "natH": 353,
+          "inkX": 45,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 316,
+          "height": 353,
+          "dim": "316 × 353"
+        },
+        "restFit": {
+          "natW": 316,
+          "natH": 353,
+          "inkX": 45,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 316,
+          "height": 353,
+          "dim": "316 × 353"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 45,
+            "y1": 57,
+            "x2": 361,
+            "y2": 410,
+            "elements": 14,
+            "inkX": 45,
+            "inkY": 57,
+            "natW": 316,
+            "natH": 353,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 38.27101135253906,
+            "y1": 53.82474899291992,
+            "x2": 361.44911193847656,
+            "y2": 413.24103927612305,
+            "elements": 14,
+            "inkX": 38,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 44.550899505615234,
+            "y1": 53.82474899291992,
+            "x2": 367.7289695739746,
+            "y2": 413.24103927612305,
+            "elements": 14,
+            "inkX": 44,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 45,
+            "y1": 57,
+            "x2": 361,
+            "y2": 410,
+            "elements": 14,
+            "inkX": 45,
+            "inkY": 57,
+            "natW": 316,
+            "natH": 353,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 38.27101135253906,
+            "y1": 53.82474899291992,
+            "x2": 361.44911193847656,
+            "y2": 413.24103927612305,
+            "elements": 14,
+            "inkX": 38,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 44.550899505615234,
+            "y1": 53.82474899291992,
+            "x2": 367.7289695739746,
+            "y2": 413.24103927612305,
+            "elements": 14,
+            "inkX": 44,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 38.27101135253906,
+          "y1": 53.82474899291992,
+          "x2": 367.7289695739746,
+          "y2": 413.24103927612305,
+          "inkX": 38,
+          "inkY": 53,
+          "natW": 330,
+          "natH": 361
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 7000,
+            "delay": 900,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "310",
+              "height": "346",
+              "viewBox": "0 0 270 300",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 50% 93.333%; animation: 7s ease-in-out 0.9s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "155px 322.932px",
+              "animation": {
+                "name": "sway",
+                "duration": "7s",
+                "delay": "0.9s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 45,
+                "y": 57,
+                "w": 310,
+                "h": 346
+              },
+              "bytes": 2225,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "the-hollow": {
+      "natW": 316,
+      "natH": 353,
+      "inkX": 45,
+      "inkY": 57,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 1,
+        "measured": 1,
+        "from": "gz-forest-the-hollow",
+        "canonical": {
+          "natW": 316,
+          "natH": 353,
+          "inkX": 45,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 316,
+            "natH": 353,
+            "inkX": 45,
+            "inkY": 57,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 1,
+            "ids": [
+              "gz-forest-the-hollow"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 316,
+          "natH": 353,
+          "inkX": 45,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 316,
+          "height": 353,
+          "dim": "316 × 353"
+        },
+        "restFit": {
+          "natW": 316,
+          "natH": 353,
+          "inkX": 45,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 316,
+          "height": 353,
+          "dim": "316 × 353"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 45,
+            "y1": 57,
+            "x2": 361,
+            "y2": 410,
+            "elements": 13,
+            "inkX": 45,
+            "inkY": 57,
+            "natW": 316,
+            "natH": 353,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 38.27101135253906,
+            "y1": 53.82474899291992,
+            "x2": 361.44911193847656,
+            "y2": 413.24103927612305,
+            "elements": 13,
+            "inkX": 38,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 44.550899505615234,
+            "y1": 53.82474899291992,
+            "x2": 367.7289695739746,
+            "y2": 413.24103927612305,
+            "elements": 13,
+            "inkX": 44,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 45,
+            "y1": 57,
+            "x2": 361,
+            "y2": 410,
+            "elements": 13,
+            "inkX": 45,
+            "inkY": 57,
+            "natW": 316,
+            "natH": 353,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 38.27101135253906,
+            "y1": 53.82474899291992,
+            "x2": 361.44911193847656,
+            "y2": 413.24103927612305,
+            "elements": 13,
+            "inkX": 38,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 44.550899505615234,
+            "y1": 53.82474899291992,
+            "x2": 367.7289695739746,
+            "y2": 413.24103927612305,
+            "elements": 13,
+            "inkX": 44,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 38.27101135253906,
+          "y1": 53.82474899291992,
+          "x2": 367.7289695739746,
+          "y2": 413.24103927612305,
+          "inkX": 38,
+          "inkY": 53,
+          "natW": 330,
+          "natH": 361
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 7600,
+            "delay": 1700,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          },
+          {
+            "name": "leafFall",
+            "duration": 3600,
+            "delay": 800,
+            "easing": "linear",
+            "iterations": null,
+            "target": "g",
+            "targetIsRoot": false
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "310",
+              "height": "346",
+              "viewBox": "0 0 270 300",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 50% 93.333%; animation: 7.6s ease-in-out 1.7s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "155px 322.932px",
+              "animation": {
+                "name": "sway",
+                "duration": "7.6s",
+                "delay": "1.7s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 45,
+                "y": 57,
+                "w": 310,
+                "h": 346
+              },
+              "bytes": 2173,
+              "animatedDescendants": 1
+            }
+          ]
+        }
+      }
+    },
+    "the-gnarled": {
+      "natW": 316,
+      "natH": 353,
+      "inkX": 45,
+      "inkY": 57,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 2,
+        "measured": 2,
+        "from": "gz-forest-the-gnarled",
+        "canonical": {
+          "natW": 316,
+          "natH": 353,
+          "inkX": 45,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 316,
+            "natH": 353,
+            "inkX": 45,
+            "inkY": 57,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 2,
+            "ids": [
+              "gz-forest-the-gnarled",
+              "gz-forest-the-gnarled-copy-mtj252jz09j0u"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 316,
+          "natH": 353,
+          "inkX": 45,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 316,
+          "height": 353,
+          "dim": "316 × 353"
+        },
+        "restFit": {
+          "natW": 316,
+          "natH": 353,
+          "inkX": 45,
+          "inkY": 57,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 316,
+          "height": 353,
+          "dim": "316 × 353"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 45,
+            "y1": 57,
+            "x2": 361,
+            "y2": 410,
+            "elements": 20,
+            "inkX": 45,
+            "inkY": 57,
+            "natW": 316,
+            "natH": 353,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 38.27101135253906,
+            "y1": 53.82474899291992,
+            "x2": 361.44911193847656,
+            "y2": 413.24103927612305,
+            "elements": 20,
+            "inkX": 38,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 44.550899505615234,
+            "y1": 53.82474899291992,
+            "x2": 367.7289695739746,
+            "y2": 413.24103927612305,
+            "elements": 20,
+            "inkX": 44,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 45,
+            "y1": 57,
+            "x2": 361,
+            "y2": 410,
+            "elements": 20,
+            "inkX": 45,
+            "inkY": 57,
+            "natW": 316,
+            "natH": 353,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 38.27101135253906,
+            "y1": 53.82474899291992,
+            "x2": 361.44911193847656,
+            "y2": 413.24103927612305,
+            "elements": 20,
+            "inkX": 38,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 44.550899505615234,
+            "y1": 53.82474899291992,
+            "x2": 367.7289695739746,
+            "y2": 413.24103927612305,
+            "elements": 20,
+            "inkX": 44,
+            "inkY": 53,
+            "natW": 324,
+            "natH": 361,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 38.27101135253906,
+          "y1": 53.82474899291992,
+          "x2": 367.7289695739746,
+          "y2": 413.24103927612305,
+          "inkX": 38,
+          "inkY": 53,
+          "natW": 330,
+          "natH": 361
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 8000,
+            "delay": 2100,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          },
+          {
+            "name": "leafFall",
+            "duration": 4000,
+            "delay": 1200,
+            "easing": "linear",
+            "iterations": null,
+            "target": "g",
+            "targetIsRoot": false
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "310",
+              "height": "346",
+              "viewBox": "0 0 270 300",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px); transform-origin: 50% 93.333%; animation: 8s ease-in-out 2.1s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 6px 7px 0px)",
+              "transformOrigin": "155px 322.932px",
+              "animation": {
+                "name": "sway",
+                "duration": "8s",
+                "delay": "2.1s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 45,
+                "y": 57,
+                "w": 310,
+                "h": 346
+              },
+              "bytes": 2878,
+              "animatedDescendants": 1
+            }
+          ]
+        }
+      }
+    },
+    "tall-tuft": {
+      "natW": 265,
+      "natH": 160,
+      "inkX": 70,
+      "inkY": 153,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 1,
+        "measured": 1,
+        "from": "gz-forest-tall-tuft",
+        "canonical": {
+          "natW": 268,
+          "natH": 164,
+          "inkX": 68,
+          "inkY": 151,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 268,
+            "natH": 164,
+            "inkX": 68,
+            "inkY": 151,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 1,
+            "ids": [
+              "gz-forest-tall-tuft"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 268,
+          "natH": 164,
+          "inkX": 68,
+          "inkY": 151,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 268,
+          "height": 164,
+          "dim": "268 × 164"
+        },
+        "restFit": {
+          "natW": 265,
+          "natH": 160,
+          "inkX": 70,
+          "inkY": 153,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 265,
+          "height": 160,
+          "dim": "265 × 160"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 70,
+            "y1": 153,
+            "x2": 335,
+            "y2": 313,
+            "elements": 11,
+            "inkX": 70,
+            "inkY": 153,
+            "natW": 265,
+            "natH": 160,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 67.10108947753906,
+            "y1": 150.30813598632812,
+            "x2": 335.26918029785156,
+            "y2": 315.7193908691406,
+            "elements": 11,
+            "inkX": 67,
+            "inkY": 150,
+            "natW": 269,
+            "natH": 166,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 69.73079681396484,
+            "y1": 150.30813598632812,
+            "x2": 337.89888763427734,
+            "y2": 315.7193908691406,
+            "elements": 11,
+            "inkX": 69,
+            "inkY": 150,
+            "natW": 269,
+            "natH": 166,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 70,
+            "y1": 153,
+            "x2": 335,
+            "y2": 313,
+            "elements": 11,
+            "inkX": 70,
+            "inkY": 153,
+            "natW": 265,
+            "natH": 160,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 67.10108947753906,
+            "y1": 150.30813598632812,
+            "x2": 335.26918029785156,
+            "y2": 315.7193908691406,
+            "elements": 11,
+            "inkX": 67,
+            "inkY": 150,
+            "natW": 269,
+            "natH": 166,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 69.73079681396484,
+            "y1": 150.30813598632812,
+            "x2": 337.89888763427734,
+            "y2": 315.7193908691406,
+            "elements": 11,
+            "inkX": 69,
+            "inkY": 150,
+            "natW": 269,
+            "natH": 166,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 67.10108947753906,
+          "y1": 150.30813598632812,
+          "x2": 337.89888763427734,
+          "y2": 315.7193908691406,
+          "inkX": 67,
+          "inkY": 150,
+          "natW": 271,
+          "natH": 166
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 4800,
+            "delay": 0,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "260",
+              "height": "154",
+              "viewBox": "0 0 220 130",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 5px 6px 0px); transform-origin: 50% 90.769%; animation: 4.8s ease-in-out 0s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 5px 6px 0px)",
+              "transformOrigin": "130px 139.784px",
+              "animation": {
+                "name": "sway",
+                "duration": "4.8s",
+                "delay": "0s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 70,
+                "y": 153,
+                "w": 260,
+                "h": 154
+              },
+              "bytes": 1693,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "meadow-mound": {
+      "natW": 265,
+      "natH": 160,
+      "inkX": 70,
+      "inkY": 153,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 1,
+        "measured": 1,
+        "from": "gz-forest-meadow-mound",
+        "canonical": {
+          "natW": 265,
+          "natH": 160,
+          "inkX": 70,
+          "inkY": 153,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 265,
+            "natH": 160,
+            "inkX": 70,
+            "inkY": 153,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 1,
+            "ids": [
+              "gz-forest-meadow-mound"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 265,
+          "natH": 160,
+          "inkX": 70,
+          "inkY": 153,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 265,
+          "height": 160,
+          "dim": "265 × 160"
+        },
+        "restFit": {
+          "natW": 265,
+          "natH": 160,
+          "inkX": 70,
+          "inkY": 153,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 265,
+          "height": 160,
+          "dim": "265 × 160"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 70,
+            "y1": 153,
+            "x2": 335,
+            "y2": 313,
+            "elements": 9,
+            "inkX": 70,
+            "inkY": 153,
+            "natW": 265,
+            "natH": 160,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 70,
+            "y1": 153,
+            "x2": 335,
+            "y2": 313,
+            "elements": 9,
+            "inkX": 70,
+            "inkY": 153,
+            "natW": 265,
+            "natH": 160,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 70,
+            "y1": 153,
+            "x2": 335,
+            "y2": 313,
+            "elements": 9,
+            "inkX": 70,
+            "inkY": 153,
+            "natW": 265,
+            "natH": 160,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 70,
+            "y1": 153,
+            "x2": 335,
+            "y2": 313,
+            "elements": 9,
+            "inkX": 70,
+            "inkY": 153,
+            "natW": 265,
+            "natH": 160,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 70,
+            "y1": 153,
+            "x2": 335,
+            "y2": 313,
+            "elements": 9,
+            "inkX": 70,
+            "inkY": 153,
+            "natW": 265,
+            "natH": 160,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 70,
+            "y1": 153,
+            "x2": 335,
+            "y2": 313,
+            "elements": 9,
+            "inkX": 70,
+            "inkY": 153,
+            "natW": 265,
+            "natH": 160,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 70,
+          "y1": 153,
+          "x2": 335,
+          "y2": 313,
+          "inkX": 70,
+          "inkY": 153,
+          "natW": 265,
+          "natH": 160
+        },
+        "animations": [],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "260",
+              "height": "154",
+              "viewBox": "0 0 220 130",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 5px 6px 0px);",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 5px 6px 0px)",
+              "transformOrigin": "130px 123.2px",
+              "animation": {
+                "name": "none",
+                "duration": "0s",
+                "delay": "0s",
+                "timing": "ease"
+              },
+              "rect": {
+                "x": 70,
+                "y": 153,
+                "w": 260,
+                "h": 154
+              },
+              "bytes": 1350,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "wild-sprigs": {
+      "natW": 265,
+      "natH": 160,
+      "inkX": 70,
+      "inkY": 153,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 1,
+        "measured": 1,
+        "from": "gz-forest-wild-sprigs",
+        "canonical": {
+          "natW": 265,
+          "natH": 160,
+          "inkX": 70,
+          "inkY": 153,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 265,
+            "natH": 160,
+            "inkX": 70,
+            "inkY": 153,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 1,
+            "ids": [
+              "gz-forest-wild-sprigs"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 265,
+          "natH": 160,
+          "inkX": 70,
+          "inkY": 153,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 265,
+          "height": 160,
+          "dim": "265 × 160"
+        },
+        "restFit": {
+          "natW": 265,
+          "natH": 160,
+          "inkX": 70,
+          "inkY": 153,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 265,
+          "height": 160,
+          "dim": "265 × 160"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 70,
+            "y1": 153,
+            "x2": 335,
+            "y2": 313,
+            "elements": 15,
+            "inkX": 70,
+            "inkY": 153,
+            "natW": 265,
+            "natH": 160,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 67.10108947753906,
+            "y1": 150.30813598632812,
+            "x2": 335.26918029785156,
+            "y2": 315.7193908691406,
+            "elements": 15,
+            "inkX": 67,
+            "inkY": 150,
+            "natW": 269,
+            "natH": 166,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 69.73079681396484,
+            "y1": 150.30813598632812,
+            "x2": 337.89888763427734,
+            "y2": 315.7193908691406,
+            "elements": 15,
+            "inkX": 69,
+            "inkY": 150,
+            "natW": 269,
+            "natH": 166,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 70,
+            "y1": 153,
+            "x2": 335,
+            "y2": 313,
+            "elements": 15,
+            "inkX": 70,
+            "inkY": 153,
+            "natW": 265,
+            "natH": 160,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 67.10108947753906,
+            "y1": 150.30813598632812,
+            "x2": 335.26918029785156,
+            "y2": 315.7193908691406,
+            "elements": 15,
+            "inkX": 67,
+            "inkY": 150,
+            "natW": 269,
+            "natH": 166,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 69.73079681396484,
+            "y1": 150.30813598632812,
+            "x2": 337.89888763427734,
+            "y2": 315.7193908691406,
+            "elements": 15,
+            "inkX": 69,
+            "inkY": 150,
+            "natW": 269,
+            "natH": 166,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 67.10108947753906,
+          "y1": 150.30813598632812,
+          "x2": 337.89888763427734,
+          "y2": 315.7193908691406,
+          "inkX": 67,
+          "inkY": 150,
+          "natW": 271,
+          "natH": 166
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 5600,
+            "delay": 900,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "260",
+              "height": "154",
+              "viewBox": "0 0 220 130",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 5px 6px 0px); transform-origin: 50% 90.769%; animation: 5.6s ease-in-out 0.9s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 5px 6px 0px)",
+              "transformOrigin": "130px 139.784px",
+              "animation": {
+                "name": "sway",
+                "duration": "5.6s",
+                "delay": "0.9s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 70,
+                "y": 153,
+                "w": 260,
+                "h": 154
+              },
+              "bytes": 2171,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "plain-blades": {
+      "natW": 265,
+      "natH": 160,
+      "inkX": 70,
+      "inkY": 153,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 3,
+        "measured": 3,
+        "from": "gz-forest-plain-blades",
+        "canonical": {
+          "natW": 265,
+          "natH": 160,
+          "inkX": 70,
+          "inkY": 153,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 265,
+            "natH": 160,
+            "inkX": 70,
+            "inkY": 153,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 3,
+            "ids": [
+              "gz-forest-plain-blades",
+              "gz-forest-plain-blades-copy-mtj3vpnq1yh2cu",
+              "gz-forest-plain-blades-copy-mtj3vv9k1z9ryd"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 265,
+          "natH": 160,
+          "inkX": 70,
+          "inkY": 153,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 265,
+          "height": 160,
+          "dim": "265 × 160"
+        },
+        "restFit": {
+          "natW": 265,
+          "natH": 160,
+          "inkX": 70,
+          "inkY": 153,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 265,
+          "height": 160,
+          "dim": "265 × 160"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 70,
+            "y1": 153,
+            "x2": 335,
+            "y2": 313,
+            "elements": 11,
+            "inkX": 70,
+            "inkY": 153,
+            "natW": 265,
+            "natH": 160,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 67.10108947753906,
+            "y1": 150.30813598632812,
+            "x2": 335.26918029785156,
+            "y2": 315.7193908691406,
+            "elements": 11,
+            "inkX": 67,
+            "inkY": 150,
+            "natW": 269,
+            "natH": 166,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 69.73079681396484,
+            "y1": 150.30813598632812,
+            "x2": 337.89888763427734,
+            "y2": 315.7193908691406,
+            "elements": 11,
+            "inkX": 69,
+            "inkY": 150,
+            "natW": 269,
+            "natH": 166,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 70,
+            "y1": 153,
+            "x2": 335,
+            "y2": 313,
+            "elements": 11,
+            "inkX": 70,
+            "inkY": 153,
+            "natW": 265,
+            "natH": 160,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 67.10108947753906,
+            "y1": 150.30813598632812,
+            "x2": 335.26918029785156,
+            "y2": 315.7193908691406,
+            "elements": 11,
+            "inkX": 67,
+            "inkY": 150,
+            "natW": 269,
+            "natH": 166,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 69.73079681396484,
+            "y1": 150.30813598632812,
+            "x2": 337.89888763427734,
+            "y2": 315.7193908691406,
+            "elements": 11,
+            "inkX": 69,
+            "inkY": 150,
+            "natW": 269,
+            "natH": 166,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 67.10108947753906,
+          "y1": 150.30813598632812,
+          "x2": 337.89888763427734,
+          "y2": 315.7193908691406,
+          "inkX": 67,
+          "inkY": 150,
+          "natW": 271,
+          "natH": 166
+        },
+        "animations": [
+          {
+            "name": "sway",
+            "duration": 5200,
+            "delay": 1600,
+            "easing": "linear",
+            "iterations": null,
+            "target": "svg",
+            "targetIsRoot": true
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "260",
+              "height": "154",
+              "viewBox": "0 0 220 130",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 5px 6px 0px); transform-origin: 50% 90.769%; animation: 5.2s ease-in-out 1.6s infinite normal none running sway;",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 5px 6px 0px)",
+              "transformOrigin": "130px 139.784px",
+              "animation": {
+                "name": "sway",
+                "duration": "5.2s",
+                "delay": "1.6s",
+                "timing": "ease-in-out"
+              },
+              "rect": {
+                "x": 70,
+                "y": 153,
+                "w": 260,
+                "h": 154
+              },
+              "bytes": 1839,
+              "animatedDescendants": 0
+            }
+          ]
+        }
+      }
+    },
+    "grand-toadstool": {
+      "natW": 265,
+      "natH": 206,
+      "inkX": 70,
+      "inkY": 130,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 1,
+        "measured": 1,
+        "from": "gz-forest-grand-toadstool",
+        "canonical": {
+          "natW": 265,
+          "natH": 206,
+          "inkX": 70,
+          "inkY": 130,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 265,
+            "natH": 206,
+            "inkX": 70,
+            "inkY": 130,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 1,
+            "ids": [
+              "gz-forest-grand-toadstool"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 265,
+          "natH": 206,
+          "inkX": 70,
+          "inkY": 130,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 265,
+          "height": 206,
+          "dim": "265 × 206"
+        },
+        "restFit": {
+          "natW": 265,
+          "natH": 206,
+          "inkX": 70,
+          "inkY": 130,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 265,
+          "height": 206,
+          "dim": "265 × 206"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 14,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 14,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 14,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 14,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 14,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 14,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 70,
+          "y1": 130,
+          "x2": 335,
+          "y2": 336,
+          "inkX": 70,
+          "inkY": 130,
+          "natW": 265,
+          "natH": 206
+        },
+        "animations": [
+          {
+            "name": "bob",
+            "duration": 4400,
+            "delay": 0,
+            "easing": "linear",
+            "iterations": null,
+            "target": "g",
+            "targetIsRoot": false
+          },
+          {
+            "name": "bob",
+            "duration": 4400,
+            "delay": 700,
+            "easing": "linear",
+            "iterations": null,
+            "target": "g",
+            "targetIsRoot": false
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "260",
+              "height": "200",
+              "viewBox": "0 0 220 170",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 5px 6px 0px);",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 5px 6px 0px)",
+              "transformOrigin": "130px 160px",
+              "animation": {
+                "name": "none",
+                "duration": "0s",
+                "delay": "0s",
+                "timing": "ease"
+              },
+              "rect": {
+                "x": 70,
+                "y": 130,
+                "w": 260,
+                "h": 200
+              },
+              "bytes": 2043,
+              "animatedDescendants": 2
+            }
+          ]
+        }
+      }
+    },
+    "honey-caps": {
+      "natW": 265,
+      "natH": 206,
+      "inkX": 70,
+      "inkY": 130,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 1,
+        "measured": 1,
+        "from": "gz-forest-honey-caps",
+        "canonical": {
+          "natW": 265,
+          "natH": 206,
+          "inkX": 70,
+          "inkY": 130,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 265,
+            "natH": 206,
+            "inkX": 70,
+            "inkY": 130,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 1,
+            "ids": [
+              "gz-forest-honey-caps"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 265,
+          "natH": 206,
+          "inkX": 70,
+          "inkY": 130,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 265,
+          "height": 206,
+          "dim": "265 × 206"
+        },
+        "restFit": {
+          "natW": 265,
+          "natH": 206,
+          "inkX": 70,
+          "inkY": 130,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 265,
+          "height": 206,
+          "dim": "265 × 206"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 18,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 18,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 18,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 18,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 18,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 18,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 70,
+          "y1": 130,
+          "x2": 335,
+          "y2": 336,
+          "inkX": 70,
+          "inkY": 130,
+          "natW": 265,
+          "natH": 206
+        },
+        "animations": [
+          {
+            "name": "bob",
+            "duration": 5000,
+            "delay": 300,
+            "easing": "linear",
+            "iterations": null,
+            "target": "g",
+            "targetIsRoot": false
+          },
+          {
+            "name": "bob",
+            "duration": 5000,
+            "delay": 0,
+            "easing": "linear",
+            "iterations": null,
+            "target": "g",
+            "targetIsRoot": false
+          },
+          {
+            "name": "bob",
+            "duration": 5000,
+            "delay": 900,
+            "easing": "linear",
+            "iterations": null,
+            "target": "g",
+            "targetIsRoot": false
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "260",
+              "height": "200",
+              "viewBox": "0 0 220 170",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 5px 6px 0px);",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 5px 6px 0px)",
+              "transformOrigin": "130px 160px",
+              "animation": {
+                "name": "none",
+                "duration": "0s",
+                "delay": "0s",
+                "timing": "ease"
+              },
+              "rect": {
+                "x": 70,
+                "y": 130,
+                "w": 260,
+                "h": 200
+              },
+              "bytes": 2261,
+              "animatedDescendants": 3
+            }
+          ]
+        }
+      }
+    },
+    "pink-bonnets": {
+      "natW": 265,
+      "natH": 206,
+      "inkX": 70,
+      "inkY": 130,
+      "viewW": 400,
+      "viewH": 460,
+      "source": "frames.js fit at the rest pose (sway seeked to rotate(0)), temporary section via Frames.adopt",
+      "inSitu": {
+        "standing": 1,
+        "measured": 1,
+        "from": "gz-forest-pink-bonnets",
+        "canonical": {
+          "natW": 265,
+          "natH": 206,
+          "inkX": 70,
+          "inkY": 130,
+          "viewW": 400,
+          "viewH": 460
+        },
+        "distinct": 1,
+        "variants": [
+          {
+            "natW": 265,
+            "natH": 206,
+            "inkX": 70,
+            "inkY": 130,
+            "viewW": 400,
+            "viewH": 460,
+            "count": 1,
+            "ids": [
+              "gz-forest-pink-bonnets"
+            ]
+          }
+        ]
+      },
+      "adopt": {
+        "firstFit": {
+          "natW": 265,
+          "natH": 206,
+          "inkX": 70,
+          "inkY": 130,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 265,
+          "height": 206,
+          "dim": "265 × 206"
+        },
+        "restFit": {
+          "natW": 265,
+          "natH": 206,
+          "inkX": 70,
+          "inkY": 130,
+          "viewW": 400,
+          "viewH": 460,
+          "width": 265,
+          "height": 206,
+          "dim": "265 × 206"
+        },
+        "portAgreesWithRestFit": true,
+        "phases": {
+          "rest": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 18,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 18,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 18,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "rest-inner50": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 18,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway0-inner50": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 18,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          },
+          "sway50-inner50": {
+            "x1": 70,
+            "y1": 130,
+            "x2": 335,
+            "y2": 336,
+            "elements": 18,
+            "inkX": 70,
+            "inkY": 130,
+            "natW": 265,
+            "natH": 206,
+            "overhang": {
+              "l": 0,
+              "t": 0,
+              "r": 0,
+              "b": 0
+            }
+          }
+        },
+        "envelope": {
+          "x1": 70,
+          "y1": 130,
+          "x2": 335,
+          "y2": 336,
+          "inkX": 70,
+          "inkY": 130,
+          "natW": 265,
+          "natH": 206
+        },
+        "animations": [
+          {
+            "name": "bob",
+            "duration": 4600,
+            "delay": 0,
+            "easing": "linear",
+            "iterations": null,
+            "target": "g",
+            "targetIsRoot": false
+          },
+          {
+            "name": "bob",
+            "duration": 4600,
+            "delay": 500,
+            "easing": "linear",
+            "iterations": null,
+            "target": "g",
+            "targetIsRoot": false
+          },
+          {
+            "name": "bob",
+            "duration": 4600,
+            "delay": 1000,
+            "easing": "linear",
+            "iterations": null,
+            "target": "g",
+            "targetIsRoot": false
+          },
+          {
+            "name": "twinkle",
+            "duration": 2100,
+            "delay": 400,
+            "easing": "linear",
+            "iterations": null,
+            "target": "g",
+            "targetIsRoot": false
+          }
+        ],
+        "svg": {
+          "rootChildren": [
+            "svg"
+          ],
+          "svgs": [
+            {
+              "width": "260",
+              "height": "200",
+              "viewBox": "0 0 220 170",
+              "style": "display: block; overflow: visible; filter: drop-shadow(rgba(0, 0, 0, 0.3) 5px 6px 0px);",
+              "filter": "drop-shadow(rgba(0, 0, 0, 0.3) 5px 6px 0px)",
+              "transformOrigin": "130px 160px",
+              "animation": {
+                "name": "none",
+                "duration": "0s",
+                "delay": "0s",
+                "timing": "ease"
+              },
+              "rect": {
+                "x": 70,
+                "y": 130,
+                "w": 260,
+                "h": 200
+              },
+              "bytes": 2674,
+              "animatedDescendants": 4
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,19 +1,17 @@
 # Local tooling, not the site.
 .claude/
 
-# lab 2's performance workbench: traces, captures and throwaway harnesses.
-# ~50MB, already kept off the deploy by .vercelignore — and git has no
-# .vercelignore to read, so it needs telling separately. Nothing in here is
-# needed to build, serve or understand the bench.
-lab2/perf/
+# lab 2's performance workbench keeps its evidence here: ~53MB of screen
+# captures, traces and run logs across 148 PNGs and 20 logs. The harnesses
+# that produce them are worth keeping and are tracked; the output of a run
+# that has already been read is not. Held off the deploy separately by
+# .vercelignore, which excludes the whole of lab2/perf — git has no
+# .vercelignore to read, so the two lists differ on purpose.
+lab2/perf/results/
 
 # The shortcuts and scratch files that live beside lab 2 on this machine.
-# Same list as .vercelignore, for the same reason.
 lab2/index.html.keep-bak
 lab2/*.tmp
 lab2/*.bat
 lab2/*.ico
 lab2/*.lnk
-
-# The little static server used to preview the site locally.
-serve.js
