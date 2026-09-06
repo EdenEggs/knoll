@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in · Knoll</title>
+<!-- The icon sits HERE and not in the helmet, which is where /yard and
+     /dashboard keep theirs. The helmet is hoisted into <head> by support.js,
+     i.e. after the runtime boots — and Chrome, finding no icon before then,
+     asks for /login/favicon.ico and logs the 404 it gets. One line earlier in
+     the document and it never asks. Same as /signup next door. -->
+<link rel="icon" href="../logo/logo-icon.svg">
+<!-- REACT FROM OUR OWN SHELF, NOT UNPKG'S. support.js ends in loadReactUmd(),
+     which opens with `if (window.React && window.ReactDOM) return` and
+     otherwise fetches both off unpkg.com. These two put them there first, so
+     this page has no third party in its boot path at all. They are lab 2's
+     copies (site/lab2/vendor/), byte-identical to the pinned builds support.js
+     names — the integrity hashes below are support.js's own REACT_SRI and
+     REACT_DOM_SRI, and the browser still checks them.
+
+     Blocking, not defer, and in that order: support.js installs the
+     `x-dc{display:none}` rule that hides the raw template, and it has to be
+     in the head before <body> is parsed or the unrendered `{{ }}` markup
+     flashes up first. -->
+<script src="../lab2/vendor/react.production.min.js"
+        integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z"
+        crossorigin="anonymous"></script>
+<script src="../lab2/vendor/react-dom.production.min.js"
+        integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"
+        crossorigin="anonymous"></script>
+<script src="./support.js"></script>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<!-- THE HOUSE FACES, from the one copy the site keeps. The export inlined
+     all fifteen @font-face rules with the woff2 files bundled in beside them;
+     this is the same fifteen, already sitting in site/lab2/fonts/ — the two
+     blocks are character-for-character identical once the src:url() is
+     stripped, because the export was generated from that file. A relative
+     href rather than the /fonts/ rewrite in vercel.json, so the page is also
+     correct off a bare static server. -->
+<link rel="stylesheet" href="../lab2/fonts/fonts.css">
+<style>
+  body { margin: 0; background: #efe7ed; }
+
+  /* ── THE HOUSE BAR ───────────────────────────────────────────────────────
+     Lab 2's header, worn by the two gate pages so they read as part of the
+     site rather than two loose drawings. Same rules as lab2/lab.css's
+     .lab-head / .lab-brand with the token values written out (--card, --line,
+     --ink, --display): these pages do not load lab.css, and the only other
+     thing they would want from it is Sora 800, which fonts.css already
+     carries and which the page already links.
+
+     Absolute, not fixed — it sits at the top of the document and scrolls away
+     with it, the way lab 2's own header does. The root div below is
+     position:relative, so the bar anchors to it and spans it WITHOUT joining
+     its flex row, which is what keeps the scroll centred. The root's
+     padding-top is 92px instead of the export's 40px to clear it: 51.5px of
+     bar (12 + 26 + 12 + 1.5) and the export's own 40px gap under it. */
+  .knoll-head { position: absolute; top: 0; left: 0; right: 0; z-index: 20;
+    display: flex; align-items: center; gap: 22px; padding: 12px 22px;
+    background: #fdfbfd; border-bottom: 1.5px dashed #e2d4df; box-sizing: border-box; }
+  .knoll-brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+    color: #26212a; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px;
+    letter-spacing: -0.01em; }
+  .knoll-brand img { display: block; }
+  .knoll-brand:hover { color: #c93b82; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+  input::placeholder { color: rgba(59,42,26,0.35); }
+  @keyframes swingOnce { 0% { transform: rotate(0.5deg); } 30% { transform: rotate(-1.6deg); } 65% { transform: rotate(1.3deg); } 100% { transform: rotate(0.5deg); } }
+  @keyframes jostle { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-7deg); } 55% { transform: rotate(5deg); } 80% { transform: rotate(-2deg); } }
+  @keyframes hatSlip { 0% { transform: translate(0,0) rotate(0deg); } 100% { transform: translate(-4px,16px) rotate(-9deg); } }
+  @keyframes unusedWax { 0% { transform: scale(0.2,0.4); opacity: 0; } 40% { transform: scale(1.25,0.85); opacity: 1; } 70% { transform: scale(0.92,1.08); } 100% { transform: scale(1,1); opacity: 1; } }
+  @keyframes zFloat { 0% { opacity: 0; transform: translate(0,0) scale(0.7); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(14px,-28px) scale(1.2); } }
+  @keyframes rollerDip { 0%, 100% { transform: translateY(0); } 35% { transform: translateY(9px); } 70% { transform: translateY(-3px); } }
+  @keyframes swing { 0%, 100% { transform: rotate(3deg); } 50% { transform: rotate(-3deg); } }
+  @keyframes kickL { 0%, 100% { transform: rotate(7deg); } 50% { transform: rotate(-9deg); } }
+  @keyframes kickR { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(7deg); } }
+  @keyframes sway { 0%, 100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.2deg); } }
+</style>
+</helmet>
+<div data-screen-label="Log in" style="min-height: 100vh; position: relative; overflow: hidden; background-color: #efe7ed; background-image: radial-gradient(rgba(38,33,42,0.09) 1px, transparent 1px); background-size: 20px 20px; font-family: 'Kalam', cursive; color: #17120b; display: flex; align-items: flex-start; justify-content: center; padding: 92px 16px 200px; box-sizing: border-box">
+  <!-- The house bar. `../` is the site root, which vercel.json rewrites to
+       lab 2 — the same destination lab 2's own brand link uses. -->
+  <header class="knoll-head">
+    <a class="knoll-brand" href="../"><img src="../logo/logo-icon.svg" alt="" width="26" height="26"><span>knoll</span></a>
+  </header>
+
+
+  <!-- pines from the village kit, peeking in from the bottom corners -->
+  <svg width="0" height="0" style="position: absolute"><defs><path id="pine" d="M0,-440 L58,-328 L30,-336 L88,-222 L48,-232 L116,-114 L62,-126 L134,0 L-134,0 L-62,-126 L-116,-114 L-48,-232 L-88,-222 L-30,-336 L-58,-328 Z"></path></defs></svg>
+  <svg aria-hidden="true" width="112" height="180" sc-camel-view-box="-146 -452 292 464" style="position: absolute; left: -10px; bottom: 60px; pointer-events: none"><use href="#pine" fill="#1e1633"></use></svg>
+  <svg aria-hidden="true" width="200" height="370" sc-camel-view-box="-30 190 300 555" style="position: absolute; left: 30px; bottom: -120px; pointer-events: none; filter: drop-shadow(9px 10px 0 rgba(0,0,0,0.28)); transform-origin: 50% 100%; animation: sway 6s ease-in-out infinite">
+    <rect x="94" y="638" width="46" height="94" fill="#6b4a2e" stroke="#17120b" stroke-width="6"></rect>
+    <circle cx="117" cy="702" r="7" fill="#5c3a22" stroke="#17120b" stroke-width="3"></circle>
+    <use href="#pine" transform="translate(117,660) scale(1.05)" fill="#35693c" stroke="#17120b" stroke-width="7" stroke-linejoin="round"></use>
+    <g transform="translate(117,660) scale(1.05)" stroke="#5a9e58" stroke-width="5" stroke-linecap="round" fill="none"><path d="M-58,-96 Q-20,-82 30,-92"></path><path d="M-40,-206 Q-8,-194 28,-202"></path><path d="M-26,-306 Q0,-298 20,-304"></path></g>
+  </svg>
+  <svg aria-hidden="true" width="150" height="278" sc-camel-view-box="-30 190 300 555" style="position: absolute; right: 20px; bottom: -90px; pointer-events: none; filter: drop-shadow(9px 10px 0 rgba(0,0,0,0.28)); transform-origin: 50% 100%; animation: sway 7s ease-in-out infinite 1.3s">
+    <rect x="94" y="638" width="46" height="94" fill="#6b4a2e" stroke="#17120b" stroke-width="6"></rect>
+    <use href="#pine" transform="translate(117,660) scale(1.05)" fill="#35693c" stroke="#17120b" stroke-width="7" stroke-linejoin="round"></use>
+    <g transform="translate(117,660) scale(1.05)" stroke="#5a9e58" stroke-width="5" stroke-linecap="round" fill="none"><path d="M-58,-96 Q-20,-82 30,-92"></path><path d="M-40,-206 Q-8,-194 28,-202"></path></g>
+  </svg>
+  <svg aria-hidden="true" width="90" height="145" sc-camel-view-box="-146 -452 292 464" style="position: absolute; right: 150px; bottom: 40px; pointer-events: none"><use href="#pine" fill="#1e1633"></use></svg>
+
+  <!-- the rubber-hose arm: behind the paper, in front of the village -->
+  <svg aria-hidden="true" style="position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: {{ armZ }}; overflow: visible">
+    <path ref="{{ armInkRef }}" d="M0,0" fill="none" stroke="#17120b" stroke-width="22" stroke-linecap="round"></path>
+    <path ref="{{ armCoatRef }}" d="M0,0" fill="none" stroke="#5a8fd6" stroke-width="12" stroke-linecap="round"></path>
+    <line ref="{{ cuffRef }}" x1="0" y1="0" x2="0" y2="0" stroke="#17120b" stroke-width="12" stroke-linecap="round"></line>
+    <line ref="{{ cuffRef2 }}" x1="0" y1="0" x2="0" y2="0" stroke="#fdf7e3" stroke-width="6" stroke-linecap="round"></line>
+  </svg>
+
+  <!-- THE SCROLL -->
+  <div ref="{{ scrollRef }}" style="position: relative; width: 100%; max-width: 460px; z-index: 3; transform: rotate(0.5deg); animation: {{ swingAnim }}">
+    <!-- top roller -->
+    <div style="position: relative; height: 30px; margin: 0 -20px; z-index: 3">
+      <div style="position: absolute; left: 0; top: 4px; width: 22px; height: 22px; background: #6b4a2e; border: 3px solid #17120b; border-radius: 50%; box-sizing: border-box"></div>
+      <div style="position: absolute; right: 0; top: 4px; width: 22px; height: 22px; background: #6b4a2e; border: 3px solid #17120b; border-radius: 50%; box-sizing: border-box"></div>
+      <div style="position: absolute; left: 14px; right: 14px; top: 0; height: 30px; box-sizing: border-box; background: #8a6a42; border: 3px solid #17120b; border-radius: 15px 14px 16px 15px; box-shadow: 4px 4px 0 #d4c6d3"></div>
+      <div style="position: absolute; left: 30px; right: 30px; top: 8px; height: 0; border-top: 2px solid rgba(23,18,11,0.28)"></div>
+    </div>
+    <!-- paper -->
+    <div style="position: relative; margin: -14px 6px; z-index: 2">
+      <div style="height: {{ paperH }}; overflow: {{ paperOverflow }}; transition: {{ paperTransition }}; background: #f4ecd5; border: 3px solid #17120b; border-radius: 4px 9px 5px 11px; box-shadow: 4px 4px 0 #d4c6d3; box-sizing: border-box">
+        <div ref="{{ paperInnerRef }}">
+          <div style="height: 16px; background: #e4d9bb; border-bottom: 2px solid rgba(23,18,11,0.25)"></div>
+          <form sc-camel-on-submit="{{ onSubmit }}" novalidate="true" style="padding: 20px 34px 22px; display: flex; flex-direction: column; gap: 16px; position: relative">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center">
+              <h1 style="margin: 0; font-family: Rye, serif; font-weight: 400; font-size: 30px; line-height: 1.1; color: #17120b; text-wrap: balance">{{ heading }}</h1>
+              <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; color: #17120b; opacity: 0.65">{{ subhead }}</div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 6px">
+                <div style="width: 60px; height: 3px; background: #17120b; opacity: 0.5"></div>
+                <div style="width: 10px; height: 10px; background: #e8484a; border: 2.5px solid #17120b; transform: rotate(45deg)"></div>
+                <div style="width: 60px; height: 3px; background: #17120b; opacity: 0.5"></div>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 14px; font-size: 18px; line-height: 1.5">
+              <!-- email -->
+              <div style="position: relative">
+                <div>Halt — who goes there? A resident reachable by post at</div>
+                <div style="position: relative; border-bottom: 2px dotted rgba(23,18,11,0.5)">
+                  <input ref="{{ emailRef }}" id="f-email" name="email" type="email" autocomplete="email" value="{{ email }}" sc-camel-on-change="{{ onEmail }}" sc-camel-on-focus="{{ onFocusEmail }}" sc-camel-on-blur="{{ onBlurEmail }}" aria-describedby="e-email" style="display: block; width: 100%; box-sizing: border-box; background: transparent; border: 0; outline: none; padding: 4px 0 3px; font-family: 'Public Sans', sans-serif; font-size: 17px; color: #3b2a1a; caret-color: #3b2a1a">
+                  <div style="position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: #17120b; transform-origin: left; transform: scaleX({{ emailLine }}); transition: transform 0.35s ease-out"></div>
+                </div>
+                <label for="f-email" style="display: block; font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(email)</label>
+                <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}">
+                  <div id="e-email" style="position: {{ notePos }}; left: 100%; top: 0; margin-left: {{ noteMl }}; width: {{ noteW }}; color: #b83739; font-size: 15px; line-height: 1.3; transform: rotate(1.5deg); display: flex; gap: 6px; align-items: flex-start; margin-top: {{ noteMt }}">
+                    <svg width="34" height="20" sc-camel-view-box="0 0 34 20" style="flex: none; margin-top: 3px"><path d="M32,4 Q20,2 4,14 M12,15 L3,14 L8,7" fill="none" stroke="#b83739" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <span>{{ emailErr }}</span>
+                  </div>
+                </sc-if>
+              </div>
+              <!-- password -->
+              <div style="position: relative">
+                <div>bearing the secret word</div>
+                <div style="position: relative; border-bottom: 2px dotted rgba(23,18,11,0.5); display: flex; align-items: center; gap: 8px">
+                  <input ref="{{ pwRef }}" id="f-pw" name="password" type="{{ pwType }}" autocomplete="current-password" value="{{ pw }}" sc-camel-on-change="{{ onPw }}" sc-camel-on-focus="{{ onFocusPw }}" sc-camel-on-blur="{{ onBlurPw }}" aria-describedby="e-pw" style="display: block; flex: 1; min-width: 0; background: transparent; border: 0; outline: none; padding: 4px 0 3px; font-family: 'Public Sans', sans-serif; font-size: 17px; color: #3b2a1a; caret-color: #3b2a1a; letter-spacing: {{ pwSpacing }}">
+                  <button type="button" sc-camel-on-click="{{ togglePw }}" aria-pressed="{{ showPw }}" style="flex: none; background: transparent; border: 0; padding: 2px 4px; cursor: pointer; font-family: VT323, monospace; font-size: 16px; letter-spacing: 1px; color: #17120b; opacity: 0.7" style-hover="opacity: 1">{{ pwToggleLabel }}</button>
+                  <div style="position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: #17120b; transform-origin: left; transform: scaleX({{ pwLine }}); transition: transform 0.35s ease-out"></div>
+                </div>
+                <label for="f-pw" style="display: block; font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(password) · <a href="#" style="color: #b83739; font-style: italic">forgotten it? ask the gatekeeper</a></label>
+                <sc-if value="{{ pwErr }}" hint-placeholder-val="{{ false }}">
+                  <div id="e-pw" style="position: {{ notePos }}; left: 100%; top: 0; margin-left: {{ noteMl }}; width: {{ noteW }}; color: #b83739; font-size: 15px; line-height: 1.3; transform: rotate(-1deg); display: flex; gap: 6px; align-items: flex-start; margin-top: {{ noteMt }}">
+                    <svg width="34" height="20" sc-camel-view-box="0 0 34 20" style="flex: none; margin-top: 3px"><path d="M32,4 Q20,2 4,14 M12,15 L3,14 L8,7" fill="none" stroke="#b83739" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <span>{{ pwErr }}</span>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+
+            <!-- the lock, and the key that fits it -->
+            <div style="display: flex; align-items: center; gap: 14px; margin-top: 6px; position: relative">
+              <button ref="{{ sealRef }}" type="submit" disabled="{{ sealBusy }}" sc-camel-on-mouse-enter="{{ onSealEnter }}" sc-camel-on-mouse-leave="{{ onSealLeave }}" aria-label="Turn the key to log in" style="position: relative; width: 162px; height: 100px; flex: none; background: transparent; border: 0; padding: 0; cursor: {{ sealCursor }}">
+                <!-- the padlock -->
+                <div style="position: absolute; left: 8px; top: 4px; width: 64px; height: 94px; animation: {{ lockAnim }}; transform-origin: 50% 80%">
+                  <div style="position: absolute; left: 12px; top: 0; width: 40px; height: 46px; border: 7px solid #17120b; border-bottom: 0; border-radius: 22px 22px 0 0; box-sizing: border-box; transform-origin: 100% 100%; transform: {{ shackleT }}; transition: transform 0.4s cubic-bezier(.3,1.4,.5,1)">
+                    <div style="position: absolute; left: -5px; right: -5px; top: -5px; bottom: 0; border: 3px solid #c9c4b8; border-bottom: 0; border-radius: 20px 20px 0 0"></div>
+                  </div>
+                  <div style="position: absolute; left: 0; top: 40px; width: 64px; height: 54px; background: #c9a24a; border: 3px solid #17120b; border-radius: 10px 10px 13px 12px; box-sizing: border-box; box-shadow: inset -4px -4px 0 rgba(23,18,11,0.18), 4px 4px 0 #d4c6d3">
+                    <div style="position: absolute; left: 22px; top: 10px; width: 14px; height: 14px; background: #17120b; border-radius: 50%"></div>
+                    <div style="position: absolute; left: 26px; top: 20px; width: 6px; height: 16px; background: #17120b; border-radius: 0 0 2px 2px"></div>
+                  </div>
+                  <!-- the key, once it is in the lock: only its bow shows -->
+                  <sc-if value="{{ keyInLock }}" hint-placeholder-val="{{ false }}">
+                    <div style="position: absolute; left: 17px; top: 45px; width: 30px; height: 30px; border-radius: 50%; background: #c9a24a; border: 3px solid #17120b; box-sizing: border-box; box-shadow: 3px 3px 0 rgba(23,18,11,0.3); transform: rotate({{ keyTurn }}deg); transition: transform 0.3s cubic-bezier(.4,1.3,.5,1)">
+                      <div style="position: absolute; left: 8px; top: 8px; width: 8px; height: 8px; background: #17120b; border-radius: 50%"></div>
+                      <div style="position: absolute; left: 10px; bottom: -3px; width: 4px; height: 9px; background: #17120b; border-radius: 2px"></div>
+                    </div>
+                  </sc-if>
+                </div>
+                <!-- the key, lying beside the lock -->
+                <div ref="{{ keyRef }}" style="position: absolute; left: 84px; top: 44px; width: 74px; height: 28px; transform-origin: 12px 14px; transform: {{ keyT }}; opacity: {{ keyOp }}; transition: transform 0.4s cubic-bezier(.3,1.2,.5,1), opacity 0.12s linear; filter: drop-shadow(3px 3px 0 rgba(23,18,11,0.28))">
+                  <div style="position: absolute; left: 0; top: 2px; width: 24px; height: 24px; border-radius: 50%; background: #c9a24a; border: 3px solid #17120b; box-sizing: border-box">
+                    <div style="position: absolute; left: 5px; top: 5px; width: 8px; height: 8px; background: #f4ecd5; border: 2px solid #17120b; border-radius: 50%; box-sizing: border-box"></div>
+                  </div>
+                  <div style="position: absolute; left: 22px; top: 10px; width: 48px; height: 8px; background: #c9a24a; border: 2.5px solid #17120b; border-radius: 3px; box-sizing: border-box"></div>
+                  <div style="position: absolute; left: 54px; top: 15px; width: 6px; height: 9px; background: #c9a24a; border: 2.5px solid #17120b; border-top: 0; border-radius: 0 0 2px 2px; box-sizing: border-box"></div>
+                  <div style="position: absolute; left: 63px; top: 15px; width: 6px; height: 12px; background: #c9a24a; border: 2.5px solid #17120b; border-top: 0; border-radius: 0 0 2px 2px; box-sizing: border-box"></div>
+                </div>
+              </button>
+              <div style="display: flex; flex-direction: column; gap: 3px">
+                <div style="font-family: VT323, monospace; font-size: 22px; letter-spacing: 3px; color: #17120b">{{ sealLabel }}</div>
+                <div style="font-style: italic; font-size: 14px; opacity: 0.65">{{ sealHint }}</div>
+                <label style="display: flex; align-items: center; gap: 8px; font-style: italic; font-size: 14px; opacity: 0.75; cursor: pointer; margin-top: 2px"><input type="checkbox" checked="{{ remember }}" sc-camel-on-change="{{ onRemember }}" style="width: 15px; height: 15px; accent-color: #b83739; margin: 0"><span>keep the gate unlatched for me</span></label>
+                <div style="font-style: italic; font-size: 13px; opacity: 0.65; margin-top: 4px">by signing in you agree to the <a href="#" style="color: #b83739">Terms of Residency</a></div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+              <div style="display: flex; align-items: center; gap: 10px; width: 100%">
+                <div style="flex: 1; height: 0; border-top: 2px dotted rgba(23,18,11,0.4)"></div>
+                <div style="font-family: VT323, monospace; font-size: 16px; letter-spacing: 2px; color: #17120b; opacity: 0.65; white-space: nowrap">OR, BY OTHER POST</div>
+                <div style="flex: 1; height: 0; border-top: 2px dotted rgba(23,18,11,0.4)"></div>
+              </div>
+              <button type="button" sc-camel-on-click="{{ onGoogle }}" disabled="{{ sealBusy }}" style="display: flex; align-items: center; gap: 12px; width: 100%; max-width: 300px; box-sizing: border-box; padding: 9px 16px 8px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 8px 11px 7px 10px; box-shadow: 4px 4px 0 rgba(23,18,11,0.55); cursor: pointer; font-family: 'Kalam', cursive; font-size: 16px; color: #17120b; text-align: left; transition: transform 0.08s" style-hover="background: #fffaf0; transform: translate(-1px,-1px)" style-active="transform: translate(2px,2px); box-shadow: 2px 2px 0 rgba(23,18,11,0.55)">
+                <svg width="22" height="22" sc-camel-view-box="0 0 48 48" aria-hidden="true" style="flex: none"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-2.8-.4-4H24v8.1h12.8c-.3 2.2-1.7 5.4-4.8 7.6l7.4 5.7c4.4-4.1 7.1-10.1 7.1-17.4z"></path><path fill="#FBBC05" d="M10.5 28.7c-.5-1.5-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C1 16.5 0 20.1 0 24s1 7.5 2.6 10.8l7.9-6.1z"></path><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2 1.4-4.8 2.4-8.5 2.4-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"></path></svg>
+                <span style="flex: 1">Google knows me — let me through</span>
+                <span style="font-family: VT323, monospace; font-size: 14px; letter-spacing: 1px; opacity: 0.6">→</span>
+              </button>
+              <div style="font-style: italic; font-size: 13px; opacity: 0.6; text-align: center; margin-top: -4px">a familiar face, in lieu of a secret word</div>
+            </div>
+            <div style="font-style: italic; font-size: 14.5px; opacity: 0.7; text-align: center">New to the hill? <a href="../signup/" style="color: #b83739">Petition for residency</a></div>
+          </form>
+          <div style="height: 16px; background: #e4d9bb; border-top: 2px solid rgba(23,18,11,0.25)"></div>
+        </div>
+      </div>
+    </div>
+    <!-- bottom roller, with the gnome hanging off its left end -->
+    <div style="position: relative; height: 30px; margin: 0 -20px; z-index: 3; animation: {{ rollerAnim }}">
+      <div style="position: absolute; left: 0; top: 4px; width: 22px; height: 22px; background: #6b4a2e; border: 3px solid #17120b; border-radius: 50%; box-sizing: border-box"></div>
+      <div style="position: absolute; right: 0; top: 4px; width: 22px; height: 22px; background: #6b4a2e; border: 3px solid #17120b; border-radius: 50%; box-sizing: border-box"></div>
+      <div style="position: absolute; left: 14px; right: 14px; top: 0; height: 30px; box-sizing: border-box; background: #8a6a42; border: 3px solid #17120b; border-radius: 14px 16px 15px 15px; box-shadow: 4px 4px 0 #d4c6d3"></div>
+      <div style="position: absolute; left: 30px; right: 30px; bottom: 8px; height: 0; border-top: 2px solid rgba(23,18,11,0.28)"></div>
+      <!-- THE GNOME, 220x310 drawn at half size, his hand on the roller at (56,12) -->
+      <div ref="{{ gnomeRef }}" aria-hidden="true" style="position: absolute; left: -42px; top: 10px; width: 110px; height: 155px; pointer-events: none; transform-origin: 82px 6px; animation: {{ gnomeAnim }}">
+        <div ref="{{ shoulderRef }}" style="position: absolute; left: 37px; top: 84px; width: 0; height: 0"></div>
+        <svg width="110" height="155" sc-camel-view-box="0 0 220 310" style="display: block; overflow: visible; filter: drop-shadow(6px 7px 0 rgba(0,0,0,0.3))">
+          <g style="transform-origin: 164px 12px; animation: swing 4.5s ease-in-out infinite">
+            <path d="M146,168 L164,14" stroke="#17120b" stroke-width="23" stroke-linecap="round"></path>
+            <path d="M146,168 L164,14" stroke="#4a72d4" stroke-width="13" stroke-linecap="round"></path>
+            <circle cx="164" cy="12" r="12" fill="#f0cfae" stroke="#17120b" stroke-width="5"></circle>
+            <g style="transform-origin: 92px 252px; animation: kickL 2.2s ease-in-out infinite">
+              <line x1="92" y1="252" x2="85" y2="290" stroke="#17120b" stroke-width="20" stroke-linecap="round"></line>
+              <line x1="92" y1="252" x2="85" y2="290" stroke="#5b4632" stroke-width="11" stroke-linecap="round"></line>
+              <ellipse cx="84" cy="297" rx="10" ry="13" transform="rotate(8 84 297)" fill="#8a6a42" stroke="#17120b" stroke-width="5"></ellipse>
+            </g>
+            <g style="transform-origin: 128px 252px; animation: kickR 2.2s ease-in-out infinite">
+              <line x1="128" y1="252" x2="135" y2="290" stroke="#17120b" stroke-width="20" stroke-linecap="round"></line>
+              <line x1="128" y1="252" x2="135" y2="290" stroke="#5b4632" stroke-width="11" stroke-linecap="round"></line>
+              <ellipse cx="136" cy="297" rx="10" ry="13" transform="rotate(-8 136 297)" fill="#8a6a42" stroke="#17120b" stroke-width="5"></ellipse>
+            </g>
+            <path d="M70,150 L150,150 L182,258 L38,258 Z" fill="#5a8fd6" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+            <path d="M110,150 L110,258" stroke="rgba(23,18,11,0.18)" stroke-width="3"></path>
+            <circle cx="110" cy="250" r="10" fill="#ffd23f" stroke="#17120b" stroke-width="4"></circle>
+            <circle cx="74" cy="168" r="14" fill="#4a72d4" stroke="#17120b" stroke-width="5"></circle>
+            <g ref="{{ headRef }}" style="transform-origin: 110px 140px">
+              <ellipse cx="72" cy="116" rx="8" ry="11" fill="#f5b8c4" stroke="#17120b" stroke-width="4"></ellipse>
+              <ellipse cx="148" cy="116" rx="8" ry="11" fill="#f5b8c4" stroke="#17120b" stroke-width="4"></ellipse>
+              <circle cx="110" cy="112" r="40" fill="#f0cfae" stroke="#17120b" stroke-width="5"></circle>
+              <path d="M64,118 Q110,148 156,118 Q166,225 110,242 Q54,225 64,118 Z" fill="#f7f0df" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+              <path d="M83,95 Q92,87 100,93" fill="none" stroke="#17120b" stroke-width="4" stroke-linecap="round"></path>
+              <path d="M120,93 Q128,87 137,95" fill="none" stroke="#17120b" stroke-width="4" stroke-linecap="round"></path>
+              <circle cx="93" cy="114" r="9" fill="#ffffff" stroke="#17120b" stroke-width="4"></circle>
+              <circle cx="127" cy="114" r="9" fill="#ffffff" stroke="#17120b" stroke-width="4"></circle>
+              <g ref="{{ pupilsRef }}">
+                <circle cx="93" cy="115" r="4" fill="#17120b"></circle>
+                <circle cx="127" cy="115" r="4" fill="#17120b"></circle>
+              </g>
+              <g style="opacity: {{ lidOpacity }}; transition: opacity 0.2s">
+                <path d="M84,114 Q93,122 102,114" fill="#f0cfae" stroke="#17120b" stroke-width="4" stroke-linecap="round"></path>
+                <path d="M118,114 Q127,122 136,114" fill="#f0cfae" stroke="#17120b" stroke-width="4" stroke-linecap="round"></path>
+              </g>
+              <ellipse cx="110" cy="145" rx="7" ry="8" fill="#5b3324" stroke="#17120b" stroke-width="4"></ellipse>
+              <ellipse cx="91" cy="136" rx="11" ry="5.5" transform="rotate(-24 91 136)" fill="#fffaf0" stroke="#17120b" stroke-width="4"></ellipse>
+              <ellipse cx="129" cy="136" rx="11" ry="5.5" transform="rotate(24 129 136)" fill="#fffaf0" stroke="#17120b" stroke-width="4"></ellipse>
+              <circle cx="110" cy="126" r="13" fill="#e8a583" stroke="#17120b" stroke-width="5"></circle>
+              <circle cx="106" cy="122" r="3.5" fill="rgba(255,255,255,0.55)"></circle>
+              <g style="transform: translateY({{ hatDrop }}px) rotate({{ hatTilt }}deg); transform-origin: 62px 95px; transition: transform 0.3s cubic-bezier(.3,1.3,.5,1); animation: {{ hatAnim }}">
+                <path d="M110,10 L158,90 L62,90 Z" fill="#e8484a" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+                <rect x="96" y="50" width="14" height="14" transform="rotate(-12 103 57)" fill="#b83739" stroke="#17120b" stroke-width="3" stroke-dasharray="4 3"></rect>
+                <rect x="54" y="84" width="112" height="22" rx="11" fill="#b83739" stroke="#17120b" stroke-width="5"></rect>
+                <rect x="68" y="90" width="26" height="6" rx="3" fill="rgba(255,255,255,0.35)"></rect>
+                <circle cx="110" cy="12" r="10" fill="#fdf7e3" stroke="#17120b" stroke-width="5"></circle>
+              </g>
+            </g>
+            <sc-if value="{{ asleep }}" hint-placeholder-val="{{ false }}">
+              <text x="168" y="80" font-family="Rye, serif" font-size="34" fill="#17120b" style="animation: zFloat 1.6s ease-out infinite; transform-origin: 168px 80px">z</text>
+            </sc-if>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <sc-if value="{{ done }}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; left: 0; right: 0; top: 60px; text-align: center; display: flex; flex-direction: column; gap: 6px; align-items: center">
+        <div style="font-family: Rye, serif; font-size: 28px; color: #17120b">Welcome back to Knoll.</div>
+        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">the gate swings open · <a href="#" style="text-decoration: none">into the village →</a></div>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- THE HAND, in front of everything -->
+  <div ref="{{ handRef }}" aria-hidden="true" style="position: fixed; left: 0; top: 0; width: 56px; height: 56px; pointer-events: none; z-index: 5; will-change: transform; opacity: {{ handOpacity }}; transition: opacity 0.3s">
+    <div ref="{{ handInnerRef }}" style="width: 56px; height: 56px; transform-origin: 30% 30%; transition: transform 0.09s ease-out">
+      <sc-if value="{{ posePoint }}" hint-placeholder-val="{{ true }}">
+        <svg width="56" height="56" sc-camel-view-box="0 0 56 56" style="display: block; overflow: visible; filter: drop-shadow(3px 3px 0 rgba(23,18,11,0.25))">
+          <path d="M22,50 Q10,48 12,34 L14,26 Q14,20 19,20 L20,27 L12,8 Q10,2 15,2 Q19,2 21,8 L26,20 L30,20 Q36,18 39,23 L44,25 Q49,27 47,33 Q50,36 47,42 Q48,50 40,52 Q32,54 22,50 Z" fill="#f0cfae" stroke="#17120b" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path d="M30,22 L31,32 M39,24 L38,33 M46,32 L42,40" fill="none" stroke="#17120b" stroke-width="2" stroke-linecap="round" opacity="0.6"></path>
+        </svg>
+      </sc-if>
+      <sc-if value="{{ poseQuill }}" hint-placeholder-val="{{ false }}">
+        <svg width="56" height="56" sc-camel-view-box="0 0 56 56" style="display: block; overflow: visible; filter: drop-shadow(3px 3px 0 rgba(23,18,11,0.25))">
+          <path d="M6,2 L28,30" stroke="#17120b" stroke-width="7" stroke-linecap="round"></path>
+          <path d="M6,2 L28,30" stroke="#fdf7e3" stroke-width="3.5" stroke-linecap="round"></path>
+          <path d="M14,12 Q24,4 36,10 Q30,18 22,20 Z" fill="#bfe3f0" stroke="#17120b" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path d="M24,52 Q12,50 14,38 Q16,28 22,26 L34,22 Q42,22 45,30 Q50,34 47,42 Q48,50 40,53 Q32,55 24,52 Z" fill="#f0cfae" stroke="#17120b" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path d="M22,27 L28,36 M32,24 L36,34 M40,28 L42,38" fill="none" stroke="#17120b" stroke-width="2" stroke-linecap="round" opacity="0.6"></path>
+        </svg>
+      </sc-if>
+      <sc-if value="{{ poseGrab }}" hint-placeholder-val="{{ false }}">
+        <svg width="56" height="56" sc-camel-view-box="0 0 56 56" style="display: block; overflow: visible; filter: drop-shadow(3px 3px 0 rgba(23,18,11,0.25))">
+          <path d="M20,52 Q8,48 10,36 Q10,28 12,22 Q12,14 18,14 L20,24 Q22,8 28,8 Q33,8 32,22 Q36,8 42,10 Q46,12 44,24 Q50,16 53,22 Q55,28 50,38 Q52,48 42,52 Q30,55 20,52 Z" fill="#f0cfae" stroke="#17120b" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path d="M20,26 L21,34 M32,24 L32,34 M44,26 L42,36" fill="none" stroke="#17120b" stroke-width="2" stroke-linecap="round" opacity="0.6"></path>
+        </svg>
+      </sc-if>
+      <sc-if value="{{ poseThumb }}" hint-placeholder-val="{{ false }}">
+        <svg width="56" height="56" sc-camel-view-box="0 0 56 56" style="display: block; overflow: visible; filter: drop-shadow(3px 3px 0 rgba(23,18,11,0.25))">
+          <path d="M18,54 Q8,52 8,40 L8,30 Q8,24 14,24 L22,24 L26,10 Q28,2 34,4 Q38,6 36,16 L34,24 L46,24 Q52,24 51,31 Q53,36 50,40 Q51,46 46,48 Q46,54 38,54 Z" fill="#f0cfae" stroke="#17120b" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path d="M36,32 L48,32 M36,40 L48,40 M36,47 L46,47" fill="none" stroke="#17120b" stroke-width="2" stroke-linecap="round" opacity="0.6"></path>
+        </svg>
+      </sc-if>
+      <sc-if value="{{ posePalm }}" hint-placeholder-val="{{ false }}">
+        <svg width="56" height="56" sc-camel-view-box="0 0 56 56" style="display: block; overflow: visible; filter: drop-shadow(3px 3px 0 rgba(23,18,11,0.25))">
+          <path d="M18,54 Q8,52 8,40 L8,26 Q8,20 12,20 Q16,20 16,26 L16,14 Q16,8 20,8 Q25,8 25,14 L25,8 Q25,2 30,2 Q35,2 35,8 L35,14 Q35,9 39,9 Q44,9 44,15 L44,26 Q44,22 48,22 Q52,22 52,28 L50,42 Q50,54 38,54 Z" fill="#f0cfae" stroke="#17120b" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path d="M16,26 L16,34 M25,14 L25,32 M35,14 L35,32 M44,26 L44,34" fill="none" stroke="#17120b" stroke-width="2" stroke-linecap="round" opacity="0.6"></path>
+        </svg>
+      </sc-if>
+    </div>
+  </div>
+
+  <span ref="{{ mirrorRef }}" aria-hidden="true" style="position: absolute; visibility: hidden; white-space: pre; font-family: 'Public Sans', sans-serif; font-size: 17px; left: 0; top: 0"></span>
+  <div aria-live="polite" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{ liveMsg }}</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="">
+class Component extends DCLogic {
+  state = { pose: 'point', paperH: '0px', paperT: 'none', swung: false, focused: null, name: '', email: '', pw: '', pw2: '', showPw: false,
+    errs: {}, seal: 'idle', remember: true, asleep: false, narrow: false, jostle: false, hatSlip: false, done: false, live: '', rolledUp: false };
+  refs = {};
+  r = (k) => (el) => { this.refs[k] = el; };
+  armInkRef = this.r('armInk'); armCoatRef = this.r('armCoat'); cuffRef = this.r('cuff'); cuffRef2 = this.r('cuff2');
+  scrollRef = this.r('scroll'); paperInnerRef = this.r('paperInner'); nameRef = this.r('name'); emailRef = this.r('email'); pwRef = this.r('pw'); pw2Ref = this.r('pw2');
+  sealRef = this.r('seal'); keyRef = this.r('key'); gnomeRef = this.r('gnome'); shoulderRef = this.r('shoulder'); headRef = this.r('head'); pupilsRef = this.r('pupils');
+  handRef = this.r('hand'); handInnerRef = this.r('handInner'); mirrorRef = this.r('mirror');
+
+  // motion state — refs, not state; the loop writes the DOM directly
+  m = { mx: -200, my: -200, hasMouse: false, hx: 0, hy: 0, hvx: 0, hvy: 0, ex: 0, ey: 0, evx: 0, evy: 0, init: false,
+    mode: 'cursor', lastMove: 0, focusMouse: null, scribbleT: 0, idle: null, lastIdle: 0, awayT: 0, sealHover: false, noteAt: null, noteT: 0, lastSpeed: 0, squash: 0, last: 0, rest: false };
+
+  componentDidMount() {
+    this.onResize(); window.addEventListener('resize', this.onResize);
+    window.addEventListener('mousemove', this.onMove);
+    window.addEventListener('blur', this.onAway); document.addEventListener('mouseleave', this.onAway);
+    window.addEventListener('focus', this.onBack); document.addEventListener('mouseenter', this.onBack);
+    // KNOLL-LOGIN FIX 1 of 2 (see about.md § changes to the export): the
+    // matching setItem below is already in a try/catch, and this read has to
+    // be too. Where storage throws — site data blocked, an old Safari private
+    // window, a sandboxed frame — an unguarded read ends componentDidMount
+    // right here, so unroll() is never scheduled and the rAF loop never
+    // starts: the page becomes a shut scroll with a stranded hand beside it.
+    // /signup carries the identical bug and the identical fix.
+    let ret = false; try { ret = !!localStorage.getItem('knoll-login:seen'); } catch (e) {}
+    const dur = ret ? 400 : 700;
+    const unroll = () => {
+      const h = this.refs.paperInner ? this.refs.paperInner.scrollHeight + 6 : 640;
+      this.setState({ paperT: 'height ' + dur + 'ms cubic-bezier(.3,1.35,.5,1)', paperH: h + 'px' });
+      setTimeout(() => this.setState({ swung: true, open: true }), dur);
+      setTimeout(() => this.setState({ swung: false }), dur + 1400);
+    };
+    setTimeout(() => { (document.fonts ? document.fonts.ready : Promise.resolve()).then(unroll); }, 350);
+    this.watchPaper();
+    try { localStorage.setItem('knoll-login:seen', '1'); } catch (e) {}
+    this.raf = requestAnimationFrame(this.tick);
+  }
+  // KNOLL-LOGIN FIX 2 of 2 (see about.md § changes to the export). The paper's
+  // height is a pixel number measured once, the frame the scroll unrolls — and
+  // the form does not stay that height. Every margin note that appears adds to
+  // it, and under 800px wide those notes stop being margin notes and stack
+  // UNDER their field instead (notePos, renderVals). The box is overflow:visible
+  // once open, so the surplus does not clip: it hangs out below the bottom
+  // roller, over the pines. A pixel height is still the right thing to animate
+  // between, so this keeps it and re-measures instead of going to `auto` —
+  // `auto` would look right and then refuse to animate on the way back down,
+  // breaking the roll-up. Only while the scroll is open: the roll-ups set
+  // open:false in the same batch they set paperH:'0px', so this never fights
+  // them. Same fix as /signup next door, for the same inherited bug.
+  watchPaper() {
+    if (typeof ResizeObserver !== 'function' || !this.refs.paperInner) return;
+    this.paperRO = new ResizeObserver(() => {
+      if (!this.state.open || !this.refs.paperInner) return;
+      const h = this.refs.paperInner.scrollHeight + 6;
+      if (Math.abs(parseFloat(this.state.paperH) - h) < 1) return;
+      this.setState({ paperT: 'height 220ms ease-out', paperH: h + 'px' });
+    });
+    this.paperRO.observe(this.refs.paperInner);
+  }
+  componentWillUnmount() {
+    if (this.paperRO) this.paperRO.disconnect();
+    cancelAnimationFrame(this.raf); window.removeEventListener('resize', this.onResize); window.removeEventListener('mousemove', this.onMove);
+    window.removeEventListener('blur', this.onAway); document.removeEventListener('mouseleave', this.onAway);
+    window.removeEventListener('focus', this.onBack); document.removeEventListener('mouseenter', this.onBack);
+  }
+  onResize = () => { const n = window.innerWidth < 800; if (n !== this.state.narrow) this.setState({ narrow: n }); };
+  onMove = (e) => {
+    const m = this.m; m.mx = e.clientX; m.my = e.clientY; m.hasMouse = true; m.lastMove = performance.now(); m.awayT = 0;
+    if (m.mode === 'caret' && m.focusMouse && Math.hypot(e.clientX - m.focusMouse.x, e.clientY - m.focusMouse.y) > 40) m.mode = 'cursor';
+    if (this.state.asleep) this.wake();
+  };
+  onAway = () => { if (!this.m.awayT) this.m.awayT = performance.now(); };
+  onBack = () => { this.m.awayT = 0; if (this.state.asleep) this.wake(); };
+  wake() { this.setState({ asleep: false, jostle: true }); setTimeout(() => this.setState({ jostle: false }), 500); }
+
+  setPose(p) {
+    if (p === this.state.pose) return;
+    const inner = this.refs.handInner; if (inner) this.m.squash = 0.22;
+    setTimeout(() => this.setState({ pose: p }), 60);
+  }
+
+  // ─── fields ───
+  onName = (e) => this.setState({ name: e.target.value }, this.typed);
+  onEmail = (e) => this.setState({ email: e.target.value }, this.typed);
+  onPw = (e) => this.setState({ pw: e.target.value }, this.typed);
+  onPw2 = (e) => this.setState({ pw2: e.target.value }, this.typed);
+  onFocusPw2 = () => this.focusField('pw2'); onBlurPw2 = () => this.blurField('pw2');
+  typed = () => { this.m.scribbleT = performance.now(); this.m.mode = 'caret'; if (this.state.focused) { this.m.touched = this.m.touched || {}; this.m.touched[this.state.focused] = true; } };
+  focusField(f) { this.setState({ focused: f }); this.m.mode = 'caret'; this.m.focusMouse = { x: this.m.mx, y: this.m.my }; }
+  onFocusName = () => this.focusField('name'); onFocusEmail = () => this.focusField('email'); onFocusPw = () => this.focusField('pw');
+  onBlurName = () => this.blurField('name'); onBlurEmail = () => this.blurField('email'); onBlurPw = () => this.blurField('pw');
+  validate(f) {
+    const s = this.state;
+    if (f === 'name') return s.name.trim() ? '' : 'every gnome has a name; even Nameless is one';
+    if (f === 'email') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email) ? '' : (s.email.includes('@') ? 'the postmaster wants a proper address after the @' : 'no @ in this one; the postmaster won\u2019t find you');
+    if (f === 'pw') return s.pw ? '' : 'the gate wants a secret word before it opens';
+    return '';
+  }
+  blurField(f) {
+    // an untouched, empty blank earns no note — only the seal asks for it
+    if (!this.state[f] && !this.m.touched?.[f]) { this.setState({ focused: null }); this.m.mode = 'cursor'; return; }
+    const err = this.validate(f);
+    const errs = Object.assign({}, this.state.errs); if (err) errs[f] = err; else delete errs[f];
+    this.setState({ focused: null, errs, live: err ? err : '' });
+    this.m.mode = 'cursor';
+    if (err) { this.m.noteAt = f; this.m.noteT = performance.now(); }
+    else if (this.state[f]) { this.setPose('thumb'); this.m.thumbT = performance.now(); }
+  }
+  togglePw = () => this.setState((s) => ({ showPw: !s.showPw }));
+  onRemember = (e) => this.setState({ remember: e.target.checked });
+
+  onGoogle = () => {
+    if (this.state.seal !== 'idle' && this.state.seal !== 'cracked') return;
+    this.setState({ seal: 'cooling', errs: {}, live: 'Asking Google to vouch for you' });
+    setTimeout(() => {
+      this.setState({ seal: 'set', live: 'Welcome back to Knoll' });
+      setTimeout(() => this.setState({ paperT: 'height 380ms cubic-bezier(.6,0,.8,1)', paperH: '0px', rolledUp: true, open: false }), 500);
+      setTimeout(() => this.setState({ done: true }), 950);
+    }, 1400);
+  };
+
+  // ─── the lock ───
+  onSealEnter = () => { this.m.sealHover = true; };
+  onSealLeave = () => { this.m.sealHover = false; };
+  onSubmit = (e) => {
+    e.preventDefault();
+    if (this.state.seal !== 'idle' && this.state.seal !== 'cracked') return;
+    const errs = {}; ['email', 'pw'].forEach((f) => { const er = this.validate(f); if (er) errs[f] = er; });
+    if (Object.keys(errs).length) { this.setState({ errs, live: Object.values(errs)[0] }); this.m.noteAt = Object.keys(errs)[0]; this.m.noteT = performance.now(); return; }
+    const outcome = this.state.pw === '0' ? 'wrong' : 'success';   // pretend server: '0' is the wrong word
+    // the hand fetches the key, carries it to the lock, fits it, turns it
+    this.setState({ seal: 'reach', errs: {} });
+    setTimeout(() => this.setState({ seal: 'grip' }), 380);
+    setTimeout(() => this.setState({ seal: 'carry' }), 520);
+    setTimeout(() => this.setState({ seal: 'insert' }), 980);
+    setTimeout(() => this.setState({ seal: 'turn', jostle: true, hatSlip: true }), 1180);
+    setTimeout(() => this.setState({ seal: 'cooling', jostle: false, live: 'Turning the key' }), 1500);
+    setTimeout(() => {
+      if (outcome === 'wrong') {
+        this.setState({ seal: 'eject' });
+        setTimeout(() => this.setState({ seal: 'cracked', errs: { pw: 'that is not the secret word the gate remembers' }, live: 'that is not the secret word the gate remembers' }), 120);
+        this.m.wagT = performance.now();   // no, no, no — then the note
+        setTimeout(() => { this.m.noteAt = 'pw'; this.m.noteT = performance.now(); }, 1500);
+      } else {
+        this.setState({ seal: 'set', live: 'Welcome back to Knoll' });
+        setTimeout(() => this.setState({ paperT: 'height 380ms cubic-bezier(.6,0,.8,1)', paperH: '0px', rolledUp: true, open: false }), 600);
+        setTimeout(() => this.setState({ done: true }), 1050);
+      }
+    }, 2200);
+  };
+
+  // ─── the loop ───
+  caretPoint() {
+    const f = this.state.focused; const el = this.refs[f]; const mir = this.refs.mirror; if (!el || !mir) return null;
+    const v = el.value; const hid = (f === 'pw' || f === 'pw2') && !this.state.showPw;
+    mir.textContent = hid ? '\u2022'.repeat(v.length) : v; mir.style.letterSpacing = hid ? '3px' : '0';
+    const r = el.getBoundingClientRect(); const w = Math.min(mir.getBoundingClientRect().width, r.width - 4);
+    return { x: r.left + w, y: r.bottom - 6 };
+  }
+  target(now) {
+    const m = this.m, s = this.state;
+    const sh = this.shoulder();
+    if (s.asleep || s.rolledUp) return { x: sh.x + 6, y: sh.y + 40, pose: s.rolledUp ? 'palm' : 'point', rest: true };
+    if (s.seal !== 'idle' && s.seal !== 'cracked' && this.refs.seal) {
+      // the palm sits ~12px below (hx,hy); grip the key by its bow, then hold it in the lock
+      const sr2 = this.refs.seal.getBoundingClientRect(); const lx = sr2.left + 40, ly = sr2.top + 64;
+      if ((s.seal === 'reach' || s.seal === 'grip' || s.seal === 'carry') && this.refs.key) { const r = this.refs.key.getBoundingClientRect(); return { x: r.left + 12, y: r.top + 2, pose: 'grab', hand: true, onPaper: true }; }
+      if (s.seal === 'insert' || s.seal === 'turn') return { x: lx, y: ly - 12, pose: 'grab', hand: true, onPaper: true };
+      return { x: lx + 30, y: ly - 40, pose: s.seal === 'cooling' ? 'palm' : 'thumb', hand: true, onPaper: true };
+    }
+    if (m.wagT && now - m.wagT < 1500 && this.refs.pw) { const r = this.refs.pw.getBoundingClientRect(); const sr0 = this.refs.scroll.getBoundingClientRect(); return { x: sr0.left - 44, y: r.top - 30, pose: 'point', hand: true, wag: true, k: (now - m.wagT) / 1500 }; }
+    if (m.noteAt && now - m.noteT < 900) {
+      const el = document.getElementById('e-' + m.noteAt); if (el) { const r = el.getBoundingClientRect(); return { x: r.left + 40 + (now - m.noteT) / 900 * Math.min(r.width - 60, 120), y: r.top + 14, pose: 'quill', hand: true, scribble: true }; }
+    }
+    if (s.focused && m.mode === 'caret') { const c = this.caretPoint(); if (c) return { x: c.x, y: c.y, pose: 'quill', hand: true, scribble: now - m.scribbleT < 260 }; }
+    if (m.sealHover && this.refs.key) { const r = this.refs.key.getBoundingClientRect(); return { x: r.left + 12, y: r.top - 26, pose: 'grab', hand: true }; }
+    if (!m.hasMouse) return { x: sh.x + 6, y: sh.y + 40, pose: 'point', rest: true };
+    // is the cursor near the scroll?
+    const sr = this.refs.scroll ? this.refs.scroll.getBoundingClientRect() : null;
+    const near = sr && m.mx > sr.left - 140 && m.mx < sr.right + 200 && m.my > sr.top - 100 && m.my < sr.bottom + 100;
+    if (!near) return { x: sh.x + 6, y: sh.y + 40, pose: 'point', rest: true };
+    let pose = 'point';
+    if (m.thumbT && now - m.thumbT < 500) pose = 'thumb';
+    return { x: m.mx + 24, y: m.my + 24, pose, hand: true };
+  }
+  shoulder() {
+    const el = this.refs.shoulder; if (!el) return { x: 0, y: 0 };
+    const r = el.getBoundingClientRect(); return { x: r.left, y: r.top };
+  }
+  // the hand never crosses onto the paper: anything aimed inside the scroll is
+  // parked in the left margin at the same height, pointing in at it
+  keepInMargin(t) {
+    const sr = this.refs.scroll ? this.refs.scroll.getBoundingClientRect() : null; if (!sr) return t;
+    const edge = sr.left - 44;
+    if (t.onPaper) return t;   // the seal press is the one time the hand comes onto the paper
+    if (t.x > edge) { t = Object.assign({}, t, { aimX: t.x, aimY: t.y, x: edge, y: Math.max(sr.top + 10, Math.min(sr.bottom - 10, t.y)) }); }
+    return t;
+  }
+  tick = (now) => {
+    this.raf = requestAnimationFrame(this.tick);
+    const m = this.m, s = this.state; const dt = Math.min(0.05, (now - (m.last || now)) / 1000) || 0.016; m.last = now;
+    const sh = this.shoulder();
+    if (!m.init) { m.hx = sh.x; m.hy = sh.y + 30; m.ex = sh.x; m.ey = sh.y + 20; m.init = true; }
+    let t = this.keepInMargin(this.target(now));
+    // idles: every 4–5 s of stillness, one gesture, never looping
+    if (t.hand && !t.scribble && s.seal === 'idle' && now - m.lastMove > 4200 && now - m.lastIdle > 4200 && !m.idle) {
+      const kinds = ['drum', 'twiddle', 'scratch']; m.idle = { kind: kinds[Math.floor(Math.random() * 3)], t0: now, dur: 900 }; m.lastIdle = now;
+    }
+    if (m.idle) {
+      const k = (now - m.idle.t0) / m.idle.dur;
+      if (k > 1 || now - m.lastMove < 100) m.idle = null;
+      else if (m.idle.kind === 'drum') t = Object.assign({}, t, { y: t.y + Math.abs(Math.sin(k * Math.PI * 4)) * 5 });
+      else if (m.idle.kind === 'twiddle') t = Object.assign({}, t, { pose: 'quill', x: t.x + Math.sin(k * Math.PI * 3) * 4 });
+      else t = Object.assign({}, t, { x: sh.x + 40 + Math.sin(k * Math.PI * 6) * 3, y: sh.y + 4, pose: 'grab' });
+    }
+    if (t.scribble) { t.x += Math.sin(now / 18) * 2.2; t.y += Math.cos(now / 23) * 1.6; }
+    // doze after 20 s away
+    if (m.awayT && now - m.awayT > 20000 && !s.asleep) this.setState({ asleep: true });
+    // hand spring
+    const kH = t.onPaper ? 260 : 140, dH = 2 * Math.sqrt(kH) * 0.9;
+    m.hvx += ((t.x - m.hx) * kH - m.hvx * dH) * dt; m.hvy += ((t.y - m.hy) * kH - m.hvy * dH) * dt;
+    m.hx += m.hvx * dt; m.hy += m.hvy * dt;
+    // elbow: slower spring toward the sagging midpoint
+    const dist = Math.hypot(m.hx - sh.x, m.hy - sh.y);
+    const sag = Math.min(180, 30 + dist * 0.35);
+    // the elbow always stays out past the scroll's left edge, so the arm goes
+    // round the paper rather than under it when the hand is on the far side
+    const sr = this.refs.scroll ? this.refs.scroll.getBoundingClientRect() : null;
+    let tx = (sh.x + m.hx) / 2, ty = (sh.y + m.hy) / 2 + sag;
+    if (sr && !t.onPaper) tx = Math.min(tx, sr.left - 80);
+    const kE = 90, dE = 2 * Math.sqrt(kE) * 0.75;
+    m.evx += ((tx - m.ex) * kE - m.evx * dE) * dt; m.evy += ((ty - m.ey) * kE - m.evy * dE) * dt;
+    m.ex += m.evx * dt; m.ey += m.evy * dt;
+    // wrist: the heel of the hand, rotated with it (hand box is 56 at hx-14,hy-10; pivot 30%,30%)
+    // while wagging, the hand pivots at its heel so the finger sweeps and the palm stays put
+    const pv = t.wag ? { x: 30, y: 50 } : { x: 16.8, y: 16.8 };
+    const rr = (m.rot || 0) * Math.PI / 180, pvx = m.hx - 14 + pv.x, pvy = m.hy - 10 + pv.y;
+    const hx0 = 30 - pv.x, hy0 = 50 - pv.y; // heel of the hand, relative to the pivot
+    const wx = pvx + hx0 * Math.cos(rr) - hy0 * Math.sin(rr), wy = pvy + hx0 * Math.sin(rr) + hy0 * Math.cos(rr);
+    const d = 'M' + sh.x.toFixed(1) + ',' + sh.y.toFixed(1) + ' Q' + m.ex.toFixed(1) + ',' + m.ey.toFixed(1) + ' ' + wx.toFixed(1) + ',' + wy.toFixed(1);
+    if (this.refs.armInk) { this.refs.armInk.setAttribute('d', d); this.refs.armCoat.setAttribute('d', d); }
+    // cuff, across the tangent at the wrist
+    let tnx = wx - m.ex, tny = wy - m.ey; const tl = Math.hypot(tnx, tny) || 1; tnx /= tl; tny /= tl;
+    const cx = wx - tnx * 4, cy = wy - tny * 4, px = -tny * 8, py = tnx * 8;
+    [this.refs.cuff, this.refs.cuff2].forEach((c) => { if (c) { c.setAttribute('x1', cx - px); c.setAttribute('y1', cy - py); c.setAttribute('x2', cx + px); c.setAttribute('y2', cy + py); } });
+    // hand: tilt into travel, squash on stop and on pose swap
+    const speed = Math.hypot(m.hvx, m.hvy);
+    const decel = Math.max(0, m.lastSpeed - speed); m.lastSpeed = speed;
+    m.squash = Math.max(m.squash * (1 - dt * 9), Math.min(0.18, decel * 0.0012));
+    // aim: the finger is drawn pointing up-left (about -55° from +x); turn the
+    // hand so it points at what it is following, plus a lean into its travel
+    const aimX = t.aimX ?? (m.hasMouse ? m.mx : m.hx), aimY = t.aimY ?? (m.hasMouse ? m.my : m.hy);
+    let want = t.onPaper ? 0 : Math.atan2(aimY - m.hy, aimX - m.hx) * 57.3 + 55;
+    if (t.wag) want = -35 + Math.sin(t.k * Math.PI * 6) * 34 * Math.min(1, t.k * 6) * Math.min(1, (1 - t.k) * 4);   // finger up, wagging side to side
+    let da = ((want - (m.rot || 0) + 540) % 360) - 180; m.rot = (m.rot || 0) + da * Math.min(1, dt * (t.wag ? 22 : 10));
+    const tilt = m.rot + Math.max(-10, Math.min(10, m.hvx * 0.015));
+    if (this.refs.hand) this.refs.hand.style.transform = 'translate(' + (m.hx - 14).toFixed(1) + 'px,' + (m.hy - 10).toFixed(1) + 'px)';
+    if (this.refs.handInner) this.refs.handInner.style.transformOrigin = t.wag ? '30px 50px' : '30% 30%';
+    if (this.refs.handInner) this.refs.handInner.style.transform = 'rotate(' + tilt.toFixed(1) + 'deg) scale(' + (1 + m.squash).toFixed(3) + ',' + (1 - m.squash).toFixed(3) + ')';
+    if (t.pose !== s.pose && !(s.seal === 'cooling' && t.pose !== 'palm')) this.setPose(t.pose);
+    if (t.rest !== m.rest) { m.rest = !!t.rest; this.forceUpdate(); }
+    // the head turns toward the cursor, the eyes follow
+    if (this.refs.head && this.refs.gnome) {
+      const g = this.refs.gnome.getBoundingClientRect(); const hx0 = g.left + 55, hy0 = g.top + 60;
+      const lx = m.hasMouse ? m.mx : m.hx, ly = m.hasMouse ? m.my : m.hy;
+      const ang = Math.max(-12, Math.min(12, Math.atan2(lx - hx0, 200) * 57.3));
+      this.refs.head.style.transform = 'rotate(' + (s.asleep ? 8 : ang).toFixed(1) + 'deg)';
+      const dl = Math.hypot(lx - hx0, ly - hy0) || 1; const k = Math.min(1, dl / 300);
+      this.refs.pupils.style.transform = 'translate(' + ((lx - hx0) / dl * 5 * k).toFixed(1) + 'px,' + ((ly - hy0) / dl * 4 * k).toFixed(1) + 'px)';
+    }
+  };
+
+  renderVals() {
+    const s = this.state, p = s.pose;
+    const busy = s.seal !== 'idle' && s.seal !== 'cracked';
+    const turning = s.seal === 'turn' || s.seal === 'cooling' || s.seal === 'set';
+    const inLock = s.seal === 'insert' || turning;
+    const carried = s.seal === 'carry' || s.seal === 'eject';
+    const pwFocused = s.focused === 'pw' || s.focused === 'pw2';
+    return {
+      armInkRef: this.armInkRef, armCoatRef: this.armCoatRef, cuffRef: this.cuffRef, cuffRef2: this.cuffRef2, scrollRef: this.scrollRef, paperInnerRef: this.paperInnerRef,
+      keyRef: this.keyRef, nameRef: this.nameRef, emailRef: this.emailRef, pwRef: this.pwRef, sealRef: this.sealRef, gnomeRef: this.gnomeRef, shoulderRef: this.shoulderRef,
+      headRef: this.headRef, pupilsRef: this.pupilsRef, handRef: this.handRef, handInnerRef: this.handInnerRef, mirrorRef: this.mirrorRef,
+      paperH: s.paperH, paperTransition: s.paperT, paperOverflow: s.open ? 'visible' : 'hidden',
+      swingAnim: s.swung ? 'swingOnce 1.4s ease-in-out both' : 'none',
+      rollerAnim: s.seal === 'turn' ? 'rollerDip 0.5s ease-out both' : 'none',
+      lockAnim: s.seal === 'cracked' || s.seal === 'eject' ? 'jostle 0.5s ease-out both' : 'none',
+      gnomeAnim: s.jostle ? 'jostle 0.5s ease-out both' : 'none',
+      hatAnim: s.hatSlip ? 'hatSlip 0.4s cubic-bezier(.3,1.4,.5,1) both' : 'none',
+      hatDrop: pwFocused ? (s.showPw ? 22 : 42) : 0, hatTilt: pwFocused && s.showPw ? -10 : 0,
+      lidOpacity: s.asleep ? 1 : 0, asleep: s.asleep,
+      name: s.name, email: s.email, pw: s.pw, onName: this.onName, onEmail: this.onEmail, onPw: this.onPw,
+      onFocusName: this.onFocusName, onFocusEmail: this.onFocusEmail, onFocusPw: this.onFocusPw, onBlurName: this.onBlurName, onBlurEmail: this.onBlurEmail, onBlurPw: this.onBlurPw,
+      nameLine: s.focused === 'name' ? 1 : 0, emailLine: s.focused === 'email' ? 1 : 0, pwLine: s.focused === 'pw' ? 1 : 0, pw2Line: s.focused === 'pw2' ? 1 : 0,
+      nameErr: s.errs.name || false, emailErr: s.errs.email || false, pwErr: s.errs.pw || false, pw2Err: s.errs.pw2 || false,
+      pw2: s.pw2, pw2Ref: this.pw2Ref, onPw2: this.onPw2, onFocusPw2: this.onFocusPw2, onBlurPw2: this.onBlurPw2,
+      notePos: s.narrow ? 'static' : 'absolute', noteMl: s.narrow ? '0' : '52px', noteW: s.narrow ? 'auto' : '150px', noteMt: s.narrow ? '6px' : '0',
+      pwType: s.showPw ? 'text' : 'password', pwSpacing: s.showPw ? '0' : '3px', showPw: s.showPw, togglePw: this.togglePw, pwToggleLabel: s.showPw ? 'HIDE' : 'SHOW',
+      onGoogle: this.onGoogle, onSubmit: this.onSubmit, onSealEnter: this.onSealEnter, onSealLeave: this.onSealLeave, sealBusy: busy, sealCursor: busy ? 'progress' : 'pointer',
+      keyT: carried || inLock ? 'translate(-56px,6px) rotate(0deg)' : 'rotate(-12deg)', keyOp: inLock ? 0 : 1,
+      keyInLock: inLock, keyTurn: turning ? 90 : 0,
+      shackleT: s.seal === 'set' ? 'translateY(-10px) rotate(28deg)' : 'none',
+      sealLabel: s.seal === 'set' ? 'UNLOCKED' : (busy ? 'TURNING…' : 'TURN THE KEY'),
+      sealHint: s.seal === 'cracked' ? 'the key jammed; see the margin' : (busy ? 'the lock is stiff' : 'and the gate swings open'),
+      done: s.done, liveMsg: s.live, interlude: !!s.interlude,
+      remember: s.remember, onRemember: this.onRemember,
+      heading: 'Hear ye — a resident returns to the hill',
+      subhead: 'Form 2-A · Passage at the Gate · see Rule Book §4',
+      handOpacity: this.m.rest ? 0.92 : 1,
+      armZ: busy ? 4 : 2,
+      posePoint: p === 'point', poseQuill: p === 'quill', poseGrab: p === 'grab', poseThumb: p === 'thumb', posePalm: p === 'palm',
+    };
+  }
+}
+</script>
+
+
+</body></html>
