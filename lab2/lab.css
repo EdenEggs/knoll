@@ -709,6 +709,9 @@ body.lab-banding,body.lab-banding .bench *{cursor:crosshair}
 .opt-po i{width:14px;height:14px}
 .opt-iz{font-family:var(--mono);font-weight:800;font-size:10.5px;letter-spacing:.06em}
 .opt-say{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;color:var(--serial-ink);padding:0 4px;white-space:nowrap}
+/* …and when the panel the tool belongs to never loaded, the same line says
+   so in the amber the delete tool uses for "this is not the ordinary case" */
+.opt-say-off{color:var(--amber)}
 .opt-sk svg{display:block;color:var(--pink-2)}
 .opt-sk[aria-pressed="true"] svg{color:#fff}
 

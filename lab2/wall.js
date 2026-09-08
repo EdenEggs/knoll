@@ -1227,14 +1227,26 @@ window.Wall = (function () {
          the same two numbers. Only the tail differs, and only in whose
          pointer it is reading. */
       const sk = tool === 'sticker';
-      const f = sk ? (window.Stickers && Stickers.armed()) : (window.Tracer && Tracer.armed());
+      /* AND WHETHER THE PANEL IS THERE AT ALL. stickers.js and tracer.js load
+         AFTER this file, and every call into them is guarded — so if one of
+         them never arrives (a stale index.html with no script tag for it, a
+         404, a syntax error) the button is still on the dock and the press
+         still lands here, and the row would sit there saying "pick a sticker
+         out of the drawer" with no drawer to pick out of. A row that names a
+         thing the user cannot see is worse than one that says what happened,
+         so it says what happened. (2026-09-08, after exactly that: a cached
+         index.html served the new dock and no stickers.js.) */
+      const panel = sk ? window.Stickers : window.Tracer;
+      const f = panel && panel.armed();
       html = grp('SIZE', IMG.map((px, i) =>
         '<button type="button" class="opt-btn opt-iz" data-iz="' + i + '" title="' + px + ' across" aria-label="' + px + ' across">' +
         ['S', 'M', 'L'][i] + '</button>').join('')) +
         rule + grp('FADE', PO.map((o, i) =>
         '<button type="button" class="opt-btn opt-po" data-po="' + i + '" aria-label="' + Math.round(o * 100) + '%">' +
         '<i style="opacity:' + o + '"></i></button>').join('')) +
-        rule + '<span class="opt-say">' + (f ? 'on the pointer: ' + escT(f.name)
+        rule + '<span class="opt-say' + (panel ? '' : ' opt-say-off') + '">' +
+        (!panel ? (sk ? 'the sticker drawer did not load' : 'the tracing table did not load') + ' — try a reload'
+          : f ? 'on the pointer: ' + escT(f.name)
           : sk ? 'pick a sticker out of the drawer' : 'pick a tracing from the library') + '</span>';
     } else if (tool === 'text') {
       /* THE TYPE CASE ONLY COMES UP WITH THE BOX. Picking up the text tool

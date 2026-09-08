@@ -263,6 +263,31 @@ const STICKERS = [
   check('every stamp undoes', await page.evaluate(() => Wall.store.get().items.filter(Boolean).length === 0));
 
   check('no page errors', errors.length === 0, errors.join(' | ').slice(0, 200));
+
+  /* AND WHEN THE DRAWER ITSELF NEVER LOADS. wall.js builds the dock and loads
+     BEFORE stickers.js, so it cannot test for it: a stale index.html with no
+     script tag, or a 404, still leaves STICKER on the dock and the press
+     still lands on the options row. That row used to say "pick a sticker out
+     of the drawer" with no drawer behind it — a sentence about something the
+     user cannot see. On a page where the file is blocked it has to say what
+     actually happened. (2026-09-08, after exactly that in the wild.) */
+  const blind = await ctx.newPage();
+  await blind.route('**/_lab2/default', r => r.fulfill({ status: 404, body: 'no door' }));
+  await blind.route('**/stickers.js', r => r.abort());
+  await blind.goto('http://localhost:4321/lab2/', { waitUntil: 'load' });
+  await blind.waitForFunction(() => window.Lab && window.Wall);
+  await blind.waitForTimeout(1200);
+  const blindSaid = await blind.evaluate(() => {
+    Wall.setTool('sticker');
+    const s = document.querySelector('.opt-say');
+    return { stickers: typeof window.Stickers, onDock: !!document.querySelector('#tool-dock [data-tool="sticker"]'),
+             text: s && s.textContent, amber: !!document.querySelector('.opt-say.opt-say-off'),
+             panel: !!document.getElementById('stickers') };
+  });
+  check('with stickers.js blocked, the row says the drawer did not load',
+    blindSaid.stickers === 'undefined' && blindSaid.onDock && !blindSaid.panel &&
+    /did not load/.test(blindSaid.text || '') && blindSaid.amber, JSON.stringify(blindSaid));
+  await blind.close();
   const fails = results.filter(r => !r.ok).length;
   console.log(`\n${results.length - fails}/${results.length} passed`);
   await browser.close();

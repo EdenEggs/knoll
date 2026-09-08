@@ -7,7 +7,7 @@ they are waiting on artwork. This file is what to hand an agent that is adding
 some.
 
 Everything below is the real contract, not a sketch. `perf/verify-stickers.js`
-(22 checks) exercises it end to end.
+(23 checks) exercises it end to end.
 
 ---
 
@@ -223,7 +223,7 @@ From `site/`:
 node lab2/perf/verify-stickers.js
 ```
 
-22 checks, in real Chrome. It loads its **own** two made-up stickers rather
+23 checks, in real Chrome. It loads its **own** two made-up stickers rather
 than yours — deliberately, so it does not go stale the day real kits arrive —
 and covers the panel, the chips, the search, arming, both stamping paths, the
 undo, and the empty state.
@@ -241,6 +241,12 @@ check, for a handful of stickers across the kits:
   `id`-collision test — it only shows when two are painted together);
 - the search finds it by name and by kit.
 
+The last of the 23 checks is the odd one out: it loads the bench with
+`stickers.js` **blocked**, and asserts the options row says *the sticker
+drawer did not load* rather than naming a drawer that is not there. wall.js
+builds the dock and loads before `stickers.js`, so it cannot test for the file
+— that row is the only place the failure can surface.
+
 Measure and screenshot with Playwright and real Chrome, never the hidden
 Browser pane — the pane does not run `requestAnimationFrame`, so anything that
 settles through one reads stale there. `perf/shot-panels.js` shoots both
@@ -256,4 +262,4 @@ panels.
 | `wall.js` | `stickerAt()` writes the stamp; `paint()`'s `k === 'd'` branch draws it. `IMG` is the S/M/L long edges. |
 | `lab.css` | **THE SIDE PANELS** — the shared `.lab-panel` case and the `.sd-*` insides. |
 | `about.md` | §7, *The sticker tool, and the sticker drawer* — the design argument. |
-| `perf/verify-stickers.js` | the 22 checks. |
+| `perf/verify-stickers.js` | the 23 checks. |
