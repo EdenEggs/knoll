@@ -8,7 +8,7 @@ const { chromium } = require('playwright');
   await page.goto('http://localhost:4321/lab2/', { waitUntil: 'load' });
   await page.waitForFunction(() => window.Lab && window.Frames && window.Wall && window.Tracer);
   await page.waitForTimeout(1500);
-  await page.evaluate(() => Wall.setTool('image'));
+  await page.evaluate(() => Wall.setTool('upload'));
   await page.waitForTimeout(600);
   const r = await page.evaluate(() => { const e = document.querySelector('#tracer .tr-plate'); const q = e.getBoundingClientRect(); return { x: q.left + q.width / 2, y: q.top + q.height / 2 }; });
   await page.evaluate(([x, y]) => Lab.setZoom(2.5, x, y), [r.x, r.y]);

@@ -655,6 +655,18 @@ body.lab-banding,body.lab-banding .bench *{cursor:crosshair}
   background:conic-gradient(#ff3b3b,#ffd23f,#59d36a,#3fd0ff,#5871f5,#e259f0,#ff3b3b);
   box-shadow:inset 0 0 0 3.5px var(--gz-handle-bg)}
 #dock-wheel[aria-expanded="true"]{opacity:1;background:rgba(255,255,255,.12)}
+/* the sticker, drawn the way the Design Canvas export draws it: a square with
+   its bottom-left corner rounded far off and the lifted edge curling out of
+   that corner. Borders, not a path — the export is borders, so this is a
+   transcription of its numbers (22px box, 3px border, radii 4/4/4/10, and a
+   10px curl hung 3px out at the corner with an 8px round on it) scaled by
+   16/22 to the dock's icon size, where any path would have been a guess at
+   the same shape. The wheel above is the other CSS icon here, for the same
+   reason. currentColor, so it goes white with the button when it is pressed. */
+.dock-sticker-ico{display:block;width:16px;height:16px;box-sizing:border-box;border:2.2px solid currentColor;
+  border-radius:2.9px 2.9px 2.9px 7.3px;position:relative}
+.dock-sticker-ico::after{content:"";position:absolute;bottom:-2.2px;left:-2.2px;width:7.3px;height:7.3px;
+  border-right:2.2px solid currentColor;border-top:2.2px solid currentColor;border-radius:0 5.8px 0 0}
 /* the wheel itself: hue round the rim of the disc, saturation in towards its
    white centre, brightness on the bar under it. Cut from the dock's own pill
    and hung off the palette group, so it is wherever the dock is; --opts-h is
@@ -895,165 +907,321 @@ body[data-wall-tool="delete"] .gz:not(.gz-copy){pointer-events:none}
    because it is the same kind of sentence — this is the one */
 .gz.menued{outline:1.5px dotted var(--pink);outline-offset:2px}
 
-/* ─── THE TRACING TABLE ──────────────────────────────────────────────────
-   IMAGE on the dock spawns this onto the sheet, centred on whatever the
-   camera is looking at — see spawnAtView() in tracer.js. The numbers are the
-   Design Canvas export's own (Downloads/features/Tracing Table.html — cream
-   #d9d0c1 / #f4ecd5 / #fdf7e3 on ink #17120b, the blue #3e6cc6, VT323 for the
-   plates and Kalam for the handwriting), transcribed from its inline styles
-   into classes so tracer.js can drive it; see WHERE THE LOOK COMES FROM
-   there. The design was drawn 1270 wide, so .tr-zoom shrinks the whole thing
-   rather than re-laying it out: every border and letter keeps its
-   proportion. It is a gizmo like any other now — Lab.register() drags it by
-   its bar (.tr-bar, [data-handle]) and piles it with everything else — so it
-   sits in the ordinary gizmo band rather than the page's own chrome. */
-.tracer{position:absolute;left:0;top:0;z-index:998;font-family:'Kalam',cursive;color:#17120b;line-height:1.3}
-.tracer[hidden]{display:none}
-.tr-zoom{zoom:.72;width:1270px;max-width:100%;padding:0 20px 20px 0}
-@media (max-width:1100px){.tr-zoom{zoom:.58}}
-.tr-row{display:flex;align-items:stretch;gap:30px}
-.tr-win{width:960px;flex:none;max-width:100%;box-sizing:border-box;background:#d9d0c1;border:5px solid #17120b;
-  border-radius:20px 24px 16px 22px;box-shadow:14px 16px 0 rgba(23,18,11,.45);position:relative}
-.tr-screw{position:absolute;width:13px;height:13px;background:#b8ac97;border:3px solid #17120b;border-radius:50%}
-.tr-screw::after{content:"";position:absolute;left:2px;top:5px;width:9px;height:2.5px;background:#17120b;transform:rotate(40deg)}
-.tr-nw{top:10px;left:10px}.tr-ne{top:10px;right:10px}.tr-sw{bottom:10px;left:10px}.tr-se{bottom:10px;right:10px}
-.tr-ne::after{transform:rotate(-25deg)}.tr-sw::after{transform:rotate(80deg)}.tr-se::after{transform:rotate(10deg)}
-.tr-bar{display:flex;align-items:center;gap:14px;padding:16px 34px 12px;border-bottom:4px solid #17120b;cursor:grab;touch-action:none}
-.tracer.dragging .tr-bar{cursor:grabbing}
-.tr-plate{font-family:'VT323',monospace;font-size:27px;letter-spacing:4px;color:#17120b;background:#f4ecd5;border:3px solid #17120b;
-  border-radius:9px 5px 10px 6px;padding:1px 16px 0;white-space:nowrap;line-height:1.15}
-.tr-serial{font-family:'VT323',monospace;font-size:19px;letter-spacing:3px;color:#8fd0ff;background:#17120b;border-radius:5px;padding:1px 10px 0}
-.tr-grill{flex:1;height:20px;border:3px solid #17120b;border-radius:5px;background:repeating-linear-gradient(90deg,#b8ac97 0 7px,#17120b 7px 10px)}
-.tr-winbtns{display:flex;gap:8px}
-.tr-winbtns button{width:30px;height:30px;box-sizing:border-box;background:#f4ecd5;border:3px solid #17120b;border-radius:7px 5px 8px 6px;
-  font-family:'VT323',monospace;font-size:22px;line-height:1;color:#17120b;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
-.tr-winbtns .tr-x{border-radius:5px 8px 6px 7px;font-size:20px}
-.tr-winbtns button:hover{background:#fdf7e3}.tr-winbtns .tr-x:hover{background:#e8b6b6}
-.tr-winbtns button:active{transform:translate(1px,2px)}
-.tr-body{display:grid;grid-template-columns:264px 236px 1fr;gap:30px;padding:30px 34px 28px}
-/* folded by its –: the title bar stays, the rest goes, and the library with it */
-.tracer.tr-folded .tr-body,.tracer.tr-folded .tr-side{display:none}
-.tracer.tr-folded .tr-win{border-radius:20px 24px 16px 22px}
-.tracer.tr-folded .tr-bar{border-bottom:0}
-.tracer.tr-folded .tr-sw,.tracer.tr-folded .tr-se{display:none}
-.tr-col{display:flex;flex-direction:column;gap:14px;min-width:0}
-.tr-tag{align-self:flex-start;font-family:'VT323',monospace;font-size:17px;letter-spacing:3px;color:#f4ecd5;background:#17120b;
-  border-radius:4px;padding:1px 10px 0;white-space:nowrap}
-.tr-drop{border:3px dashed #17120b;border-radius:14px 10px 13px 11px;background:#f4ecd5;min-height:218px;box-sizing:border-box;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;cursor:pointer;padding:14px}
-.tr-drop:hover,.tr-drop.over{background:#fdf7e3;border-color:#3e6cc6}
+/* ─── THE SIDE PANELS: THE TRACING TABLE, AND THE STICKER DRAWER ─────────
+   The two panels the dock's UPLOAD and STICKER put up. They are the user's
+   UI, not scenery: FIXED to the left of the viewport, not placed on the
+   paper, so panning and zooming the bench moves the drawing under them and
+   leaves them exactly where the hand left them. Nothing about them is a
+   gizmo — no Lab.register, no drag by the bar, nothing in keep.js's layout,
+   nothing to copy — which is also why neither needs the one-frame
+   will-change the world's own panels need after a zoom: they are not inside
+   the sheet whose pose is animated.
+
+   WHERE THE LOOK COMES FROM. Downloads/features/Tracing Table.html, a Design
+   Canvas export of the whole LAB DOCK: a strip of buttons with these two
+   panels standing beside it, both the same 344-wide case in the same dark
+   palette — the case #251f2b on ink #100c16, pockets and buttons #332b3c
+   (#3d3447 hovered), the pink #e8479c with #ff9fd0 for a readout, paper
+   #f6f1f8, VT323 for the plates and Kalam for the handwriting. Every number
+   below is that design's, transcribed out of its inline styles.
+
+   THE CASE IS ONE THING, WRITTEN ONCE. The export draws both panels with the
+   same border, the same radii, the same shadow and the same header — plate,
+   spacer, × — so that shell is .lab-panel and its .lp-* furniture here, and
+   .tracer and .sticker-drawer below add only what is actually different
+   inside them. The tracing table WAS a 1270-wide cream machine with screws
+   and a grill (the previous export); this export redrew it as this panel,
+   and the cream is gone with it.
+
+   ONLY ONE IS EVER UP, because UPLOAD and STICKER are two tools and a tool
+   is exclusive, so they share the one slot rather than stacking. The slot
+   starts under the header — --head-h is lab.js's own measurement of where
+   the bench starts, since the header is one line deployed and a paragraph of
+   workbench notes at home — and runs to the foot of the screen. A panel
+   taller than that scrolls inside itself; it never grows past the screen.
+
+   IT ONLY GETS OUT OF THE DOCK'S WAY WHEN THE DOCK IS IN IT. The dock is
+   CENTRED and the panel is hard left, so on a wide window they never meet
+   and the panel is free to run all the way down — which matters, because
+   the tracing table is about 830 tall and every pixel it does not get is a
+   scroll between the dials and the light table. They meet when the dock's
+   own width leaves less than the panel needs on its left: 16 + 344 + 16 on
+   one side of centre, so below about 1300px. Only there does the panel stop
+   short of the dock and its options row. */
+.lab-panel{position:fixed;left:16px;top:calc(var(--head-h,52px) + 14px);z-index:6000;
+  width:344px;max-width:calc(100vw - 32px);max-height:calc(100dvh - var(--head-h,52px) - 34px);
+  box-sizing:border-box;background:#251f2b;border:5px solid #100c16;
+  border-radius:18px 22px 16px 20px;box-shadow:12px 14px 0 rgba(10,7,14,.45);
+  display:flex;flex-direction:column;overflow:hidden;
+  font-family:'Kalam',cursive;color:#f4f0f7;line-height:1.3}
+.lab-panel[hidden]{display:none}
+/* narrow enough that the centred dock reaches the panel's column: stop above
+   it and its options row rather than under them */
+@media (max-width:1300px){
+  .lab-panel{max-height:calc(100dvh - var(--head-h,52px) - 130px)}
+}
+/* on a phone the dock stands up the side and the paper is precious: the
+   panel takes the width it can get and stops being a margin ornament */
+@media (max-width:720px){
+  .lab-panel{left:10px;right:10px;width:auto;max-width:none;
+    max-height:calc(100dvh - var(--head-h,52px) - 150px)}
+}
+.lp-bar{display:flex;align-items:center;gap:8px;padding:13px 16px 10px;border-bottom:4px solid #100c16;flex:none}
+.lp-plate{font-family:'VT323',monospace;font-size:21px;letter-spacing:3px;color:#f4f0f7;background:#332b3c;
+  border:3px solid #100c16;border-radius:9px 5px 10px 6px;padding:1px 11px 0;white-space:nowrap;line-height:1.15}
+.lp-gap{flex:1}
+.lp-x{width:27px;height:27px;flex-shrink:0;box-sizing:border-box;background:#332b3c;border:3px solid #100c16;
+  border-radius:6px 8px 5px 7px;font-family:'VT323',monospace;font-size:18px;line-height:1;color:#f4f0f7;
+  cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
+.lp-x:hover{background:#e8479c}
+.lp-x:active{transform:translate(1px,2px)}
+.lp-x:focus-visible{outline:2px solid #ff9fd0;outline-offset:2px}
+/* the body scrolls and the footer does not: the flat file and the drawer's
+   hint stay put while the dials or the grid run past them. The export gives
+   the body overflow-y:auto and means it — the tracing table is about 830 tall
+   and only a big window fits all of it — so the bar is dressed in the case's
+   own colours rather than left as the browser's light default on the dark. */
+.lp-body{flex:1;min-height:0;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:11px;
+  scrollbar-width:thin;scrollbar-color:#3d3447 transparent}
+.lp-body::-webkit-scrollbar{width:10px}
+.lp-body::-webkit-scrollbar-track{background:transparent}
+.lp-body::-webkit-scrollbar-thumb{background:#3d3447;border:3px solid #251f2b;border-radius:5px}
+.lp-body::-webkit-scrollbar-thumb:hover{background:#4d4359}
+.lp-foot{flex:none;border-top:4px solid #100c16;padding:10px 16px 11px;display:flex;flex-direction:column;gap:8px}
+/* 01 LAY IT DOWN, 02 THE DIALS, 03 LIGHT TABLE */
+.lp-tag{align-self:flex-start;font-family:'VT323',monospace;font-size:17px;letter-spacing:3px;color:#f4f0f7;
+  background:#100c16;border-radius:4px;padding:1px 10px 0;white-space:nowrap}
+.lp-tag + *{margin-top:-3px}
+/* a plate, a rule to the end of the line, and a serial on the right */
+.lp-head{display:flex;align-items:center;gap:9px}
+.lp-head .lp-plate{font-size:17px;border-radius:7px 5px 8px 6px;padding:1px 10px 0}
+.lp-rule{flex:1;height:3px;background:rgba(10,7,14,.25);border-radius:2px}
+.lp-count{font-family:'VT323',monospace;font-size:15px;letter-spacing:2px;color:#f4f0f7;opacity:.55;white-space:nowrap}
+.lp-serial{font-family:'VT323',monospace;font-size:14px;letter-spacing:2px;color:#ff9fd0;background:#100c16;
+  border-radius:4px;padding:1px 7px 0;white-space:nowrap}
+/* the dashed pocket, waiting to be filled — the export draws it in the flat
+   file, and the empty sticker drawer borrows it */
+.lp-pocket{aspect-ratio:1;box-sizing:border-box;background:#332b3c;border:3px dashed #100c16;
+  border-radius:9px 6px 8px 7px;opacity:.68;display:flex;align-items:flex-end;justify-content:flex-end;
+  padding:2px 5px;font-family:'VT323',monospace;font-size:12px;color:#f4f0f7}
+.lp-pocket:nth-child(4n+2){border-radius:7px 9px 6px 8px}
+.lp-pocket:nth-child(4n+3){border-radius:8px 7px 9px 6px}
+.lp-pocket:nth-child(4n){border-radius:6px 8px 7px 9px}
+/* the little bit of handwriting under a panel's working end */
+.lp-fine{font-size:13px;color:#f4f0f7;opacity:.6;line-height:1.25}
+.lp-fine.lp-nudge{animation:lpNudge .45s}
+@keyframes lpNudge{15%{transform:translateX(-4px)}45%{transform:translateX(4px)}75%{transform:translateX(-2px)}}
+/* what is carried out of either panel on the pointer, on its own bit of paper */
+.lp-ghost{position:fixed;z-index:6600;width:120px;height:120px;margin:-60px 0 0 -60px;pointer-events:none;
+  background:#f6f1f8;border:3px solid #e8479c;border-radius:9px 6px 8px 7px;
+  box-shadow:6px 7px 0 rgba(10,7,14,.35);opacity:.92}
+.lp-ghost svg{display:block;width:100%;height:100%;padding:8px;box-sizing:border-box}
+
+/* ── THE TRACING TABLE ───────────────────────────────────────────────────
+   01 lay a picture down, 02 set the dials, 03 watch it come off the light
+   table, and THE FLAT FILE along the bottom keeps what you saved. tracer.js
+   drives it; the pipeline is lab 1's vectorize.js and did not change when
+   the panel was redrawn.
+
+   THE EXPORT STILL SAYS SAVE SVG, and this still does not: a tracing lives
+   in the library and on the paper, and a file on the desktop was a third
+   place for it to be wrong (THE LIBRARY, SINCE 2026-09-04 in tracer.js). So
+   that button keeps the export's shape and the wording it earned — SAVE TO
+   LIBRARY — and the note under it says the same. */
+.tr-drop{border:3px dashed #100c16;border-radius:14px 10px 13px 11px;background:#332b3c;padding:14px;
+  display:flex;align-items:center;gap:12px;cursor:pointer}
+.tr-drop:hover,.tr-drop.over{background:#3d3447;border-color:#e8479c}
 .tr-drop.bad{animation:trShake .35s}
 @keyframes trShake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
-.tr-drop-empty{display:flex;flex-direction:column;align-items:center;gap:9px}
-.tr-pic{display:block;width:58px;height:48px;box-sizing:border-box;border:3px solid #17120b;border-radius:8px 6px 9px 7px;background:#fdf7e3;position:relative;overflow:hidden}
-.tr-pic b{position:absolute;top:8px;left:9px;width:11px;height:11px;background:#b8ac97;border:2.5px solid #17120b;border-radius:50%}
-.tr-pic u{position:absolute;bottom:-7px;left:-6px;width:34px;height:26px;background:#b8ac97;border:2.5px solid #17120b;transform:rotate(45deg)}
-.tr-pic s{position:absolute;bottom:-9px;right:-9px;width:38px;height:30px;background:#d9d0c1;border:2.5px solid #17120b;transform:rotate(-42deg)}
-.tr-drop strong{font-weight:700;font-size:17px;color:#17120b;text-align:center;line-height:1.3}
-.tr-drop strong small{font-weight:400;font-size:14px;opacity:.7}
-.tr-drop-full{display:flex;flex-direction:column;align-items:center;gap:8px}
-.tr-drop-full img{display:block;max-width:100%;max-height:150px;border:3px solid #17120b;border-radius:8px;background:#fdf7e3}
-.tr-drop-full em{font-style:normal;font-family:'VT323',monospace;font-size:15px;letter-spacing:3px;color:#f4ecd5;background:#17120b;border-radius:4px;padding:1px 8px 0}
-.tr-btn{box-sizing:border-box;background:#f4ecd5;border:3px solid #17120b;border-radius:8px 11px 7px 10px;padding:6px 12px 4px;
-  font-family:'VT323',monospace;font-size:21px;letter-spacing:4px;color:#17120b;cursor:pointer;box-shadow:4px 5px 0 rgba(23,18,11,.55);line-height:1.1}
-.tr-btn:hover{background:#fdf7e3}
-.tr-btn:active{transform:translate(3px,4px);box-shadow:1px 1px 0 rgba(23,18,11,.55)}
-.tr-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:4px 5px 0 rgba(23,18,11,.55);background:#f4ecd5}
-.tr-fine{font-size:13.5px;color:#17120b;opacity:.6;line-height:1.35;text-align:center}
-.tr-dial{background:#f4ecd5;border:3px solid #17120b;border-radius:10px 7px 9px 8px;padding:10px 12px 8px;display:flex;flex-direction:column;gap:6px}
+.tr-drop-empty{display:flex;align-items:center;gap:12px;min-width:0}
+.tr-pic{display:block;width:52px;height:44px;flex-shrink:0;box-sizing:border-box;border:3px solid #100c16;
+  border-radius:8px 6px 9px 7px;background:#f6f1f8;position:relative;overflow:hidden}
+.tr-pic b{position:absolute;top:7px;left:8px;width:10px;height:10px;background:#6f6479;border:2.5px solid #100c16;border-radius:50%}
+.tr-pic u{position:absolute;bottom:-7px;left:-6px;width:30px;height:24px;background:#6f6479;border:2.5px solid #100c16;transform:rotate(45deg)}
+.tr-pic s{position:absolute;bottom:-9px;right:-9px;width:34px;height:28px;background:#cdc5d6;border:2.5px solid #100c16;transform:rotate(-42deg)}
+.tr-drop strong{font-weight:700;font-size:16px;color:#f4f0f7;line-height:1.25;min-width:0}
+.tr-drop strong small{font-weight:400;font-size:13.5px;opacity:.7}
+.tr-drop-full{display:flex;align-items:center;gap:12px;min-width:0}
+.tr-drop-full img{display:block;width:52px;height:44px;flex-shrink:0;object-fit:cover;border:3px solid #100c16;
+  border-radius:8px 6px 9px 7px;background:#f6f1f8}
+.tr-drop-full em{font-style:normal;font-family:'VT323',monospace;font-size:15px;letter-spacing:3px;color:#f4f0f7;
+  background:#100c16;border-radius:4px;padding:1px 8px 0}
+.tr-dial{background:#332b3c;border:3px solid #100c16;border-radius:10px 7px 9px 8px;padding:9px 12px 7px;
+  display:flex;flex-direction:column;gap:5px}
+.tr-dial + .tr-dial{border-radius:8px 10px 7px 9px}
 .tr-dial-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.tr-dial-top span{font-family:'VT323',monospace;font-size:18px;letter-spacing:3px}
-.tr-dial-top b{font-family:'VT323',monospace;font-weight:400;font-size:19px;letter-spacing:2px;color:#8fd0ff;background:#17120b;border-radius:4px;padding:0 8px}
-.tr-dial input{width:100%;accent-color:#3e6cc6;cursor:pointer;margin:0}
-.tr-go{box-sizing:border-box;background:#3e6cc6;border:4px solid #17120b;border-radius:12px 15px 10px 14px;padding:12px 10px 9px;
-  font-family:'VT323',monospace;font-size:31px;letter-spacing:5px;color:#fdf7e3;cursor:pointer;box-shadow:6px 7px 0 rgba(23,18,11,.6);line-height:1}
-.tr-go:hover{background:#4d7cd4}
-.tr-go:active{transform:translate(5px,6px);box-shadow:1px 1px 0 rgba(23,18,11,.6)}
-.tr-go:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:6px 7px 0 rgba(23,18,11,.6);background:#3e6cc6}
-.tr-flow{display:flex;align-items:center;gap:10px;background:#f4ecd5;border:3px solid #17120b;border-radius:9px 7px 10px 8px;padding:7px 12px}
-.tr-gauge{display:block;width:40px;height:40px;flex:none;background:#fdf7e3;border:3px solid #17120b;border-radius:50%;position:relative}
-.tr-gauge b{position:absolute;bottom:50%;left:50%;width:3.5px;height:15px;margin-left:-1.75px;background:#3e6cc6;border-radius:2px;
-  transform-origin:bottom center;transform:rotate(-32deg);transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
-.tr-gauge u{position:absolute;top:50%;left:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;background:#17120b;border-radius:50%}
-.tr-flow div{display:flex;flex-direction:column;min-width:0}
-.tr-flow span{font-family:'VT323',monospace;font-size:16px;letter-spacing:3px}
-.tr-flow small{font-size:13px;opacity:.6;line-height:1.2}
+.tr-dial-top span{font-family:'VT323',monospace;font-size:18px;letter-spacing:3px;color:#f4f0f7}
+.tr-dial-top b{font-family:'VT323',monospace;font-weight:400;font-size:19px;letter-spacing:2px;color:#ff9fd0;
+  background:#100c16;border-radius:4px;padding:0 8px}
+.tr-dial input{width:100%;accent-color:#e8479c;cursor:pointer;margin:0}
+/* TRACE IT, and the ink-flow gauge stood in its own box beside it */
+.tr-run{display:flex;align-items:stretch;gap:10px}
+.tr-go{flex:1;box-sizing:border-box;background:#e8479c;border:4px solid #100c16;border-radius:12px 15px 10px 14px;
+  padding:9px 10px 6px;font-family:'VT323',monospace;font-size:27px;letter-spacing:4px;color:#fff;cursor:pointer;
+  box-shadow:5px 6px 0 rgba(10,7,14,.6);line-height:1}
+.tr-go:hover{background:#f26bb0}
+.tr-go:active{transform:translate(4px,5px);box-shadow:1px 1px 0 rgba(10,7,14,.6)}
+.tr-go:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:5px 6px 0 rgba(10,7,14,.6);background:#e8479c}
+.tr-flow{width:46px;flex-shrink:0;background:#332b3c;border:3px solid #100c16;border-radius:9px 7px 10px 8px;
+  display:flex;align-items:center;justify-content:center}
+.tr-gauge{display:block;width:32px;height:32px;background:#f6f1f8;border:3px solid #100c16;border-radius:50%;position:relative}
+.tr-gauge b{position:absolute;bottom:50%;left:50%;width:3px;height:12px;margin-left:-1.5px;background:#e8479c;
+  border-radius:2px;transform-origin:bottom center;transform:rotate(-32deg);transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+.tr-gauge u{position:absolute;top:50%;left:50%;width:6px;height:6px;margin:-3px 0 0 -3px;background:#100c16;border-radius:50%}
 .tr-tabs{display:flex;gap:8px}
-.tr-tab{flex:1;box-sizing:border-box;background:#f4ecd5;border:3px solid #17120b;border-radius:8px 6px 9px 7px;padding:3px 16px 1px;
-  font-family:'VT323',monospace;font-size:18px;letter-spacing:3px;color:#17120b;cursor:pointer;box-shadow:3px 4px 0 rgba(23,18,11,.45)}
-.tr-tab.on{background:#3e6cc6;color:#fdf7e3}
-.tr-tab:active{transform:translate(2px,3px);box-shadow:0 1px 0 rgba(23,18,11,.45)}
-.tr-table{flex:1;min-height:258px;box-sizing:border-box;border:4px solid #17120b;border-radius:12px 16px 10px 14px;background-color:#fdf7e3;
-  background-image:linear-gradient(45deg,rgba(23,18,11,.05) 25%,transparent 25%,transparent 75%,rgba(23,18,11,.05) 75%),
-                   linear-gradient(45deg,rgba(23,18,11,.05) 25%,transparent 25%,transparent 75%,rgba(23,18,11,.05) 75%);
-  background-size:22px 22px;background-position:0 0,11px 11px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.tr-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(255,238,180,.75) 0%,rgba(255,238,180,0) 70%)}
-.tr-lamp{position:absolute;top:-4px;left:50%;transform:translateX(-50%);transform-origin:top center;animation:trLamp 5s ease-in-out infinite;
-  display:flex;flex-direction:column;align-items:center;pointer-events:none;z-index:2}
-.tr-lamp i{display:block;width:4px;height:26px;background:#17120b}
-.tr-lamp b{display:block;width:74px;height:34px;box-sizing:border-box;background:#b8ac97;border:4px solid #17120b;border-radius:40px 40px 6px 6px;position:relative}
-.tr-lamp u{position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);width:26px;height:12px;background:#ffe9a8;border:3px solid #17120b;border-top-width:0;border-radius:0 0 13px 13px}
+.tr-tab{flex:1;box-sizing:border-box;background:#332b3c;border:3px solid #100c16;border-radius:8px 6px 9px 7px;
+  padding:3px 10px 1px;font-family:'VT323',monospace;font-size:17px;letter-spacing:2px;color:#f4f0f7;cursor:pointer;
+  box-shadow:3px 4px 0 rgba(10,7,14,.45)}
+.tr-tab:last-child{border-radius:6px 9px 7px 8px}
+.tr-tab.on{background:#e8479c;color:#fff}
+.tr-tab:active{transform:translate(2px,3px);box-shadow:0 1px 0 rgba(10,7,14,.45)}
+/* the light table: paper under a checker, a pink lamp over it */
+.tr-table{min-height:196px;box-sizing:border-box;border:4px solid #100c16;border-radius:12px 16px 10px 14px;
+  background-color:#f6f1f8;
+  background-image:linear-gradient(45deg,rgba(10,7,14,.05) 25%,transparent 25%,transparent 75%,rgba(10,7,14,.05) 75%),
+                   linear-gradient(45deg,rgba(10,7,14,.05) 25%,transparent 25%,transparent 75%,rgba(10,7,14,.05) 75%);
+  background-size:22px 22px;background-position:0 0,11px 11px;position:relative;
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+.tr-glow{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(255,140,200,.32) 0%,rgba(255,140,200,0) 70%)}
+.tr-lamp{position:absolute;top:-4px;left:50%;transform:translateX(-50%);transform-origin:top center;
+  animation:trLamp 5s ease-in-out infinite;display:flex;flex-direction:column;align-items:center;pointer-events:none;z-index:2}
+.tr-lamp i{display:block;width:4px;height:22px;background:#100c16}
+.tr-lamp b{display:block;width:62px;height:28px;box-sizing:border-box;background:#6f6479;border:4px solid #100c16;
+  border-radius:34px 34px 6px 6px;position:relative}
+.tr-lamp u{position:absolute;bottom:-11px;left:50%;transform:translateX(-50%);width:22px;height:11px;
+  background:#ffd9ee;border:3px solid #100c16;border-top-width:0;border-radius:0 0 11px 11px}
 @keyframes trLamp{0%,100%{transform:translateX(-50%) rotate(-1.6deg)}50%{transform:translateX(-50%) rotate(1.6deg)}}
-#tr-original{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:64px 14px 30px;box-sizing:border-box}
-#tr-traced{position:absolute;inset:64px 14px 30px;display:flex;align-items:center;justify-content:center}
+#tr-original{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:48px 12px 26px;box-sizing:border-box}
+#tr-traced{position:absolute;inset:48px 12px 26px;display:flex;align-items:center;justify-content:center}
 #tr-traced svg{display:block;max-width:100%;max-height:100%;width:auto;height:auto}
-.tr-empty{position:relative;display:flex;align-items:center;gap:8px;padding:0 20px}
-.tr-empty[hidden]{display:none}
-.tr-empty span{font-size:17px;opacity:.55;text-align:center}
-.tr-empty i{display:block;width:9px;height:20px;background:#3e6cc6;animation:trBlink 1.1s steps(1) infinite}
-@keyframes trBlink{0%,55%{opacity:1}56%,100%{opacity:.15}}
-.tr-paths{position:absolute;bottom:8px;right:12px;font-family:'VT323',monospace;font-size:15px;letter-spacing:2px;opacity:.45;z-index:2}
-.tr-side{flex:1;min-width:220px;display:flex;flex-direction:column}
-.tr-note{align-self:center;background:#f4ecd5;border:3px solid #17120b;border-radius:4px 10px 5px 11px;box-shadow:6px 7px 0 rgba(23,18,11,.35);
-  padding:20px 14px 10px;width:180px;box-sizing:border-box;transform:rotate(2.5deg);position:relative;z-index:2;margin-bottom:16px;
-  font-weight:700;font-size:14.5px;line-height:1.4}
-.tr-note i{position:absolute;top:-11px;left:50%;transform:translateX(-50%) rotate(-3deg);width:70px;height:20px;background:rgba(143,208,255,.5);border:3px solid #17120b;border-radius:3px}
-.tr-note span{font-weight:400;font-size:13px}
-.tr-file{flex:1;box-sizing:border-box;background:#d9d0c1;border:5px solid #17120b;border-radius:16px 20px 14px 18px;box-shadow:10px 12px 0 rgba(23,18,11,.45);
-  display:flex;flex-direction:column;overflow:hidden}
-/* a picture dragged straight onto the library: load it, trace it, file it —
-   see the drop wiring for #tr-file-box in tracer.js */
-.tr-file.over{border-color:#3e6cc6;background:#c9deff}
-.tr-file.tr-nudge{animation:trNudge .5s}
-@keyframes trNudge{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
-.tr-file-bar{display:flex;align-items:center;justify-content:center;padding:12px 14px 9px;border-bottom:4px solid #17120b}
-.tr-file-bar .tr-plate{font-size:21px;letter-spacing:3px;border-radius:8px 5px 9px 6px;padding:1px 14px 0}
-.tr-slots{flex:1;padding:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-content:start;overflow:auto;max-height:430px}
-.tr-slot{aspect-ratio:1;box-sizing:border-box;background:#f4ecd5;border:3px dashed #17120b;border-radius:9px 6px 8px 7px;opacity:.55;
-  display:flex;align-items:flex-end;justify-content:flex-end;padding:3px 6px;font-family:'VT323',monospace;font-size:13px;color:#17120b;position:relative}
-/* a pocket with a tracing in it: solid, bright, and a button */
-.tr-slot.tr-filled{opacity:1;border-style:solid;cursor:pointer;padding:0;overflow:hidden;display:block}
-.tr-slot.tr-filled:hover{border-color:#3e6cc6;background:#fdf7e3}
-.tr-slot.on{border-color:#3e6cc6;box-shadow:0 0 0 3px #3e6cc6}
-.tr-slot svg{display:block;width:100%;height:100%;padding:8px;box-sizing:border-box}
-.tr-slot-n{position:absolute;right:6px;bottom:3px;font-family:'VT323',monospace;font-size:13px}
-/* a pocket is picked up (a carry onto the paper) or pressed (the viewer);
-   the × and the download that used to sit on it are gone — see THE LIBRARY,
-   SINCE 2026-09-04 in tracer.js */
-.tr-slot.tr-filled{cursor:grab;touch-action:none}
+.tr-empty{position:relative;display:flex;align-items:center;gap:7px;padding:24px 18px 0}
+.tr-empty span{font-size:15.5px;color:#1a1520;opacity:.6;text-align:center}
+.tr-empty i{width:8px;height:18px;flex-shrink:0;background:#e8479c;animation:trBlink 1.1s steps(1) infinite}
+@keyframes trBlink{50%{opacity:0}}
+.tr-paths{position:absolute;bottom:7px;right:11px;font-family:'VT323',monospace;font-size:14px;letter-spacing:2px;
+  color:#1a1520;opacity:.55}
+.tr-row2{display:flex;gap:10px}
+.tr-btn{box-sizing:border-box;background:#332b3c;border:3px solid #100c16;border-radius:8px 11px 7px 10px;
+  padding:6px 12px 4px;font-family:'VT323',monospace;font-size:20px;letter-spacing:3px;color:#f4f0f7;cursor:pointer;
+  box-shadow:4px 5px 0 rgba(10,7,14,.55);line-height:1.1}
+.tr-btn:hover{background:#3d3447}
+.tr-btn:active{transform:translate(3px,4px);box-shadow:1px 1px 0 rgba(10,7,14,.55)}
+.tr-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:4px 5px 0 rgba(10,7,14,.55);background:#332b3c}
+#tr-save{flex:1;border-radius:9px 12px 8px 11px}
+/* the sticky note, its tape torn over the corner — the steps on top, and
+   under them whatever the table has to say for itself just now */
+.tr-note{background:#332b3c;border:3px solid #100c16;border-radius:4px 10px 5px 11px;padding:9px 12px 8px;
+  position:relative;margin-top:4px;font-weight:700;font-size:14px;line-height:1.35;color:#f4f0f7}
+.tr-note i{position:absolute;top:-10px;right:14px;width:58px;height:18px;background:rgba(255,158,208,.55);
+  border:3px solid #100c16;border-radius:3px;transform:rotate(-3deg)}
+.tr-note small{display:block;font-weight:400;font-size:13px;opacity:.85}
+/* THE FLAT FILE: four across, the way the export draws it */
+.tr-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.tr-slot{aspect-ratio:1;box-sizing:border-box;background:#332b3c;border:3px dashed #100c16;
+  border-radius:9px 6px 8px 7px;opacity:.68;display:flex;align-items:flex-end;justify-content:flex-end;
+  padding:2px 5px;font-family:'VT323',monospace;font-size:12px;color:#f4f0f7}
+.tr-slot:nth-child(4n+2){border-radius:7px 9px 6px 8px}
+.tr-slot:nth-child(4n+3){border-radius:8px 7px 9px 6px}
+.tr-slot:nth-child(4n){border-radius:6px 8px 7px 9px}
+/* a pocket with a tracing in it: solid, bright, and a button. It is picked up
+   (a carry onto the paper) or pressed (the viewer); the × and the download
+   that used to sit on it are gone — see THE LIBRARY, SINCE 2026-09-04 in
+   tracer.js */
+.tr-slot.tr-filled{position:relative;opacity:1;background:#f6f1f8;border-style:solid;border-color:#100c16;
+  align-items:center;justify-content:center;padding:4px;cursor:grab;touch-action:none;overflow:hidden}
+.tr-slot.tr-filled svg{display:block;width:100%;height:100%}
 .tracer.tr-carrying .tr-slot.tr-filled{cursor:grabbing}
-.tr-ghost{position:fixed;z-index:6600;width:120px;height:120px;margin:-60px 0 0 -60px;pointer-events:none;
-  background:#fdf7e3;border:3px solid #3e6cc6;border-radius:9px 6px 8px 7px;box-shadow:6px 7px 0 rgba(23,18,11,.35);opacity:.92}
-.tr-ghost svg{display:block;width:100%;height:100%;padding:8px;box-sizing:border-box}
-/* THE VIEWER: one tracing, large, over the window */
-.tr-viewer{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:rgba(23,18,11,.35);border-radius:20px 24px 16px 22px}
-.tr-viewer[hidden]{display:none}
-.tr-viewer-card{width:min(720px,92%);background:#d9d0c1;border:5px solid #17120b;border-radius:16px 20px 14px 18px;box-shadow:14px 16px 0 rgba(23,18,11,.45);display:flex;flex-direction:column;gap:14px;padding-bottom:16px}
-.tr-viewer-bar{padding:12px 18px 10px}
-.tr-viewer-table{margin:0 18px;height:360px;box-sizing:border-box;border:4px solid #17120b;border-radius:12px 16px 10px 14px;background-color:#fdf7e3;
-  background-image:linear-gradient(45deg,rgba(23,18,11,.05) 25%,transparent 25%,transparent 75%,rgba(23,18,11,.05) 75%),
-                   linear-gradient(45deg,rgba(23,18,11,.05) 25%,transparent 25%,transparent 75%,rgba(23,18,11,.05) 75%);
-  background-size:22px 22px;background-position:0 0,11px 11px;display:flex;align-items:center;justify-content:center;padding:18px}
-.tr-viewer-table svg{display:block;max-width:100%;max-height:100%;width:auto;height:auto}
-.tr-viewer-row{display:flex;gap:12px;margin:0 18px}
-.tr-viewer-row .tr-btn{flex:1}
-.tr-viewer-row .tr-btn.on{background:#3e6cc6;color:#fdf7e3}
-.tr-btn-x:hover{background:#e8b6b6}
-.tr-viewer .tr-fine{margin:0 18px}
-.tr-on{position:absolute;left:4px;top:4px;font-family:'VT323',monospace;font-size:12px;letter-spacing:2px;color:#fdf7e3;background:#3e6cc6;
-  border:2px solid #17120b;border-radius:4px;padding:0 5px;display:none}
+.tr-slot.on{box-shadow:0 0 0 2px #e8479c}
+.tr-slot-n{position:absolute;bottom:1px;right:4px;font-family:'VT323',monospace;font-size:11px;color:#1a1520;opacity:.55}
+.tr-on{position:absolute;left:3px;top:3px;font-family:'VT323',monospace;font-size:9px;letter-spacing:1px;color:#fff;
+  background:#e8479c;border:2px solid #100c16;border-radius:4px;padding:0 3px;display:none}
 .tr-slot.on .tr-on{display:block}
-.tr-file-foot{padding:8px 14px 10px;border-top:4px solid #17120b;font-size:13.5px;opacity:.6;text-align:center;line-height:1.3}
+.tr-file-box.over{outline:3px dashed #e8479c;outline-offset:4px;border-radius:8px}
+.tr-file-box.tr-nudge{animation:lpNudge .45s}
+/* THE VIEWER: one tracing, large, over the panel */
+.tr-viewer{position:fixed;inset:0;z-index:6100;display:flex;align-items:center;justify-content:center;
+  background:rgba(10,7,14,.55)}
+.tr-viewer[hidden]{display:none}
+.tr-viewer-card{width:min(520px,92vw);box-sizing:border-box;background:#251f2b;border:5px solid #100c16;
+  border-radius:16px 20px 14px 18px;box-shadow:12px 14px 0 rgba(10,7,14,.45);
+  display:flex;flex-direction:column;gap:12px;padding-bottom:14px}
+.tr-viewer-bar{padding:12px 16px 10px}
+.tr-viewer-table{margin:0 16px;height:300px;box-sizing:border-box;border:4px solid #100c16;
+  border-radius:12px 16px 10px 14px;background-color:#f6f1f8;
+  background-image:linear-gradient(45deg,rgba(10,7,14,.05) 25%,transparent 25%,transparent 75%,rgba(10,7,14,.05) 75%),
+                   linear-gradient(45deg,rgba(10,7,14,.05) 25%,transparent 25%,transparent 75%,rgba(10,7,14,.05) 75%);
+  background-size:22px 22px;background-position:0 0,11px 11px;
+  display:flex;align-items:center;justify-content:center;padding:16px}
+.tr-viewer-table svg{display:block;max-width:100%;max-height:100%;width:auto;height:auto}
+.tr-viewer-row{display:flex;gap:10px;margin:0 16px}
+.tr-viewer-row .tr-btn{flex:1}
+.tr-viewer-row .tr-btn.on{background:#e8479c;color:#fff}
+.tr-btn-x:hover{background:#7a2b3a}
+.tr-viewer .lp-fine{margin:0 16px}
+
+/* ── THE STICKER DRAWER ──────────────────────────────────────────────────
+   The same case, the other tool: rummage, filter by kit, and carry a sticker
+   out onto the paper. stickers.js drives it, and it ships EMPTY — the grid
+   shows the export's own dashed pockets until kits are filed in. */
+.sd-search{display:flex;align-items:center;gap:9px;background:#332b3c;border:3px solid #100c16;
+  border-radius:10px 7px 9px 8px;padding:6px 11px}
+/* the glass is the export's own: ink drawn on the pocket's dark, quiet on
+   purpose — it is a mark beside the words, not a button */
+.sd-glass{display:block;width:17px;height:17px;flex-shrink:0;box-sizing:border-box;border:3px solid #100c16;
+  border-radius:50%;position:relative}
+.sd-glass::after{content:"";position:absolute;bottom:-6px;right:-4px;width:9px;height:3px;background:#100c16;
+  border-radius:2px;transform:rotate(45deg)}
+.sd-search input{flex:1;min-width:0;border:0;outline:none;background:transparent;font-family:'Kalam',cursive;
+  font-size:15px;color:#f4f0f7;padding:0}
+.sd-search input::placeholder{color:#f4f0f7;opacity:.45}
+/* the chips are the kits. Each one in the export is cut by hand, so the six
+   radii it drew are cycled rather than one of them repeated */
+.sd-chips{display:flex;flex-wrap:wrap;gap:6px}
+.sd-chip{font-family:'VT323',monospace;font-size:16px;letter-spacing:2px;color:#f4f0f7;background:#332b3c;
+  border:3px solid #100c16;border-radius:7px 5px 8px 6px;padding:0 9px 1px;cursor:pointer;line-height:1.3}
+.sd-chip:nth-child(6n+2){border-radius:5px 8px 6px 7px}
+.sd-chip:nth-child(6n+3){border-radius:8px 6px 7px 9px}
+.sd-chip:nth-child(6n+4){border-radius:6px 9px 5px 8px}
+.sd-chip:nth-child(6n+5){border-radius:9px 5px 8px 7px}
+.sd-chip:nth-child(6n){border-radius:7px 8px 9px 5px}
+.sd-chip:hover{background:#3d3447}
+.sd-chip.on{background:#e8479c;color:#fff}
+.sd-chip:focus-visible{outline:2px solid #ff9fd0;outline-offset:2px}
+.sd-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start}
+/* an empty drawer, and a search nothing answers: the export's own dashed
+   pocket, four across the way its flat file draws them */
+.sd-grid.sd-bare{grid-template-columns:repeat(4,1fr);gap:9px}
+.sd-none{grid-column:1/-1;font-size:13.5px;opacity:.6;text-align:center;padding:14px 4px}
+/* a sticker is picked up (a click) or carried out (a drag) — see PICKED UP,
+   NOT LOOKED AT in stickers.js for why there is no viewer behind it */
+.sd-card{position:relative;box-sizing:border-box;background:#332b3c;border:3px solid #100c16;
+  border-radius:10px 7px 9px 8px;padding:7px;display:flex;flex-direction:column;gap:6px;
+  cursor:grab;touch-action:none;box-shadow:3px 4px 0 rgba(10,7,14,.4)}
+.sd-card:nth-child(4n+2){border-radius:7px 10px 8px 9px}
+.sd-card:nth-child(4n+3){border-radius:9px 6px 10px 7px}
+.sd-card:nth-child(4n){border-radius:8px 9px 7px 10px}
+.sd-card:hover{background:#3d3447}
+.sd-card:active{transform:translate(2px,3px);box-shadow:0 1px 0 rgba(10,7,14,.4)}
+.sd-card:focus-visible{outline:2px solid #ff9fd0;outline-offset:2px}
+.sticker-drawer.sd-carrying .sd-card{cursor:grabbing}
+.sd-card.on{background:#3d3447;box-shadow:0 0 0 2px #e8479c,3px 4px 0 rgba(10,7,14,.4)}
+.sd-thumb{position:relative;aspect-ratio:1;box-sizing:border-box;border:3px solid #100c16;
+  border-radius:7px 5px 8px 6px;background-color:#f6f1f8;
+  background-image:linear-gradient(45deg,rgba(10,7,14,.05) 25%,transparent 25%,transparent 75%,rgba(10,7,14,.05) 75%),
+                   linear-gradient(45deg,rgba(10,7,14,.05) 25%,transparent 25%,transparent 75%,rgba(10,7,14,.05) 75%);
+  background-size:14px 14px;background-position:0 0,7px 7px;
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+.sd-card:nth-child(4n+2) .sd-thumb{border-radius:5px 8px 6px 7px}
+.sd-card:nth-child(4n+3) .sd-thumb{border-radius:8px 6px 7px 9px}
+.sd-card:nth-child(4n) .sd-thumb{border-radius:6px 9px 5px 8px}
+.sd-art{display:block;width:88%;height:88%}
+.sd-on{position:absolute;left:4px;top:4px;font-family:'VT323',monospace;font-size:11px;letter-spacing:2px;
+  color:#fff;background:#e8479c;border:2px solid #100c16;border-radius:4px;padding:0 5px;display:none}
+.sd-card.on .sd-on{display:block}
+.sd-name{font-weight:700;font-size:13.5px;line-height:1.15;color:#f4f0f7;overflow-wrap:anywhere}
+.sd-name span{font-weight:400;font-size:12px;opacity:.6}
+
 
 /* ── THE COMPANY: everybody else's pointer ──────────────────────────────────
    cursors.js draws every other visitor on the bench as an arrow in a colour

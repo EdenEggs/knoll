@@ -30,15 +30,32 @@
      hex and stays put. The ink chosen is kept with the drawing and applies
      to NEW marks only — see THE WHEEL, below.
 
-     IMAGE, WHERE STICKER WAS  The five stamps are off the dock. In their
-     place is the tracing table (tracer.js): press IMAGE and the table spawns
-     onto the sheet, centred on the view; lay a picture on it (or drag one
-     straight onto THE LIBRARY), trace it, file it, and a filed tracing goes
-     on the pointer the way a stamp did — a click on the paper stamps it
-     there as a piece of the wall (k:'i', which paints the tracing's own
-     paths at the size the options row says). The stamps already on the
-     paper still paint: STAMPS and SK are kept for them, the way the
-     stickies are kept for old notes.
+     STICKER AND UPLOAD, WHERE IMAGE WAS  The five stamps came off the dock
+     a while ago and IMAGE took their place; IMAGE is now two buttons, the
+     way the Design Canvas export draws the lab dock (Downloads/features/
+     Tracing Table.html, which draws both panels under one strip).
+
+     BOTH PANELS ARE THE USER'S UI, NOT SCENERY. They stand FIXED to the
+     left of the screen for as long as their tool is up, so panning and
+     zooming the bench moves the drawing under them and leaves them where
+     the hand left them. Neither is a gizmo: they are not on the paper, not
+     dragged, not in keep.js's layout and not copyable. See THE SIDE PANELS
+     in lab.css.
+
+     UPLOAD is a +, and opens the tracing table (tracer.js): lay a picture on
+     it (or drag one straight onto THE FLAT FILE at its foot), trace it, file
+     it, and a filed tracing goes on the pointer the way a stamp did — a
+     click on the paper stamps it there as a piece of the wall (k:'i', which
+     paints the tracing's own paths at the size the options row says).
+
+     STICKER opens the sticker drawer (stickers.js), which holds the artwork
+     that came WITH the bench rather than anything you made: pick one out of
+     the drawer, or carry it out on the pointer, and it lands as k:'d'. The
+     two tools share the options row, so a tracing and a sticker are set by
+     the same SIZE and FADE and remember the same two numbers.
+
+     The stamps already on the paper still paint: STAMPS and SK are kept for
+     them, the way the stickies are kept for old notes.
 
      A NOTE IS A BOX, NOT A LINE
      It has a WIDTH, and the words fall onto as many lines as that width needs
@@ -373,6 +390,19 @@ window.Wall = (function () {
         node = el('g', { transform: 'translate(' + round(it.x - f.w * s / 2) + ',' + round(it.y - f.h * s / 2) + ') scale(' + s + ')',
           opacity: PO[it.o] == null ? 1 : PO[it.o] });
         node.innerHTML = f.d;
+      } else if (it.k === 'd') {
+        /* a sticker out of the drawer, stamped: the same geometry a tracing
+           gets — long edge it.z world px, centred on the press — painted from
+           the catalogue (stickers.js) rather than from the library. A sticker
+           the catalogue has not got paints NOTHING and does not throw: a kit
+           that has not been filed in yet is the ordinary case, and
+           Stickers.load() repaints the wall when one lands. */
+        const st = window.Stickers && Stickers.get(it.f);
+        if (!st) return;
+        const sc = it.z / Math.max(st.w, st.h, 1);
+        node = el('g', { transform: 'translate(' + round(it.x - st.w * sc / 2) + ',' + round(it.y - st.h * sc / 2) + ') scale(' + sc + ')',
+          opacity: PO[it.o] == null ? 1 : PO[it.o] });
+        node.innerHTML = st.d;
       } else if (it.k === 'g') {
         /* a gif off KLIPY, pinned: scaled the same way a tracing is, so the
            long edge is it.z world px and it sits centred on the press — but
@@ -513,6 +543,23 @@ window.Wall = (function () {
     return true;
   }
 
+  /* THE SAME DOOR FOR A STICKER, and it needed one for the reason the gif
+     below needed one: a sticker arrives two ways — pressed onto the paper
+     with one on the pointer, or dragged out of the drawer and let go where
+     you want it — and both are this one write, so both land at the size and
+     fade the options row says and both undo alike.
+
+     It takes stickers.js's record — { id, name, kit, w, h, d } — and not an
+     item, so the caller never has to know what an item looks like or which
+     of IMG and PO the row is on. Only the ID is written down: the drawing
+     stays in the catalogue, which is what lets a kit be re-loaded without
+     every stamp of it going stale. */
+  function stickerAt(s, wx, wy) {
+    if (!s || !s.id) return false;
+    add({ k: 'd', f: s.id, o: po, x: round(wx), y: round(wy), z: IMG[iz] });
+    return true;
+  }
+
   /* THE SAME DOOR FOR A GIF, and it needed one for the same reason the
      tracing did: a strip can arrive three ways now — pressed onto the paper
      with one on the pointer (below), DRAGGED out of the row and let go where
@@ -556,12 +603,18 @@ window.Wall = (function () {
       window.addEventListener('pointermove', drawMove, true);
       window.addEventListener('pointerup', drawEnd, true);
       window.addEventListener('pointercancel', drawEnd, true);
-    } else if (tool === 'image') {
+    } else if (tool === 'upload') {
       // a filed tracing on the pointer is stamped where you pressed, at the
       // size the row says; nothing on the pointer asks the table for one
       const f = window.Tracer && Tracer.armed();
       if (f) stampAt(f, p.x, p.y);
       else if (window.Tracer) Tracer.nudge();
+    } else if (tool === 'sticker') {
+      // …and a sticker out of the drawer, the same press, the same two
+      // numbers, and the same drawer asked to say why when there is none
+      const s = window.Stickers && Stickers.armed();
+      if (s) stickerAt(s, p.x, p.y);
+      else if (window.Stickers) Stickers.nudge();
     } else if (tool === 'text') {
       /* A press on a note that is already up goes BACK INTO IT rather than
          starting a new one on top of it — which is also what makes the double
@@ -1060,8 +1113,21 @@ window.Wall = (function () {
   const TOOLS = [
     { k: 'move', n: 'Move', i: '<path d="M4 2 15 8.5 9.6 10 8 15.5z"/>' },
     { k: 'draw', n: 'Draw', i: '<path d="M2.5 15.5 4 11.5 12.5 3a2 2 0 0 1 2.8 2.8L6.8 14z"/>' },
-    // image: the tracing table, spawned onto the view — see tracer.js
-    { k: 'image', n: 'Image', i: '<path fill-rule="evenodd" d="M2 3h14v12H2zm1.8 1.8v8.4h10.4V4.8z"/><path d="M4.4 12.6l3.1-4.2 2.1 2.5 1.7-2 2.5 3.7z"/><circle cx="11.7" cy="6.9" r="1.25"/>' },
+    /* sticker and upload, the two halves of what IMAGE used to be. STICKER
+       opens the drawer of shipped artwork (stickers.js) and wears the
+       export's own icon — a square with one corner peeled — which is CSS
+       rather than a path, because the export draws it in borders and a
+       transcription of those borders is exact where a traced path would be a
+       guess (.dock-sticker-ico in lab.css; .dock-wheel-ico is the other icon
+       on this dock made that way). An entry with `ico` brings its own markup
+       and skips the <svg> the rest are wrapped in. UPLOAD is a +, and opens
+       the tracing table
+       (tracer.js), which is where a picture of your own becomes artwork.
+       Neither carries a `needs`: both files load AFTER this one, so there is
+       nothing on window to test yet — every call into them is guarded where
+       it is made, the way IMAGE's always were. */
+    { k: 'sticker', n: 'Sticker', ico: '<i class="dock-sticker-ico" aria-hidden="true"></i>' },
+    { k: 'upload', n: 'Upload', i: '<path d="M7.6 2.6h2.8V7.6h5V10.4h-5v5H7.6v-5h-5V7.6h5z"/>' },
     { k: 'text', n: 'Text', i: '<path d="M3 2h12v3h-4.5v10h-3V5H3z"/>' },
     // gif: a search out of KLIPY. It is the one tool that draws nothing
     // itself — gif.js does the searching and the choosing — so it is only
@@ -1073,7 +1139,7 @@ window.Wall = (function () {
     dock.innerHTML =
       '<div class="dock-grp">' + TOOLS.map(t =>
         '<button type="button" class="dock-btn" data-tool="' + t.k + '" title="' + t.n + '" aria-label="' + t.n + '">' +
-        '<svg viewBox="0 0 18 18" width="16" height="16" aria-hidden="true">' + t.i + '</svg>' +
+        (t.ico || '<svg viewBox="0 0 18 18" width="16" height="16" aria-hidden="true">' + t.i + '</svg>') +
         '<span>' + t.n + '</span></button>').join('') + '</div>' +
       '<span class="dock-rule" aria-hidden="true"></span>' +
       '<div class="dock-grp dock-pal">' +
@@ -1153,17 +1219,23 @@ window.Wall = (function () {
         ' aria-label="' + (g ? 'pixels ' + g + ' across' : 'no pixels') + '">' +
         '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">' + pixIcon(g) + '</svg>' +
         '</button>').join(''));
-    } else if (tool === 'image') {
-      // the tracing itself is chosen on the table; the row says how big it
-      // lands and how faded, and which one is on the pointer
-      const f = window.Tracer && Tracer.armed();
+    } else if (tool === 'upload' || tool === 'sticker') {
+      /* ONE ROW FOR BOTH. The artwork itself is chosen on the table or in
+         the drawer; the row only ever says how big it lands and how faded,
+         and which one is on the pointer — and a tracing and a sticker land
+         the same way, so they are set by the same two groups and remember
+         the same two numbers. Only the tail differs, and only in whose
+         pointer it is reading. */
+      const sk = tool === 'sticker';
+      const f = sk ? (window.Stickers && Stickers.armed()) : (window.Tracer && Tracer.armed());
       html = grp('SIZE', IMG.map((px, i) =>
         '<button type="button" class="opt-btn opt-iz" data-iz="' + i + '" title="' + px + ' across" aria-label="' + px + ' across">' +
         ['S', 'M', 'L'][i] + '</button>').join('')) +
         rule + grp('FADE', PO.map((o, i) =>
         '<button type="button" class="opt-btn opt-po" data-po="' + i + '" aria-label="' + Math.round(o * 100) + '%">' +
         '<i style="opacity:' + o + '"></i></button>').join('')) +
-        rule + '<span class="opt-say">' + (f ? 'on the pointer: ' + escT(f.name) : 'pick a tracing from the library') + '</span>';
+        rule + '<span class="opt-say">' + (f ? 'on the pointer: ' + escT(f.name)
+          : sk ? 'pick a sticker out of the drawer' : 'pick a tracing from the library') + '</span>';
     } else if (tool === 'text') {
       /* THE TYPE CASE ONLY COMES UP WITH THE BOX. Picking up the text tool
          says nothing about a note that is not being written yet, so there is
@@ -1245,7 +1317,9 @@ window.Wall = (function () {
     if (t === tool) return;
     shutNote(); closeWheel(); tool = t; markTools(); buildOpts(); syncGrid();
     // the tracing table is part of its tool: up with it, away with it
-    if (window.Tracer) Tracer.tool(t === 'image');
+    if (window.Tracer) Tracer.tool(t === 'upload');
+    // …and so is the sticker drawer, which is the other half of that split
+    if (window.Stickers) Stickers.tool(t === 'sticker');
     // …and picking up gif is what shows what's trending, the first time
     if (window.Gif) Gif.tool(t === 'gif');
   }
@@ -1469,6 +1543,7 @@ window.Wall = (function () {
 
   return { store, setTool, get tool() { return tool; },
            stampAt,                      // tracer.js: a tracing dragged off the library lands here
+           stickerAt,                    // stickers.js: …and a sticker dragged out of the drawer
            gifAt,                        // gif.js: …and a gif dragged off the row, or clicked in it
            syncOpts: buildOpts,          // the + tool redraws its own row through this
            paint,                        // tracer.js: a stamp is drawn from the library, so the library changing repaints

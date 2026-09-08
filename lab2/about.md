@@ -45,6 +45,7 @@ caution tape.
 | `sign.js` | the gnome who hoists the K when you click a letter. |
 | `tape.js` | the caution tape prop. |
 | `vol.js` | the dock's speaker, and every noise the bench makes (synthesised, no audio files). |
+| `stickers.js` | the sticker drawer — STICKER on the dock: the kits that came with the bench, carried out onto the paper. |
 | `wall.js` | the tool dock — pen, stickers, notes, colours, undo. The biggest file, and self-contained. |
 | `ink.js` | ctrl held: the hitbox becomes the drawing rather than the box round it. §3 has it. |
 | `spotlight.js` | a page a frame opens to read gets the whole screen: the bench dimmed edge to edge with a hole where the page is, the camera glided to it, a click in the dark to close. The feature asks by marks in its file (`data-lab-reads`, `-scrim`, `-page`, `-close`); ADDING.md §3 has them. |
@@ -650,16 +651,15 @@ before its first write, which is the session you undo if a session goes wrong.
 
 ---
 
-### The image tool, and the tracing table
+### The upload tool, and the tracing table
 
-**image** on the dock (where **sticker** was) spawns the tracing table onto
-the sheet, centred on whatever the camera is showing — `tracer.js`, the
-Design Canvas export in `Downloads/features/Tracing Table.html` transcribed
-into classes (`.tracer` in `lab.css`). It has no iframe and nothing of its
-own to load, so it is driven from out here rather than adopted by frames.js
-— but it is `Lab.register()`ed like any other gizmo, so it drags by its bar,
-piles, and picks the same way the eighty-four documents do; see
-`spawnAtView()` for where it lands each time the tool comes up. The pipeline
+**upload** on the dock — a **+**, in the half of the old **image** button that
+was not given to **sticker** (below) — stands the tracing table up the LEFT OF
+THE SCREEN and leaves it there: `tracer.js`, the Design Canvas export in
+`Downloads/features/Tracing Table.html` transcribed into classes (`.tracer`,
+on the shared `.lab-panel` case, in `lab.css`). It has no iframe and nothing
+of its own to load, so it is driven from out here rather than adopted by
+frames.js. The pipeline
 is lab 1's `vectorize.js` lifted whole — k-means palette, marching-squares
 loops, Douglas-Peucker — with SMOOTHING read as a percentage. Lay a picture
 down (drop, click, or paste one), set the dials, **TRACE IT**, and **SAVE TO
@@ -683,11 +683,91 @@ and is looked up by name; the stamps already on the paper still paint —
 `STAMPS` and `SK` are kept for them. (Since 2026-09-04; THE LIBRARY in
 `tracer.js` has the argument, and `perf/verify-tracer.js` walks it.)
 
-The table is its own compositor layer inside the animated sheet, and Chrome
-would not always raster it afresh at the zoom the camera landed on — so it
-went soft the way a bitmap does. `tracer.js` remakes the layer when a zoom
-lands (will-change on for one frame), and it is sharp again. A picture LAID
-on the table is a bitmap and stays one; the tracing of it is the vector.
+**It is the user's UI, not scenery** (2026-09-08). It used to be a gizmo: a
+panel placed ON the paper, `Lab.register()`ed, dragged by its bar, and so
+panned and zoomed with the drawing under it — which meant the tool you were
+working with wandered off the screen the moment you moved the camera. It is
+now fixed chrome beside the dock, the way the export always drew it. Gone with
+that: `Lab.register`, `Lab.place`, `spawnAtView`, the drag handle, the fold,
+and the one-frame `will-change` that kept it sharp inside the animated sheet
+(a fixed panel is not in that sheet, so it never went soft). It is also no
+longer copyable, no longer in `Lab.gizmos`, and no longer in keep.js's layout
+— `perf/probe-tracer.js` and `perf/shot-tracer.js`, which existed to chase the
+zoom-softness, are about a problem that cannot happen any more.
+
+**And it was re-drawn by the same export.** The table was a 1270-wide cream
+machine with four screws, a grill and three columns; the 2026-09-08 export
+redrew it as a 344-wide panel in the dark palette — one scrolling column, the
+dials stacked, the ink-flow gauge stood in its own box beside **TRACE IT**, and
+**THE FLAT FILE** four pockets across the foot. The pipeline did not change,
+and neither did the library or anything that reads it: only the case around
+them. A picture LAID on the table is a bitmap and stays one; the tracing of it
+is the vector.
+
+---
+
+### The sticker tool, and the sticker drawer
+
+**sticker** on the dock, beside **upload**, puts **the sticker drawer** in the
+same slot — `stickers.js`, transcribed from the same Design Canvas export
+(`Downloads/features/Tracing Table.html`, which draws the whole lab dock: the
+table and the drawer side by side under one strip of buttons). Its icon is the
+export's own: a square with one corner peeled.
+
+**The case is one thing, written once.** The export draws both panels with the
+same border, radii, shadow and header — plate, spacer, × — so that shell is
+`.lab-panel` and its `.lp-*` furniture in `lab.css`, and `.tracer` and
+`.sticker-drawer` add only what is different inside them. Both are fixed to the
+left of the viewport, from under the header (`--head-h`, lab.js's own
+measurement) down to the foot of the screen; only one is ever up, because
+**upload** and **sticker** are two tools and a tool is exclusive. The panel
+only stops short of the tool dock below about 1300px, which is where the
+centred dock first reaches its column — above that it runs the full height,
+which matters because the table is about 830 tall and every pixel it does not
+get is a scroll between the dials and the light table.
+
+**It is not the flat file.** The table MAKES artwork — traced from a picture
+of yours, filed in THE LIBRARY at its side, and that is where everything the
+table makes lives. The drawer HOLDS artwork that came WITH the bench: kits of
+stickers, drawn elsewhere and shipped, rummaged for by name and filtered by
+kit. One is your own work, the other is stock, and neither writes into the
+other.
+
+**The catalogue is not a store**, and that is the one real difference from the
+flat file. A shipped sticker is not the user's data: it must not answer to
+`reset data`, it must not eat the few megabytes `localStorage` has, and its id
+has to mean the same thing on every device or a stamped sticker would come
+back blank on the next machine. So the kits live in memory and arrive through
+one door:
+
+```js
+Stickers.load({
+  kits: [ { id: 'pipeworks', name: 'Pipeworks' } ],
+  stickers: [ { id: 'pw-elbow', name: 'Elbow Joint', kit: 'pipeworks',
+                w: 400, h: 400, d: '<path d="…" fill="#5a635d"/>' } ]
+});
+```
+
+`d` is the inside of an `<svg viewBox="0 0 w h">`, colours already in it — the
+same shape a filed tracing keeps. Calling `load` again REPLACES the catalogue
+rather than adding to it, so a sheet can be re-loaded without doubling, and it
+repaints the wall on the way out: a stamp made before its sticker arrived drew
+nothing, and draws itself the moment the kit lands. **Ids are written into
+every stamp**, so name them rather than numbering them.
+
+A sticker is **clicked** to go on the pointer (a second click takes it off) and
+**dragged out onto the paper** to be stamped where it lands — `Wall.stickerAt`,
+a wall item `k:'d'` that names the sticker and paints its drawing at the size
+and fade the options row says, which is the SAME row the tracing uses and so
+the same two numbers. (`k` was the five old stamps, still painted for the
+artwork that used them, so the new one took the next free letter.) There is no
+viewer behind a sticker the way there is behind a pocket: nothing can be taken
+OUT of a drawer of shipped art, so there is nothing for a viewer to hold. A
+sticker the catalogue has not got paints nothing and does not throw.
+
+**The drawer ships empty** (2026-09-08). No kits have been drawn into it yet,
+so the grid shows the export's own dashed pockets and says so; everything that
+acts on a sticker is built and wired and waiting on `Stickers.load`.
 
 ---
 

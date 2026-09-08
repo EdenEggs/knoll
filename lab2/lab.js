@@ -268,11 +268,13 @@ window.Lab = (function () {
      too when it runs after this file. The alternative is a feature you can
      make but not keep, which is a toy.
 
-     WHAT IT CANNOT COPY is the sign, and the tracing table: neither has a
-     data-src, both are live DOM this file just drives (sign.js for one,
-     tracer.js for the other), and a second one of either would be a gnome
-     who does not lift. The filter is `el.dataset.src` and that is the only
-     exclusion. */
+     WHAT IT CANNOT COPY is the sign: it has no data-src, it is live DOM this
+     file just drives (sign.js), and a second one would be a gnome who does
+     not lift. The filter is `el.dataset.src` and that is the only exclusion.
+     The tracing table and the sticker drawer used to be on this list; since
+     2026-09-08 they are fixed chrome outside the world altogether (THE SIDE
+     PANELS in lab.css), so there is nothing here for them to be excluded
+     from. */
   /* The saved list is MADE AT BOOT and not here: store() writes into a list
      of its own that is declared further down this file, so calling it from up
      here is reaching for a const before it exists. It is opened where the
@@ -326,11 +328,11 @@ window.Lab = (function () {
        survive it. */
     if (!from.length) return false;
     const take = from.filter(el => el.dataset.src);
-    /* ASKED FOR, AND NOT COPYABLE: the sign, or the tracing table — the two
-       with no data-src. The clipboard goes EMPTY here rather than standing,
-       because standing is how a ctrl+v that named THIS thing used to put the
-       LAST thing on the paper. A gesture that cannot be honoured must not be
-       honoured with something else. (2026-09-04) */
+    /* ASKED FOR, AND NOT COPYABLE: the sign — the one with no data-src. The
+       clipboard goes EMPTY here rather than standing, because standing is how
+       a ctrl+v that named THIS thing used to put the LAST thing on the paper.
+       A gesture that cannot be honoured must not be honoured with something
+       else. (2026-09-04) */
     if (!take.length) { clip = null; return false; }
     clip = take.map(el => {
       const p = window.Frames && Frames.panelOf ? Frames.panelOf(el) : (window.Frames && Frames.panels.find(q => q.el === el));

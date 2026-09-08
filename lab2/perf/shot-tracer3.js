@@ -11,7 +11,7 @@ const { chromium } = require('playwright');
   // the lockup at 100%, then open the table there so the note, the book and the sign share a screen
   await page.evaluate(() => { const b = Lab.bench.getBoundingClientRect(); Lab.camTo(1, b.width / 2 - 2450 * 1, b.height / 2 - (-1250) * 1, 0); });
   await page.waitForTimeout(1500);
-  await page.evaluate(() => Wall.setTool('image'));
+  await page.evaluate(() => Wall.setTool('upload'));
   await page.waitForTimeout(800);
   const rectOf = async (sel) => page.evaluate(sel => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.left, y: b.top, w: b.width, h: b.height }; }, sel);
   // zoom in by real wheel steps over the note

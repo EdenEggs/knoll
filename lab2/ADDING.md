@@ -10,7 +10,7 @@ behind every rule here are in `about.md` §9 and `perf/results/`.
 | **kit part** | a drawing: `<svg>` + CSS animation, no inputs, no script | nothing (a sprite on a tile), or one compositor layer when near | one of the kit sheets — `forest`, `village`, `gnome` — or a new sheet listed in `kits.js` |
 | **prop** | a small drawing that is drawn straight in `index.html` (the sign, the pond, the campfire) | nothing | `index.html`, as a `.gz-art` section |
 | **machine** | a document: React layout, inputs, timers, a canvas, typing | ~0.5 ms every frame it is warm and drawn — so it is drawn only when it is worth it | its own `features/<name>.dc.html`, with a poster |
-| **wall ink** | a stroke, a stamp, a note, a filed tracing | nothing (one `<svg>` in world units) | `wall.js` / the tracing table |
+| **wall ink** | a stroke, a stamp, a note, a filed tracing, a sticker | nothing (one `<svg>` in world units) | `wall.js` / the tracing table / the sticker drawer |
 
 The rule of thumb: **if it has no button, it is not a machine.** A tree, a
 lamp post, a signpost, a gnome, a cloud, a house — all kit parts. If you find

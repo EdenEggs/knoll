@@ -1,31 +1,39 @@
 /* ─── THE TRACING TABLE ───────────────────────────────────────────────────
-   IMAGE on the dock, where STICKER was. Press it and the table spawns onto
-   the sheet, centred on whatever the camera is looking at (spawnAtView,
-   below) — drag it by its bar like any other feature. Lay a picture down,
-   set the dials, TRACE IT, and SAVE TO LIBRARY files the tracing in THE
-   LIBRARY beside it, which a picture can also be dragged straight onto — a
-   tracing in it goes on the pointer the way a stamp did, so a click on the
-   paper puts it there.
+   UPLOAD on the dock — a +, in what used to be the IMAGE button. Press it
+   and the table comes up on the LEFT OF THE SCREEN and stays there: lay a
+   picture down, set the dials, TRACE IT, and SAVE TO LIBRARY files the
+   tracing in THE FLAT FILE along its foot, which a picture can also be
+   dragged straight onto — a tracing in it goes on the pointer the way a
+   stamp did, so a click on the paper puts it there.
+
+   IT IS THE USER'S UI, NOT SCENERY (2026-09-08). It used to be a gizmo: a
+   panel placed ON the paper, registered with Lab, dragged by its bar, and so
+   panned and zoomed with the drawing under it — which meant the tool you
+   were working with wandered off the screen as soon as you moved the camera.
+   It is now fixed chrome beside the dock, the way the export always drew it.
+   Gone with that: Lab.register, Lab.place, spawnAtView, the drag handle, the
+   fold, and the one-frame will-change that kept it sharp inside the animated
+   sheet — none of which a fixed panel needs. See THE SIDE PANELS in lab.css.
 
    WHERE THE LOOK COMES FROM. The design is Downloads/features/Tracing
-   Table.html, a Design Canvas export — the window with its four screws, the
-   dials, the light table with the lamp, the sticky note and the library.
-   Every other feature on this bench is a document in a frame, and this one
+   Table.html, a Design Canvas export of the whole LAB DOCK: a strip of
+   buttons with this table and the sticker drawer (stickers.js) standing
+   beside it, both the same 344-wide case in the same dark palette. Every
+   other feature on this bench is a document in a frame, and this one
    deliberately is not: it has no iframe and nothing of its own to load, so
    it is driven from out here (a file dropped on it, a tracing painted onto
-   the wall, a store to keep) rather than adopted by frames.js. It is still a
-   gizmo like any other, though — Lab.register() gives it the same drag, pile
-   and pick as the eighty-four documents, it just never gets a Frames panel.
-   So the export's markup is transcribed below with classes in place of its
-   inline styles — see THE TRACING TABLE in lab.css, which is that design's
-   own numbers — and the LAB TOOLS strip it mocks up is left out, since the
-   real dock is right there.
+   the wall, a store to keep) rather than adopted by frames.js. The export's
+   markup is transcribed below with classes in place of its inline styles —
+   see THE SIDE PANELS in lab.css, which is that design's own numbers — and
+   the LAB TOOLS strip it mocks up is left out, since the real dock is right
+   there.
 
-   RE-EXPORTED 2026-09-04 in the newer bundle format (a zoom widget in the
-   corner and a LAB TOOLS mock, both viewer furniture — see NO SECOND SHEET
-   in features/bare.css for what those are on a machine). Every number, colour
-   and radius of the drawing was checked against this transcription and
-   matched, so nothing was carried over; the export still says SAVE SVG and
+   RE-DRAWN BY THE 2026-09-08 EXPORT. The table was a 1270-wide cream machine
+   with four screws, a grill and three columns; that export redrew it as this
+   panel — one scrolling column, the dials stacked, the ink-flow gauge stood
+   beside TRACE IT, and THE FLAT FILE four pockets across the foot. The
+   PIPELINE did not change, and neither did the library or anything that
+   reads it: only the case around them. The export still says SAVE SVG and
    THE FLAT FILE, which is the wording from before THE LIBRARY, below.
 
    THE PIPELINE is lab 1's vectorize.js, lifted whole: the picture is drawn
@@ -76,7 +84,7 @@ window.Tracer = (function () {
   const MAX_DIM = 640;       // longest edge of the working grid — the trace's real resolution
   const ALPHA_T = 16;        // pixels this transparent or more are background, never traced
   const SAMPLE_CAP = 3000;   // pixels sampled for k-means; the full image is only ever nearest-assigned
-  const SLOTS = 6;           // the library always shows at least this many pockets
+  const SLOTS = 4;           // the flat file always shows at least this many pockets — one row of the export's four
 
   const store = Lab.store('flatfile', () => ({ list: [] }));
   const S = () => store.get();
@@ -87,7 +95,7 @@ window.Tracer = (function () {
   const work = document.createElement('canvas');
   const workCtx = work.getContext('2d', { willReadFrequently: true });
 
-  let panel = null, on = false, registered = false;
+  let panel = null, on = false;
   let armedId = null;                    // the tracing on the pointer — a mood, not saved
   let objectUrl = null, baseName = 'trace', workImageData = null, hasImage = false;
   let last = null;                       // the tracing on the light table: { d, w, h, colors, paths }
@@ -104,106 +112,99 @@ window.Tracer = (function () {
     if (panel) return panel;
     panel = document.createElement('div');
     panel.id = 'tracer';
-    panel.className = 'tracer';
+    panel.className = 'tracer lab-panel';
     panel.dataset.gizmo = 'tracer';
     panel.hidden = true;
     panel.setAttribute('aria-label', 'the tracing table');
     panel.innerHTML =
-      '<div class="tr-zoom"><div class="tr-row">' +
-        '<div class="tr-win">' +
-          '<i class="tr-screw tr-nw"></i><i class="tr-screw tr-ne"></i><i class="tr-screw tr-sw"></i><i class="tr-screw tr-se"></i>' +
-          '<div class="tr-bar" data-handle>' +
-            '<div class="tr-plate">THE TRACING TABLE</div>' +
-            '<div class="tr-serial">NO. KN-0016</div>' +
-            '<div class="tr-grill"></div>' +
-            '<div class="tr-winbtns">' +
-              '<button type="button" class="tr-min" id="tr-min" title="fold the table away — press again to open it out">–</button>' +
-              '<button type="button" class="tr-x" id="tr-x" title="put the tool down">×</button>' +
-            '</div>' +
-          '</div>' +
-          '<div class="tr-body">' +
-            '<div class="tr-col">' +
-              '<div class="tr-tag">01 LAY IT DOWN</div>' +
-              '<label class="tr-drop" id="tr-drop" for="tr-file">' +
-                '<input type="file" id="tr-file" accept="image/*" hidden>' +
-                '<span class="tr-drop-empty" id="tr-drop-empty">' +
-                  '<i class="tr-pic"><b></b><u></u><s></s></i>' +
-                  '<strong>drop a picture here<br><small>or click to browse · any image</small></strong>' +
-                '</span>' +
-                '<span class="tr-drop-full" id="tr-drop-full" hidden><img id="tr-thumb" alt="the picture on the table"><em>LOADED</em></span>' +
-              '</label>' +
-              '<button type="button" class="tr-btn" id="tr-clear" disabled>CLEAR</button>' +
-              '<div class="tr-fine">stays on this device — nothing is uploaded.</div>' +
-            '</div>' +
-            '<div class="tr-col">' +
-              '<div class="tr-tag">02 THE DIALS</div>' +
-              '<div class="tr-dial"><div class="tr-dial-top"><span>COLORS</span><b id="tr-colors-out">06</b></div>' +
-                '<input type="range" id="tr-colors" min="2" max="12" value="6" aria-label="colours"></div>' +
-              '<div class="tr-dial"><div class="tr-dial-top"><span>SMOOTHING</span><b id="tr-smooth-out">50%</b></div>' +
-                '<input type="range" id="tr-smooth" min="0" max="100" value="50" aria-label="smoothing"></div>' +
-              '<button type="button" class="tr-go" id="tr-trace" disabled>TRACE IT</button>' +
-              '<div class="tr-flow"><i class="tr-gauge"><b id="tr-needle"></b><u></u></i>' +
-                '<div><span>INK FLOW</span><small id="tr-status">drop a picture to begin</small></div></div>' +
-            '</div>' +
-            '<div class="tr-col tr-col-table">' +
-              '<div class="tr-tag">03 LIGHT TABLE</div>' +
-              '<div class="tr-tabs">' +
-                '<button type="button" class="tr-tab on" data-view="original">ORIGINAL</button>' +
-                '<button type="button" class="tr-tab" data-view="traced">TRACED</button>' +
-              '</div>' +
-              '<div class="tr-table">' +
-                '<i class="tr-glow"></i>' +
-                '<div class="tr-lamp"><i></i><b><u></u></b></div>' +
-                '<img id="tr-original" alt="the picture you laid down" hidden>' +
-                '<div id="tr-traced" hidden></div>' +
-                '<div class="tr-empty" id="tr-empty"><span id="tr-empty-text">the picture you lay down shows up here</span><i></i></div>' +
-                '<div class="tr-paths" id="tr-paths">0 PATHS</div>' +
-              '</div>' +
-              '<button type="button" class="tr-btn" id="tr-save" disabled title="file the tracing in the library">SAVE TO LIBRARY</button>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="tr-side">' +
-          '<div class="tr-note"><i></i>1. lay down a picture<br>2. set the dials<br>3. TRACE IT<br>' +
-            '<span>save it to the library, then drag it out onto the paper — or click it to see it large.</span></div>' +
-          '<div class="tr-file" id="tr-file-box">' +
-            '<div class="tr-file-bar"><div class="tr-plate">LIBRARY</div></div>' +
-            '<div class="tr-slots" id="tr-slots"></div>' +
-            '<div class="tr-file-foot" id="tr-foot">finished tracings pile up here.</div>' +
-          '</div>' +
-        '</div>' +
+      '<div class="lp-bar">' +
+        '<div class="lp-plate">THE TRACING TABLE</div>' +
+        '<div class="lp-gap"></div>' +
+        '<button type="button" class="lp-x" id="tr-x" title="put the tool down">×</button>' +
       '</div>' +
-      // THE VIEWER: over the window, one tracing at a time
+      '<div class="lp-body">' +
+        '<div class="lp-tag">01 LAY IT DOWN</div>' +
+        '<label class="tr-drop" id="tr-drop" for="tr-file">' +
+          '<input type="file" id="tr-file" accept="image/*" hidden>' +
+          '<span class="tr-drop-empty" id="tr-drop-empty">' +
+            '<i class="tr-pic"><b></b><u></u><s></s></i>' +
+            '<strong>drop a picture here<br><small>or click to browse · any image</small></strong>' +
+          '</span>' +
+          '<span class="tr-drop-full" id="tr-drop-full" hidden><img id="tr-thumb" alt="the picture on the table"><em>LOADED</em></span>' +
+        '</label>' +
+        '<div class="lp-tag">02 THE DIALS</div>' +
+        '<div class="tr-dial"><div class="tr-dial-top"><span>COLORS</span><b id="tr-colors-out">06</b></div>' +
+          '<input type="range" id="tr-colors" min="2" max="12" value="6" aria-label="colours"></div>' +
+        '<div class="tr-dial"><div class="tr-dial-top"><span>SMOOTHING</span><b id="tr-smooth-out">50%</b></div>' +
+          '<input type="range" id="tr-smooth" min="0" max="100" value="50" aria-label="smoothing"></div>' +
+        /* TRACE IT, with the ink-flow gauge stood in its own box beside it —
+           the export's arrangement, and where the old machine's INK FLOW
+           panel went. The needle still swings while a trace runs; what that
+           panel had to SAY has moved to the note at the foot of the body. */
+        '<div class="tr-run">' +
+          '<button type="button" class="tr-go" id="tr-trace" disabled>TRACE IT</button>' +
+          '<div class="tr-flow" title="ink flow"><i class="tr-gauge"><b id="tr-needle"></b><u></u></i></div>' +
+        '</div>' +
+        '<div class="lp-tag">03 LIGHT TABLE</div>' +
+        '<div class="tr-tabs">' +
+          '<button type="button" class="tr-tab on" data-view="original">ORIGINAL</button>' +
+          '<button type="button" class="tr-tab" data-view="traced">TRACED</button>' +
+        '</div>' +
+        '<div class="tr-table">' +
+          '<i class="tr-glow"></i>' +
+          '<div class="tr-lamp"><i></i><b><u></u></b></div>' +
+          '<img id="tr-original" alt="the picture you laid down" hidden>' +
+          '<div id="tr-traced" hidden></div>' +
+          '<div class="tr-empty" id="tr-empty"><span id="tr-empty-text">the picture you lay down shows up here</span><i></i></div>' +
+          '<div class="tr-paths" id="tr-paths">0 PATHS</div>' +
+        '</div>' +
+        /* the export draws SAVE SVG here and a note under it saying to save
+           the tracing as an SVG; both are the wording from before THE
+           LIBRARY, and this still does not download — see THE LIBRARY, SINCE
+           2026-09-04 above. Same two buttons, same shapes, the words this
+           table earned. */
+        '<div class="tr-row2">' +
+          '<button type="button" class="tr-btn" id="tr-save" disabled title="file the tracing in the library">SAVE TO LIBRARY</button>' +
+          '<button type="button" class="tr-btn" id="tr-clear" disabled>CLEAR</button>' +
+        '</div>' +
+        '<div class="tr-note"><i></i>1. lay down a picture · 2. set the dials · 3. TRACE IT' +
+          '<small id="tr-status">drop a picture to begin</small></div>' +
+      '</div>' +
+      '<div class="lp-foot" id="tr-file-box">' +
+        '<div class="lp-head">' +
+          '<div class="lp-plate">THE FLAT FILE</div>' +
+          '<div class="lp-rule"></div>' +
+          '<div class="lp-serial">KN-0016</div>' +
+        '</div>' +
+        '<div class="tr-slots" id="tr-slots"></div>' +
+        '<div class="lp-fine" id="tr-foot">finished tracings pile up here.</div>' +
+      '</div>' +
+      /* THE VIEWER: one tracing, large, over the whole screen rather than
+         over the panel — the panel is 344 wide now, and "large" inside it
+         would be smaller than the pocket it came from. It is a fixed child
+         of the panel so that putting the tool down takes it away too. */
       '<div class="tr-viewer" id="tr-viewer" hidden>' +
         '<div class="tr-viewer-card">' +
-          '<div class="tr-bar tr-viewer-bar">' +
-            '<div class="tr-plate" id="tr-viewer-name">TRACING</div>' +
-            '<div class="tr-serial" id="tr-viewer-meta"></div>' +
-            '<div class="tr-grill"></div>' +
-            '<div class="tr-winbtns"><button type="button" class="tr-x" id="tr-viewer-close" title="back to the library">×</button></div>' +
+          '<div class="lp-bar tr-viewer-bar">' +
+            '<div class="lp-plate" id="tr-viewer-name">TRACING</div>' +
+            '<div class="lp-gap"></div>' +
+            '<div class="lp-serial" id="tr-viewer-meta"></div>' +
+            '<button type="button" class="lp-x" id="tr-viewer-close" title="back to the library">×</button>' +
           '</div>' +
           '<div class="tr-viewer-table" id="tr-viewer-table"></div>' +
           '<div class="tr-viewer-row">' +
             '<button type="button" class="tr-btn" id="tr-viewer-arm">ON THE POINTER</button>' +
             '<button type="button" class="tr-btn tr-btn-x" id="tr-viewer-remove" title="take it out of the library — its stamps come off the paper too">TAKE IT OUT ×</button>' +
           '</div>' +
-          '<div class="tr-fine">drag a pocket straight onto the paper to stamp it there.</div>' +
+          '<div class="lp-fine">drag a pocket straight onto the paper to stamp it there.</div>' +
         '</div>' +
-      '</div></div>';
-    Lab.world.appendChild(panel);
+      '</div>';
+    /* the body, not the world: this is chrome sitting over the bench, so it
+       is outside the sheet the camera moves and is never re-rastered by a
+       zoom the way a panel on the paper had to be. */
+    document.body.appendChild(panel);
     wire();
     renderSlots();
-    /* SHARP AFTER A ZOOM. The table is its own compositor layer (it overlaps
-       the frames), inside a sheet whose pose is a Web Animation, and Chrome
-       does not always raster such a layer afresh at the zoom the camera
-       landed on — so the table went soft the way a scaled bitmap does.
-       Remaking the layer when a zoom lands (will-change on for one frame)
-       rasters it again at the landed scale. One panel, once per zoom. */
-    document.addEventListener('lab:zoom', () => {
-      if (!on || panel.hidden) return;
-      panel.style.willChange = 'transform';
-      requestAnimationFrame(() => requestAnimationFrame(() => { panel.style.willChange = ''; }));
-    });
     return panel;
   }
 
@@ -584,7 +585,7 @@ window.Tracer = (function () {
   function renderSlots() {
     const box = $('tr-slots'); if (!box) return;
     const list = S().list;
-    const n = Math.max(SLOTS, Math.ceil(list.length / 3) * 3);
+    const n = Math.max(SLOTS, Math.ceil(list.length / 4) * 4);   // whole rows of four
     let html = '';
     for (let i = 0; i < n; i++) {
       const f = list[i], num = String(i + 1).padStart(2, '0');
@@ -592,7 +593,7 @@ window.Tracer = (function () {
       html += '<div class="tr-slot tr-filled' + (f.id === armedId ? ' on' : '') + '" data-id="' + esc(f.id) + '" role="button" tabindex="0"' +
         ' title="' + esc(f.name) + ' · ' + f.colors + ' colours · ' + f.paths + ' paths\nclick to see it large · drag it onto the paper to stamp it">' +
         thumbOf(f) +
-        '<span class="tr-on">ON THE POINTER</span>' +
+        '<span class="tr-on">ON</span>' +
         '<span class="tr-slot-n">' + num + '</span></div>';
     }
     box.innerHTML = html;
@@ -658,7 +659,7 @@ window.Tracer = (function () {
         press.moved = true;
         const f = byId.get(press.id); if (!f) { end(e); return; }
         ghost = document.createElement('div');
-        ghost.className = 'tr-ghost';
+        ghost.className = 'lp-ghost';
         ghost.innerHTML = thumbOf(f);
         document.body.appendChild(ghost);
         panel.classList.add('tr-carrying');
@@ -713,7 +714,6 @@ window.Tracer = (function () {
     $('tr-smooth').addEventListener('input', e => { $('tr-smooth-out').textContent = e.target.value + '%'; scheduleTrace(); });
     panel.querySelectorAll('.tr-tab').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
 
-    $('tr-min').addEventListener('click', () => panel.classList.toggle('tr-folded'));
     $('tr-x').addEventListener('click', () => { if (window.Wall) Wall.setTool('move'); });
 
     wireDrag($('tr-slots'));                     // a press is a click (the viewer) or a carry (a stamp)
@@ -728,33 +728,18 @@ window.Tracer = (function () {
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && viewing) closeViewer(); });
   }
 
-  /* Where it lands: centred on whatever the bench is showing right now, in
-     world coordinates, so it is never a pan away. Measured AFTER tr-folded
-     comes off (a folded table reports its folded size) and after it is
-     unhidden (a hidden one has no box at all) — reading offsetWidth here
-     forces the one layout that answers both. Lab.place is the same write a
-     drag's drop makes, so the gizmo bookkeeping (geoOf, growBench) stays
-     correct; it is asked not to save, because opening the tool is a spawn,
-     not a drag — see THE TRACING TABLE in lab.css for why it does not just
-     hold still in a screen corner any more. */
-  function spawnAtView() {
-    const b = Lab.bench.getBoundingClientRect();
-    const c = Lab.toWorld(b.left + b.width / 2, b.top + b.height / 2);
-    Lab.place(panel, Math.round(c.x - panel.offsetWidth / 2), Math.round(c.y - panel.offsetHeight / 2), false);
-  }
-
   // ── what the dock asks ─────────────────────────────────────────────────
-  // up with the tool, away with it — the picture on the table and the one on
-  // the pointer both stay put in between, the way the dials do
+  /* Up with the tool, away with it — the picture on the table and the one on
+     the pointer both stay put in between, the way the dials do. There is no
+     placing to do: the panel is fixed to the left of the screen and is in
+     the same spot every time it comes up, which is the whole point of it
+     being chrome (IT IS THE USER'S UI, NOT SCENERY, above). Nothing is built
+     until the first real open, so a tool nobody ever picks up costs the boot
+     nothing. */
   function tool(up) {
     on = !!up;
     build().hidden = !on;
-    // registered on the first real open, not at boot — a tool nobody ever
-    // picks up should not show up in Lab.gizmos or keep.js's autosave report
-    if (on) {
-      if (!registered) { Lab.register(panel); registered = true; }
-      panel.classList.remove('tr-folded'); renderSlots(); spawnAtView();
-    }
+    if (on) renderSlots();
   }
   const armed = () => (armedId && byId.get(armedId)) || null;
   const get = id => byId.get(id) || null;

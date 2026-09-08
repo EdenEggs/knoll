@@ -20,10 +20,43 @@ const check = (name, ok, info) => { results.push({ name, ok }); console.log((ok 
   await page.waitForTimeout(1500);
   await page.evaluate(() => { const b = Lab.bench.getBoundingClientRect(); Lab.camTo(0.6, b.width / 2 - 2300 * 0.6, b.height / 2 - 600 * 0.6, 0); });
   await page.waitForTimeout(800);
-  await page.evaluate(() => Wall.setTool('image'));
+  await page.evaluate(() => Wall.setTool('upload'));
   await page.waitForTimeout(800);
-  check('the table opens on the image tool', await page.evaluate(() => !!document.getElementById('tracer') && !document.getElementById('tracer').hidden));
+  check('the table opens on the upload tool', await page.evaluate(() => !!document.getElementById('tracer') && !document.getElementById('tracer').hidden));
+  /* IT IS CHROME, NOT SCENERY (2026-09-08): fixed to the left of the screen,
+     not a gizmo, and it holds still while the camera moves. */
+  const placed = await page.evaluate(async () => {
+    const el = document.getElementById('tracer');
+    const at = () => { const r = el.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top)]; };
+    const was = at(), pos = getComputedStyle(el).position;
+    const gizmo = Lab.gizmos.some(g => g.el.dataset.gizmo === 'tracer');
+    const b = Lab.bench.getBoundingClientRect();
+    Lab.camTo(0.35, b.width / 2 - 5000 * 0.35, b.height / 2 - 5000 * 0.35, 0);
+    await new Promise(r => setTimeout(r, 500));
+    return { pos, gizmo, was, now: at(), w: Math.round(el.getBoundingClientRect().width) };
+  });
+  check('the table is fixed chrome, not a gizmo, and holds still while the bench moves',
+    placed.pos === 'fixed' && !placed.gizmo && placed.w === 344 && placed.was.join() === placed.now.join(),
+    JSON.stringify(placed));
   check('no download button anywhere on the table', await page.evaluate(() => !document.querySelector('#tracer [data-dl], #tracer .tr-slot-dl')));
+
+  /* BLANK ON A FRESH DEVICE — what a visitor to the deployed site gets. The
+     flat file is Lab.store('flatfile'): THIS browser's localStorage and
+     nothing else. No tracing is baked into index.html, and serve.js's
+     autosave door only ever sees gizmo geometry, never a store — but the
+     shipped default is worth saying out loud rather than trusting, so this
+     runs on a context with no storage at all, before anything is filed. */
+  const fresh = await page.evaluate(() => ({
+    filled: document.querySelectorAll('#tr-slots .tr-slot.tr-filled').length,
+    pockets: document.querySelectorAll('#tr-slots .tr-slot').length,
+    foot: document.getElementById('tr-foot').textContent,
+    // Lab.store writes its own default the first time it is read, so the key
+    // exists on a fresh device — what matters is that the LIST in it is empty
+    stored: JSON.parse(localStorage.getItem('knoll-lab2:flatfile') || '{"list":[]}').list.length
+  }));
+  check('the flat file is blank on a fresh device — four empty pockets, nothing filed',
+    fresh.filled === 0 && fresh.pockets === 4 && /pile up here/.test(fresh.foot) && fresh.stored === 0,
+    JSON.stringify(fresh));
 
   // a picture: a red blob with a black outline, drawn on a canvas
   const png = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 160; c.height = 160; const x = c.getContext('2d'); x.fillStyle = '#17120b'; x.beginPath(); x.arc(80, 80, 60, 0, 7); x.fill(); x.fillStyle = '#e8484a'; x.beginPath(); x.arc(80, 80, 50, 0, 7); x.fill(); x.fillStyle = '#ffd23f'; x.fillRect(60, 60, 40, 40); return c.toDataURL('image/png').split(',')[1]; });
@@ -70,7 +103,7 @@ const check = (name, ok, info) => { results.push({ name, ok }); console.log((ok 
   });
   await page.mouse.move(slot.x, slot.y); await page.mouse.down();
   await page.mouse.move(slot.x + 30, slot.y + 30, { steps: 4 });
-  const ghost = await page.evaluate(() => !!document.querySelector('.tr-ghost'));
+  const ghost = await page.evaluate(() => !!document.querySelector('.lp-ghost'));
   await page.mouse.move(bare.x, bare.y, { steps: 12 });
   await page.waitForTimeout(100);
   await page.screenshot({ path: path.join(OUT, 'tracer-drag.png') });

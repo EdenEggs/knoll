@@ -17,7 +17,7 @@ const OUT = path.join(__dirname, 'results');
   await page.waitForFunction(() => window.Lab && window.Frames && window.Wall && window.Tracer);
   await page.waitForTimeout(1500);
   // open the table via the dock's image tool
-  await page.evaluate(() => Wall.setTool('image'));
+  await page.evaluate(() => Wall.setTool('upload'));
   await page.waitForTimeout(600);
   const plate = async () => page.evaluate(() => { const el = document.querySelector('#tracer .tr-plate'); const r = el.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
   const sharp = async (label) => {
