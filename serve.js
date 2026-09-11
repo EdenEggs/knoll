@@ -57,6 +57,31 @@ const BENCHES = {
   '/_ironhive/default': path.join(ROOT, 'ironhive', 'index.html')
 };
 
+/* THE WALL DOOR (2026-09-11). The hive's seed.js posts the wall the bench
+   should OPEN ON — the pieces, the tracings some of them are stamped from,
+   and the camera — and it is written out whole as ironhive/wall-seed.json,
+   one piece to a line so that a diff of it reads. Nothing is edited in place
+   and nothing is merged: the post is the file. The bench reads it back on a
+   browser's first visit (THE WALL THIS BENCH OPENS ON, in seed.js). */
+const WALL_DOOR = '/_ironhive/wall';
+const WALL_FILE = path.join(ROOT, 'ironhive', 'wall-seed.json');
+function seedText(seed) {
+  const lines = arr => arr.map(x => JSON.stringify(x)).join(',\n');
+  return '{\n"cam": ' + JSON.stringify(seed.cam) +
+         ',\n"wall": {"items": [\n' + lines(seed.wall.items) + '\n]}' +
+         ',\n"flatfile": {"list": [\n' + lines(seed.flatfile.list) + '\n]}\n}\n';
+}
+function saveWall(body) {
+  const cam = body && body.cam, wall = body && body.wall, ff = body && body.flatfile;
+  if (!wall || !Array.isArray(wall.items)) return { ok: false, error: 'no wall in the post' };
+  const items = wall.items.filter(it => it && typeof it === 'object' && typeof it.k === 'string');
+  if (!items.length) return { ok: false, error: 'nothing on the wall to publish' };
+  if (!cam || ![cam.z, cam.cx, cam.cy].every(Number.isFinite)) return { ok: false, error: 'no camera in the post' };
+  const list = ff && Array.isArray(ff.list) ? ff.list.filter(t => t && t.id) : [];
+  fs.writeFileSync(WALL_FILE, seedText({ cam, wall: { items }, flatfile: { list } }));
+  return { ok: true, pieces: items.length, tracings: list.length };
+}
+
 /* Markers round the appended copies. The block is the ONE region of the file
    this program owns; everything else it touches is three attributes on a tag
    somebody else wrote. */
@@ -313,6 +338,26 @@ function serve(req, res) {
 }
 
 http.createServer((req, res) => {
+  if (req.url.split('?')[0] === WALL_DOOR) {   // see THE WALL DOOR
+    if (req.method === 'GET') {                // seed.js knocks here before it shows the button
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, door: true }));
+      return;
+    }
+    if (req.method !== 'POST') { res.writeHead(405); res.end(); return; }
+    let raw = '';
+    req.on('data', c => { raw += c; if (raw.length > 8e6) req.destroy(); });
+    req.on('end', () => {
+      let out;
+      try { out = saveWall(JSON.parse(raw)); }
+      catch (e) { out = { ok: false, error: String((e && e.message) || e) }; }
+      if (out.ok) console.log('  ironhive: published the wall · ' + out.pieces + ' pieces, ' + out.tracings + ' tracings → wall-seed.json');
+      else console.log('  ! ' + out.error);
+      res.writeHead(out.ok ? 200 : 400, { 'content-type': 'application/json' });
+      res.end(JSON.stringify(out));
+    });
+    return;
+  }
   const bench = BENCHES[req.url.split('?')[0]];
   if (bench) {
     if (req.method === 'GET') {          // keep.js knocks here before it starts

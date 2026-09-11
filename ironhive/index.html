@@ -65,6 +65,12 @@
     <button type="button" id="lab-reset-data" class="lab-link">reset data</button>
     <a class="lab-link" href="../lab/">lab 1 →</a>
   </div>
+  <!-- seed.js shows this once serve.js answers its door: what is on the
+       paper becomes wall-seed.json, the wall a first visit opens on. OUTSIDE
+       the tools row on purpose — a fourth link in that row wrapped it under
+       the hint at 1600 wide and took forty pixels off the bench; lab.css
+       stands this one under the row instead (#lab-seed). -->
+  <button type="button" id="lab-seed" class="lab-link" hidden>publish the wall</button>
 </header>
 
 <main id="bench" class="bench" aria-label="workbench">
@@ -202,6 +208,13 @@
      KITS in kits.js and about.md. -->
 <script src="kits.js"></script>
 <script src="lab.js"></script>
+<!-- THE WALL THIS BENCH OPENS ON: straight after lab.js and BEFORE wall.js
+     and tracer.js open their stores, because whether this browser has ever
+     had a wall here is what it reads, and an opened store already looks like
+     one. Fetches wall-seed.json and puts it on a first visit's bare paper,
+     framed as it was published; on the dev server it is also the "publish
+     the wall" control in the tools row. See the head of seed.js. -->
+<script src="seed.js"></script>
 <script src="vol.js"></script>
 <script src="frames.js"></script>
 <!-- tape.js no longer has anything to do with the dock — a strip takes
