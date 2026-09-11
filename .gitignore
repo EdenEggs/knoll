@@ -30,3 +30,4 @@ ironhive/*.lnk
 # the harness is worth keeping, the output of a run already read is not — and
 # no PNG here is part of the site (the favicon is the .ico above).
 ironhive/*.png
+ironhive/results/

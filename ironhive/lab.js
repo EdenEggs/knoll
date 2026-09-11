@@ -858,6 +858,15 @@ window.Lab = (function () {
      would now cost two of the very re-layerisations this exists to avoid,
      at every stop.
 
+     (2026-09-11: NOT QUITE. Blink never runs this animation on the
+     compositor — its Animation trace events carry a compositeFailed reason
+     at every zoom — so the pose lands on the main thread like any style,
+     and the crisp landing is the compositor following the zoom, which it
+     does now that the sheet no longer carries will-change: transform
+     (lab.css says why, and ironhive/probe-blank.js has the numbers). The
+     animation is kept: every pose write in this file goes through it and
+     it costs nothing that has been measured to matter.)
+
      Where there is no Web Animations API, or an effect with no
      setKeyframes, the style is written the way it always was. */
   const rigs = new WeakMap();            // element → its animation, or false where there is none to be had

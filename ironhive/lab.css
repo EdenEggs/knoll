@@ -179,10 +179,33 @@ html.lab-local .lab-slash,html.lab-local .lab-name{display:inline}
    way up and once on the way down, which on a bench this size was the lag.
    Now the sheet stays on the GPU, and the camera is a Web Animation whose
    keyframes lab.js rewrites (THE CAMERA IS AN ANIMATION, there): a pan or a
-   zoom is a compositor update and not a re-layerisation of the page, and an
-   animated layer is re-rasterised at its own scale, so it lands crisp with
-   no settle dance. The will-change stays, as the hint it always was. */
-.bench-world{position:absolute;left:0;top:0;transform-origin:0 0;cursor:grab;will-change:transform}
+   zoom is a compositor update and not a re-layerisation of the page.
+
+   BUT NOT BY WILL-CHANGE ANY MORE. Until 2026-09-11 this rule carried
+   `will-change: transform`, "the hint it always was", and the hint is what
+   the compositor's own numbers point at for the paper going blank in bands
+   while a film plays (ironhive/probe-blank.js has the whole account).
+   Chrome rasters a will-change layer at its NATURAL scale — one screen
+   pixel per sheet pixel — whenever the zoom is within a factor of four
+   below it, and follows the zoom only further out. So at 25%, the zoom the
+   report was taken at, the sheet was ninety-six tiles and 111 MB where
+   twelve tiles and 14 MB would do: sixteen times the pixels, twenty-five
+   at a device scale of 1.25, and every re-raster of the visible paper — a
+   tab coming back, a memory-pressure signal, a change on the sheet — cost
+   that much more. A tile row the compositor has not got round to is a
+   straight cut across the whole width with the dots showing through,
+   which is the report. The blank itself was never caught in the lab, so
+   this is the strongest mitigation the measurements allow rather than a
+   watched-it-happen cause.
+
+   The translate3d the pose is written with keeps the sheet composited on
+   its own, and without the hint the compositor rasters it at the zoom
+   everywhere and still lands it crisp — measured ideal and raster scale
+   equal at 10, 25, 50 and 400%. The animation turned out to have nothing to
+   do with it: blink never runs it on the compositor (its Animation trace
+   events carry a compositeFailed reason at every zoom), and a plain
+   transform style gives the same numbers, hint on or off. */
+.bench-world{position:absolute;left:0;top:0;transform-origin:0 0;cursor:grab}
 .bench-world .gz{cursor:auto}
 
 /* ─── the sign ───────────────────────────────────────────────────────────
