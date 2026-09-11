@@ -630,6 +630,17 @@ body.lab-banding,body.lab-banding .bench *{cursor:crosshair}
 .tool-dock{bottom:16px}
 .tool-opts{bottom:70px;padding:4px 8px;gap:5px;border-radius:12px;
   flex-wrap:wrap;justify-content:center;max-width:min(94vw,960px)}
+/* ── A LINE OVER THE DOCK WHEN A SAVE DID NOT FIT ─────────────────────────
+   lab.js puts it up when localStorage throws on a write and takes it down
+   on the first write that fits again (A SAVE THAT DOES NOT FIT, there).
+   The dock's own pill, amber words, fixed above the options row — never on
+   the paper, never under the hand, and never in the way of a press. */
+.lab-warn{position:fixed;left:50%;bottom:122px;transform:translateX(-50%);z-index:6001;
+  max-width:min(92vw,640px);padding:8px 14px;border-radius:12px;
+  background:var(--gz-handle-bg);border:2px solid var(--hard-edge);color:var(--amber);
+  font-family:var(--body);font-size:12.5px;font-weight:600;line-height:1.35;text-align:center;
+  box-shadow:0 2px 0 var(--hard-edge),0 16px 34px -16px rgba(var(--drop-rgb),.6);pointer-events:none}
+.lab-warn[hidden]{display:none}
 .dock-grp{display:flex;align-items:center;gap:3px}
 .dock-rule{width:1px;height:20px;background:var(--grip);margin:0 3px}
 

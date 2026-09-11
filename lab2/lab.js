@@ -1167,6 +1167,31 @@ window.Lab = (function () {
 
   // ── store: tiny persisted state for gizmos (localStorage, per device) ──
   const stores = [];
+  /* A SAVE THAT DOES NOT FIT IS SAID OUT LOUD. localStorage is a few
+     megabytes per origin and every bench on this site shares them — the
+     iron hive's wall sits beside this bench's, its library and its tape
+     under the same www.knoll.space — so a long drawing session can fill it,
+     and setItem then throws. Swallowed, as it was until 2026-09-11, the
+     screen goes on showing the change (the state is in memory) and the next
+     reload does not, which is exactly the "it was there and then it wasn't"
+     nobody can diagnose. So a save that throws puts a line up over the dock
+     naming the problem and the two ways out, and the first save that fits
+     again takes it down. `full` is the key that last failed, so the line is
+     taken down by that store finding room and not by any other store's
+     write going through. tracer.js reads its own key back after every
+     filing for the same reason and says so in its own panel; this is the
+     same promise made once, for the lot. */
+  let full = null, warnEl = null;
+  function warn(text) {
+    if (!warnEl) {
+      warnEl = document.createElement('div');
+      warnEl.className = 'lab-warn';
+      warnEl.setAttribute('role', 'alert');
+      document.body.appendChild(warnEl);
+    }
+    warnEl.textContent = text || '';
+    warnEl.hidden = !text;
+  }
   function store(key, defaults) {
     const K = 'knoll-lab2:' + key;
     const fresh = () => typeof defaults === 'function' ? defaults() : JSON.parse(JSON.stringify(defaults));
@@ -1174,7 +1199,17 @@ window.Lab = (function () {
     try { const v = JSON.parse(localStorage.getItem(K)); if (v && typeof v === 'object') state = v; } catch (e) {}
     if (!state) { state = fresh(); seeded = true; }
     const subs = [];
-    const save = () => { try { localStorage.setItem(K, JSON.stringify(state)); } catch (e) {} };
+    const save = () => {
+      try { localStorage.setItem(K, JSON.stringify(state)); }
+      catch (e) {
+        full = K;
+        warn('this browser’s storage is full — the last change was not saved. ' +
+             'Take something off the paper (delete it, or undo), or reset data.');
+        return false;
+      }
+      if (full === K) { full = null; warn(''); }
+      return true;
+    };
     if (seeded) save();   // a fresh seed persists at once, so seeded dates and ids hold still across reloads
     const emit = () => subs.forEach(f => f(state));
     const api = {
@@ -1978,6 +2013,9 @@ window.Lab = (function () {
   if (resetDataBtn) resetDataBtn.addEventListener('click', () => { if (confirm('Wipe everything lab 2 has saved on this device — the drawings, the tape, the lot?')) resetData(); });
 
   return { register, place, resetAll, gizmos, store, uid, resetData, world, bench, grid, growBench,
+    /* the line over the dock a store puts up when a save does not fit —
+       see A SAVE THAT DOES NOT FIT, up by the stores */
+    warn,
     hidpi, toWorld, toScreen, setZoom, panBy, camTo, fit, focusOn, jumpTo, moving,
     stamp, remember, undoTop, undoMove, undo, copy, paste, deleteCopy, isCopy,
     raise, lower, remove, rankOf, menuAt, closeMenu,

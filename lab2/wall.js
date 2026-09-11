@@ -172,10 +172,36 @@ window.Wall = (function () {
   ];
   const PADS = { y: '--sticky-a', p: '--sticky-b', b: '--sticky-c', g: '--sticky-d' };
   const pad = k => 'var(' + (PADS[k] || PADS.y) + ')';
-  const MAX = 600;                       // pieces before the oldest starts dropping
+  /* THERE IS NO CAP ON THE PILE ANY MORE. Until 2026-09-11 this line read
+     `const MAX = 600` and add() spliced the oldest pieces off the FRONT of
+     the list once it was longer than that — every stroke of the pen being a
+     piece, a scene of a hundred stickers and one afternoon's drawing was
+     enough, and the stickers stamped first started vanishing as more went
+     on, silently. It was found on the iron hive, whose wall.js is this one's
+     twin, and never reported here — but nothing here was any different. The
+     splice was worse than the loss: it renamed every index at once, and an
+     index is what everything in this file knows a piece by — a move in
+     flight, a note being resized, a note being edited and every undo closure
+     all pointed at the wrong thing afterwards (see deleting what is already
+     there). What bounds the wall now is localStorage itself, and lab.js says
+     so out loud when a save no longer fits (A SAVE THAT DOES NOT FIT, over
+     there) rather than anything here dropping a piece. */
 
   const store = Lab.store('wall', () => ({ items: [] }));
   const S = () => store.get();
+  /* DEAD SLOTS ARE DROPPED AT BOOT, AND ONLY AT BOOT. A delete and an
+     emptied note both leave a null in the list rather than splicing it out,
+     because everything that holds an index has to go on holding it (see
+     deleting what is already there, below). Those nulls are worth nothing
+     after a reload — undo is not saved, nothing is held, nothing is open —
+     so this is the one moment the list can be squeezed without renaming a
+     piece anybody is still pointing at. Without it a wall that had things
+     taken off it all day would carry a growing tail of nothing, saved and
+     parsed on every write. A store with no list at all (a save from before
+     this file, or a hand-edited one) is given an empty one rather than left
+     to throw at the first paint. */
+  if (!Array.isArray(S().items)) store.update(st => { st.items = []; });
+  else if (S().items.some(it => !it)) store.update(st => { st.items = st.items.filter(Boolean); });
 
   // tool choices are a mood, not a document — they live for the session only,
   // the same way the hero treats them
@@ -577,12 +603,13 @@ window.Wall = (function () {
     return true;
   }
 
+  /* A PUSH AND NOTHING ELSE. This used to trim the front of the list past
+     MAX pieces, which is the bug the note up by the constants is about
+     (THERE IS NO CAP ON THE PILE ANY MORE): nothing here drops a piece,
+     ever, and nothing here moves one. */
   function add(item) {
     mark('ink');
-    store.update(st => {
-      st.items.push(item);
-      if (st.items.length > MAX) st.items.splice(0, st.items.length - MAX);
-    });
+    store.update(st => { st.items.push(item); });
   }
 
   svg.addEventListener('pointerdown', e => {
@@ -906,7 +933,12 @@ window.Wall = (function () {
     if (ed) {
       store.update(st => {
         if (!st.items[ed.i]) return;     // taken off the wall while it was open
-        if (!t) { st.items.splice(ed.i, 1); return; }
+        /* NULLED, NOT SPLICED, the same as a delete and for the same reason
+           (see deleting what is already there): a splice here renamed every
+           piece after this one, and a move in flight, a note being resized
+           and the undo stack all went on using the old names. The slot is
+           squeezed out at the next boot. (2026-09-11) */
+        if (!t) { st.items[ed.i] = null; return; }
         Object.assign(st.items[ed.i], { c: c, f: fo, t: t, sz: TSZ[fz],
           w: round(nw), b: fb, i: fi, u: fu, a: fa });
       });
