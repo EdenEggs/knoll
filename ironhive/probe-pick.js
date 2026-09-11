@@ -439,8 +439,13 @@ const say = (ok, what, extra) =>
   // the slot rather than splicing it, so the live pieces are what to count
   await page.waitForFunction(() => window.Wall && Wall.store.get().items.filter(Boolean).length === 3);
   await page.waitForTimeout(600);
-  say(JSON.stringify(await pos()) === JSON.stringify(want),
-      'positions, sizes and angles came back off the store', JSON.stringify(await pos()));
+  // …and since 2026-09-11 those null slots are squeezed out at boot (DEAD
+  // SLOTS ARE DROPPED AT BOOT, wall.js), so it is the live pieces, in order,
+  // that have to come back — not the holes between them
+  const live = list => JSON.stringify(list.filter(Boolean));
+  const back = await pos();
+  say(live(back) === live(want) && back.length === 3,
+      'positions, sizes and angles came back off the store, the dead slots squeezed out', JSON.stringify(back));
 
   console.log('\n' + (errs.length ? errs.length + ' page error(s)' : 'no page errors'));
   await page.waitForTimeout(400);

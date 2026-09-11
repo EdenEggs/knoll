@@ -975,8 +975,20 @@ window.Lab = (function () {
     room.style.height = rh + 'px';
     gridEl.style.width = rw + 'px';      // the grid is the room's floor — see paintGrid
     gridEl.style.height = rh + 'px';
+    /* AND WHOEVER DRAWS ON THE ROOM IS TOLD. wall.js sizes the square that
+       catches a press on bare paper to the room (HOW FAR THE INK REACHES,
+       over there), so the room changing shape is a thing it has to hear. */
+    document.dispatchEvent(new CustomEvent('lab:room'));
     return true;
   }
+
+  /* THE ROOM, IN WORLD UNITS: every point the camera can be scrolled to
+     show, which is the content box with a viewport of slack either side —
+     see fitRoom. wall.js asks, so the rectangle it catches a press on is
+     this and not a fixed forty thousand. Nothing until the room has been
+     fitted, which happens at the foot of this file, before wall.js runs. */
+  const reach = () => (roomW > 0 && roomH > 0 && Z > 0)
+    ? { x: -OX / Z, y: -OY / Z, w: roomW / Z, h: roomH / Z } : null;
 
   function applyCam() {
     if (fitRoom() || Z !== drawnZ) {
@@ -1199,6 +1211,31 @@ window.Lab = (function () {
 
   // ── store: tiny persisted state for gizmos (localStorage, per device) ──
   const stores = [];
+  /* A SAVE THAT DOES NOT FIT IS SAID OUT LOUD. localStorage is a few
+     megabytes per origin and every bench on this site shares them — lab 2's
+     wall and its library sit beside this bench's under the same
+     www.knoll.space — so a long drawing session can fill it, and setItem
+     then throws. Swallowed, as it was until 2026-09-11, the screen goes on
+     showing the change (the state is in memory) and the next reload does
+     not, which is exactly the "it was there and then it wasn't" nobody can
+     diagnose. So a save that throws puts a line up over the dock naming the
+     problem and the two ways out, and the first save that fits again takes
+     it down. `full` is the key that last failed, so the line is taken down
+     by that store finding room and not by any other store's write going
+     through. tracer.js reads its own key back after every filing for the
+     same reason and says so in its own panel; this is the same promise made
+     once, for the lot. */
+  let full = null, warnEl = null;
+  function warn(text) {
+    if (!warnEl) {
+      warnEl = document.createElement('div');
+      warnEl.className = 'lab-warn';
+      warnEl.setAttribute('role', 'alert');
+      document.body.appendChild(warnEl);
+    }
+    warnEl.textContent = text || '';
+    warnEl.hidden = !text;
+  }
   function store(key, defaults) {
     const K = 'knoll-ironhive:' + key;
     const fresh = () => typeof defaults === 'function' ? defaults() : JSON.parse(JSON.stringify(defaults));
@@ -1206,7 +1243,17 @@ window.Lab = (function () {
     try { const v = JSON.parse(localStorage.getItem(K)); if (v && typeof v === 'object') state = v; } catch (e) {}
     if (!state) { state = fresh(); seeded = true; }
     const subs = [];
-    const save = () => { try { localStorage.setItem(K, JSON.stringify(state)); } catch (e) {} };
+    const save = () => {
+      try { localStorage.setItem(K, JSON.stringify(state)); }
+      catch (e) {
+        full = K;
+        warn('this browser’s storage is full — the last change was not saved. ' +
+             'Take something off the paper (delete it, or undo), or reset data.');
+        return false;
+      }
+      if (full === K) { full = null; warn(''); }
+      return true;
+    };
     if (seeded) save();   // a fresh seed persists at once, so seeded dates and ids hold still across reloads
     const emit = () => subs.forEach(f => f(state));
     const api = {
@@ -2268,6 +2315,10 @@ window.Lab = (function () {
 
   return { register, place, resetAll, gizmos, store, uid, resetData, world, bench, grid, growBench,
     hidpi, toWorld, toScreen, setZoom, panBy, camTo, fit, focusOn, jumpTo, moving,
+    /* the room the camera can reach, in world units (wall.js sizes its
+       press-catching square to it), and the line over the dock a store puts
+       up when a save does not fit — see A SAVE THAT DOES NOT FIT */
+    reach, warn,
     /* what is on the paper has changed shape — drop the measured rectangle
        the camera is clamped inside. wall.js says this whenever its store is
        written; the features say it in here already. */

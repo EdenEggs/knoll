@@ -612,6 +612,10 @@ window.Kits = (function () {
     watcher.observe(el, { attributes: true, attributeFilter: ['style', 'class'] });
     held(r);
     loadSheet(r.kit).then(() => { if (recs.get(r.id) === r) { dirtyRect(r); mustSoon(); } });
+    // the first part on a bench that had none: the tiles it is drawn on do
+    // not exist yet (NO PARTS, NO TILES, in layoutTiles), so lay them now —
+    // at boot start() does this itself, once every section is adopted
+    if (started && !tiles.size) layoutTiles();
     return r;
   }
   function drop(el) {
@@ -620,6 +624,7 @@ window.Kits = (function () {
     unhash(r); dirtyRect(r);
     byEl.delete(el);
     if (recs.get(r.id) === r) recs.delete(r.id);
+    if (!recs.size) layoutTiles();       // …and the last one off takes the tiles with it
     return true;
   }
 
@@ -699,6 +704,19 @@ window.Kits = (function () {
 
   function layoutTiles() {
     if (!window.Lab) return;
+    /* NO PARTS, NO TILES. A tile is a 1024×1024 canvas (times the device's
+       pixel ratio, squared) on the GPU, and a viewport's worth of them with
+       a ring round it is twenty or so — a hundred megabytes and more of
+       textures, thrown away and cut again on every zoom step and on every
+       scroll that outruns lab:still. On a bench with a wood of kit parts on
+       it that is the price of drawing the wood at 25%; on one with none —
+       the iron hive, which is lab 2 with the paper cleared — it was the same
+       price for painting nothing at all, alongside a youtube player's
+       decoder, which is the kind of load under which a compositor starts
+       dropping tiles and the paper goes blank in patches (2026-09-11). So a
+       bench with nothing to draw lays no tiles, and the first part adopted
+       lays them — see adopt(). */
+    if (!recs.size) { if (tiles.size) clearTiles(); tileZ = 0; tileT = 0; return; }
     const Z = zoomOf();
     if (Z > ZOOM_NO_TILES) { clearTiles(); tileZ = Z; tileT = 0; return; }
     if (Z !== tileZ) { clearTiles(); tileZ = Z; tileT = TILE_PX / Z; noteBase(Math.round(Z * dpr() * SPRITE_ROUND) / SPRITE_ROUND); }

@@ -213,10 +213,34 @@ window.Wall = (function () {
   ];
   const PADS = { y: '--sticky-a', p: '--sticky-b', b: '--sticky-c', g: '--sticky-d' };
   const pad = k => 'var(' + (PADS[k] || PADS.y) + ')';
-  const MAX = 600;                       // pieces before the oldest starts dropping
+  /* THERE IS NO CAP ON THE PILE ANY MORE. Until 2026-09-11 this line read
+     `const MAX = 600` and add() spliced the oldest pieces off the FRONT of
+     the list once it was longer than that — every stroke of the pen being a
+     piece, a scene of a hundred stickers and one afternoon's drawing was
+     enough, and the stickers stamped first started vanishing as more went
+     on, silently, which is exactly what was reported. The splice was worse
+     than the loss: it renamed every index at once, and an index is the NAME
+     of a piece here (see WHICH ORDER THEY GO ON IN), so the pick, a film
+     playing, a note open and every undo closure all pointed at the wrong
+     thing afterwards. What bounds the wall now is localStorage itself, and
+     lab.js says so out loud when a save no longer fits (A SAVE THAT DOES NOT
+     FIT, over there) rather than anything here dropping a piece. */
 
   const store = Lab.store('wall', () => ({ items: [] }));
   const S = () => store.get();
+  /* DEAD SLOTS ARE DROPPED AT BOOT, AND ONLY AT BOOT. A delete, an undone
+     paste and an emptied note all leave a null in the list rather than
+     splicing it out, because everything that holds an index has to go on
+     holding it (see the delete tool, below). Those nulls are worth nothing
+     after a reload — undo is not saved, the pick starts empty, nothing is
+     open — so this is the one moment the list can be squeezed without
+     renaming a piece anybody is still pointing at. Without it a wall that
+     had things taken off it all day would carry a growing tail of nothing,
+     saved and parsed on every write. A store with no list at all (a save
+     from before this file, or a hand-edited one) is given an empty one
+     rather than left to throw at the first paint. */
+  if (!Array.isArray(S().items)) store.update(st => { st.items = []; });
+  else if (S().items.some(it => !it)) store.update(st => { st.items = st.items.filter(Boolean); });
 
   // tool choices are a mood, not a document — they live for the session only,
   // the same way the hero treats them
@@ -448,10 +472,35 @@ window.Wall = (function () {
      pointer, and the svg is overflow:visible, which is what lets it be
      rendered outside its own box. Drawing therefore works wherever you can
      pan to. It is not a .wall-item, so in move mode it goes as inert as the
-     rest of the layer and clicks fall through to the paper underneath. */
+     rest of the layer and clicks fall through to the paper underneath.
+
+     THE SIZE OF THE ROOM, NOT FORTY THOUSAND. It was a fixed ±20000 square
+     for most of this file's life, and that square is what the browser took
+     the sheet's layer to be: a will-change'd, animated compositor layer
+     forty thousand world units on a side whatever was on it — measured
+     through the devtools protocol on 2026-09-11 while chasing the paper
+     going blank in patches. The camera cannot be scrolled past the room
+     lab.js sizes (THE CAMERA IS A SCROLL, over there), so a square the size
+     of the room, with half a room of slack each way for a drag that runs
+     off the edge before the edge-pan has caught up, catches exactly the
+     same presses and gives the layer a sensible size. lab.js says 'lab:room'
+     whenever the room changes shape and Lab.reach() says where it is; the
+     old square stands until the first of those, and stays if there is no
+     such door (an older lab.js). */
   const REACH = 20000;
   const reach = el('rect', { x: -REACH, y: -REACH, width: REACH * 2, height: REACH * 2,
                              fill: 'transparent' });
+  function fitReach() {
+    const r = window.Lab && Lab.reach && Lab.reach();
+    if (!r || !(r.w > 0) || !(r.h > 0)) return;
+    const mx = r.w / 2, my = r.h / 2;
+    reach.setAttribute('x', round(r.x - mx));
+    reach.setAttribute('y', round(r.y - my));
+    reach.setAttribute('width', round(r.w + mx * 2));
+    reach.setAttribute('height', round(r.h + my * 2));
+  }
+  document.addEventListener('lab:room', fitReach);
+  document.addEventListener('lab:zoom', fitReach);   // the same room is a different size in world units at a new zoom
 
   /* ── WHICH WAY UP A STAMPED PIECE IS, AND WHICH WAY ROUND ────────────────
      `r` is degrees clockwise and `fx`/`fy` are the two mirrors, all three
@@ -935,12 +984,12 @@ window.Wall = (function () {
     return true;
   }
 
+  /* A PUSH AND NOTHING ELSE. This used to trim the front of the list past
+     MAX pieces, which is the bug the note at the head of the file is about:
+     nothing here drops a piece, ever, and nothing here moves one. */
   function add(item) {
     mark('ink');
-    store.update(st => {
-      st.items.push(item);
-      if (st.items.length > MAX) st.items.splice(0, st.items.length - MAX);
-    });
+    store.update(st => { st.items.push(item); });
   }
 
   svg.addEventListener('pointerdown', e => {
@@ -1385,7 +1434,12 @@ window.Wall = (function () {
       store.update(st => {
         const old = st.items[ed.i];
         if (!old) return;                // taken off the wall while it was open
-        if (!t) { st.items.splice(ed.i, 1); return; }
+        /* NULLED, NOT SPLICED, the same as a delete and for the same reason
+           (see deleting what is already there): a splice here renamed every
+           piece after this one, and the pick, a film and the undo stack all
+           went on using the old names. The slot is squeezed out at the next
+           boot. (2026-09-11) */
+        if (!t) { st.items[ed.i] = null; return; }
         if (vid) {
           st.items[ed.i] = Object.assign(vid,
             { x: round(old.x + VID[0] / 2), y: round(old.y) },
@@ -3128,6 +3182,7 @@ window.Wall = (function () {
      order they signed up. */
   store.on(() => { if (window.Lab && Lab.forget) Lab.forget(); });
   paint();
+  fitReach();                            // the room was fitted when lab.js booted, before this file ran
 
   // A scroll is cut to the width of the words, and the words change width twice
   // after that first paint: once when the web fonts land, and again every time
