@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Knoll · Iron Hive</title>
+<link rel="icon" href="../logo/logo-icon.svg">
+<!-- Sora + Public Sans are the house faces. VT323 is the caution tape, which
+     is printed rather than written — and the tracing table's plates. Kalam is
+     the tracing table's handwriting (its design's own face; the table has no
+     frame of its own, so this page loads it rather than a document doing
+     so). Rye is the sign's, and the sign's only: the wordmark is set in it
+     on the bench itself rather than inside a frame. The features load their
+     own faces inside their own frames — they are whole documents and dress
+     themselves. -->
+<!-- SELF-HOSTED since 2026-09-04: the same faces, served from ./fonts, so
+     nothing on this bench waits on fonts.googleapis.com to paint — and the
+     features' own <link>s point at the same file (../fonts/fonts.css), so
+     a frame never fetches a face the page already has. -->
+<!-- LOCAL, OR THE LANDING PAGE. Served from the bench's own server (serve.js,
+     on localhost) this is the workbench, with its hint and its row of switches
+     in the header; served from anywhere else it is the landing page, and the
+     header is the wordmark alone — see THE LANDING PAGE WEARS ONLY THE LOGO
+     in lab.css. Decided here, before the stylesheet, so neither side ever
+     paints the other's header for a frame. keep.js makes the same call for
+     its own pill by knocking on the door, which is the same fact asked the
+     slow way. -->
+<script>if(/^(localhost|127.0.0.1|[::1])$/.test(location.hostname))document.documentElement.classList.add('lab-local');</script>
+<link href="fonts/fonts.css" rel="stylesheet">
+<!-- THE OPENING VIEW, ASKED FOR FIRST. This bench opens on bare paper, so the
+     only thing the opening frame needs is the faces the header and the two
+     side panels are set in. The kit sheets and the posters lab 2 preloads
+     here are art this bench does not carry — see THE EMPTY BENCH below. -->
+<link rel="preload" href="fonts/Rye-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/Sora-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/Public-Sans-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="lab.css">
+</head>
+<body>
+
+<header class="lab-head">
+  <a class="lab-brand" href="../">
+    <img src="../logo/logo-icon.svg" alt="" width="26" height="26">
+    <span>knoll</span><span class="lab-slash">/</span><span class="lab-name">iron hive</span>
+  </a>
+  <p class="lab-hint">an <b>empty bench</b>: the whole of lab 2's workshop — the camera, the dock, the wall, the tracing table and the sticker drawer — standing over bare paper, with nothing on it and nothing in the way. It is the room the <b>Iron Hive</b> kits were cut for. The bench moves like figma's canvas — hold the <b>scroll wheel</b> (or <b>space</b>) and drag to pan, scroll to pan, <b>ctrl+scroll</b> or pinch to zoom, <b>shift 1</b> to fit what you have made on screen. <b>Drag the bare paper</b> and you pull a band out: everything it touches is picked, <b>shift-click</b> adds one or drops one, and dragging any of them carries the lot. <b>Hold ctrl</b> and the hitbox stops being the box: what answers the pointer is what is <i>drawn</i> under it, so you can take one tree out of a stand of them and the gaps between the branches belong to whatever is behind. The <b>?</b> in the corner has the rest. The dock at the bottom draws on the paper itself; <b>esc</b> puts the pen down, and <b>ctrl+z</b> — or its <b>undo</b> button — takes back the last thing you moved or drew. Its <b>sticker</b> tool stands the sticker drawer up the left of the screen: rummage by kit or by name, pick one out, and click the paper to stamp it there, or drag one straight onto it. One that is already down can be <b>pressed and held</b> — or just dragged — to move it about without leaving the tool, and a quick <b>tap</b> on it still stamps another on top, which is how things get piled up. With the <b>move</b> tool up the band gathers stickers the way it gathers anything else: everything it touches is picked, and dragging any one of them carries the whole lot in one go, one <b>ctrl+z</b> to put back. Press a single one and it wears two handles — a <b>corner</b> at its bottom right to scale it by, and a <b>ring</b> on a stalk above it to turn it, <b>shift</b> for fifteen-degree steps. Double-click either handle to put that one back: the corner to the size the artwork was drawn at, the ring to upright. <b>shift H</b> and <b>shift V</b> mirror what is picked — one piece about its own middle, a group about the group's, so a row comes back reading the other way round; flip twice and you have exactly what you started with. Its <b>upload</b> tool puts the tracing table in the same place — lay a picture on it, trace it, file it, stamp it. Both panels are chrome, not scenery: they hold still while the bench moves under them. <b>ctrl+c</b> then <b>ctrl+v</b> copies whatever is picked and pastes it a nudge down-right — a group comes back as a group, still the same distance apart, and one <b>ctrl+z</b> takes the whole paste off again. <b>Right-click</b> a thing for its menu: <b>raise</b> and <b>lower</b> step it over or under the next thing it overlaps, and <b>delete</b> takes it off the paper (ctrl+z brings it back). Right-click one of a picked group and all three do the whole group at once, one <b>ctrl+z</b> between them.</p>
+  <div class="lab-tools">
+    <!-- keep.js's one piece of chrome, and it starts HIDDEN. A bench being
+         written back into this file every thirty seconds should say so, and
+         a bench that is only being looked at should not have a switch for a
+         thing it cannot do — so the pill appears when keep.js finds the door
+         in serve.js and stays away on the deployed site. Click it to pause
+         and to start again. -->
+    <!-- SAVE NOW, rather than within thirty seconds. Same write as the
+         autosave and no other kind: what is on the screen becomes what is in
+         index.html, which is what 'reset layout' goes back to. It keeps the
+         autosave's company in being hidden until keep.js finds the door —
+         a button that cannot write is worse than no button. -->
+    <button type="button" id="lab-save" class="lab-save" hidden
+            title="save this arrangement as the default layout (ctrl+s) — reset layout comes back here">save layout</button>
+    <button type="button" id="lab-keep" class="lab-keep" hidden
+            title="every 30s, where everything is on this screen becomes where it is in index.html — click to pause"></button>
+    <button type="button" id="lab-reset" class="lab-link">reset layout</button>
+    <button type="button" id="lab-reset-data" class="lab-link">reset data</button>
+    <a class="lab-link" href="../lab/">lab 1 →</a>
+  </div>
+</header>
+
+<main id="bench" class="bench" aria-label="workbench">
+
+  <!-- the world: everything on the bench lives in here so the whole sheet can
+       zoom. It is not painted — the bench's grid shows through it — so the
+       canvas has no edge; this is only what the features are pinned to.
+
+       A feature is FIVE LINES AND NO CASE. There is no panel around it, no
+       handle bar and no border: the .dc.html in the iframe is the whole of
+       what you see, sitting on the paper the way a drawing does. The four
+       things over it are all invisible until they are wanted — the chip that
+       stands in until the feature has booted, the shield you click through to
+       wake it (and drag to move it), the size readout, and the corner that
+       re-cuts it. data-home-x / -y is where 'home' is; data-w / -h is the
+       viewport the feature is MEASURED at — the one it was composed against
+       — and no longer the box: frames.js measures the drawing and cuts the
+       box to it, which is where every default size on this bench comes from
+       and what double-clicking the corner goes back to. The inline width and
+       height are only what a frame stands at until it has been measured. -->
+  <div id="bench-world" class="bench-world">
+
+  <!-- ═════════════════════ THE EMPTY BENCH ═══════════════════════════════
+       Nothing stands here, and that is the whole of what this page is: lab 2
+       with the paper cleared. There is no lockup, no workshop, no grove and
+       no sign — no <section> at all — so the bench boots with zero frames to
+       adopt, zero documents to boot and zero kit parts to raster, and the
+       camera opens on the origin rather than being framed onto a rectangle
+       of art (lab.js: WHERE IT OPENS falls through to its default when it
+       finds nothing to fit).
+
+       WHAT IS ON IT INSTEAD is whatever you draw and stamp: the wall's ink,
+       the tracings you file, and the 221 stickers in the drawer. All of it
+       is wall ink — one <svg> in world units, nothing per frame — and all of
+       it lives in this browser's localStorage, NOT in this file. Nothing
+       here is written back by keep.js, which only ever edits sections.
+
+       UNDER ITS OWN KEYS, which matters more than it looks: localStorage is
+       per ORIGIN, and this bench and lab 2 are the same origin. Every key
+       here is knoll-ironhive: where lab 2's is knoll-lab2: — the ink, the
+       flat file, the camera, the volume, the lot — so the two benches keep
+       separate paper, and `reset data` on one leaves the other alone. The
+       cursor room is split the same way, in cursors.js.
+
+       TO PUT SOMETHING PERMANENT ON THE PAPER, add a <section> exactly as
+       lab 2 does it — ADDING.md next door is the whole of how, and the four
+       kinds it opens with are the four things this bench can hold. A machine
+       also wants features/ and a poster, and a kit part wants the sheet it
+       names in features/; neither directory is copied here, because an empty
+       bench has nothing to point at them. -->
+
+  </div><!-- /bench-world -->
+
+</main>
+
+<!-- the tool dock, as on the coming-soon hero and on lab 1: move / draw /
+     image / text, the ink and its colour wheel, undo and delete — and a row of options
+     above it that only shows up when the chosen tool has any. Both are
+     filled in by wall.js. -->
+<div class="tool-opts" id="tool-opts" hidden aria-label="tool options"></div>
+<div class="tool-dock" id="tool-dock" aria-label="drawing tools"></div>
+
+<!-- zoom dock -->
+<div class="zoom-dock" id="zoom-dock" aria-label="zoom">
+  <button type="button" id="zoom-fit" title="fit everything on screen (shift 1)" aria-label="fit everything on screen">⤢</button>
+  <span class="dock-rule" aria-hidden="true"></span>
+  <button type="button" id="zoom-out" title="zoom out (−)">−</button>
+  <button type="button" id="zoom-val" title="back to 100% (shift 0)">100%</button>
+  <button type="button" id="zoom-in" title="zoom in (+)">+</button>
+  <span class="dock-rule" aria-hidden="true"></span>
+  <button type="button" id="vol-btn" class="vol-btn" aria-label="the sound">
+    <svg viewBox="0 0 18 18" width="15" height="15" aria-hidden="true">
+      <path class="vol-cone" d="M3 7h3l4-3.4v10.8L6 11H3z"/>
+      <path class="vol-wave vol-w1" d="M12 6.6a3.4 3.4 0 0 1 0 4.8"/>
+      <path class="vol-wave vol-w2" d="M14.1 4.4a6.4 6.4 0 0 1 0 9.2"/>
+      <path class="vol-cross" d="M12.2 6.6l4.4 4.8M16.6 6.6l-4.4 4.8"/>
+    </svg>
+  </button>
+  <input type="range" id="vol-slider" class="vol-slider" min="0" max="100" value="70" aria-label="how loud">
+  <span class="dock-rule" aria-hidden="true"></span>
+  <button type="button" id="zoom-keys" title="how to move about" aria-label="how to move about" aria-expanded="false">?</button>
+</div>
+
+<!-- how to move about -->
+<div class="keymap" id="keymap" hidden>
+  <b>MOVING ABOUT</b>
+  <dl>
+    <dt><kbd>wheel drag</kbd></dt><dd>hold the scroll wheel down and drag — pans from anywhere</dd>
+    <dt><kbd>space</kbd><kbd>drag</kbd></dt><dd>the hand: pans over anything, features included</dd>
+    <dt><kbd>drag</kbd></dt><dd>a sleeping feature moves; bare paper pulls a band</dd>
+    <dt><kbd>scroll</kbd></dt><dd>pan up and down — <kbd>shift</kbd> for sideways</dd>
+    <dt><kbd>ctrl</kbd><kbd>scroll</kbd></dt><dd>zoom about the pointer (pinch does too)</dd>
+  </dl>
+  <hr>
+  <dl>
+    <dt><kbd>+</kbd><kbd>−</kbd></dt><dd>zoom in and out</dd>
+    <dt><kbd>shift</kbd><kbd>0</kbd></dt><dd>back to 100%</dd>
+    <dt><kbd>shift</kbd><kbd>1</kbd></dt><dd>fit every feature on screen</dd>
+    <dt><kbd>h</kbd><kbd>v</kbd></dt><dd>hand tool, then back to the pointer</dd>
+    <dt><kbd>click</kbd></dt><dd>a feature to wake it up and use it</dd>
+    <dt><kbd>shift</kbd><kbd>click</kbd></dt><dd>pick a feature, or drop it from the pick</dd>
+    <dt><kbd>ctrl</kbd><kbd>hold</kbd></dt><dd>the hitbox becomes the drawing — one tree out of a wood</dd>
+    <dt><kbd>press</kbd><kbd>hold</kbd></dt><dd>with the sticker tool up: take hold of one already on the paper and move it — a tap stamps another instead</dd>
+    <dt><kbd>drag</kbd></dt><dd>a picked sticker — the whole pick goes with it, and one undo brings it all back</dd>
+    <dt><kbd>corner</kbd><kbd>ring</kbd></dt><dd>press one sticker on its own: the corner scales it, the ring above it turns it (<kbd>shift</kbd> for 15°) — double-click either to reset</dd>
+    <dt><kbd>shift</kbd><kbd>h</kbd><kbd>v</kbd></dt><dd>mirror what is picked, left-to-right or top-to-bottom — a group flips about the group</dd>
+    <dt><kbd>ctrl</kbd><kbd>s</kbd></dt><dd>save this arrangement as the default — reset layout comes back here</dd>
+    <dt><kbd>ctrl</kbd><kbd>z</kbd></dt><dd>undo — the last thing moved, or the last thing drawn</dd>
+    <dt><kbd>ctrl</kbd><kbd>c</kbd><kbd>v</kbd></dt><dd>copy what is picked, and paste it a nudge down-right — a group stays a group</dd>
+    <dt><kbd>right click</kbd></dt><dd>a feature — raise it, lower it, or delete it (undo puts it back)</dd>
+    <dt><kbd>esc</kbd></dt><dd>let it go, put the pick down, drop the drawing tool</dd>
+  </dl>
+</div>
+
+<!-- React ONCE, for every frame on the bench: features/prelude.js hands
+     these two into each iframe's realm and support.js then keeps them instead
+     of fetching its own — one parse instead of one per tree. Same pinned
+     build and SRI as support.js's cdn.ts, so a frame that boots early hits
+     the same cache entry. defer, so the bench never waits on unpkg: a frame
+     that outruns it just fetches its own copy, exactly as before. -->
+<!-- SELF-HOSTED since 2026-09-04: the same two builds, byte for byte (the
+     integrity hashes are the proof and still checked), served from ./vendor
+     so the bench boots with unpkg down. support.js keeps its own unpkg
+     fallback for a frame opened off the disk. -->
+<script defer src="vendor/react.production.min.js"
+        integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z"
+        crossorigin="anonymous"></script>
+<script defer src="vendor/react-dom.production.min.js"
+        integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"
+        crossorigin="anonymous"></script>
+<!-- THE KITS, before lab.js on purpose: a tree, a gnome or a village piece
+     is not a document any more — kits.js reshapes every such section (no
+     iframe, a .gz-art) before lab.js registers it and frames.js adopts it,
+     paints the far ones on tiles and lifts the near ones live. See THE
+     KITS in kits.js and about.md. -->
+<script src="kits.js"></script>
+<script src="lab.js"></script>
+<script src="vol.js"></script>
+<script src="frames.js"></script>
+<!-- tape.js no longer has anything to do with the dock — a strip takes
+     itself down by its own ✕ now, not a button wall.js builds — so unlike
+     before, nothing here needs it ahead of wall.js. Kept in this order
+     anyway, since there is no reason to reshuffle it. -->
+<script src="tape.js"></script>
+<!-- the gif tool, which is GIF on the dock: a search out of KLIPY, a strip
+     linked rather than kept, stamped on the paper. BEFORE wall.js, not
+     after like tracer.js — wall.js's dock only shows GIF if window.Gif
+     already exists the moment it builds itself, and gif.js needs nothing
+     from wall.js to define itself, only window.Lab (already up, above). -->
+<script src="gif.js"></script>
+<script src="wall.js"></script>
+<!-- the tracing table, which is UPLOAD on the dock: a picture in, a tracing
+     out, filed in the library and stamped on the paper. After wall.js,
+     whose tool it is. -->
+<script src="tracer.js"></script>
+<!-- and the sticker drawer, which is STICKER beside it: the artwork that
+     came WITH the bench, browsed by kit and carried out onto the paper.
+     After wall.js for the same reason, and beside the table because the two
+     are one split button in the export they both come from. -->
+<script src="stickers.js"></script>
+<!-- THE ARTWORK ITSELF, which is this bench's reason for being: 289 stickers
+     in 34 kits, off seven Design Canvas sheets. ~735 KB of markup is far
+     past the weight STICKERS.md §2 says to stop shipping at boot, so this
+     file ships none of it — it fetches sticker-kits.json when the drawer is
+     first opened, or when the page has gone idle, whichever comes first, and
+     hands it to Stickers.load then. See the head of the file.
+     A sheet that asks for a script tag of its own here — the Iron Globe's
+     asked for a social-marks.js — is merged into sticker-kits.json instead:
+     Stickers.load replaces the catalogue, so a second caller empties it. -->
+<script src="sticker-kits.js"></script>
+<!-- the sign's own one trick: click a letter, a gnome puts it overhead -->
+<script src="sign.js"></script>
+<!-- hold ctrl and the hitbox is the drawing rather than the box round it —
+     which is how you get one tree out of a wood. After frames.js because it
+     asks the frames what is painted under the pointer. -->
+<script src="ink.js"></script>
+<!-- a page a frame opens to read — the Knoll Times' issues, for now — gets
+     the whole screen: the bench dimmed edge to edge with a hole where the
+     page is, the camera glided to put it in the middle, a click anywhere in
+     the dark to put it down. After frames.js, whose panels it watches; the
+     feature says it opens things by marks in its file (ADDING.md §3). -->
+<script src="spotlight.js"></script>
+<!-- LAST, and after frames.js on purpose: it reads Lab.gizmos and
+     Frames.panels, and a frame it asked about before frames.js had adopted
+     it would report a cut nobody made. It writes this file — see keep.js. -->
+<script src="keep.js"></script>
+<!-- everybody else on the bench, as a cursor. trystero (vendor/, one
+     bundled file) finds the other visitors over the public Nostr relays and
+     the cursors go browser to browser over WebRTC — no server, which is
+     the only kind this site has. Deferred, so the bench never waits on it,
+     and the bundle is NOT loaded here: cursors.js adds that <script> itself
+     once the page has loaded and gone idle, because the bundle makes a
+     keypair the moment it runs and a deferred script runs before
+     DOMContentLoaded, which is what the bench's own start waits on. After
+     keep.js, which is the last of the bench's own: this is a passenger,
+     and everything it reads (Lab, Frames, the frames' boot messages) is up
+     long before a deferred script runs. -->
+<script defer src="cursors.js"></script>
+</body>
+</html>

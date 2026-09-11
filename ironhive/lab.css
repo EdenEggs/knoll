@@ -1,0 +1,1532 @@
+/* ─── knoll / lab 2 ────────────────────────────────────────────────────────
+   The bench, and nothing that stands on it.
+
+   Lab 1's stylesheet is the bench PLUS thirteen machines; this one is the
+   bench alone — the paper, the chassis a panel hangs in, the tool dock at the
+   bottom and the zoom-and-volume dock in the corner. Everything on the bench
+   here is a design-canvas feature in an iframe, and a feature brings its own
+   look with it, so there is nothing below about how any of them are drawn.
+
+   Same token sheet as lab 1, cut down to what lab 2 actually paints with. The
+   values ARE the knoll look — cream paper, aubergine ink, pink. */
+
+:root{
+  /* ── the paper and the ink ───────────────────────────────────────────── */
+  --paper:#faf7f9; --paper-2:#f1e7ee; --card:#fdfbfd;
+  --ink:#26212a; --ink-2:#2e2636; --ink-3:#3d3346;
+  --mute:#8b7f92; --mute-2:#bcaebf; --line:#e2d4df;
+  --pink:#c93b82; --pink-2:#ef4d98; --pink-soft:#f9d3e6;
+  --blue:#5871f5; --green:#2fae76; --amber:#f59321;
+
+  /* ── type ────────────────────────────────────────────────────────────── */
+  --display:'Sora',sans-serif;              /* plates, headings, names       */
+  --body:'Public Sans',sans-serif;          /* everything else               */
+  --mono:ui-monospace,"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;
+
+  /* ── surfaces sitting on the paper ───────────────────────────────────── */
+  --field:#fff;                             /* cards, inputs, buttons        */
+  --tint:#fff4f9;                           /* accent-washed hover           */
+  --tint-2:#fff7fb;                         /* the same, a shade cooler      */
+  --chip:#faf5f8;                           /* little secondary buttons, kbd */
+  --hard-edge:#0f0c12;                      /* the heavy black on the docks  */
+  /* the sticky pad the dock's note tool writes on — four colours and the
+     underside of the fold */
+  --sticky-a:#ffe27a; --sticky-b:#ffb3c9; --sticky-c:#a9d7f2; --sticky-d:#c2e6a2;
+  --sticky-edge:rgba(0,0,0,.15);
+
+  /* ── the bench: the paper, and what the grid is drawn in ─────────────── */
+  --bench-bg:#efe7ed;                       /* the paper itself              */
+  --bench-dot:rgba(38,33,42,.06);           /* its dot grid                  */
+  --drop-rgb:38,33,42;                      /* what every soft shadow is of  */
+
+  /* ── the dark pill both docks are cut from ───────────────────────────── */
+  /* lab 1 spends these on a gizmo's case as well; here nothing has a case,
+     so they dress the tool dock and the zoom dock and nothing else */
+  --gz-handle-bg:#2e2636; --gz-handle-ink:#fff;
+  --grip:#4a3f54;                           /* the little rules on the dock  */
+  --serial-ink:#bdb0c2;                     /* the tiny labels above it      */
+
+  /* ── the stamps on the dock's sticker tool ───────────────────────────── */
+  --gn-boot:#4a3524; --gn-coat:#3d55c9;
+  --gn-skin:#f6cdb0; --gn-nose:#eeb896; --gn-beard:#fff;
+  --gn-hat:#d93b4a; --gn-brim:#b02f3c;
+
+  /* ── the caution tape, which is printed rather than drawn ────────────── */
+  --st-ink:#17120b; --st-yellow:#ffd23f; --st-red:#e8484a;
+  --st-mono:'VT323',monospace; --st-line:4px solid var(--st-ink);
+  --st-drop:rgba(23,18,11,.82);
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}   /* the hidden attribute must beat any author display */
+html,body{margin:0;padding:0;height:100%}
+/* the page itself never scrolls — the header sits on top, the bench fills the
+   rest and the camera in lab.js moves the sheet inside it */
+body{background:var(--paper);font-family:var(--body);color:var(--ink);
+  height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;overscroll-behavior:none}
+a{color:var(--pink)}a:hover{color:#a52c68}
+::selection{background:var(--pink-soft)}
+button,input{font-family:inherit}
+
+/* header */
+.lab-head{display:flex;align-items:center;gap:22px;padding:12px 22px;border-bottom:1.5px dashed var(--line);background:var(--card);flex-wrap:wrap;
+  flex:none;position:relative;z-index:20;max-height:42vh;overflow:auto}
+.lab-brand{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-family:var(--display);font-weight:800;font-size:18px;letter-spacing:-0.01em}
+.lab-brand img{display:block}
+.lab-slash{color:var(--mute-2);font-weight:600;margin:0 -2px}
+.lab-name{color:var(--pink)}
+.lab-hint{margin:0;flex:1 1 320px;font-size:13px;color:var(--mute);line-height:1.5;text-wrap:pretty}
+.lab-tools{display:flex;gap:14px;align-items:center}
+.lab-link{background:none;border:0;padding:0;font-size:12.5px;font-weight:600;color:var(--pink);cursor:pointer;text-decoration:none}
+.lab-link:hover{color:#a52c68;text-decoration:underline}
+
+/* THE LANDING PAGE WEARS ONLY THE LOGO. The hint and the row of tools are the
+   bench's own chrome — how to drive it, and the switches that write the layout
+   back into index.html (keep.js), put it back (reset layout) or wipe the stores
+   (reset data), and the way through to lab 1. Served from the bench's own
+   server they show; anywhere else — the deployed site, which has no door for
+   any of them to act through — the header is the wordmark and nothing else.
+   The switch is html.lab-local, set in the head of index.html before the first
+   paint (2026-09-04). */
+.lab-hint,.lab-tools{display:none}
+html.lab-local .lab-hint{display:block}
+html.lab-local .lab-tools{display:flex}
+/* …and the wordmark is just knoll: the "/ lab 2" that says which bench this
+   is belongs to the workbench too */
+.lab-slash,.lab-name{display:none}
+html.lab-local .lab-slash,html.lab-local .lab-name{display:inline}
+
+/* keep.js's pill: this bench is writing itself into index.html, which is a
+   thing the page has to admit to. A CHIP AND NOT A LINK because the other
+   three are things you do and this is a thing that is happening — it reads
+   as a state with a switch under it rather than as a fourth button. It is
+   the quietest thing in the row until a save lands (pink for a beat, the way
+   anything that just happened is) or one fails (red, and it stays red). */
+.lab-keep{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);
+  border-radius:999px;padding:3px 10px;background:var(--paper);cursor:pointer;
+  font-family:var(--body);font-size:11.5px;font-weight:600;color:var(--mute);
+  letter-spacing:0.01em;white-space:nowrap;transition:color .18s,border-color .18s,background .18s}
+/* SAVE LAYOUT is the one thing in this row that is not a link. reset layout
+   and reset data are undoings and read as text; this WRITES A FILE, and the
+   only control on the page that does had better not look like the two next
+   to it. So it is filled, and it is first — the row now reads do, then
+   undo. */
+.lab-save{border:0;border-radius:999px;padding:5px 13px;cursor:pointer;
+  font-family:var(--body);font-size:11.5px;font-weight:700;letter-spacing:.02em;
+  color:#fff;background:var(--pink);white-space:nowrap;
+  transition:background .16s,transform .1s}
+.lab-save:hover{background:#a52c68}
+.lab-save:active{transform:translateY(1px)}
+.lab-save.is-done{background:#2f8f5b}
+.lab-save.is-bad{background:#b3261e}
+.lab-save[hidden]{display:none}
+
+/* a class sets display, so [hidden] has to be said again or it loses to it
+   and the pill shows up on the deployed bench with nothing behind it */
+.lab-keep[hidden]{display:none}
+.lab-keep::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;
+  opacity:.65;flex:none}
+.lab-keep:hover{border-color:var(--mute-2);color:var(--ink-3)}
+.lab-keep.is-saved{color:var(--pink);border-color:var(--pink-soft);background:#fff6fb}
+.lab-keep.is-off{color:var(--mute-2)}
+.lab-keep.is-off::before{opacity:.3}
+.lab-keep.is-bad{color:#b3261e;border-color:#f0c4c0;background:#fff5f4}
+
+/* the bench is the viewport — a window onto an endless canvas, and its grid
+   IS the paper: there is no sheet laid on top of it, just squares that carry
+   on for ever. lab.js keeps --gs (one cell, in screen pixels) in step with
+   the camera and slides #bench-grid under everything by a transform, so the
+   grid pans and zooms with the work sitting on it instead of holding still
+   like wallpaper.
+
+   THE BENCH SCROLLS, AND THAT IS THE PAN. It used to say "nothing here
+   scrolls; the camera moves", and the camera moved by a transform — which
+   the engine answers, every frame, by deciding the page's layers again, at
+   a cost that grows with how much of the bench is warm. A scroll offset it
+   moves for nothing. So the bench is a scroll container with its scrollbars
+   hidden, lab.js writes the scroll (THE CAMERA IS A SCROLL, there), and the
+   sheet holds still in a room sized to the reach the camera always had.
+   overflow-anchor off, or the engine would nudge the offset whenever
+   growBench() resized the sheet; touch-action none, or a finger would scroll
+   natively on top of the pointer handlers' own pan; overscroll contained, so
+   the end of the room never turns into a page gesture. */
+.bench{position:relative;flex:1 1 auto;min-height:0;background:var(--bench-bg);cursor:default;
+  overflow:auto;overflow-anchor:none;overscroll-behavior:contain;scroll-behavior:auto;touch-action:none;
+  scrollbar-width:none}
+.bench::-webkit-scrollbar{display:none}
+/* the room: an empty box that gives the bench exactly the scroll range the
+   camera's clamp allows — lab.js sizes it; nothing is ever drawn in it */
+#bench-room{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;visibility:hidden}
+/* THE GRID IS THE ROOM'S FLOOR. It was the bench's background once, moved by
+   background-position — a repaint of a viewport of dots on every frame — and
+   then its own composited layer slid by a transform, which was the main
+   thread handing the compositor a new keyframe every frame. Now that the
+   bench scrolls it is simply an element the size of the room (lab.js sizes
+   it with the room and anchors the pattern to the world origin by
+   background-position, in paintGrid), scrolled with everything else for
+   nothing and painted once per zoom step. */
+#bench-grid{position:absolute;left:0;top:0;pointer-events:none;
+  background-image:radial-gradient(var(--bench-dot) 1px,transparent 1px);
+  background-size:var(--gs,20px) var(--gs,20px)}
+/* the world is the frame the panels hang in and the thing the camera moves.
+   Deliberately NOT painted: the grid below shows through it, so the canvas
+   has no edges.
+
+   PERMANENTLY COMPOSITED, which is the opposite of what this file used to
+   say. The old scheme promoted the sheet while the camera moved and demoted
+   it when it stopped, to force a sharp repaint at the landed zoom — at the
+   price of re-rasterising everything in view TWICE per gesture, once on the
+   way up and once on the way down, which on a bench this size was the lag.
+   Now the sheet stays on the GPU, and the camera is a Web Animation whose
+   keyframes lab.js rewrites (THE CAMERA IS AN ANIMATION, there): a pan or a
+   zoom is a compositor update and not a re-layerisation of the page, and an
+   animated layer is re-rasterised at its own scale, so it lands crisp with
+   no settle dance. The will-change stays, as the hint it always was. */
+.bench-world{position:absolute;left:0;top:0;transform-origin:0 0;cursor:grab;will-change:transform}
+.bench-world .gz{cursor:auto}
+
+/* ─── the sign ───────────────────────────────────────────────────────────
+   The mark, standing on the paper alongside the features. It is a .gz, so it
+   already has the position, the clipping and the crop marks that come with
+   being picked up; what it wants on top is somewhere to put its two pieces.
+
+   IT IS A LOCKUP: the badge at the top left, and the wordmark under it and
+   pushed right, so the two sit on a diagonal rather than stacked up in a
+   column — a signature under a stamp. Everything here is in the sign's own
+   1200×1000 box, which is world pixels, and the whole box is scaled by the
+   camera; so these numbers are a drawing, not a layout, and nothing in here
+   reflows. The badge is geometry in a viewBox and the wordmark is DOM: both
+   are redrawn at whatever the zoom is and neither goes soft.
+
+     the badge ..... 700×517, top left, from a 92×68 viewBox
+     the wordmark .. 1600×558 of artwork at 0.6, so 960×335, at 230,567 —
+                     which lands its right edge at 1190, ten short of the
+                     box's own, which is where the 14px of card shadow and
+                     tilt go. The 558 is 490 of letters, the caption's 44 of
+                     air and its 24 of type; it was 714 when the K hung off a
+                     gnome and 490 in between.
+
+   NOTHING LEAVES THE BOX ANY MORE. The gnome used to walk under whichever
+   letter was clicked and fade in from a crouch below it, which put his boots
+   at 1019 in a 1000-tall box and cost him 19px to the clip. He stands still
+   now — see below — so his lowest point is his own 494, or 863 of box, and
+   the K tops out at 435 under the ceiling. The 98px of floor under the mark
+   is floor, and the box could come in if it ever wanted to.
+
+   What is under the mark, eventually, is the fan-mark banner — a feature of
+   its own, and no longer hung off this caption: it sits at the FOOT of the
+   lockup with the cards, the builder and the book in between. index.html's
+   §10 has that arithmetic, and the lockup header has the shape it is part
+   of.
+
+   The 1600 is the size the wordmark was drawn at in Design Canvas and the
+   scale is here rather than baked into the markup on purpose: the artwork in
+   index.html stays diffable against a fresh export of the canvas. */
+.gz-sign{cursor:grab}
+.gz-sign.dragging{cursor:grabbing}
+.sign-badge{position:absolute;left:0;top:0;width:700px;height:517px;display:block}
+/* .gz sets line-height:0 for the iframes; the wordmark is type and wants it back */
+.sign-word{position:absolute;left:230px;top:567px;width:1600px;
+  transform:scale(.6);transform-origin:top left;line-height:normal}
+.sign-word-row{position:relative;display:flex;align-items:flex-end;gap:40px}
+.sign-tile{position:relative;width:260px;height:305px;box-sizing:border-box;margin-bottom:20px;
+  background:#fdf7e3;border:6px solid #17120b;box-shadow:10px 12px 0 rgba(60,50,80,.2);flex-shrink:0}
+
+/* ─── THE CAPTION ─────────────────────────────────────────────────────
+   Under the row and centred on it, which is what the column is for: the row
+   is exactly 1600 wide by construction — 400 of K, four 260s and four 40s —
+   so making .sign-word a column changes nothing about where the letters sit
+   and gives the line something to be centred against.
+
+   VT323 at 18, like the tape: the two bits of printed matter on this bench
+   are the same face on purpose. It is aria-hidden with the rest of the
+   wordmark — the section is already labelled 'knoll'. */
+.sign-word{display:flex;flex-direction:column;align-items:center}
+.sign-caption{margin-top:44px;display:flex;align-items:center;gap:16px;
+  font-family:'VT323',monospace}
+.sign-caption-line{font-size:18px;letter-spacing:4px;color:#4a4054;opacity:.65}
+.sign-caption-stamp{font-size:16px;letter-spacing:3px;color:#e8484a;
+  border:3px solid #e8484a;border-radius:4px;padding:1px 10px;transform:rotate(-4deg)}
+
+/* ─── THE LETTERS, AND THE GNOME UNDER THEM ───────────────────────────
+   All five letters take a pointer — .sign-word is aria-hidden and the section
+   is dragged by whatever is under the press, so this is the one thing on the
+   sign that is worth clicking and it says so with the cursor. sign.js tells a
+   click from a drag by how far the press travelled, the same rule frames.js
+   uses to tell waking a feature from moving it.
+
+   THE STACK IS THREE DEEP and the order is the whole trick: the gnome's body
+   under the letters, the letters, his hands over them. Anything with a
+   z-index needs a position for it to count, which the letters have already
+   and the lifter is given here.
+
+   HE IS PARKED, not driven. left 90 and top 194 put him under the K and that
+   is the last this stylesheet has to say about where he is — the animation is
+   in his arms, which are svg geometry and belong to sign.js. The 90 is the
+   canvas's own: his 220-wide box, centred in the K's 400-wide holder, which
+   is the first thing in the row and so starts at 0.
+
+   Only OPACITY is animated here, and only because the fade wants a duration
+   rather than a curve — .15s, the canvas's. `translate` on the K is left to
+   sign.js for the reason it has always been left there: the K's card carries
+   an inline rotate, and animating `transform` would have to re-state that in
+   every frame and get it right. The individual property composes with the
+   shorthand instead, so the tilt stays exactly where the drawing put it. */
+.sign-letter{z-index:2;cursor:pointer}
+.sign-lift{position:absolute;left:90px;top:194px;display:block;overflow:visible;opacity:0;
+  pointer-events:none;transition:opacity .15s ease;will-change:opacity}
+.sign-word-row.lifting .sign-lift{opacity:1}
+.sign-lift-body{z-index:1;filter:drop-shadow(5px 6px 0 rgba(60,50,80,.18))}
+.sign-lift-hands{z-index:3}
+@media (prefers-reduced-motion:reduce){.sign-letter{cursor:default}}
+
+/* the hand: space held, or the H tool. Panning grabs the whole window. */
+body.lab-hand .bench,body.lab-hand .bench *{cursor:grab!important}
+body.lab-panning,body.lab-panning .bench,body.lab-panning .bench *{cursor:grabbing!important}
+body.lab-panning{user-select:none;-webkit-user-select:none}
+body.lab-panning .bench-world{pointer-events:none}
+/* PIXEL MODE — the grid stops being a texture and becomes the cells you fill */
+body.wall-pixel #bench-grid{background-image:
+  linear-gradient(var(--bench-dot) 1px,transparent 1px),
+  linear-gradient(90deg,var(--bench-dot) 1px,transparent 1px)}
+
+/* ─── a feature, loose on the paper ──────────────────────────────────────
+   There is no case. Lab 1 hangs each of its gizmos in a chassis — a bordered
+   box with a dark handle bar, a name plate, a serial and little feet — because
+   a gizmo there is a panel of controls that needs somewhere to live. What
+   stands on THIS bench is a whole screen somebody designed, on its own paper,
+   and a case round it would be a second frame round a picture that already has
+   one. So .gz is the feature and nothing else: no border, no plate, no shadow.
+   What you see is the .dc.html, sitting on the bench the way a drawing does.
+
+   IT IS FRAMED, but only in the technical sense: a .dc.html is a whole
+   DOCUMENT — it wants its own <head>, its own fonts and its own React root,
+   and support.js boots exactly one of them per document — so it goes in an
+   iframe. The iframe has no chrome of its own and the feature paints right to
+   its edges, so nothing about it reads as a window.
+
+   ITS SIZE IS ITS DRAWING'S, and frames.js measures it: the iframe is set to
+   the size of the artwork inside it and then SCALED into whatever box the
+   corner has been dragged to, so the two are no longer the same number. Hence
+   the width and height below, which are only what a frame has before it has
+   been measured — and the transform-origin, which is the one thing the scale
+   needs from the stylesheet.
+
+   FOUR THINGS SIT OVER IT, all of them invisible until they are wanted — the
+   poster, the shield, the size readout and the corner. See each below. */
+.gz{position:absolute;left:0;top:0;overflow:hidden;line-height:0;
+  user-select:none;contain:layout style paint}
+/* FAR OFF SCREEN, A FEATURE IS NOT DRAWN AT ALL. frames.js puts .gz-cold on
+   any panel more than a screen's worth outside the viewport, and this one
+   property tells the engine to skip the whole subtree — no layout, no paint,
+   no raster tiles, and the browser stops firing rAF inside a frame it is not
+   rendering. The document under it stays alive and keeps its state (hidden
+   preserves the rendering state, unlike display:none), so a panel slides
+   back in exactly as it was. The box itself still exists at its own size —
+   the styles say the size — so nothing about the sheet's geometry moves. */
+.gz.gz-cold{content-visibility:hidden}
+.gz iframe{position:absolute;left:0;top:0;display:block;width:100%;height:100%;
+  transform-origin:0 0;border:0;background:transparent}
+/* …and where a panel is drawn in THIS page rather than in a frame — the sign —
+   .gz-art stands in for the iframe and takes the same treatment: pinned to the
+   top left, scaled from that corner, and given its size by frames.js. It is a
+   wrapper and nothing else: it draws no paper, takes no pointer of its own and
+   exists so that the ART can be a different size from the BOX round it, which
+   is the only way the corner can mean 'bigger' rather than 'wider'. */
+.gz-art{position:absolute;left:0;top:0;transform-origin:0 0}
+/* ─── THE KITS ───────────────────────────────────────────────────────────
+   A tree, a gnome or a village piece is not a document any more (kits.js):
+   far away it is painted on a tile of #kit-layer, under every section and
+   over the wall's ink; near, or in the hand, it is live svg inside its own
+   .gz-art. The tiles are canvases positioned in world units, so a pan
+   scrolls them with the sheet and a zoom scales them until the next set is
+   cut at the landed zoom. They take no pointer: the section over them does. */
+#kit-layer{position:absolute;left:0;top:0;width:0;height:0;z-index:9;pointer-events:none}
+#kit-layer .kit-tile{position:absolute;display:block;pointer-events:none}
+/* the live svg sits where its ink starts — (0,0) of the art for nearly every
+   part, further in for one whose arm or hat pokes out of its box; kits.js
+   writes the left/top (placeLive) */
+.gz[data-kit] .gz-art>svg{display:block;position:absolute;left:0;top:0}
+/* the ctrl outline: kits.js lays a flat copy behind the drawing and spreads
+   it 2.5px by four hard shadows — ink.js's own recipe, in this document */
+.gz[data-kit] .gz-art>[data-lab-ink]{position:absolute;left:0;top:0;pointer-events:none;
+  filter:drop-shadow(2.5px 0 0 var(--pink)) drop-shadow(-2.5px 0 0 var(--pink)) drop-shadow(0 2.5px 0 var(--pink)) drop-shadow(0 -2.5px 0 var(--pink))}
+.gz[data-kit] .gz-art>[data-lab-ink] *{fill:var(--pink)!important;stroke:var(--pink)!important;filter:none!important;animation:none!important}
+/* carried, it shakes — the sheets' own jiggle, which they ran under
+   data-lab-drag inside their frames; here the section's class says so */
+.gz.dragging[data-kit] .gz-art>svg{animation:jiggle .3s ease-in-out infinite!important;transform-origin:50% 80%!important}
+.gz.dragging[data-kit="gnome"] .gz-art>svg{transform-origin:50% 30%!important}
+/* and the harness's freeze, for a screenshot that can be compared */
+.bench[data-kit-freeze] .gz[data-kit] .gz-art svg,.bench[data-kit-freeze] .gz[data-kit] .gz-art svg *{animation-play-state:paused!important}
+/* panning, or the hand — the features stand aside for the camera either way */
+body.lab-hand .gz iframe,body.lab-panning .gz iframe{pointer-events:none}
+
+/* PICKED UP, OR JUST PICKED. A feature in the air used to throw a shadow —
+   the one moment it was drawn as an object rather than as paper. But this is
+   a canvas and not a desk, and the thing you are moving about is a rectangle
+   you are deciding where to put: so it is MARKED UP rather than lit. Crop
+   marks, dashed, one on each corner. Pink like the hairline on a live
+   feature, dashed rather than solid so being held and being live never read
+   as the same state.
+
+   .picked wears the SAME MARKS as .dragging, and that is the point rather
+   than a saving: a feature the band has gathered up and a feature under your
+   hand are one state a beat apart — chosen, and about to move — and drawing
+   them differently would be inventing a distinction the gesture does not
+   have. lab.js has both, next to the z-order.
+
+   Four corners out of one box. Eight strips — a horizontal and a vertical per
+   corner — each a run of dashes laid down FROM its own corner outwards, which
+   is what the four gradient directions are for: every mark starts on the
+   corner itself instead of wherever the pattern happened to fall. 36px of arm
+   is exactly three dashes long. .gz clips its children, so the marks sit just
+   inside the edge and nothing is drawn outside the feature. */
+.gz.dragging::after,.gz.picked::after{content:"";position:absolute;inset:0;z-index:5;pointer-events:none;
+  --arm:36px;                        /* how far a corner runs along each edge */
+  --pen:2px;                         /* and how heavy the line is             */
+  --east:repeating-linear-gradient(90deg,var(--pink) 0 7px,transparent 7px 12px);
+  --west:repeating-linear-gradient(270deg,var(--pink) 0 7px,transparent 7px 12px);
+  --south:repeating-linear-gradient(180deg,var(--pink) 0 7px,transparent 7px 12px);
+  --north:repeating-linear-gradient(0deg,var(--pink) 0 7px,transparent 7px 12px);
+  background-repeat:no-repeat;
+  background-image:var(--east),var(--south),   /* top left     */
+                   var(--west),var(--south),   /* top right    */
+                   var(--west),var(--north),   /* bottom right */
+                   var(--east),var(--north);   /* bottom left  */
+  background-size:var(--arm) var(--pen),var(--pen) var(--arm),
+                  var(--arm) var(--pen),var(--pen) var(--arm),
+                  var(--arm) var(--pen),var(--pen) var(--arm),
+                  var(--arm) var(--pen),var(--pen) var(--arm);
+  background-position:left top,left top,
+                      right top,right top,
+                      right bottom,right bottom,
+                      left bottom,left bottom}
+/* ─── THE BAND ───────────────────────────────────────────────────────────
+   The rectangle a drag on the bare paper pulls out, and the only thing on
+   this bench drawn in SCREEN pixels over the sheet rather than on it: it is
+   a sibling of #bench-world, not a child, so nothing about it scales. A band
+   drawn on the paper would be a hairline at 20% and a rope at 300%, and the
+   one line whose weight has to stay honest is the one you are aiming with.
+
+   Above the props at 60 and 70 — you are gathering things up, so nothing on
+   the sheet has business over the top of the gesture — and well under the
+   docks at 6000, which are furniture and not paper. lab.js draws it; see
+   DRAGGING THE BARE PAPER: THE BAND. */
+.lab-band{position:fixed;z-index:9080;pointer-events:none;
+  border:1.5px dashed var(--pink);background:rgba(201,59,130,.07)}
+/* …and no selecting while it is drawn, which body.lab-panning has always had
+   and the band, being younger, was never given. A band pulled across the
+   paper runs over the words on the page behind it and was selecting them the
+   whole way; the mess that made is written up in lab.js under AND THE
+   BROWSER'S OWN DRAG IS NOT WANTED ON THE PAPER. */
+body.lab-banding,body.lab-banding .bench *{cursor:crosshair}
+body.lab-banding{user-select:none;-webkit-user-select:none}
+
+.gz.ping{animation:gzPing .9s ease-out}
+@keyframes gzPing{0%,60%{outline:3px solid var(--pink);outline-offset:3px}100%{outline:3px solid transparent;outline-offset:3px}}
+
+/* ─── THE SHIELD ─────────────────────────────────────────────────────────
+   An iframe eats every pointer event that lands on it, and this bench is
+   panned by scrolling — so without this the wheel would stop working the
+   moment the pointer crossed a feature. A transparent sheet covers each one
+   and the document under it is DEAD until you click: while the shield is up
+   the bench gets the wheel, and the shield itself is what you drag the feature
+   about by. Click once and it drops, and the feature is live. It comes back
+   when the pointer leaves, on esc, and whenever the hand tool comes out.
+
+   It is also the only thing telling you a feature is asleep, since there is no
+   handle bar to say so — hence the hint, which only shows under the pointer. */
+.gz-shield{position:absolute;inset:0;z-index:3;cursor:grab;background:transparent;touch-action:none}
+.gz.dragging .gz-shield{cursor:grabbing}
+.gz-shield::after{content:"click to use · drag to move";position:absolute;right:30px;bottom:6px;
+  line-height:1;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gz-handle-ink);background:rgba(46,38,54,.82);padding:5px 10px;border-radius:999px;
+  opacity:0;transition:opacity .14s}
+.gz-shield:hover::after{opacity:1}
+.gz.dragging .gz-shield::after{opacity:0}
+/* live: the shield is gone and a hairline says which one has the pointer. An
+   outline rather than a border, so it is drawn outside the feature and moves
+   nothing inside it. */
+.gz.live{outline:2px solid var(--pink);outline-offset:0}
+.gz.live .gz-shield{display:none}
+
+/* ─── PICKING BY THE DRAWING ──────────────────────────────────────────────
+   Ctrl held: ink.js works out which feature the pointer is actually PAINTED
+   on and takes the boxes out of the way of it. .ink-off is the whole of the
+   mechanism — one property, and the browser's own hit-testing does the rest;
+   the two rules under it are only so you can see it happening.
+
+   THE MARK IS NOT THE PICK'S. .picked and .dragging wear dashed crop marks,
+   and this had better not: it is not a selection, it is a sentence about the
+   next click — this is the one you would get. So it is dotted where they are
+   dashed, and it is drawn TWICE, because in a wood the box alone does not
+   answer the question. Four tree boxes over one another are four rectangles
+   with the same corners; outlining one of them says a box is chosen without
+   saying WHICH TREE, which is the only thing anybody wanted to know.
+
+   So the drawing is outlined and the box is a hairline round it: the outline
+   says which one, the box says what you would then be carrying.
+
+   THE OUTLINE IS NOT DRAWN HERE. For anything that is a drawing, ink.js lays
+   a flat copy of it behind itself inside the frame and spreads it — see THE
+   OUTLINE IS A COPY, in ink.js. It has to be done in there because a
+   drawing's own drop shadow is part of what the frame paints, and an outline
+   traced from outside traces the shadow with it: fat, and offset six and
+   seven to the south-east.
+
+   What is left out here is the case that has no frame — the sign — and the
+   soft version is right for it: it is one thing in the middle of the lockup
+   and never in a crowd, so there is nothing to tell it apart FROM. */
+.gz.ink-off{pointer-events:none}
+.gz.ink-hit{outline:1.5px dotted var(--pink);outline-offset:2px}
+.gz.ink-hit:not([data-kit]) .gz-art{
+  filter:drop-shadow(0 0 3px var(--pink)) drop-shadow(0 0 3px var(--pink)) drop-shadow(0 0 6px var(--pink))}
+/* and the cursor says the paper is not for panning while this is on */
+.bench.picking-ink{cursor:crosshair}
+.bench.picking-ink .gz-shield{cursor:crosshair}
+.bench.picking-ink .gz-shield::after{opacity:0}
+
+/* ─── THE POSTER ─────────────────────────────────────────────────────────
+   What stands in for a feature that has not arrived yet. It used to be the
+   feature's own thumbnail held up over the frame, which was the right answer
+   while every feature sat on a cream rectangle of its own: better to look at
+   a still of the thing than at an empty box. With the backgrounds gone there
+   IS no box, and a thumbnail is a cream rectangle — the one thing this bench
+   has just stopped drawing. So the poster is now a chip and nothing else: a
+   feature on its way is a word on the paper, and the paper shows through. */
+.gz-poster{position:absolute;inset:0;z-index:2;
+  display:grid;place-items:center;transition:opacity .35s;
+  line-height:1.2}   /* .gz zeroes the line box for the iframe; the chip needs one back */
+.gz-poster b{position:relative;font-family:var(--mono);font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink-3);background:var(--card);border:1.5px solid var(--ink-2);
+  border-radius:999px;padding:5px 12px;box-shadow:0 2px 0 var(--ink-2)}
+.gz.booted .gz-poster{opacity:0;pointer-events:none}
+/* THE POSTER: a picture of the drawing where the document will be, placed
+   by frames.js's place() with the drawing's own sum (see THE POSTERS in
+   frames.js); the chip is hidden while a picture is up */
+.gz-poster.has-img{display:block}
+.gz-poster.has-img b{display:none}
+.gz-poster img{position:absolute;left:0;top:0;display:block;transform-origin:0 0;pointer-events:none;user-select:none}
+/* …and back to the picture: a booted machine under the boot line is not
+   drawn (frames.js repost) — the frame is display:none, the document lives
+   on, the poster stands in without a fade */
+.gz.gz-postered iframe{display:none}
+.gz.booted.gz-postered .gz-poster{opacity:1;transition:none}
+/* …and the one that never arrived, which is the same chip in pink. */
+.gz.stalled .gz-poster b{color:var(--pink);border-color:var(--pink);box-shadow:0 2px 0 var(--pink)}
+
+/* ─── THE CORNER, and the reading beside it ──────────────────────────────
+   A design canvas screen fills the box it is given, so the box is the only
+   thing deciding how it reads — which makes re-cutting one part of using it
+   rather than a nicety. Nothing is drawn there until the pointer is over the
+   feature, so an untouched bench is eighty-four panels and no handles. */
+.gz-size{position:absolute;right:0;bottom:0;z-index:4;width:22px;height:22px;padding:0;border:0;
+  background:none;cursor:nwse-resize;touch-action:none;color:var(--ink-2);
+  opacity:0;transition:opacity .14s}
+.gz:hover .gz-size,.gz.sizing .gz-size,.gz-size:focus-visible{opacity:.5}
+.gz-size:hover,.gz.sizing .gz-size{opacity:1;color:var(--pink)}
+.gz-size::after{content:"";position:absolute;right:4px;bottom:4px;width:11px;height:11px;
+  border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor}
+.gz.sizing{user-select:none}
+.gz.sizing iframe,.gz.sizing .gz-art{pointer-events:none}
+
+.gz-dim{position:absolute;right:26px;bottom:5px;z-index:4;line-height:1;
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--gz-handle-ink);
+  background:rgba(46,38,54,.82);padding:5px 9px;border-radius:999px;white-space:nowrap;
+  opacity:0;transition:opacity .14s;pointer-events:none}
+.gz.sizing .gz-dim{opacity:1}
+
+/* ─── the zoom dock ──────────────────────────────────────────────────────── */
+.zoom-dock{position:fixed;right:16px;bottom:16px;z-index:6000;display:flex;align-items:center;gap:2px;padding:4px;
+  background:var(--card);border:2px solid var(--ink-2);border-radius:12px;box-shadow:0 2px 0 var(--ink-2),0 14px 30px -14px rgba(var(--drop-rgb),.4)}
+.zoom-dock button{border:0;background:none;border-radius:8px;cursor:pointer;color:var(--ink)}
+#zoom-in,#zoom-out{width:28px;height:28px;font-size:16px;font-weight:700;line-height:1}
+#zoom-in:hover,#zoom-out:hover{background:var(--pink-soft);color:var(--pink)}
+#zoom-val{font-family:var(--mono);font-size:11px;min-width:46px;height:28px;color:var(--mute);font-weight:700}
+#zoom-val:hover{color:var(--pink)}
+#zoom-fit,#zoom-keys{width:28px;height:28px;font-size:13px;font-weight:700;line-height:1;color:var(--mute)}
+#zoom-fit:hover,#zoom-keys:hover,#zoom-keys[aria-expanded="true"]{background:var(--pink-soft);color:var(--pink)}
+.zoom-dock .dock-rule{width:1px;height:18px;background:var(--line);margin:0 3px}
+
+/* the keymap card — how to move about, on a ? */
+.keymap{position:fixed;right:16px;bottom:62px;z-index:6000;width:266px;padding:10px 12px 11px;
+  background:var(--card);border:2px solid var(--ink-2);border-radius:12px;
+  box-shadow:0 2px 0 var(--ink-2),0 18px 36px -18px rgba(var(--drop-rgb),.5)}
+.keymap b{display:block;font-size:9.5px;font-weight:800;letter-spacing:.18em;color:var(--mute-2);margin-bottom:7px}
+.keymap dl{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;margin:0;align-items:baseline}
+.keymap dt{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end}
+.keymap dd{margin:0;font-size:11.5px;color:var(--mute);line-height:1.35}
+.keymap kbd{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.02em;color:var(--ink);
+  background:var(--chip);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px;white-space:nowrap}
+.keymap hr{border:0;border-top:1.5px dashed var(--line);margin:9px 0}
+
+/* ─── THE DOCK ON A PHONE ─────────────────────────────────────────────────
+   Two pills on the floor is one pill too many when the floor is 390 wide.
+   The zoom dock is 233 across at the right-hand end of it and the tool dock
+   is 476 and middled, so on a phone they LANDED ON EACH OTHER — the zoom
+   dock over the text tool, the ink and the bin, and the tools running off
+   both edges underneath it. (They overlap on any screen under about 970;
+   a phone is only where it stops being a near miss.)
+
+   So on a narrow screen the zoom dock leaves the floor and STANDS UP THE
+   RIGHT-HAND SIDE, a column starting just under the header. The tools keep
+   the floor to themselves, and what the zoom costs the bench is 40px of its
+   edge instead of 50px of its foot — which on a screen this shape is the
+   cheaper of the two by a long way, because the thing being looked at is
+   taller than it is wide.
+
+   --head-h IS A MEASUREMENT, written by layout() in lab.js on every resize:
+   the header is one line on the deployed site and a paragraph of workbench
+   notes at home, so where the bench starts is not a number this file can
+   know. The fallback is the deployed header's own height, for the frame
+   before the first layout(). */
+@media (max-width:700px){
+  .zoom-dock{top:calc(var(--head-h,52px) + 10px);right:10px;bottom:auto;
+    flex-direction:column;gap:2px;padding:4px 3px;border-radius:12px}
+  .zoom-dock .dock-rule{width:16px;height:1px;margin:3px 0}
+  /* a finger is not a pointer: every button in the column goes up to 32 */
+  #zoom-in,#zoom-out{width:32px;height:32px;font-size:18px}
+  #zoom-fit,#zoom-keys,.vol-btn{width:32px;height:30px}
+  /* the reading is the widest thing in a row and the narrowest thing wanted
+     in a column — 46px of min-width would set the whole column's width */
+  #zoom-val{min-width:0;width:32px;height:22px;font-size:10px;letter-spacing:-.03em}
+  /* …and the slider is 52 across, which is the column again. It is already
+     off under 560; standing up, it is off for the whole of this range. */
+  .vol-slider{display:none}
+  /* the keymap comes off the SIDE of the column rather than out from under
+     it, and it is 266 wide and 728 TALL against a screen that is 390 by 780
+     — so it is told the screen's measurements as well as its own, and reads
+     down inside itself when it runs out of room. (It overflowed the bottom
+     of a phone from the corner too; standing it at the top is only where
+     that became worth saying.)
+     58 = 10 (the dock's own right) + 42 (its width) + the same 6px seam the
+     corner had (its bottom:62 was 16 + 40 + 6), or the two 2px borders abut
+     into one 4px line; 74 = 58 + the 16px left margin the clamp keeps. */
+  .keymap{top:calc(var(--head-h,52px) + 10px);right:58px;bottom:auto;
+    width:min(266px,calc(100vw - 74px));
+    max-height:calc(100dvh - var(--head-h,52px) - 20px);overflow:auto;
+    overscroll-behavior:contain}
+}
+
+/* ─── the volume in the dock ─────────────────────────────────────────────── */
+.vol-btn{width:26px;height:28px;display:inline-flex;align-items:center;justify-content:center;color:var(--mute)}
+.vol-btn:hover{background:var(--pink-soft);color:var(--pink)}
+.vol-cone{fill:currentColor}
+.vol-wave{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round}
+.vol-cross{display:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;fill:none}
+.vol-btn.muted{color:#c9bcc6}
+.vol-btn.muted .vol-wave{display:none}
+.vol-btn.muted .vol-cross{display:block}
+.vol-btn.humming{color:var(--green)}
+.vol-btn.humming .vol-w2{animation:volPulse 1.8s ease-in-out infinite}
+@keyframes volPulse{0%,100%{opacity:.35}50%{opacity:1}}
+.vol-slider{width:52px;height:20px;margin:0 2px;accent-color:var(--pink);cursor:pointer;background:none}
+@media (max-width:560px){.vol-slider{display:none}}
+
+/* ─── the tool dock ────────────────────────────────────────────────────────
+   The hero's dock, on the bench. A dark pill at the bottom centre with the
+   four tools, the ink and its colour wheel, undo and delete; a second pill above it carries
+   whatever options the chosen tool has and is simply not there in move mode
+   — nor under the text tool until a note is actually being written.
+   Both are fixed, in screen space, so they hold still while the camera moves. */
+.tool-dock,.tool-opts{position:fixed;left:50%;transform:translateX(-50%);z-index:6000;
+  display:flex;align-items:center;gap:4px;padding:5px;border-radius:14px;
+  background:var(--gz-handle-bg);border:2px solid var(--hard-edge);
+  box-shadow:0 2px 0 var(--hard-edge),0 16px 34px -16px rgba(var(--drop-rgb),.6)}
+.tool-dock{bottom:16px}
+.tool-opts{bottom:70px;padding:4px 8px;gap:5px;border-radius:12px;
+  flex-wrap:wrap;justify-content:center;max-width:min(94vw,960px)}
+.dock-grp{display:flex;align-items:center;gap:3px}
+.dock-rule{width:1px;height:20px;background:var(--grip);margin:0 3px}
+
+.dock-btn{display:inline-flex;flex-direction:column;align-items:center;gap:1px;border:0;background:none;
+  border-radius:9px;padding:5px 9px 4px;color:var(--gz-handle-ink);cursor:pointer;opacity:.62;
+  transition:background .12s,opacity .12s}
+.dock-btn svg{fill:currentColor;display:block}
+.dock-btn span{font-size:8.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.dock-btn:hover{opacity:1;background:rgba(255,255,255,.09)}
+.dock-btn[aria-pressed="true"]{opacity:1;background:var(--pink);color:#fff}
+.dock-mini{opacity:.5}
+
+/* the ink, and the wheel that changes it. One swatch, painted with whatever
+   the next mark is made in — a token the skin resolves, so it re-mixes itself
+   on dark paper, or a hex off the wheel, which stays put. The COLOUR button
+   beside it opens the wheel; its icon is a conic of the six pure hues, a
+   picture of the thing it opens. */
+.dock-sw{width:24px;height:24px;padding:0;border-radius:50%;cursor:pointer;background:var(--sw);
+  border:2px solid rgba(255,255,255,.28);transition:transform .1s,border-color .12s}
+.dock-sw:hover{transform:scale(1.12);border-color:#fff}
+.dock-pal{position:relative;gap:6px;padding-left:3px}
+.dock-wheel-ico{display:block;width:16px;height:16px;border-radius:50%;
+  background:conic-gradient(#ff3b3b,#ffd23f,#59d36a,#3fd0ff,#5871f5,#e259f0,#ff3b3b);
+  box-shadow:inset 0 0 0 3.5px var(--gz-handle-bg)}
+#dock-wheel[aria-expanded="true"]{opacity:1;background:rgba(255,255,255,.12)}
+/* the sticker, drawn the way the Design Canvas export draws it: a square with
+   its bottom-left corner rounded far off and the lifted edge curling out of
+   that corner. Borders, not a path — the export is borders, so this is a
+   transcription of its numbers (22px box, 3px border, radii 4/4/4/10, and a
+   10px curl hung 3px out at the corner with an 8px round on it) scaled by
+   16/22 to the dock's icon size, where any path would have been a guess at
+   the same shape. The wheel above is the other CSS icon here, for the same
+   reason. currentColor, so it goes white with the button when it is pressed. */
+.dock-sticker-ico{display:block;width:16px;height:16px;box-sizing:border-box;border:2.2px solid currentColor;
+  border-radius:2.9px 2.9px 2.9px 7.3px;position:relative}
+.dock-sticker-ico::after{content:"";position:absolute;bottom:-2.2px;left:-2.2px;width:7.3px;height:7.3px;
+  border-right:2.2px solid currentColor;border-top:2.2px solid currentColor;border-radius:0 5.8px 0 0}
+/* the wheel itself: hue round the rim of the disc, saturation in towards its
+   white centre, brightness on the bar under it. Cut from the dock's own pill
+   and hung off the palette group, so it is wherever the dock is; --opts-h is
+   set by wall.js when it opens and lifts it clear of the options row. */
+.wheel{position:absolute;left:50%;bottom:calc(100% + 16px + var(--opts-h,0px));transform:translateX(-50%);
+  width:200px;padding:12px;border-radius:14px;background:var(--gz-handle-bg);border:2px solid var(--hard-edge);
+  box-shadow:0 2px 0 var(--hard-edge),0 16px 34px -16px rgba(var(--drop-rgb),.6);
+  display:flex;flex-direction:column;align-items:center;gap:11px;cursor:default}
+.wheel-disc{position:relative;width:160px;height:160px;border-radius:50%;cursor:crosshair;touch-action:none;
+  background:radial-gradient(circle closest-side,#fff 0,rgba(255,255,255,0) 100%),
+             conic-gradient(#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);
+  box-shadow:0 0 0 2px rgba(255,255,255,.14)}
+.wheel-dot,.wheel-thumb{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;
+  border:2.5px solid #fff;box-shadow:0 0 0 1.5px rgba(0,0,0,.45);pointer-events:none}
+.wheel-val{position:relative;width:100%;height:14px;border-radius:7px;cursor:pointer;touch-action:none;
+  background:linear-gradient(90deg,#000,var(--top,#fff));box-shadow:0 0 0 2px rgba(255,255,255,.14)}
+.wheel-thumb{top:50%}
+.wheel-row{display:flex;align-items:center;gap:8px;width:100%}
+.wheel-hex{width:76px;flex:none;border:0;border-radius:7px;padding:5px 7px;background:rgba(255,255,255,.1);
+  color:var(--gz-handle-ink);font-family:var(--mono);font-size:11.5px;letter-spacing:.04em}
+.wheel-hex:focus{outline:2px solid var(--pink);outline-offset:0}
+.wheel-house{display:flex;gap:5px;margin-left:auto}
+.wheel-chip{width:16px;height:16px;padding:0;border-radius:50%;cursor:pointer;background:var(--sw);
+  border:1.5px solid rgba(255,255,255,.35);transition:transform .1s}
+.wheel-chip:hover{transform:scale(1.2);border-color:#fff}
+
+.opt-lab{font-family:var(--mono);font-size:8px;letter-spacing:.16em;color:var(--serial-ink)}
+.opt-rule{width:1px;height:16px;background:var(--grip);margin:0 2px}
+.opt-btn{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;padding:0 6px;
+  border:0;border-radius:7px;background:none;color:var(--gz-handle-ink);cursor:pointer;opacity:.6;
+  font-size:10.5px;transition:background .12s,opacity .12s}
+.opt-btn:hover{opacity:1;background:rgba(255,255,255,.09)}
+.opt-btn[aria-pressed="true"]{opacity:1;background:var(--pink);color:#fff}
+/* a group of options that belong together, so one of them can be faded when
+   the other's setting has taken over (width, once the pen is squared off) */
+.opt-set{display:inline-flex;align-items:center;gap:5px;transition:opacity .14s}
+.opt-set.opt-moot{opacity:.32}
+.opt-px svg{display:block}
+.opt-po i{display:block;width:14px;height:14px;border-radius:50%;background:currentColor}
+/* ── the pen's width ───────────────────────────────────────────────────────
+   One slider where four dots were, because the pen now goes to 1400px and a
+   dot that size is not a button. Drawn by hand rather than left native: a
+   range input is a different shape in every browser and none of those shapes
+   is this dock's. A thin track cut from the same faint white the rules are,
+   and the thumb in the pink a pressed button takes, ringed in the dock's own
+   background so it reads as sitting ON the track rather than in it.
+
+   26px tall, the height of every button beside it, so the row does not grow
+   when the pen tool comes up. Chrome and Firefox each want their own pair of
+   pseudo-elements and neither tolerates the other's in the same rule — one
+   unknown selector voids the whole block — so the two pairs are written out
+   twice rather than grouped. */
+.opt-slider{-webkit-appearance:none;appearance:none;width:132px;height:26px;margin:0;padding:0;
+  background:none;cursor:pointer;vertical-align:middle}
+.opt-slider::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:rgba(255,255,255,.18)}
+.opt-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;margin-top:-5px;
+  border:2px solid var(--gz-handle-bg);border-radius:50%;background:var(--pink);box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.opt-slider::-moz-range-track{height:4px;border-radius:2px;background:rgba(255,255,255,.18)}
+.opt-slider::-moz-range-thumb{width:14px;height:14px;
+  border:2px solid var(--gz-handle-bg);border-radius:50%;background:var(--pink);box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.opt-slider:hover::-webkit-slider-thumb{transform:scale(1.15)}
+.opt-slider:hover::-moz-range-thumb{transform:scale(1.15)}
+.opt-slider:focus-visible{outline:2px solid var(--pink);outline-offset:1px;border-radius:6px}
+/* wide enough for 1400 at every width under it, so the PIXEL group beside it
+   does not shuffle sideways while the thumb is being dragged. Both classes,
+   because .opt-num's own min-width is written further down this file and a
+   single class here would lose to it wherever it sat. */
+.opt-num.opt-pwn{min-width:34px}
+.opt-iz{font-family:var(--mono);font-weight:800;font-size:10.5px;letter-spacing:.06em}
+.opt-say{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;color:var(--serial-ink);padding:0 4px;white-space:nowrap}
+/* …and when the panel the tool belongs to never loaded, the same line says
+   so in the amber the delete tool uses for "this is not the ordinary case" */
+.opt-say-off{color:var(--amber)}
+.opt-sk svg{display:block;color:var(--pink-2)}
+.opt-sk[aria-pressed="true"] svg{color:#fff}
+
+/* ── the gif row ─────────────────────────────────────────────────────────
+   GIF on the dock, next to TEXT — a search bar in the options row itself
+   rather than a panel of its own, since a result is one click from going
+   up: press one and it stays on the pointer, the way a tracing off the
+   library does. The key row and the results wrap onto their own line
+   (flex-basis:100%, same trick a folded FONT row would use) so the search
+   bar stays put while what is under it changes. See gif.js. */
+.opt-gif-q,.opt-gif-k{border:0;border-radius:7px;padding:5px 8px;background:rgba(255,255,255,.1);
+  color:var(--gz-handle-ink);font-family:var(--mono);font-size:11px;letter-spacing:.02em}
+.opt-gif-q{width:140px}
+.opt-gif-k{width:170px}
+.opt-gif-q:focus,.opt-gif-k:focus{outline:2px solid var(--pink);outline-offset:0}
+.opt-gif-q::placeholder,.opt-gif-k::placeholder{color:var(--gz-handle-ink);opacity:.45}
+.opt-gif-key{flex-basis:100%}
+.opt-gif-fine{flex-basis:100%;white-space:normal;line-height:1.4;max-width:560px}
+.opt-gif-fine a{color:inherit;text-decoration:underline}
+.opt-gif-grid{flex-basis:100%;flex-wrap:wrap;gap:4px}
+.opt-gif-hit{width:40px;height:40px;padding:0;overflow:hidden;cursor:grab;touch-action:none}
+.opt-gif-hit:active{cursor:grabbing}
+.opt-gif-hit img{width:100%;height:100%;object-fit:cover;display:block;border-radius:5px;pointer-events:none}
+.opt-gif-hit.opt-gif-on{box-shadow:0 0 0 2px var(--pink)}
+/* the thumbnail carried out of the row — the tracing library's ghost, in the
+   one size a strip reads at while it is in the air (see OUT OF THE ROW AND
+   ONTO THE PAPER, gif.js). It follows the pointer and takes none of it. */
+.gif-ghost{position:fixed;z-index:6600;width:120px;height:120px;margin:-60px 0 0 -60px;
+  object-fit:cover;pointer-events:none;border-radius:8px;
+  border:3px solid var(--pink);box-shadow:6px 7px 0 rgba(var(--drop-rgb),.35);opacity:.92}
+.opt-gif-mini{font-size:8px;letter-spacing:.12em;opacity:.4}
+.opt-gif-mini:hover{opacity:1}
+.opt-gif-mark{flex-basis:100%;font-family:var(--mono);font-size:8px;letter-spacing:.12em;
+  color:var(--serial-ink);opacity:.55}
+.opt-gif-mark a{color:inherit}
+.opt-gif-bad{color:var(--amber)}
+
+/* ── the type case ───────────────────────────────────────────────────────
+   B / I / U each show what they do, so the row needs no words for them; the
+   size sits between A− and A+ as a READOUT rather than a button, because it
+   is the one thing there that is a value and not a switch. */
+.opt-ty{min-width:24px;font-size:13px;line-height:1}
+.opt-ty-b{font-weight:800}
+.opt-ty-i{font-style:italic;font-family:Georgia,'Times New Roman',serif}
+.opt-ty-u{text-decoration:underline;text-underline-offset:2px}
+.opt-z{font-family:var(--mono);font-size:11px;font-weight:700;min-width:24px}
+.opt-btn:disabled{opacity:.22;cursor:default;background:none}
+.opt-num{min-width:23px;text-align:center;font-family:var(--mono);font-size:11px;font-weight:700;
+  color:var(--gz-handle-ink);opacity:.85;font-variant-numeric:tabular-nums}
+.opt-al svg{display:block;fill:currentColor}
+/* the stamps are drawn against paper, so on the dock's dark pill their outlines
+   would vanish. Re-point the few tokens the artwork uses, button-locally. */
+.opt-sk{--ink-2:rgba(255,255,255,.6);--paper:transparent;
+  --gn-skin:var(--gz-handle-ink);--gn-beard:rgba(255,255,255,.85);--amber:var(--amber)}
+
+/* ─── the ink on the paper ────────────────────────────────────────────────
+   One svg in world units under the gizmos. It only takes the pointer when a
+   tool is up; in move mode the layer steps back and the pieces take it. */
+.wall-ink{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:1}
+.wall-ink.wall-live{pointer-events:auto;cursor:crosshair}
+body.lab-hand .wall-ink,body.lab-panning .wall-ink{pointer-events:none!important}
+.wall-item{pointer-events:none}
+/* the badge on a sleeping video: the one part of a piece that means "start
+   this" rather than "take hold of this", so it says so with the cursor */
+.wall-play{cursor:pointer}
+/* ── A VIDEO PLAYING ON THE PAPER ─────────────────────────────────────────
+   An HTML box in world units inside #bench-world, exactly like the note box
+   below — so it pans and zooms with the paper — and NOT part of the svg
+   layer, which is rebuilt from scratch on every change to the wall and would
+   restart the film each time (see AND AWAKE IT IS A PLAYER in wall.js).
+
+   OVER EVERYTHING ON THE PAPER. A film is the one thing here you are meant to
+   be looking at while it runs, so it goes above the ink layer, the features
+   and the kits rather than into the pile with them — a video with a line
+   drawn across it, or behind a sticker somebody put there first, is a video
+   nobody can watch. 9050 is just under the note box, which has to stay on top
+   of it: a box you are typing into is the thing you are looking at instead.
+
+   Nothing is drawn over the film by this file. Its own piece paints nothing
+   while it plays, so there is no picture behind it and no .wall-item over it
+   to swallow a press the player wanted. */
+.wall-video{position:absolute;z-index:9050;overflow:hidden;border:3px solid var(--hard-edge);
+  border-radius:5px;background:#000;box-shadow:0 12px 30px -12px rgba(var(--drop-rgb),.6)}
+.wall-video iframe{display:block;width:100%;height:100%;border:0}
+/* ITS OWN ✕, the way a strip of tape carries one. Escape stops a film, but a
+   key nobody has been told about is not an affordance — and with the piece
+   itself off the paper while it plays there is nothing else to press.
+
+   A FRACTION OF THE BOX, CLAMPED, which is the rule the crop handles already
+   go by (see SIZED AGAINST THE PIECE in wall.js): everything out here is in
+   world units, so a fixed 26px is a speck on a video at 20% and a saucer at
+   400%. 9% of the width keeps the proportion, and the two ends stop a tiny
+   video getting a ✕ nobody can hit or a wall-sized one getting a dinner
+   plate. It sits INSIDE the corner rather than out over the paper, where a
+   press would land on whatever is behind it at small sizes; the inset is a
+   flat 6px because a percentage there would resolve against the box's height
+   at the top and its width at the side, which is two different insets. */
+.wall-video-x{position:absolute;right:6px;top:6px;z-index:2;
+  display:flex;align-items:center;justify-content:center;width:clamp(18px,9%,34px);aspect-ratio:1;
+  padding:0;border:0;border-radius:50%;background:rgba(16,12,20,.62);color:#fff;font-size:15px;
+  line-height:1;cursor:pointer;opacity:0;transition:opacity .14s,background .14s}
+.wall-video:hover .wall-video-x,.wall-video-x:focus-visible{opacity:1}
+.wall-video-x:hover{background:var(--pink)}
+/* WITH THE PEN OUT, A MARK STILL ANSWERS THE RIGHT BUTTON. A drawing tool
+   gives the whole layer to the pointer (.wall-live) and leaves the pieces on
+   it inert, which is what makes bare paper and a line you already drew the
+   same thing to draw on. It also made a line the one thing on this bench with
+   no menu on it: lab.js aims that at whatever the press landed on, and what
+   the press landed on was always the layer.
+
+   So the pieces answer with the pen in hand too, and NOTHING ABOUT DRAWING
+   CHANGES — the press handler is on the LAYER, and an event that starts on a
+   piece reaches it by bubbling exactly as it did when the piece was inert.
+   Left button draws over the line; right button gets the line's menu.
+
+   It costs less than move mode already does, where every piece is hit-tested
+   AND wears a drop-shadow on hover and a cursor of its own; here there is
+   neither, because nothing here can be picked up. */
+body[data-wall-tool="draw"] .wall-item{pointer-events:auto}
+.wall-picking .wall-item{pointer-events:auto;cursor:grab}
+/* ── WHAT THE POINTER IS OVER IS DRAWN ON ANOTHER LAYER ───────────────────
+   There is no :hover rule on a wall item any more, and that is the fix rather
+   than an omission. Hovering used to put a pink drop-shadow on the piece, and
+   then (a first attempt at this) an outline. BOTH make the browser hand that
+   piece a surface of its own, and a piece with a surface of its own comes
+   back BLANK for a frame every time the layer is rasterised again — which is
+   every zoom. That is the white box people kept seeing under the pointer.
+
+     hovering a piece, 3446 shapes at 36% — worst frame in the pass
+       drop-shadow  218–230ms      outline  36–55ms, still blanks
+       a box on its own layer  6ms, and the artwork is never touched
+
+   The drop-shadow was the expensive one for a second reason: a filter needs
+   the whole layer rasterised again, so it cost that 220ms frame on the way in
+   AND on the way out, with unpainted tiles showing white while it ran.
+
+   So wall.js keeps a nearly empty svg of its own above the ink and puts one
+   rectangle in it (see THE HOVER BOX). Changing that layer costs nothing,
+   because there is nothing on it. */
+.wall-over{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:2}
+.wall-over-box{fill:none;stroke:var(--pink-2);stroke-width:2;vector-effect:non-scaling-stroke;rx:3}
+body[data-wall-tool="delete"] .wall-over-box{stroke:var(--amber)}
+/* a stroke is a hairline to the hit-tester unless it is given some girth */
+.wall-picking path.wall-item{stroke-linecap:round}
+.wall-item.wall-held{cursor:grabbing;filter:drop-shadow(0 4px 6px rgba(var(--drop-rgb),.45))}
+/* THE SAME PIECES ANSWERING FOR A DIFFERENT REASON. With the sticker tool up
+   a press on something already stamped might be a stamp (a tap) or a move (a
+   hold) — see PRESS AND HOLD in wall.js — and it can be neither until the
+   piece can be pressed at all, so they come back on the way they do for move.
+   Two things stay as the layer set them, on purpose: the CURSOR is still the
+   crosshair, because tapping is still the common gesture and this is still
+   the stamping tool, and bare paper still answers too, which is what keeps a
+   stamp landing anywhere. The pink is the same "you could pick this up" the
+   move tool gives, and here it is also the only hint the hold exists. */
+.wall-holdable .wall-item{pointer-events:auto}
+.wall-holdable path.wall-item{stroke-linecap:round}
+/* the delete tool reads the paper the same way move does — see markTools()
+   in wall.js — so it is the same two rules with amber standing in for pink:
+   what a click would remove marks itself differently from what a drag would
+   carry. */
+.wall-deleting .wall-item{pointer-events:auto;cursor:crosshair}
+.wall-deleting path.wall-item{stroke-linecap:round}
+/* …and the other half, a pasted COPY of a feature. .gz-copy is lab.js's mark
+   (makeGz); a copy answers the pointer the way it always does (nothing to
+   flip — gizmos are interactive regardless of tool) and gets the same amber
+   cue on hover.
+
+   AN ORIGINAL HAS TO GO TRANSPARENT, not just uninterested. A .gz's box is
+   not its drawing — see 'THE FRAME IS A WINDOW' in frames.js — so most of
+   the eighty-four sit over a good deal of paper nothing is drawn on, paper
+   that may well have a wall mark or a pasted copy under it. A .gz-shield
+   fills that whole box and, on every OTHER tool, that is exactly the point:
+   it is what lets a click either wake the feature or start dragging it. The
+   delete tool wants neither, on an original, so its shield stops answering
+   the pointer there and clicks fall through to whatever is actually under
+   the cursor — a wall-item, a copy stacked below it, or bare paper — the
+   same way a not-allowed cursor alone could never have promised, since a
+   cursor is a picture of the pointer and not the pointer itself. */
+body[data-wall-tool="delete"] .gz.gz-copy{cursor:crosshair}
+body[data-wall-tool="delete"] .gz.gz-copy:hover{outline:3px dashed var(--amber);outline-offset:3px}
+body[data-wall-tool="delete"] .gz:not(.gz-copy){pointer-events:none}
+
+/* ── writing a note ───────────────────────────────────────────────
+   A box the width the note will be, in the face and size it will be, growing
+   downwards as the words wrap. It lives inside the world, so it is already at
+   the zoom you are working at. The tab on the right edge reshapes it. */
+.wall-note{position:absolute;transform:translate(-4px,-50%);z-index:9060;padding:9px 12px;
+  border:2px solid var(--pink);border-radius:11px;background:var(--field);
+  box-shadow:0 10px 26px -10px rgba(var(--drop-rgb),.55)}
+.wall-note-in{display:block;width:260px;margin:0;padding:0;border:0;background:none;outline:none;
+  resize:none;overflow:hidden;color:var(--ink);font-size:22px;line-height:1.32}
+.wall-note-in::placeholder{color:var(--mute-2)}
+.wall-note-grip{position:absolute;right:-9px;top:50%;transform:translateY(-50%);width:14px;height:38px;
+  padding:0;border:2px solid var(--pink);border-radius:7px;background:var(--field);cursor:ew-resize;
+  display:grid;place-items:center;touch-action:none}
+.wall-note-grip::before{content:"";width:2px;height:16px;border-radius:2px;background:var(--pink);opacity:.75}
+.wall-note-hint{position:absolute;left:1px;top:calc(100% + 7px);margin:0;white-space:nowrap;
+  pointer-events:none;font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--mute-2)}
+/* ── A PALE INK GETS A DARK BOX ───────────────────────────────────────────
+   The box is white paper, which suits the ink most notes are written in and
+   is exactly wrong for white: you would be typing invisibly and finding out
+   what you had written only when the note went up. wall.js reads the ink's
+   COMPUTED colour as you choose it and puts this class on the box when the
+   ink is too pale for white paper (see AND THE BOX GOES DARK, over there).
+
+   It is the dock's own dark, so the box reads as the same piece of furniture
+   the ink was chosen on rather than as a different mode; the pink border and
+   the grip stay exactly as they are, since both read on either ground. */
+.wall-note.wall-note-dark{background:var(--gz-handle-bg)}
+.wall-note-dark .wall-note-in::placeholder{color:rgba(255,255,255,.42)}
+.wall-note-dark .wall-note-hint{color:rgba(255,255,255,.5)}
+
+/* and the tab that reshapes a note once it is on the paper: nothing at all
+   until the move tool is up, then a hint of one until you are on it */
+.wall-grip{fill:var(--pink);opacity:0;pointer-events:none}
+.wall-picking .wall-grip{opacity:.3;pointer-events:auto;cursor:ew-resize}
+.wall-picking .wall-grip:hover{opacity:.95}
+
+/* ─── what is picked on the wall ───────────────────────────────────────────
+   The other pick. .gz.picked wears eight dashed corner arms painted out of
+   repeating gradients; a mark on the paper is an SVG node with no background
+   to paint, so wall.js draws the same eight arms as <line>s on a layer of its
+   own and this is what they are drawn in. Same pink, same weight, same idea:
+   being picked and being carried look alike on purpose (see THE MARK IS NOT
+   THE PICK'S over in the features).
+
+   NON-SCALING-STROKE is what keeps them honest. Everything on that layer is
+   in world units and the camera scales it, so a 2px line would be a hairline
+   at 20% and a rope at 400% — exactly the reason lab.js draws its band as a
+   sibling of the world rather than a child of it. This is the SVG way of
+   saying the same thing: the geometry zooms, the ink does not.
+
+   THE TWO HANDLES ride the same layer and say what they do with the cursor:
+   the corner square is a diagonal pull, so nwse; the ring on its stalk is a
+   turn, and grab is the nearest thing a browser offers. Both are given a
+   paper-coloured outline, because half the artwork in the hive is near-black
+   and a pink square on a black chain link is a pink square you cannot find.
+   A turned piece takes its handles round with it — see paintMarks — so the
+   corner is always the piece's own bottom right, not the screen's. */
+.wall-crop line{stroke:var(--pink);stroke-width:2;stroke-linecap:butt;
+  stroke-dasharray:7 5;vector-effect:non-scaling-stroke}
+.wall-marks{pointer-events:none}
+.wall-picking .wall-scale,.wall-picking .wall-turn{opacity:.55;pointer-events:auto;
+  stroke:var(--paper);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.wall-picking .wall-scale{cursor:nwse-resize}
+.wall-picking .wall-turn{cursor:grab}
+.wall-picking .wall-turn:active{cursor:grabbing}
+.wall-picking .wall-scale:hover,.wall-picking .wall-turn:hover{opacity:1}
+.wall-stem{stroke:var(--pink);stroke-width:1.5;opacity:.5;
+  vector-effect:non-scaling-stroke;pointer-events:none}
+/* .wall-picked carries NO paint of its own, on purpose. The crop marks are
+   the mark of the pick — the same sentence .gz.picked makes with its own
+   eight arms — and hovering already lights a piece pink. A glow on top of
+   both said nothing a third time and cost a raster pass per picked item,
+   which on a wall with forty of them is forty. The class stays as the hook
+   wall.js and the probe read the pick by. */
+
+
+/* ─── the caution tape ─────────────────────────────────────────────────────
+   Not a tool and not a feature: a prop. The dock's tape button drops a strip
+   on the sheet and each end is a handle, so it cordons off whatever on the
+   bench is not finished. Printed rather than drawn, which is why it keeps its
+   own black-and-yellow instead of taking the paper's ink.
+
+   IT LIES ON TOP OF THE FEATURES, above the notes and above everything a
+   feature paints. Tape that goes UNDER the thing it is cordoning off is not
+   cordoning anything off — and a strip you cannot get a finger on because
+   there is a feature over it is not a strip you can move. Both were true at
+   z-index 6, which is below the band the features stack in. The layer itself
+   still takes no pointer, so only the tape is grabbable and the bench keeps
+   the wheel everywhere between the strips. (The band, and why the features
+   cannot climb out of it, is in lab.js — look for WHAT STANDS ON WHAT.) */
+.tape-layer{position:absolute;inset:0;pointer-events:none;z-index:9070}
+.tape-layer .tape{pointer-events:auto}
+.tape{position:absolute;height:46px;transform-origin:0 50%;font-family:var(--st-mono)}
+.tape-strip{display:flex;align-items:stretch;height:46px;background:var(--st-yellow);
+  border:var(--st-line);box-shadow:10px 11px 0 var(--st-drop);box-sizing:border-box}
+.tape-end{width:30px;flex:none;cursor:ew-resize;touch-action:none;border:0;padding:0;
+  background:repeating-linear-gradient(45deg,var(--st-ink) 0 11px,var(--st-yellow) 11px 22px)}
+.tape-end-l{border-right:3.5px solid var(--st-ink)}
+.tape-end-r{border-left:3.5px solid var(--st-ink);
+  background:repeating-linear-gradient(-45deg,var(--st-ink) 0 11px,var(--st-yellow) 11px 22px)}
+.tape-end:hover,.tape-end:focus-visible{outline:3px dashed var(--st-red);outline-offset:2px}
+/* the ends are the only way to change the length, and the printed cap is a
+   30px target — which is a dozen real pixels once the bench is zoomed out to
+   where you can see enough of the sheet to want to cordon part of it off. So
+   each end carries an invisible pad reaching out past the cap: you pull the
+   end of the tape by grabbing the end of the tape, rather than by hitting the
+   stripe exactly. It reaches OUTWARD, never into the middle, so the pad never
+   eats the move handle. Events on a pseudo-element are dispatched at the
+   button it belongs to, so there is nothing to wire up. */
+.tape-end{position:relative}
+.tape-end::after{content:'';position:absolute;top:-14px;bottom:-14px}
+.tape-end-l::after{left:-24px;right:0}
+.tape-end-r::after{left:0;right:-24px}
+.tape-mid{display:flex;align-items:stretch;overflow:hidden;flex:1;min-width:0;cursor:grab;
+  touch-action:none}
+.tape-layer.pulling .tape-mid{cursor:grabbing}
+.tape-seg{display:flex;align-items:center;gap:14px;padding:0 14px;flex:none;
+  border-right:3px dashed rgba(23,18,11,.35)}
+.tape-seg b{font-family:var(--st-mono);font-size:30px;letter-spacing:.2em;color:var(--st-ink);
+  white-space:nowrap;line-height:1;font-weight:400}
+.tape-seg i{width:13px;height:13px;background:var(--st-ink);transform:rotate(45deg);flex:none}
+/* the ✕ only turns up when you are near the strip — a permanent one on every
+   piece of tape would be a page covered in little red buttons */
+.tape-x{position:absolute;top:-13px;right:-13px;width:24px;height:24px;border-radius:50%;
+  background:var(--st-red);color:#fdf3d9;border:3px solid var(--st-ink);font-family:var(--st-mono);
+  font-size:13px;line-height:1;cursor:pointer;padding:0;opacity:0;transition:opacity .12s}
+.tape:hover .tape-x,.tape-x:focus-visible{opacity:1}
+
+/* ─── the menu ───────────────────────────────────────────────────────────
+   Right-click a feature: raise, lower, delete, and a line saying where in
+   the pile it is. Cut from the same dark pill as the docks — furniture, not
+   paper — and over them (6500), so a feature right-clicked at the foot of
+   the screen is not answered from under the dock. lab.js builds it and
+   moves it; THE MENU there has the rest. */
+.lab-menu{position:fixed;z-index:6500;min-width:200px;padding:6px;border-radius:12px;
+  background:var(--gz-handle-bg);border:2px solid var(--hard-edge);
+  box-shadow:0 2px 0 var(--hard-edge),0 16px 34px -16px rgba(var(--drop-rgb),.6);
+  display:flex;flex-direction:column;gap:1px;user-select:none}
+.lab-menu[hidden]{display:none}
+.lab-menu-name{display:block;max-width:280px;padding:5px 9px 6px;font-family:var(--mono);font-size:9.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--serial-ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lab-menu button{display:grid;grid-template-columns:18px 1fr;column-gap:8px;align-items:center;text-align:left;
+  border:0;border-radius:8px;padding:6px 9px;background:none;color:var(--gz-handle-ink);cursor:pointer;
+  font-family:var(--body);font-size:12.5px;font-weight:700;letter-spacing:.02em;opacity:.88;
+  transition:background .12s,opacity .12s}
+.lab-menu button i{font-style:normal;font-size:10px;text-align:center;opacity:.75}
+.lab-menu button small{grid-column:2;font-size:10px;font-weight:500;letter-spacing:.01em;color:var(--serial-ink)}
+.lab-menu button:hover{opacity:1;background:rgba(255,255,255,.1)}
+.lab-menu .lab-menu-x:hover{background:rgba(232,72,74,.3)}
+.lab-menu-where{display:block;margin-top:4px;padding:6px 9px 4px;border-top:1px solid var(--grip);
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--serial-ink)}
+/* the one the menu is about: dotted, the way the ctrl-pick's answer is,
+   because it is the same kind of sentence — this is the one */
+.gz.menued{outline:1.5px dotted var(--pink);outline-offset:2px}
+
+/* ─── THE SIDE PANELS: THE TRACING TABLE, AND THE STICKER DRAWER ─────────
+   The two panels the dock's UPLOAD and STICKER put up. They are the user's
+   UI, not scenery: FIXED to the left of the viewport, not placed on the
+   paper, so panning and zooming the bench moves the drawing under them and
+   leaves them exactly where the hand left them. Nothing about them is a
+   gizmo — no Lab.register, no drag by the bar, nothing in keep.js's layout,
+   nothing to copy — which is also why neither needs the one-frame
+   will-change the world's own panels need after a zoom: they are not inside
+   the sheet whose pose is animated.
+
+   WHERE THE LOOK COMES FROM. Downloads/features/Tracing Table.html, a Design
+   Canvas export of the whole LAB DOCK: a strip of buttons with these two
+   panels standing beside it, both the same 344-wide case in the same dark
+   palette — the case #251f2b on ink #100c16, pockets and buttons #332b3c
+   (#3d3447 hovered), the pink #e8479c with #ff9fd0 for a readout, paper
+   #f6f1f8, VT323 for the plates and Kalam for the handwriting. Every number
+   below is that design's, transcribed out of its inline styles.
+
+   THE CASE IS ONE THING, WRITTEN ONCE. The export draws both panels with the
+   same border, the same radii, the same shadow and the same header — plate,
+   spacer, × — so that shell is .lab-panel and its .lp-* furniture here, and
+   .tracer and .sticker-drawer below add only what is actually different
+   inside them. The tracing table WAS a 1270-wide cream machine with screws
+   and a grill (the previous export); this export redrew it as this panel,
+   and the cream is gone with it.
+
+   ONLY ONE IS EVER UP, because UPLOAD and STICKER are two tools and a tool
+   is exclusive, so they share the one slot rather than stacking. The slot
+   starts under the header — --head-h is lab.js's own measurement of where
+   the bench starts, since the header is one line deployed and a paragraph of
+   workbench notes at home — and runs to the foot of the screen. A panel
+   taller than that scrolls inside itself; it never grows past the screen.
+
+   IT ONLY GETS OUT OF THE DOCK'S WAY WHEN THE DOCK IS IN IT. The dock is
+   CENTRED and the panel is hard left, so on a wide window they never meet
+   and the panel is free to run all the way down — which matters, because
+   the tracing table is about 830 tall and every pixel it does not get is a
+   scroll between the dials and the light table. They meet when the dock's
+   own width leaves less than the panel needs on its left: 16 + 344 + 16 on
+   one side of centre, so below about 1300px. Only there does the panel stop
+   short of the dock and its options row. */
+/* THE WIDTH IS A VARIABLE, AND THE PULL ONLY EVER WRITES THAT. 344 is the
+   export's number and stays the default; the grip on the right edge (lab.js,
+   THE SIDE PANELS PULL WIDER) sets --lp-w and nothing else. It has to be a
+   variable rather than an inline width because max-width is still in charge
+   here and a whole different rule takes over under 720px — an inline width
+   would beat both and leave a phone with a 700px panel off the side of the
+   screen. */
+.lab-panel{position:fixed;left:16px;top:calc(var(--head-h,52px) + 14px);z-index:6000;
+  width:var(--lp-w,344px);max-width:calc(100vw - 32px);
+  /* THE HEIGHT HAS TWO MASTERS NOW. --lp-cap is this file's: the screen less
+     the header, and less the dock's row on a window narrow enough that the
+     centred dock reaches the panel's column (below). --lp-maxh is lab.js's,
+     set only when a PULLED-WIDE panel reaches the dock on a window that is
+     not narrow at all — which the media query below cannot see, because a
+     media query cannot read how far the grip has been pulled. Whichever is
+     the shorter wins, and with nothing pulled the second is not set. */
+  --lp-cap:calc(100dvh - var(--head-h,52px) - 34px);
+  max-height:min(var(--lp-maxh,300dvh),var(--lp-cap));
+  box-sizing:border-box;background:#251f2b;border:5px solid #100c16;
+  border-radius:18px 22px 16px 20px;box-shadow:12px 14px 0 rgba(10,7,14,.45);
+  display:flex;flex-direction:column;overflow:hidden;
+  font-family:'Kalam',cursive;color:#f4f0f7;line-height:1.3}
+.lab-panel[hidden]{display:none}
+/* narrow enough that the centred dock reaches the panel's column: stop above
+   it and its options row rather than under them */
+@media (max-width:1300px){
+  .lab-panel{--lp-cap:calc(100dvh - var(--head-h,52px) - 130px)}
+}
+/* on a phone the dock stands up the side and the paper is precious: the
+   panel takes the width it can get and stops being a margin ornament */
+@media (max-width:720px){
+  .lab-panel{left:10px;right:10px;width:auto;max-width:none;
+    --lp-cap:calc(100dvh - var(--head-h,52px) - 150px)}
+  /* width:auto above ignores --lp-w, so the grip has nothing left to say */
+  .lp-grip{display:none}
+  .lp-body{margin-right:0;padding-right:16px}
+}
+.lp-bar{display:flex;align-items:center;gap:8px;padding:13px 16px 10px;border-bottom:4px solid #100c16;flex:none}
+.lp-plate{font-family:'VT323',monospace;font-size:21px;letter-spacing:3px;color:#f4f0f7;background:#332b3c;
+  border:3px solid #100c16;border-radius:9px 5px 10px 6px;padding:1px 11px 0;white-space:nowrap;line-height:1.15}
+.lp-gap{flex:1}
+.lp-x{width:27px;height:27px;flex-shrink:0;box-sizing:border-box;background:#332b3c;border:3px solid #100c16;
+  border-radius:6px 8px 5px 7px;font-family:'VT323',monospace;font-size:18px;line-height:1;color:#f4f0f7;
+  cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
+.lp-x:hover{background:#e8479c}
+.lp-x:active{transform:translate(1px,2px)}
+.lp-x:focus-visible{outline:2px solid #ff9fd0;outline-offset:2px}
+/* the body scrolls and the footer does not: the flat file and the drawer's
+   hint stay put while the dials or the grid run past them. The export gives
+   the body overflow-y:auto and means it — the tracing table is about 830 tall
+   and only a big window fits all of it — so the bar is dressed in the case's
+   own colours rather than left as the browser's light default on the dark. */
+/* THE RIGHT MARGIN IS THE GRIP'S LANE. The grip is the last 10px inside the
+   case and the body's scrollbar was drawn exactly there, so a pull would have
+   fought the scroll. The 10px margin walks the whole body — scrollbar and all
+   — left of the grip, and the padding drops from 16 to 6 so the CONTENT still
+   sits 16px in and nothing about the design's inside moves. */
+.lp-body{flex:1;min-height:0;overflow-y:auto;padding:14px 6px 14px 16px;margin-right:10px;
+  display:flex;flex-direction:column;gap:11px;
+  scrollbar-width:thin;scrollbar-color:#3d3447 transparent}
+.lp-body::-webkit-scrollbar{width:10px}
+.lp-body::-webkit-scrollbar-track{background:transparent}
+.lp-body::-webkit-scrollbar-thumb{background:#3d3447;border:3px solid #251f2b;border-radius:5px}
+.lp-body::-webkit-scrollbar-thumb:hover{background:#4d4359}
+/* ─── THE GRIP: PULL THE PANEL WIDER ─────────────────────────────────────
+   A drawer you cannot open wider is a drawer you scroll, and the sticker
+   drawer is 289 stickers deep. The grip is a real <button>, so it is in the
+   tab order and takes the arrow keys, and it is drawn as the case's own
+   ribbing rather than a browser resizer: three dashes down the edge, ink
+   until you touch them, pink while you pull. Nothing here knows how many
+   columns anything has — the grid works that out from the width it is given
+   (see THE GRID GOES TWO, THREE, FOUR). */
+.lp-grip{position:absolute;right:0;top:0;bottom:0;z-index:5;width:10px;padding:0;border:0;
+  background:none;cursor:ew-resize;touch-action:none}
+.lp-grip::after{content:"";position:absolute;top:50%;right:3px;width:4px;height:54px;margin-top:-27px;
+  border-radius:3px;background:repeating-linear-gradient(#3d3447 0 3px,transparent 3px 7px);
+  transition:background .14s}
+.lp-grip:hover::after,.lp-sizing .lp-grip::after,.lp-grip:focus-visible::after{
+  background:repeating-linear-gradient(#e8479c 0 3px,transparent 3px 7px)}
+.lp-grip:focus-visible{outline:2px solid #ff9fd0;outline-offset:-2px}
+/* the pull must not select the bench's text under it — the exact bug
+   body.lab-banding shipped with, so it is written in from the start here */
+.lp-sizing{user-select:none}
+body.lp-resizing{user-select:none;cursor:ew-resize}
+.lp-foot{flex:none;border-top:4px solid #100c16;padding:10px 16px 11px;display:flex;flex-direction:column;gap:8px}
+/* 01 LAY IT DOWN, 02 THE DIALS, 03 LIGHT TABLE */
+.lp-tag{align-self:flex-start;font-family:'VT323',monospace;font-size:17px;letter-spacing:3px;color:#f4f0f7;
+  background:#100c16;border-radius:4px;padding:1px 10px 0;white-space:nowrap}
+.lp-tag + *{margin-top:-3px}
+/* a plate, a rule to the end of the line, and a serial on the right */
+.lp-head{display:flex;align-items:center;gap:9px}
+.lp-head .lp-plate{font-size:17px;border-radius:7px 5px 8px 6px;padding:1px 10px 0}
+.lp-rule{flex:1;height:3px;background:rgba(10,7,14,.25);border-radius:2px}
+.lp-count{font-family:'VT323',monospace;font-size:15px;letter-spacing:2px;color:#f4f0f7;opacity:.55;white-space:nowrap}
+.lp-serial{font-family:'VT323',monospace;font-size:14px;letter-spacing:2px;color:#ff9fd0;background:#100c16;
+  border-radius:4px;padding:1px 7px 0;white-space:nowrap}
+/* the dashed pocket, waiting to be filled — the export draws it in the flat
+   file, and the empty sticker drawer borrows it */
+.lp-pocket{aspect-ratio:1;box-sizing:border-box;background:#332b3c;border:3px dashed #100c16;
+  border-radius:9px 6px 8px 7px;opacity:.68;display:flex;align-items:flex-end;justify-content:flex-end;
+  padding:2px 5px;font-family:'VT323',monospace;font-size:12px;color:#f4f0f7}
+.lp-pocket:nth-child(4n+2){border-radius:7px 9px 6px 8px}
+.lp-pocket:nth-child(4n+3){border-radius:8px 7px 9px 6px}
+.lp-pocket:nth-child(4n){border-radius:6px 8px 7px 9px}
+/* the little bit of handwriting under a panel's working end */
+.lp-fine{font-size:13px;color:#f4f0f7;opacity:.6;line-height:1.25}
+.lp-fine.lp-nudge{animation:lpNudge .45s}
+@keyframes lpNudge{15%{transform:translateX(-4px)}45%{transform:translateX(4px)}75%{transform:translateX(-2px)}}
+/* what is carried out of either panel on the pointer, on its own bit of paper */
+.lp-ghost{position:fixed;z-index:6600;width:120px;height:120px;margin:-60px 0 0 -60px;pointer-events:none;
+  background:#f6f1f8;border:3px solid #e8479c;border-radius:9px 6px 8px 7px;
+  box-shadow:6px 7px 0 rgba(10,7,14,.35);opacity:.92}
+.lp-ghost svg{display:block;width:100%;height:100%;padding:8px;box-sizing:border-box}
+
+/* ── THE TRACING TABLE ───────────────────────────────────────────────────
+   01 lay a picture down, 02 set the dials, 03 watch it come off the light
+   table, and THE FLAT FILE along the bottom keeps what you saved. tracer.js
+   drives it; the pipeline is lab 1's vectorize.js and did not change when
+   the panel was redrawn.
+
+   THE EXPORT STILL SAYS SAVE SVG, and this still does not: a tracing lives
+   in the library and on the paper, and a file on the desktop was a third
+   place for it to be wrong (THE LIBRARY, SINCE 2026-09-04 in tracer.js). So
+   that button keeps the export's shape and the wording it earned — SAVE TO
+   LIBRARY — and the note under it says the same. */
+.tr-drop{border:3px dashed #100c16;border-radius:14px 10px 13px 11px;background:#332b3c;padding:14px;
+  display:flex;align-items:center;gap:12px;cursor:pointer}
+.tr-drop:hover,.tr-drop.over{background:#3d3447;border-color:#e8479c}
+.tr-drop.bad{animation:trShake .35s}
+@keyframes trShake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.tr-drop-empty{display:flex;align-items:center;gap:12px;min-width:0}
+.tr-pic{display:block;width:52px;height:44px;flex-shrink:0;box-sizing:border-box;border:3px solid #100c16;
+  border-radius:8px 6px 9px 7px;background:#f6f1f8;position:relative;overflow:hidden}
+.tr-pic b{position:absolute;top:7px;left:8px;width:10px;height:10px;background:#6f6479;border:2.5px solid #100c16;border-radius:50%}
+.tr-pic u{position:absolute;bottom:-7px;left:-6px;width:30px;height:24px;background:#6f6479;border:2.5px solid #100c16;transform:rotate(45deg)}
+.tr-pic s{position:absolute;bottom:-9px;right:-9px;width:34px;height:28px;background:#cdc5d6;border:2.5px solid #100c16;transform:rotate(-42deg)}
+.tr-drop strong{font-weight:700;font-size:16px;color:#f4f0f7;line-height:1.25;min-width:0}
+.tr-drop strong small{font-weight:400;font-size:13.5px;opacity:.7}
+.tr-drop-full{display:flex;align-items:center;gap:12px;min-width:0}
+.tr-drop-full img{display:block;width:52px;height:44px;flex-shrink:0;object-fit:cover;border:3px solid #100c16;
+  border-radius:8px 6px 9px 7px;background:#f6f1f8}
+.tr-drop-full em{font-style:normal;font-family:'VT323',monospace;font-size:15px;letter-spacing:3px;color:#f4f0f7;
+  background:#100c16;border-radius:4px;padding:1px 8px 0}
+.tr-dial{background:#332b3c;border:3px solid #100c16;border-radius:10px 7px 9px 8px;padding:9px 12px 7px;
+  display:flex;flex-direction:column;gap:5px}
+.tr-dial + .tr-dial{border-radius:8px 10px 7px 9px}
+.tr-dial-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tr-dial-top span{font-family:'VT323',monospace;font-size:18px;letter-spacing:3px;color:#f4f0f7}
+.tr-dial-top b{font-family:'VT323',monospace;font-weight:400;font-size:19px;letter-spacing:2px;color:#ff9fd0;
+  background:#100c16;border-radius:4px;padding:0 8px}
+.tr-dial input{width:100%;accent-color:#e8479c;cursor:pointer;margin:0}
+/* TRACE IT, and the ink-flow gauge stood in its own box beside it */
+.tr-run{display:flex;align-items:stretch;gap:10px}
+.tr-go{flex:1;box-sizing:border-box;background:#e8479c;border:4px solid #100c16;border-radius:12px 15px 10px 14px;
+  padding:9px 10px 6px;font-family:'VT323',monospace;font-size:27px;letter-spacing:4px;color:#fff;cursor:pointer;
+  box-shadow:5px 6px 0 rgba(10,7,14,.6);line-height:1}
+.tr-go:hover{background:#f26bb0}
+.tr-go:active{transform:translate(4px,5px);box-shadow:1px 1px 0 rgba(10,7,14,.6)}
+.tr-go:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:5px 6px 0 rgba(10,7,14,.6);background:#e8479c}
+.tr-flow{width:46px;flex-shrink:0;background:#332b3c;border:3px solid #100c16;border-radius:9px 7px 10px 8px;
+  display:flex;align-items:center;justify-content:center}
+.tr-gauge{display:block;width:32px;height:32px;background:#f6f1f8;border:3px solid #100c16;border-radius:50%;position:relative}
+.tr-gauge b{position:absolute;bottom:50%;left:50%;width:3px;height:12px;margin-left:-1.5px;background:#e8479c;
+  border-radius:2px;transform-origin:bottom center;transform:rotate(-32deg);transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+.tr-gauge u{position:absolute;top:50%;left:50%;width:6px;height:6px;margin:-3px 0 0 -3px;background:#100c16;border-radius:50%}
+.tr-tabs{display:flex;gap:8px}
+.tr-tab{flex:1;box-sizing:border-box;background:#332b3c;border:3px solid #100c16;border-radius:8px 6px 9px 7px;
+  padding:3px 10px 1px;font-family:'VT323',monospace;font-size:17px;letter-spacing:2px;color:#f4f0f7;cursor:pointer;
+  box-shadow:3px 4px 0 rgba(10,7,14,.45)}
+.tr-tab:last-child{border-radius:6px 9px 7px 8px}
+.tr-tab.on{background:#e8479c;color:#fff}
+.tr-tab:active{transform:translate(2px,3px);box-shadow:0 1px 0 rgba(10,7,14,.45)}
+/* the light table: paper under a checker, a pink lamp over it */
+.tr-table{min-height:196px;box-sizing:border-box;border:4px solid #100c16;border-radius:12px 16px 10px 14px;
+  background-color:#f6f1f8;
+  background-image:linear-gradient(45deg,rgba(10,7,14,.05) 25%,transparent 25%,transparent 75%,rgba(10,7,14,.05) 75%),
+                   linear-gradient(45deg,rgba(10,7,14,.05) 25%,transparent 25%,transparent 75%,rgba(10,7,14,.05) 75%);
+  background-size:22px 22px;background-position:0 0,11px 11px;position:relative;
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+.tr-glow{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(255,140,200,.32) 0%,rgba(255,140,200,0) 70%)}
+.tr-lamp{position:absolute;top:-4px;left:50%;transform:translateX(-50%);transform-origin:top center;
+  animation:trLamp 5s ease-in-out infinite;display:flex;flex-direction:column;align-items:center;pointer-events:none;z-index:2}
+.tr-lamp i{display:block;width:4px;height:22px;background:#100c16}
+.tr-lamp b{display:block;width:62px;height:28px;box-sizing:border-box;background:#6f6479;border:4px solid #100c16;
+  border-radius:34px 34px 6px 6px;position:relative}
+.tr-lamp u{position:absolute;bottom:-11px;left:50%;transform:translateX(-50%);width:22px;height:11px;
+  background:#ffd9ee;border:3px solid #100c16;border-top-width:0;border-radius:0 0 11px 11px}
+@keyframes trLamp{0%,100%{transform:translateX(-50%) rotate(-1.6deg)}50%{transform:translateX(-50%) rotate(1.6deg)}}
+#tr-original{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:48px 12px 26px;box-sizing:border-box}
+#tr-traced{position:absolute;inset:48px 12px 26px;display:flex;align-items:center;justify-content:center}
+#tr-traced svg{display:block;max-width:100%;max-height:100%;width:auto;height:auto}
+.tr-empty{position:relative;display:flex;align-items:center;gap:7px;padding:24px 18px 0}
+.tr-empty span{font-size:15.5px;color:#1a1520;opacity:.6;text-align:center}
+.tr-empty i{width:8px;height:18px;flex-shrink:0;background:#e8479c;animation:trBlink 1.1s steps(1) infinite}
+@keyframes trBlink{50%{opacity:0}}
+.tr-paths{position:absolute;bottom:7px;right:11px;font-family:'VT323',monospace;font-size:14px;letter-spacing:2px;
+  color:#1a1520;opacity:.55}
+.tr-row2{display:flex;gap:10px}
+.tr-btn{box-sizing:border-box;background:#332b3c;border:3px solid #100c16;border-radius:8px 11px 7px 10px;
+  padding:6px 12px 4px;font-family:'VT323',monospace;font-size:20px;letter-spacing:3px;color:#f4f0f7;cursor:pointer;
+  box-shadow:4px 5px 0 rgba(10,7,14,.55);line-height:1.1}
+.tr-btn:hover{background:#3d3447}
+.tr-btn:active{transform:translate(3px,4px);box-shadow:1px 1px 0 rgba(10,7,14,.55)}
+.tr-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:4px 5px 0 rgba(10,7,14,.55);background:#332b3c}
+#tr-save{flex:1;border-radius:9px 12px 8px 11px}
+/* the sticky note, its tape torn over the corner — the steps on top, and
+   under them whatever the table has to say for itself just now */
+.tr-note{background:#332b3c;border:3px solid #100c16;border-radius:4px 10px 5px 11px;padding:9px 12px 8px;
+  position:relative;margin-top:4px;font-weight:700;font-size:14px;line-height:1.35;color:#f4f0f7}
+.tr-note i{position:absolute;top:-10px;right:14px;width:58px;height:18px;background:rgba(255,158,208,.55);
+  border:3px solid #100c16;border-radius:3px;transform:rotate(-3deg)}
+.tr-note small{display:block;font-weight:400;font-size:13px;opacity:.85}
+/* THE FLAT FILE: four across, the way the export draws it */
+.tr-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.tr-slot{aspect-ratio:1;box-sizing:border-box;background:#332b3c;border:3px dashed #100c16;
+  border-radius:9px 6px 8px 7px;opacity:.68;display:flex;align-items:flex-end;justify-content:flex-end;
+  padding:2px 5px;font-family:'VT323',monospace;font-size:12px;color:#f4f0f7}
+.tr-slot:nth-child(4n+2){border-radius:7px 9px 6px 8px}
+.tr-slot:nth-child(4n+3){border-radius:8px 7px 9px 6px}
+.tr-slot:nth-child(4n){border-radius:6px 8px 7px 9px}
+/* a pocket with a tracing in it: solid, bright, and a button. It is picked up
+   (a carry onto the paper) or pressed (the viewer); the × and the download
+   that used to sit on it are gone — see THE LIBRARY, SINCE 2026-09-04 in
+   tracer.js */
+.tr-slot.tr-filled{position:relative;opacity:1;background:#f6f1f8;border-style:solid;border-color:#100c16;
+  align-items:center;justify-content:center;padding:4px;cursor:grab;touch-action:none;overflow:hidden}
+.tr-slot.tr-filled svg{display:block;width:100%;height:100%}
+.tracer.tr-carrying .tr-slot.tr-filled{cursor:grabbing}
+.tr-slot.on{box-shadow:0 0 0 2px #e8479c}
+.tr-slot-n{position:absolute;bottom:1px;right:4px;font-family:'VT323',monospace;font-size:11px;color:#1a1520;opacity:.55}
+.tr-on{position:absolute;left:3px;top:3px;font-family:'VT323',monospace;font-size:9px;letter-spacing:1px;color:#fff;
+  background:#e8479c;border:2px solid #100c16;border-radius:4px;padding:0 3px;display:none}
+.tr-slot.on .tr-on{display:block}
+.tr-file-box.over{outline:3px dashed #e8479c;outline-offset:4px;border-radius:8px}
+.tr-file-box.tr-nudge{animation:lpNudge .45s}
+/* THE VIEWER: one tracing, large, over the panel */
+.tr-viewer{position:fixed;inset:0;z-index:6100;display:flex;align-items:center;justify-content:center;
+  background:rgba(10,7,14,.55)}
+.tr-viewer[hidden]{display:none}
+.tr-viewer-card{width:min(520px,92vw);box-sizing:border-box;background:#251f2b;border:5px solid #100c16;
+  border-radius:16px 20px 14px 18px;box-shadow:12px 14px 0 rgba(10,7,14,.45);
+  display:flex;flex-direction:column;gap:12px;padding-bottom:14px}
+.tr-viewer-bar{padding:12px 16px 10px}
+.tr-viewer-table{margin:0 16px;height:300px;box-sizing:border-box;border:4px solid #100c16;
+  border-radius:12px 16px 10px 14px;background-color:#f6f1f8;
+  background-image:linear-gradient(45deg,rgba(10,7,14,.05) 25%,transparent 25%,transparent 75%,rgba(10,7,14,.05) 75%),
+                   linear-gradient(45deg,rgba(10,7,14,.05) 25%,transparent 25%,transparent 75%,rgba(10,7,14,.05) 75%);
+  background-size:22px 22px;background-position:0 0,11px 11px;
+  display:flex;align-items:center;justify-content:center;padding:16px}
+.tr-viewer-table svg{display:block;max-width:100%;max-height:100%;width:auto;height:auto}
+.tr-viewer-row{display:flex;gap:10px;margin:0 16px}
+.tr-viewer-row .tr-btn{flex:1}
+.tr-viewer-row .tr-btn.on{background:#e8479c;color:#fff}
+.tr-btn-x:hover{background:#7a2b3a}
+.tr-viewer .lp-fine{margin:0 16px}
+
+/* ── THE STICKER DRAWER ──────────────────────────────────────────────────
+   The same case, the other tool: rummage, filter by kit, and carry a sticker
+   out onto the paper. stickers.js drives it, and it ships EMPTY — the grid
+   shows the export's own dashed pockets until kits are filed in. */
+.sd-search{display:flex;align-items:center;gap:9px;background:#332b3c;border:3px solid #100c16;
+  border-radius:10px 7px 9px 8px;padding:6px 11px}
+/* the glass is the export's own: ink drawn on the pocket's dark, quiet on
+   purpose — it is a mark beside the words, not a button */
+.sd-glass{display:block;width:17px;height:17px;flex-shrink:0;box-sizing:border-box;border:3px solid #100c16;
+  border-radius:50%;position:relative}
+.sd-glass::after{content:"";position:absolute;bottom:-6px;right:-4px;width:9px;height:3px;background:#100c16;
+  border-radius:2px;transform:rotate(45deg)}
+.sd-search input{flex:1;min-width:0;border:0;outline:none;background:transparent;font-family:'Kalam',cursive;
+  font-size:15px;color:#f4f0f7;padding:0}
+.sd-search input::placeholder{color:#f4f0f7;opacity:.45}
+/* the chips are the kits. Each one in the export is cut by hand, so the six
+   radii it drew are cycled rather than one of them repeated */
+.sd-chips{display:flex;flex-wrap:wrap;gap:6px}
+/* TWENTY-FIVE KITS, which is not the handful the row was drawn for. The chips
+   sit in the same scrolling body as the grid, so left to wrap freely they
+   grow to fifteen rows and push every pocket below the fold — the drawer
+   opens on a wall of labels and no artwork at all. Four rows and its own
+   scroll: the kits are all still there, and the stickers are the first thing
+   you see, which is the point of opening it. */
+/* flex-shrink:0 is not optional here — .lp-body is a flex column, and giving
+   the chips their own overflow makes them shrinkable below their content, so
+   without it the grid's height squeezes them to nothing and the kits vanish
+   altogether. Four rows, and they hold that. */
+.sticker-drawer .sd-chips{flex:0 0 auto;max-height:126px;overflow-y:auto;overscroll-behavior:contain;
+  padding-right:4px;align-content:start}
+.sticker-drawer .sd-chips::-webkit-scrollbar{width:8px}
+.sticker-drawer .sd-chips::-webkit-scrollbar-track{background:transparent}
+.sticker-drawer .sd-chips::-webkit-scrollbar-thumb{background:#3d3447;border:2px solid #251f2b;border-radius:4px}
+.sticker-drawer .sd-chips::-webkit-scrollbar-thumb:hover{background:#4d4359}
+.sd-chip{font-family:'VT323',monospace;font-size:16px;letter-spacing:2px;color:#f4f0f7;background:#332b3c;
+  border:3px solid #100c16;border-radius:7px 5px 8px 6px;padding:0 9px 1px;cursor:pointer;line-height:1.3}
+.sd-chip:nth-child(6n+2){border-radius:5px 8px 6px 7px}
+.sd-chip:nth-child(6n+3){border-radius:8px 6px 7px 9px}
+.sd-chip:nth-child(6n+4){border-radius:6px 9px 5px 8px}
+.sd-chip:nth-child(6n+5){border-radius:9px 5px 8px 7px}
+.sd-chip:nth-child(6n){border-radius:7px 8px 9px 5px}
+.sd-chip:hover{background:#3d3447}
+.sd-chip.on{background:#e8479c;color:#fff}
+.sd-chip:focus-visible{outline:2px solid #ff9fd0;outline-offset:2px}
+/* ─── THE GRID GOES TWO, THREE, FOUR ─────────────────────────────────────
+   The drawer widens (.lp-grip) and the cards are meant to follow it up to
+   four across and stop. THE CAP IS IN THE TRACK SIZE, not in a column count
+   anybody counts: every track is at least a QUARTER of the row — the row
+   less its three 12px gaps, over four — so a fifth column cannot fit however
+   far the panel is pulled, and there is no width JavaScript has to agree
+   with. Below that the 132px floor wins instead and auto-fill drops to three
+   and then two, which is what the 344 the panel opens at gives you.
+
+   Measured one pixel at a time in real Chrome, which is where the scrollbar
+   gets its say (ironhive/probe-panel.js):
+
+     344 wide → 2 across (the export's own layout, unchanged)
+     462      → 3
+     606      → 4, and 4 is the end of it, out to the 720 cap */
+.sd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(max(132px,calc((100% - 36px) / 4)),1fr));
+  gap:12px;align-content:start}
+/* an empty drawer, and a search nothing answers: the export's own dashed
+   pocket, four across the way its flat file draws them */
+.sd-grid.sd-bare{grid-template-columns:repeat(4,1fr);gap:9px}
+.sd-none{grid-column:1/-1;font-size:13.5px;opacity:.6;text-align:center;padding:14px 4px}
+/* a sticker is picked up (a click) or carried out (a drag) — see PICKED UP,
+   NOT LOOKED AT in stickers.js for why there is no viewer behind it */
+.sd-card{position:relative;box-sizing:border-box;background:#332b3c;border:3px solid #100c16;
+  border-radius:10px 7px 9px 8px;padding:7px;display:flex;flex-direction:column;gap:6px;
+  cursor:grab;touch-action:none;box-shadow:3px 4px 0 rgba(10,7,14,.4)}
+.sd-card:nth-child(4n+2){border-radius:7px 10px 8px 9px}
+.sd-card:nth-child(4n+3){border-radius:9px 6px 10px 7px}
+.sd-card:nth-child(4n){border-radius:8px 9px 7px 10px}
+.sd-card:hover{background:#3d3447}
+.sd-card:active{transform:translate(2px,3px);box-shadow:0 1px 0 rgba(10,7,14,.4)}
+.sd-card:focus-visible{outline:2px solid #ff9fd0;outline-offset:2px}
+.sticker-drawer.sd-carrying .sd-card{cursor:grabbing}
+.sd-card.on{background:#3d3447;box-shadow:0 0 0 2px #e8479c,3px 4px 0 rgba(10,7,14,.4)}
+.sd-thumb{position:relative;aspect-ratio:1;box-sizing:border-box;border:3px solid #100c16;
+  border-radius:7px 5px 8px 6px;background-color:#f6f1f8;
+  background-image:linear-gradient(45deg,rgba(10,7,14,.05) 25%,transparent 25%,transparent 75%,rgba(10,7,14,.05) 75%),
+                   linear-gradient(45deg,rgba(10,7,14,.05) 25%,transparent 25%,transparent 75%,rgba(10,7,14,.05) 75%);
+  background-size:14px 14px;background-position:0 0,7px 7px;
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+.sd-card:nth-child(4n+2) .sd-thumb{border-radius:5px 8px 6px 7px}
+.sd-card:nth-child(4n+3) .sd-thumb{border-radius:8px 6px 7px 9px}
+.sd-card:nth-child(4n) .sd-thumb{border-radius:6px 9px 5px 8px}
+.sd-art{display:block;width:88%;height:88%}
+.sd-on{position:absolute;left:4px;top:4px;font-family:'VT323',monospace;font-size:11px;letter-spacing:2px;
+  color:#fff;background:#e8479c;border:2px solid #100c16;border-radius:4px;padding:0 5px;display:none}
+.sd-card.on .sd-on{display:block}
+.sd-name{font-weight:700;font-size:13.5px;line-height:1.15;color:#f4f0f7;overflow-wrap:anywhere}
+.sd-name span{font-weight:400;font-size:12px;opacity:.6}
+
+
+/* ── THE COMPANY: everybody else's pointer ──────────────────────────────────
+   cursors.js draws every other visitor on the bench as an arrow in a colour
+   of their own, with a ring of it round the tip (the colour arrives on --c).
+   The layer is a child of the world at world 0,0 — so a pan, being a
+   scroll, carries the cursors with the paper and no script hears about it
+   — and each cursor counter-scales by 1/zoom about its tip (transform-
+   origin 0 0, and the svg is sat so the tip IS the origin) to stay the
+   size of a cursor. Above the tape at 9070, since a pointer is over
+   everything on the sheet; under the docks, which are furniture and live
+   outside the world anyway. The transform is a Web Animation (cursors.js:
+   drive) and will-change keeps the layer between tweens; a tween in
+   flight is sampled each frame like any Web Animation, and MEASURED
+   (2026-09-04, perf/probe-cursors.js, the measure.js harness): one to
+   twelve cursors at twenty to sixty points a second each, the idle median
+   unchanged at the display floor and at the opening camera. Nothing here
+   answers the pointer. */
+.company{position:absolute;left:0;top:0;width:0;height:0;overflow:visible;pointer-events:none;z-index:9075}
+.company-cursor{position:absolute;left:0;top:0;width:0;height:0;transform-origin:0 0;will-change:transform;
+  transition:opacity .3s ease}
+.company-cursor.away{opacity:0}
+.company-cursor::before{content:"";position:absolute;left:-16px;top:-16px;width:32px;height:32px;border-radius:50%;
+  border:1.5px solid var(--c);background:color-mix(in srgb,var(--c) 18%,transparent)}
+.company-cursor svg{position:absolute;left:-3px;top:-2.5px;width:24px;height:24px;display:block;overflow:visible}
+.company-cursor path{fill:var(--c);stroke:#fff;stroke-width:1.6;stroke-linejoin:round;paint-order:stroke}
+
+/* ── THE SPOTLIGHT: a page a frame opens to read gets the whole screen ─────
+   spotlight.js. One fixed box the size of the page a frame has opened, with
+   a shadow the size of the screen round it: the dark is the shadow, the
+   hole is the box, and the box follows the page through pans and zooms
+   (left/top/width/height, written by paint()). Above the docks, which dim
+   with everything else; under the menu and the ghosts. It never answers
+   the pointer — a click in the dark is heard by spotlight.js on the
+   window, and one in the hole is the document's. The tint is the
+   document's own (the Knoll Times' scrim, rgba(23,18,11,.55)), which goes
+   clear underneath while this is up, so the frame's box does not sit in
+   the dark as a darker rectangle. */
+.spotlight{position:fixed;left:0;top:0;width:0;height:0;z-index:6400;pointer-events:none;border-radius:12px;
+  box-shadow:0 0 0 200vmax rgba(23,18,11,0);transition:box-shadow .24s ease}
+.spotlight.on{box-shadow:0 0 0 200vmax rgba(23,18,11,.55)}
+/* the X, drawn on this side of the glass at the paper's corner — the
+   document's own is hidden while the light is on — in the document's own
+   red, border, drop and hand, so nothing looks to have changed */
+.spotlight-x{position:fixed;left:0;top:0;z-index:6401;width:40px;height:40px;padding:0;margin:0;cursor:pointer;
+  background:#e8484a;border:4px solid #17120b;border-radius:50%;box-shadow:4px 5px 0 rgba(23,18,11,.7);
+  color:#fdf3d9;font-family:'VT323',monospace;font-size:24px;line-height:1;text-transform:none}
+.spotlight-x:hover{background:#f05a5c}
+.spotlight-x:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+/* the live frame's pink rim is drawn at its box's edge, which under the
+   spotlight is a line across the dark right where the paper is clipped —
+   it says "this one has the pointer", and the light already does */
+body.lab-spotlit .gz.live{outline-color:transparent}
+/* …and the dashed corners of a picked one, for the same reason */
+body.lab-spotlit .gz.picked::after{visibility:hidden}

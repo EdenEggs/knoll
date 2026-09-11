@@ -1,5 +1,8 @@
 {
   "cleanUrls": false,
+  "redirects": [
+    { "source": "/ironhive", "destination": "/ironhive/", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/", "destination": "/lab2/index.html" },
     { "source": "/coming-soon", "destination": "/coming-soon.html" },

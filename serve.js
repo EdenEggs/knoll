@@ -39,11 +39,23 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = __dirname;
-const LAB2 = path.join(ROOT, 'lab2', 'index.html');
 const PORT = Number(process.argv[2] || process.env.PORT || 4321);
 
-// ── the door ──────────────────────────────────────────────────────────────
-const SAVE = '/_lab2/default';
+// ── the doors ─────────────────────────────────────────────────────────────
+/* ONE DOOR PER BENCH, and the door is what chooses the FILE. There are two
+   benches on this server now — lab 2, and the empty one in ironhive — and
+   they are the same program with different paper, so a single door would let
+   whichever bench happened to be open write itself over the other. The
+   emptier the bench the worse that is: ironhive has no sections at all, and
+   the guard in save() below ('nothing to save') is the only thing that would
+   have stood between an empty page and lab 2's eighty-four.
+
+   A bench's keep.js names its own door and nothing else; adding a third is
+   this line and that constant. */
+const BENCHES = {
+  '/_lab2/default':     path.join(ROOT, 'lab2', 'index.html'),
+  '/_ironhive/default': path.join(ROOT, 'ironhive', 'index.html')
+};
 
 /* Markers round the appended copies. The block is the ONE region of the file
    this program owns; everything else it touches is three attributes on a tag
@@ -52,9 +64,11 @@ const MARK_TOP = '<!-- ▼ copies written down by keep.js — see THE COPIES BLO
 const MARK_END = '<!-- ▲ copies written down by keep.js -->';
 const ANCHOR   = '  </div><!-- /bench-world -->';
 
-// one backup per run of this server, taken the first time it writes: enough to
-// undo a bad session, and it does not grow a new file every thirty seconds
-let backedUp = false;
+// one backup per bench per run of this server, taken the first time that bench
+// is written: enough to undo a bad session, and it does not grow a new file
+// every thirty seconds. Per BENCH, not per run — two benches sharing the flag
+// would mean whichever saved second was never backed up at all.
+const backedUp = new Set();
 
 // ── tags ──────────────────────────────────────────────────────────────────
 /* Finding a section is done by SCANNING, not by a regex over the whole file:
@@ -208,11 +222,11 @@ function apply(html, gizmos) {
   return { html: html, promoted: promoted, missing: missing, dropped: dropped };
 }
 
-function save(body) {
+function save(body, file) {
   const gizmos = Array.isArray(body && body.gizmos) ? body.gizmos : null;
   if (!gizmos || !gizmos.length) return { ok: false, error: 'nothing to save' };
 
-  const before = fs.readFileSync(LAB2, 'utf8');
+  const before = fs.readFileSync(file, 'utf8');
   const out = apply(before, gizmos);
   if (out.error) return { ok: false, error: out.error };
 
@@ -231,12 +245,12 @@ function save(body) {
   if (out.html === before)
     return { ok: true, wrote: false, promoted: out.promoted, missing: out.missing };
 
-  if (!backedUp) {
-    try { fs.writeFileSync(LAB2 + '.keep-bak', before); backedUp = true; } catch (e) {}
+  if (!backedUp.has(file)) {
+    try { fs.writeFileSync(file + '.keep-bak', before); backedUp.add(file); } catch (e) {}
   }
-  const tmp = LAB2 + '.tmp';
+  const tmp = file + '.tmp';
   fs.writeFileSync(tmp, out.html);
-  fs.renameSync(tmp, LAB2);
+  fs.renameSync(tmp, file);
   return { ok: true, wrote: true, promoted: out.promoted, missing: out.missing };
 }
 
@@ -299,7 +313,8 @@ function serve(req, res) {
 }
 
 http.createServer((req, res) => {
-  if (req.url.split('?')[0] === SAVE) {
+  const bench = BENCHES[req.url.split('?')[0]];
+  if (bench) {
     if (req.method === 'GET') {          // keep.js knocks here before it starts
       res.writeHead(200, { 'content-type': 'application/json' });
       res.end(JSON.stringify({ ok: true, door: true }));
@@ -310,11 +325,12 @@ http.createServer((req, res) => {
     req.on('data', c => { raw += c; if (raw.length > 4e6) req.destroy(); });
     req.on('end', () => {
       let out;
-      try { out = save(JSON.parse(raw)); }
+      try { out = save(JSON.parse(raw), bench); }
       catch (e) { out = { ok: false, error: String((e && e.message) || e) }; }
       if (out.wrote) {
         const n = (out.promoted || []).length;
-        console.log('  saved the default look' + (n ? ' · wrote down ' + n + ' cop' + (n === 1 ? 'y' : 'ies') : ''));
+        console.log('  ' + path.basename(path.dirname(bench)) + ': saved the default look' +
+                    (n ? ' · wrote down ' + n + ' cop' + (n === 1 ? 'y' : 'ies') : ''));
       } else if (!out.ok) console.log('  ! ' + out.error);
       res.writeHead(out.ok ? 200 : 400, { 'content-type': 'application/json' });
       res.end(JSON.stringify(out));
@@ -325,4 +341,5 @@ http.createServer((req, res) => {
 }).listen(PORT, () => {
   console.log('site  → http://localhost:' + PORT + '/');
   console.log('lab 2 → http://localhost:' + PORT + '/lab2/   (autosave door open)');
+  console.log('hive  → http://localhost:' + PORT + '/ironhive/   (empty bench, its own door)');
 });

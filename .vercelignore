@@ -3,5 +3,12 @@ lab2/*.tmp
 lab2/*.bat
 lab2/*.ico
 lab2/*.lnk
+ironhive/index.html.keep-bak
+ironhive/*.tmp
+ironhive/*.bat
+ironhive/*.ico
+ironhive/*.lnk
+ironhive/*.png
+ironhive/probe-*.js
 serve.js
 lab2/perf

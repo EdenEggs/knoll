@@ -15,3 +15,18 @@ lab2/*.tmp
 lab2/*.bat
 lab2/*.ico
 lab2/*.lnk
+
+# And the same beside the iron hive, which has its own one-click starter and
+# its own autosave door — the page and its stickers are the site, the .bat and
+# the .lnk that open them are this machine.
+ironhive/index.html.keep-bak
+ironhive/*.tmp
+ironhive/*.bat
+ironhive/*.ico
+ironhive/*.lnk
+
+# The hive keeps its probes at its own root rather than in a perf/ of its own,
+# so their screenshots land beside the page. Same rule as lab2/perf/results:
+# the harness is worth keeping, the output of a run already read is not — and
+# no PNG here is part of the site (the favicon is the .ico above).
+ironhive/*.png
