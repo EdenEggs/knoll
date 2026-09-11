@@ -10,8 +10,11 @@
          before the page loads is still the one piece after it
      4   "reset data" means bare paper: the stores are wiped, the mark stays,
          and the next load does not put the shipped wall back
+     4b  a phone opens on the seed's own phone framing (cam_narrow) — the
+         title with the film under it — and the dock wraps into rows that
+         fit the screen, with the options row standing above them
      5   the dev server's door answers the knock, refuses a post with no wall
-         in it, and the "publish the wall" control stands in the tools row
+         in it, and the "publish the wall" control stands in the header
 
    Run with the site's serve.js already up on 4321:  node ironhive/probe-seed.js */
 const fs = require('fs');
@@ -112,6 +115,42 @@ const URL = 'http://localhost:4321/ironhive/?seed=on';
   s = await state(page);
   say(s.pieces === 0, 'after reset data the paper stays bare on the next load', s.pieces + ' pieces, mark ' + s.mark);
   await ctx.close();
+
+  // ── 4b · a phone ──────────────────────────────────────────────────────────
+  console.log('\n4b · a phone (412 × 915, touch)');
+  const phone = await browser.newContext({ viewport: { width: 412, height: 915 }, deviceScaleFactor: 2.625, isMobile: true, hasTouch: true });
+  const pp = await phone.newPage();
+  pp.on('pageerror', e => console.log('PAGEERROR', String(e)));
+  await pp.route('**/_ironhive/default', r => r.fulfill({ status: 404, body: 'no door' }));
+  // the deployed header is one line; on the dev server the hint alone is 42vh of a phone, and the
+  // bench it leaves would frame the wrong thing — so the hint is put away before the page boots
+  // (an init script runs before <html> exists, so the style goes in the moment the document has a root)
+  await pp.addInitScript(() => {
+    const add = () => { const root = document.head || document.documentElement; if (!root) return false;
+      const st = document.createElement('style'); st.textContent = 'html.lab-local .lab-hint{display:none!important}'; root.appendChild(st); return true; };
+    if (!add()) new MutationObserver((m, o) => { if (add()) o.disconnect(); }).observe(document, { childList: true, subtree: true });
+  });
+  await pp.goto(URL, { waitUntil: 'load' });
+  await settled(pp);
+  await pp.waitForTimeout(1000);
+  const ps = await pp.evaluate(() => {
+    const b = Lab.bench.getBoundingClientRect(); const c = Lab.toWorld(b.left + b.width / 2, b.top + b.height / 2);
+    const d = document.getElementById('tool-dock').getBoundingClientRect();
+    Wall.setTool('draw');
+    const o = document.getElementById('tool-opts').getBoundingClientRect();
+    Wall.setTool('move');
+    return { pieces: Wall.store.get().items.filter(Boolean).length, zoom: +Lab.zoom.toFixed(4), centre: [Math.round(c.x), Math.round(c.y)], bench: Math.round(b.width),
+             dock: { l: Math.round(d.left), r: Math.round(d.right), t: Math.round(d.top), h: Math.round(d.height) }, opts: { b: Math.round(o.bottom), h: Math.round(o.height) }, vw: innerWidth };
+  });
+  const n = seed.cam_narrow;
+  const wantN = +(n.z * ps.bench / n.w).toFixed(4);
+  say(ps.pieces === want, 'the wall is on the phone too', ps.pieces + ' pieces');
+  say(Math.abs(ps.zoom - wantN) < 0.002, 'framed on the phone view — the title with the film under it', 'zoom ' + ps.zoom + ' (published ' + n.z + ' on ' + n.w + ' wide, this bench ' + ps.bench + ' → ' + wantN + ')');
+  say(Math.hypot(ps.centre[0] - n.cx, ps.centre[1] - n.cy) < 40, 'with the phone view\'s world point under the middle', ps.centre.join(',') + ' vs ' + n.cx + ',' + n.cy);
+  say(ps.dock.l >= 0 && ps.dock.r <= ps.vw && ps.dock.h > 70, 'the dock fits the screen, wrapped into rows', JSON.stringify(ps.dock) + ' in ' + ps.vw + ' wide');
+  say(ps.opts.h > 0 && ps.opts.b <= ps.dock.t + 2, 'and the options row stands above it', 'opts bottom ' + ps.opts.b + ', dock top ' + ps.dock.t);
+  await pp.screenshot({ path: path.join(__dirname, 'results', 'seed-phone.png') }).catch(() => {});
+  await phone.close();
 
   // ── 5 · the door ──────────────────────────────────────────────────────────
   console.log('\n5 · the dev server\'s wall door');

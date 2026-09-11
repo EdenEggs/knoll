@@ -29,11 +29,22 @@
    it stands, through /_ironhive/wall, and serve.js writes it out as
    ironhive/wall-seed.json — commit, push, and that is the wall everyone opens
    on. The camera is kept as the world point under the middle of the bench,
-   the zoom, and the bench's width when it was published, so a narrower screen
-   shows the same width of paper rather than a slice of it. (2026-09-11) */
+   the zoom, and the bench's width when it was published, so a wider screen
+   shows the same width of paper and more of it either side.
+
+   A PHONE GETS ITS OWN FRAMING. The wide view scaled to a phone's width is
+   the whole composition at 4%, a map of the place rather than the place —
+   so the seed carries a second camera, cam_narrow, and a bench under 700
+   wide (the line lab.css stands the zoom dock up at) opens on that one: the
+   title with the film under it, filling the width. It is published the
+   same way, from a window that is itself narrower than 700 — the control
+   says "phone view" when it is about to publish that one — and serve.js
+   keeps whichever framing the post did not carry. (2026-09-11) */
 window.Seed = (function () {
   const KEY = { wall: 'knoll-ironhive:wall', flatfile: 'knoll-ironhive:flatfile', cam: 'knoll-ironhive:cam', mark: 'knoll-ironhive:seeded' };
   const FILE = 'wall-seed.json', DOOR = '/_ironhive/wall';
+  const NARROW = 700;                       // under this the bench is a phone's — the same line as lab.css's zoom dock
+  const isNarrow = () => Lab.bench.getBoundingClientRect().width < NARROW;
   const get = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
   // read now, before the stores open — see READ BEFORE THE STORES OPEN
   const had = { wall: get(KEY.wall) != null, cam: get(KEY.cam) != null, mark: get(KEY.mark) != null };
@@ -49,13 +60,18 @@ window.Seed = (function () {
   const ready = fn => { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); };
 
   /* the camera as published, on this bench: the same world point under the
-     middle and the same zoom, scaled down on a bench narrower than the one
-     it was published from so the same width of paper is on screen */
-  function frame(c) {
-    if (!c || !isFinite(c.z) || !isFinite(c.cx) || !isFinite(c.cy)) return false;
+     middle and the same zoom scaled by the bench's width against the one it
+     was published from, so the same width of paper is on screen — the wide
+     framing only ever scaled DOWN (a wider screen shows more, not bigger),
+     the phone framing both ways (a phone is a phone) */
+  function frame(seed) {
     const b = Lab.bench.getBoundingClientRect();
     if (b.width < 40 || b.height < 40) return false;
-    const z = Math.max(0.02, Math.min(4, c.z * (c.w > 0 ? Math.min(1, b.width / c.w) : 1)));
+    const narrow = b.width < NARROW && seed.cam_narrow;
+    const c = narrow ? seed.cam_narrow : seed.cam;
+    if (!c || !isFinite(c.z) || !isFinite(c.cx) || !isFinite(c.cy)) return false;
+    const by = c.w > 0 ? b.width / c.w : 1;
+    const z = Math.max(0.02, Math.min(4, c.z * (narrow ? by : Math.min(1, by))));
     if (Lab.forget) Lab.forget();                          // the paper has just changed shape
     Lab.camTo(z, b.width / 2 - c.cx * z, b.height / 2 - c.cy * z, 0);
     return true;
@@ -71,18 +87,21 @@ window.Seed = (function () {
     const ff = seed.flatfile && Array.isArray(seed.flatfile.list) ? seed.flatfile : null;
     if (ff && window.Tracer && Tracer.store && !(Tracer.store.get().list || []).length) Tracer.store.set(JSON.parse(JSON.stringify(ff)));
     if (Wall.paint) Wall.paint();                          // the stamps from the tracings, now the library has them
-    frame(seed.cam);
+    frame(seed);
     mark();
   }
   if (!driven) fetch(FILE, { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(seed => { if (seed) ready(() => apply(seed)); }).catch(() => {});
 
   // ── publishing, on the dev server only ──────────────────────────────────
   let btn = null;
+  const label = () => 'publish the wall' + (isNarrow() ? ' (phone view)' : '');
   function collect() {
     const b = Lab.bench.getBoundingClientRect();
     const c = Lab.toWorld(b.left + b.width / 2, b.top + b.height / 2);
     const round = v => Math.round(v * 10) / 10;
-    return { cam: { z: Math.round(Lab.zoom * 10000) / 10000, cx: round(c.x), cy: round(c.y), w: Math.round(b.width) },
+    // which of the two framings this is: the bench's own width says (A PHONE GETS ITS OWN FRAMING)
+    return { which: isNarrow() ? 'narrow' : 'wide',
+             cam: { z: Math.round(Lab.zoom * 10000) / 10000, cx: round(c.x), cy: round(c.y), w: Math.round(b.width) },
              wall: { items: Wall.store.get().items.filter(Boolean) },
              flatfile: { list: (window.Tracer && Tracer.store && Tracer.store.get().list) || [] } };
   }
@@ -92,15 +111,16 @@ window.Seed = (function () {
     try {
       const r = await fetch(DOOR, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(collect()) });
       const v = await r.json().catch(() => ({}));
-      btn.textContent = r.ok && v.ok ? 'published — ' + v.pieces + ' pieces on the wall' : 'not published: ' + (v.error || r.status);
+      btn.textContent = r.ok && v.ok ? 'published — ' + v.pieces + ' pieces, the ' + v.which + ' view' : 'not published: ' + (v.error || r.status);
     } catch (e) { btn.textContent = 'not published: ' + e.message; }
     btn.disabled = false;
-    setTimeout(() => { if (btn) btn.textContent = 'publish the wall'; }, 5000);
+    setTimeout(() => { if (btn) btn.textContent = label(); }, 5000);
   }
   if (document.documentElement.classList.contains('lab-local')) {
     fetch(DOOR, { method: 'GET' }).then(r => r.ok ? r.json() : null).then(v => {
       if (!v || !v.door) return;
-      ready(() => { btn = document.getElementById('lab-seed'); if (!btn) return; btn.hidden = false; btn.addEventListener('click', publish); });
+      ready(() => { btn = document.getElementById('lab-seed'); if (!btn) return; btn.hidden = false; btn.textContent = label(); btn.addEventListener('click', publish);
+                    window.addEventListener('resize', () => { if (btn && !btn.disabled) btn.textContent = label(); }); });
     }).catch(() => {});
   }
 

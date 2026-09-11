@@ -68,18 +68,30 @@ const WALL_FILE = path.join(ROOT, 'ironhive', 'wall-seed.json');
 function seedText(seed) {
   const lines = arr => arr.map(x => JSON.stringify(x)).join(',\n');
   return '{\n"cam": ' + JSON.stringify(seed.cam) +
+         (seed.cam_narrow ? ',\n"cam_narrow": ' + JSON.stringify(seed.cam_narrow) : '') +
          ',\n"wall": {"items": [\n' + lines(seed.wall.items) + '\n]}' +
          ',\n"flatfile": {"list": [\n' + lines(seed.flatfile.list) + '\n]}\n}\n';
 }
+/* TWO FRAMINGS, ONE POST EACH. A post says which camera it carries — the
+   wide one, or the phone's, decided by the width of the window it was
+   published from (A PHONE GETS ITS OWN FRAMING, seed.js) — and the other
+   framing is carried over from the file as it stands, so publishing from a
+   desktop never loses the phone view and the other way round. The wall and
+   the tracings are the post's either way: it is the same paper. */
 function saveWall(body) {
   const cam = body && body.cam, wall = body && body.wall, ff = body && body.flatfile;
+  const which = body && body.which === 'narrow' ? 'narrow' : 'wide';
   if (!wall || !Array.isArray(wall.items)) return { ok: false, error: 'no wall in the post' };
   const items = wall.items.filter(it => it && typeof it === 'object' && typeof it.k === 'string');
   if (!items.length) return { ok: false, error: 'nothing on the wall to publish' };
   if (!cam || ![cam.z, cam.cx, cam.cy].every(Number.isFinite)) return { ok: false, error: 'no camera in the post' };
   const list = ff && Array.isArray(ff.list) ? ff.list.filter(t => t && t.id) : [];
-  fs.writeFileSync(WALL_FILE, seedText({ cam, wall: { items }, flatfile: { list } }));
-  return { ok: true, pieces: items.length, tracings: list.length };
+  let was = {};
+  try { was = JSON.parse(fs.readFileSync(WALL_FILE, 'utf8')); } catch (e) {}
+  const seed = { cam: which === 'wide' ? cam : was.cam, cam_narrow: which === 'narrow' ? cam : was.cam_narrow, wall: { items }, flatfile: { list } };
+  if (!seed.cam) return { ok: false, error: 'the phone view cannot go first: publish the wide view from a window wider than 700 before this one' };
+  fs.writeFileSync(WALL_FILE, seedText(seed));
+  return { ok: true, which, pieces: items.length, tracings: list.length };
 }
 
 /* Markers round the appended copies. The block is the ONE region of the file

@@ -687,6 +687,29 @@ body.lab-banding{user-select:none;-webkit-user-select:none}
 .dock-btn span{font-size:8.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
 .dock-btn:hover{opacity:1;background:rgba(255,255,255,.09)}
 .dock-btn[aria-pressed="true"]{opacity:1;background:var(--pink);color:#fff}
+/* THE TOOL DOCK WRAPS ON A PHONE. It is one row of nine, wider than the
+   screen, and centred — so a phone got the middle of it: no MOVE or DRAW
+   off the left, UNDO and DELETE cut off the right (2026-09-11, from a
+   screenshot). Under 700 it wraps into rows inside 94vw, the groups
+   wrapping too so a 360-wide screen is not beaten by the six tools alone;
+   the rules between the groups come off, since a rule at the start of a
+   row is a scratch. The options row and the storage-full line stand up
+   over the two rows — 118 is the dock's own two rows, its gaps and its
+   ten from the bottom. AFTER the rules above and not in the phone block
+   near the zoom dock, because these come last on purpose: at one
+   specificity the later rule wins, and up there the dock's own bottom:16
+   and padding below it won every time (the first cut wrapped the rows and
+   moved nothing else). width:max-content is load-bearing too: a fixed box
+   at left:50% with no width is shrunk to fit the half of the screen right
+   of that line, and the dock came out four rows and 206 wide. */
+@media (max-width:700px){
+  .tool-dock{flex-wrap:wrap;justify-content:center;width:max-content;max-width:94vw;padding:4px;gap:2px;bottom:10px}
+  .tool-dock .dock-grp{flex-wrap:wrap;justify-content:center}
+  .tool-dock .dock-rule{display:none}
+  .dock-btn{padding:4px 7px 3px}
+  .tool-opts{bottom:118px;width:max-content}
+  .lab-warn{bottom:170px}
+}
 .dock-mini{opacity:.5}
 
 /* the ink, and the wheel that changes it. One swatch, painted with whatever
