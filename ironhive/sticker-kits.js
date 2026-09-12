@@ -1,16 +1,19 @@
 /* ─── THE STICKER KITS ─────────────────────────────────────────────────────
-   The artwork the sticker drawer holds on this bench: 289 stickers in 34
-   kits, baked out of the seven Design Canvas sheets in Downloads/assets —
+   The artwork the sticker drawer holds on this bench: 305 stickers in 37
+   kits, baked out of the eight Design Canvas sheets in Downloads/assets —
    Pipeworks, Chainworks, Ironworks, Ruinworks, the Iron Hive kit IH-0004
    (Deadfall, Canopy and Crows, Twisted Timber), the Ruinworks Billboard
    Kit, whose eight bb-* kits kitbash an abandoned billboard out of faces,
    frames, legs, catwalks, lamp arms, footings, debris and toppers on a 120u
    bay module — so its pieces are meant to be butted edge to edge, not
-   scattered — and IH-0005, the Iron Globe: one sticker, ih-web-globe, a
+   scattered — IH-0005, the Iron Globe: one sticker, ih-web-globe, a
    riveted meridian globe on a yoke and foot plate, drawn as a website link
-   mark and filed, as its sheet asks, under a kit of its own, ih-social. The
+   mark and filed, as its sheet asks, under a kit of its own, ih-social (the
    sheet gives that kit an id and no name; SOCIAL MARKS is ours, so the chip
-   reads as a kit and a search for "social" finds it.
+   reads as a kit and a search for "social" finds it) — and Rockworks, the
+   ground cover: sixteen pieces of cold granite in three rk-* kits — scree
+   and chips, boulders, slabs and outcrops — cut to be strewn over bare
+   ground rather than butted.
 
    THE GLOBE'S SHEET SAYS TO SHIP IT IN A social-marks.js OF ITS OWN — one
    more Stickers.load call, and a script tag after stickers.js. On this bench
@@ -27,8 +30,23 @@
    rasterising the drawing, not with getBBox({stroke:true}), which Chrome
    ignores: it hands back the geometry box. probe-globe.js shows both.
 
-   IT IS NOT SHIPPED HERE. The markup is ~735 KB and the file ~810 KB, well
-   over twice the weight STICKERS.md §2 says to stop loading at boot, so this
+   ROCKWORKS' SHEET ASKS FOR A FILE OF ITS OWN TOO — sticker-kits/rockworks.js,
+   one more Stickers.load — and went into sticker-kits.json instead, for the
+   same reason, appended after the globe. Two things about it differ from the
+   sheets before it:
+
+     · ITS KITS ARE FILED WITH THE SHEET'S NAME IN FRONT — "Rockworks
+       Boulders" where the sheet says "Boulders" — because the search matches
+       a kit's name (STICKERS.md §6): bare, a search for "rockworks" found
+       nothing, and one for "rock" found only the sprockets. The ids are the
+       sheet's, untouched. The billboard kit went in the same way.
+     · NOTHING WAS GROWN. Its viewBoxes really are trimmed to the INK, strokes
+       and all: rasterised, every one of the sixteen keeps at least 1.6u of
+       its box clear on every side. probe-rockworks.js holds it to that, and
+       proves the measure can catch a box that does clip.
+
+   IT IS NOT SHIPPED HERE. The markup is ~830 KB and the file ~910 KB, nearly
+   three times the weight STICKERS.md §2 says to stop loading at boot, so this
    file holds none of it: the drawings live in sticker-kits.json beside it and
    are fetched once, then handed to Stickers.load — which is designed for
    exactly this, and repaints the drawer and the wall on the way out. The

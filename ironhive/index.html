@@ -103,7 +103,7 @@
        finds nothing to fit).
 
        WHAT IS ON IT INSTEAD is whatever you draw and stamp: the wall's ink,
-       the tracings you file, and the 221 stickers in the drawer. All of it
+       the tracings you file, and the 305 stickers in the drawer. All of it
        is wall ink — one <svg> in world units, nothing per frame — and all of
        it lives in this browser's localStorage, NOT in this file. Nothing
        here is written back by keep.js, which only ever edits sections.
@@ -163,6 +163,7 @@
     <dt><kbd>drag</kbd></dt><dd>a sleeping feature moves; bare paper pulls a band</dd>
     <dt><kbd>scroll</kbd></dt><dd>pan up and down — <kbd>shift</kbd> for sideways</dd>
     <dt><kbd>ctrl</kbd><kbd>scroll</kbd></dt><dd>zoom about the pointer (pinch does too)</dd>
+    <dt><kbd>two fingers</kbd></dt><dd>on a touch screen: drag to move about, pinch to zoom — one finger still draws and moves things, and whatever it had hold of is put back</dd>
   </dl>
   <hr>
   <dl>
@@ -238,15 +239,16 @@
      After wall.js for the same reason, and beside the table because the two
      are one split button in the export they both come from. -->
 <script src="stickers.js"></script>
-<!-- THE ARTWORK ITSELF, which is this bench's reason for being: 289 stickers
-     in 34 kits, off seven Design Canvas sheets. ~735 KB of markup is far
+<!-- THE ARTWORK ITSELF, which is this bench's reason for being: 305 stickers
+     in 37 kits, off eight Design Canvas sheets. ~830 KB of markup is far
      past the weight STICKERS.md §2 says to stop shipping at boot, so this
      file ships none of it — it fetches sticker-kits.json when the drawer is
      first opened, or when the page has gone idle, whichever comes first, and
      hands it to Stickers.load then. See the head of the file.
      A sheet that asks for a script tag of its own here — the Iron Globe's
-     asked for a social-marks.js — is merged into sticker-kits.json instead:
-     Stickers.load replaces the catalogue, so a second caller empties it. -->
+     asked for a social-marks.js, Rockworks' for a sticker-kits/rockworks.js —
+     is merged into sticker-kits.json instead: Stickers.load replaces the
+     catalogue, so a second caller empties it. -->
 <script src="sticker-kits.js"></script>
 <!-- the sign's own one trick: click a letter, a gnome puts it overhead -->
 <script src="sign.js"></script>

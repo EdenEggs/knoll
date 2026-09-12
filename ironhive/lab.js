@@ -22,6 +22,7 @@
      · hold space (or press H) and drag ....... pan, the hand tool
      · scroll / two-finger swipe .............. pan   (shift — sideways)
      · ctrl / ⌘ + scroll, or pinch ............ zoom about the pointer
+     · two fingers on a touch screen .......... pan and pinch, one gesture
      · + / − / 0, shift 1 to fit, shift 0 ..... zoom by keyboard
 
    …and the bare paper is where you pick things up FROM, not where you pan:
@@ -1929,6 +1930,157 @@ window.Lab = (function () {
   bench.addEventListener('pointercancel', e => { if (pan && e.pointerId === pan.id) endPan(); }, true);
   window.addEventListener('blur', () => { endPan(); endSweep(); edgeStop(); setHand(false); });
 
+  /* ── TWO FINGERS ARE THE CAMERA ──────────────────────────────────────────
+     Everything above is a mouse's: a wheel to scroll, a middle button to pan
+     from anywhere, ctrl to zoom by, a space bar for the hand. A phone has
+     none of the four, and the one finger it does have is spoken for —
+     fingerPan hands the paper to the camera only where nothing else wants the
+     press, and on a bench whose paper is covered in stickers that is almost
+     nowhere. So on a phone this bench could be drawn on and rearranged, and
+     not MOVED: "I can't move around, holding and dragging just moved assets"
+     is this file working exactly as it was written.
+
+     Every canvas anybody has ever used answers that with the same gesture, so
+     this one does too: TWO FINGERS PAN AND PINCH. One finger goes on meaning
+     what it has always meant, so nothing anybody had learnt here is taken
+     away to pay for it.
+
+     IT IS ONE GESTURE AND NOT TWO. The pan and the zoom are not worked out
+     apart and added together — the world point under the MIDDLE of the two
+     fingers is taken when they land and put back under wherever their middle
+     is now, at a zoom scaled by how far apart they have moved since. The
+     sheet is glued to the hand: what you pinched about stays under the pinch,
+     and there is no order of operations to get wrong. One finger left down is
+     that same arithmetic with the span held still, which is why lifting one
+     of the two goes on panning rather than stopping dead.
+
+     THE SECOND FINGER TAKES THE FIRST ONE'S PRESS BACK. By the time it lands
+     the first finger is already holding something — a sticker mid-drag, a
+     stroke a few points long, a press-and-hold part way through its clock —
+     because nothing could have known a second one was coming. So 'lab:pinch'
+     is said the instant it arrives, and whoever is holding something puts it
+     back untouched and files nothing (wall.js's listener, and tape.js's). A
+     PINCH LEAVES NOTHING BEHIND: no sticker a few pixels off where it was, no
+     dot where the pen went down, nothing on the undo stack.
+
+     THE FINGERS ARE HEARD ON THE WINDOW, on the capture phase, which is the
+     earliest anything on the page sees them — this file's own handlers below
+     included. That is what lets the second finger be swallowed before the
+     bench, the wall or the drawer has been told there was a press at all, and
+     it is why the pinch itself never has to undo anything: nothing else ever
+     hears of the fingers it is using. (2026-09-11) */
+  const fingers = new Map();             // the fingers on the paper: id → where each one is
+  let pinch = null;                      // { z, d, wx, wy } — how the sheet was held when they landed
+  let pinchRaf = 0, pinchAt = -1e9;      // …and when the last of them left
+
+  /* the fingers as one point: where their middle is, and how far apart they
+     are. One finger is its own middle and spans nothing, so the zoom holds. */
+  function midOf(f) {
+    if (f.length < 2) return { x: f[0].x, y: f[0].y, d: 0 };
+    return { x: (f[0].x + f[1].x) / 2, y: (f[0].y + f[1].y) / 2,
+             d: Math.max(1, Math.hypot(f[1].x - f[0].x, f[1].y - f[0].y)) };
+  }
+
+  /* TAKE HOLD OF THE SHEET WHERE THE FINGERS ARE NOW — said when the second
+     one lands and again whenever one is added or taken away. Every reading is
+     relative to this one, so a finger lifted mid-pinch re-anchors instead of
+     throwing the sheet across the bench. */
+  function grip() {
+    const f = [...fingers.values()];
+    if (!f.length) { pinch = null; return; }
+    const m = midOf(f), w = toWorld(m.x, m.y);
+    pinch = { z: Z, d: m.d, wx: w.x, wy: w.y };
+  }
+
+  function follow() {
+    const f = [...fingers.values()];
+    if (!pinch || !f.length) return;
+    const m = midOf(f), b = box();
+    if (m.d && pinch.d) Z = clamp(pinch.z * m.d / pinch.d, ZMIN, ZMAX);
+    PX = m.x - b.left - pinch.wx * Z;
+    PY = m.y - b.top - pinch.wy * Z;
+    clampCam(); applyCam(); emitZoom();
+  }
+
+  /* ONE CAMERA WRITE PER FRAME, not one per finger. Two fingers on a screen
+     report a move each, and applyCam is a scroll, a keyframe and the grid —
+     work better done once with both readings in it than twice. Chrome hands
+     pointer moves over at the top of the frame, so the frame this asks for is
+     the one already being drawn: the coalescing costs no latency. */
+  const flush = () => { if (pinchRaf) { cancelAnimationFrame(pinchRaf); pinchRaf = 0; follow(); } };
+
+  window.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'touch' || !bench.contains(e.target)) return;
+    flush();                                      // the camera caught up, with the fingers as they were
+    fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (fingers.size < 2) return;                 // one finger is still everybody else's
+    if (!pinch) {
+      endPan(); endSweep(); edgeStop(); stopTween();
+      document.dispatchEvent(new CustomEvent('lab:pinch'));
+      // the dress a pan already wears: nothing selectable, and the sheet's own
+      // pointer-events off while the hand has it (lab.css)
+      document.body.classList.add('lab-panning');
+    }
+    grip();
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+
+  window.addEventListener('pointermove', e => {
+    const f = fingers.get(e.pointerId);
+    if (!f) return;
+    f.x = e.clientX; f.y = e.clientY;
+    if (!pinch) return;                           // one finger: whoever has it still has it
+    if (!pinchRaf) pinchRaf = requestAnimationFrame(() => { pinchRaf = 0; follow(); });
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+
+  function lift(e) {
+    if (!fingers.has(e.pointerId)) return;
+    if (pinch) { flush(); e.preventDefault(); e.stopPropagation(); }
+    fingers.delete(e.pointerId);
+    if (!pinch) return;
+    if (fingers.size) { grip(); return; }         // one still down: it goes on panning
+    pinch = null;
+    pinchAt = performance.now();
+    document.body.classList.remove('lab-panning');
+  }
+  window.addEventListener('pointerup', lift, true);
+  window.addEventListener('pointercancel', lift, true);
+  // a tab that goes away mid-pinch would otherwise leave its fingers down for ever
+  window.addEventListener('blur', () => {
+    if (!fingers.size) return;
+    fingers.clear();
+    if (!pinch) return;
+    pinch = null;
+    pinchAt = performance.now();
+    document.body.classList.remove('lab-panning');
+  });
+
+  /* AND THE CLICK AT THE END OF A PINCH IS NOT A CLICK ON ANYTHING. The
+     browser makes one out of the finger that pressed first if that finger
+     happened to stay still, and the paper is full of things that take a click
+     seriously — a strip of tape comes off the bench by one. So the paper's
+     clicks are swallowed while the fingers are down and for a moment after
+     they leave. The chrome's are not: no pinch OF THE PAPER can end on a
+     button that is not on it, and a tool picked up straight after one is a
+     press somebody meant. */
+  document.addEventListener('click', e => {
+    if (!pinch && performance.now() - pinchAt > 400) return;
+    if (!bench.contains(e.target)) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+
+  /* SAFARI'S OWN TWO-FINGER ZOOM, which is the PAGE's scale sitting under this
+     one and multiplying it — the same refusal as the ctrl-wheel above, said in
+     the one event webkit has for it. touch-action:none on the bench is meant
+     to be enough and is, everywhere it is honoured; this is the belt for those
+     braces. Scoped to the bench, so the header and the docks can still be
+     zoomed by anybody who needs them bigger. */
+  bench.addEventListener('gesturestart', e => e.preventDefault());
+
   /* ── AND THE BROWSER'S OWN DRAG IS NOT WANTED ON THE PAPER ───────────────
      A native HTML5 drag — of a selection, of an image — CANCELS THE POINTER.
      The browser fires pointercancel and takes the gesture away, and this file
@@ -2351,5 +2503,9 @@ window.Lab = (function () {
        who wants it — a copy it has written into index.html has to come OUT
        of this list, or the next load builds it twice. */
     get copies() { return copies; },
-    get zoom() { return Z; }, get pan() { return { x: PX, y: PY }; } };
+    get zoom() { return Z; }, get pan() { return { x: PX, y: PY }; },
+    /* IS THE CAMERA IN TWO FINGERS? Nothing has to ask — every press this
+       takes is taken back through 'lab:pinch' — but a getter costs a line and
+       the probe has to catch the gesture while it is still in flight. */
+    get pinching() { return !!pinch; } };
 })();
