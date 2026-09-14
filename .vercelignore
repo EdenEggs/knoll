@@ -11,5 +11,13 @@ ironhive/*.lnk
 ironhive/*.png
 ironhive/probe-*.js
 ironhive/recut.js
+toem2/*.keep-bak
+toem2/*.tmp
+toem2/*.bat
+toem2/*.ico
+toem2/*.lnk
+toem2/*.png
+toem2/results
+toem2/probe-*.js
 serve.js
 lab2/perf

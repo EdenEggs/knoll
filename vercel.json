@@ -1,7 +1,8 @@
 {
   "cleanUrls": false,
   "redirects": [
-    { "source": "/ironhive", "destination": "/ironhive/", "permanent": false }
+    { "source": "/ironhive", "destination": "/ironhive/", "permanent": false },
+    { "source": "/toem2", "destination": "/toem2/", "permanent": false }
   ],
   "rewrites": [
     { "source": "/", "destination": "/lab2/index.html" },
