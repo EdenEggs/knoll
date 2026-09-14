@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./prelude.js"></script>
+<script src="./support.js"></script>
+<!-- the iron hive shows this on its own paper — see features/bare.css -->
+<link rel="stylesheet" href="./bare.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<!-- the iron hive serves these faces itself — see SELF-HOSTED in index.html -->
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  /* WHAT THE BENCH CHANGED — see features/bare.css. Every line below is the
+     export as it came out of Design Canvas, verbatim, and no declaration is
+     changed. Round it: the head is the bench's (prelude.js, support.js,
+     bare.css); the bundled @font-face block is ../fonts/fonts.css, where
+     JetBrains Mono and Oswald are self-hosted; and the screen root wears
+     data-screen-label, which this export shipped without — it is how
+     frames.js and bare.css tell the sheet (the backdrop the export paints
+     round its drawing) from the drawing. Opened on its own, the file is still
+     the export. Written by ../recut.js (comms): for a re-export, run that
+     again rather than editing here. */
+  body { margin: 0; background: #cbb894; }
+  a { color: #b8611f; }
+  a:hover { color: #e08a3a; }
+  @keyframes blip { 0%, 60%, 100% { opacity: 0.25 } 30% { opacity: 1 } }
+</style>
+</helmet>
+<div data-screen-label="Ironhive · Comms" style="min-height: 100vh; background: linear-gradient(#cbb894 0%, #cbb894 54%, #8e9a8f 54%, #8e9a8f 100%); display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; font-family: 'Oswald', sans-serif">
+
+  <div style="width: 100%; max-width: 404px; height: min(860px, calc(100vh - 40px)); display: flex; flex-direction: column; border: 6px solid #17150f; background: #0e0d0c; box-shadow: 10px 10px 0 rgba(23,21,15,0.35); position: relative; overflow: hidden">
+
+    <div style="position: absolute; inset: 3px; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; z-index: 6">
+      <div style="display: flex; justify-content: space-between">
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: #4a443d"></div>
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: #4a443d"></div>
+      </div>
+      <div style="display: flex; justify-content: space-between">
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: #4a443d"></div>
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: #4a443d"></div>
+      </div>
+    </div>
+
+    <div style="flex: none; display: flex; align-items: center; gap: 12px; padding: 9px 12px 8px; background: #17150f; border-bottom: 3px solid #2a2620">
+      <div style="display: flex; gap: 5px">
+        <div style="width: 9px; height: 9px; background: #57504a"></div>
+        <div style="width: 9px; height: 9px; background: #57504a"></div>
+      </div>
+      <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.2em; color: #e0d9ce; text-transform: uppercase">Ironhive · Comms</div>
+      <div style="flex: 1; height: 3px; background: repeating-linear-gradient(90deg, #2f2a24 0 8px, transparent 8px 14px)"></div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: {{ accent }}">{{ onlineCount }}</div>
+    </div>
+
+    <div style="flex: none; display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 10px; background: #131110; border-bottom: 1px solid #2a2620">
+      <sc-for list="{{ channels }}" as="c" hint-placeholder-count="4">
+        <button sc-camel-on-click="{{ c.pick }}" style="flex: none; display: flex; align-items: center; gap: 6px; padding: 6px 9px; border: 2px solid {{ c.bd }}; background: {{ c.bg }}; cursor: pointer; font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: {{ c.fg }}; white-space: nowrap" style-hover="border-color: #6b6157">
+          <span style="font-family: 'JetBrains Mono', monospace; opacity: 0.6">#</span>{{ c.name }}
+          <sc-if value="{{ c.hasUnread }}" hint-placeholder-val="{{ false }}">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; padding: 1px 4px; background: {{ accent }}; color: #120f0b">{{ c.unread }}</span>
+          </sc-if>
+        </button>
+      </sc-for>
+    </div>
+
+    <div style="flex: none; display: flex; align-items: flex-start; gap: 9px; padding: 9px 12px; background: #17150f; border-bottom: 1px solid #2a2620">
+      <div style="flex: none; margin-top: 1px; font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.12em; color: {{ accent }}">PIN</div>
+      <div style="flex: 1; min-width: 0; font-size: 13px; line-height: 1.45; color: #b3aa9e; text-wrap: pretty">{{ pinnedText }}</div>
+    </div>
+
+    <div style="flex: none; display: flex; align-items: center; gap: 8px; padding: 7px 12px; background: #100f0d; border-bottom: 1px solid #2a2620; cursor: pointer" sc-camel-on-click="{{ toggleRoster }}">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #7c756b">{{ rosterLabel }}</div>
+      <div style="flex: 1; height: 1px; background: #221f1c"></div>
+      <div style="display: flex; gap: 4px">
+        <sc-for list="{{ rosterDots }}" as="d" hint-placeholder-count="6">
+          <div style="width: 7px; height: 7px; background: {{ d.color }}"></div>
+        </sc-for>
+      </div>
+    </div>
+
+    <sc-if value="{{ rosterOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="flex: none; max-height: 152px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #2a2620 #0c0b0a; padding: 8px 12px 10px; background: #0c0b0a; border-bottom: 1px solid #2a2620; display: flex; flex-direction: column; gap: 6px">
+        <sc-for list="{{ roster }}" as="r" hint-placeholder-count="8">
+          <div style="display: flex; align-items: center; gap: 8px">
+            <div style="flex: none; width: 7px; height: 7px; background: {{ r.color }}"></div>
+            <div style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; color: {{ r.fg }}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ r.handle }}</div>
+            <div style="flex: none; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: #5e584f; text-transform: uppercase">{{ r.state }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <div ref="{{ listRef }}" style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #2a2620 #0a0908; padding: 12px 12px 16px; background: #0a0908; display: flex; flex-direction: column; gap: 13px">
+      <sc-for list="{{ messages }}" as="m" hint-placeholder-count="7">
+        <sc-if value="{{ m.isSystem }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; align-items: center; gap: 9px">
+            <div style="flex: 1; height: 1px; background: #1d1a17"></div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #8a8175; text-align: center">{{ m.text }}</div>
+            <div style="flex: 1; height: 1px; background: #1d1a17"></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ m.isMessage }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <sc-if value="{{ m.hasReply }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; gap: 7px; padding-left: 2px; align-items: baseline">
+                <div style="flex: none; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #8a8175">↳</div>
+                <div style="min-width: 0; font-size: 12px; line-height: 1.3; color: #8a8175; overflow: hidden; text-overflow: ellipsis; white-space: nowrap"><span style="color: #8a8175">{{ m.replyAuthor }}</span> {{ m.replyText }}</div>
+              </div>
+            </sc-if>
+            <div style="display: flex; align-items: baseline; gap: 8px">
+              <div style="font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: {{ m.nameColor }}">{{ m.author }}</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: #847b6f">{{ m.time }}</div>
+              <div style="flex: 1"></div>
+              <button sc-camel-on-click="{{ m.reply }}" style="padding: 0; border: none; background: none; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #8a8175" style-hover="color: {{ accent }}">REPLY</button>
+            </div>
+            <div style="font-size: 14px; line-height: 1.5; color: #cfc7bb; text-wrap: pretty">{{ m.text }}</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px">
+              <sc-for list="{{ m.reactions }}" as="r" hint-placeholder-count="2">
+                <button sc-camel-on-click="{{ r.toggle }}" style="display: flex; align-items: center; gap: 5px; padding: 2px 7px; border: 1px solid {{ r.bd }}; background: {{ r.bg }}; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; color: {{ r.fg }}">{{ r.glyph }} {{ r.count }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ someoneTyping }}" hint-placeholder-val="{{ false }}">
+      <div style="flex: none; display: flex; align-items: center; gap: 7px; padding: 6px 12px; background: #0c0b0a; border-top: 1px solid #1d1a17">
+        <div style="display: flex; gap: 3px">
+          <div style="width: 5px; height: 5px; background: #7c756b; animation: blip 1.1s infinite"></div>
+          <div style="width: 5px; height: 5px; background: #7c756b; animation: blip 1.1s infinite 0.18s"></div>
+          <div style="width: 5px; height: 5px; background: #7c756b; animation: blip 1.1s infinite 0.36s"></div>
+        </div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: #7c756b">{{ typingLabel }}</div>
+      </div>
+    </sc-if>
+
+    <div style="flex: none; height: 9px; background-image: repeating-linear-gradient(135deg, #17150f 0 9px, #6d5426 9px 18px); border-top: 3px solid #2a2620"></div>
+
+    <sc-if value="{{ replying }}" hint-placeholder-val="{{ false }}">
+      <div style="flex: none; display: flex; align-items: center; gap: 9px; padding: 7px 12px; background: #141210; border-bottom: 1px solid #221f1c">
+        <div style="flex: none; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: {{ accent }}">RE</div>
+        <div style="flex: 1; min-width: 0; font-size: 12px; color: #8a8175; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ replyLabel }}</div>
+        <button sc-camel-on-click="{{ cancelReply }}" style="flex: none; width: 20px; height: 20px; padding: 0; border: 1px solid #332e28; background: #0e0d0c; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #8a8175" style-hover="border-color: {{ accent }}; color: #ddd5ca">✕</button>
+      </div>
+    </sc-if>
+
+    <div style="flex: none; display: flex; align-items: stretch; gap: 8px; padding: 10px; background: #100f0d">
+      <input value="{{ draft }}" sc-camel-on-change="{{ onDraft }}" sc-camel-on-key-down="{{ onKey }}" placeholder="Write to the hive" style="flex: 1; min-width: 0; padding: 9px 10px; background: #0a0908; border: 2px solid #2a2620; color: #ddd5ca; font-family: 'Oswald', sans-serif; font-size: 14px; letter-spacing: 0.03em; outline: none" style-focus="border-color: {{ accent }}">
+      <button sc-camel-on-click="{{ send }}" style="flex: none; padding: 0 14px; border: 2px solid #17150f; background: {{ accent }}; cursor: pointer; font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.16em; color: #120f0b; text-transform: uppercase" style-hover="border-color: #6d5426">Send</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;$preview&quot;:{&quot;width&quot;:444,&quot;height&quot;:900},&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#c2701f&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#c2701f&quot;,&quot;#8f4a1e&quot;,&quot;#e8484f&quot;,&quot;#6f8f7a&quot;]}}">
+const ME = 'ironlord';
+
+const CHANNELS = [
+  { id: 'general', name: 'general', unread: 0, pinned: 'Patch 0.9.4 notes are up — scarcity markers no longer stack past three. Read before posting bugs.' },
+  { id: 'forge', name: 'forge-talk', unread: 3, pinned: 'Weekly build challenge: survive ten turns on one furnace. Screenshots in this channel only.' },
+  { id: 'bugs', name: 'bug-reports', unread: 0, pinned: 'Include your seed and turn number. Crash logs go to the support inbox, not here.' },
+  { id: 'lore', name: 'lore', unread: 12, pinned: 'Speculation welcome. Datamined text belongs behind a spoiler warning.' }
+];
+
+const SEED = {
+  general: [
+    { k: 's', text: 'CHANNEL OPENED · 14:02' },
+    { k: 'm', a: 'ashwright', t: '14:06', x: 'Third run in a row where the Barons decree lands the turn I commit to the forge. Anyone else reading that as scripted?' },
+    { k: 'm', a: 'greaveknot', t: '14:09', x: 'It is weighted, not scripted. Decree odds climb with your order score, so hoarding order invites it.', ry: 'ashwright', ryx: 'Third run in a row where the Barons decree lands…', rx: { up: 4, note: 1 } },
+    { k: 'm', a: 'saltwidow', t: '14:15', x: 'Confirmed on my end. Dumped order into recruits and the decree stopped showing up until turn nine.' },
+    { k: 's', text: 'VOTE CLOSED · SCARCITY REWORK · 61% FOR' },
+    { k: 'm', a: 'kilnhand', t: '14:22', x: 'Sixty-one percent is thin. Hope they read the comments and not just the tally.', rx: { up: 7 } }
+  ],
+  forge: [
+    { k: 's', text: 'CHALLENGE WEEK 6 · ONE FURNACE' },
+    { k: 'm', a: 'greaveknot', t: '11:40', x: 'Ten turns, one furnace, no habitat units. The workforce holds if you pass twice early.' },
+    { k: 'm', a: 'ashwright', t: '11:52', x: 'Passing twice feels like losing two turns. Does the scarcity marker not catch up with you?', ry: 'greaveknot', ryx: 'Ten turns, one furnace, no habitat units…' },
+    { k: 'm', a: 'emberclad', t: '12:04', x: 'It catches up on turn eight. By then you should have the second mineral card and can buy out of it.', rx: { up: 3, note: 2 } }
+  ],
+  bugs: [
+    { k: 'm', a: 'saltwidow', t: '09:31', x: 'Seed 4471, turn 12: the district panel keeps the previous card art after closing it. Reopening fixes it.' },
+    { k: 'm', a: 'wonderstaff', t: '09:48', x: 'Reproduced. It is a stale texture on the detail view, fix is in for the next build. Thanks for the seed.', rx: { up: 11 } },
+    { k: 's', text: 'MARKED CONFIRMED · BUILD 0.9.5' }
+  ],
+  lore: [
+    { k: 'm', a: 'kilnhand', t: '20:11', x: 'The temple inscriptions use the same glyph for faith and fuel. That is either sloppy or the whole point.' },
+    { k: 'm', a: 'emberclad', t: '20:19', x: 'It is the point. Every offering screen tells you what the hive burns to keep believing.', ry: 'kilnhand', ryx: 'The temple inscriptions use the same glyph…', rx: { up: 9, note: 4 } },
+    { k: 'm', a: 'ashwright', t: '20:33', x: 'Then the Ironlord is not a ruler, just the last person willing to keep the fire lit.' }
+  ]
+};
+
+const ROSTER = [
+  { handle: 'wonderstaff', state: 'dev' },
+  { handle: 'greaveknot', state: 'online' },
+  { handle: 'ashwright', state: 'online' },
+  { handle: 'saltwidow', state: 'online' },
+  { handle: 'emberclad', state: 'online' },
+  { handle: 'kilnhand', state: 'idle' },
+  { handle: 'slagborn', state: 'idle' },
+  { handle: 'ironlord', state: 'you' }
+];
+
+const GLYPHS = { up: '\u25B2', note: '\u25C6' };
+
+class Component extends DCLogic {
+  state = {
+    ch: 'general',
+    draft: '',
+    replyTo: null,
+    rosterOpen: false,
+    typing: false,
+    unread: { general: 0, forge: 3, bugs: 0, lore: 12 },
+    mine: {},
+    msgs: JSON.parse(JSON.stringify(SEED))
+  };
+
+  componentDidMount() {
+    this._t = setInterval(() => this.setState(s => ({ typing: !s.typing })), 6500);
+    this.scrollDown();
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+
+  scrollDown() {
+    const el = this._list;
+    if (el) requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
+  }
+
+  pickChannel(id) {
+    this.setState(s => ({ ch: id, replyTo: null, unread: { ...s.unread, [id]: 0 } }), () => this.scrollDown());
+  }
+
+  send() {
+    const text = this.state.draft.trim();
+    if (!text) return;
+    this.setState(s => {
+      const now = new Date();
+      const t = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+      const msg = { k: 'm', a: ME, t, x: text };
+      if (s.replyTo) { msg.ry = s.replyTo.a; msg.ryx = s.replyTo.x; }
+      const msgs = { ...s.msgs, [s.ch]: [...s.msgs[s.ch], msg] };
+      return { msgs, draft: '', replyTo: null };
+    }, () => this.scrollDown());
+  }
+
+  toggleMine(key) {
+    this.setState(s => ({ mine: { ...s.mine, [key]: !s.mine[key] } }));
+  }
+
+  renderVals() {
+    const accent = this.props.accentColor ?? '#c2701f';
+    const s = this.state;
+    const chan = CHANNELS.find(c => c.id === s.ch) || CHANNELS[0];
+    const online = ROSTER.filter(r => r.state !== 'idle').length;
+
+    const messages = s.msgs[s.ch].map((m, i) => {
+      if (m.k === 's') return { isSystem: true, isMessage: false, text: m.text, reactions: [] };
+      const rx = m.rx || {};
+      const keys = Object.keys(rx);
+      const reactions = keys.map(k => {
+        const id = s.ch + ':' + i + ':' + k;
+        const on = !!s.mine[id];
+        return {
+          glyph: GLYPHS[k] || GLYPHS.up,
+          count: (rx[k] || 0) + (on ? 1 : 0),
+          bg: on ? '#241a0e' : '#131110',
+          bd: on ? accent : '#2a2620',
+          fg: on ? accent : '#8a8175',
+          toggle: () => this.toggleMine(id)
+        };
+      });
+      return {
+        isSystem: false,
+        isMessage: true,
+        author: m.a,
+        time: m.t,
+        text: m.x,
+        nameColor: m.a === ME ? accent : '#ddd5ca',
+        hasReply: !!m.ry,
+        replyAuthor: m.ry || '',
+        replyText: m.ryx || '',
+        reactions,
+        reply: () => this.setState({ replyTo: { a: m.a, x: m.x } })
+      };
+    });
+
+    return {
+      accent,
+      onlineCount: online + ' ONLINE',
+      channels: CHANNELS.map(c => {
+        const active = c.id === s.ch;
+        const u = s.unread[c.id] || 0;
+        return {
+          name: c.name,
+          unread: u,
+          hasUnread: u > 0,
+          bg: active ? '#241a0e' : '#0e0d0c',
+          bd: active ? accent : '#2a2620',
+          fg: active ? '#e8dfd2' : '#8a8175',
+          pick: () => this.pickChannel(c.id)
+        };
+      }),
+      pinnedText: chan.pinned,
+      rosterOpen: s.rosterOpen,
+      rosterLabel: (s.rosterOpen ? 'HIDE ROSTER' : 'ROSTER') + ' \u00B7 ' + ROSTER.length + ' MEMBERS',
+      toggleRoster: () => this.setState(p => ({ rosterOpen: !p.rosterOpen })),
+      rosterDots: ROSTER.slice(0, 6).map(r => ({ color: r.state === 'idle' ? '#4a443d' : accent })),
+      roster: ROSTER.map(r => ({
+        handle: r.handle,
+        state: r.state,
+        color: r.state === 'idle' ? '#4a443d' : accent,
+        fg: r.handle === ME ? accent : '#b3aa9e'
+      })),
+      messages,
+      listRef: el => { this._list = el; },
+      someoneTyping: s.typing,
+      typingLabel: 'greaveknot is writing',
+      replying: !!s.replyTo,
+      replyLabel: s.replyTo ? s.replyTo.a + ' \u00B7 ' + s.replyTo.x.slice(0, 60) : '',
+      cancelReply: () => this.setState({ replyTo: null }),
+      draft: s.draft,
+      onDraft: e => this.setState({ draft: e.target.value }),
+      onKey: e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); this.send(); } },
+      send: () => this.send()
+    };
+  }
+}
+</script>
+</body>
+</html>

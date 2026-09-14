@@ -381,6 +381,16 @@ window.Frames = (function () {
            every time somebody held ctrl over it. It is the one thing in
            here that is on the paper without being on the drawing. */
         if (el.hasAttribute && el.hasAttribute('data-lab-ink')) continue;
+        /* INK THAT DRIFTS IS NOT MEASURED EITHER (2026-09-13). The council
+           ballot's steam puffs rise ninety pixels over its chimney as they
+           fade, on a three-second loop, and this walk measures whatever is
+           visible at the moment it runs — so the ballot came out 687 tall on
+           one load and 735 on the next, its whole drawing sitting up to 48px
+           lower in its box by where a puff happened to be. A feature marks
+           such ink data-lab-drift (../recut.js marks the ballot's) and the
+           frame is cut to the drawing that holds still; a puff near the top
+           of its rise, all but faded, is clipped at the edge of the box. */
+        if (el.hasAttribute && el.hasAttribute('data-lab-drift')) continue;
         const cs = win.getComputedStyle(el);
         if (cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity === 0) continue;
         const own = spill(cs);
@@ -828,10 +838,113 @@ window.Frames = (function () {
     if (p) tellDrag(p);
   }));
 
+  /* THE KEYS A LIVE FEATURE SCROLLS WITH ARE ITS OWN (2026-09-13). A scroll
+     key pressed in a feature scrolls whatever it can inside the document, and
+     what nothing in there can take, Chrome hands UP to the page — and this
+     bench's page scroll IS the camera (lab.js: a pan is a scroll). So → on the
+     screenshot gallery turned the screenshot AND slid the whole bench forty
+     pixels, press after press, until the gallery slid out from under a
+     pointer that had not moved, the section heard pointerleave, and 260ms
+     later the feature went to sleep with the next press landing on its
+     shield. probe-gallery.js found it; lab 2's frames.js has the same hole.
+
+     So a scroll key that nothing in the document can take is kept from going
+     on to the bench, and only that: a field keeps its caret keys, a list that
+     can still scroll that way keeps its keys, space is left alone on anything
+     it would press, and the feature's own handlers hear every key — this
+     prevents the scroll, not the event. The wheel is not touched: a trackpad
+     latches its whole gesture to where it began, so containing it would leave
+     the bench dead under a feature just used; the wheel's hand-back is the
+     release in wireInside instead. Where the keyboard scrolls FROM is the
+     focused element, or, with nothing focused, the last thing pressed.
+
+     AND AT A LIST'S EDGE THE STEP IS OURS. A list with SOME room left is not
+     a list that can take the key: Chrome scrolls it as far as it will go and
+     sends the rest of the step on out — and two quick presses are exactly
+     that, the second landing while the first's smooth scroll is still on its
+     way to the end, so the list reports room it has already spent and the
+     whole second step went to the bench (40px, measured). So a scroller that
+     can take the whole step gets the browser's own scroll, smooth and all,
+     and one that can take only part of it is taken the rest of the way here,
+     with the key stopped. The steps are Chrome's: 40px a line, seven eighths
+     of the box a page, all of it for Home and End. */
+  const SCROLL_KEYS = { ArrowUp: { y: -1 }, ArrowDown: { y: 1 }, ArrowLeft: { x: -1 }, ArrowRight: { x: 1 },
+                        PageUp: { y: -1, page: 1 }, PageDown: { y: 1, page: 1 }, Home: { y: -1, edge: 1 }, End: { y: 1, edge: 1 } };
+  function keepScrollIn(doc) {
+    let pressed = null;
+    doc.addEventListener('pointerdown', e => { pressed = e.target; }, true);
+    doc.addEventListener('keydown', e => {
+      if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target;
+      if (!t || !t.closest) return;
+      if (t.closest('input,textarea,select,[contenteditable=""],[contenteditable="true"]')) return;
+      let key = e.key;
+      if (key === ' ') {
+        if (t.closest('button,a[href],summary,label,[role="button"],[tabindex]')) return;   // space presses those
+        key = e.shiftKey ? 'PageUp' : 'PageDown';
+      }
+      const d = SCROLL_KEYS[key];
+      if (!d) return;
+      const win = doc.defaultView, y = !!d.y, dir = d.y || d.x;
+      let el = t !== doc.body && t !== doc.documentElement ? t : (pressed && pressed.isConnected ? pressed : null);
+      for (; el && el.nodeType === 1 && el !== doc.documentElement; el = el.parentElement) {
+        const cs = win.getComputedStyle(el);
+        if (!/(auto|scroll)/.test(y ? cs.overflowY : cs.overflowX)) continue;
+        const pos = y ? el.scrollTop : el.scrollLeft;
+        const room = dir > 0 ? (y ? el.scrollHeight - el.clientHeight : el.scrollWidth - el.clientWidth) - pos : pos;
+        if (room < 1) continue;                       // at its end that way: ask the next one out
+        const step = d.edge ? Infinity : d.page ? Math.max(40, (y ? el.clientHeight : el.clientWidth) * 0.875) : 40;
+        if (room >= step) return;                     // it takes the whole step: the browser's own scroll
+        e.preventDefault();                           // it takes part of it: that part here, and none past the edge
+        if (y) el.scrollTop = pos + dir * room; else el.scrollLeft = pos + dir * room;
+        return;
+      }
+      e.preventDefault();                             // nothing in here moves for it, so nothing out there should
+    });
+  }
+
+  /* AND THE KEYS IT ZOOMS WITH ARE THE BENCH'S (2026-09-13). lab.js takes
+     ctrl+=, ctrl+− and ctrl+0 for the camera, and the ctrl-wheel in
+     wireInside below is handed back out of a live feature — but the keys
+     never were. A key goes to the document with the focus, and a feature has
+     the focus from the first click on it, so from then on the bench's zoom
+     keys went to the feature. With nothing in there listening, the browser
+     had them and zoomed the whole page, the same hole the ctrl-wheel note
+     below plugs for the wheel. In a MACHINE the export's own zoom handler
+     had them (lab 2's machine furniture): it stored a zoom that bare.css
+     pins away, so nothing on screen changed and the key looked dead — and
+     the council ballot's drag divided the pointer by that stored zoom. Four
+     presses of ctrl+− with the ballot awake and it ran 2.44px for every
+     pixel of the pointer, came down far wide of the slot it was let go over,
+     and stayed that way after a reload, since the export keeps its zoom in
+     localStorage. Lab 2's ballot-o-tron has the same hole.
+
+     So in a live feature the three keys are the bench's again: taken on the
+     way DOWN, before anything in the document hears them — a machine's
+     handler listens on its window, the last stop — and handed to
+     Lab.setZoom exactly as lab.js hands them. A field keeps them, as a
+     field on the page does. probe-ballot.js checks it. */
+  function keepZoomKeys(doc) {
+    doc.addEventListener('keydown', e => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey || !window.Lab || !Lab.setZoom) return;
+      const t = e.target;
+      if (t && t.closest && t.closest('input,textarea,select,[contenteditable=""],[contenteditable="true"]')) return;
+      const z = Lab.zoom;
+      if (e.key === '+' || e.key === '=') Lab.setZoom(z * 1.2);
+      else if (e.key === '-' || e.key === '_') Lab.setZoom(z / 1.2);
+      else if (e.key === '0') Lab.setZoom(1);
+      else return;
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
+  }
+
   function wireInside(p) {
     const doc = docOf(p);
     if (!doc) return;
     doc.addEventListener('keydown', e => { if (e.key === 'Escape') release(); });
+    keepScrollIn(doc);
+    keepZoomKeys(doc);
     doc.addEventListener('mouseleave', () => { if (live === p) rearm(); });
     doc.addEventListener('mouseenter', holdOn);
     /* A right-click in here is the bench's menu, not the browser's — the
@@ -1334,6 +1447,7 @@ window.Frames = (function () {
         w0 = p.el.offsetWidth; h0 = p.el.offsetHeight;
         x0 = e.clientX; y0 = e.clientY;
         el.classList.add('sizing');
+        sizingNow = back;                          // …and how to put the corner back
         try { grip.setPointerCapture(e.pointerId); } catch (err) {}
         e.preventDefault(); e.stopPropagation();
       });
@@ -1345,10 +1459,24 @@ window.Frames = (function () {
       const done = e => {
         if (!on) return;
         on = false;
+        sizingNow = null;
         el.classList.remove('sizing');
         try { grip.releasePointerCapture(e.pointerId); } catch (err) {}
         cut(p, p.el.offsetWidth, p.el.offsetHeight, true);
         sound('drop');
+      };
+      /* AND THE OTHER ENDING: back to the size it was at the press, with
+         nothing saved and no drop to hear. A second finger on the paper is the
+         camera (lab.js: TWO FINGERS ARE THE CAMERA), so the press that was
+         pulling this corner is a press that never happened — `cut` with save
+         false is the same call the drag itself makes, which is what keeps this
+         exact rather than approximate. */
+      const back = () => {
+        if (!on) return;
+        on = false;
+        sizingNow = null;
+        el.classList.remove('sizing');
+        cut(p, w0, h0, false);
       };
       grip.addEventListener('pointerup', done);
       grip.addEventListener('pointercancel', done);
@@ -1375,6 +1503,14 @@ window.Frames = (function () {
     if (p.kit && window.Kits && Kits.adopt) Kits.adopt(el, p);
     return p;
   }
+
+  /* A CORNER BEING PULLED, and how to put it back — one of the four presses on
+     this bench that a second finger has to take back (the others are the
+     feature drag in lab.js, the wall's and the tape's). One variable and one
+     listener for the whole bench rather than one per feature: only ever one
+     corner is being pulled, because only ever one hand is on it. */
+  let sizingNow = null;
+  document.addEventListener('lab:pinch', () => { if (sizingNow) sizingNow(); });
 
   // every panel on the bench: the eighty-four with a document under them, and
   // the sign, which is drawn in this one. adopt() tells them apart.

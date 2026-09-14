@@ -19,7 +19,7 @@ lab2/*.lnk
 # And the same beside the iron hive, which has its own one-click starter and
 # its own autosave door — the page and its stickers are the site, the .bat and
 # the .lnk that open them are this machine.
-ironhive/index.html.keep-bak
+ironhive/*.keep-bak
 ironhive/*.tmp
 ironhive/*.bat
 ironhive/*.ico

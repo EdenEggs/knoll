@@ -94,19 +94,21 @@
   <div id="bench-world" class="bench-world">
 
   <!-- ═════════════════════ THE EMPTY BENCH ═══════════════════════════════
-       Nothing stands here, and that is the whole of what this page is: lab 2
-       with the paper cleared. There is no lockup, no workshop, no grove and
-       no sign — no <section> at all — so the bench boots with zero frames to
-       adopt, zero documents to boot and zero kit parts to raster, and the
-       camera opens on the origin rather than being framed onto a rectangle
-       of art (lab.js: WHERE IT OPENS falls through to its default when it
-       finds nothing to fit).
+       Lab 2 with the paper cleared, and since 2026-09-13 FOUR sections put
+       back: the screenshot gallery, the comms panel, the council ballot and
+       the bulletin press, below. Until then there was no <section> here at
+       all, so the bench booted with zero frames to adopt and zero documents
+       to boot; now it has four of each and nothing more — no lockup, no
+       workshop, no grove, no sign, and no kit part, so kits.js still has
+       nothing to raster.
 
-       WHAT IS ON IT INSTEAD is whatever you draw and stamp: the wall's ink,
+       WHAT IS ON IT OTHERWISE is whatever you draw and stamp: the wall's ink,
        the tracings you file, and the 305 stickers in the drawer. All of it
        is wall ink — one <svg> in world units, nothing per frame — and all of
-       it lives in this browser's localStorage, NOT in this file. Nothing
-       here is written back by keep.js, which only ever edits sections.
+       it lives in this browser's localStorage, NOT in this file (a first
+       visit is given wall-seed.json's, see seed.js). keep.js writes back
+       only what sections carry, which here is where the panels stand, their
+       pile and their cuts, and never the wall.
 
        UNDER ITS OWN KEYS, which matters more than it looks: localStorage is
        per ORIGIN, and this bench and lab 2 are the same origin. Every key
@@ -115,12 +117,231 @@
        separate paper, and `reset data` on one leaves the other alone. The
        cursor room is split the same way, in cursors.js.
 
-       TO PUT SOMETHING PERMANENT ON THE PAPER, add a <section> exactly as
-       lab 2 does it — ADDING.md next door is the whole of how, and the four
+       TO PUT SOMETHING ELSE PERMANENT ON THE PAPER, add a <section> exactly
+       as lab 2 does it — lab2/ADDING.md is the whole of how, and the four
        kinds it opens with are the four things this bench can hold. A machine
-       also wants features/ and a poster, and a kit part wants the sheet it
-       names in features/; neither directory is copied here, because an empty
-       bench has nothing to point at them. -->
+       wants its document in features/, which now holds lab 2's prelude.js,
+       support.js and bare.css byte for byte, and a poster if it should be a
+       picture when zoomed out (posters/index.json is empty: nothing here has
+       one). A kit part wants the sheet it names in features/, and there are
+       none. -->
+
+  <!-- ─────────────── THE SCREENSHOT GALLERY (2026-09-13) ───────────────
+       IRONHIVE · SCREENS: the Design Canvas export "Ironhive Screenshot
+       Gallery", a riveted screen that steps through seven screenshots of
+       the game — its arrows, the numbered pills under it, or ← → once it is
+       awake. features/gallery.dc.html is that export with the bench's head,
+       and `node ironhive/recut.js gallery` is what made it: run that again
+       for a re-export. It also resamples the screenshots out of the
+       3840-wide originals into features/shots/, and prints which original
+       each slot is and why.
+
+       WHERE IT STANDS is wherever it was last saved from the bench: keep.js
+       writes data-home-x/-y, data-home-z and, once the corner has been
+       pulled, data-cut, and those numbers are the arrangement's, not this
+       comment's. It went in at 1040,−3900, in the smoke left of the title,
+       and was moved on the bench the same day. Three things to know about
+       moving it, or anything else on this paper — probe-gallery.js reports
+       all three for whatever the numbers are:
+         · THE REIN. lab.js keeps a feature's top at or below −(its height)
+           − 2600, and its left at or below the BENCH's width + 7000: 7412 on
+           a 412-wide phone, 8366 on a 1366 laptop, 8600 at 1600. A home
+           further right than that is drawn further left on that screen, and
+           one further up is drawn lower, on every load.
+         · A PHONE'S FIRST VIEW sees world x 3043 to 6857 at every phone
+           width; a panel straddling either line shows as a sliver of dark
+           frame down the edge of it.
+         · A CUT IS A WINDOW. Pulled wider or taller than the drawing, the box
+           keeps the shape it was pulled to and the drawing is fitted inside
+           it; the spare box beside the drawing is invisible and still takes
+           every press there, so wall pieces under it cannot be picked up
+           through it.
+
+       data-scale="2" IS ITS NATURAL SIZE. The document draws the screen
+       962×656, shadow and all, which beside a trailer nearly two thousand
+       wide is a postcard — so uncut it stands at twice its drawing,
+       1924×1312, and follows the drawing (frames.js, …OR AT A FRACTION OF
+       IT). A data-cut overrides that with the size the corner was pulled to,
+       and double-clicking the corner comes back to twice. The screenshots
+       are 1920 wide for the uncut size: the 928px the document draws one at,
+       times two, is the pixel the paper shows at 100%.
+
+       NO POSTER, ON PURPOSE. posters/index.json is empty, so this boots the
+       old way, the moment it comes within 400px of the screen, and at the
+       opening zoom it is a gallery you can click through rather than a
+       photograph of one. It, the comms panel, the council ballot and the
+       bulletin press are the only four documents on this bench, so the
+       half-millisecond a warm document costs a frame is paid four times at
+       most. -->
+  <section class="gz" id="gz-screens" data-gizmo="ironhive-screens"
+           data-src="features/gallery.dc.html" data-w="1120" data-h="780" data-scale="2"
+           data-home-x="8595" data-home-y="-1127" data-home-z="0" data-cut="2513x1740" style="width:2513px;height:1740px"
+           aria-label="Ironhive · Screens">
+    <iframe title="Ironhive screenshots"></iframe>
+    <div class="gz-poster"><b>waking up</b></div>
+    <div class="gz-shield"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+  <!-- ──────────────── THE COMMS PANEL (2026-09-13) ────────────────
+       IRONHIVE · COMMS: the Design Canvas export "Ironhive Comms Panel", a
+       mock of the game's community chat — four channels with their own
+       pinned notes and unread badges, the roster, replies, reactions, a
+       typing blip and a box to write to the hive in. All of it lives in the
+       document's own memory: nothing is sent anywhere, and a reload starts
+       the conversation over. features/comms.dc.html is the export with the
+       bench's head; `node ironhive/recut.js comms` made it and makes it
+       again from a re-export.
+
+       WHERE IT STANDS is wherever it was last saved from the bench, as for
+       the gallery, and the gallery's three notes on moving things (the rein,
+       a phone's first view, a cut being a window) hold here too. It went in
+       at 1028,−2464, under the gallery — the largest free box in the
+       published opening view, found by a scan — and was moved on the bench
+       the same day. probe-comms.js reports where it lands on a wide screen,
+       a laptop and a phone.
+
+       data-scale="2", like the gallery: the document draws the panel 414×882
+       with its shadow, and the two were drawn as a set, so uncut they stand
+       at the same multiple and their type comes out the same size. A
+       data-cut changes that here as it does there.
+
+       ITS KEYS: typing in it is typing in it — a key pressed in a document
+       never reaches the bench, so its h, v and space are letters in the box —
+       and a scroll key that nothing in the panel can take no longer scrolls
+       the bench under it (frames.js, THE KEYS A LIVE FEATURE SCROLLS WITH ARE
+       ITS OWN). -->
+  <section class="gz" id="gz-comms" data-gizmo="ironhive-comms"
+           data-src="features/comms.dc.html" data-w="444" data-h="900" data-scale="2"
+           data-home-x="4408" data-home-y="3914" data-home-z="2" data-cut="2817x3129" style="width:2817px;height:3129px"
+           aria-label="Ironhive · Comms">
+    <iframe title="Ironhive comms"></iframe>
+    <div class="gz-poster"><b>waking up</b></div>
+    <div class="gz-shield"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+  <!-- ─────────────── THE COUNCIL BALLOT (2026-09-13) ───────────────
+       COUNCIL BALLOT: the Design Canvas export "Ironhive Council Ballot" — a
+       motion, a paper ballot to mark AYE or NAY and DRAG into the engine's
+       slot, and a tally screen that counts it in: five motions, each with a
+       standing count a vote is added to. What is cast is remembered in the
+       export's own localStorage key, ironhive.ballot.v1 — not a
+       knoll-ironhive: key, so `reset data` does not clear it.
+       features/ballot.dc.html is the export with the bench's head; `node
+       ironhive/recut.js ballot` made it and makes it again from a re-export.
+
+       THE FIRST MACHINE ON THIS BENCH. The export draws inside a second
+       full-viewport div that carries its own zoom, beside a +/−/RESET widget
+       pinned to the corner — lab 2's machine furniture — so it wears lab 2's
+       two machine marks, data-lab-sheet and data-lab-nozoom: the widget is
+       not drawn and the inner zoom is pinned at 1, the bench having its own
+       camera. Its ctrl+= and ctrl+− are the bench's camera's, as everywhere
+       else on it: they used to reach the export's own zoom state instead,
+       invisibly, and the ballot's drag divides the pointer by that state —
+       four ctrl+− and the ballot ran 2.44× as far as the pointer. frames.js
+       takes the keys before the document hears them now (AND THE KEYS IT
+       ZOOMS WITH).
+
+       AND ITS SCRIPT, IN TWELVE PLACES — the one feature here whose logic
+       the bench has changed (recut.js, BALLOT_SWAPS). As exported, a ballot
+       would not lift until AYE or NAY was marked, and a press on a blank one
+       did nothing at all, which reads as a ballot that cannot be dragged.
+       Now it lifts either way and the SLOT asks for the mark: a blank ballot
+       over it turns the slot and the ballot's ring red rather than green,
+       the screen says MARK YOUR BALLOT FIRST, and let go it springs back
+       with the hint asking for aye or nay. The drag follows the pointer by
+       the zoom the ballot is DRAWN at, not the one the export stored.
+
+       AND TWO MARKS OF THE HIVE'S OWN, which lab 2's machines do not wear.
+       data-lab-grab on the ballot: as exported, a finger's drag on it was
+       taken by the browser for a pan two moves in — the bench's
+       touch-action:none stops at the frame — so no vote could be cast by
+       finger and the bench slid instead; bare.css gives the mark
+       touch-action:none. data-lab-drift on the three steam puffs: they rise
+       over the chimney as they fade, frames.js measured whatever was visible
+       at that moment, and the ballot came out 687 tall on one load and 735 on
+       the next, its drawing sitting up to 48px lower in its box; frames.js
+       leaves drifting ink out of the measurement now, and a puff near the top
+       of its rise is clipped at the edge of the box. probe-ballot.js checks
+       both, and fails both against the document from before the marks.
+
+       WHERE IT STANDS is wherever it was last saved from the bench, and the
+       gallery's three notes on moving things hold here too. It went in at
+       8358,−3287, at its drawing's own size (1016×687, so no data-scale): with
+       the gallery and the comms panel where they then stood, the gap between
+       the smokestacks and the billboard was the only free box in the
+       published opening view, and only at ×1 — found by a scan. That is past
+       a phone's rein (7412), so a phone draws it further left, off its first
+       view either way. -->
+  <section class="gz" id="gz-ballot" data-gizmo="ironhive-ballot"
+           data-src="features/ballot.dc.html" data-w="1120" data-h="780"
+           data-home-x="573" data-home-y="4025" data-home-z="3" data-cut="3184x2076" style="width:3184px;height:2076px"
+           aria-label="Council Ballot">
+    <iframe title="Council Ballot"></iframe>
+    <div class="gz-poster"><b>waking up</b></div>
+    <div class="gz-shield"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+  <!-- ─────────────── THE BULLETIN PRESS (2026-09-13) ───────────────
+       BULLETIN PRESS: the Design Canvas export "Ironhive Bulletin Press" — a
+       salvaged web press that runs on its own, the cylinder and a gear
+       turning, the platen stamping and the ink needle bobbing over the sheet
+       it has just pressed, beside THE STAND of back issues. Click any of the
+       five bulletins and it opens over the machine, its lower half unfolding;
+       its ✕, a click off it or Escape puts it away — Escape being the bench's
+       let-go key as well, it puts the press to sleep too, so the next click
+       wakes it. features/press.dc.html is the export with the bench's head;
+       `node ironhive/recut.js press` made it and makes it again from a
+       re-export. One declaration of it is changed (recut.js, PRESS_SWAPS):
+       the dark round an opened bulletin sits on starts 8px lower than
+       exported, because the ✕ on the paper's corner hangs above the paper
+       and stuck up past the top of the box, which cut the top off it.
+
+       THE WORDS ARE NOT WRITTEN YET. The export ships the five bulletins with
+       their numbers and dates — NO. 001 of JULY 15 to NO. 005 of SEPTEMBER 9,
+       2026 — and every headline, kicker and paragraph EMPTY, so an opened one
+       is its masthead, its rules and room for lines. Nothing here fills them
+       in; a re-export with words in it is the way they arrive.
+
+       A MACHINE, like the council ballot: lab 2's zoom sheet and widget, so
+       data-lab-sheet and data-lab-nozoom; its ctrl+= and ctrl+− are the
+       bench's camera (frames.js, AND THE KEYS IT ZOOMS WITH), and the one
+       thing it keeps is that zoom of its own, in ironhive.press.zoom.v1,
+       which the bench never lets it write. Its two steam puffs wear
+       data-lab-drift, though they rise and fade well inside the drawing.
+       Nothing in it is dragged, so it wears no data-lab-grab.
+
+       data-w="1160" IS LOAD-BEARING. Its title row is a block as wide as the
+       sheet, so the frame measures the drawing as wide as the viewport less
+       the sheet's 80px of padding, however narrow the ink: 1200 at 1280,
+       which is 116px of invisible box that would take presses, and 1084 at
+       1160. The row itself needs 1064, so 1144 with the padding, and below
+       that the sheet's own overflow-x:auto would scroll. data-scale is 2.95,
+       the most frames.js's 3200 ceiling allows at that width (3198×2761), and
+       a hair under the council ballot's ×3.02 cut, so the two machines' type
+       comes out the same size side by side.
+
+       WHERE IT STANDS is wherever it was last saved from the bench, and the
+       gallery's three notes on moving things hold here too. It went in at
+       −8798,1021: left of the council ballot, 200 clear of it, its feet on
+       the ballot's line, and the first spot beside it with none of the
+       published wall under it. probe-press.js reports where it lands and what
+       it covers. -->
+  <section class="gz" id="gz-press" data-gizmo="ironhive-press"
+           data-src="features/press.dc.html" data-w="1160" data-h="1100" data-scale="2.95"
+           data-home-x="7292" data-home-y="3232" data-home-z="1" data-cut="3200x3200" style="width:3200px;height:3200px"
+           aria-label="Bulletin Press">
+    <iframe title="Ironhive Bulletin Press"></iframe>
+    <div class="gz-poster"><b>waking up</b></div>
+    <div class="gz-shield"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
 
   </div><!-- /bench-world -->
 

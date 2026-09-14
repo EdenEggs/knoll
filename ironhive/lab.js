@@ -1516,6 +1516,7 @@ window.Lab = (function () {
       });
       cx = e.clientX; cy = e.clientY;
       dragging = true;
+      carrying = drop;                                 // …and how to put it all back
       try { handle.setPointerCapture(e.pointerId); } catch (err) {}
       e.preventDefault();
     });
@@ -1527,9 +1528,34 @@ window.Lab = (function () {
       edgeWatch(cx, cy, follow);
     });
 
+    /* THE CREW PUT BACK WHERE IT WAS PICKED UP, and nothing filed — the other
+       ending of the drag below. A second finger on the paper is the camera, so
+       the press that was carrying these is a press that never happened: x0/y0
+       are where each of them started, kept by the pointerdown above for the
+       'did the hand actually take it anywhere' test. */
+    const drop = () => {
+      if (!dragging) return;
+      dragging = false;
+      carrying = null;
+      edgeStop();
+      crew.forEach(g => {
+        g.el.classList.remove('dragging');
+        undrive(g.el);
+        /* NOT SAVED, which end() below deliberately does and this must not.
+           The drag never wrote anything — carry() is a transform, and the
+           saved position is still the one from before the press — so putting
+           the element back is the whole job, and a save here would leave a
+           remembered position behind for a press that never happened. Lab 2's
+           probe caught exactly that. */
+        place(g.el, g.x0, g.y0, false);
+      });
+      crew = [];
+    };
+
     const end = e => {
       if (!dragging) return;
       dragging = false;
+      carrying = null;
       edgeStop();
       try { handle.releasePointerCapture(e.pointerId); } catch (err) {}
       crew.forEach(g => {
@@ -1721,6 +1747,14 @@ window.Lab = (function () {
   const fingerPan = t => !!(t && t.closest && !t.closest(HANDS_OFF) && !scrollable(t, 0, 1) && !scrollable(t, 0, -1));
 
   let hand = false, tool = 'move', pan = null;
+  /* a feature in mid-drag, and how to put it back where it was picked up. The
+     second finger of a pinch takes the press back (TWO FINGERS ARE THE CAMERA,
+     below), and a drag of a feature is one of the presses on this bench that
+     has something to put back — the others are the wall's, the tape's and
+     frames.js's corner, and each answers 'lab:pinch' in its own file. Ported
+     from lab 2 on 2026-09-13 with the bench's first section, the screenshot
+     gallery: until then there was no feature here to carry. */
+  let carrying = null;
 
   const paintTool = () => document.body.classList.toggle('lab-hand', hand || tool === 'hand');
   function setHand(on) { if (hand !== on) { hand = on; paintTool(); } }
@@ -1959,8 +1993,9 @@ window.Lab = (function () {
      stroke a few points long, a press-and-hold part way through its clock —
      because nothing could have known a second one was coming. So 'lab:pinch'
      is said the instant it arrives, and whoever is holding something puts it
-     back untouched and files nothing (wall.js's listener, and tape.js's). A
-     PINCH LEAVES NOTHING BEHIND: no sticker a few pixels off where it was, no
+     back untouched and files nothing: wall.js's listener, tape.js's, frames.js's
+     corner and the feature drag above (carrying). A PINCH LEAVES NOTHING
+     BEHIND: no sticker a few pixels off where it was, no feature nudged, no
      dot where the pen went down, nothing on the undo stack.
 
      THE FINGERS ARE HEARD ON THE WINDOW, on the capture phase, which is the
@@ -2017,6 +2052,7 @@ window.Lab = (function () {
     if (!pinch) {
       endPan(); endSweep(); edgeStop(); stopTween();
       document.dispatchEvent(new CustomEvent('lab:pinch'));
+      if (carrying) carrying();                   // …including a feature this hand was carrying
       // the dress a pan already wears: nothing selectable, and the sheet's own
       // pointer-events off while the hand has it (lab.css)
       document.body.classList.add('lab-panning');

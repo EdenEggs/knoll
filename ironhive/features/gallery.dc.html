@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./prelude.js"></script>
+<script src="./support.js"></script>
+<!-- the iron hive shows this on its own paper — see features/bare.css -->
+<link rel="stylesheet" href="./bare.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<!-- the iron hive serves these faces itself — see SELF-HOSTED in index.html -->
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  /* WHAT THE BENCH CHANGED — see features/bare.css. Every line below is the
+     export as it came out of Design Canvas, verbatim, and no declaration is
+     changed. Round it: the head is the bench's (prelude.js, support.js,
+     bare.css); the bundled @font-face block is ../fonts/fonts.css, where
+     JetBrains Mono and Oswald are self-hosted; every <img> points into
+     shots/, resampled from the original screenshots rather than the 1600-wide
+     copies the export carried; and the screen root wears data-screen-label,
+     which this export shipped without — it is how frames.js and bare.css tell
+     the sheet (the backdrop the export paints round its drawing) from the
+     drawing. Opened on its own, the file is still the export. Written by
+     ../recut.js (gallery): for a re-export, run that again rather than
+     editing here. */
+  body { margin: 0; background: #cbb894; }
+  a { color: #b8611f; }
+  a:hover { color: #e08a3a; }
+</style>
+</helmet>
+<div data-screen-label="Ironhive · Screens" style="min-height: 100vh; background: linear-gradient(#cbb894 0%, #cbb894 54%, #8e9a8f 54%, #8e9a8f 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 22px 52px; box-sizing: border-box; font-family: 'Oswald', sans-serif">
+
+  <div style="width: 100%; max-width: min(940px, max(560px, calc((100vh - 170px) * 1.78))); display: flex; flex-direction: column; align-items: center">
+
+    <div style="width: 100%; border: 6px solid #17150f; background: #0e0d0c; box-shadow: 10px 10px 0 rgba(23,21,15,0.35); position: relative">
+
+      <div style="position: absolute; inset: 3px; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; z-index: 3">
+        <div style="display: flex; justify-content: space-between">
+          <div style="width: 8px; height: 8px; border-radius: 50%; background: #4a443d"></div>
+          <div style="width: 8px; height: 8px; border-radius: 50%; background: #4a443d"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between">
+          <div style="width: 8px; height: 8px; border-radius: 50%; background: #4a443d"></div>
+          <div style="width: 8px; height: 8px; border-radius: 50%; background: #4a443d"></div>
+        </div>
+      </div>
+
+      <div style="position: relative; z-index: 4; display: flex; align-items: center; gap: 14px; padding: 9px 12px 8px; background: #17150f; border-bottom: 3px solid #2a2620">
+        <div style="display: flex; gap: 5px">
+          <div style="width: 9px; height: 9px; background: #57504a"></div>
+          <div style="width: 9px; height: 9px; background: #57504a"></div>
+        </div>
+        <div style="font-size: 15px; font-weight: 700; letter-spacing: 0.2em; color: #e0d9ce; text-transform: uppercase">Ironhive · Screens</div>
+        <div style="flex: 1; height: 3px; background: repeating-linear-gradient(90deg, #2f2a24 0 8px, transparent 8px 14px)"></div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; color: {{ accent }}">{{ counter }}</div>
+      </div>
+
+      <div style="position: relative; width: 100%; aspect-ratio: 16 / 9; background: #0a0908; overflow: hidden">
+        <img src="shots/screenshot01.webp" alt="Screenshot 1" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: {{ op0 }}; transition: opacity 200ms linear">
+        <img src="shots/screenshot05.webp" alt="Screenshot 2" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: {{ op1 }}; transition: opacity 200ms linear">
+        <img src="shots/screenshot07.webp" alt="Screenshot 3" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: {{ op2 }}; transition: opacity 200ms linear">
+        <img src="shots/screenshot09.webp" alt="Screenshot 4" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: {{ op3 }}; transition: opacity 200ms linear">
+        <img src="shots/screenshot11.webp" alt="Screenshot 5" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: {{ op4 }}; transition: opacity 200ms linear">
+        <img src="shots/screenshot12.webp" alt="Screenshot 6" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: {{ op5 }}; transition: opacity 200ms linear">
+        <img src="shots/screenshot13.webp" alt="Screenshot 7" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: {{ op6 }}; transition: opacity 200ms linear">
+
+        <div style="position: absolute; inset: 0; background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0 1px, transparent 1px 3px); pointer-events: none"></div>
+
+        <button sc-camel-on-click="{{ prev }}" aria-label="Previous screenshot" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; padding: 0; border: 3px solid #17150f; background: rgba(14,13,12,0.82); cursor: pointer; display: flex; align-items: center; justify-content: center" style-hover="background: #17150f; border-color: {{ accent }}">
+          <span style="display: block; width: 13px; height: 13px; border-left: 3px solid #e0d9ce; border-bottom: 3px solid #e0d9ce; transform: rotate(45deg) translate(2px, -2px)"></span>
+        </button>
+
+        <button sc-camel-on-click="{{ next }}" aria-label="Next screenshot" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; padding: 0; border: 3px solid #17150f; background: rgba(14,13,12,0.82); cursor: pointer; display: flex; align-items: center; justify-content: center" style-hover="background: #17150f; border-color: {{ accent }}">
+          <span style="display: block; width: 13px; height: 13px; border-right: 3px solid #e0d9ce; border-top: 3px solid #e0d9ce; transform: rotate(45deg) translate(-2px, 2px)"></span>
+        </button>
+      </div>
+
+      <div style="height: 9px; background-image: repeating-linear-gradient(135deg, #17150f 0 9px, #6d5426 9px 18px); border-top: 3px solid #2a2620"></div>
+
+      <div style="display: flex; align-items: center; gap: 16px; padding: 12px 14px 13px; background: #100f0d">
+        <div style="flex: 1"></div>
+        <div style="display: flex; gap: 7px">
+          <sc-for list="{{ shots }}" as="s" hint-placeholder-count="3">
+            <button sc-camel-on-click="{{ s.pick }}" aria-label="{{ s.alt }}" style="width: 26px; height: 26px; padding: 0; border: 2px solid {{ s.bd }}; background: {{ s.bg }}; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: {{ s.fg }}; letter-spacing: 0.04em">{{ s.num }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#c2701f&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#c2701f&quot;,&quot;#8f4a1e&quot;,&quot;#e8484f&quot;,&quot;#6f8f7a&quot;]}}">
+const SHOTS = [1, 2, 3, 4, 5, 6, 7].map(n => ({ title: 'Screenshot ' + n }));
+
+class Component extends DCLogic {
+  state = { i: 0 };
+
+  componentDidMount() {
+    this._key = (e) => {
+      if (e.key === 'ArrowRight') this.step(1);
+      else if (e.key === 'ArrowLeft') this.step(-1);
+    };
+    window.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); }
+
+  step(d) {
+    this.setState(s => ({ i: (s.i + d + SHOTS.length) % SHOTS.length }));
+  }
+
+  renderVals() {
+    const accent = this.props.accentColor ?? '#c2701f';
+    const i = this.state.i;
+    const pad = n => String(n + 1).padStart(2, '0');
+    return {
+      accent,
+      op0: i === 0 ? 1 : 0,
+      op1: i === 1 ? 1 : 0,
+      op2: i === 2 ? 1 : 0,
+      op3: i === 3 ? 1 : 0,
+      op4: i === 4 ? 1 : 0,
+      op5: i === 5 ? 1 : 0,
+      op6: i === 6 ? 1 : 0,
+      counter: pad(i) + ' / ' + pad(SHOTS.length - 1),
+      prev: () => this.step(-1),
+      next: () => this.step(1),
+      shots: SHOTS.map((s, n) => ({
+        alt: s.title,
+        num: pad(n),
+        bg: n === i ? accent : '#1a1815',
+        bd: n === i ? accent : '#332e28',
+        fg: n === i ? '#120f0b' : '#8b8378',
+        pick: () => this.setState({ i: n })
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>
