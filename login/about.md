@@ -94,6 +94,16 @@ these pages.
 `action=` all appear exactly zero times. Turning the key runs a ~2.2s animation
 and a `setTimeout`; "Google knows me — let me through" is a `setTimeout`.
 
+**One thing does now go somewhere (2026-09-06):** the *"into the village →"*
+link in the opened state, which the export drew and pointed at `href="#"`, now
+points at **`../yard/`** — the twin of the change made to `/signup` the same
+day. A link is not a submission, so the paragraph above is untouched; this is
+simply the one link on the page that goes anywhere. `/yard`'s SIGN OUT is the
+way back here. `site/yard/about.md` §9a has the whole map of doors.
+
+The other dead `href="#"` links — *forgotten it? ask the gatekeeper* and *Terms
+of Residency* — are untouched and still go nowhere.
+
 Unlike `/signup`, **this page declares no Design Canvas props at all** — its
 script tag is a bare `data-dc-script=""`. The failure path is hardcoded
 instead:

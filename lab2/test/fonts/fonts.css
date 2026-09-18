@@ -1,0 +1,63 @@
+/* lab2/fonts/fonts.css — the house faces, served from here rather than
+   fonts.googleapis.com, so a frame never waits on a third party to boot
+   (see SELF-HOSTED in about.md). Latin subsets only; generated from
+   Google Fonts CSS on 2026-09-04, files alongside. */
+@font-face{font-family:'Kalam';font-style:normal;font-weight:400;font-display:swap;src:url(Kalam-400.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Kalam';font-style:normal;font-weight:700;font-display:swap;src:url(Kalam-700.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Pirata One';font-style:normal;font-weight:400;font-display:swap;src:url(Pirata-One-400.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Public Sans';font-style:normal;font-weight:400;font-display:swap;src:url(Public-Sans-400.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Public Sans';font-style:normal;font-weight:500;font-display:swap;src:url(Public-Sans-500.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Public Sans';font-style:normal;font-weight:600;font-display:swap;src:url(Public-Sans-600.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Public Sans';font-style:normal;font-weight:700;font-display:swap;src:url(Public-Sans-700.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Rye';font-style:normal;font-weight:400;font-display:swap;src:url(Rye-400.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Sora';font-style:normal;font-weight:600;font-display:swap;src:url(Sora-600.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Sora';font-style:normal;font-weight:700;font-display:swap;src:url(Sora-700.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Sora';font-style:normal;font-weight:800;font-display:swap;src:url(Sora-800.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(Space-Mono-400.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Space Mono';font-style:normal;font-weight:700;font-display:swap;src:url(Space-Mono-700.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'UnifrakturMaguntia';font-style:normal;font-weight:400;font-display:swap;src:url(UnifrakturMaguntia-400.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'VT323';font-style:normal;font-weight:400;font-display:swap;src:url(VT323-400.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+/* The Press Table's four, 2026-09-07 (../PRESS-TABLE-PLAN.md §6 step 4, press/CONTRACTS.md §3):
+   a comic display, a cozy rounded, a sci-fi geometric, a typewriter. Same
+   recipe as above — the Google Fonts CSS2 API asked with a Chrome desktop
+   User-Agent so it answers woff2 with unicode-ranges, each family's latin
+   block saved beside this file, its unicode-range copied. Fredoka and
+   Orbitron came as ONE variable file each (the API hands the same URL for
+   both weights), so Fredoka-400 serves the 400 and 600 rows and Orbitron-400
+   the 400 and 700; each row still declares a single weight, as Public Sans
+   does above, and the browser clamps the wght axis to it.
+   Licences, checked the same day against github.com/google/fonts (main) and
+   SAVED BESIDE THE FACE. A self-hosted font is a redistributed copy, and both
+   licences ask the copy to carry its notice and its licence text along (OFL
+   1.1 §2, Apache 2.0 §4(a)). The woff2 does not carry the text: read out of
+   these files on 2026-09-07 (each one's table stream brotli-inflated and its
+   `name` table parsed), all nineteen faces in this folder hold name record 0,
+   the copyright line, and record 14, a URL to the licence — and not one holds
+   record 13, the licence itself. So the text sits in the folder, each file
+   byte-for-byte the upstream one (md5 in brackets):
+     Bangers        OFL 1.1     https://raw.githubusercontent.com/google/fonts/main/ofl/bangers/OFL.txt   200, 4 479 B → Bangers-OFL.txt [579eddf3…, CRLF upstream]   file 23 528 B
+     Fredoka        OFL 1.1     https://raw.githubusercontent.com/google/fonts/main/ofl/fredoka/OFL.txt   200, 4 388 B → Fredoka-OFL.txt [21f5400b…]                 file 29 732 B
+     Orbitron       OFL 1.1     https://raw.githubusercontent.com/google/fonts/main/ofl/orbitron/OFL.txt  200, 4 426 B → Orbitron-OFL.txt [11406755…] — its copyright
+                    line reserves the name "Orbitron", which is why each family keeps its own copy rather
+                    than the folder keeping one shared OFL text.                                          file 11 800 B
+     Special Elite  APACHE 2.0  https://raw.githubusercontent.com/google/fonts/main/ofl/specialelite/OFL.txt is 404 —
+                    the family lives at https://raw.githubusercontent.com/google/fonts/main/apache/specialelite/
+                    (METADATA.pb: license "APACHE2", designer Astigmatic, added 2011-04-20). Its LICENSE.txt
+                    (200, 11 358 B) is saved beside the file as Special-Elite-LICENSE.txt [3b83ef96…]. The
+                    plan asked for OFL faces, and this one is not: it is flagged in press/CHANGELOG.md for
+                    the owner to keep or swap.                                                            file 53 296 B
+   The four woff2 above were fetched again on 2026-09-07 from the same CSS2
+   query and are md5-identical to what fonts.gstatic.com serves today (asking
+   for ONE weight instead of two gives a smaller static instance, 16 076 B for
+   Fredoka and 6 396 B for Orbitron, not these files — the two-weight query is
+   the one that hands the variable file). The EIGHT families the 2026-09-04
+   block above brought in (all OFL by their name records) are in the same
+   position these four were: a copyright line and a URL in the name table, no
+   licence text beside them. That is the owner's call, not this phase's;
+   press/NOTES.md §D.18 records it. */
+@font-face{font-family:'Bangers';font-style:normal;font-weight:400;font-display:swap;src:url(Bangers-400.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Fredoka';font-style:normal;font-weight:400;font-display:swap;src:url(Fredoka-400.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Fredoka';font-style:normal;font-weight:600;font-display:swap;src:url(Fredoka-400.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Orbitron';font-style:normal;font-weight:400;font-display:swap;src:url(Orbitron-400.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Orbitron';font-style:normal;font-weight:700;font-display:swap;src:url(Orbitron-400.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Special Elite';font-style:normal;font-weight:400;font-display:swap;src:url(Special-Elite-400.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}

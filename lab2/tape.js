@@ -92,6 +92,8 @@ window.Tape = (function () {
      from the length at the start and at the end; stretching a strip shows
      more of the same repeat, and the count catches up when you let go. That
      is one re-layout instead of hundreds, and you cannot see the difference. */
+  let pulling = null;                  // a strip in mid-drag, and how to put it back
+
   function grab(e) {
     const el = e.target.closest('.tape');
     if (!el) return;
@@ -127,11 +129,21 @@ window.Tape = (function () {
       }
       fit(el, now);
     };
-    const up = () => {
+    const off = () => {
       window.removeEventListener('pointermove', step);
       window.removeEventListener('pointerup', up);
       window.removeEventListener('pointercancel', up);
       layer.classList.remove('pulling');
+      pulling = null;
+    };
+    /* A SECOND FINGER ON THE PAPER IS THE CAMERA (lab.js: TWO FINGERS ARE THE
+       CAMERA), and this strip was only ever the first finger's business. So it
+       goes back to where it was picked up: nothing written, and nothing for
+       undo to put back — which is what every other press on the bench does
+       when a pinch takes it. */
+    const drop = () => { off(); fit(el, s0); };
+    const up = () => {
+      off();
       // now, once: this is also what re-cuts the CAUTIONs to the new length
       store.update(st => {
         const s = st.strips.find(v => v.id === id);
@@ -153,6 +165,7 @@ window.Tape = (function () {
       }
     };
     layer.classList.add('pulling');
+    pulling = drop;
     window.addEventListener('pointermove', step);
     window.addEventListener('pointerup', up);
     window.addEventListener('pointercancel', up);
@@ -168,6 +181,7 @@ window.Tape = (function () {
   }
 
   layer.addEventListener('pointerdown', grab);
+  document.addEventListener('lab:pinch', () => { if (pulling) pulling(); });
   layer.addEventListener('click', e => {
     const x = e.target.closest('[data-drop]');
     if (!x) return;

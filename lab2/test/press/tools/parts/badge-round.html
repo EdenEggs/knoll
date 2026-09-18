@@ -1,0 +1,77 @@
+<!-- BADGE-ROUND — the round badge, a rosette seal: a ring of scallops
+     round a coloured band round a face that holds a square for a picture,
+     with the page's word under the picture (PRESS-TABLE-PLAN.md Appendix
+     D: tags award, seal; a text part and an image-slot part, so it is
+     always live — ADDING.md §1.2). Layers: halo shadow body line highlight
+     detail image-slot text.
+
+     THE SCALLOPS are 12 half-circles standing on a base circle of radius
+     48 about (64,64), one straight up — the burst's twelve, so the two
+     seals sit together on a sheet. Twelve valleys 30° apart on r 48 are
+     24.8 apart, so each bump is an arc of radius 12.4 (half the chord —
+     exactly a half-circle, which is what makes the valleys cusps and not
+     dents) and its crown reaches r 58.8: the halo's 3 on top of that is
+     61.8, inside the box's 64. Eight scallops read as a flower, sixteen
+     as a wobble at 40 px; twelve are a seal. The one path is the halo's
+     stroke, the shadow, the body's rim and the line.
+
+     THE BODY is three fills: the scallop path in {{ skPrimary }}, a disc
+     of radius 48 in {{ skSecondary }} — the BAND, whose edge runs through
+     the twelve valleys so the scallops are petals on it — and a disc of
+     radius 40 in {{ skPrimary }} again, the FACE. An 8-wide band because
+     the glint needs somewhere to sit and a 4-wide band is a line at 40 px.
+     The face's edge is a line-layer circle; the band's outer edge is the
+     detail layer's, at 1.5, because it is the third ring and a plain
+     style is better without it.
+
+     THE IMAGE SLOT is a 36 × 36 square at x 46..82, y 34..70, corners
+     {{ skRadius }} (written sc-camel-rx, as viewBox is written
+     sc-camel-view-box — palette-keys.js's header says why): its top corners
+     sit at r 35 (√(18² + 30²)), five
+     inside the face's ring, and its bottom at r 19; the page may drop a
+     picture into it and the line layer's matching rect stays as its frame.
+     THE TEXT sits under it on the face's centre line at font-size 12,
+     baseline 95: the face is 50 wide at that depth (a chord 31 below the
+     centre) and five capitals at Sora 700 are about 43 wide at 12. A
+     longer word overflows the face — §3.6 keeps text slots to a word or
+     two.
+
+     THE SHADOW is the scallop path 3 down-right in {{ skShadow }}, the
+     least the contract allows so its rim stays inside a 6-wide halo.
+
+     THE HIGHLIGHT is one glint on the band's upper-left, an ellipse 6 ×
+     2.2 turned −45° on r 44 (the band's middle) at 225°, and a dot of
+     radius 2 further round at 255°. -->
+<sc-if value="{{ isBadgeRound }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M76.4,17.6 A12.4,12.4 0 0 1 97.9,30.1 A12.4,12.4 0 0 1 110.4,51.6 A12.4,12.4 0 0 1 110.4,76.4 A12.4,12.4 0 0 1 97.9,97.9 A12.4,12.4 0 0 1 76.4,110.4 A12.4,12.4 0 0 1 51.6,110.4 A12.4,12.4 0 0 1 30.1,97.9 A12.4,12.4 0 0 1 17.6,76.4 A12.4,12.4 0 0 1 17.6,51.6 A12.4,12.4 0 0 1 30.1,30.1 A12.4,12.4 0 0 1 51.6,17.6 A12.4,12.4 0 0 1 76.4,17.6 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+    </g>
+    <g data-layer="shadow">
+      <path d="M76.4,17.6 A12.4,12.4 0 0 1 97.9,30.1 A12.4,12.4 0 0 1 110.4,51.6 A12.4,12.4 0 0 1 110.4,76.4 A12.4,12.4 0 0 1 97.9,97.9 A12.4,12.4 0 0 1 76.4,110.4 A12.4,12.4 0 0 1 51.6,110.4 A12.4,12.4 0 0 1 30.1,97.9 A12.4,12.4 0 0 1 17.6,76.4 A12.4,12.4 0 0 1 17.6,51.6 A12.4,12.4 0 0 1 30.1,30.1 A12.4,12.4 0 0 1 51.6,17.6 A12.4,12.4 0 0 1 76.4,17.6 Z" transform="translate(3 3)" fill="{{ skShadow }}"></path>
+    </g>
+    <g data-layer="body">
+      <path d="M76.4,17.6 A12.4,12.4 0 0 1 97.9,30.1 A12.4,12.4 0 0 1 110.4,51.6 A12.4,12.4 0 0 1 110.4,76.4 A12.4,12.4 0 0 1 97.9,97.9 A12.4,12.4 0 0 1 76.4,110.4 A12.4,12.4 0 0 1 51.6,110.4 A12.4,12.4 0 0 1 30.1,97.9 A12.4,12.4 0 0 1 17.6,76.4 A12.4,12.4 0 0 1 17.6,51.6 A12.4,12.4 0 0 1 30.1,30.1 A12.4,12.4 0 0 1 51.6,17.6 A12.4,12.4 0 0 1 76.4,17.6 Z" fill="{{ skPrimary }}"></path>
+      <circle cx="64" cy="64" r="48" fill="{{ skSecondary }}"></circle>
+      <circle cx="64" cy="64" r="40" fill="{{ skPrimary }}"></circle>
+    </g>
+    <g data-layer="line">
+      <path d="M76.4,17.6 A12.4,12.4 0 0 1 97.9,30.1 A12.4,12.4 0 0 1 110.4,51.6 A12.4,12.4 0 0 1 110.4,76.4 A12.4,12.4 0 0 1 97.9,97.9 A12.4,12.4 0 0 1 76.4,110.4 A12.4,12.4 0 0 1 51.6,110.4 A12.4,12.4 0 0 1 30.1,97.9 A12.4,12.4 0 0 1 17.6,76.4 A12.4,12.4 0 0 1 17.6,51.6 A12.4,12.4 0 0 1 30.1,30.1 A12.4,12.4 0 0 1 51.6,17.6 A12.4,12.4 0 0 1 76.4,17.6 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      <circle cx="64" cy="64" r="40" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}"></circle>
+      <rect x="46" y="34" width="36" height="36" sc-camel-rx="{{ skRadius }}" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round"></rect>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="32.9" cy="32.9" rx="6" ry="2.2" transform="rotate(-45 32.9 32.9)" fill="{{ skHighlight }}"></ellipse>
+      <circle cx="52.6" cy="21.5" r="2" fill="{{ skHighlight }}"></circle>
+    </g>
+    <g data-layer="detail">
+      <circle cx="64" cy="64" r="48" fill="none" stroke="{{ skInk }}" stroke-width="1.5"></circle>
+    </g>
+    <g data-layer="image-slot">
+      <rect x="46" y="34" width="36" height="36" sc-camel-rx="{{ skRadius }}" fill="{{ skPaper }}"></rect>
+    </g>
+    <g data-layer="text">
+      <text x="64" y="95" font-size="12" text-anchor="middle" style="font-family:var(--display),sans-serif;font-weight:700" fill="{{ skInk }}">{{ skText }}</text>
+    </g>
+  </svg>
+</sc-if>

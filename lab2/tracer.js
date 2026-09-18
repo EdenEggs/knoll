@@ -203,6 +203,8 @@ window.Tracer = (function () {
        is outside the sheet the camera moves and is never re-rastered by a
        zoom the way a panel on the paper had to be. */
     document.body.appendChild(panel);
+    // the case can be pulled wider by its right edge, and remembers how wide
+    if (window.Lab && Lab.gripPanel) Lab.gripPanel(panel);
     wire();
     renderSlots();
     return panel;

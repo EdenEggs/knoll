@@ -1,0 +1,85 @@
+{
+  "slug": "pixelfort",
+  "title": "Pixelfort",
+  "tagline": "Hold the wall. Count the sunsets.",
+  "description": "A small stone fort, a smaller garrison, and a very long summer. Pixelfort is a wall-building strategy game drawn in sixteen colours: raise towers, post knights on the battlements, and see how many dawns you can hold out for. Every sprite is hand-placed on a four-pixel grid.",
+  "developer": "Fixture Games",
+  "publisher": "Fixture Games",
+  "releaseDate": "2027",
+  "platforms": [
+    "pc",
+    "switch"
+  ],
+  "genres": [
+    "strategy",
+    "pixel art",
+    "tower defence"
+  ],
+  "links": {
+    "steam": "https://example.com/pixelfort/steam",
+    "site": "https://example.com/pixelfort",
+    "trailer": "https://example.com/pixelfort/trailer"
+  },
+  "assets": [
+    {
+      "id": "logo",
+      "role": "logo",
+      "file": "art/logo.png",
+      "w": 256,
+      "h": 96,
+      "alpha": true,
+      "sha256": "000cfef26e38d10f57e1a76a08b6ec7d7cc40d5299a2d17bb302862bd450215d"
+    },
+    {
+      "id": "keyart-portrait",
+      "role": "keyart",
+      "file": "art/keyart-portrait.png",
+      "w": 480,
+      "h": 640,
+      "alpha": false,
+      "sha256": "ed2488f8bcd47d06e186567dea8cdcfcdb11fda328424258d7b65398702f5b89"
+    },
+    {
+      "id": "shot-1",
+      "role": "screenshot",
+      "file": "art/shot-1.png",
+      "w": 640,
+      "h": 360,
+      "alpha": false,
+      "sha256": "ffb99ae8426e3f5641c7b84121886500aa502ccff4811f31ae4867955b080537"
+    },
+    {
+      "id": "shot-2",
+      "role": "screenshot",
+      "file": "art/shot-2.png",
+      "w": 640,
+      "h": 360,
+      "alpha": false,
+      "sha256": "ff43393cf5c5a970bac56240f91b77a45a446638226b322ff5b358d5c72b87a9"
+    },
+    {
+      "id": "shot-3",
+      "role": "screenshot",
+      "file": "art/shot-3.png",
+      "w": 640,
+      "h": 360,
+      "alpha": false,
+      "sha256": "9263140fdb53062cef03a8fe7f088389dc3890e923b92e568d23758fdd8cd0e4"
+    },
+    {
+      "id": "shot-4",
+      "role": "screenshot",
+      "file": "art/shot-4.png",
+      "w": 640,
+      "h": 360,
+      "alpha": false,
+      "sha256": "859abadb363e6ee785b6aa788b8056ca42877c916fce57866dfb53a9ea0b9f2d"
+    }
+  ],
+  "rights": {
+    "attested": true,
+    "by": "fixture",
+    "at": "2026-09-07T00:00:00.000Z"
+  },
+  "source": "manual"
+}

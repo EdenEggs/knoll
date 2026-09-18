@@ -296,7 +296,11 @@
     <sc-if value="{{ done }}" hint-placeholder-val="{{ false }}">
       <div style="position: absolute; left: 0; right: 0; top: 60px; text-align: center; display: flex; flex-direction: column; gap: 6px; align-items: center">
         <div style="font-family: Rye, serif; font-size: 28px; color: #17120b">Welcome back to Knoll.</div>
-        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">the gate swings open · <a href="#" style="text-decoration: none">into the village →</a></div>
+        <!-- THE DOOR OUT OF THE GATE, the twin of /signup's. Points at /yard,
+             which is the village as far as this site has one. Nothing was logged
+             in to; the form still sends nothing. /yard's SIGN OUT is the way
+             back here, and it says the same thing about what it does not do. -->
+        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">the gate swings open · <a href="../yard/" style="text-decoration: none">into the village →</a></div>
       </div>
     </sc-if>
   </div>

@@ -1,0 +1,119 @@
+<!-- SWORD — two swords crossed, tips up, the heraldic pair
+     (PRESS-TABLE-PLAN.md Appendix D: tags sword, fantasy — sword is a
+     motif the vision call matches). Layers: halo shadow body line
+     highlight detail.
+
+     ONE SWORD, DRAWN TWICE. Each sword is the same four shapes in a local
+     frame with the blade pointing up (−y) and the origin where the blades
+     cross, and each is placed by one transform: translate(64 64) rotate(45)
+     for the front sword (tip to the upper right) and rotate(−45) for the
+     one behind. The blade is 14 wide with a 14-long point, tip at −76 and
+     shoulder at +31; the guard is a 38-wide bar from 31 to 41 with ends
+     bowed 3 outward; the grip a 10 × 24 rect (sc-camel-rx {{ skRadius }},
+     so a round style rounds it); the pommel a circle of radius 6 at 69. Tip to pommel
+     is 151 along the diagonal, 107 in x and in y — 10..118 in the box, 84 %
+     of it, and the halo's 3 still clears the edge. Blade {{ skPaper }}
+     (steel takes the page's white, the way the skull's bone does), guard
+     and pommel {{ skSecondary }} (the kit's gold, as frame-ornate uses it),
+     grip {{ skPrimary }}.
+
+     THE CROSSING is real, not an X of outlines. The front sword's body is
+     painted after the back sword's, so it covers it; and in the line layer
+     the BACK blade's outline is drawn in two pieces that stop 9 either
+     side of the crossing — the front blade covers |y| ≤ 7 of the back
+     blade's frame and its own outline covers to 8.5, so a 1.5-radius round
+     cap ending at 9 sits under the front edge and no line runs across the
+     front blade. The fuller (detail) on the back blade has the same gap.
+
+     THE HALO is every shape of both swords stroked 6 in {{ skPaper }}: the
+     union of the strokes is the outer edge, and whatever falls inside is
+     under the body. Every fill and stroke sits on the shape itself, never
+     on its group: the linter and the style pass read the shape, not what
+     it inherits. THE SHADOW is the same eight shapes in {{ skShadow }}
+     moved 3 down and right, the least the contract allows (burst says
+     why).
+
+     THE HIGHLIGHT is one glint down the front blade, an ellipse 1.8 × 13
+     along its left edge, and a dot of radius 1.8 on the front pommel.
+
+     THE DETAIL is 1.5 strokes (half the default line): a fuller down each
+     blade from −58 to 24 and three wraps across each grip 6 apart. A
+     simple style drops them and the swords are still swords. -->
+<sc-if value="{{ isSword }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <g transform="translate(64 64) rotate(-45)">
+        <path d="M0,-76 L7,-62 L7,31 L-7,31 L-7,-62 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+        <path d="M-19,31 Q-22,36 -19,41 L19,41 Q22,36 19,31 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+        <rect x="-5" y="41" width="10" height="24" sc-camel-rx="{{ skRadius }}" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></rect>
+        <circle cx="0" cy="69" r="6" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></circle>
+      </g>
+      <g transform="translate(64 64) rotate(45)">
+        <path d="M0,-76 L7,-62 L7,31 L-7,31 L-7,-62 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+        <path d="M-19,31 Q-22,36 -19,41 L19,41 Q22,36 19,31 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+        <rect x="-5" y="41" width="10" height="24" sc-camel-rx="{{ skRadius }}" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></rect>
+        <circle cx="0" cy="69" r="6" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></circle>
+      </g>
+    </g>
+    <g data-layer="shadow">
+      <g transform="translate(3 3)">
+        <g transform="translate(64 64) rotate(-45)">
+          <path d="M0,-76 L7,-62 L7,31 L-7,31 L-7,-62 Z" fill="{{ skShadow }}"></path>
+          <path d="M-19,31 Q-22,36 -19,41 L19,41 Q22,36 19,31 Z" fill="{{ skShadow }}"></path>
+          <rect x="-5" y="41" width="10" height="24" sc-camel-rx="{{ skRadius }}" fill="{{ skShadow }}"></rect>
+          <circle cx="0" cy="69" r="6" fill="{{ skShadow }}"></circle>
+        </g>
+        <g transform="translate(64 64) rotate(45)">
+          <path d="M0,-76 L7,-62 L7,31 L-7,31 L-7,-62 Z" fill="{{ skShadow }}"></path>
+          <path d="M-19,31 Q-22,36 -19,41 L19,41 Q22,36 19,31 Z" fill="{{ skShadow }}"></path>
+          <rect x="-5" y="41" width="10" height="24" sc-camel-rx="{{ skRadius }}" fill="{{ skShadow }}"></rect>
+          <circle cx="0" cy="69" r="6" fill="{{ skShadow }}"></circle>
+        </g>
+      </g>
+    </g>
+    <g data-layer="body">
+      <g transform="translate(64 64) rotate(-45)">
+        <path d="M0,-76 L7,-62 L7,31 L-7,31 L-7,-62 Z" fill="{{ skPaper }}"></path>
+        <path d="M-19,31 Q-22,36 -19,41 L19,41 Q22,36 19,31 Z" fill="{{ skSecondary }}"></path>
+        <rect x="-5" y="41" width="10" height="24" sc-camel-rx="{{ skRadius }}" fill="{{ skPrimary }}"></rect>
+        <circle cx="0" cy="69" r="6" fill="{{ skSecondary }}"></circle>
+      </g>
+      <g transform="translate(64 64) rotate(45)">
+        <path d="M0,-76 L7,-62 L7,31 L-7,31 L-7,-62 Z" fill="{{ skPaper }}"></path>
+        <path d="M-19,31 Q-22,36 -19,41 L19,41 Q22,36 19,31 Z" fill="{{ skSecondary }}"></path>
+        <rect x="-5" y="41" width="10" height="24" sc-camel-rx="{{ skRadius }}" fill="{{ skPrimary }}"></rect>
+        <circle cx="0" cy="69" r="6" fill="{{ skSecondary }}"></circle>
+      </g>
+    </g>
+    <g data-layer="line">
+      <g transform="translate(64 64) rotate(-45)">
+        <path d="M-7,-9 L-7,-62 L0,-76 L7,-62 L7,-9 M7,9 L7,31 L-7,31 L-7,9" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+        <path d="M-19,31 Q-22,36 -19,41 L19,41 Q22,36 19,31 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+        <rect x="-5" y="41" width="10" height="24" sc-camel-rx="{{ skRadius }}" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></rect>
+        <circle cx="0" cy="69" r="6" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></circle>
+      </g>
+      <g transform="translate(64 64) rotate(45)">
+        <path d="M0,-76 L7,-62 L7,31 L-7,31 L-7,-62 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+        <path d="M-19,31 Q-22,36 -19,41 L19,41 Q22,36 19,31 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+        <rect x="-5" y="41" width="10" height="24" sc-camel-rx="{{ skRadius }}" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></rect>
+        <circle cx="0" cy="69" r="6" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></circle>
+      </g>
+    </g>
+    <g data-layer="highlight">
+      <g transform="translate(64 64) rotate(45)">
+        <ellipse cx="-3.5" cy="-40" rx="1.8" ry="13" fill="{{ skHighlight }}"></ellipse>
+        <circle cx="-2" cy="67" r="1.8" fill="{{ skHighlight }}"></circle>
+      </g>
+    </g>
+    <g data-layer="detail">
+      <g transform="translate(64 64) rotate(-45)">
+        <path d="M0,-58 L0,-9 M0,9 L0,24" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round"></path>
+        <path d="M-5,47 L5,47 M-5,53 L5,53 M-5,59 L5,59" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round"></path>
+      </g>
+      <g transform="translate(64 64) rotate(45)">
+        <path d="M0,-58 L0,24" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round"></path>
+        <path d="M-5,47 L5,47 M-5,53 L5,53 M-5,59 L5,59" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round"></path>
+      </g>
+    </g>
+  </svg>
+</sc-if>

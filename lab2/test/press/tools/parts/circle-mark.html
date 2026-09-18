@@ -1,0 +1,59 @@
+<!-- CIRCLE-MARK — the loose circle a hand draws round a thing to say
+     "this one": one open line that goes round once, keeps going, and
+     stops a little past where it began, so the two turns overlap and
+     cross (PRESS-TABLE-PLAN.md Appendix D: tags pointer, sketch). Layers:
+     halo shadow body line. The body layer is empty and there is no
+     highlight and no detail, on purpose, as underline.html does it: this
+     part is a line and nothing else — one open path in the line layer,
+     its die-cut edge in the halo, and a faint copy of itself for the
+     shadow. A stroke has no face to glint and no fine work to drop.
+
+     THE CIRCLE is one open cubic path of thirteen segments: 1.65 turns
+     clockwise from one o'clock, sampled every 45° and joined by cubics
+     whose handles are a sixth of the chord to the neighbours on either
+     side (a Catmull-Rom spline, the curve that passes through every
+     sample without a kink), so nothing on it is a true arc. The radius
+     wobbles about 35 by up to 3.1 — three small sines, two, three and
+     five waves round, none of them the loudest: a first cut with a
+     three-wave alone at 2.2 came out a rounded triangle, which is what a
+     single wave round a circle always draws — and the second turn runs
+     1.8 tighter with its centre drifted 2.6 left and 2 down, which is why
+     it crosses the first turn twice and ends inside it: the way a pen
+     that went round twice actually lands. It is written in an 85.3-unit
+     frame inside a scale(1.5), so that the line layer's stroke —
+     {{ skStroke }} and nothing else, as the contract says — comes out 4.5
+     wide in the box at the default 3: a marker's line, not a pen's, and
+     still one the style pass re-weights. 1.5 because at 40 px the ring is
+     a 32-px loop and a 3-unit stroke there is a hairline. In the box the
+     ink spans about 11..115 across and 15..114 down, 81 % by 77 %, and its
+     centre sits within 2 of the box's.
+
+     THE HALO is the same path stroked 7 in that frame, which is 10.5 in
+     the box: the 4.5-wide ink plus 3 outside it on each side, the die-cut
+     margin every part keeps. It reaches 6 and 122 at most.
+
+     THE SHADOW is the same path stroked in {{ skShadow }} at the same
+     width, moved 3 down and right (2 in the scaled frame — 3 in the box).
+     Under the ink it shows as a sliver along the lower-right of the
+     ring, the cel shade of a raised stroke — the faint shadow a sketch
+     mark gets and no more. -->
+<sc-if value="{{ isCircleMark }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <g transform="scale(1.5)">
+        <path d="M54.4,10.3 C57.6,13.3 69.6,20.9 73.3,28.5 C77.1,36.1 79.8,48.5 76.8,55.8 C73.8,63.1 63,68.9 55.1,72.2 C47.3,75.6 37.5,77.9 29.7,75.7 C21.9,73.6 11.6,66.2 8.4,59.1 C5.3,52 8,41 10.9,33.3 C13.8,25.7 19.1,16.4 25.8,13.2 C32.6,10 44,11 51.2,14 C58.4,17 65.6,24 69.1,31.2 C72.6,38.4 75.4,50.3 72.5,57.2 C69.6,64.1 59.2,69.5 51.8,72.6 C44.3,75.8 35.1,78.1 27.7,76.1 C20.3,74 10.8,63 7.5,60.4" fill="none" stroke="{{ skPaper }}" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"></path>
+      </g>
+    </g>
+    <g data-layer="shadow">
+      <g transform="scale(1.5) translate(2 2)">
+        <path d="M54.4,10.3 C57.6,13.3 69.6,20.9 73.3,28.5 C77.1,36.1 79.8,48.5 76.8,55.8 C73.8,63.1 63,68.9 55.1,72.2 C47.3,75.6 37.5,77.9 29.7,75.7 C21.9,73.6 11.6,66.2 8.4,59.1 C5.3,52 8,41 10.9,33.3 C13.8,25.7 19.1,16.4 25.8,13.2 C32.6,10 44,11 51.2,14 C58.4,17 65.6,24 69.1,31.2 C72.6,38.4 75.4,50.3 72.5,57.2 C69.6,64.1 59.2,69.5 51.8,72.6 C44.3,75.8 35.1,78.1 27.7,76.1 C20.3,74 10.8,63 7.5,60.4" fill="none" stroke="{{ skShadow }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      </g>
+    </g>
+    <g data-layer="body"></g>
+    <g data-layer="line">
+      <g transform="scale(1.5)">
+        <path d="M54.4,10.3 C57.6,13.3 69.6,20.9 73.3,28.5 C77.1,36.1 79.8,48.5 76.8,55.8 C73.8,63.1 63,68.9 55.1,72.2 C47.3,75.6 37.5,77.9 29.7,75.7 C21.9,73.6 11.6,66.2 8.4,59.1 C5.3,52 8,41 10.9,33.3 C13.8,25.7 19.1,16.4 25.8,13.2 C32.6,10 44,11 51.2,14 C58.4,17 65.6,24 69.1,31.2 C72.6,38.4 75.4,50.3 72.5,57.2 C69.6,64.1 59.2,69.5 51.8,72.6 C44.3,75.8 35.1,78.1 27.7,76.1 C20.3,74 10.8,63 7.5,60.4" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      </g>
+    </g>
+  </svg>
+</sc-if>

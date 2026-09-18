@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "analysis",
+  "description": "PRESS-TABLE-PLAN.md Appendix A, transcribed rule for rule; §3.2 says what it means. The machine-derived half of a page, kept so the page can be rebuilt without paying for the vision call twice. Every number below is the plan's.",
+  "type": "object",
+  "required": ["palette", "dark", "stats"],
+  "properties": {
+    "palette": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": ["hex", "weight", "L", "C", "h"],
+        "properties": {
+          "hex":    { "type": "string", "pattern": "^#[0-9a-f]{6}$" },
+          "weight": { "type": "number" },
+          "L":      { "type": "number" },
+          "C":      { "type": "number" },
+          "h":      { "type": "number" }
+        }
+      }
+    },
+    "dark": { "type": "boolean" },
+    "stats": {
+      "type": "object",
+      "properties": {
+        "pixelSize":    { "type": "integer", "minimum": 0, "maximum": 16 },
+        "outline":      { "type": "object", "properties": { "present": { "type": "boolean" }, "weight": { "type": "number" } } },
+        "paletteCount": { "type": "integer" },
+        "saturation":   { "type": "number" },
+        "contrast":     { "type": "number" },
+        "hfEnergy":     { "type": "number" },
+        "edgeDensity":  { "type": "number" }
+      }
+    },
+    "vibe":         { "oneOf": [{ "type": "null" }, { "$ref": "vibe.schema.json" }] },
+    "vibeCacheKey": { "type": "string" }
+  }
+}

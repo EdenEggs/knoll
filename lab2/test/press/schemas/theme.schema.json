@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "theme",
+  "description": "PRESS-TABLE-PLAN.md Appendix A, transcribed rule for rule; §3.3 says what it means. The token sheet one page overrides lab.css with, plus the --sk-* sticker roles and the font pairing id. The nine ids are press/fonts.js's PAIRINGS (CONTRACTS §3).",
+  "type": "object",
+  "required": ["dark", "tokens", "fonts"],
+  "properties": {
+    "dark": { "type": "boolean" },
+    "tokens": {
+      "type": "object",
+      "propertyNames": { "pattern": "^--[a-z0-9-]+$" },
+      "additionalProperties": { "type": "string" }
+    },
+    "fonts": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": { "enum": ["clean", "pixel", "hand", "rustic", "gothic", "comic", "cozy", "scifi", "typewriter"] }
+      }
+    }
+  }
+}

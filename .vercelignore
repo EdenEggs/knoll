@@ -21,3 +21,7 @@ toem2/results
 toem2/probe-*.js
 serve.js
 lab2/perf
+lab2/bench-template
+folder_*/*.keep-bak
+folder_*/*.tmp
+.folder_*.making

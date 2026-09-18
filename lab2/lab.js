@@ -1462,6 +1462,7 @@ window.Lab = (function () {
       });
       cx = e.clientX; cy = e.clientY;
       dragging = true;
+      carrying = drop;                                 // …and how to put it all back
       try { handle.setPointerCapture(e.pointerId); } catch (err) {}
       e.preventDefault();
     });
@@ -1473,9 +1474,35 @@ window.Lab = (function () {
       edgeWatch(cx, cy, follow);
     });
 
+    /* THE CREW PUT BACK WHERE IT WAS PICKED UP, and nothing filed — the other
+       ending of the drag below. A second finger on the paper is the camera, so
+       the press that was carrying these is a press that never happened: x0/y0
+       are where each of them started, kept by the pointerdown above for the
+       'did the hand actually take it anywhere' test. */
+    const drop = () => {
+      if (!dragging) return;
+      dragging = false;
+      carrying = null;
+      edgeStop();
+      crew.forEach(g => {
+        g.el.classList.remove('dragging');
+        undrive(g.el);
+        /* NOT SAVED, which end() below deliberately does and this must not.
+           The drag never wrote anything — carry() is a transform, and the
+           saved position is still the one from before the press — so putting
+           the element back is the whole job, and a save here would leave a
+           remembered position behind for a press that never happened. The
+           probe caught exactly that: a feature with nothing saved for it had
+           a position in localStorage after a pinch passed over it. */
+        place(g.el, g.x0, g.y0, false);
+      });
+      crew = [];
+    };
+
     const end = e => {
       if (!dragging) return;
       dragging = false;
+      carrying = null;
       edgeStop();
       try { handle.releasePointerCapture(e.pointerId); } catch (err) {}
       crew.forEach(g => {
@@ -1667,6 +1694,12 @@ window.Lab = (function () {
   const fingerPan = t => !!(t && t.closest && !t.closest(HANDS_OFF) && !scrollable(t, 0, 1) && !scrollable(t, 0, -1));
 
   let hand = false, tool = 'move', pan = null;
+  /* a feature in mid-drag, and how to put it back where it was picked up. The
+     second finger of a pinch takes the press back (TWO FINGERS ARE THE CAMERA,
+     below), and a drag of a machine is one of the three presses on this bench
+     that has something to put back — the other two are the wall's and the
+     tape's, and each answers 'lab:pinch' in its own file. */
+  let carrying = null;
 
   const paintTool = () => document.body.classList.toggle('lab-hand', hand || tool === 'hand');
   function setHand(on) { if (hand !== on) { hand = on; paintTool(); } }
@@ -1870,6 +1903,160 @@ window.Lab = (function () {
   bench.addEventListener('pointercancel', e => { if (pan && e.pointerId === pan.id) endPan(); }, true);
   window.addEventListener('blur', () => { endPan(); endSweep(); edgeStop(); setHand(false); });
 
+  /* ── TWO FINGERS ARE THE CAMERA ──────────────────────────────────────────
+     Everything above is a mouse's: a wheel to scroll, a middle button to pan
+     from anywhere, ctrl to zoom by, a space bar for the hand. A phone has
+     none of the four, and the one finger it does have is spoken for —
+     fingerPan hands the paper to the camera only where nothing else wants the
+     press, and this bench is COVERED in features, so a finger that lands
+     almost anywhere drags a machine instead of moving the sheet. It was the
+     iron hive that the report came from ("I can't move around, holding and
+     dragging just moved assets"), and it is the same file and the same
+     sentence here.
+
+     Every canvas anybody has ever used answers that with the same gesture, so
+     this one does too: TWO FINGERS PAN AND PINCH. One finger goes on meaning
+     what it has always meant, so nothing anybody had learnt here is taken
+     away to pay for it.
+
+     IT IS ONE GESTURE AND NOT TWO. The pan and the zoom are not worked out
+     apart and added together — the world point under the MIDDLE of the two
+     fingers is taken when they land and put back under wherever their middle
+     is now, at a zoom scaled by how far apart they have moved since. The
+     sheet is glued to the hand: what you pinched about stays under the pinch,
+     and there is no order of operations to get wrong. One finger left down is
+     that same arithmetic with the span held still, which is why lifting one
+     of the two goes on panning rather than stopping dead.
+
+     THE SECOND FINGER TAKES THE FIRST ONE'S PRESS BACK. By the time it lands
+     the first finger is already holding something — a machine mid-drag, a
+     stroke a few points long, a note being reshaped — because nothing could
+     have known a second one was coming. So 'lab:pinch' is said the instant it
+     arrives, and whoever is holding something puts it back untouched and
+     files nothing: the feature drag above (carrying), wall.js's listener, and
+     tape.js's. A PINCH LEAVES NOTHING BEHIND: no machine a few pixels off
+     where it was, no dot where the pen went down, nothing on the undo stack.
+
+     THE FINGERS ARE HEARD ON THE WINDOW, on the capture phase, which is the
+     earliest anything on the page sees them — this file's own handlers above
+     included. That is what lets the second finger be swallowed before the
+     bench, a feature or the drawer has been told there was a press at all,
+     and it is why the pinch itself never has to undo anything: nothing else
+     ever hears of the fingers it is using. (2026-09-11, ported from the iron
+     hive.) */
+  const fingers = new Map();             // the fingers on the paper: id → where each one is
+  let pinch = null;                      // { z, d, wx, wy } — how the sheet was held when they landed
+  let pinchRaf = 0, pinchAt = -1e9;      // …and when the last of them left
+
+  /* the fingers as one point: where their middle is, and how far apart they
+     are. One finger is its own middle and spans nothing, so the zoom holds. */
+  function midOf(f) {
+    if (f.length < 2) return { x: f[0].x, y: f[0].y, d: 0 };
+    return { x: (f[0].x + f[1].x) / 2, y: (f[0].y + f[1].y) / 2,
+             d: Math.max(1, Math.hypot(f[1].x - f[0].x, f[1].y - f[0].y)) };
+  }
+
+  /* TAKE HOLD OF THE SHEET WHERE THE FINGERS ARE NOW — said when the second
+     one lands and again whenever one is added or taken away. Every reading is
+     relative to this one, so a finger lifted mid-pinch re-anchors instead of
+     throwing the sheet across the bench. */
+  function grip() {
+    const f = [...fingers.values()];
+    if (!f.length) { pinch = null; return; }
+    const m = midOf(f), w = toWorld(m.x, m.y);
+    pinch = { z: Z, d: m.d, wx: w.x, wy: w.y };
+  }
+
+  function follow() {
+    const f = [...fingers.values()];
+    if (!pinch || !f.length) return;
+    const m = midOf(f), b = box();
+    if (m.d && pinch.d) Z = clamp(pinch.z * m.d / pinch.d, ZMIN, ZMAX);
+    PX = m.x - b.left - pinch.wx * Z;
+    PY = m.y - b.top - pinch.wy * Z;
+    clampCam(); applyCam(); emitZoom();
+  }
+
+  /* ONE CAMERA WRITE PER FRAME, not one per finger. Two fingers on a screen
+     report a move each, and applyCam is a scroll, a keyframe and the grid —
+     work better done once with both readings in it than twice. Chrome hands
+     pointer moves over at the top of the frame, so the frame this asks for is
+     the one already being drawn: the coalescing costs no latency. */
+  const flush = () => { if (pinchRaf) { cancelAnimationFrame(pinchRaf); pinchRaf = 0; follow(); } };
+
+  window.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'touch' || !bench.contains(e.target)) return;
+    flush();                                      // the camera caught up, with the fingers as they were
+    fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (fingers.size < 2) return;                 // one finger is still everybody else's
+    if (!pinch) {
+      endPan(); endSweep(); edgeStop(); stopTween();
+      document.dispatchEvent(new CustomEvent('lab:pinch'));
+      if (carrying) carrying();                   // …including a machine this hand was carrying
+      // the dress a pan already wears: nothing selectable, and the sheet's own
+      // pointer-events off while the hand has it (lab.css)
+      document.body.classList.add('lab-panning');
+    }
+    grip();
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+
+  window.addEventListener('pointermove', e => {
+    const f = fingers.get(e.pointerId);
+    if (!f) return;
+    f.x = e.clientX; f.y = e.clientY;
+    if (!pinch) return;                           // one finger: whoever has it still has it
+    if (!pinchRaf) pinchRaf = requestAnimationFrame(() => { pinchRaf = 0; follow(); });
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+
+  function lift(e) {
+    if (!fingers.has(e.pointerId)) return;
+    if (pinch) { flush(); e.preventDefault(); e.stopPropagation(); }
+    fingers.delete(e.pointerId);
+    if (!pinch) return;
+    if (fingers.size) { grip(); return; }         // one still down: it goes on panning
+    pinch = null;
+    pinchAt = performance.now();
+    document.body.classList.remove('lab-panning');
+  }
+  window.addEventListener('pointerup', lift, true);
+  window.addEventListener('pointercancel', lift, true);
+  // a tab that goes away mid-pinch would otherwise leave its fingers down for ever
+  window.addEventListener('blur', () => {
+    if (!fingers.size) return;
+    fingers.clear();
+    if (!pinch) return;
+    pinch = null;
+    pinchAt = performance.now();
+    document.body.classList.remove('lab-panning');
+  });
+
+  /* AND THE CLICK AT THE END OF A PINCH IS NOT A CLICK ON ANYTHING. The
+     browser makes one out of the finger that pressed first if that finger
+     happened to stay still, and the paper is full of things that take a click
+     seriously — a feature wakes up to one, a strip of tape comes off the bench
+     by one. So the paper's clicks are swallowed while the fingers are down and
+     for a moment after they leave. The chrome's are not: no pinch OF THE PAPER
+     can end on a button that is not on it, and a tool picked up straight after
+     one is a press somebody meant. */
+  document.addEventListener('click', e => {
+    if (!pinch && performance.now() - pinchAt > 400) return;
+    if (!bench.contains(e.target)) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+
+  /* SAFARI'S OWN TWO-FINGER ZOOM, which is the PAGE's scale sitting under this
+     one and multiplying it — the same refusal as the ctrl-wheel above, said in
+     the one event webkit has for it. touch-action:none on the bench is meant
+     to be enough and is, everywhere it is honoured; this is the belt for those
+     braces. Scoped to the bench, so the header and the docks can still be
+     zoomed by anybody who needs them bigger. */
+  bench.addEventListener('gesturestart', e => e.preventDefault());
+
   // windows and linux want a middle click to start an autoscroll or a paste — no
   bench.addEventListener('mousedown', e => { if (e.button === 1) e.preventDefault(); }, true);
   bench.addEventListener('auxclick', e => { if (e.button === 1) { e.preventDefault(); e.stopPropagation(); } }, true);
@@ -2009,6 +2196,138 @@ window.Lab = (function () {
     if (e.code === 'Space' || e.key === ' ') { setHand(false); if (pan && pan.live) endPan(); }
   });
 
+  /* ─── THE SIDE PANELS PULL WIDER ────────────────────────────────────────
+     A grip down the right edge of a .lab-panel. It writes ONE number — the
+     panel's own --lp-w — and lab.css has every other number that decides what
+     the inside does with it: the sticker drawer's grid is written to go two,
+     three, four columns across the range on its own, and there is no column
+     count in here to fall out of step with it.
+
+     IT LIVES HERE BECAUSE THE CASE IS SHARED. The tracing table and the
+     sticker drawer are the same .lab-panel in the same dark case, written
+     once and worn by both (lab.css, THE SIDE PANELS), so a pull that worked
+     on one and not the visually identical other would read as a fault. Both
+     call this; each remembers its OWN width, because they are the same case
+     and not the same job — pulling the drawer out to four columns says
+     nothing about the table.
+
+     SCREEN PIXELS, NOT WORLD ONES. A re-cut feature divides the drag by the
+     zoom because it lives on the sheet that the camera scales; this is chrome
+     bolted to the viewport, so the pointer and the panel are already counting
+     in the same units and there is nothing to convert.
+
+     The width is remembered on this machine only, in the bench's own
+     namespace — PW is KEY with its tail swapped, so the two benches sharing
+     an origin cannot read each other's, the same split every other key here
+     makes. Reads are forgiving: storage off gets the design's 344 back and a
+     grip that still works for the session. */
+  const PW = KEY.replace(':pos:', ':panelw:');
+  const PW_MIN = 344, PW_MAX = 720;
+  const clampW = w => Math.max(PW_MIN, Math.min(PW_MAX, Math.round(w)));
+
+  function gripPanel(panel) {
+    if (!panel || panel.querySelector('.lp-grip')) return;
+
+    /* AND IT MUST NOT COME TO REST ON THE DOCK. lab.css already shortens a
+       panel that would meet the dock — but that rule is a media query on
+       1300px, and 1300 was arithmetic on a panel 344 wide: 16 + 344 + 16 on
+       one side of centre. Pull the drawer to 720 and the meeting point moves
+       out past 2000, so on an ordinary 1600 window a wide drawer comes down
+       squarely on the tool buttons. A media query cannot be told how far the
+       grip has been pulled, so the clearance is MEASURED instead: if the
+       panel's column overlaps the dock's, the panel stops above it, and
+       there is no dock width written down anywhere here to go stale.
+
+       The test is HORIZONTAL only, which is what keeps it from chasing its
+       own tail — the panel's left and right do not depend on its height, so
+       setting the height cannot change the answer. */
+    /* IS IT ON THE SCREEN is asked with getClientRects, NOT offsetParent.
+       offsetParent is null for every position:fixed element — and the panel,
+       the dock and the options row are all fixed — so the obvious guard here
+       turned the whole of this function off and left the overlap it exists to
+       prevent. A rect with a size is the honest question. */
+    const up = el => !!el && !el.hidden && el.getClientRects().length > 0;
+
+    function clearDock() {
+      if (!up(panel)) return;
+      const p = panel.getBoundingClientRect();
+      let top = Infinity;
+      ['tool-opts', 'tool-dock'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!up(el)) return;
+        const r = el.getBoundingClientRect();
+        // same column, with the panel's own shadow's worth of daylight kept
+        if (r.left < p.right + 16 && r.right > p.left) top = Math.min(top, r.top);
+      });
+      if (top === Infinity) panel.style.removeProperty('--lp-maxh');
+      else panel.style.setProperty('--lp-maxh', Math.max(160, Math.round(top - p.top - 14)) + 'px');
+    }
+
+    const put = w => { panel.style.setProperty('--lp-w', clampW(w) + 'px'); clearDock(); };
+    const keep = () => { try { localStorage.setItem(PW + panel.id, String(panel.offsetWidth)); } catch (e) {} };
+
+    let was = 0;
+    try { was = parseFloat(localStorage.getItem(PW + panel.id)) || 0; } catch (e) {}
+    if (was) put(was);
+
+    /* the three moments the answer can change: the panel being put up, the
+       window changing shape, and the pull itself (which put() covers). The
+       observer watches [hidden] ALONE — watching style would see the height
+       this very function writes and come straight back round. */
+    new MutationObserver(clearDock).observe(panel, { attributes: true, attributeFilter: ['hidden'] });
+    window.addEventListener('resize', clearDock);
+    clearDock();
+
+    const grip = document.createElement('button');
+    grip.type = 'button';
+    grip.className = 'lp-grip';
+    grip.title = 'pull to widen the panel \u00b7 double-click to put it back';
+    grip.setAttribute('aria-label', 'widen the panel');
+    panel.appendChild(grip);
+
+    let w0 = 0, x0 = 0, on = false;
+    grip.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      on = true; w0 = panel.offsetWidth; x0 = e.clientX;
+      panel.classList.add('lp-sizing');
+      document.body.classList.add('lp-resizing');
+      try { grip.setPointerCapture(e.pointerId); } catch (err) {}
+      e.preventDefault(); e.stopPropagation();
+    });
+    grip.addEventListener('pointermove', e => { if (on) put(w0 + (e.clientX - x0)); });
+    const done = e => {
+      if (!on) return;
+      on = false;
+      panel.classList.remove('lp-sizing');
+      document.body.classList.remove('lp-resizing');
+      try { grip.releasePointerCapture(e.pointerId); } catch (err) {}
+      keep();
+    };
+    grip.addEventListener('pointerup', done);
+    grip.addEventListener('pointercancel', done);
+
+    /* BACK TO THE WIDTH IT WAS DRAWN AT, and the saved one GOES rather than
+       being overwritten — the same difference double-clicking a feature's
+       corner makes, and the reason a panel put back stays put back. */
+    grip.addEventListener('dblclick', e => {
+      e.stopPropagation();
+      panel.style.removeProperty('--lp-w');
+      clearDock();
+      try { localStorage.removeItem(PW + panel.id); } catch (err) {}
+    });
+
+    // it is a button, so it is already on the tab ring: the arrows are all it
+    // needs to mean something there. Shift for a bigger step, as everywhere.
+    grip.addEventListener('keydown', e => {
+      const step = e.shiftKey ? 48 : 16;
+      if (e.key === 'ArrowRight') put(panel.offsetWidth + step);
+      else if (e.key === 'ArrowLeft') put(panel.offsetWidth - step);
+      else return;
+      keep();
+      e.preventDefault();
+    });
+  }
+
   const resetDataBtn = document.getElementById('lab-reset-data');
   if (resetDataBtn) resetDataBtn.addEventListener('click', () => { if (confirm('Wipe everything lab 2 has saved on this device — the drawings, the tape, the lot?')) resetData(); });
 
@@ -2019,6 +2338,9 @@ window.Lab = (function () {
     hidpi, toWorld, toScreen, setZoom, panBy, camTo, fit, focusOn, jumpTo, moving,
     stamp, remember, undoTop, undoMove, undo, copy, paste, deleteCopy, isCopy,
     raise, lower, remove, rankOf, menuAt, closeMenu,
+    /* the pull-wider grip on the shared .lab-panel case; tracer.js and
+       stickers.js each hand their panel over as they build it */
+    gripPanel,
     /* what the menu has taken off the paper — keep.js reports it, so the
        file hears about a delete the same way it hears about a move */
     get gone() { return stash.slice(); },
@@ -2028,5 +2350,9 @@ window.Lab = (function () {
        who wants it — a copy it has written into index.html has to come OUT
        of this list, or the next load builds it twice. */
     get copies() { return copies; },
-    get zoom() { return Z; }, get pan() { return { x: PX, y: PY }; } };
+    get zoom() { return Z; }, get pan() { return { x: PX, y: PY }; },
+    /* IS THE CAMERA IN TWO FINGERS? Nothing has to ask — every press this
+       takes is taken back through 'lab:pinch' — but a getter costs a line and
+       the probe has to catch the gesture while it is still in flight. */
+    get pinching() { return !!pinch; } };
 })();

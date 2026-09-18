@@ -1,0 +1,45 @@
+{
+  "fixture": "neonrun",
+  "hints": {
+    "dark": true
+  },
+  "rank": [
+    {
+      "preset": "neon",
+      "score": 0.2
+    },
+    {
+      "preset": "cozy-soft",
+      "score": 2.9
+    },
+    {
+      "preset": "cel",
+      "score": 3.6
+    }
+  ],
+  "stats": {
+    "contrast": 0.1161,
+    "edgeDensity": 0.1496,
+    "hfEnergy": 0.0058,
+    "outline": {
+      "present": true,
+      "weight": 0.3
+    },
+    "paletteCount": 61,
+    "pixelSize": 0,
+    "saturation": 0.1051
+  },
+  "vector": {
+    "corners": 0.3,
+    "finish": "glow",
+    "linePasses": 1,
+    "lineShow": true,
+    "lineWeight": 0.3,
+    "lineWobble": 0,
+    "paletteSize": 0,
+    "pixel": 0,
+    "saturation": 0.4728,
+    "shading": "soft",
+    "texture": "scanlines"
+  }
+}

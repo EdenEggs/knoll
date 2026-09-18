@@ -1,0 +1,87 @@
+<!-- BUBBLE-THOUGHT — the comic thought bubble: a scalloped cloud with two
+     puffs trailing away to the bottom-left, and the page's words inside it
+     (PRESS-TABLE-PLAN.md Appendix D: tag comic; a text slot, so this part
+     is always live — ADDING.md §1.2). Layers: halo shadow body line
+     highlight detail text.
+
+     IT BOBS, NOT SWAYS: the root animation is sk-bob, because a thought
+     hangs over its thinker and a lean would tip the words with it — the
+     same reason bubble-speech bobs.
+
+     THE CLOUD is nine lobes round an ellipse centred on (64,50), 50 by 31:
+     nine vertices 40° apart starting at −70° so a lobe, not a valley, sits
+     on the top and the outline is mirror-symmetric about x=64; each lobe is
+     an arc between neighbouring vertices with a radius of 0.58 × its chord,
+     which bows it out by a little over a quarter of the chord — nine is the
+     fewest lobes that still look like a cloud and not a flower, and 0.58
+     is where the lobes are round without pinching into the valleys. The
+     cloud's ink runs x 12–116, y 11–87. The TRAIL is two circles down to
+     the left: radius 7.5 at (34,97), radius 4.5 at (19,112) — the big one
+     about twelve clear of the cloud's underside, the small one a further
+     twelve on, the way puffs thin out — so the whole sticker is x 12–116,
+     y 11–117: 81 % × 83 %, centred on (64,64), the halo's 3 within the box.
+     The cloud and both puffs are the halo's stroke, the shadow, the body's
+     rim and the line, so every layer has the same silhouette.
+
+     THE BODY is two fills: the silhouette in skPrimary, and over it the
+     FACE — the same nine-lobe cloud round a smaller ellipse (41 by 23, the
+     same vertices' angles, the same 0.58) in skPaper, which leaves a rim of
+     about 9 all round, and a paper dot of radius 3.5 in the big puff — so
+     the words in skInk sit on paper and the rim carries the glint. The
+     small puff stays solid: a 4.5 circle has no room for a face.
+
+     THE SHADOW is the silhouette 3 down and right in skShadow, the least
+     the contract allows, so the halo's rim clears the paper at the small
+     puff.
+
+     THE HIGHLIGHT is one glint in the upper-left rim: an ellipse 6 × 2.2
+     at (33,24), turned −27° to lie along the rim there (the rim between
+     the outer lobe's apex (30,20) and the face's (36,27) runs at that
+     angle), and a dot of radius 2 at (53,20) in the top lobe's rim.
+
+     THE DETAIL is the face's own outline at stroke 1.5, the double line a
+     drawn bubble has; a plain style drops it and the rim still shows.
+
+     THE TEXT is one <text> at (64,57): the face's centre is (64,50), and
+     a 20-unit bold display face has a cap height near 14, so the baseline
+     7 below centre sets the word on the middle; 20 units fits five
+     capitals in the 80-wide face at its equator with margin. -->
+<sc-if value="{{ isBubbleThought }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-bob 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M81.1,20.9 A17.1,17.1 0 0 1 107.3,34.5 A12.6,12.6 0 0 1 113.2,55.4 A14.6,14.6 0 0 1 96.1,73.7 A19.1,19.1 0 0 1 64,81 A19.1,19.1 0 0 1 31.9,73.7 A14.6,14.6 0 0 1 14.8,55.4 A12.6,12.6 0 0 1 20.7,34.5 A17.1,17.1 0 0 1 46.9,20.9 A19.8,19.8 0 0 1 81.1,20.9 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+      <circle cx="34" cy="97" r="7.5" fill="none" stroke="{{ skPaper }}" stroke-width="6"></circle>
+      <circle cx="19" cy="112" r="4.5" fill="none" stroke="{{ skPaper }}" stroke-width="6"></circle>
+    </g>
+    <g data-layer="shadow">
+      <g transform="translate(3 3)">
+        <path d="M81.1,20.9 A17.1,17.1 0 0 1 107.3,34.5 A12.6,12.6 0 0 1 113.2,55.4 A14.6,14.6 0 0 1 96.1,73.7 A19.1,19.1 0 0 1 64,81 A19.1,19.1 0 0 1 31.9,73.7 A14.6,14.6 0 0 1 14.8,55.4 A12.6,12.6 0 0 1 20.7,34.5 A17.1,17.1 0 0 1 46.9,20.9 A19.8,19.8 0 0 1 81.1,20.9 Z" fill="{{ skShadow }}"></path>
+        <circle cx="34" cy="97" r="7.5" fill="{{ skShadow }}"></circle>
+        <circle cx="19" cy="112" r="4.5" fill="{{ skShadow }}"></circle>
+      </g>
+    </g>
+    <g data-layer="body">
+      <path d="M81.1,20.9 A17.1,17.1 0 0 1 107.3,34.5 A12.6,12.6 0 0 1 113.2,55.4 A14.6,14.6 0 0 1 96.1,73.7 A19.1,19.1 0 0 1 64,81 A19.1,19.1 0 0 1 31.9,73.7 A14.6,14.6 0 0 1 14.8,55.4 A12.6,12.6 0 0 1 20.7,34.5 A17.1,17.1 0 0 1 46.9,20.9 A19.8,19.8 0 0 1 81.1,20.9 Z" fill="{{ skPrimary }}"></path>
+      <circle cx="34" cy="97" r="7.5" fill="{{ skPrimary }}"></circle>
+      <circle cx="19" cy="112" r="4.5" fill="{{ skPrimary }}"></circle>
+      <path d="M78,28.4 A13.8,13.8 0 0 1 99.5,38.5 A9.4,9.4 0 0 1 104.4,54 A11.3,11.3 0 0 1 90.4,67.6 A15.6,15.6 0 0 1 64,73 A15.6,15.6 0 0 1 37.6,67.6 A11.3,11.3 0 0 1 23.6,54 A9.4,9.4 0 0 1 28.5,38.5 A13.8,13.8 0 0 1 50,28.4 A16.3,16.3 0 0 1 78,28.4 Z" fill="{{ skPaper }}"></path>
+      <circle cx="34" cy="97" r="3.5" fill="{{ skPaper }}"></circle>
+    </g>
+    <g data-layer="line">
+      <path d="M81.1,20.9 A17.1,17.1 0 0 1 107.3,34.5 A12.6,12.6 0 0 1 113.2,55.4 A14.6,14.6 0 0 1 96.1,73.7 A19.1,19.1 0 0 1 64,81 A19.1,19.1 0 0 1 31.9,73.7 A14.6,14.6 0 0 1 14.8,55.4 A12.6,12.6 0 0 1 20.7,34.5 A17.1,17.1 0 0 1 46.9,20.9 A19.8,19.8 0 0 1 81.1,20.9 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      <circle cx="34" cy="97" r="7.5" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}"></circle>
+      <circle cx="19" cy="112" r="4.5" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}"></circle>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="33" cy="24" rx="6" ry="2.2" transform="rotate(-27 33 24)" fill="{{ skHighlight }}"></ellipse>
+      <circle cx="53" cy="20" r="2" fill="{{ skHighlight }}"></circle>
+    </g>
+    <g data-layer="detail">
+      <path d="M78,28.4 A13.8,13.8 0 0 1 99.5,38.5 A9.4,9.4 0 0 1 104.4,54 A11.3,11.3 0 0 1 90.4,67.6 A15.6,15.6 0 0 1 64,73 A15.6,15.6 0 0 1 37.6,67.6 A11.3,11.3 0 0 1 23.6,54 A9.4,9.4 0 0 1 28.5,38.5 A13.8,13.8 0 0 1 50,28.4 A16.3,16.3 0 0 1 78,28.4 Z" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"></path>
+      <circle cx="34" cy="97" r="3.5" fill="none" stroke="{{ skInk }}" stroke-width="1.5"></circle>
+    </g>
+    <g data-layer="text">
+      <text x="64" y="57" font-size="20" text-anchor="middle" style="font-family:var(--display),sans-serif;font-weight:700" fill="{{ skInk }}">{{ skText }}</text>
+    </g>
+  </svg>
+</sc-if>

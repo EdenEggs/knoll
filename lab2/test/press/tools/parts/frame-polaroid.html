@@ -1,0 +1,80 @@
+<!-- FRAME-POLAROID — the instant-camera print: a white card with a square
+     picture window near the top and the wide margin under it that a thumb
+     holds, stuck to the page at a slight tilt, the scrapbook's screenshot
+     frame (PRESS-TABLE-PLAN.md Appendix D: tags scrapbook, screenshot).
+     Layers: halo shadow body line detail image-slot. There is no
+     highlight layer, on purpose: the card is {{ skPaper }}, and the
+     highlight role is a tint of the primary made to sit on the primary —
+     on paper it is a smudge, not a shine (a first cut put a glint on the
+     top-left corner and it read as a folded flap). The gloss a print has
+     is on its picture, and the picture is the slot's.
+
+     THE CARD is 84 × 100 in its own frame (x −42..42, y −50..50), turned
+     −5° about the centre of the box: enough that it reads as a print
+     pressed on by hand and not a ruled box, and little enough that a
+     screenshot clipped into the window is not visibly skewed. Turned, the
+     card spans about 15..113 across and 10..118 down; with the 3-unit line
+     and the halo's 3 outside it nothing passes 128, and the shadow's 3
+     down-right stays inside the halo's rim on the diagonal. Ink 77 % wide,
+     84 % tall, centred.
+
+     THE WINDOW is 72 × 72 at 6 in from the top and sides (x −36..36,
+     y −44..28), leaving a bottom margin of 22 — three and a half times the
+     side margin, the polaroid's own proportion and the one thing that says
+     "polaroid" and not "picture in a box" at 40 px. The window is square-
+     cut (no radius at all: a print's picture area has crisp corners)
+     where the card takes {{ skRadius }} — written sc-camel-rx, as viewBox
+     is written sc-camel-view-box (palette-keys.js's header says why) — the
+     small round a real card's corners have.
+
+     THE CARD AND THE WINDOW ARE BOTH {{ skPaper }} — the card because a
+     polaroid is white, the window because the contract's image-slot is a
+     paper rect the page replaces with the picture, so an empty frame shows
+     paper. The line layer keeps them apart: the card's outline and the
+     window's outline, both at {{ skStroke }}. The image-slot rect is inset
+     2 inside the window's outline (x −34..34, y −42..26) so the placeholder
+     does not sit on the inner half of that stroke and thin it to 1.5.
+
+     THE SHADOW is the card moved 3 down and right in {{ skShadow }} — the
+     least the contract allows — a sliver along the card's lower-right
+     edge, the cel shade of a print lying on the page.
+
+     THE DETAIL is the caption: one scribble of three loops across the
+     bottom margin at stroke 1.5 (half the default line), the pen line a
+     hand writes under a print, plus a short second stroke for the date.
+     A simple style drops them and the wide margin still says polaroid. -->
+<sc-if value="{{ isFramePolaroid }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <g transform="translate(64 64) rotate(-5)">
+        <rect x="-42" y="-50" width="84" height="100" sc-camel-rx="{{ skRadius }}" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></rect>
+      </g>
+    </g>
+    <g data-layer="shadow">
+      <g transform="translate(67 67) rotate(-5)">
+        <rect x="-42" y="-50" width="84" height="100" sc-camel-rx="{{ skRadius }}" fill="{{ skShadow }}"></rect>
+      </g>
+    </g>
+    <g data-layer="body">
+      <g transform="translate(64 64) rotate(-5)">
+        <rect x="-42" y="-50" width="84" height="100" sc-camel-rx="{{ skRadius }}" fill="{{ skPaper }}"></rect>
+      </g>
+    </g>
+    <g data-layer="line">
+      <g transform="translate(64 64) rotate(-5)">
+        <rect x="-42" y="-50" width="84" height="100" sc-camel-rx="{{ skRadius }}" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></rect>
+        <rect x="-36" y="-44" width="72" height="72" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></rect>
+      </g>
+    </g>
+    <g data-layer="detail">
+      <g transform="translate(64 64) rotate(-5)">
+        <path d="M-30,40 C-26,32 -22,32 -20,39 C-18,45 -13,44 -11,38 C-9,32 -4,32 -2,39 C0,45 5,44 8,37 M18,39 L30,39" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      </g>
+    </g>
+    <g data-layer="image-slot">
+      <g transform="translate(64 64) rotate(-5)">
+        <rect x="-34" y="-42" width="68" height="68" fill="{{ skPaper }}"></rect>
+      </g>
+    </g>
+  </svg>
+</sc-if>

@@ -329,7 +329,13 @@
     <sc-if value="{{ done }}" hint-placeholder-val="{{ false }}">
       <div style="position: absolute; left: 0; right: 0; top: 60px; text-align: center; display: flex; flex-direction: column; gap: 6px; align-items: center">
         <div style="font-family: Rye, serif; font-size: 28px; color: #17120b">Welcome to Knoll.</div>
-        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">your key is in the post · <a href="#" style="text-decoration: none">into the village →</a></div>
+        <!-- THE DOOR OUT OF THE GATE. The export drew this line and pointed it
+             at `#`; the village it means is /yard, which is where a resident
+             lands. Nothing was signed up for — §5 still holds, the form sends
+             nothing and this link is the only thing on the page that goes
+             anywhere — but the walk from the gate to your own plot is the one
+             journey these two pages are for, and it may as well be walkable. -->
+        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">your key is in the post · <a href="../yard/" style="text-decoration: none">into the village →</a></div>
       </div>
     </sc-if>
     <sc-if value="{{ interlude }}" hint-placeholder-val="{{ false }}">

@@ -1,0 +1,257 @@
+<!--
+  press/index.html — THE PRESS TABLE.
+
+  A plain page (plan §10 6.1): not a bench and not a machine. It has forms,
+  three previews and a job to do — drop a folder of art, look at what the
+  machine read off it, pick one of three compositions, and build the game
+  page — and lab 2's camera, which owns the wheel, ctrl and space, would be
+  in the way of every one of those. So there is no lab.js here, no
+  #bench-world, no iframe and no Design Canvas export: the look is written
+  by hand in press.css in the house's own tokens, the way tracer.js's design
+  was transcribed into THE TRACING TABLE in lab.css.
+
+  THE SHAPE OF THE PAGE, and why it is this one. The page never scrolls;
+  the two columns do (lab.css's own rule for the bench, and the reason is
+  the same — a header that runs away and a build button that has to be
+  hunted for are both worse than two short scrollbars). Left is everything
+  the owner PUTS IN, top to bottom in the order it happens: the drop zone,
+  then the pictures that landed with the role each was read as, then the
+  words. Right is everything the machine SAYS BACK: what it read off the
+  art, the three compositions it offers, and the handful of dials that are
+  worth turning. The footer is one bar with one button, because there is
+  one act at the end of this and it writes a file.
+
+  1280 IS THE NARROW CASE and 1600 the comfortable one (the two widths the
+  brief names). At 1280 the left column is 380 px — wide enough for a
+  description field at ~46 characters a line — and each of the three
+  mockups is about 270 px across; at 1600 they are about 380. Under 1180 the
+  columns stack rather than squeezing, since a 300-px form is worse than a
+  scroll.
+
+  ── THE LOAD ORDER, AND WHY IT IS THIS ORDER ─────────────────────────────
+  Every one of these is a plain classic <script> — no modules, no bundler,
+  no CDN (§0.3) — so each has run by the time the next one parses, and
+  press.js, which is last, can read every global at its first line.
+
+    fonts/fonts.css   the @font-face rows for all nineteen faces. First,
+                      because a stylesheet in the head is requested before
+                      anything paints and the mockups set their type in
+                      whichever pairing press/fonts.js names; a face
+                      arriving late reflows a preview under the owner.
+    press.css         this page's own look. After fonts.css so it may name
+                      the families ('Sora', 'Public Sans') and get them.
+    palette.js        window.Palette. No dependencies. First of the scripts
+                      because it is the bottom of the stack: theme.js and
+                      style.js both read it (at call time, not at load, but
+                      dependency order is how a reader should meet them).
+    fonts.js          window.Fonts. Pure tables; nothing depends on it yet.
+    theme.js          window.Theme. Reads Palette.
+    style.js          window.Style. Needs a canvas at call time, nothing at
+                      load.
+    recipes.js        window.Recipes. Pure.
+    vibe.js           window.Vibe. Pure; the fetch is inside request().
+    tools/lib/validate.js   window.Validate (it is a UMD-ish IIFE: it sets
+                      module.exports in Node and window.Validate here).
+                      Loaded before press.js, which fetches the seven
+                      schemas through Validate.loadFetch at boot.
+    ../kits.js        window.Kits. On a page with no #bench-world it exposes
+                      { extractOnly, kindOf, isKitSrc, SHEETS, setStyle }
+                      and nothing of the bench (CONTRACTS §7; the proof is
+                      press/tools/no-bench.html). It is loaded BEFORE
+                      preview.js because Preview asks it for the sticker
+                      strings.
+    preview.js        window.Preview — render() and trayFor(), the contract
+                      the two halves of this phase meet on. It draws into a
+                      container it is handed and writes no global CSS.
+    store.js          window.PressStore. Loaded before press.js because
+                      press.js opens its stores on its first line.
+    press.js          window.Press. Last, and the only file that reads the
+                      others at load.
+
+  The three .js files this page does NOT load are the bench: lab.js,
+  frames.js, ink.js. If one of them ever appears in this list, something has
+  gone wrong with the argument at the top of press/store.js.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>knoll / press — the Press Table</title>
+<link rel="icon" href="/logo/logo-icon.svg">
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="stylesheet" href="press.css">
+</head>
+<body>
+
+<header class="pt-head">
+  <a class="pt-brand" href="/">
+    <img src="/logo/logo-icon.svg" alt="" width="24" height="24">
+    <span>knoll</span><span class="pt-slash">/</span><span class="pt-name">press</span>
+  </a>
+  <a class="pt-back" href="../">&larr; lab 2</a>
+  <span class="pt-mode" id="pt-mode" data-mode="knocking">KNOCKING</span>
+  <p class="pt-hint" id="pt-hint">Drop a folder of art on the left. The table reads its colours and its style, offers three compositions, and writes the page.</p>
+</header>
+
+<main class="pt-main">
+
+  <!-- ── LEFT: what the owner puts in ─────────────────────────────────── -->
+  <div class="pt-col pt-left">
+
+    <section class="pt-card" id="pt-drop-card">
+      <h2 class="pt-tag">1 · the art</h2>
+      <div class="pt-drop" id="pt-drop" tabindex="0" role="button" aria-label="drop images here">
+        <span class="pt-drop-pic" aria-hidden="true"><b></b><u></u><s></s></span>
+        <strong>drop the pictures here<br><small>PNG · JPG · WebP · up to 12 files, 25 MB — and a manifest.json if you have one</small></strong>
+      </div>
+      <input type="file" id="pt-files" multiple accept="image/png,image/jpeg,image/webp,application/json,.json" hidden>
+      <p class="pt-fine" id="pt-drop-note"></p>
+    </section>
+
+    <section class="pt-card" id="pt-assets-card" hidden>
+      <h2 class="pt-tag">2 · the pictures, and what each one is</h2>
+      <ul class="pt-assets" id="pt-assets"></ul>
+      <p class="pt-fine">A role you change re-runs the reading. <b>Hero</b> is the wide picture the widescreen composition is built round; <b>key art</b> is the tall one the poster is built round.</p>
+    </section>
+
+    <section class="pt-card">
+      <h2 class="pt-tag">3 · the words</h2>
+      <form class="pt-form" id="pt-form" autocomplete="off">
+
+        <label class="pt-f" data-for="title">
+          <span class="pt-l">title <i>required</i></span>
+          <input type="text" id="f-title" maxlength="80" placeholder="Pixelfort">
+        </label>
+
+        <label class="pt-f" data-for="slug">
+          <span class="pt-l">slug <i>the folder, and the URL</i></span>
+          <input type="text" id="f-slug" maxlength="40" placeholder="pixelfort" spellcheck="false">
+          <em class="pt-under" id="f-slug-where">/lab2/test/games/…/</em>
+        </label>
+
+        <label class="pt-f" data-for="tagline">
+          <span class="pt-l">tagline</span>
+          <input type="text" id="f-tagline" maxlength="140" placeholder="Hold the wall. Count the sunsets.">
+        </label>
+
+        <label class="pt-f" data-for="description">
+          <span class="pt-l">description</span>
+          <textarea id="f-description" rows="5" maxlength="1200" placeholder="A paragraph. It is set as a note on the page, so a long one is a tall column."></textarea>
+          <em class="pt-under"><span id="f-description-n">0</span> / 1200</em>
+        </label>
+
+        <div class="pt-two">
+          <label class="pt-f" data-for="developer">
+            <span class="pt-l">developer</span>
+            <input type="text" id="f-developer" maxlength="80">
+          </label>
+          <label class="pt-f" data-for="publisher">
+            <span class="pt-l">publisher</span>
+            <input type="text" id="f-publisher" maxlength="80">
+          </label>
+        </div>
+
+        <label class="pt-f" data-for="releaseDate">
+          <span class="pt-l">release</span>
+          <input type="text" id="f-release" maxlength="40" placeholder="2027, or Q3 2027, or 14 March">
+        </label>
+
+        <div class="pt-f" data-for="platforms">
+          <span class="pt-l">platforms</span>
+          <div class="pt-chips" id="f-platforms"></div>
+        </div>
+
+        <div class="pt-f" data-for="links">
+          <span class="pt-l">links <i>https:// only</i></span>
+          <div class="pt-links" id="f-links"></div>
+        </div>
+
+        <div class="pt-f pt-rights" data-for="rights">
+          <label class="pt-check">
+            <input type="checkbox" id="f-rights">
+            <span>I hold the rights to this art, or have permission to publish it.</span>
+          </label>
+          <input type="text" id="f-rights-by" maxlength="80" placeholder="who is saying so — the publisher's name">
+        </div>
+
+      </form>
+      <ul class="pt-faults" id="pt-faults"></ul>
+    </section>
+
+  </div>
+
+  <!-- ── RIGHT: what the machine says back ────────────────────────────── -->
+  <div class="pt-col pt-right">
+
+    <section class="pt-card" id="pt-analysis-card">
+      <h2 class="pt-tag">4 · what it read <span class="pt-tag-note" id="pt-analysis-state">waiting for a picture</span></h2>
+      <div class="pt-analysis" id="pt-analysis">
+        <p class="pt-empty">Nothing has been dropped yet. The reading starts the moment the first image lands.</p>
+      </div>
+    </section>
+
+    <section class="pt-card" id="pt-mock-card">
+      <h2 class="pt-tag">5 · three compositions
+        <button type="button" class="pt-btn pt-btn-sm" id="pt-shuffle" disabled>shuffle</button>
+      </h2>
+      <div class="pt-mocks" id="pt-mocks"></div>
+      <p class="pt-fine" id="pt-mock-note">Pick one. It is a starting point: once the page is built you rearrange it on the bench and keep.js writes the arrangement back into the file.</p>
+    </section>
+
+    <section class="pt-card" id="pt-tweak-card">
+      <h2 class="pt-tag">6 · the dials</h2>
+      <div class="pt-tweak" id="pt-tweak">
+        <p class="pt-empty">The dials arrive with the reading.</p>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="pt-foot">
+  <p class="pt-say" id="pt-say">knocking on the door&hellip;</p>
+  <a class="pt-out" id="pt-out" hidden target="_blank" rel="noopener"></a>
+  <button type="button" class="pt-go" id="pt-build" disabled>BUILD THE PAGE</button>
+</footer>
+
+<script src="palette.js"></script>
+<script src="fonts.js"></script>
+<script src="theme.js"></script>
+<script src="style.js"></script>
+<script src="recipes.js"></script>
+<script src="vibe.js"></script>
+<script src="tools/lib/validate.js"></script>
+<script src="../kits.js"></script>
+<script src="preview.js"></script>
+<script src="store.js"></script>
+<script src="press.js"></script>
+
+<!-- ▼ ── THE IMPORT FIELD (plan §12 3) — press/import.js ─────────────────
+     APPENDED BLOCK, and it is appended on purpose: press.js and the markup
+     above were being edited by another pass while this was written, so this
+     phase owns exactly these five lines and press/import.js and nothing
+     else in this file. Two things live here.
+
+     1. `#pt-import-mount`, an empty div. THIS IS THE DOCUMENTED ELEMENT ID
+        the import field mounts against. It is empty and hidden at rest; in
+        OWNER MODE import.js moves it to the top of the left column (before
+        `#pt-drop-card`, where "0 · bring in an intake" belongs, one step
+        ahead of "1 · the art") and draws its panel inside it. In publisher
+        mode nothing is drawn and the div stays hidden and empty — the field
+        is the owner's, and an import box on a stranger's page is an
+        invitation to sit and guess tokens at it.
+
+     2. `import.js` itself, LAST of the scripts, because it reads
+        `window.Press` (for the door it derived, the schema pool it fetched
+        and `addFiles`) and `window.Validate`, and every script here is a
+        plain classic one, so last means both have run. It self-mounts only
+        while press.js has no hook of its own: the moment press.js calls
+        `PressImport.mount(el, {onBundle})` that call owns the panel and
+        re-parents it, and this block can shrink to the script line.
+-->
+<div id="pt-import-mount" hidden></div>
+<script src="import.js"></script>
+<!-- ▲ ── end of the import field ─────────────────────────────────────── -->
+</body>
+</html>

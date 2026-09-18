@@ -1,0 +1,69 @@
+<!-- CLIP — a paperclip, the plain wire kind, laid on the page at a tilt
+     (PRESS-TABLE-PLAN.md Appendix D: tags scrapbook). Layers: halo shadow
+     body line highlight. No detail layer: the clip is one bent wire and
+     has no fine stroke a simple style could drop.
+
+     THE WIRE is drawn as its OUTLINE, one closed path, and the same path
+     is the halo's stroke, the shadow, the body's fill and the line — a
+     paperclip is line-heavy by nature, so the ink is the whole edge of a
+     wire 8 units thick (about 2.5 px at 40 px, the least that still reads
+     as wire and not as a scratch) round a thin body. The wire's centre
+     runs, in the clip's own frame: up the inner right side at x 11, round
+     the inner bottom (radius 11, centre y 70), up the inner left side at
+     x −11, over the top (radius 18, centre 7, 24 — the top bend of a
+     paperclip is off-centre, from the inner left to the outer right), down
+     the outer right at x 25, round the outer bottom (radius 25, centre
+     y 74) and up the outer left at x −25; its two ends stop level at y 36,
+     one on the outer left and one on the inner right, which is the shape
+     that makes it a paperclip and not a loop. The outline is that centre
+     line offset 4 each side — straight edges 4 apart, bends of radius
+     ±4 about the same centres — closed with a half-circle cap of radius 4
+     at each end. The gap between the two runs of wire is 6, the one
+     number that could not be smaller: with the 3-unit line stroked 1.5
+     into it from each side, 3 of it stays open.
+
+     THE FRAME. Upright the clip spans x −29..29 and y 2..103; it is moved
+     so that box's centre (0, 52.5) sits at the origin, turned −20°, and
+     put at 64, 64. 20° is a clip dropped on the page, not one ruled onto
+     it; the turned box is about 84 × 114, three quarters of the sticker
+     across and nearly all of it down, and with the line and the shadow's
+     3 the ink stays inside 128.
+
+     THE BODY is {{ skSecondary }}: a coated clip in the page's second
+     colour, and a role that shows on dark paper where skPaper would
+     vanish. THE SHADOW is the outline moved 3 down and right, which shows
+     along the lower-right edge of every run of wire, the gap included.
+
+     THE HIGHLIGHT is one sliver: an ellipse 3 × 26 along the outer right
+     side at x 25, from y 34 to 60, and a dot of radius 2 at the top bend —
+     the shine along a round wire. -->
+<sc-if value="{{ isClip }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <g transform="translate(64 64) rotate(-20) translate(0 -52.5)">
+        <path d="M15,36 L15,70 A15,15 0 0 1 -15,70 L-15,24 A22,22 0 0 1 29,24 L29,74 A29,29 0 0 1 -29,74 L-29,36 A4,4 0 0 1 -21,36 L-21,74 A21,21 0 0 0 21,74 L21,24 A14,14 0 0 0 -7,24 L-7,70 A7,7 0 0 0 7,70 L7,36 A4,4 0 0 1 15,36 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+      </g>
+    </g>
+    <g data-layer="shadow">
+      <g transform="translate(67 67) rotate(-20) translate(0 -52.5)">
+        <path d="M15,36 L15,70 A15,15 0 0 1 -15,70 L-15,24 A22,22 0 0 1 29,24 L29,74 A29,29 0 0 1 -29,74 L-29,36 A4,4 0 0 1 -21,36 L-21,74 A21,21 0 0 0 21,74 L21,24 A14,14 0 0 0 -7,24 L-7,70 A7,7 0 0 0 7,70 L7,36 A4,4 0 0 1 15,36 Z" fill="{{ skShadow }}"></path>
+      </g>
+    </g>
+    <g data-layer="body">
+      <g transform="translate(64 64) rotate(-20) translate(0 -52.5)">
+        <path d="M15,36 L15,70 A15,15 0 0 1 -15,70 L-15,24 A22,22 0 0 1 29,24 L29,74 A29,29 0 0 1 -29,74 L-29,36 A4,4 0 0 1 -21,36 L-21,74 A21,21 0 0 0 21,74 L21,24 A14,14 0 0 0 -7,24 L-7,70 A7,7 0 0 0 7,70 L7,36 A4,4 0 0 1 15,36 Z" fill="{{ skSecondary }}"></path>
+      </g>
+    </g>
+    <g data-layer="line">
+      <g transform="translate(64 64) rotate(-20) translate(0 -52.5)">
+        <path d="M15,36 L15,70 A15,15 0 0 1 -15,70 L-15,24 A22,22 0 0 1 29,24 L29,74 A29,29 0 0 1 -29,74 L-29,36 A4,4 0 0 1 -21,36 L-21,74 A21,21 0 0 0 21,74 L21,24 A14,14 0 0 0 -7,24 L-7,70 A7,7 0 0 0 7,70 L7,36 A4,4 0 0 1 15,36 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      </g>
+    </g>
+    <g data-layer="highlight">
+      <g transform="translate(64 64) rotate(-20) translate(0 -52.5)">
+        <ellipse cx="25" cy="47" rx="1.5" ry="13" fill="{{ skHighlight }}"></ellipse>
+        <circle cx="7" cy="6" r="2" fill="{{ skHighlight }}"></circle>
+      </g>
+    </g>
+  </svg>
+</sc-if>

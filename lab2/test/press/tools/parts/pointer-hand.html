@@ -1,0 +1,69 @@
+<!-- POINTER-HAND — the manicule: a gloved hand pointing right, thumb up,
+     three fingers curled, a cuff at the wrist, the printer's "see here"
+     (PRESS-TABLE-PLAN.md Appendix D: tags pointer, retro). Layers: halo
+     shadow body line highlight detail.
+
+     THE SILHOUETTE is one path around cuff, fist, thumb and finger, read
+     clockwise from the cuff's top-left corner (8,50): the cuff 22 wide and
+     56 tall (x 8–30, y 50–106), the fist's back rising from the wrist at
+     (30,50) to the thumb's root at (40,48); the THUMB a lobe 24 wide at the
+     root (x 40–64) and 30 tall, its tip at y=18, drawn with two cubics
+     whose controls lean right so it tilts the way a thumb does; the INDEX
+     FINGER 18 thick (y 46–64) from the thumb's far side at x=64 to a round
+     tip whose controls reach x=122, the ink itself stopping at 120 — with
+     the halo's 3 that is 123 — so the finger is 56 long against a fist 44
+     wide (x 30–74): a first cut had them the other way round and it read
+     as a fist with a stub, so the fist gave the finger 8; and the three
+     CURLED FINGERS three cubic bumps down the fist's right side, 14 tall
+     each (y 64–78, 78–92, 92–106), their controls at x=86 so each bulges
+     to about x=83, nine past the fist's x=74; the palm's bottom runs level
+     at y=106 back to the wrist and the cuff. Ink from x=8 to 120 and y=18
+     to 106: 88 % wide, 69 % tall, centred on (64,62).
+
+     THE BODY is the silhouette in skPrimary with the cuff laid over it in
+     skSecondary as a rect with square corners (no rx — a rounded cuff would
+     let the primary show at its corners, and a cuff is square-cut anyway);
+     the line layer draws the wrist as its own stroke (x=30) so the cuff
+     stays a cuff with the fill gone. The two valleys between the curled
+     fingers are full-weight strokes in the line layer, 12 units in from
+     the fist's edge: they are outline, not detail — without them the fist
+     is a blob.
+
+     THE SHADOW is the silhouette 3 down and right in skShadow, the least
+     the contract allows, so the halo's rim clears the paper at the
+     fingertip.
+
+     THE HIGHLIGHT is one glint along the top of the index finger, an
+     ellipse 8 × 2.5 at (100,51), where a glove shines, and a dot of radius
+     2.5 on the thumb's tip.
+
+     THE DETAIL is the creases at stroke 1.5: the index finger's knuckle
+     (a short arc at x=86), the nail-line near the tip (x=108), the thumb's
+     crease at its root, and a second cuff line at x=24, 6 inside the wrist
+     line, the cuff's turned hem — all things a plain style may drop and
+     the hand still points. -->
+<sc-if value="{{ isPointerHand }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M8,50 L30,50 L40,48 C38,32 44,18 56,18 C66,18 66,32 64,48 L112,46 C122,46 122,64 112,64 L74,64 C86,64 86,78 74,78 C86,78 86,92 74,92 C86,92 86,106 74,106 L30,106 L8,106 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+    </g>
+    <g data-layer="shadow">
+      <path d="M8,50 L30,50 L40,48 C38,32 44,18 56,18 C66,18 66,32 64,48 L112,46 C122,46 122,64 112,64 L74,64 C86,64 86,78 74,78 C86,78 86,92 74,92 C86,92 86,106 74,106 L30,106 L8,106 Z" transform="translate(3 3)" fill="{{ skShadow }}"></path>
+    </g>
+    <g data-layer="body">
+      <path d="M8,50 L30,50 L40,48 C38,32 44,18 56,18 C66,18 66,32 64,48 L112,46 C122,46 122,64 112,64 L74,64 C86,64 86,78 74,78 C86,78 86,92 74,92 C86,92 86,106 74,106 L30,106 L8,106 Z" fill="{{ skPrimary }}"></path>
+      <rect x="8" y="50" width="22" height="56" fill="{{ skSecondary }}"></rect>
+    </g>
+    <g data-layer="line">
+      <path d="M8,50 L30,50 L40,48 C38,32 44,18 56,18 C66,18 66,32 64,48 L112,46 C122,46 122,64 112,64 L74,64 C86,64 86,78 74,78 C86,78 86,92 74,92 C86,92 86,106 74,106 L30,106 L8,106 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      <path d="M30,50 L30,106 M74,78 L62,78 M74,92 L62,92" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="100" cy="51" rx="8" ry="2.5" fill="{{ skHighlight }}"></ellipse>
+      <circle cx="56" cy="24" r="2.5" fill="{{ skHighlight }}"></circle>
+    </g>
+    <g data-layer="detail">
+      <path d="M86,48 Q89,55 86,62 M108,50 Q111,55 108,60 M44,50 Q48,44 54,42 M24,54 L24,102" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round"></path>
+    </g>
+  </svg>
+</sc-if>

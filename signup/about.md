@@ -203,6 +203,19 @@ all appear exactly zero times in the file. Pressing the seal runs a ~2s
 animation and a `setTimeout`; "Let Google vouch for me" is a `setTimeout` and a
 hardcoded `you@gmail.com`. Reloading loses everything typed.
 
+**One thing does now go somewhere (2026-09-06):** the *"into the village →"*
+link in the sealed state, which the export drew and pointed at `href="#"`, now
+points at **`../yard/`**. The village this page has always meant is `/yard`,
+which is where a resident lands, and the walk from the gate to your own plot is
+the one journey these two pages are for. It changes nothing above: a link is not
+a submission, and this is still the only link on the page that goes anywhere at
+all. `/login` carries the identical change, and `/yard`'s SIGN OUT is the way
+back here — it says the same kind of thing about what it does not do.
+`site/yard/about.md` §9a has the whole map of doors.
+
+The other dead `href="#"` links — *Rule Book* and *Terms of Residency* — are
+untouched and still go nowhere. There is nothing yet for them to point at.
+
 Which outcome the seal reaches is the page's one Design Canvas prop, declared
 in `data-props` under the section name **"Pretend server"**:
 

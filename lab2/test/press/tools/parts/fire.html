@@ -1,0 +1,61 @@
+<!-- FIRE — one flame, the "hot" sticker (PRESS-TABLE-PLAN.md Appendix D:
+     tags hype, fire — fire is a motif the vision call matches). Layers:
+     halo shadow body line highlight detail.
+
+     THE FLAME is a teardrop with a pointed tip and one lick off its
+     upper-left side — the shape the fire emoji settled on, because it is
+     the one silhouette that still says fire at 40 px where a flame with
+     three tongues says "cabbage". Eight cubic curves: tip at (62,8), the
+     big bulge out to x 104 on the right, the base rounding under at y 120,
+     the flank back up to the lick, whose point is at (26,22) and whose
+     inner side falls to a sharp valley at (50,52) before the tip rises
+     again. 22..104 wide and 8..120 tall: the height fills the box, the
+     width is 64 % of it, which is a flame's proportion — squarer and it is
+     a bush. The one path is the halo's stroke, the shadow, the body and
+     the line, so the die-cut edge and the cel shade are the silhouette
+     exactly.
+
+     THE CORE is a second, smaller teardrop in {{ skSecondary }} — 40 wide,
+     tip at (62,50), base at y 112, 8 above the outer base so that with the
+     two outlines (1.5 each inside their edges) a 5-unit band of the outer
+     colour still shows between them at the bottom. Outlined in the line
+     layer like every edge; a flame with no core is a leaf.
+
+     THE SHADOW is the silhouette moved 3 down and right — the least the
+     contract allows, the same reason burst gives: with the halo on, the
+     shadow's rim stays inside the paper edge on the diagonal.
+
+     THE HIGHLIGHT is one glint on the left flank, an ellipse 3.5 × 9 tilted
+     18° to lie along it (the flank rises at 18° off vertical between
+     (22,70) and (36,40)), plus a dot of radius 2.5 on the lick — the shine
+     sits where the sticker faces the light, which is the side away from
+     the shadow.
+
+     THE DETAIL is one wisp inside the core, a 1.5 stroke (half the default
+     line) curving from (66,72) down to (66,104): the flicker a simple style
+     drops without the flame losing anything. -->
+<sc-if value="{{ isFire }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M62,8 C70,24 100,42 104,68 C108,94 90,120 64,120 C38,120 20,96 22,70 C23,56 34,48 36,40 C38,34 32,27 26,22 C40,26 50,40 50,52 C50,40 56,24 62,8 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+    </g>
+    <g data-layer="shadow">
+      <path d="M62,8 C70,24 100,42 104,68 C108,94 90,120 64,120 C38,120 20,96 22,70 C23,56 34,48 36,40 C38,34 32,27 26,22 C40,26 50,40 50,52 C50,40 56,24 62,8 Z" transform="translate(3 3)" fill="{{ skShadow }}"></path>
+    </g>
+    <g data-layer="body">
+      <path d="M62,8 C70,24 100,42 104,68 C108,94 90,120 64,120 C38,120 20,96 22,70 C23,56 34,48 36,40 C38,34 32,27 26,22 C40,26 50,40 50,52 C50,40 56,24 62,8 Z" fill="{{ skPrimary }}"></path>
+      <path d="M62,50 C70,62 84,72 84,90 C84,104 74,112 64,112 C54,112 44,104 44,90 C44,78 56,68 62,50 Z" fill="{{ skSecondary }}"></path>
+    </g>
+    <g data-layer="line">
+      <path d="M62,8 C70,24 100,42 104,68 C108,94 90,120 64,120 C38,120 20,96 22,70 C23,56 34,48 36,40 C38,34 32,27 26,22 C40,26 50,40 50,52 C50,40 56,24 62,8 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      <path d="M62,50 C70,62 84,72 84,90 C84,104 74,112 64,112 C54,112 44,104 44,90 C44,78 56,68 62,50 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="31" cy="68" rx="3.5" ry="9" transform="rotate(18 31 68)" fill="{{ skHighlight }}"></ellipse>
+      <circle cx="38" cy="46" r="2.5" fill="{{ skHighlight }}"></circle>
+    </g>
+    <g data-layer="detail">
+      <path d="M66,72 C58,82 58,96 66,104" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round"></path>
+    </g>
+  </svg>
+</sc-if>

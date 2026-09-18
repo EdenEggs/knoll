@@ -43,3 +43,10 @@ toem2/*.ico
 toem2/*.lnk
 toem2/*.png
 toem2/results/
+
+# Benches made by lab 2's "+ new bench" (serve.js, from lab2/bench-template):
+# each bench is the site; its backups and a folder left half-made are this
+# machine's.
+folder_*/*.keep-bak
+folder_*/*.tmp
+.folder_*.making/

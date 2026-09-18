@@ -1,0 +1,72 @@
+<!-- TAPE-STRIP — one length of washi tape, torn off the roll at both ends
+     and stuck down at a slight angle, the scrapbook's way of holding a
+     picture to the page (PRESS-TABLE-PLAN.md Appendix D: tags scrapbook,
+     cozy). Layers: halo shadow body line highlight detail.
+
+     THE STRIP is 110 × 48 in its own frame (x −55..55, y −24..24), turned
+     −8° about the centre of the box: 8° is enough that the tape reads as
+     stuck on by hand and not ruled, and little enough that the corners stay
+     off the box's edges — turned, the strip spans about 5..123 across and
+     32..96 down, so with the 3-unit line and the shadow's 3 nothing passes
+     128. A strip is wide and short by nature: it fills the box across and
+     half of it down, which is what a piece of tape looks like.
+
+     THE TORN ENDS are seven teeth each, 5–7 deep on a 6–8 pitch and no two
+     alike — deep enough to still be teeth at 40 px, where the whole strip
+     is 34 px long; a straight cut would make it a ribbon. The same path is
+     drawn for the halo, the shadow, the body and the line, so the die-cut
+     edge and the cel shade follow the tears.
+
+     THE STRIPES are the washi: five diagonal bands in {{ skHighlight }},
+     8 wide on a 16 pitch, leaning 17 across the strip's 48 height (about
+     70° off the tape's edge, the steep stripe of a paper tape). They are
+     the lighter role and not an opacity, which is how the tape looks
+     half-see-through on every palette without a literal colour; and they
+     stop 3 short of the tooth valleys on both sides so no band pokes
+     through a tear. They stand in for the glint: a matte paper tape has
+     no shine.
+
+     THE SHADOW is the silhouette moved 3 down and right, the least the
+     contract allows, so it stays inside the halo's rim on the diagonal.
+
+     THE DETAIL is two tear lines at each end, stroke 1.5 (half the default
+     line), running 6 units in from a tooth valley: the crack the paper
+     tears along. A simple style drops them and the teeth still say torn. -->
+<sc-if value="{{ isTapeStrip }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <g transform="translate(64 64) rotate(-8)">
+        <path d="M-50,-24 L50,-24 L56,-17 L49,-10 L55,-3 L49,4 L56,12 L50,18 L55,24 L-51,24 L-56,17 L-49,10 L-55,3 L-49,-4 L-56,-11 L-50,-17 L-55,-22 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+      </g>
+    </g>
+    <g data-layer="shadow">
+      <g transform="translate(67 67) rotate(-8)">
+        <path d="M-50,-24 L50,-24 L56,-17 L49,-10 L55,-3 L49,4 L56,12 L50,18 L55,24 L-51,24 L-56,17 L-49,10 L-55,3 L-49,-4 L-56,-11 L-50,-17 L-55,-22 Z" fill="{{ skShadow }}"></path>
+      </g>
+    </g>
+    <g data-layer="body">
+      <g transform="translate(64 64) rotate(-8)">
+        <path d="M-50,-24 L50,-24 L56,-17 L49,-10 L55,-3 L49,4 L56,12 L50,18 L55,24 L-51,24 L-56,17 L-49,10 L-55,3 L-49,-4 L-56,-11 L-50,-17 L-55,-22 Z" fill="{{ skPrimary }}"></path>
+      </g>
+    </g>
+    <g data-layer="line">
+      <g transform="translate(64 64) rotate(-8)">
+        <path d="M-50,-24 L50,-24 L56,-17 L49,-10 L55,-3 L49,4 L56,12 L50,18 L55,24 L-51,24 L-56,17 L-49,10 L-55,3 L-49,-4 L-56,-11 L-50,-17 L-55,-22 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      </g>
+    </g>
+    <g data-layer="highlight">
+      <g transform="translate(64 64) rotate(-8)">
+        <path d="M-29,-24 L-21,-24 L-38,24 L-46,24 Z" fill="{{ skHighlight }}"></path>
+        <path d="M-13,-24 L-5,-24 L-22,24 L-30,24 Z" fill="{{ skHighlight }}"></path>
+        <path d="M3,-24 L11,-24 L-6,24 L-14,24 Z" fill="{{ skHighlight }}"></path>
+        <path d="M19,-24 L27,-24 L10,24 L2,24 Z" fill="{{ skHighlight }}"></path>
+        <path d="M35,-24 L43,-24 L26,24 L18,24 Z" fill="{{ skHighlight }}"></path>
+      </g>
+    </g>
+    <g data-layer="detail">
+      <g transform="translate(64 64) rotate(-8)">
+        <path d="M49,-10 L43,-9 M49,4 L43,5 M-49,10 L-43,9 M-49,-4 L-43,-3" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round"></path>
+      </g>
+    </g>
+  </svg>
+</sc-if>

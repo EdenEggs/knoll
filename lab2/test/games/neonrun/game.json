@@ -1,0 +1,386 @@
+{
+  "version": 1,
+  "builtAt": "2026-09-07T00:00:00.000Z",
+  "manifest": {
+    "slug": "neonrun",
+    "title": "Neon Run",
+    "tagline": "Outrun the grid.",
+    "description": "An endless runner on a wireframe highway that never ends and never repeats. Two colours, one lane, no brakes: Neon Run is about the line you leave behind you and how long it glows. Built for a synth soundtrack and a dark room.",
+    "developer": "Fixture Games",
+    "publisher": "Fixture Games",
+    "releaseDate": "2027-03",
+    "platforms": [
+      "pc",
+      "ps5",
+      "xbox"
+    ],
+    "genres": [
+      "runner",
+      "synthwave",
+      "arcade"
+    ],
+    "links": {
+      "steam": "https://example.com/neonrun/steam",
+      "site": "https://example.com/neonrun",
+      "trailer": "https://example.com/neonrun/trailer"
+    },
+    "assets": [
+      {
+        "id": "logo",
+        "role": "logo",
+        "file": "art/logo.png",
+        "w": 640,
+        "h": 240,
+        "alpha": true,
+        "sha256": "ce5c71c11ab3567e29ea40933bf63b9944d2adf7677dad237cebb6f33a3ba1a6"
+      },
+      {
+        "id": "hero",
+        "role": "hero",
+        "file": "art/hero.webp",
+        "w": 1600,
+        "h": 900,
+        "alpha": false,
+        "sha256": "202d54443b5b923de2d27060956187fd2d8ad29ffd53b025ea38f378f6e2f53a"
+      },
+      {
+        "id": "shot-1",
+        "role": "screenshot",
+        "file": "art/shot-1.webp",
+        "w": 960,
+        "h": 540,
+        "alpha": false,
+        "sha256": "1a8407baa7d5b7815a86e86ae88e1f561b372b7a1f8c341ecf4defa130032333"
+      },
+      {
+        "id": "shot-2",
+        "role": "screenshot",
+        "file": "art/shot-2.webp",
+        "w": 960,
+        "h": 540,
+        "alpha": false,
+        "sha256": "1b674de5c869986f3bb0f84c699636828e0c666be04099e26f84e952a8a91a7a"
+      },
+      {
+        "id": "shot-3",
+        "role": "screenshot",
+        "file": "art/shot-3.webp",
+        "w": 960,
+        "h": 540,
+        "alpha": false,
+        "sha256": "2bd817ec4b40cbd0befac6e6eae2f5a495e9d3649524e64455c67099d0b4fb1a"
+      },
+      {
+        "id": "shot-4",
+        "role": "screenshot",
+        "file": "art/shot-4.webp",
+        "w": 960,
+        "h": 540,
+        "alpha": false,
+        "sha256": "3c156343254269b874c68afa25765e0beebf5aa568a8d9d8d126bd464fa4f427"
+      }
+    ],
+    "rights": {
+      "attested": true,
+      "by": "fixture",
+      "at": "2026-09-07T00:00:00.000Z"
+    },
+    "source": "manual"
+  },
+  "analysis": {
+    "palette": [
+      {
+        "hex": "#260f52",
+        "weight": 0.2506154156244527,
+        "L": 0.2519348945583732,
+        "C": 0.11256547515138264,
+        "h": 291.89468860177533
+      },
+      {
+        "hex": "#170b35",
+        "weight": 0.22800198915546804,
+        "L": 0.19755635363918558,
+        "C": 0.07765710218495991,
+        "h": 290.64392346007526
+      },
+      {
+        "hex": "#0d061b",
+        "weight": 0.2213827604323274,
+        "L": 0.1479953995390419,
+        "C": 0.04501673059730495,
+        "h": 296.76524066412594
+      },
+      {
+        "hex": "#62155a",
+        "weight": 0.13891293644945663,
+        "L": 0.3562763903998355,
+        "C": 0.13590409540673842,
+        "h": 332.6903042448546
+      },
+      {
+        "hex": "#163860",
+        "weight": 0.12022743118083803,
+        "L": 0.3380451996059756,
+        "C": 0.08091570129012897,
+        "h": 254.3057492281179
+      },
+      {
+        "hex": "#197c9d",
+        "weight": 0.025987060576722915,
+        "L": 0.548132792528735,
+        "C": 0.09842114075470136,
+        "h": 226.47901938657282
+      },
+      {
+        "hex": "#21d5ef",
+        "weight": 0.01487240658073427,
+        "L": 0.8021372249566803,
+        "C": 0.13466641921347913,
+        "h": 210.76898682036577
+      }
+    ],
+    "dark": true,
+    "stats": {
+      "contrast": 0.1161,
+      "edgeDensity": 0.1496,
+      "hfEnergy": 0.0058,
+      "outline": {
+        "present": true,
+        "weight": 0.3
+      },
+      "paletteCount": 61,
+      "pixelSize": 0,
+      "saturation": 0.1051
+    },
+    "vibe": null
+  },
+  "theme": {
+    "dark": true,
+    "tokens": {
+      "--paper": "#161323",
+      "--paper-2": "#1d1a2a",
+      "--card": "#141121",
+      "--bench-bg": "#0e0b1b",
+      "--bench-dot": "rgba(199,236,244,.06)",
+      "--drop-rgb": "199,236,244",
+      "--ink": "#c7ecf4",
+      "--ink-2": "#badfe7",
+      "--ink-3": "#a7cbd3",
+      "--mute": "#5f6b79",
+      "--mute-2": "#444a59",
+      "--line": "#282838",
+      "--pink": "#944689",
+      "--pink-2": "#ae5ea2",
+      "--pink-soft": "#3f223b",
+      "--blue": "#6959a1",
+      "--green": "#197c9d",
+      "--amber": "#a44061",
+      "--field": "#161323",
+      "--tint": "#1b1527",
+      "--tint-2": "#191526",
+      "--chip": "#181425",
+      "--hard-edge": "#010005",
+      "--sticky-a": "#582350",
+      "--sticky-b": "#572f00",
+      "--sticky-c": "#004722",
+      "--sticky-d": "#003e63",
+      "--gz-handle-bg": "#badfe7",
+      "--gz-handle-ink": "#161323",
+      "--grip": "#8ca3af",
+      "--serial-ink": "#444a59",
+      "--sk-primary": "#944689",
+      "--sk-secondary": "#6959a1",
+      "--sk-ink": "#c7ecf4",
+      "--sk-paper": "#161323",
+      "--sk-highlight": "#bc7bb1",
+      "--sk-shadow": "#441b3e",
+      "--sk-halo": "0",
+      "--display": "'Orbitron','Bank Gothic',Eurostile,sans-serif",
+      "--body": "'Space Mono',Menlo,Consolas,monospace",
+      "--mono": "'Space Mono',Menlo,Consolas,monospace"
+    },
+    "fonts": {
+      "id": "scifi",
+      "display": "'Orbitron','Bank Gothic',Eurostile,sans-serif",
+      "body": "'Space Mono',Menlo,Consolas,monospace",
+      "mono": "'Space Mono',Menlo,Consolas,monospace"
+    },
+    "css": ":root{--paper:#161323;--paper-2:#1d1a2a;--card:#141121;--bench-bg:#0e0b1b;--bench-dot:rgba(199,236,244,.06);--drop-rgb:199,236,244;--ink:#c7ecf4;--ink-2:#badfe7;--ink-3:#a7cbd3;--mute:#5f6b79;--mute-2:#444a59;--line:#282838;--pink:#944689;--pink-2:#ae5ea2;--pink-soft:#3f223b;--blue:#6959a1;--green:#197c9d;--amber:#a44061;--field:#161323;--tint:#1b1527;--tint-2:#191526;--chip:#181425;--hard-edge:#010005;--sticky-a:#582350;--sticky-b:#572f00;--sticky-c:#004722;--sticky-d:#003e63;--gz-handle-bg:#badfe7;--gz-handle-ink:#161323;--grip:#8ca3af;--serial-ink:#444a59;--sk-primary:#944689;--sk-secondary:#6959a1;--sk-ink:#c7ecf4;--sk-paper:#161323;--sk-highlight:#bc7bb1;--sk-shadow:#441b3e;--sk-halo:0;--display:'Orbitron','Bank Gothic',Eurostile,sans-serif;--body:'Space Mono',Menlo,Consolas,monospace;--mono:'Space Mono',Menlo,Consolas,monospace;}"
+  },
+  "style": {
+    "preset": "neon",
+    "lineShow": true,
+    "lineWeight": 0.3,
+    "lineWobble": 0,
+    "linePasses": 1,
+    "corners": 0.5,
+    "shading": "soft",
+    "texture": "scanlines",
+    "paletteSize": 0,
+    "pixel": 0,
+    "saturation": 0.4728,
+    "finish": "glow"
+  },
+  "layout": {
+    "recipe": "widescreen",
+    "open": {
+      "x": -1020,
+      "y": -1070.8,
+      "w": 2880,
+      "h": 1716.3
+    },
+    "openNarrow": {
+      "x": -1020,
+      "y": -1070.8,
+      "w": 2880,
+      "h": 1716.3
+    },
+    "slots": [
+      {
+        "kind": "pic",
+        "ref": "hero",
+        "x": -900,
+        "y": -950,
+        "w": 1600,
+        "h": 900,
+        "scale": 1,
+        "rot": 0,
+        "z": 0
+      },
+      {
+        "kind": "sticker",
+        "ref": "frame-film",
+        "x": -880,
+        "y": 80,
+        "w": 442.2,
+        "h": 445.5,
+        "scale": 3.3,
+        "rot": -2,
+        "z": 1,
+        "image": "shot-1"
+      },
+      {
+        "kind": "sticker",
+        "ref": "frame-film",
+        "x": -420,
+        "y": 80,
+        "w": 442.2,
+        "h": 445.5,
+        "scale": 3.3,
+        "rot": 2,
+        "z": 2,
+        "image": "shot-2"
+      },
+      {
+        "kind": "sticker",
+        "ref": "frame-film",
+        "x": 40,
+        "y": 80,
+        "w": 442.2,
+        "h": 445.5,
+        "scale": 3.3,
+        "rot": -2,
+        "z": 3,
+        "image": "shot-3"
+      },
+      {
+        "kind": "sticker",
+        "ref": "frame-film",
+        "x": 500,
+        "y": 80,
+        "w": 442.2,
+        "h": 445.5,
+        "scale": 3.3,
+        "rot": 2,
+        "z": 4,
+        "image": "shot-4"
+      },
+      {
+        "kind": "pic",
+        "ref": "logo",
+        "x": -860,
+        "y": -380,
+        "w": 256,
+        "h": 96,
+        "scale": 0.4,
+        "rot": 0,
+        "z": 5
+      },
+      {
+        "kind": "note",
+        "ref": "title",
+        "x": 780,
+        "y": -950,
+        "w": 960,
+        "h": 217.6,
+        "scale": 1,
+        "rot": 0,
+        "z": 6,
+        "text": "Neon Run\nOutrun the grid.",
+        "width": 960,
+        "size": 34
+      },
+      {
+        "kind": "note",
+        "ref": "description",
+        "x": 780,
+        "y": -678.4,
+        "w": 960,
+        "h": 297.28,
+        "scale": 1,
+        "rot": 0,
+        "z": 7,
+        "text": "An endless runner on a wireframe highway that never ends and never repeats. Two colours, one lane, no brakes: Neon Run is about the line you leave behind you and how long it glows. Built for a synth soundtrack and a dark room.",
+        "width": 960,
+        "size": 34
+      },
+      {
+        "kind": "sticker",
+        "ref": "banner",
+        "x": 301.35,
+        "y": -256.25,
+        "w": 469,
+        "h": 472.5,
+        "scale": 3.5,
+        "rot": 0,
+        "z": 8,
+        "text": "2027"
+      },
+      {
+        "kind": "sticker",
+        "ref": "burst-round",
+        "x": 485.6,
+        "y": -950.8,
+        "w": 214.4,
+        "h": 216,
+        "scale": 1.6,
+        "rot": 0,
+        "z": 9
+      },
+      {
+        "kind": "sign",
+        "ref": "links",
+        "x": 780,
+        "y": -231.12,
+        "w": 960,
+        "h": 112.8,
+        "scale": 1,
+        "rot": 0,
+        "z": 10,
+        "width": 960,
+        "size": 34
+      },
+      {
+        "kind": "sticker",
+        "ref": "arrow",
+        "x": 992.8,
+        "y": -414.12,
+        "w": 214.4,
+        "h": 216,
+        "scale": 1.6,
+        "rot": 45,
+        "z": 11
+      }
+    ]
+  }
+}

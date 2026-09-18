@@ -1,0 +1,91 @@
+<!doctype html>
+<!-- ─── STYLE-HARNESS ──────────────────────────────────────────────────────
+   press/tools/style-harness.html — a bare page (no bench, no lab.js, no
+   kits) that loads the Press Table's four pure modules and exposes ONE
+   function for perf/test-style.js to call through Playwright:
+
+       window.runStyle({ screenshots: [dataURL…], keyart: [dataURL…],
+                         logos: [dataURL…], hints: { dark } })
+         → Promise<{ stats, vector, rank, dark, palette, pictures, game }>
+
+   Each data URL is decoded the way the Press Table will decode a dropped
+   file — an <img> whose src is the URL, awaited through img.decode() — and
+   handed to Style.measure as the element, which draws it once on a canvas
+   and reads the pixels back. Nothing is fetched: the test reads the fixture
+   PNGs from disk and sends them in as data URLs, so the page makes no
+   request past the four <script> tags, and the door is never knocked on
+   (there is no keep.js here to knock).
+
+   `dark` is not one of Style's statistics (CONTRACTS §4: the hint is
+   analysis.dark, Theme's call — the weight-averaged OKLCH L of the palette
+   under 0.55). So the harness derives it the way tools/lib/fixture-theme.js
+   does in Node for the theme tests: the FIRST key art (the manifest's hero
+   or key art; a screenshot if the game has neither) quantised with
+   Palette.quantize at k 8, Palette.rng(7), minWeight 0.01, ignoreEdges —
+   fixture-theme's own numbers, so this page and the theme tests read one
+   palette — then Theme.derive({palette, saturation: stats.saturation}).dark.
+   That is why theme.js and fonts.js are loaded beside palette.js and
+   style.js: Theme's rule is Theme's, not copied here. `hints.dark`, when
+   given, overrides it (a test that wants to force a plate light or dark).
+
+   `pictures` is Style.inspect's raw numbers per input (the pixel-error
+   curve, the Sobel percentiles, the run histograms) so the test can print
+   the table behind a stat; it is NOT part of the golden — stats, vector
+   and rank are. `palette` is the eight OKLCH entries `dark` was read from;
+   `game` is what Style.measure filled into its `detail` argument (the
+   pooled plate luma, the ink class the weight came from, the run median).
+
+   Served at http://localhost:4322/lab2/test/press/tools/style-harness.html
+   (the sandbox server; never 4321). ─────────────────────────────────── -->
+<meta charset="utf-8">
+<title>style harness</title>
+<style>body{font:13px/1.4 ui-monospace,monospace;margin:16px;color:#333}</style>
+<p>press/style.js harness — <code>window.runStyle({screenshots, keyart, logos, hints})</code>; nothing here is a bench.</p>
+<pre id="out"></pre>
+<script src="../palette.js"></script>
+<script src="../fonts.js"></script>
+<script src="../theme.js"></script>
+<script src="../style.js"></script>
+<script>
+(function () {
+  'use strict';
+  const K = 8, SEED = 7, MIN_WEIGHT = 0.01;   // tools/lib/fixture-theme.js's numbers, so `dark` is the theme tests' `dark`
+
+  function decode(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('style-harness: a data URL did not decode'));
+      img.src = url;
+    }).then(img => (img.decode ? img.decode().then(() => img, () => img) : img));
+  }
+  function pixels(img) {                       // ImageData of an <img>, for Palette.quantize
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d', { willReadFrequently: true });
+    x.drawImage(img, 0, 0);
+    return x.getImageData(0, 0, c.width, c.height);
+  }
+
+  window.runStyle = async function (input) {
+    input = input || {};
+    const all = async (urls) => { const out = []; for (const u of urls || []) out.push(await decode(u)); return out; };
+    const screenshots = await all(input.screenshots), keyart = await all(input.keyart), logos = await all(input.logos);
+    const game = {};                             // measure's game-level intermediates (the pooled plate, the ink class, the run)
+    const stats = Style.measure({ screenshots, keyart, logos }, game);
+    const pictures = screenshots.map(i => Style.inspect(i, 'screenshot')).concat(keyart.map(i => Style.inspect(i, 'keyart')), logos.map(i => Style.inspect(i, 'logo')));
+    let palette = [], dark = false;
+    const plate = keyart[0] || screenshots[0];
+    if (plate) {
+      palette = Palette.describe(Palette.quantize(pixels(plate), K, { rng: Palette.rng(SEED), minWeight: MIN_WEIGHT, ignoreEdges: true }));
+      dark = Theme.derive({ palette, saturation: stats.saturation }).dark;
+    }
+    const hints = Object.assign({ dark }, input.hints || {});
+    const vector = Style.vector(stats, hints);
+    const rank = Style.rank(vector);
+    const result = { stats, vector, rank, dark: hints.dark, palette, pictures, game };
+    document.getElementById('out').textContent = JSON.stringify({ stats, vector, rank, dark: hints.dark }, null, 2);
+    return result;
+  };
+})();
+</script>

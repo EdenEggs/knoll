@@ -1,0 +1,105 @@
+<!--
+  press/tools/fonts-check.html — the nine pairings, one line each, in their
+  own faces. Not a bench and not a machine: a plain page that loads
+  fonts/fonts.css and press/fonts.js the way a game page will (relative
+  paths, nothing off this server) and draws every pairing from
+  Fonts.PAIRINGS itself, so the page cannot say something the table does
+  not. test-fonts.js opens it on 4322 in headless Chrome, waits for
+  document.fonts.ready, asks document.fonts.check() and each FontFace's
+  status for every family, and screenshots it to perf/results/fonts/
+  pairings.png — the picture a person looks at to see that Bangers is
+  Bangers and that the two Fredoka rows are two weights of one file.
+
+  Each pairing gets its headline in the display face at the weight a
+  heading is set in (the module's main weight — the two variable faces
+  show their lighter row beside it, so both @font-face rows are used and
+  both load), a body line at 15 px, a mono line at 11 px, and for gothic a
+  drop cap in the accent face. Under the nine, a strip draws EVERY
+  @font-face row of fonts.css at its own weight, read off the stylesheet,
+  so every FontFace in document.fonts is used by the page and has to load
+  — the nine headlines alone would leave Sora 600 and Kalam 400 untouched,
+  and an untouched face is one the test cannot tell from a broken one.
+  The footer prints suggest() for every
+  preset, light and dark, at the two saturations the test uses (0.05 and
+  0.3, either side of the 0.12 line), so the rule table can be read off
+  the picture too. Paper white, ink #26212a, mute #8b7f92 — lab.css's
+  light defaults, typed here so this page needs no lab.css.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>fonts-check — the nine pairings</title>
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<style>
+  html,body{margin:0;background:#fff;color:#26212a}
+  body{padding:28px 36px 36px;font-family:'Public Sans',sans-serif;font-size:14px;line-height:1.35;width:1040px}
+  h1{font-family:'Sora',sans-serif;font-weight:700;font-size:16px;margin:0 0 4px;letter-spacing:-0.01em}
+  p.note{margin:0 0 20px;color:#8b7f92;font-size:12px}
+  .row{display:grid;grid-template-columns:96px 1fr;gap:0 18px;align-items:start;padding:10px 0 12px;border-top:1px solid #e9e4ec}
+  .id{font-family:ui-monospace,"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8b7f92;padding-top:12px}
+  .id b{display:block;color:#26212a;font-weight:700;letter-spacing:.14em}
+  .head{font-size:36px;line-height:1.1;margin:0 0 4px;white-space:nowrap}
+  .head .light{opacity:.55;font-size:.62em;margin-left:14px}
+  .body{font-size:15px;margin:0 0 3px}
+  .mono{font-size:11px;letter-spacing:.06em;color:#8b7f92;margin:0}
+  .cap{float:left;font-size:44px;line-height:.8;margin:6px 6px 0 0}
+  table{border-collapse:collapse;margin-top:22px;font-size:11px;font-family:ui-monospace,"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace}
+  th,td{text-align:left;padding:2px 14px 2px 0;color:#26212a;font-weight:400}
+  th{color:#8b7f92;letter-spacing:.08em;text-transform:uppercase;font-size:9.5px}
+</style>
+</head>
+<body>
+<h1>The nine pairings — fonts-check</h1>
+<p class="note">every family from ../../fonts/, drawn from Fonts.PAIRINGS; nothing on this page leaves the server</p>
+<div id="rows"></div>
+<div id="rules"></div>
+<script src="../fonts.js"></script>
+<script>
+(function () {
+  const P = Fonts.PAIRINGS, rows = document.getElementById('rows');
+  const MAIN = { 'Sora': 700, 'Kalam': 700, 'Fredoka': 600, 'Orbitron': 700 };  // the module's main weights, repeated for the picture
+  const SAMPLE = 'Sphinx of black quartz, judge my vow';
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  for (const id of Object.keys(P)) {
+    const p = P[id], s = Fonts.stacks(id), row = el('div', 'row');
+    const idc = el('div', 'id'); idc.appendChild(el('b', null, id)); idc.appendChild(document.createTextNode(p.display)); row.appendChild(idc);
+    const right = el('div');
+    if (p.accent) { const cap = el('span', 'cap', 'K'); cap.style.fontFamily = s.accent; right.appendChild(cap); }
+    const head = el('div', 'head'); head.style.fontFamily = s.display; head.style.fontWeight = MAIN[p.display] || 400;
+    head.appendChild(document.createTextNode(p.display + ' — ' + SAMPLE));
+    if (MAIN[p.display] && p.display !== 'Sora' && p.display !== 'Kalam') { const light = el('span', 'light', '400: judge my vow'); light.style.fontWeight = 400; head.appendChild(light); }
+    right.appendChild(head);
+    const body = el('p', 'body', p.body + ' — the quick brown fox jumps over the lazy dog; 0123456789 & fan page, wishlist, trailer.'); body.style.fontFamily = s.body; right.appendChild(body);
+    const mono = el('p', 'mono', 'mono ' + p.mono + ' · preload ' + Fonts.preloads(id).join(' + ') + ' · faces ' + p.faces.length); mono.style.fontFamily = s.mono; right.appendChild(mono);
+    row.appendChild(right); rows.appendChild(row);
+  }
+  const presets = ['pixel', 'flat', 'outline-cartoon', 'cel', 'painterly', 'ink-sketch', 'neon', 'retro-print', 'grunge', 'cozy-soft'];
+  /* The strip: every @font-face row of ../../fonts/fonts.css, read off the
+     stylesheet itself, drawn once at its own weight — so every FontFace in
+     document.fonts is used by the page and must load, not only the ones
+     the nine headlines happen to ask for. */
+  const strip = el('p', 'mono'); strip.id = 'strip'; strip.appendChild(document.createTextNode('every row of fonts.css at its weight: '));
+  for (const sheet of document.styleSheets) {
+    let rules = []; try { rules = [...sheet.cssRules]; } catch (e) { }
+    for (const r of rules) {
+      if (!(r instanceof CSSFontFaceRule)) continue;
+      const fam = r.style.getPropertyValue('font-family').replace(/^['"]|['"]$/g, ''), w = r.style.getPropertyValue('font-weight') || '400';
+      const sp = el('span', null, fam + ' ' + w); sp.style.fontFamily = "'" + fam + "'"; sp.style.fontWeight = w; sp.style.fontSize = '13px'; sp.style.marginRight = '10px'; sp.style.color = '#26212a';
+      strip.appendChild(sp);
+    }
+  }
+  document.getElementById('rules').appendChild(strip);
+  const t = el('table'), th = el('tr');
+  for (const h of ['preset', 'light 0.05', 'light 0.3', 'dark 0.05', 'dark 0.3']) th.appendChild(el('th', null, h));
+  t.appendChild(th);
+  for (const st of presets) {
+    const tr = el('tr'); tr.appendChild(el('td', null, st));
+    for (const [dark, sat] of [[false, 0.05], [false, 0.3], [true, 0.05], [true, 0.3]]) tr.appendChild(el('td', null, Fonts.suggest({ style: st, dark, saturation: sat }).join(' / ')));
+    t.appendChild(tr);
+  }
+  document.getElementById('rules').appendChild(t);
+})();
+</script>
+</body>
+</html>

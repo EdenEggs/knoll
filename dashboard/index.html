@@ -2,6 +2,14 @@
 <html><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Owner Dashboard · Knoll</title>
+<!-- The icon sits HERE and not in the helmet, which is where this page used to
+     keep it. The helmet is hoisted into <head> by support.js, i.e. after the
+     runtime boots — and Chrome, finding no icon before then, asks for
+     /dashboard/favicon.ico and logs the 404 it gets. One line earlier in the
+     document and it never asks. /signup, /login and /yard all do it this way;
+     this was the last page that did not. -->
+<link rel="icon" href="../logo/logo-icon.svg">
 <script src="./support.js"></script>
 </head>
 <body>
@@ -9,16 +17,106 @@
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-<link href="https://fonts.googleapis.com/css2?family=Rye&family=VT323&display=swap" rel="stylesheet">
-<link rel="icon" href="../logo/logo-icon.svg">
+<!-- Two faces added to the one request this page already makes, both for the
+     house bar below: Sora 800 is the wordmark, Public Sans 600 is the switch.
+     Same argument /yard made when the bar arrived there — extending one request
+     to an origin already preconnected beats a second origin or a self-hosting
+     move, and both faces are already in use elsewhere on the site. -->
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@600&family=Rye&family=Sora:wght@800&family=VT323&display=swap" rel="stylesheet">
 <style>
   body { margin: 0; background: #ece7f1; }
   a { color: #e8484a; }
   a:hover { color: #b8302f; }
   ::selection { background: #ffd23f; }
+
+  /* ── THE HOUSE BAR ───────────────────────────────────────────────────────
+     lab 2's header, worn here so the dashboard reads as a room of the site
+     rather than a page that happens to share its palette. This page was the
+     last of the four standalone Design Canvas pages without it — /yard,
+     /signup and /login have all had it since 2026-09-05.
+
+     THESE RULES ARE /yard's, COPIED. Not lab 2's directly: yard already did the
+     work of writing lab.css's `.lab-head` / `.lab-brand` out with the token
+     values in place (--card #fdfbfd, --line #e2d4df, --ink #26212a, --display
+     Sora), and of arguing which of lab 2's declarations do not belong on a page
+     that is not the bench. `site/yard/about.md` § the house bar is the record of
+     that argument and applies here word for word; the short version is that
+     flex-wrap / max-height / overflow / flex:none are the bench's and z-index:20
+     would tie this page's own fixed layers.
+
+     IN NORMAL FLOW, pulled full-bleed by negative margins, the same as /yard's
+     and unlike /signup's and /login's — those two are absolute because their
+     root is a centred flex row that a bar would shove off-centre. This root is
+     an ordinary block, so the bar can simply BE the first thing in it.
+
+     THE COUPLING: `margin: -34px -30px 34px` IS the root div's own padding
+     (`padding:34px 30px 56px`) spelled out, so the bar reaches the full width of
+     the page instead of sitting inside the gutter. Change the root's padding and
+     change these. Yard has this coupling in two places because it has a
+     breakpoint; this page has no @media at all, so it has it once. If a
+     breakpoint is ever added here, it is the second thing to add — yard's own
+     export broke exactly this and it took a measurement to see it. */
+  .knoll-head { display: flex; align-items: center; gap: 22px;
+    margin: -34px -30px 34px; padding: 12px 22px;
+    background: #fdfbfd; border-bottom: 1.5px dashed #e2d4df; }
+  .knoll-brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+    color: #26212a; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px;
+    letter-spacing: -0.01em; }
+  .knoll-brand img { display: block; }
+  .knoll-brand:hover { color: #a52c68; }
+
+  /* ── THE SWITCH ──────────────────────────────────────────────────────────
+     The other half of /yard's. Both blocks are the same forty lines and there is
+     no shared stylesheet to put them in — these four pages each carry their own
+     copy of everything, by construction — so KEEP THEM IN STEP BY HAND. The
+     reasoning is written out once, at /yard/index.html § THE SWITCH. The short
+     version: it lives in the bar because the bar is the only thing both pages
+     have in common and the only thing in the same place on both; it is drawn in
+     lab 2's in-bar vocabulary — `.lab-keep`'s pill and padding (`lab.css:105`),
+     `.lab-keep.is-saved`'s lit palette (`:130`) borrowed for the hover, NOT
+     `.lab-keep:hover`, which is a grey nudge and a different rule — and
+     `.lab-save`'s fill for the current page; and `aria-current="page"` is both
+     the semantics and the hook the fill keys off, so the two cannot drift apart.
+
+     Two colours are darker than lab 2's on purpose: --mute (#8b7f92) and --pink
+     (#c93b82) measure 3.56:1 and 4.47:1 here, under WCAG AA's 4.5 for 11.5px
+     text, so the resting ink is --ink-3 (#3d3346) and the lit pink is #a52c68.
+     Both are lab 2's own values — see the long note in /yard.
+
+     The `:hover` rule is here to ADD a hover, not to beat one: `.knoll-switch a`
+     (0,1,1) ties this page's `a:hover` (0,1,1) and wins on order, so without it
+     a hovered pill would simply keep its resting colour. That is a different
+     case from `.knoll-brand` (0,1,0), which genuinely loses to `a:hover`. */
+  .knoll-switch { display: inline-flex; align-items: center; gap: 6px; }
+  .knoll-switch a { display: inline-flex; align-items: center; border: 1.5px solid #e2d4df;
+    border-radius: 999px; padding: 3px 10px; background: #faf7f9; color: #3d3346;
+    text-decoration: none; font-family: 'Public Sans', sans-serif; font-size: 11.5px;
+    font-weight: 600; letter-spacing: 0.01em; white-space: nowrap;
+    transition: color .18s, border-color .18s, background .18s; }
+  .knoll-switch a:hover { color: #a52c68; border-color: #f9d3e6; background: #fff6fb; }
+  .knoll-switch a[aria-current="page"],
+  .knoll-switch a[aria-current="page"]:hover { background: #26212a; border-color: #26212a;
+    color: #fdfbfd; cursor: default; }
 </style>
 </helmet>
 <div data-screen-label="Owner Dashboard" style="min-height:100vh; box-sizing:border-box; background:#ece7f1; background-image:radial-gradient(circle, rgba(90,70,110,0.13) 1.3px, transparent 1.3px); background-size:24px 24px; padding:34px 30px 56px; font-family:'VT323',monospace; color:#17120b">
+  <!-- THE HOUSE BAR. `../` is the site root, which vercel.json rewrites to
+       lab 2 — the same destination lab 2's own brand link uses. Locally that
+       is a 404: there is no site/index.html and the rewrite is Vercel-only.
+       That is the behaviour on all four of these pages, not a bug in this one.
+       Outside the 1200px wrapper below, because the bar is full-bleed and the
+       page's content is not.
+
+       The two switch links are the same two that stand in /yard's bar, with
+       aria-current moved across. Keep them in step. -->
+  <header class="knoll-head">
+    <a class="knoll-brand" href="../"><img src="../logo/logo-icon.svg" alt="" width="26" height="26"><span>knoll</span></a>
+    <nav class="knoll-switch" aria-label="your pages">
+      <a href="../yard/">yard</a>
+      <a aria-current="page">dashboard</a>
+    </nav>
+  </header>
+
   <div style="max-width:1200px; margin:0 auto">
 
     <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:30px">
@@ -51,8 +149,8 @@
             <div style="font-size:14px; letter-spacing:1px; color:{{ k.deltaColor }}; border:3px solid {{ k.deltaColor }}; padding:0 7px; transform:rotate(-2deg); background:#fffcf0; flex:none">{{ k.delta }}</div>
           </div>
           <svg sc-camel-view-box="0 0 100 28" sc-camel-preserve-aspect-ratio="none" aria-hidden="true" style="display:block; width:100%; height:30px">
-            <polyline points="{{ k.spark }}" fill="none" stroke="#17120b" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" opacity="0.45"></polyline>
-            <circle cx="{{ k.dotX }}" cy="{{ k.dotY }}" r="2.6" fill="#e8484a"></circle>
+            <polyline sc-camel-points="{{ k.spark }}" fill="none" stroke="#17120b" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" opacity="0.45"></polyline>
+            <circle sc-camel-cx="{{ k.dotX }}" sc-camel-cy="{{ k.dotY }}" r="2.6" fill="#e8484a"></circle>
           </svg>
         </div>
       </sc-for>
@@ -73,19 +171,19 @@
           <div style="position:relative">
             <svg sc-camel-view-box="0 0 640 240" role="img" aria-label="Total residents over time" style="display:block; width:100%; height:auto">
               <sc-for list="{{ grid }}" as="g" hint-placeholder-count="5">
-                <g><line x1="48" x2="628" y1="{{ g.y }}" y2="{{ g.y }}" stroke="rgba(23,18,11,0.16)" stroke-width="2" stroke-dasharray="2 5"></line><text x="40" y="{{ g.ty }}" text-anchor="end" font-family="VT323, monospace" font-size="14" fill="#4a4054">{{ g.label }}</text></g>
+                <g><line x1="48" x2="628" sc-camel-y1="{{ g.y }}" sc-camel-y2="{{ g.y }}" stroke="rgba(23,18,11,0.16)" stroke-width="2" stroke-dasharray="2 5"></line><text x="40" sc-camel-y="{{ g.ty }}" text-anchor="end" font-family="VT323, monospace" font-size="14" fill="#4a4054">{{ g.label }}</text></g>
               </sc-for>
               <line x1="48" x2="628" y1="210" y2="210" stroke="#17120b" stroke-width="3"></line>
-              <path d="{{ areaPath }}" fill="rgba(90,143,214,0.28)"></path>
-              <path d="{{ linePath }}" fill="none" stroke="#17120b" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"></path>
-              <path d="{{ linePath }}" fill="none" stroke="#5a8fd6" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"></path>
-              <circle cx="{{ endX }}" cy="{{ endY }}" r="5" fill="#e8484a" stroke="#17120b" stroke-width="3"></circle>
-              <text x="{{ endLX }}" y="{{ endLY }}" font-family="VT323, monospace" font-size="17" fill="#17120b" font-weight="bold">{{ endLabel }}</text>
+              <path sc-camel-d="{{ areaPath }}" fill="rgba(90,143,214,0.28)"></path>
+              <path sc-camel-d="{{ linePath }}" fill="none" stroke="#17120b" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"></path>
+              <path sc-camel-d="{{ linePath }}" fill="none" stroke="#5a8fd6" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"></path>
+              <circle sc-camel-cx="{{ endX }}" sc-camel-cy="{{ endY }}" r="5" fill="#e8484a" stroke="#17120b" stroke-width="3"></circle>
+              <text sc-camel-x="{{ endLX }}" sc-camel-y="{{ endLY }}" font-family="VT323, monospace" font-size="17" fill="#17120b" font-weight="bold">{{ endLabel }}</text>
               <sc-for list="{{ xLabels }}" as="xl" hint-placeholder-count="4">
-                <text x="{{ xl.x }}" y="234" text-anchor="middle" font-family="VT323, monospace" font-size="14" fill="#4a4054">{{ xl.t }}</text>
+                <text sc-camel-x="{{ xl.x }}" y="234" text-anchor="middle" font-family="VT323, monospace" font-size="14" fill="#4a4054">{{ xl.t }}</text>
               </sc-for>
               <sc-if value="{{ tipOn }}" hint-placeholder-val="{{ false }}">
-                <line x1="{{ tipX }}" x2="{{ tipX }}" y1="14" y2="210" stroke="#17120b" stroke-width="2" stroke-dasharray="4 4"></line>
+                <line sc-camel-x1="{{ tipX }}" sc-camel-x2="{{ tipX }}" y1="14" y2="210" stroke="#17120b" stroke-width="2" stroke-dasharray="4 4"></line>
               </sc-if>
               <rect x="48" y="14" width="580" height="196" fill="transparent" style="pointer-events:all; cursor:crosshair" sc-camel-on-pointer-move="{{ trendMove }}" sc-camel-on-pointer-leave="{{ trendLeave }}"></rect>
             </svg>
