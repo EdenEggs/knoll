@@ -350,6 +350,9 @@ function send(req, res, file) {
 function serve(req, res) {
   let p;
   try { p = decodeURIComponent(req.url.split('?')[0]); } catch (e) { p = '/'; }
+  // the front page is lab 2: vercel.json rewrites / to it, and here it is a hop to its own folder,
+  // so every page's knoll in the corner (href="../") lands on lab 2 on both hosts
+  if (p === '/') { res.writeHead(302, { Location: '/lab2/' }); res.end(); return; }
   const file = path.resolve(ROOT, '.' + p);
   if (file !== ROOT && !file.startsWith(ROOT + path.sep)) {
     res.writeHead(403, { 'content-type': 'text/plain' }); res.end('no'); return;
