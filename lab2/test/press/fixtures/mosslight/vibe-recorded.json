@@ -1,0 +1,20 @@
+{
+  "_recorded": "RECORDED, NOT MODEL OUTPUT. Nothing in this file came back from api.anthropic.com. It is a hand-written judgement in the shape api/vibe.js would return, written so that Phase 7 could be built and tested at all.",
+  "_why": "There is no ANTHROPIC_API_KEY in this environment (press/NOTES.md D.11), so the vision call has never been made from this machine — not once, for any fixture. Every test in press/tools/test-vibe.js that involves the model feeds this file through a stubbed transport. It is evidence that the PLUMBING works: the schema, the server rules, the cache and the merge. It is NOT evidence that the model answers this way, or that the call works at all.",
+  "_date": "2026-09-07",
+  "_fixture": "mosslight",
+  "_model": "claude-opus-5",
+  "_judgement": "Appendix H's expectations for this fixture (preset painterly or cozy-soft, pairing hand, recipe widescreen or scrapbook) with the painterly/scrapbook side of each pair taken: the plate has no hard line in it and the six palette entries are all one hue (105-111 degrees, C 0.06-0.07), which is 'calm' by the definition in the prompt. scrapbook rather than widescreen on purpose — the system prompt sends hand-drawn and cozy work there, and confidence 0.72 is over the 0.6 line, so this file is also the one case in the fixture set that exercises Appendix E's recipe override.",
+  "vibe": {
+    "artStyle": "hand-painted",
+    "mood": ["cozy", "serene"],
+    "motifs": ["leaf", "mushroom", "forest", "lantern", "plant"],
+    "preset": "painterly",
+    "alternates": ["cozy-soft", "ink-sketch"],
+    "fontPairing": "hand",
+    "recipe": "scrapbook",
+    "harmony": "calm",
+    "confidence": 0.72,
+    "why": "Soft painted plates of moss and ochre with no outline anywhere and a single hue family, which wants analogous accents and a scrapbook page."
+  }
+}

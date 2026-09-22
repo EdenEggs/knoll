@@ -1,0 +1,62 @@
+<!-- GEAR — an eight-tooth cog, the "machine" sticker (PRESS-TABLE-PLAN.md
+     Appendix D: tags gear, scifi, machine — gear is a motif the vision
+     call matches). Layers: halo shadow body line highlight detail.
+
+     THE COG is eight teeth on a 45° pitch: tips at radius 60 (the widest
+     the box allows once the halo's 3 and the round join at a tip are
+     added — the halo reaches 1 and 127, as burst's does), roots at 46,
+     each tooth 16° across at the tip and 24° at the root with a 21° arc of
+     root between teeth. Eight because six looks like a flower and twelve
+     is the burst; and a depth of 14 is what keeps a tooth a tooth at 40 px
+     — shallower and the rim is merely bumpy. The path is 8 × (three lines
+     and one arc) = 34 commands, and it is drawn four times — halo stroke,
+     shadow, body, line — so the die-cut edge and the cel shade are the
+     silhouette exactly.
+
+     THE FACE is a disc of radius 32 in {{ skSecondary }} inside the rim,
+     and THE BORE a circle of radius 13 in {{ skPaper }} — a hole in a
+     sticker shows the paper, and on a dark page the paper is dark, so the
+     hole stays a hole. Both are outlined in the line layer.
+
+     THE SHADOW is the silhouette moved 3 down and right, the least the
+     contract allows (burst says why).
+
+     THE HIGHLIGHT is one glint on the rim's upper left, an ellipse 7 × 3
+     at radius 39 turned −45° to run along the rim (the ring between the
+     face and the roots is 32..46, so the glint clears both outlines), and
+     a dot of radius 2.5 beside it at radius 38.6.
+
+     THE DETAIL is four rivets: circles of radius 2.5, stroke 1.5 (half the
+     default line), at radius 23 on the diagonals — inside the face
+     (32 − 1.5) and clear of the bore (13 + 1.5). A simple style drops them
+     and the cog is still the cog. -->
+<sc-if value="{{ isGear }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M54.4,19.0 L55.6,4.6 L72.4,4.6 L73.6,19.0 A46,46 0 0 1 89.1,25.4 L100.1,16.1 L111.9,27.9 L102.6,38.9 A46,46 0 0 1 109.0,54.4 L123.4,55.6 L123.4,72.4 L109.0,73.6 A46,46 0 0 1 102.6,89.1 L111.9,100.1 L100.1,111.9 L89.1,102.6 A46,46 0 0 1 73.6,109.0 L72.4,123.4 L55.6,123.4 L54.4,109.0 A46,46 0 0 1 38.9,102.6 L27.9,111.9 L16.1,100.1 L25.4,89.1 A46,46 0 0 1 19.0,73.6 L4.6,72.4 L4.6,55.6 L19.0,54.4 A46,46 0 0 1 25.4,38.9 L16.1,27.9 L27.9,16.1 L38.9,25.4 A46,46 0 0 1 54.4,19.0 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+    </g>
+    <g data-layer="shadow">
+      <path d="M54.4,19.0 L55.6,4.6 L72.4,4.6 L73.6,19.0 A46,46 0 0 1 89.1,25.4 L100.1,16.1 L111.9,27.9 L102.6,38.9 A46,46 0 0 1 109.0,54.4 L123.4,55.6 L123.4,72.4 L109.0,73.6 A46,46 0 0 1 102.6,89.1 L111.9,100.1 L100.1,111.9 L89.1,102.6 A46,46 0 0 1 73.6,109.0 L72.4,123.4 L55.6,123.4 L54.4,109.0 A46,46 0 0 1 38.9,102.6 L27.9,111.9 L16.1,100.1 L25.4,89.1 A46,46 0 0 1 19.0,73.6 L4.6,72.4 L4.6,55.6 L19.0,54.4 A46,46 0 0 1 25.4,38.9 L16.1,27.9 L27.9,16.1 L38.9,25.4 A46,46 0 0 1 54.4,19.0 Z" transform="translate(3 3)" fill="{{ skShadow }}"></path>
+    </g>
+    <g data-layer="body">
+      <path d="M54.4,19.0 L55.6,4.6 L72.4,4.6 L73.6,19.0 A46,46 0 0 1 89.1,25.4 L100.1,16.1 L111.9,27.9 L102.6,38.9 A46,46 0 0 1 109.0,54.4 L123.4,55.6 L123.4,72.4 L109.0,73.6 A46,46 0 0 1 102.6,89.1 L111.9,100.1 L100.1,111.9 L89.1,102.6 A46,46 0 0 1 73.6,109.0 L72.4,123.4 L55.6,123.4 L54.4,109.0 A46,46 0 0 1 38.9,102.6 L27.9,111.9 L16.1,100.1 L25.4,89.1 A46,46 0 0 1 19.0,73.6 L4.6,72.4 L4.6,55.6 L19.0,54.4 A46,46 0 0 1 25.4,38.9 L16.1,27.9 L27.9,16.1 L38.9,25.4 A46,46 0 0 1 54.4,19.0 Z" fill="{{ skPrimary }}"></path>
+      <circle cx="64" cy="64" r="32" fill="{{ skSecondary }}"></circle>
+      <circle cx="64" cy="64" r="13" fill="{{ skPaper }}"></circle>
+    </g>
+    <g data-layer="line">
+      <path d="M54.4,19.0 L55.6,4.6 L72.4,4.6 L73.6,19.0 A46,46 0 0 1 89.1,25.4 L100.1,16.1 L111.9,27.9 L102.6,38.9 A46,46 0 0 1 109.0,54.4 L123.4,55.6 L123.4,72.4 L109.0,73.6 A46,46 0 0 1 102.6,89.1 L111.9,100.1 L100.1,111.9 L89.1,102.6 A46,46 0 0 1 73.6,109.0 L72.4,123.4 L55.6,123.4 L54.4,109.0 A46,46 0 0 1 38.9,102.6 L27.9,111.9 L16.1,100.1 L25.4,89.1 A46,46 0 0 1 19.0,73.6 L4.6,72.4 L4.6,55.6 L19.0,54.4 A46,46 0 0 1 25.4,38.9 L16.1,27.9 L27.9,16.1 L38.9,25.4 A46,46 0 0 1 54.4,19.0 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      <circle cx="64" cy="64" r="32" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}"></circle>
+      <circle cx="64" cy="64" r="13" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}"></circle>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="36.4" cy="36.4" rx="7" ry="3" transform="rotate(-45 36.4 36.4)" fill="{{ skHighlight }}"></ellipse>
+      <circle cx="50" cy="28" r="2.5" fill="{{ skHighlight }}"></circle>
+    </g>
+    <g data-layer="detail">
+      <circle cx="80.3" cy="47.7" r="2.5" fill="none" stroke="{{ skInk }}" stroke-width="1.5"></circle>
+      <circle cx="80.3" cy="80.3" r="2.5" fill="none" stroke="{{ skInk }}" stroke-width="1.5"></circle>
+      <circle cx="47.7" cy="80.3" r="2.5" fill="none" stroke="{{ skInk }}" stroke-width="1.5"></circle>
+      <circle cx="47.7" cy="47.7" r="2.5" fill="none" stroke="{{ skInk }}" stroke-width="1.5"></circle>
+    </g>
+  </svg>
+</sc-if>

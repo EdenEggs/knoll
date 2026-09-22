@@ -1,0 +1,7 @@
+# the sandbox keeps what the bench keeps off the repo (site/.gitignore has the same list for lab2/)
+press/cache/
+games/*/_src/
+*.keep-bak
+*.tmp
+perf/results/
+perf/fixtures/

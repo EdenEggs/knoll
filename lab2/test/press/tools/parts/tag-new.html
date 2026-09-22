@@ -1,0 +1,106 @@
+<!-- TAG-NEW — the luggage tag that says NEW, the shop-shelf sticker
+     (PRESS-TABLE-PLAN.md Appendix D: tags new, sale). Layers: halo shadow
+     body line highlight detail. No text slot: the word is drawn, three
+     block letters as filled paths, so the tag can be a sprite (a <text>
+     part is always live, ADDING.md §1.2).
+
+     THE TAG is a pentagon in its own upright coordinates — the point at
+     (11,64), shoulders at x 35 (the chamfer runs 24 across for 30 up, a
+     little steeper than 45° so the pointed end does not eat the face),
+     the far corners at x 117, 60 tall (y 34..94) — and the whole drawing
+     is turned 14° clockwise about the box centre, rotate(14 64 64): a tag
+     hangs from its string and falls away to the right. Turned, its corners
+     land at (12.6,51.2) (43.1,27.9) (122.7,47.7) (108.2,105.9) (28.6,86.1),
+     so with the line's half-stroke and the shadow's 3 the ink stops at 125.7
+     right and 108.9 down, and the halo's 3 more still stays under 128. The
+     string carries the drawing up into the empty top-left corner, which is
+     what fills the box past the tag's own 111 × 78.
+
+     THE EYELET at tag-local (28,64) — (29.1,55.3) once turned — is a ring of
+     radius 7 in {{ skSecondary }} (the metal grommet, the sticker's second
+     colour) with a hole of radius 3.2 in {{ skPaper }}: paper is the page's
+     own ground in every palette, so a paper disc reads as a hole on white
+     and on near-black alike.
+
+     THE FACE is a rounded rect 69 × 46 (x 44..113, y 41..87) in
+     {{ skPaper }} on the coloured tag, sc-camel-rx {{ skRadius }} so the
+     style pass rounds it with everything else. The word sits on paper in ink, the one
+     pair of roles that contrasts by definition; on a coloured tag alone a
+     dark ink on a dark primary would vanish. Its outline is a DETAIL stroke
+     at 1.5 (half the default line) — a simple style drops it and the paper
+     field still reads.
+
+     THE LETTERS are the sticker kit's block alphabet: a 14-tall cell,
+     stems 3 wide, bars 2.8, square corners, the diagonals of N and W set
+     at a perpendicular 3 and 2.6 (W's four arms would leave no counters at
+     the stems' width — Impact thins them the same way). N advances 10, E 9,
+     W 15, with 2 between, so NEW is 38 cell-units wide; scaled ×1.55 it is
+     58.9 × 21.7 on the 69-wide face — 61 usable after a 4 margin — and
+     placed by translate(49 53.2) so its centre is the face's (78.5,64).
+     Every letter is one path of 13 commands or fewer (N 11, E 13, W 13;
+     the linter's line is 60). The same twelve letters serve tag-soon and
+     tag-wishlist.
+
+     THE STRING leaves the eyelet up and left in two strands (line strokes,
+     cubic curves from the hole's rim to a knot at (18,31)), drawn after the
+     outline so they cross the tag's edge on top of it, the way a string
+     through a hole does; the knot is an ink dot of radius 2.4 in the body
+     layer, and beyond it the loop is an ellipse 5.5 × 8 at (13.5,21.5)
+     leaning 30° left, so the loop reaches (7.3,14) and with its stroke and
+     the halo's 3 stays 4 inside the box. The strands and the loop are in
+     the halo too — a die-cut edge follows the whole drawing, and a string
+     with no paper round it would be cut off the sticker.
+
+     THE SHADOW is the tag's pentagon moved 3 down and right after the turn
+     (transform="translate(3 3) rotate(14 64 64)" — rotate first, then the
+     shift, so the shade lies down-right on the page and not down-right
+     along the tilted tag). It shows as a sliver along the lower-right
+     edges: the cel shade.
+
+     THE HIGHLIGHT is a glint on the pointed end, above the eyelet — an
+     ellipse 6 × 2.2 at tag-local (32,45) turned −51° to lie along the
+     chamfer — and a dot of radius 2 at (39,38) in the rim above the face. -->
+<sc-if value="{{ isTagNew }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M11,64 L35,34 H117 V94 H35 Z" transform="rotate(14 64 64)" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+      <path d="M26.5,52.5 C23.5,46.5 20.5,39.5 17.5,32.5 M31,52 C27.5,45.5 22.5,39 19,32.5" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linecap="round"></path>
+      <ellipse cx="13.5" cy="21.5" rx="5.5" ry="8" transform="rotate(-30 13.5 21.5)" fill="none" stroke="{{ skPaper }}" stroke-width="6"></ellipse>
+    </g>
+    <g data-layer="shadow">
+      <path d="M11,64 L35,34 H117 V94 H35 Z" transform="translate(3 3) rotate(14 64 64)" fill="{{ skShadow }}"></path>
+    </g>
+    <g data-layer="body">
+      <g transform="rotate(14 64 64)">
+        <path d="M11,64 L35,34 H117 V94 H35 Z" fill="{{ skPrimary }}"></path>
+        <rect x="44" y="41" width="69" height="46" sc-camel-rx="{{ skRadius }}" fill="{{ skPaper }}"></rect>
+        <circle cx="28" cy="64" r="7" fill="{{ skSecondary }}"></circle>
+        <circle cx="28" cy="64" r="3.2" fill="{{ skPaper }}"></circle>
+        <g transform="translate(49 53.2) scale(1.55)">
+          <path transform="translate(0 0)" d="M0,14 V0 H3.2 L7,7.6 V0 H10 V14 H6.8 L3,6.4 V14 Z" fill="{{ skInk }}"></path>
+          <path transform="translate(12 0)" d="M0,14 V0 H9 V2.8 H3 V5.6 H8 V8.4 H3 V11.2 H9 V14 Z" fill="{{ skInk }}"></path>
+          <path transform="translate(23 0)" d="M0.1,0 H2.7 L4.3,9 L7.5,0.2 L10.7,9 L12.3,0 H14.9 L12.4,14 H9.7 L7.5,7.8 L5.3,14 H2.6 Z" fill="{{ skInk }}"></path>
+        </g>
+      </g>
+      <circle cx="18" cy="31" r="2.4" fill="{{ skInk }}"></circle>
+    </g>
+    <g data-layer="line">
+      <path d="M11,64 L35,34 H117 V94 H35 Z" transform="rotate(14 64 64)" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      <circle cx="28" cy="64" r="7" transform="rotate(14 64 64)" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}"></circle>
+      <path d="M26.5,52.5 C23.5,46.5 20.5,39.5 17.5,32.5 M31,52 C27.5,45.5 22.5,39 19,32.5" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linecap="round"></path>
+      <ellipse cx="13.5" cy="21.5" rx="5.5" ry="8" transform="rotate(-30 13.5 21.5)" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}"></ellipse>
+    </g>
+    <g data-layer="highlight">
+      <g transform="rotate(14 64 64)">
+        <ellipse cx="32" cy="45" rx="6" ry="2.2" transform="rotate(-51 32 45)" fill="{{ skHighlight }}"></ellipse>
+        <circle cx="39" cy="38" r="2" fill="{{ skHighlight }}"></circle>
+      </g>
+    </g>
+    <g data-layer="detail">
+      <g transform="rotate(14 64 64)">
+        <rect x="44" y="41" width="69" height="46" sc-camel-rx="{{ skRadius }}" fill="none" stroke="{{ skInk }}" stroke-width="1.5"></rect>
+        <circle cx="28" cy="64" r="3.2" fill="none" stroke="{{ skInk }}" stroke-width="1.5"></circle>
+      </g>
+    </g>
+  </svg>
+</sc-if>

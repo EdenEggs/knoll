@@ -84,6 +84,7 @@
 
 window.Company = (function () {
   if (!window.Lab || !window.Frames) return null;
+  if (document.documentElement.classList.contains('toem-embed')) return null;   // the yard's picture of this page is not a visitor (index.html: ?embed=1)
   // no WebRTC, or no SubtleCrypto (plain http off localhost): no cursors, and nothing else is missing
   if (typeof window.RTCPeerConnection !== 'function' || !(window.crypto && window.crypto.subtle)) return null;
 

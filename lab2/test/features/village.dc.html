@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./prelude.js"></script>
+<script src="./support.js"></script>
+<!-- lab 2 shows this on its own paper — see features/bare.css -->
+<link rel="stylesheet" href="./bare.css">
+<!-- Rye is on the sheet exactly once, on the signpost. The export carried the
+     whole family inlined as base64; this is the same two faces off the CDN,
+     which is what every other feature here does. VT323 came with the export
+     too and nothing on the sheet ever asks for it, so it is not here. -->
+<!-- lab 2 serves these faces itself — see SELF-HOSTED in index.html -->
+<link rel="stylesheet" href="../fonts/fonts.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  body { margin: 0; }
+
+  /* The sheet's seven keyframes, kept whole rather than pruned to the ones
+     the parts below actually reach for — same argument as forest.dc.html's
+     four: they are one line each, they are what the village was animated
+     against, and a part added later brings its animation with it and finds
+     it already here. */
+  @keyframes kh-flicker { 0%, 100% { opacity: 1 } 10% { opacity: 0.7 } 20% { opacity: 0.95 } 34% { opacity: 0.75 } 50% { opacity: 1 } 66% { opacity: 0.8 } 82% { opacity: 0.95 } }
+  @keyframes kh-bucket { from { transform: translateY(0) } to { transform: translateY(10px) } }
+  @keyframes kh-wave { from { transform: rotate(-8deg) } to { transform: rotate(16deg) } }
+  @keyframes kh-pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.2 } }
+  @keyframes kh-spin { to { transform: rotate(360deg) } }
+  @keyframes kh-sway { from { transform: skewX(-4deg) } to { transform: skewX(4deg) } }
+  @keyframes kh-moonglow { 0%, 100% { opacity: 0.06 } 50% { opacity: 0.13 } }
+
+  /* THE JIGGLE is lab 2's, not the sheet's — the same three lines
+     forest.dc.html and gnome.dc.html carry. frames.js writes data-lab-drag
+     onto this document's <html> for as long as somebody is carrying the
+     thing about, and a lamp post picked up by its lamp ought to shake.
+
+     :not([data-defs]) because the first child of the screen is the shared
+     <defs> — a 0×0 absolutely-positioned svg holding #pine and #ds — and
+     animating that is animating nothing, slowly. */
+  @keyframes jiggle {
+    0%, 100% { transform: rotate(-4deg); }
+    25%      { transform: rotate(3.5deg); }
+    50%      { transform: rotate(-2.5deg); }
+    75%      { transform: rotate(4.5deg); }
+  }
+  html[data-lab-drag] [data-village] > svg:not([data-defs]) { animation: jiggle .3s ease-in-out infinite; }
+  [data-village] > svg:not([data-defs]) { transform-origin: 50% 80%; }
+</style>
+</helmet>
+<div data-screen-label="Village Part" data-village style="min-height: 100vh; box-sizing: border-box; display: flex; align-items: center; justify-content: center; position: relative">
+
+  <!-- THE SHARED DEFS, and they are shared for real: #pine is the tree
+       outline both pines <use>, and #ds is the drop shadow nearly every part
+       is filtered through. It stays OUTSIDE the sc-ifs and is painted for
+       every part, because a part rendered without it is a part with no
+       shadow and, for the two pines, no tree at all. -->
+  <svg data-defs width="0" height="0" style="position: absolute">
+    <defs>
+      <path id="pine" d="M0,-440 L58,-328 L30,-336 L88,-222 L48,-232 L116,-114 L62,-126 L134,0 L-134,0 L-62,-126 L-116,-114 L-48,-232 L-88,-222 L-30,-336 L-58,-328 Z" vector-effect="non-scaling-stroke"></path>
+      <filter id="ds" x="-30%" y="-30%" width="170%" height="170%">
+        <feDropShadow dx="9" dy="10" sc-camel-std-deviation="0" flood-color="#000000" flood-opacity="0.28"></feDropShadow>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- 01 · TOADSTOOL HOUSE — the red toadstool house, with its chimney -->
+  <sc-if value="{{ isToadstoolHouse }}" hint-placeholder-val="{{ true }}">
+    <svg width="214" height="201" sc-camel-view-box="408 424 428 402">
+          <g filter="url(#ds)">
+            <path d="M545,800 Q538,655 620,648 Q702,655 695,800 Q620,818 545,800 Z" fill="#f7f0df" stroke="#17120b" stroke-width="7"></path>
+            <ellipse cx="620" cy="662" rx="202" ry="44" fill="#a73435" stroke="#17120b" stroke-width="7"></ellipse>
+            <path d="M420,662 Q444,470 620,452 Q796,470 820,662 Q620,732 420,662 Z" fill="#e8484a" stroke="#17120b" stroke-width="7" stroke-linejoin="round"></path>
+            <circle cx="528" cy="545" r="26" fill="#fdf7e3" stroke="#17120b" stroke-width="5"></circle>
+            <circle cx="702" cy="565" r="20" fill="#fdf7e3" stroke="#17120b" stroke-width="5"></circle>
+            <circle cx="612" cy="498" r="15" fill="#fdf7e3" stroke="#17120b" stroke-width="5"></circle>
+            <circle cx="472" cy="618" r="13" fill="#fdf7e3" stroke="#17120b" stroke-width="5"></circle>
+            <circle cx="764" cy="628" r="11" fill="#fdf7e3" stroke="#17120b" stroke-width="5"></circle>
+            <circle cx="620" cy="612" r="26" fill="#ffd23f" stroke="#17120b" stroke-width="6"></circle>
+            <path d="M594,612 L646,612 M620,586 L620,638" stroke="#17120b" stroke-width="4"></path>
+            <rect x="704" y="438" width="36" height="54" rx="8" fill="#d9c9a8" stroke="#17120b" stroke-width="5"></rect>
+            <ellipse cx="722" cy="440" rx="24" ry="9" fill="#e8d9b0" stroke="#17120b" stroke-width="5"></ellipse>
+            <path d="M585,800 L585,716 Q620,686 655,716 L655,800 Z" fill="#9c6b3f" stroke="#17120b" stroke-width="6" stroke-linejoin="round"></path>
+            <path d="M608,700 L608,796 M632,700 L632,796" stroke="rgba(23,18,11,0.25)" stroke-width="4" fill="none"></path>
+            <circle cx="620" cy="726" r="12" fill="#ffd23f" stroke="#17120b" stroke-width="4"></circle>
+            <circle cx="646" cy="766" r="5" fill="#ffd23f" stroke="#17120b" stroke-width="3"></circle>
+            <ellipse cx="620" cy="806" rx="50" ry="11" fill="#d9c9a8" stroke="#17120b" stroke-width="5"></ellipse>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 02 · BONNET HOUSE — the pink one, with the blue window -->
+  <sc-if value="{{ isBonnetHouse }}">
+    <svg width="174" height="161" sc-camel-view-box="1020 538 326 302">
+          <g filter="url(#ds)">
+            <path d="M1122,808 Q1118,700 1180,695 Q1242,700 1238,808 Q1180,822 1122,808 Z" fill="#f7f0df" stroke="#17120b" stroke-width="6"></path>
+            <ellipse cx="1180" cy="702" rx="152" ry="34" fill="#b84370" stroke="#17120b" stroke-width="6"></ellipse>
+            <path d="M1030,702 Q1052,560 1180,548 Q1308,560 1330,702 Q1180,756 1030,702 Z" fill="#e0598c" stroke="#17120b" stroke-width="6" stroke-linejoin="round"></path>
+            <circle cx="1116" cy="622" r="18" fill="#fdf7e3" stroke="#17120b" stroke-width="4"></circle>
+            <circle cx="1244" cy="636" r="14" fill="#fdf7e3" stroke="#17120b" stroke-width="4"></circle>
+            <circle cx="1182" cy="584" r="10" fill="#fdf7e3" stroke="#17120b" stroke-width="4"></circle>
+            <circle cx="1180" cy="662" r="13" fill="#ffd23f" stroke="#17120b" stroke-width="4"></circle>
+            <circle cx="1180" cy="762" r="30" fill="#4a72d4" stroke="#17120b" stroke-width="6"></circle>
+            <circle cx="1180" cy="762" r="18" fill="none" stroke="rgba(23,18,11,0.35)" stroke-width="3"></circle>
+            <circle cx="1194" cy="762" r="4.5" fill="#ffd23f" stroke="#17120b" stroke-width="3"></circle>
+            <ellipse cx="1180" cy="812" rx="46" ry="10" fill="#d9c9a8" stroke="#17120b" stroke-width="5"></ellipse>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 03 · BUTTER CAP — the small yellow one -->
+  <sc-if value="{{ isButterCap }}">
+    <svg width="130" height="123" sc-camel-view-box="825 528 226 214">
+          <g filter="url(#ds)">
+            <ellipse cx="935" cy="640" rx="100" ry="22" fill="#d9a92f" stroke="#17120b" stroke-width="5"></ellipse>
+            <path d="M895,712 Q892,638 935,635 Q978,638 982,712 Q935,724 895,712 Z" fill="#f7f0df" stroke="#17120b" stroke-width="5"></path>
+            <path d="M916,714 L916,672 Q935,658 954,672 L954,714 Z" fill="#8a5a36" stroke="#17120b" stroke-width="4"></path>
+            <circle cx="935" cy="684" r="6" fill="#ffd23f" stroke="#17120b" stroke-width="3"></circle>
+            <path d="M835,640 Q852,545 935,538 Q1018,545 1035,640 Q935,678 835,640 Z" fill="#ffd23f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+            <circle cx="895" cy="595" r="11" fill="#fdf7e3" stroke="#17120b" stroke-width="4"></circle>
+            <circle cx="972" cy="605" r="8" fill="#fdf7e3" stroke="#17120b" stroke-width="4"></circle>
+            <circle cx="938" cy="565" r="6" fill="#fdf7e3" stroke="#17120b" stroke-width="4"></circle>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 04 · STUMP HOUSE — a sawn stump with a door in it -->
+  <sc-if value="{{ isStumpHouse }}">
+    <svg width="156" height="128" sc-camel-view-box="142 616 262 216">
+          <g filter="url(#ds)">
+            <path d="M180,800 L186,650 Q270,632 354,650 L360,800 Q270,824 180,800 Z" fill="#8a6a42" stroke="#17120b" stroke-width="7"></path>
+            <path d="M214,668 L212,796 M322,668 L324,796" stroke="rgba(23,18,11,0.22)" stroke-width="5" fill="none"></path>
+            <path d="M180,798 Q158,792 150,810 L184,812 Z" fill="#8a6a42" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+            <path d="M360,798 Q382,792 390,810 L356,812 Z" fill="#8a6a42" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+            <ellipse cx="270" cy="650" rx="88" ry="26" fill="#b08a58" stroke="#17120b" stroke-width="6"></ellipse>
+            <ellipse cx="270" cy="650" rx="56" ry="15" fill="none" stroke="#6b4a2e" stroke-width="4"></ellipse>
+            <ellipse cx="270" cy="650" rx="26" ry="7" fill="none" stroke="#6b4a2e" stroke-width="4"></ellipse>
+            <path d="M235,800 L235,722 Q270,694 305,722 L305,800 Z" fill="#5c3a22" stroke="#17120b" stroke-width="6" stroke-linejoin="round"></path>
+            <circle cx="270" cy="734" r="10" fill="#ffd23f" stroke="#17120b" stroke-width="4"></circle>
+            <circle cx="296" cy="768" r="4.5" fill="#ffd23f" stroke="#17120b" stroke-width="3"></circle>
+            <circle cx="332" cy="690" r="12" fill="#ffd23f" stroke="#17120b" stroke-width="5"></circle>
+            <path d="M320,690 L344,690 M332,678 L332,702" stroke="#17120b" stroke-width="3"></path>
+            <ellipse cx="270" cy="806" rx="48" ry="10" fill="#d9c9a8" stroke="#17120b" stroke-width="5"></ellipse>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 05 · VILLAGE PINE — the pine, near -->
+  <sc-if value="{{ isVillagePine }}">
+    <svg width="200" height="370" sc-camel-view-box="-30 190 300 555">
+          <g filter="url(#ds)">
+            <rect x="94" y="638" width="46" height="94" fill="#6b4a2e" stroke="#17120b" stroke-width="6"></rect>
+            <circle cx="117" cy="702" r="7" fill="#5c3a22" stroke="#17120b" stroke-width="3"></circle>
+            <use href="#pine" transform="translate(117,660) scale(1.05)" fill="#35693c" stroke="#17120b" stroke-width="7" stroke-linejoin="round"></use>
+            <g transform="translate(117,660) scale(1.05)" stroke="#5a9e58" stroke-width="5" stroke-linecap="round" fill="none">
+              <path d="M-58,-96 Q-20,-82 30,-92"></path>
+              <path d="M-40,-206 Q-8,-194 28,-202"></path>
+              <path d="M-26,-306 Q0,-298 20,-304"></path>
+            </g>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 06 · FAR PINE — the pine, far — one flat navy silhouette -->
+  <sc-if value="{{ isFarPine }}">
+    <svg width="112" height="180" sc-camel-view-box="-146 -452 292 464">
+          <use href="#pine" transform="translate(0,0)" fill="#1e1633"></use>
+        </svg>
+  </sc-if>
+
+  <!-- 07 · THE WELL — the well, and its bucket goes up and down -->
+  <sc-if value="{{ isTheWell }}">
+    <svg width="124" height="152" sc-camel-view-box="920 742 166 204">
+          <g filter="url(#ds)">
+            <rect x="946" y="792" width="11" height="76" fill="#6b4a2e" stroke="#17120b" stroke-width="4"></rect>
+            <rect x="1044" y="792" width="11" height="76" fill="#6b4a2e" stroke="#17120b" stroke-width="4"></rect>
+            <g style="animation: kh-bucket 2.4s ease-in-out infinite alternate">
+              <line x1="1000" y1="778" x2="1000" y2="846" stroke="#17120b" stroke-width="4"></line>
+              <path d="M986,846 L1014,846 L1010,866 L990,866 Z" fill="#8a6a42" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path>
+            </g>
+            <path d="M930,800 L1000,750 L1070,800 Z" fill="#e8484a" stroke="#17120b" stroke-width="6" stroke-linejoin="round"></path>
+            <path d="M938,908 L938,864 Q1000,846 1062,864 L1062,908 Q1000,930 938,908 Z" fill="#b8b0a0" stroke="#17120b" stroke-width="6"></path>
+            <path d="M960,872 L960,890 M1000,866 L1000,886 M1040,872 L1040,890 M978,896 L978,912 M1022,896 L1022,912" stroke="rgba(23,18,11,0.3)" stroke-width="4" fill="none"></path>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 08 · PICKET RUN — four palings and two rails -->
+  <sc-if value="{{ isPicketRun }}">
+    <svg width="150" height="88" sc-camel-view-box="130 840 200 118">
+          <g filter="url(#ds)" transform="translate(90,0)">
+            <rect x="50" y="874" width="172" height="11" fill="#d9c9a8" stroke="#17120b" stroke-width="4"></rect>
+            <rect x="50" y="906" width="172" height="11" fill="#d9c9a8" stroke="#17120b" stroke-width="4"></rect>
+            <path d="M62,932 L62,864 L74,848 L86,864 L86,932 Z" fill="#e8d9b0" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+            <path d="M108,938 L108,870 L120,854 L132,870 L132,938 Z" fill="#e8d9b0" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+            <path d="M154,942 L154,874 L166,858 L178,874 L178,942 Z" fill="#e8d9b0" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+            <path d="M200,936 L200,868 L212,852 L224,868 L224,936 Z" fill="#e8d9b0" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 09 · LAMP POST — the lamp, and it flickers -->
+  <sc-if value="{{ isLampPost }}">
+    <svg width="54" height="178" sc-camel-view-box="733 700 78 258">
+          <g filter="url(#ds)">
+            <rect x="764" y="770" width="13" height="164" fill="#3a3a3a" stroke="#17120b" stroke-width="4"></rect>
+            <ellipse cx="770" cy="936" rx="27" ry="9" fill="#3a3a3a" stroke="#17120b" stroke-width="4"></ellipse>
+            <rect x="750" y="742" width="40" height="46" rx="4" fill="#ffd23f" stroke="#17120b" stroke-width="5"></rect>
+            <path d="M742,742 L770,718 L798,742 Z" fill="#3a3a3a" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path>
+            <circle cx="770" cy="712" r="5" fill="#3a3a3a" stroke="#17120b" stroke-width="3"></circle>
+          </g>
+          <g opacity="0.3"><circle cx="770" cy="765" r="30" fill="#ffd23f" style="animation: kh-flicker 2s linear 0.3s infinite"></circle></g>
+        </svg>
+  </sc-if>
+
+  <!-- 10 · THE SIGNPOST — KNOLL, and THE PINES — the only Rye on the sheet -->
+  <sc-if value="{{ isTheSignpost }}">
+    <svg width="144" height="133" sc-camel-view-box="1245 778 206 190">
+          <g filter="url(#ds)" transform="translate(-60,0)">
+            <rect x="1394" y="788" width="14" height="164" fill="#6b4a2e" stroke="#17120b" stroke-width="5"></rect>
+            <path d="M1330,798 L1470,798 L1496,821 L1470,844 L1330,844 Z" fill="#d9c9a8" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+            <text x="1402" y="831" text-anchor="middle" font-family="Rye, serif" font-size="27" fill="#17120b">KNOLL</text>
+            <path d="M1470,860 L1340,860 L1316,881 L1340,902 L1470,902 Z" fill="#d9c9a8" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+            <text x="1400" y="890" text-anchor="middle" font-family="Rye, serif" font-size="20" fill="#17120b">THE PINES</text>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 11 · PINK HAT — a villager in a pink hat -->
+  <sc-if value="{{ isPinkHat }}">
+    <svg width="82" height="136" sc-camel-view-box="672 684 92 152">
+          <g filter="url(#ds)">
+            <ellipse cx="701" cy="816" rx="9" ry="5" fill="#8a6a42" stroke="#17120b" stroke-width="3"></ellipse>
+            <ellipse cx="729" cy="816" rx="9" ry="5" fill="#8a6a42" stroke="#17120b" stroke-width="3"></ellipse>
+            <line x1="700" y1="774" x2="688" y2="800" stroke="#17120b" stroke-width="9" stroke-linecap="round"></line>
+            <line x1="730" y1="774" x2="742" y2="800" stroke="#17120b" stroke-width="9" stroke-linecap="round"></line>
+            <line x1="700" y1="774" x2="688" y2="800" stroke="#4a72d4" stroke-width="5" stroke-linecap="round"></line>
+            <line x1="730" y1="774" x2="742" y2="800" stroke="#4a72d4" stroke-width="5" stroke-linecap="round"></line>
+            <circle cx="688" cy="802" r="5" fill="#f0cfae" stroke="#17120b" stroke-width="3"></circle>
+            <circle cx="742" cy="802" r="5" fill="#f0cfae" stroke="#17120b" stroke-width="3"></circle>
+            <path d="M698,768 L732,768 L745,812 L685,812 Z" fill="#4a72d4" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path>
+            <ellipse cx="699" cy="754" rx="3.5" ry="5" fill="#f5b8c4" stroke="#17120b" stroke-width="2.5"></ellipse>
+            <ellipse cx="731" cy="754" rx="3.5" ry="5" fill="#f5b8c4" stroke="#17120b" stroke-width="2.5"></ellipse>
+            <circle cx="715" cy="753" r="17" fill="#f0cfae" stroke="#17120b" stroke-width="3.5"></circle>
+            <path d="M696,755 Q715,768 734,755 Q738,800 715,806 Q692,800 696,755 Z" fill="#f7f0df" stroke="#17120b" stroke-width="3.5" stroke-linejoin="round"></path>
+            <rect x="711" y="801" width="8" height="8" transform="rotate(45 715 805)" fill="#ffd23f" stroke="#17120b" stroke-width="2.5"></rect>
+            <circle cx="708" cy="754" r="2.9" fill="#17120b"></circle>
+            <circle cx="722" cy="754" r="2.9" fill="#17120b"></circle>
+            <circle cx="709" cy="753" r="1" fill="#ffffff"></circle>
+            <circle cx="723" cy="753" r="1" fill="#ffffff"></circle>
+            <ellipse cx="708" cy="762" rx="6" ry="3" transform="rotate(-14 708 762)" fill="#fffaf0" stroke="#17120b" stroke-width="2.5"></ellipse>
+            <ellipse cx="722" cy="762" rx="6" ry="3" transform="rotate(14 722 762)" fill="#fffaf0" stroke="#17120b" stroke-width="2.5"></ellipse>
+            <circle cx="715" cy="758" r="5.5" fill="#e8a583" stroke="#17120b" stroke-width="3"></circle>
+            <path d="M715,698 L735,740 L695,740 Z" fill="#e0598c" stroke="#17120b" stroke-width="3.5" stroke-linejoin="round"></path>
+            <rect x="691" y="736" width="48" height="10" rx="5" fill="#b84370" stroke="#17120b" stroke-width="3.5"></rect>
+            <circle cx="715" cy="698" r="4.5" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></circle>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 12 · RED HAT — a villager in a red hat, waving -->
+  <sc-if value="{{ isRedHat }}">
+    <svg width="92" height="140" sc-camel-view-box="1040 742 106 160">
+          <g filter="url(#ds)">
+            <ellipse cx="1076" cy="884" rx="9" ry="5" fill="#8a6a42" stroke="#17120b" stroke-width="3"></ellipse>
+            <ellipse cx="1104" cy="884" rx="9" ry="5" fill="#8a6a42" stroke="#17120b" stroke-width="3"></ellipse>
+            <line x1="1075" y1="842" x2="1063" y2="868" stroke="#17120b" stroke-width="9" stroke-linecap="round"></line>
+            <line x1="1075" y1="842" x2="1063" y2="868" stroke="#7bc264" stroke-width="5" stroke-linecap="round"></line>
+            <circle cx="1063" cy="870" r="5" fill="#f0cfae" stroke="#17120b" stroke-width="3"></circle>
+            <g style="animation: kh-wave 0.9s ease-in-out infinite alternate; transform-origin: 1105px 842px">
+              <line x1="1105" y1="842" x2="1122" y2="812" stroke="#17120b" stroke-width="9" stroke-linecap="round"></line>
+              <line x1="1105" y1="842" x2="1122" y2="812" stroke="#7bc264" stroke-width="5" stroke-linecap="round"></line>
+              <circle cx="1124" cy="810" r="5" fill="#f0cfae" stroke="#17120b" stroke-width="3"></circle>
+            </g>
+            <path d="M1073,836 L1107,836 L1120,880 L1060,880 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path>
+            <ellipse cx="1074" cy="822" rx="3.5" ry="5" fill="#f5b8c4" stroke="#17120b" stroke-width="2.5"></ellipse>
+            <ellipse cx="1106" cy="822" rx="3.5" ry="5" fill="#f5b8c4" stroke="#17120b" stroke-width="2.5"></ellipse>
+            <circle cx="1090" cy="821" r="17" fill="#f0cfae" stroke="#17120b" stroke-width="3.5"></circle>
+            <path d="M1071,823 Q1090,836 1109,823 Q1113,868 1090,874 Q1067,868 1071,823 Z" fill="#f7f0df" stroke="#17120b" stroke-width="3.5" stroke-linejoin="round"></path>
+            <rect x="1086" y="869" width="8" height="8" transform="rotate(45 1090 873)" fill="#ffd23f" stroke="#17120b" stroke-width="2.5"></rect>
+            <circle cx="1083" cy="822" r="2.9" fill="#17120b"></circle>
+            <circle cx="1097" cy="822" r="2.9" fill="#17120b"></circle>
+            <circle cx="1084" cy="821" r="1" fill="#ffffff"></circle>
+            <circle cx="1098" cy="821" r="1" fill="#ffffff"></circle>
+            <ellipse cx="1083" cy="830" rx="6" ry="3" transform="rotate(-14 1083 830)" fill="#fffaf0" stroke="#17120b" stroke-width="2.5"></ellipse>
+            <ellipse cx="1097" cy="830" rx="6" ry="3" transform="rotate(14 1097 830)" fill="#fffaf0" stroke="#17120b" stroke-width="2.5"></ellipse>
+            <circle cx="1090" cy="826" r="5.5" fill="#e8a583" stroke="#17120b" stroke-width="3"></circle>
+            <path d="M1090,766 L1110,808 L1070,808 Z" fill="#e8484a" stroke="#17120b" stroke-width="3.5" stroke-linejoin="round"></path>
+            <rect x="1066" y="804" width="48" height="10" rx="5" fill="#b8302f" stroke="#17120b" stroke-width="3.5"></rect>
+            <circle cx="1090" cy="766" r="4.5" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></circle>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 13 · BLUE HAT — a villager in a blue hat -->
+  <sc-if value="{{ isBlueHat }}">
+    <svg width="80" height="140" sc-camel-view-box="-38 -132 86 150">
+          <g filter="url(#ds)">
+            <ellipse cx="-14" cy="0" rx="9" ry="5" fill="#8a6a42" stroke="#17120b" stroke-width="3"></ellipse>
+            <ellipse cx="14" cy="0" rx="9" ry="5" fill="#8a6a42" stroke="#17120b" stroke-width="3"></ellipse>
+            <line x1="-15" y1="-42" x2="-27" y2="-16" stroke="#17120b" stroke-width="9" stroke-linecap="round"></line>
+            <line x1="15" y1="-42" x2="27" y2="-16" stroke="#17120b" stroke-width="9" stroke-linecap="round"></line>
+            <line x1="-15" y1="-42" x2="-27" y2="-16" stroke="#e8484a" stroke-width="5" stroke-linecap="round"></line>
+            <line x1="15" y1="-42" x2="27" y2="-16" stroke="#e8484a" stroke-width="5" stroke-linecap="round"></line>
+            <circle cx="-27" cy="-14" r="5" fill="#f0cfae" stroke="#17120b" stroke-width="3"></circle>
+            <circle cx="27" cy="-14" r="5" fill="#f0cfae" stroke="#17120b" stroke-width="3"></circle>
+            <path d="M-17,-48 L17,-48 L30,-4 L-30,-4 Z" fill="#e8484a" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path>
+            <ellipse cx="-16" cy="-62" rx="3.5" ry="5" fill="#f5b8c4" stroke="#17120b" stroke-width="2.5"></ellipse>
+            <ellipse cx="16" cy="-62" rx="3.5" ry="5" fill="#f5b8c4" stroke="#17120b" stroke-width="2.5"></ellipse>
+            <circle cx="0" cy="-63" r="17" fill="#f0cfae" stroke="#17120b" stroke-width="3.5"></circle>
+            <path d="M-19,-61 Q0,-48 19,-61 Q23,-16 0,-10 Q-23,-16 -19,-61 Z" fill="#f7f0df" stroke="#17120b" stroke-width="3.5" stroke-linejoin="round"></path>
+            <rect x="-4" y="-15" width="8" height="8" transform="rotate(45 0 -11)" fill="#ffd23f" stroke="#17120b" stroke-width="2.5"></rect>
+            <circle cx="-7" cy="-62" r="2.9" fill="#17120b"></circle>
+            <circle cx="7" cy="-62" r="2.9" fill="#17120b"></circle>
+            <circle cx="-6" cy="-63" r="1" fill="#ffffff"></circle>
+            <circle cx="8" cy="-63" r="1" fill="#ffffff"></circle>
+            <ellipse cx="-7" cy="-54" rx="6" ry="3" transform="rotate(-14 -7 -54)" fill="#fffaf0" stroke="#17120b" stroke-width="2.5"></ellipse>
+            <ellipse cx="7" cy="-54" rx="6" ry="3" transform="rotate(14 7 -54)" fill="#fffaf0" stroke="#17120b" stroke-width="2.5"></ellipse>
+            <circle cx="0" cy="-58" r="5.5" fill="#e8a583" stroke="#17120b" stroke-width="3"></circle>
+            <path d="M0,-118 L20,-76 L-20,-76 Z" fill="#4a72d4" stroke="#17120b" stroke-width="3.5" stroke-linejoin="round"></path>
+            <rect x="-24" y="-80" width="48" height="10" rx="5" fill="#3a5cb0" stroke="#17120b" stroke-width="3.5"></rect>
+            <circle cx="0" cy="-118" r="4.5" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></circle>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 14 · RED CAPS — two red toadstools -->
+  <sc-if value="{{ isRedCaps }}">
+    <svg width="86" height="74" sc-camel-view-box="120 906 82 70">
+          <g filter="url(#ds)">
+            <rect x="143" y="938" width="11" height="20" rx="4" fill="#f7f0df" stroke="#17120b" stroke-width="3.5"></rect>
+            <path d="M132,942 Q148,910 164,942 Q148,952 132,942 Z" fill="#e8484a" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path>
+            <circle cx="143" cy="932" r="3.5" fill="#fdf7e3"></circle>
+            <circle cx="155" cy="937" r="2.5" fill="#fdf7e3"></circle>
+            <rect x="170" y="946" width="9" height="15" rx="4" fill="#f7f0df" stroke="#17120b" stroke-width="3"></rect>
+            <path d="M162,949 Q174,925 187,949 Q174,957 162,949 Z" fill="#e8484a" stroke="#17120b" stroke-width="3.5" stroke-linejoin="round"></path>
+            <circle cx="172" cy="942" r="2.5" fill="#fdf7e3"></circle>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 15 · MIXED CAPS — three, one of them yellow -->
+  <sc-if value="{{ isMixedCaps }}">
+    <svg width="100" height="66" sc-camel-view-box="440 864 100 66">
+          <g filter="url(#ds)">
+            <rect x="480" y="890" width="11" height="20" rx="4" fill="#f7f0df" stroke="#17120b" stroke-width="3.5"></rect>
+            <path d="M469,894 Q485,862 501,894 Q485,904 469,894 Z" fill="#e8484a" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path>
+            <circle cx="480" cy="884" r="3.5" fill="#fdf7e3"></circle>
+            <circle cx="492" cy="889" r="2.5" fill="#fdf7e3"></circle>
+            <rect x="507" y="898" width="9" height="15" rx="4" fill="#f7f0df" stroke="#17120b" stroke-width="3"></rect>
+            <path d="M499,901 Q511,877 524,901 Q511,909 499,901 Z" fill="#ffd23f" stroke="#17120b" stroke-width="3.5" stroke-linejoin="round"></path>
+            <rect x="458" y="900" width="9" height="13" rx="4" fill="#f7f0df" stroke="#17120b" stroke-width="3"></rect>
+            <path d="M450,903 Q462,881 475,903 Q462,911 450,903 Z" fill="#e8484a" stroke="#17120b" stroke-width="3.5" stroke-linejoin="round"></path>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 16 · PINK CAPS — a pink one and a red one -->
+  <sc-if value="{{ isPinkCaps }}">
+    <svg width="80" height="72" sc-camel-view-box="1247 896 82 74">
+          <g filter="url(#ds)">
+            <rect x="1268" y="932" width="11" height="20" rx="4" fill="#f7f0df" stroke="#17120b" stroke-width="3.5"></rect>
+            <path d="M1257,936 Q1273,904 1289,936 Q1273,946 1257,936 Z" fill="#e0598c" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path>
+            <circle cx="1268" cy="926" r="3.5" fill="#fdf7e3"></circle>
+            <circle cx="1280" cy="931" r="2.5" fill="#fdf7e3"></circle>
+            <rect x="1295" y="940" width="9" height="15" rx="4" fill="#f7f0df" stroke="#17120b" stroke-width="3"></rect>
+            <path d="M1287,943 Q1299,919 1312,943 Q1299,951 1287,943 Z" fill="#e8484a" stroke="#17120b" stroke-width="3.5" stroke-linejoin="round"></path>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 17 · BLOOM — one flower on a stem, swaying -->
+  <sc-if value="{{ isBloom }}">
+    <svg width="52" height="72" sc-camel-view-box="540 866 46 62">
+          <g style="animation: kh-sway 3.4s ease-in-out infinite alternate; transform-origin: 560px 920px">
+            <line x1="560" y1="920" x2="560" y2="898" stroke="#2f5c36" stroke-width="4"></line>
+            <circle cx="554" cy="893" r="5" fill="#ffd23f" stroke="#17120b" stroke-width="2.5"></circle>
+            <circle cx="566" cy="893" r="5" fill="#ffd23f" stroke="#17120b" stroke-width="2.5"></circle>
+            <circle cx="560" cy="887" r="5" fill="#ffd23f" stroke="#17120b" stroke-width="2.5"></circle>
+            <circle cx="560" cy="894" r="4" fill="#e8484a" stroke="#17120b" stroke-width="2.5"></circle>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 18 · SPRIG — three blades of grass -->
+  <sc-if value="{{ isSprig }}">
+    <svg width="44" height="44" sc-camel-view-box="614 833 34 36">
+          <g stroke="#2f5c36" stroke-width="3.5" stroke-linecap="round" fill="none">
+            <g transform="translate(620,860)"><path d="M0,0 Q1,-12 5,-16 M7,0 Q7,-14 8,-19 M13,0 Q12,-10 17,-14" style="animation: kh-sway 2.6s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%"></path></g>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 19 · STEPPING STONES — three flat stones -->
+  <sc-if value="{{ isSteppingStones }}">
+    <svg width="140" height="80" sc-camel-view-box="736 850 180 140">
+          <ellipse cx="850" cy="960" rx="56" ry="20" fill="#e8d9b0" stroke="#17120b" stroke-width="5"></ellipse>
+          <ellipse cx="828" cy="915" rx="48" ry="17" fill="#e8d9b0" stroke="#17120b" stroke-width="5"></ellipse>
+          <ellipse cx="790" cy="876" rx="44" ry="16" fill="#e8d9b0" stroke="#17120b" stroke-width="5"></ellipse>
+        </svg>
+  </sc-if>
+
+  <!-- 20 · BOULDER — one rock -->
+  <sc-if value="{{ isBoulder }}">
+    <svg width="80" height="62" sc-camel-view-box="1310 926 84 66">
+          <g filter="url(#ds)">
+            <path d="M1320,966 Q1316,942 1338,936 Q1362,932 1372,950 Q1378,968 1358,972 Q1330,976 1320,966 Z" fill="#a8a29a" stroke="#17120b" stroke-width="5"></path>
+            <path d="M1334,946 Q1344,942 1354,946" stroke="rgba(255,255,255,0.4)" stroke-width="3.5" fill="none" stroke-linecap="round"></path>
+          </g>
+        </svg>
+  </sc-if>
+
+  <!-- 21 · THE SUN — the sun, and its rays turn -->
+  <sc-if value="{{ isTheSun }}">
+    <svg width="130" height="130" sc-camel-view-box="-100 -100 200 200">
+          <circle r="92" fill="#ffd23f" opacity="0.15"></circle>
+          <g stroke="#ffd23f" stroke-width="6" stroke-linecap="round" style="animation: kh-spin 45s linear infinite; transform-box: fill-box; transform-origin: center">
+            <line x1="0" y1="-70" x2="0" y2="-88"></line>
+            <line x1="49" y1="-49" x2="62" y2="-62"></line>
+            <line x1="70" y1="0" x2="88" y2="0"></line>
+            <line x1="49" y1="49" x2="62" y2="62"></line>
+            <line x1="0" y1="70" x2="0" y2="88"></line>
+            <line x1="-49" y1="49" x2="-62" y2="62"></line>
+            <line x1="-70" y1="0" x2="-88" y2="0"></line>
+            <line x1="-49" y1="-49" x2="-62" y2="-62"></line>
+          </g>
+          <circle r="54" fill="#ffd23f" stroke="#17120b" stroke-width="6"></circle>
+          <circle cx="-16" cy="-16" r="10" fill="rgba(255,255,255,0.45)"></circle>
+        </svg>
+  </sc-if>
+
+  <!-- 22 · THE MOON — the moon, and its halo breathes -->
+  <sc-if value="{{ isTheMoon }}">
+    <svg width="130" height="130" sc-camel-view-box="1362 32 196 196">
+          <circle cx="1460" cy="130" r="84" fill="#fdf7e3" style="animation: kh-moonglow 6s ease-in-out infinite"></circle>
+          <circle cx="1460" cy="130" r="54" fill="#fdf7e3" stroke="#17120b" stroke-width="6"></circle>
+          <circle cx="1442" cy="112" r="9" fill="#e8dcc0"></circle>
+          <circle cx="1478" cy="142" r="7" fill="#e8dcc0"></circle>
+          <circle cx="1452" cy="152" r="4.5" fill="#e8dcc0"></circle>
+        </svg>
+  </sc-if>
+
+  <!-- 23 · FIREFLY — one pulsing speck -->
+  <sc-if value="{{ isFirefly }}">
+    <svg width="48" height="48" sc-camel-view-box="482 682 36 36">
+          <circle cx="500" cy="700" r="9" fill="#ffd23f" opacity="0.18"></circle>
+          <circle cx="500" cy="700" r="3" fill="#ffe98a" style="animation: kh-pulse 1.8s ease-in-out infinite"></circle>
+        </svg>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;part&quot;:{&quot;editor&quot;:&quot;select&quot;,&quot;default&quot;:&quot;toadstool-house&quot;,&quot;options&quot;:[&quot;toadstool-house&quot;,&quot;bonnet-house&quot;,&quot;butter-cap&quot;,&quot;stump-house&quot;,&quot;village-pine&quot;,&quot;far-pine&quot;,&quot;the-well&quot;,&quot;picket-run&quot;,&quot;lamp-post&quot;,&quot;the-signpost&quot;,&quot;pink-hat&quot;,&quot;red-hat&quot;,&quot;blue-hat&quot;,&quot;red-caps&quot;,&quot;mixed-caps&quot;,&quot;pink-caps&quot;,&quot;bloom&quot;,&quot;sprig&quot;,&quot;stepping-stones&quot;,&quot;boulder&quot;,&quot;the-sun&quot;,&quot;the-moon&quot;,&quot;firefly&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Village&quot;}}">
+/* ONE FILE, TWENTY-THREE PARTS, TWENTY-THREE FEATURES.
+   The village was drawn as a single asset sheet — four houses, two pines, a
+   well, a fence, a lamp, a signpost, three villagers, three clumps of
+   toadstools, a bloom, a sprig, stepping stones, a boulder, the sun, the moon
+   and a firefly, all in one flex row — and the sheet is not what the bench
+   wants: each part is to be picked up, put down and re-cut on its own, which
+   on this bench means each is its own .gz. Twenty-three near-identical
+   documents would be twenty-three copies of the same helmet and the same
+   seven keyframes, so instead there is ONE document and the section says
+   which part it wants in its data-src —
+   features/village.dc.html#part=the-well. frames.js hands data-src to the
+   frame verbatim, so the marker survives.
+
+   IT IS A HASH AND NOT A QUERY, and the reason is written out at length in
+   gnome.dc.html, which does the same thing with #who=. Short version: a
+   static host with clean URLs answers .html with a 301 that drops the query
+   string, and a fragment never goes to the server at all.
+
+   WHAT WAS LEFT BEHIND is the sheet's own scaffolding — its white paper, the
+   64/48/96 of padding it was composed with, and the flex row that laid the
+   parts out side by side. There were never any name plates on this one to
+   take off, which is the one job forest.dc.html had that this did not.
+   Nothing about the drawings themselves was touched: the svgs above are the
+   export's, verbatim, viewBox crops and all — and those crops are windows on
+   ONE shared coordinate space, which is why their numbers run into the
+   thousands and do not start at zero. Do not "tidy" them to 0,0; the two
+   pines <use> a path defined in that space and would walk off their own
+   frames.
+
+   THERE ARE NO OTHER PROPS. Every colour on this sheet is a literal, unlike
+   the forest's season/cap/sparkles — so a red toadstool house is a red
+   toadstool house, and a pink one is a different part rather than the same
+   part in another colour. That is the sheet's choice, not a simplification
+   made here.
+
+   `part` is a real prop with a real default, so the file still opens as
+   itself in Design Canvas with nothing on the end of it at all. */
+class Component extends DCLogic {
+  renderVals() {
+    let part = this.props.part;
+    try {
+      const m = /(?:^|[#&?])part=([\w-]+)/.exec(location.hash + location.search);
+      if (m) part = m[1];
+    } catch (e) {}
+    part = part || 'toadstool-house';
+    return {
+      isToadstoolHouse: part === 'toadstool-house',
+      isBonnetHouse: part === 'bonnet-house',
+      isButterCap: part === 'butter-cap',
+      isStumpHouse: part === 'stump-house',
+      isVillagePine: part === 'village-pine',
+      isFarPine: part === 'far-pine',
+      isTheWell: part === 'the-well',
+      isPicketRun: part === 'picket-run',
+      isLampPost: part === 'lamp-post',
+      isTheSignpost: part === 'the-signpost',
+      isPinkHat: part === 'pink-hat',
+      isRedHat: part === 'red-hat',
+      isBlueHat: part === 'blue-hat',
+      isRedCaps: part === 'red-caps',
+      isMixedCaps: part === 'mixed-caps',
+      isPinkCaps: part === 'pink-caps',
+      isBloom: part === 'bloom',
+      isSprig: part === 'sprig',
+      isSteppingStones: part === 'stepping-stones',
+      isBoulder: part === 'boulder',
+      isTheSun: part === 'the-sun',
+      isTheMoon: part === 'the-moon',
+      isFirefly: part === 'firefly',
+    };
+  }
+}
+</script>
+</body>
+</html>

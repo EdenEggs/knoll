@@ -21,7 +21,9 @@
         same view before and after the press — and keeps the phone view
      7  a server with no door for it: the button still stands, a press says "not saved"
         and the note under it says to restart the server, and nothing is written; on a
-        hostname that is not this machine — the deployed site — there is no button at all
+        hostname that is not this machine — the deployed site — the button is THE LIVE
+        WALL's (seed.js: THE LIVE WALL, 2026-09-17), and with no door for that either it
+        stands disabled and says "offline"
      8  the real site is untouched, and no page errors
 
    Run:  node toem2/probe-save.js    (PORT=4394 by default; any free port) */
@@ -55,7 +57,7 @@ function get(url) {
 // ── the bench, driven ─────────────────────────────────────────────────────
 const button = p => p.evaluate(() => {
   const b = document.getElementById('toem-save'), n = document.getElementById('toem-save-note');
-  return b ? { text: b.textContent, cls: b.className, shown: b.getClientRects().length > 0, title: b.title,
+  return b ? { text: b.textContent, cls: b.className, shown: b.getClientRects().length > 0, title: b.title, disabled: b.disabled,
                width: b.offsetWidth, fits: b.scrollWidth <= b.clientWidth + 1,
                note: n && !n.hidden ? n.textContent : '', noteBad: !!(n && n.classList.contains('is-bad')) } : null;
 });
@@ -78,7 +80,7 @@ const benchSeen = p => p.evaluate(() => Array.from(window.__benchSeen || []));
 const items = p => p.evaluate(() => JSON.parse(JSON.stringify(Wall.store.get().items)));
 const frameOn = (p, nn, fill) => p.evaluate(({ nn, fill }) => {
   const its = Wall.store.get().items, idx = [];
-  its.forEach((it, i) => { if (it && it.f.indexOf('tm-p' + nn + '-') === 0) idx.push(i); });
+  its.forEach((it, i) => { if (it && it.f && it.f.indexOf('tm-p' + nn + '-') === 0) idx.push(i); });
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
   idx.forEach(i => {
     const r = document.querySelector('svg.wall-ink .wall-item[data-i="' + i + '"]').getBoundingClientRect();
@@ -314,7 +316,7 @@ const drag = async (p, x, y, dx, dy) => {
     await page4.waitForTimeout(800);
     const b9 = await button(page4);
     const local4 = await page4.evaluate(() => document.documentElement.classList.contains('lab-local'));
-    say(!local4 && !!b9 && !b9.shown, 'on the deployed site — a hostname that is not this machine — there is no save button', JSON.stringify({ local: local4, shown: b9 && b9.shown }));
+    say(!local4 && !!b9 && b9.shown && b9.text === 'offline' && b9.disabled, 'on the deployed site — a hostname that is not this machine — the button is the live wall’s, and with no door it stands disabled and says "offline"', JSON.stringify({ local: local4, shown: b9 && b9.shown, text: b9 && b9.text, disabled: b9 && b9.disabled }));
     await page4.context().close();
   } catch (e) {
     say(false, 'the probe ran to the end', String((e && e.stack) || e).split('\n').slice(0, 3).join(' | '));

@@ -1,0 +1,81 @@
+<!-- MUSHROOM — the toadstool: a broad spotted cap on a pale stem, the
+     storybook one (PRESS-TABLE-PLAN.md Appendix D: tags mushroom, cozy,
+     fantasy). Layers: halo shadow body line highlight detail.
+
+     THE CAP is one path: up from the rim at (8,66) over a crown at (64,12)
+     and down to (120,66) in two quadratics whose controls sit at y 14, so
+     the crown is all but flat on top — a boxy dome, the shape that reads as
+     a toadstool and not a hat — and the rim comes back as a third curve
+     that dips to y 75 in the middle: the cap seen a little from below. It
+     spans 8..120, 88 % of the box, the most the halo's 3 outside allows.
+     The rim's y is 66 + 36·t(1 − t) for t = (x − 8)/112, which is how the
+     stem's outline knows where to start.
+
+     THE STEM is a second path in skPaper — a toadstool's stem is cream,
+     the way its spots are, and skPaper is the role for the white bits (the
+     bubbles' inner panel is the same) — 34 wide at the cap and 42 at the
+     foot, 47..81 at y 68 flaring to 43..85 at y 106, with a rounded base
+     at y 118. Its body reaches up to y 68, six under the rim, so the cap
+     covers its top; its OUTLINE in the line layer starts where the stem's
+     edges meet the rim, (46.4,74.1) and (81.6,74.1), and is left open at
+     the top, because the line layer is drawn over the body and a closed
+     outline would draw the stem's top edge across the cap.
+
+     THE SPOTS are five circles in skPaper — 9, 7, 8, 5.5 and 5 in radius,
+     one big one left, a small one up, one right, two little ones low —
+     each at least 7 units in from the cap's edge so its own outline never
+     touches the cap's. Five is enough to say toadstool at 40 px; more and
+     the cap reads as a dice.
+
+     THE SHADOW is the cap and the stem moved 3 down and right, the least
+     the contract's 3–4 allows, so that with the halo ON the shadow's rim
+     stays inside the paper edge on the diagonal: a sliver under the rim
+     and down the stem's right, the cel shade.
+
+     THE HIGHLIGHT is one glint on the crown's upper-left — an ellipse
+     8 × 3.2 tilted −38° at (36,29), the slope of the cap's edge there
+     (it climbs from (26,26.5) to (35,19.5)), sitting 8 in from that edge
+     and 2 clear of the big spot's outline — and a dot of radius 2.5 at
+     (52,21), 7 in from the crown.
+
+     THE DETAIL is the ring on the stem — two curves 5 apart, at y 88 and
+     93, dipping 4 in the middle, the skirt a toadstool wears — at stroke
+     1.5, half the default line. A simple style drops it and the mushroom
+     is still the mushroom. -->
+<sc-if value="{{ isMushroom }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M47,68 L43,106 Q43,118 64,118 Q85,118 85,106 L81,68 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+      <path d="M8,66 Q16,14 64,12 Q112,14 120,66 Q64,84 8,66 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+    </g>
+    <g data-layer="shadow">
+      <path d="M47,68 L43,106 Q43,118 64,118 Q85,118 85,106 L81,68 Z" transform="translate(3 3)" fill="{{ skShadow }}"></path>
+      <path d="M8,66 Q16,14 64,12 Q112,14 120,66 Q64,84 8,66 Z" transform="translate(3 3)" fill="{{ skShadow }}"></path>
+    </g>
+    <g data-layer="body">
+      <path d="M47,68 L43,106 Q43,118 64,118 Q85,118 85,106 L81,68 Z" fill="{{ skPaper }}"></path>
+      <path d="M8,66 Q16,14 64,12 Q112,14 120,66 Q64,84 8,66 Z" fill="{{ skPrimary }}"></path>
+      <circle cx="36" cy="48" r="9" fill="{{ skPaper }}"></circle>
+      <circle cx="68" cy="26" r="7" fill="{{ skPaper }}"></circle>
+      <circle cx="94" cy="44" r="8" fill="{{ skPaper }}"></circle>
+      <circle cx="60" cy="61" r="5.5" fill="{{ skPaper }}"></circle>
+      <circle cx="104" cy="58" r="5" fill="{{ skPaper }}"></circle>
+    </g>
+    <g data-layer="line">
+      <path d="M46.4,74.1 L43,106 Q43,118 64,118 Q85,118 85,106 L81.6,74.1" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      <path d="M8,66 Q16,14 64,12 Q112,14 120,66 Q64,84 8,66 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      <circle cx="36" cy="48" r="9" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}"></circle>
+      <circle cx="68" cy="26" r="7" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}"></circle>
+      <circle cx="94" cy="44" r="8" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}"></circle>
+      <circle cx="60" cy="61" r="5.5" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}"></circle>
+      <circle cx="104" cy="58" r="5" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}"></circle>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="36" cy="29" rx="8" ry="3.2" transform="rotate(-38 36 29)" fill="{{ skHighlight }}"></ellipse>
+      <circle cx="52" cy="21" r="2.5" fill="{{ skHighlight }}"></circle>
+    </g>
+    <g data-layer="detail">
+      <path d="M46.5,88 Q64,96 81.5,88 M47,93 Q64,101 81,93" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round"></path>
+    </g>
+  </svg>
+</sc-if>

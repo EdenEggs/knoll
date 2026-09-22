@@ -93,7 +93,9 @@ button,input{font-family:inherit}
    server they show; anywhere else — the deployed site, which has no door for
    any of them to act through — the header is the wordmark and nothing else.
    The switch is html.lab-local, set in the head of index.html before the first
-   paint (2026-09-04). */
+   paint (2026-09-04). Since 2026-09-21 the landing header also carries the
+   account corner at its right (/account.js, which draws and styles itself,
+   and stays off the workbench). */
 .lab-hint,.lab-tools{display:none}
 html.lab-local .lab-hint{display:block}
 html.lab-local .lab-tools{display:flex}
@@ -145,6 +147,46 @@ html.lab-local .lab-tools{position:relative}
   font-family:var(--body);font-size:12px;line-height:1.4;color:var(--ink-3);text-align:right;text-wrap:pretty}
 .toem-save-note.is-bad{color:#b3261e}
 .toem-save-note[hidden]{display:none}
+/* THE LIVE WALL (seed.js: THE LIVE WALL, 2026-09-17). Served from the site
+   the tools row shows ONE thing — the submit button and the note under it —
+   because that is the one switch a visitor has; reset layout, reset data
+   and the way to lab 1 stay the workbench's. Amber is "queued": sent, and
+   waiting for a moderator's look. The note can carry a button or two (sign
+   in, approve, reject), set like the row's links. */
+html.lab-live .lab-tools{display:flex;position:relative}
+/* …and the note hangs BELOW the one-line header: the header clips (overflow:auto, for the
+   long hint on a phone), so on the live site, where there is no hint, it does not */
+html.lab-live:not(.lab-local) .lab-head{overflow:visible;max-height:none}
+html.lab-live:not(.lab-local) .lab-tools>:not(#toem-save):not(#toem-save-note):not(#toem-history){display:none}
+.lab-save.is-wait{background:#b8860b}
+.lab-save:disabled{cursor:default;opacity:.7}
+.toem-save-note .lab-link{margin-left:10px;white-space:nowrap}
+/* THE HISTORY PANEL (history.js, 2026-09-17): the drawer's case (.lab-panel), a
+   list of revisions and the queue inside it, and a second <svg> over the sheet
+   drawing a box round every piece a revision touched — green for one it put
+   up, red with a cross for one it took off, amber for one it changed, with a
+   line from where a moved piece was to where it went. */
+.toem-history .lp-body{padding-right:12px}
+.th-me{font-size:14px;color:#bdb3c8;margin:0 0 10px}
+.th-me b{color:#f4f0f7}
+.th-h{font-family:'VT323',monospace;font-size:19px;letter-spacing:2px;color:#ff9fd0;margin:10px 0 4px}
+.th-row{display:block;width:100%;text-align:left;border:0;border-radius:8px;padding:6px 8px;margin:0 0 2px;background:none;
+  font:inherit;font-size:14.5px;color:#f4f0f7;cursor:pointer;line-height:1.3}
+.th-row:hover{background:#332b3c}
+.th-row.is-on{background:#3d3447;box-shadow:inset 3px 0 0 #ff9fd0}
+.th-row small{display:block;font-size:12.5px;color:#bdb3c8}
+.th-link{border:0;background:#332b3c;color:#ff9fd0;font:inherit;font-size:13px;border-radius:6px;padding:3px 9px;cursor:pointer;margin:2px 6px 2px 0}
+.th-link:hover{background:#e8479c;color:#fff}
+.th-link.is-bad{color:#ff8a80}
+.th-foot{font-size:13.5px;color:#bdb3c8;line-height:1.4}
+.th-foot b{color:#f4f0f7}
+.th-empty{font-size:14px;color:#bdb3c8;font-style:italic}
+.wall-diff{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:2}
+.wall-diff .th-add{fill:rgba(91,208,122,.12);stroke:#3fbf66;stroke-dasharray:6 4}
+.wall-diff .th-del{fill:rgba(255,93,93,.12);stroke:#e0473f}
+.wall-diff .th-chg{fill:rgba(240,180,41,.10);stroke:#e0a020}
+.wall-diff .th-line{fill:none;stroke:#e0a020;stroke-dasharray:4 4}
+.wall-diff .th-was{fill:none;stroke:#e0a020}
 
 /* a class sets display, so [hidden] has to be said again or it loses to it
    and the pill shows up on the deployed bench with nothing behind it */

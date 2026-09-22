@@ -28,6 +28,9 @@
         integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"
         crossorigin="anonymous"></script>
 <script src="./support.js"></script>
+<!-- THE ACCOUNT CORNER (account.js, 2026-09-21): the search, and the other gate — the
+     button for this one is left off — at the right of the house bar -->
+<script src="/account.js" defer></script>
 
 </head>
 <body>
@@ -162,7 +165,7 @@
                   <button type="button" sc-camel-on-click="{{ togglePw }}" aria-pressed="{{ showPw }}" style="flex: none; background: transparent; border: 0; padding: 2px 4px; cursor: pointer; font-family: VT323, monospace; font-size: 16px; letter-spacing: 1px; color: #17120b; opacity: 0.7" style-hover="opacity: 1">{{ pwToggleLabel }}</button>
                   <div style="position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: #17120b; transform-origin: left; transform: scaleX({{ pwLine }}); transition: transform 0.35s ease-out"></div>
                 </div>
-                <label for="f-pw" style="display: block; font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(password) · <a href="#" style="color: #b83739; font-style: italic">forgotten it? ask the gatekeeper</a></label>
+                <label for="f-pw" style="display: block; font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(password) · <a href="#" sc-camel-on-click="{{ onForgot }}" style="color: #b83739; font-style: italic">forgotten it? ask the gatekeeper</a></label>
                 <sc-if value="{{ pwErr }}" hint-placeholder-val="{{ false }}">
                   <div id="e-pw" style="position: {{ notePos }}; left: 100%; top: 0; margin-left: {{ noteMl }}; width: {{ noteW }}; color: #b83739; font-size: 15px; line-height: 1.3; transform: rotate(-1deg); display: flex; gap: 6px; align-items: flex-start; margin-top: {{ noteMt }}">
                     <svg width="34" height="20" sc-camel-view-box="0 0 34 20" style="flex: none; margin-top: 3px"><path d="M32,4 Q20,2 4,14 M12,15 L3,14 L8,7" fill="none" stroke="#b83739" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -222,7 +225,7 @@
               </button>
               <div style="font-style: italic; font-size: 13px; opacity: 0.6; text-align: center; margin-top: -4px">a familiar face, in lieu of a secret word</div>
             </div>
-            <div style="font-style: italic; font-size: 14.5px; opacity: 0.7; text-align: center">New to the hill? <a href="../signup/" style="color: #b83739">Petition for residency</a></div>
+            <div style="font-style: italic; font-size: 14.5px; opacity: 0.7; text-align: center">New to the hill? <a href="{{ signupHref }}" style="color: #b83739">Petition for residency</a></div>
           </form>
           <div style="height: 16px; background: #e4d9bb; border-top: 2px solid rgba(23,18,11,0.25)"></div>
         </div>
@@ -296,7 +299,11 @@
     <sc-if value="{{ done }}" hint-placeholder-val="{{ false }}">
       <div style="position: absolute; left: 0; right: 0; top: 60px; text-align: center; display: flex; flex-direction: column; gap: 6px; align-items: center">
         <div style="font-family: Rye, serif; font-size: 28px; color: #17120b">Welcome back to Knoll.</div>
-        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">the gate swings open · <a href="#" style="text-decoration: none">into the village →</a></div>
+        <!-- THE DOOR OUT OF THE GATE, the twin of /signup's. Points at /yard,
+             which is the village as far as this site has one. Nothing was logged
+             in to; the form still sends nothing. /yard's SIGN OUT is the way
+             back here, and it says the same thing about what it does not do. -->
+        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">the gate swings open · <a href="{{ nextHref }}" style="text-decoration: none">{{ nextWord }}</a></div>
       </div>
     </sc-if>
   </div>
@@ -345,6 +352,25 @@
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script="">
+/* ── THE GATE IS REAL (2026-09-21) ───────────────────────────────────────────
+   Until today the key turned for anybody and the lock jammed only on '0'.
+   Now turning it asks the door (api/auth.js) while the hand does its work:
+   the lock opens once the door has said yes, and jams on a no, with the
+   door's own words in the margin — the wrong word, too many tries, a gate
+   with no store behind it. Then you go back where you came from: ?next=, a
+   path on this site and nothing else (the same test as api/wall.js's
+   localPath), or — with nowhere to go back to — your yard. "keep the gate
+   unlatched for me" is real now too: unticked, the session ends with the
+   browser. And "Google knows me" goes to Google, when this site has Google
+   set up, and says so in the margin when it has not. */
+const NEXT = (function () { const v = new URLSearchParams(location.search).get('next') || ''; return v.length <= 512 && /^\/(?![\/\\])[^\s\\]*$/.test(v) ? v : '/yard/'; })();
+const NEXT_WORD = /^\/yard\//.test(NEXT) ? 'into the village →' : /^\/toem2\//.test(NEXT) ? 'back to TOEM 2 →' : NEXT === '/' ? 'back to the hill →' : 'back where you were →';
+const GATE = body => fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+  .then(r => r.json().catch(() => ({})).then(o => Object.assign({ http: r.status }, o)))
+  .catch(() => ({ ok: false, http: 0, error: 'the gate did not answer — are you online?' }));
+const GATE_SAYS = { 'no-store': 'the gate is not open on this hill yet — come back soon' };
+let GATE_INFO = null;                          // what the door says about itself (is Google set up?), asked once
+const gateInfo = () => GATE_INFO || (GATE_INFO = fetch('/api/auth', { cache: 'no-store' }).then(r => r.json()).catch(() => ({})));
 class Component extends DCLogic {
   state = { pose: 'point', paperH: '0px', paperT: 'none', swung: false, focused: null, name: '', email: '', pw: '', pw2: '', showPw: false,
     errs: {}, seal: 'idle', remember: true, asleep: false, narrow: false, jostle: false, hatSlip: false, done: false, live: '', rolledUp: false };
@@ -458,15 +484,16 @@ class Component extends DCLogic {
   togglePw = () => this.setState((s) => ({ showPw: !s.showPw }));
   onRemember = (e) => this.setState({ remember: e.target.checked });
 
+  // (THE GATE IS REAL) away to Google and back to NEXT through api/wall.js's sign-in — or, with no Google here, a note
   onGoogle = () => {
     if (this.state.seal !== 'idle' && this.state.seal !== 'cracked') return;
-    this.setState({ seal: 'cooling', errs: {}, live: 'Asking Google to vouch for you' });
-    setTimeout(() => {
-      this.setState({ seal: 'set', live: 'Welcome back to Knoll' });
-      setTimeout(() => this.setState({ paperT: 'height 380ms cubic-bezier(.6,0,.8,1)', paperH: '0px', rolledUp: true, open: false }), 500);
-      setTimeout(() => this.setState({ done: true }), 950);
-    }, 1400);
+    gateInfo().then(g => {
+      if (g && g.google) { this.setState({ seal: 'cooling', errs: {}, live: 'Asking Google to vouch for you' }); location.assign('/auth/google?next=' + encodeURIComponent(NEXT)); return; }
+      this.note('email', 'Google cannot vouch for anybody on this hill yet — your address and secret word will do');
+    });
   };
+  note(f, msg) { this.setState({ errs: Object.assign({}, this.state.errs, { [f]: msg }), live: msg }); this.m.noteAt = f; this.m.noteT = performance.now(); }
+  onForgot = (e) => { e.preventDefault(); this.note('pw', 'the gatekeeper cannot post a new key yet — try the words you usually use'); };
 
   // ─── the lock ───
   onSealEnter = () => { this.m.sealHover = true; };
@@ -476,7 +503,8 @@ class Component extends DCLogic {
     if (this.state.seal !== 'idle' && this.state.seal !== 'cracked') return;
     const errs = {}; ['email', 'pw'].forEach((f) => { const er = this.validate(f); if (er) errs[f] = er; });
     if (Object.keys(errs).length) { this.setState({ errs, live: Object.values(errs)[0] }); this.m.noteAt = Object.keys(errs)[0]; this.m.noteT = performance.now(); return; }
-    const outcome = this.state.pw === '0' ? 'wrong' : 'success';   // pretend server: '0' is the wrong word
+    // the door is asked now, and has answered by the time the key has turned (THE GATE IS REAL)
+    const asked = GATE({ op: 'login', email: this.state.email.trim(), password: this.state.pw, remember: this.state.remember });
     // the hand fetches the key, carries it to the lock, fits it, turns it
     this.setState({ seal: 'reach', errs: {} });
     setTimeout(() => this.setState({ seal: 'grip' }), 380);
@@ -484,18 +512,20 @@ class Component extends DCLogic {
     setTimeout(() => this.setState({ seal: 'insert' }), 980);
     setTimeout(() => this.setState({ seal: 'turn', jostle: true, hatSlip: true }), 1180);
     setTimeout(() => this.setState({ seal: 'cooling', jostle: false, live: 'Turning the key' }), 1500);
-    setTimeout(() => {
-      if (outcome === 'wrong') {
+    Promise.all([asked, new Promise(r => setTimeout(r, 2200))]).then(([out]) => {
+      if (!out.ok) {
+        const f = out.code === 'email' ? 'email' : 'pw', msg = GATE_SAYS[out.code] || out.error || 'the gate did not open';
         this.setState({ seal: 'eject' });
-        setTimeout(() => this.setState({ seal: 'cracked', errs: { pw: 'that is not the secret word the gate remembers' }, live: 'that is not the secret word the gate remembers' }), 120);
+        setTimeout(() => this.setState({ seal: 'cracked', errs: { [f]: msg }, live: msg }), 120);
         this.m.wagT = performance.now();   // no, no, no — then the note
-        setTimeout(() => { this.m.noteAt = 'pw'; this.m.noteT = performance.now(); }, 1500);
+        setTimeout(() => { this.m.noteAt = f; this.m.noteT = performance.now(); }, 1500);
       } else {
         this.setState({ seal: 'set', live: 'Welcome back to Knoll' });
         setTimeout(() => this.setState({ paperT: 'height 380ms cubic-bezier(.6,0,.8,1)', paperH: '0px', rolledUp: true, open: false }), 600);
         setTimeout(() => this.setState({ done: true }), 1050);
+        setTimeout(() => location.assign(NEXT), 2300);   // and on through the gate; the card's link is there for a slow one
       }
-    }, 2200);
+    });
   };
 
   // ─── the loop ───
@@ -652,7 +682,8 @@ class Component extends DCLogic {
       sealLabel: s.seal === 'set' ? 'UNLOCKED' : (busy ? 'TURNING…' : 'TURN THE KEY'),
       sealHint: s.seal === 'cracked' ? 'the key jammed; see the margin' : (busy ? 'the lock is stiff' : 'and the gate swings open'),
       done: s.done, liveMsg: s.live, interlude: !!s.interlude,
-      remember: s.remember, onRemember: this.onRemember,
+      remember: s.remember, onRemember: this.onRemember, onForgot: this.onForgot,
+      nextHref: NEXT, nextWord: NEXT_WORD, signupHref: '../signup/?next=' + encodeURIComponent(NEXT),
       heading: 'Hear ye — a resident returns to the hill',
       subhead: 'Form 2-A · Passage at the Gate · see Rule Book §4',
       handOpacity: this.m.rest ? 0.92 : 1,

@@ -1,0 +1,123 @@
+<!-- SK-DEFS — the sticker sheet's shared <defs>: the filters and patterns the
+     style pass reaches for (PRESS-TABLE-PLAN.md §8 4.4), in one 0×0 svg that
+     build-sheet.js puts FIRST inside the screen of stickers-core.dc.html, the
+     way village.dc.html carries #pine and #ds. kits.js copies a data-defs svg
+     into every part it extracts (ADDING.md §2), so a part restyled with
+     filter:url(#sk-soft) or fill="url(#sk-hatch)" finds the id in its own
+     document, live or sprite. No part references any of these by hand —
+     palette-keys.js refuses a url(#…) in a fill — they are the style pass's
+     to add, and a part drawn without them is the flat preset.
+
+     EVERY COLOUR IS A ROLE. The patterns are drawn in {{ skShadow }} (the
+     shading ones: hatch, dots, dither — they replace the shadow layer's
+     fill) or {{ skInk }} (the textures: paper, noise, scanlines, grunge —
+     they lie over the body), so they follow the page's palette the way the
+     parts do. The filters carry no colour at all. build-sheet.js runs the
+     same colour scan over this file as over a part.
+
+     CAMEL-CASE ATTRIBUTES are written sc-camel-* (stdDeviation →
+     sc-camel-std-deviation, baseFrequency → sc-camel-base-frequency,
+     patternUnits → sc-camel-pattern-units …) as the village writes its
+     feDropShadow's stdDeviation: the sheet is read by two parsers, support.js
+     (which turns the prefix into the camel-cased React prop the SVG DOM
+     wants) and kits.js's decodeAttrs (which does the same by hand), and an
+     HTML parser handed the bare camel name lower-cases it. Element names
+     (feGaussianBlur, feTurbulence …) need no help: the HTML parser's own
+     foreign-content table restores their case, which is how the village's
+     feDropShadow has always worked.
+
+     THE NUMBERS, one sentence each:
+     · #sk-soft blurs by 2 units — a soft-shaded sticker's shadow edge is a
+       little wider than the 3-unit line, not a fog: 2 is the plan's "2-unit
+       blur"; the region is widened 30 % each way so the blur is not clipped
+       at the shadow's own bounds.
+     · #sk-wobble: fractal noise at baseFrequency 0.04 (one ripple every
+       25 units — two or three along a 64-unit edge, a hand's tremor rather
+       than a scribble), 2 octaves (one adds fine grain the 3-unit line
+       would just alias), seed 3, displacement scale 4 (the plan's unit —
+       the page multiplies it by lineWobble, so 4 is the wobble at 1.0, which
+       is a line that leaves its path by a stroke's width and no more).
+       Units are userSpaceOnUse so the same 4 means the same thing in every
+       part; the filter region is the whole box plus a margin of 8, so a
+       displaced line at the edge is not clipped.
+     · #sk-wobble-2: the same at seed 11, for the second pass when
+       linePasses > 1 — a different seed so the two lines do not sit on each
+       other, a nearby one so they still look drawn by the same hand.
+     · #sk-hatch: one 45° line corner to corner in a 6×6 cell, stroke 1.5 —
+       six units apart is four lines across a 24-unit shadow rim, and a line
+       half the default stroke reads as hatching rather than as a second
+       outline.
+     · #sk-dots: a circle of radius 1.6 in a 6×6 cell — a 27 % halftone dot
+       (π·1.6² over 36), the mid-tone a printed shadow is.
+     · #sk-dither: two 2×2 squares on a 4×4 checker — a 50 % ordered dither
+       at 2 units, the coarsest pattern that still reads as tone and not as a
+       chequerboard at sprite size.
+     · #sk-paper: five short fibres in a 24×24 cell at stroke-opacity .12 —
+       a tile big enough not to repeat visibly across a 128 box (five across)
+       and faint enough that the body colour still reads as the body colour
+       when the page lays it at 18 % (plan §8 4.4) — .12 × .18 is a 2 %
+       fibre.
+     · #sk-noise: nine 1×1 specks in an 8×8 cell at opacity .18 — 14 %
+       coverage, scattered by hand so no row or column holds two.
+     · #sk-scanlines: a 1-unit line every 3 — one dark row in three, the
+       pitch of a CRT at sticker scale; opacity .25 so the row is a shade,
+       not a stripe.
+     · #sk-grunge: three irregular blobs in a 32×32 cell at opacity .16 —
+       big cells so the wear does not tile visibly, few blobs so a sticker
+       is worn, not filthy. -->
+<svg data-defs width="0" height="0" style="position:absolute" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="sk-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur sc-camel-std-deviation="2"></feGaussianBlur>
+    </filter>
+    <filter id="sk-wobble" sc-camel-filter-units="userSpaceOnUse" sc-camel-primitive-units="userSpaceOnUse" x="-8" y="-8" width="144" height="144">
+      <feTurbulence type="fractalNoise" sc-camel-base-frequency="0.04" sc-camel-num-octaves="2" seed="3" result="sk-n"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="sk-n" scale="4" sc-camel-x-channel-selector="R" sc-camel-y-channel-selector="G"></feDisplacementMap>
+    </filter>
+    <filter id="sk-wobble-2" sc-camel-filter-units="userSpaceOnUse" sc-camel-primitive-units="userSpaceOnUse" x="-8" y="-8" width="144" height="144">
+      <feTurbulence type="fractalNoise" sc-camel-base-frequency="0.04" sc-camel-num-octaves="2" seed="11" result="sk-n"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="sk-n" scale="4" sc-camel-x-channel-selector="R" sc-camel-y-channel-selector="G"></feDisplacementMap>
+    </filter>
+    <pattern id="sk-hatch" width="6" height="6" sc-camel-pattern-units="userSpaceOnUse">
+      <line x1="0" y1="6" x2="6" y2="0" stroke="{{ skShadow }}" stroke-width="1.5"></line>
+    </pattern>
+    <pattern id="sk-dots" width="6" height="6" sc-camel-pattern-units="userSpaceOnUse">
+      <circle cx="3" cy="3" r="1.6" fill="{{ skShadow }}"></circle>
+    </pattern>
+    <pattern id="sk-dither" width="4" height="4" sc-camel-pattern-units="userSpaceOnUse">
+      <rect x="0" y="0" width="2" height="2" fill="{{ skShadow }}"></rect>
+      <rect x="2" y="2" width="2" height="2" fill="{{ skShadow }}"></rect>
+    </pattern>
+    <pattern id="sk-paper" width="24" height="24" sc-camel-pattern-units="userSpaceOnUse">
+      <g stroke="{{ skInk }}" stroke-width="1" stroke-opacity=".12" stroke-linecap="round">
+        <line x1="2" y1="5" x2="9" y2="4"></line>
+        <line x1="14" y1="2" x2="21" y2="3"></line>
+        <line x1="4" y1="14" x2="10" y2="16"></line>
+        <line x1="15" y1="11" x2="22" y2="10"></line>
+        <line x1="8" y1="21" x2="16" y2="20"></line>
+      </g>
+    </pattern>
+    <pattern id="sk-noise" width="8" height="8" sc-camel-pattern-units="userSpaceOnUse">
+      <g fill="{{ skInk }}" opacity=".18">
+        <rect x="0" y="3" width="1" height="1"></rect>
+        <rect x="1" y="6" width="1" height="1"></rect>
+        <rect x="2" y="0" width="1" height="1"></rect>
+        <rect x="3" y="4" width="1" height="1"></rect>
+        <rect x="4" y="1" width="1" height="1"></rect>
+        <rect x="5" y="7" width="1" height="1"></rect>
+        <rect x="6" y="2" width="1" height="1"></rect>
+        <rect x="7" y="5" width="1" height="1"></rect>
+      </g>
+    </pattern>
+    <pattern id="sk-scanlines" width="1" height="3" sc-camel-pattern-units="userSpaceOnUse">
+      <rect x="0" y="0" width="1" height="1" fill="{{ skInk }}" opacity=".25"></rect>
+    </pattern>
+    <pattern id="sk-grunge" width="32" height="32" sc-camel-pattern-units="userSpaceOnUse">
+      <g fill="{{ skInk }}" opacity=".16">
+        <path d="M3,6 Q7,2 11,5 Q14,9 10,12 Q6,14 3,11 Q1,9 3,6 Z"></path>
+        <path d="M19,17 Q24,14 28,18 Q30,22 26,25 Q22,27 19,24 Q16,21 19,17 Z"></path>
+        <path d="M8,22 Q11,20 13,23 Q14,26 11,28 Q8,29 7,26 Q6,24 8,22 Z"></path>
+      </g>
+    </pattern>
+  </defs>
+</svg>

@@ -1,0 +1,73 @@
+<!-- BUBBLE-SHOUT — the jagged comic shout bubble, the one with the words in
+     it (PRESS-TABLE-PLAN.md Appendix D: tags comic, hype; a text slot).
+     Layers: halo shadow body line highlight detail text.
+
+     IT BOBS, NOT SWAYS. A bubble hangs in the air beside whoever is
+     shouting; sk-sway is a skew, and a skewed bubble tilts the words in it
+     — so this one takes sk-bob, the sheet's 4 px up-and-down, on the same
+     4.2 s and the same −1.1 s offset as the sway so a bubble and a burst
+     side by side do not move in step.
+
+     THE BURST is 22 vertices around a centre at (66,54) — not the box's
+     centre, because the tail hangs below-left and the body sits up and
+     right to make room for it: eleven tips at 48–54 and eleven valleys at
+     36–38, the angles jittered off a 32.7° step so no two spikes match.
+     The tail is the tip at 128° pushed out to radius 76, to (19,114): 25
+     past every other tip, with its two valleys only 26° apart so it comes
+     off the bubble as one narrow spike and not a broad point. The top tips
+     stop at radius 48–50 (y 7) so the halo, 3 outside, reaches 4 and
+     nothing spills; the widest tip is at 0°, x 120.
+
+     THE FIELD for the words is an ellipse 60 × 46 in {{ skPaper }} on the
+     coloured burst — a two-tone sticker rather than a plain white balloon,
+     because a white balloon on the bench's paper is only its outline, and
+     on a dark game page it is only its outline again. The ellipse stops 6
+     short of the nearest valleys (rx 30 against valleys at 36–38), enough
+     for the outline's inner half and the field's own detail stroke to sit
+     in colour. Its outline is a DETAIL stroke at 1.5 (half the default
+     line), not a line-layer stroke: a simple style drops it and the paper
+     field still reads.
+
+     THE TEXT is {{ skText }} at 15 units, bold in the page's display face,
+     baseline y 59 — cap height ~0.7 em, so the word centres on the field at
+     54. A word wider than ~60 units is the page's to shorten (a <text>
+     part is always live, ADDING.md §1.2).
+
+     THE SHADOW is the burst moved 3 down and right, as every part here.
+
+     THE HIGHLIGHT is a glint on the upper-left spike — an ellipse 6 × 2.6
+     at −45° at (42,31), in the band between the field and the outline, and
+     a dot of radius 2.6 at (51,23) up the next spike.
+
+     THE DETAIL also has three emphasis ticks in the air off the top and
+     right (at 272°, 306° and 340°, from radius 44 to 51–52): the comic's
+     "loud". They are outside the body, so the halo does not cover them,
+     and the top one reaches y 3 — inside the box, not the halo's 3. -->
+<sc-if value="{{ isBubbleShout }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-bob 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M120,54 L102.7,63.8 L108.4,80.5 L90.8,81.5 L87.6,102.4 L70,91.8 L57.5,102.3 L51,87.8 L19.2,113.9 L38.4,77.1 L19.6,72.7 L28.2,58 L14.2,43 L33.3,36.6 L31.3,18 L48.2,20.4 L56,7 L68.6,17.1 L83.1,7 L88.3,23.3 L107.8,21.4 L101.2,42.6 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+    </g>
+    <g data-layer="shadow">
+      <path d="M120,54 L102.7,63.8 L108.4,80.5 L90.8,81.5 L87.6,102.4 L70,91.8 L57.5,102.3 L51,87.8 L19.2,113.9 L38.4,77.1 L19.6,72.7 L28.2,58 L14.2,43 L33.3,36.6 L31.3,18 L48.2,20.4 L56,7 L68.6,17.1 L83.1,7 L88.3,23.3 L107.8,21.4 L101.2,42.6 Z" transform="translate(3 3)" fill="{{ skShadow }}"></path>
+    </g>
+    <g data-layer="body">
+      <path d="M120,54 L102.7,63.8 L108.4,80.5 L90.8,81.5 L87.6,102.4 L70,91.8 L57.5,102.3 L51,87.8 L19.2,113.9 L38.4,77.1 L19.6,72.7 L28.2,58 L14.2,43 L33.3,36.6 L31.3,18 L48.2,20.4 L56,7 L68.6,17.1 L83.1,7 L88.3,23.3 L107.8,21.4 L101.2,42.6 Z" fill="{{ skPrimary }}"></path>
+      <ellipse cx="66" cy="54" rx="30" ry="23" fill="{{ skPaper }}"></ellipse>
+    </g>
+    <g data-layer="line">
+      <path d="M120,54 L102.7,63.8 L108.4,80.5 L90.8,81.5 L87.6,102.4 L70,91.8 L57.5,102.3 L51,87.8 L19.2,113.9 L38.4,77.1 L19.6,72.7 L28.2,58 L14.2,43 L33.3,36.6 L31.3,18 L48.2,20.4 L56,7 L68.6,17.1 L83.1,7 L88.3,23.3 L107.8,21.4 L101.2,42.6 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="42" cy="31" rx="6" ry="2.6" transform="rotate(-45 42 31)" fill="{{ skHighlight }}"></ellipse>
+      <circle cx="51" cy="23" r="2.6" fill="{{ skHighlight }}"></circle>
+    </g>
+    <g data-layer="detail">
+      <ellipse cx="66" cy="54" rx="30" ry="23" fill="none" stroke="{{ skInk }}" stroke-width="1.5"></ellipse>
+      <path d="M67.5,10 L67.8,3 M91.9,18.4 L96.6,11.9 M107.4,39 L114.9,36.2" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round"></path>
+    </g>
+    <g data-layer="text">
+      <text x="66" y="59" font-size="15" text-anchor="middle" style="font-family:var(--display),sans-serif;font-weight:700" fill="{{ skInk }}">{{ skText }}</text>
+    </g>
+  </svg>
+</sc-if>

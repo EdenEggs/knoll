@@ -42,19 +42,21 @@ const ROOT = __dirname;
 const PORT = Number(process.argv[2] || process.env.PORT || 4321);
 
 // ── the doors ─────────────────────────────────────────────────────────────
-/* ONE DOOR PER BENCH, and the door is what chooses the FILE. There are two
-   benches on this server now — lab 2, and the empty one in ironhive — and
-   they are the same program with different paper, so a single door would let
-   whichever bench happened to be open write itself over the other. The
-   emptier the bench the worse that is: ironhive has no sections at all, and
-   the guard in save() below ('nothing to save') is the only thing that would
-   have stood between an empty page and lab 2's eighty-four.
+/* ONE DOOR PER BENCH, and the door is what chooses the FILE. There are three
+   benches on this server now — lab 2, and the two empty ones in ironhive and
+   toem2 — and they are the same program with different paper, so a single
+   door would let whichever bench happened to be open write itself over
+   another. The emptier the bench the worse that is: ironhive and toem2 have
+   no sections at all, and the guard in save() below ('nothing to save') is
+   the only thing that would have stood between an empty page and lab 2's
+   eighty-four.
 
-   A bench's keep.js names its own door and nothing else; adding a third is
+   A bench's keep.js names its own door and nothing else; adding another is
    this line and that constant. */
 const BENCHES = {
   '/_lab2/default':     path.join(ROOT, 'lab2', 'index.html'),
-  '/_ironhive/default': path.join(ROOT, 'ironhive', 'index.html')
+  '/_ironhive/default': path.join(ROOT, 'ironhive', 'index.html'),
+  '/_toem2/default':    path.join(ROOT, 'toem2', 'index.html')
 };
 
 /* THE WALL DOOR (2026-09-11). The hive's seed.js posts the wall the bench
@@ -62,9 +64,15 @@ const BENCHES = {
    and the camera — and it is written out whole as ironhive/wall-seed.json,
    one piece to a line so that a diff of it reads. Nothing is edited in place
    and nothing is merged: the post is the file. The bench reads it back on a
-   browser's first visit (THE WALL THIS BENCH OPENS ON, in seed.js). */
-const WALL_DOOR = '/_ironhive/wall';
-const WALL_FILE = path.join(ROOT, 'ironhive', 'wall-seed.json');
+   browser's first visit (THE WALL THIS BENCH OPENS ON, in seed.js).
+
+   ONE PER BENCH since 2026-09-12, for the reason BENCHES is: toem2 opens on a
+   wall of its own (the eight TOEM 2 level plates, taken apart), and a single
+   door would publish whichever bench pressed it over the other one's seed. */
+const WALLS = {
+  '/_ironhive/wall': path.join(ROOT, 'ironhive', 'wall-seed.json'),
+  '/_toem2/wall':    path.join(ROOT, 'toem2', 'wall-seed.json')
+};
 function seedText(seed) {
   const lines = arr => arr.map(x => JSON.stringify(x)).join(',\n');
   return '{\n"cam": ' + JSON.stringify(seed.cam) +
@@ -78,7 +86,7 @@ function seedText(seed) {
    framing is carried over from the file as it stands, so publishing from a
    desktop never loses the phone view and the other way round. The wall and
    the tracings are the post's either way: it is the same paper. */
-function saveWall(body) {
+function saveWall(body, file) {
   const cam = body && body.cam, wall = body && body.wall, ff = body && body.flatfile;
   const which = body && body.which === 'narrow' ? 'narrow' : 'wide';
   if (!wall || !Array.isArray(wall.items)) return { ok: false, error: 'no wall in the post' };
@@ -87,10 +95,17 @@ function saveWall(body) {
   if (!cam || ![cam.z, cam.cx, cam.cy].every(Number.isFinite)) return { ok: false, error: 'no camera in the post' };
   const list = ff && Array.isArray(ff.list) ? ff.list.filter(t => t && t.id) : [];
   let was = {};
-  try { was = JSON.parse(fs.readFileSync(WALL_FILE, 'utf8')); } catch (e) {}
+  try { was = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) {}
   const seed = { cam: which === 'wide' ? cam : was.cam, cam_narrow: which === 'narrow' ? cam : was.cam_narrow, wall: { items }, flatfile: { list } };
   if (!seed.cam) return { ok: false, error: 'the phone view cannot go first: publish the wide view from a window wider than 700 before this one' };
-  fs.writeFileSync(WALL_FILE, seedText(seed));
+  /* ONE BACKUP PER FILE PER RUN, the way save() below keeps one of index.html.
+     TOEM 2's save button (toem2/seed.js: SAVE) makes this write a press away,
+     and the wall is written whole, so the file as it stood before this run's
+     first write is kept beside it as wall-seed.json.keep-bak (2026-09-12). */
+  if (!backedUp.has(file)) {
+    try { if (fs.existsSync(file)) fs.copyFileSync(file, file + '.keep-bak'); backedUp.add(file); } catch (e) {}
+  }
+  fs.writeFileSync(file, seedText(seed));
   return { ok: true, which, pieces: items.length, tracings: list.length };
 }
 
@@ -339,6 +354,13 @@ function serve(req, res) {
   if (file !== ROOT && !file.startsWith(ROOT + path.sep)) {
     res.writeHead(403, { 'content-type': 'text/plain' }); res.end('no'); return;
   }
+  /* This server answers the whole network it is on, not only this machine —
+     so the stores the doors keep (every account's secret word is in
+     toem2/wall-db.json) and anything hidden (.git, .claude) are not files it
+     hands out. */
+  if (/(^|[\\/])\.|-db\.json/i.test(p)) {
+    res.writeHead(403, { 'content-type': 'text/plain' }); res.end('no'); return;
+  }
   fs.stat(file, (err, st) => {
     if (!err && st.isDirectory()) {
       if (!p.endsWith('/')) { res.writeHead(302, { Location: p + '/' }); res.end(); return; }
@@ -349,8 +371,182 @@ function serve(req, res) {
   });
 }
 
-http.createServer((req, res) => {
-  if (req.url.split('?')[0] === WALL_DOOR) {   // see THE WALL DOOR
+/* ── BENCHES MADE BY A BUTTON (2026-09-12) ──────────────────────────────────
+   Lab 2's "+ new bench" (lab2/benches.js) posts NEW_DOOR, and this makes the
+   next folder_N — one past the highest there has ever been, so a number is
+   not handed out twice — as a copy of lab2/bench-template with its three
+   tokens filled: @@BENCH_SLUG@@ (the folder, which names the doors),
+   @@BENCH_KEY@@ (the folder and six random letters: every localStorage key
+   and the cursor room, so a bench made under a name that was deleted never
+   opens on the old one's paper) and @@BENCH_NAME@@ (what the header says
+   beside knoll /, the folder's name until somebody renames it). fonts/ and
+   vendor/ come from lab 2's own copies. It is built as a hidden
+   .folder_N.making and renamed into place at the end, so a failure halfway
+   leaves no half a bench.
+
+   A FOLDER WITH A bench.json IS A BENCH. Its doors — default (keep.js), wall
+   (the save button) and name (renaming it from the name itself) — are worked
+   out from the address, so a bench made a minute ago needs no line here,
+   unlike lab 2, the hive and TOEM 2, which were written into the maps above
+   before there was a marker. */
+const NEW_DOOR = '/_lab2/new-bench';
+const TEMPLATE = path.join(ROOT, 'lab2', 'bench-template');
+const TOKEN_FILE = /\.(html|js|css|json|md|txt)$/i;
+const NAME_MAX = 48;
+
+function nextBench() {
+  let top = 0;
+  for (const d of fs.readdirSync(ROOT, { withFileTypes: true })) {
+    const m = d.isDirectory() && /^\.?folder_(\d+)(\.making)?$/.exec(d.name);
+    if (m) top = Math.max(top, +m[1]);
+  }
+  return 'folder_' + (top + 1);
+}
+
+function copyBench(from, to, fill) {
+  fs.mkdirSync(to, { recursive: true });
+  for (const d of fs.readdirSync(from, { withFileTypes: true })) {
+    const a = path.join(from, d.name), b = path.join(to, d.name);
+    if (d.isDirectory()) copyBench(a, b, fill);
+    else if (fill && TOKEN_FILE.test(d.name)) fs.writeFileSync(b, fill(fs.readFileSync(a, 'utf8')));
+    else fs.copyFileSync(a, b);
+  }
+}
+
+function makeBench() {
+  if (!fs.existsSync(path.join(TEMPLATE, 'index.html'))) return { ok: false, error: 'there is no bench template at lab2/bench-template' };
+  const slug = nextBench(), dir = path.join(ROOT, slug), tmp = path.join(ROOT, '.' + slug + '.making');
+  const key = slug + '-' + Math.random().toString(36).slice(2, 8);
+  const fill = text => text.split('@@BENCH_SLUG@@').join(slug).split('@@BENCH_KEY@@').join(key).split('@@BENCH_NAME@@').join(esc(slug));
+  try {
+    copyBench(TEMPLATE, tmp, fill);
+    copyBench(path.join(ROOT, 'lab2', 'fonts'), path.join(tmp, 'fonts'), null);
+    copyBench(path.join(ROOT, 'lab2', 'vendor'), path.join(tmp, 'vendor'), null);
+    fs.writeFileSync(path.join(tmp, 'bench.json'), JSON.stringify({ slug, key, name: slug, made: new Date().toISOString() }, null, 2) + '\n');
+    fs.renameSync(tmp, dir);
+  } catch (e) {
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (e2) {}
+    return { ok: false, error: String((e && e.message) || e) };
+  }
+  return { ok: true, slug, name: slug, url: '/' + slug + '/' };
+}
+
+// /_<folder>/<door> for a folder that is a bench (has a bench.json), or nothing
+function benchAt(url) {
+  const m = /^\/_([a-z0-9][a-z0-9_-]{0,63})\/(default|wall|name)$/.exec(url);
+  if (!m) return null;
+  const dir = path.join(ROOT, m[1]);
+  try { if (!fs.statSync(path.join(dir, 'bench.json')).isFile()) return null; } catch (e) { return null; }
+  return { slug: m[1], dir, door: m[2] };
+}
+
+/* THE NAME BESIDE knoll /, written into the bench's own index.html: its
+   <title> and its .lab-name, each of which must be there exactly once or
+   nothing is written. Escaped for HTML, and put in by a function rather than
+   a replacement string, so a name with a $ in it is only ever a name. */
+function renameBench(dir, raw) {
+  const name = String(raw == null ? '' : raw).replace(/[\x00-\x1f\x7f]/g, '').replace(/\s+/g, ' ').trim();
+  if (!name) return { ok: false, error: 'a bench needs a name' };
+  if (name.length > NAME_MAX) return { ok: false, error: 'a name can be ' + NAME_MAX + ' characters at most' };
+  const file = path.join(dir, 'index.html');
+  const before = fs.readFileSync(file, 'utf8');
+  const title = /<title>Knoll · [^<]*<\/title>/g, span = /(<span class="lab-name"[^>]*>)[^<]*(<\/span>)/g;
+  if ((before.match(title) || []).length !== 1 || (before.match(span) || []).length !== 1)
+    return { ok: false, error: "this bench's index.html does not have exactly one title and one name to rewrite" };
+  const html = before.replace(title, () => '<title>Knoll · ' + esc(name) + '</title>')
+                     .replace(span, (m, open, close) => open + esc(name) + close);
+  if (!backedUp.has(file)) { try { fs.writeFileSync(file + '.keep-bak', before); backedUp.add(file); } catch (e) {} }
+  fs.writeFileSync(file + '.tmp', html);
+  fs.renameSync(file + '.tmp', file);
+  const marker = path.join(dir, 'bench.json');
+  try { const b = JSON.parse(fs.readFileSync(marker, 'utf8')); b.name = name; fs.writeFileSync(marker, JSON.stringify(b, null, 2) + '\n'); } catch (e) {}
+  return { ok: true, name };
+}
+
+const answer = (res, status, out) => { res.writeHead(status, { 'content-type': 'application/json' }); res.end(JSON.stringify(out)); };
+
+/* ── THE HILL DOOR (2026-09-17) ─────────────────────────────────────────────
+   /api/hill is the yard's publish door, and it is the one door here that is
+   ALSO on the deployed site: api/hill.js is a Vercel function, and this
+   mounts the very same module at the same path, so yard/tools.js posts to
+   one address wherever the page is opened. With no Blob token in the
+   environment the module writes yard/hill.json (committed: the wall a site
+   with no store opens on) and yard/looks/<t>.json (ignored). Its own header
+   has the rest. */
+const HILL_DOOR = '/api/hill';
+let hillApi = null;
+try { hillApi = require('./api/hill.js'); } catch (e) { console.log('  ! api/hill.js did not load: ' + e.message); }
+
+/* ── THE WALL DOOR OF TOEM 2 (2026-09-17) ───────────────────────────────────
+   /api/wall is TOEM 2's editing door and, like /api/hill, the same module on
+   both hosts: api/wall.js is a Vercel function, mounted here at the same
+   path — and at the two sign-in paths vercel.json rewrites onto it — so
+   toem2/seed.js posts to one address wherever the page is opened. With no
+   Redis in the environment the module keeps everything in toem2/wall-db.json
+   (ignored), so the owner reviews edits on localhost with nothing to set up.
+   Its own header has the rest. */
+const WALL_API = '/api/wall', WALL_AUTH = /^\/auth\/google(\/callback)?$/;
+let wallApi = null;
+try { wallApi = require('./api/wall.js'); } catch (e) { console.log('  ! api/wall.js did not load: ' + e.message); }
+
+/* ── THE GATE (2026-09-21) ──────────────────────────────────────────────────
+   /api/auth is where /signup and /login make and open accounts, and where
+   every page's account corner (account.js) asks who is signed in — the same
+   module Vercel runs, mounted at the same path, keeping its accounts in the
+   wall's store (toem2/wall-db.json here, which is why that file is also
+   never served below). */
+const AUTH_API = '/api/auth';
+let authApi = null;
+try { authApi = require('./api/auth.js'); } catch (e) { console.log('  ! api/auth.js did not load: ' + e.message); }
+
+function handle(req, res) {
+  const url = req.url.split('?')[0];
+  if (url === AUTH_API) {                      // see THE GATE
+    if (!authApi) { answer(res, 500, { ok: false, error: 'api/auth.js did not load' }); return; }
+    authApi(req, res).catch(e => answer(res, 500, { ok: false, error: String((e && e.message) || e) }));
+    return;
+  }
+  if (url === WALL_API || WALL_AUTH.test(url)) {   // see THE WALL DOOR OF TOEM 2
+    if (!wallApi) { answer(res, 500, { ok: false, error: 'api/wall.js did not load' }); return; }
+    wallApi(req, res).catch(e => answer(res, 500, { ok: false, error: String((e && e.message) || e) }));
+    return;
+  }
+  if (url === HILL_DOOR) {                     // see THE HILL DOOR
+    if (!hillApi) { answer(res, 500, { ok: false, error: 'api/hill.js did not load' }); return; }
+    hillApi(req, res).catch(e => answer(res, 500, { ok: false, error: String((e && e.message) || e) }));
+    return;
+  }
+  if (url === NEW_DOOR) {                      // see BENCHES MADE BY A BUTTON
+    if (req.method === 'GET') { answer(res, 200, { ok: true, door: true, next: nextBench() }); return; }
+    if (req.method !== 'POST') { res.writeHead(405); res.end(); return; }
+    req.resume();
+    req.on('end', () => {
+      let out;
+      try { out = makeBench(); } catch (e) { out = { ok: false, error: String((e && e.message) || e) }; }
+      if (out.ok) console.log('  made ' + out.slug + ' → http://localhost:' + PORT + out.url);
+      else console.log('  ! ' + out.error);
+      answer(res, out.ok ? 200 : 400, out);
+    });
+    return;
+  }
+  const made = benchAt(url);
+  if (made && made.door === 'name') {
+    if (req.method === 'GET') { answer(res, 200, { ok: true, door: true }); return; }
+    if (req.method !== 'POST') { res.writeHead(405); res.end(); return; }
+    let raw = '';
+    req.on('data', c => { raw += c; if (raw.length > 1e4) req.destroy(); });
+    req.on('end', () => {
+      let out;
+      try { out = renameBench(made.dir, JSON.parse(raw).name); }
+      catch (e) { out = { ok: false, error: String((e && e.message) || e) }; }
+      if (out.ok) console.log('  ' + made.slug + ': named ' + JSON.stringify(out.name));
+      else console.log('  ! ' + out.error);
+      answer(res, out.ok ? 200 : 400, out);
+    });
+    return;
+  }
+  const wallFile = WALLS[url] || (made && made.door === 'wall' ? path.join(made.dir, 'wall-seed.json') : null);
+  if (wallFile) {                              // see THE WALL DOOR
     if (req.method === 'GET') {                // seed.js knocks here before it shows the button
       res.writeHead(200, { 'content-type': 'application/json' });
       res.end(JSON.stringify({ ok: true, door: true }));
@@ -361,16 +557,16 @@ http.createServer((req, res) => {
     req.on('data', c => { raw += c; if (raw.length > 8e6) req.destroy(); });
     req.on('end', () => {
       let out;
-      try { out = saveWall(JSON.parse(raw)); }
+      try { out = saveWall(JSON.parse(raw), wallFile); }
       catch (e) { out = { ok: false, error: String((e && e.message) || e) }; }
-      if (out.ok) console.log('  ironhive: published the wall · ' + out.pieces + ' pieces, ' + out.tracings + ' tracings → wall-seed.json');
+      if (out.ok) console.log('  ' + path.basename(path.dirname(wallFile)) + ': published the wall · ' + out.pieces + ' pieces, ' + out.tracings + ' tracings → wall-seed.json');
       else console.log('  ! ' + out.error);
       res.writeHead(out.ok ? 200 : 400, { 'content-type': 'application/json' });
       res.end(JSON.stringify(out));
     });
     return;
   }
-  const bench = BENCHES[req.url.split('?')[0]];
+  const bench = BENCHES[url] || (made && made.door === 'default' ? path.join(made.dir, 'index.html') : null);
   if (bench) {
     if (req.method === 'GET') {          // keep.js knocks here before it starts
       res.writeHead(200, { 'content-type': 'application/json' });
@@ -395,8 +591,18 @@ http.createServer((req, res) => {
     return;
   }
   serve(req, res);
-}).listen(PORT, () => {
+}
+
+/* Run directly it is a server. Required (toem2/mint.js, toem2/pull-wall.js)
+   it is seedText and the wall writer, so a script can write a bench's
+   wall-seed.json exactly the way the wall door does, without opening a port. */
+if (require.main === module) http.createServer(handle).listen(PORT, () => {
   console.log('site  → http://localhost:' + PORT + '/');
   console.log('lab 2 → http://localhost:' + PORT + '/lab2/   (autosave door open)');
   console.log('hive  → http://localhost:' + PORT + '/ironhive/   (empty bench, its own door)');
+  console.log('toem2 → http://localhost:' + PORT + '/toem2/   (the TOEM 2 plates, its own door)');
+  console.log('yard  → http://localhost:' + PORT + '/yard/   (publish door /api/hill → yard/hill.json)');
+  console.log('        toem2 edits: /api/wall (and /auth/google) → toem2/wall-db.json');
+  console.log('gate  → http://localhost:' + PORT + '/signup/  and /login/   (accounts /api/auth → toem2/wall-db.json)');
 });
+else module.exports = { seedText, saveWall, handle };

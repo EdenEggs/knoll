@@ -2,23 +2,129 @@
 <html><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Owner Dashboard · Knoll</title>
+<!-- The icon sits HERE and not in the helmet, which is where this page used to
+     keep it. The helmet is hoisted into <head> by support.js, i.e. after the
+     runtime boots — and Chrome, finding no icon before then, asks for
+     /dashboard/favicon.ico and logs the 404 it gets. One line earlier in the
+     document and it never asks. /signup, /login and /yard all do it this way;
+     this was the last page that did not. -->
+<link rel="icon" href="../logo/logo-icon.svg">
+<!-- YOUR NUMBERS (2026-09-21). The dashboard is the numbers off YOUR yard now
+     that there are accounts (api/auth.js): its hill is u-<your id> (yard/tools.js:
+     WHOSE HILL), and signed out there is nobody's to show — so, like /yard, you
+     go to the gate first and come back here after. knoll_in is the cookie that
+     says who is in (api/wall.js). -->
+<script>if (!/(?:^|;\s*)knoll_in=[0-9a-f]{16}(?:;|$)/.test(document.cookie)) location.replace('/login/?next=' + encodeURIComponent(location.pathname + location.search));</script>
 <script src="./support.js"></script>
+<!-- THE ACCOUNT CORNER (account.js, 2026-09-21): the search and your gnome at the right of the house bar -->
+<script src="/account.js" defer></script>
 </head>
 <body>
 <x-dc>
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-<link href="https://fonts.googleapis.com/css2?family=Rye&family=VT323&display=swap" rel="stylesheet">
-<link rel="icon" href="../logo/logo-icon.svg">
+<!-- Two faces added to the one request this page already makes, both for the
+     house bar below: Sora 800 is the wordmark, Public Sans 600 is the switch.
+     Same argument /yard made when the bar arrived there — extending one request
+     to an origin already preconnected beats a second origin or a self-hosting
+     move, and both faces are already in use elsewhere on the site. -->
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@600&family=Rye&family=Sora:wght@800&family=VT323&display=swap" rel="stylesheet">
 <style>
   body { margin: 0; background: #ece7f1; }
   a { color: #e8484a; }
   a:hover { color: #b8302f; }
   ::selection { background: #ffd23f; }
+
+  /* ── THE HOUSE BAR ───────────────────────────────────────────────────────
+     lab 2's header, worn here so the dashboard reads as a room of the site
+     rather than a page that happens to share its palette. This page was the
+     last of the four standalone Design Canvas pages without it — /yard,
+     /signup and /login have all had it since 2026-09-05.
+
+     THESE RULES ARE /yard's, COPIED. Not lab 2's directly: yard already did the
+     work of writing lab.css's `.lab-head` / `.lab-brand` out with the token
+     values in place (--card #fdfbfd, --line #e2d4df, --ink #26212a, --display
+     Sora), and of arguing which of lab 2's declarations do not belong on a page
+     that is not the bench. `site/yard/about.md` § the house bar is the record of
+     that argument and applies here word for word; the short version is that
+     flex-wrap / max-height / overflow / flex:none are the bench's and z-index:20
+     would tie this page's own fixed layers.
+
+     IN NORMAL FLOW, pulled full-bleed by negative margins, the same as /yard's
+     and unlike /signup's and /login's — those two are absolute because their
+     root is a centred flex row that a bar would shove off-centre. This root is
+     an ordinary block, so the bar can simply BE the first thing in it.
+
+     THE COUPLING: `margin: -34px -30px 34px` IS the root div's own padding
+     (`padding:34px 30px 56px`) spelled out, so the bar reaches the full width of
+     the page instead of sitting inside the gutter. Change the root's padding and
+     change these. Yard has this coupling in two places because it has a
+     breakpoint; this page has no @media at all, so it has it once. If a
+     breakpoint is ever added here, it is the second thing to add — yard's own
+     export broke exactly this and it took a measurement to see it. */
+  .knoll-head { display: flex; align-items: center; gap: 22px;
+    margin: -34px -30px 34px; padding: 12px 22px;
+    background: #fdfbfd; border-bottom: 1.5px dashed #e2d4df; }
+  .knoll-brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+    color: #26212a; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px;
+    letter-spacing: -0.01em; }
+  .knoll-brand img { display: block; }
+  .knoll-brand:hover { color: #a52c68; }
+
+  /* ── THE SWITCH ──────────────────────────────────────────────────────────
+     The other half of /yard's. Both blocks are the same forty lines and there is
+     no shared stylesheet to put them in — these four pages each carry their own
+     copy of everything, by construction — so KEEP THEM IN STEP BY HAND. The
+     reasoning is written out once, at /yard/index.html § THE SWITCH. The short
+     version: it lives in the bar because the bar is the only thing both pages
+     have in common and the only thing in the same place on both; it is drawn in
+     lab 2's in-bar vocabulary — `.lab-keep`'s pill and padding (`lab.css:105`),
+     `.lab-keep.is-saved`'s lit palette (`:130`) borrowed for the hover, NOT
+     `.lab-keep:hover`, which is a grey nudge and a different rule — and
+     `.lab-save`'s fill for the current page; and `aria-current="page"` is both
+     the semantics and the hook the fill keys off, so the two cannot drift apart.
+
+     Two colours are darker than lab 2's on purpose: --mute (#8b7f92) and --pink
+     (#c93b82) measure 3.56:1 and 4.47:1 here, under WCAG AA's 4.5 for 11.5px
+     text, so the resting ink is --ink-3 (#3d3346) and the lit pink is #a52c68.
+     Both are lab 2's own values — see the long note in /yard.
+
+     The `:hover` rule is here to ADD a hover, not to beat one: `.knoll-switch a`
+     (0,1,1) ties this page's `a:hover` (0,1,1) and wins on order, so without it
+     a hovered pill would simply keep its resting colour. That is a different
+     case from `.knoll-brand` (0,1,0), which genuinely loses to `a:hover`. */
+  .knoll-switch { display: inline-flex; align-items: center; gap: 6px; }
+  .knoll-switch a { display: inline-flex; align-items: center; border: 1.5px solid #e2d4df;
+    border-radius: 999px; padding: 3px 10px; background: #faf7f9; color: #3d3346;
+    text-decoration: none; font-family: 'Public Sans', sans-serif; font-size: 11.5px;
+    font-weight: 600; letter-spacing: 0.01em; white-space: nowrap;
+    transition: color .18s, border-color .18s, background .18s; }
+  .knoll-switch a:hover { color: #a52c68; border-color: #f9d3e6; background: #fff6fb; }
+  .knoll-switch a[aria-current="page"],
+  .knoll-switch a[aria-current="page"]:hover { background: #26212a; border-color: #26212a;
+    color: #fdfbfd; cursor: default; }
 </style>
 </helmet>
 <div data-screen-label="Owner Dashboard" style="min-height:100vh; box-sizing:border-box; background:#ece7f1; background-image:radial-gradient(circle, rgba(90,70,110,0.13) 1.3px, transparent 1.3px); background-size:24px 24px; padding:34px 30px 56px; font-family:'VT323',monospace; color:#17120b">
+  <!-- THE HOUSE BAR. `../` is the site root, which vercel.json rewrites to
+       lab 2 — the same destination lab 2's own brand link uses. Locally that
+       is a 404: there is no site/index.html and the rewrite is Vercel-only.
+       That is the behaviour on all four of these pages, not a bug in this one.
+       Outside the 1200px wrapper below, because the bar is full-bleed and the
+       page's content is not.
+
+       The two switch links are the same two that stand in /yard's bar, with
+       aria-current moved across. Keep them in step. -->
+  <header class="knoll-head">
+    <a class="knoll-brand" href="../"><img src="../logo/logo-icon.svg" alt="" width="26" height="26"><span>knoll</span></a>
+    <nav class="knoll-switch" aria-label="your pages">
+      <a href="../yard/">yard</a>
+      <a aria-current="page">dashboard</a>
+    </nav>
+  </header>
+
   <div style="max-width:1200px; margin:0 auto">
 
     <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:30px">
@@ -31,7 +137,9 @@
           <div style="font-size:17px; letter-spacing:3px; color:#4a4054; opacity:0.7; margin-top:6px">· EVERY VISITOR COUNTED BY HAND · GNOME-CERTIFIED ·</div>
         </div>
       </div>
-      <div style="font-size:17px; letter-spacing:1px; background:#fdf7e3; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:6px 14px; transform:rotate({{ rChip }})">YOUR HILL · <b>knoll.space/yourhill</b></div>
+      <!-- THE CHIP IS THE DOOR TO THE PAGE THESE NUMBERS ARE ABOUT: the yard,
+           which is the hill. -->
+      <a href="../yard/" title="open your page" style="font-size:17px; letter-spacing:1px; background:#fdf7e3; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:6px 14px; transform:rotate({{ rChip }}); color:#17120b; text-decoration:none" style-hover="transform:rotate({{ rChip }}) translate(1px,1px); box-shadow:4px 5px 0 rgba(60,50,80,0.2)">YOUR HILL · <b>/yard</b></a>
     </div>
 
     <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:28px">
@@ -51,8 +159,8 @@
             <div style="font-size:14px; letter-spacing:1px; color:{{ k.deltaColor }}; border:3px solid {{ k.deltaColor }}; padding:0 7px; transform:rotate(-2deg); background:#fffcf0; flex:none">{{ k.delta }}</div>
           </div>
           <svg sc-camel-view-box="0 0 100 28" sc-camel-preserve-aspect-ratio="none" aria-hidden="true" style="display:block; width:100%; height:30px">
-            <polyline points="{{ k.spark }}" fill="none" stroke="#17120b" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" opacity="0.45"></polyline>
-            <circle cx="{{ k.dotX }}" cy="{{ k.dotY }}" r="2.6" fill="#e8484a"></circle>
+            <polyline sc-camel-points="{{ k.spark }}" fill="none" stroke="#17120b" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" opacity="0.45"></polyline>
+            <circle sc-camel-cx="{{ k.dotX }}" sc-camel-cy="{{ k.dotY }}" r="2.6" fill="#e8484a"></circle>
           </svg>
         </div>
       </sc-for>
@@ -64,36 +172,36 @@
         <div aria-hidden="true" style="position:absolute; top:-11px; left:-11px; width:15px; height:15px; background:#5a8fd6; border:3px solid #17120b; transform:rotate(45deg)"></div>
         <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px">
           <div>
-            <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Residents over time</h2>
+            <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">{{ trendTitle }}</h2>
             <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin-top:3px">{{ trendSub }}</div>
           </div>
           <button sc-camel-on-click="{{ toggleTrend }}" style="font-family:'VT323',monospace; font-size:15px; letter-spacing:1px; border:3px solid #17120b; background:{{ trendBtnBg }}; color:#17120b; padding:2px 10px; cursor:pointer; box-shadow:3px 4px 0 rgba(60,50,80,0.2); flex:none" style-hover="transform:translate(-1px,-1px)">{{ trendBtn }}</button>
         </div>
         <sc-if value="{{ trendChartOn }}" hint-placeholder-val="{{ true }}">
           <div style="position:relative">
-            <svg sc-camel-view-box="0 0 640 240" role="img" aria-label="Total residents over time" style="display:block; width:100%; height:auto">
+            <svg sc-camel-view-box="0 0 640 240" role="img" aria-label="{{ trendTitle }}" style="display:block; width:100%; height:auto">
               <sc-for list="{{ grid }}" as="g" hint-placeholder-count="5">
-                <g><line x1="48" x2="628" y1="{{ g.y }}" y2="{{ g.y }}" stroke="rgba(23,18,11,0.16)" stroke-width="2" stroke-dasharray="2 5"></line><text x="40" y="{{ g.ty }}" text-anchor="end" font-family="VT323, monospace" font-size="14" fill="#4a4054">{{ g.label }}</text></g>
+                <g><line x1="48" x2="628" sc-camel-y1="{{ g.y }}" sc-camel-y2="{{ g.y }}" stroke="rgba(23,18,11,0.16)" stroke-width="2" stroke-dasharray="2 5"></line><text x="40" sc-camel-y="{{ g.ty }}" text-anchor="end" font-family="VT323, monospace" font-size="14" fill="#4a4054">{{ g.label }}</text></g>
               </sc-for>
               <line x1="48" x2="628" y1="210" y2="210" stroke="#17120b" stroke-width="3"></line>
-              <path d="{{ areaPath }}" fill="rgba(90,143,214,0.28)"></path>
-              <path d="{{ linePath }}" fill="none" stroke="#17120b" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"></path>
-              <path d="{{ linePath }}" fill="none" stroke="#5a8fd6" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"></path>
-              <circle cx="{{ endX }}" cy="{{ endY }}" r="5" fill="#e8484a" stroke="#17120b" stroke-width="3"></circle>
-              <text x="{{ endLX }}" y="{{ endLY }}" font-family="VT323, monospace" font-size="17" fill="#17120b" font-weight="bold">{{ endLabel }}</text>
+              <path sc-camel-d="{{ areaPath }}" fill="rgba(90,143,214,0.28)"></path>
+              <path sc-camel-d="{{ linePath }}" fill="none" stroke="#17120b" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"></path>
+              <path sc-camel-d="{{ linePath }}" fill="none" stroke="#5a8fd6" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"></path>
+              <circle sc-camel-cx="{{ endX }}" sc-camel-cy="{{ endY }}" r="5" fill="#e8484a" stroke="#17120b" stroke-width="3"></circle>
+              <text sc-camel-x="{{ endLX }}" sc-camel-y="{{ endLY }}" font-family="VT323, monospace" font-size="17" fill="#17120b" font-weight="bold">{{ endLabel }}</text>
               <sc-for list="{{ xLabels }}" as="xl" hint-placeholder-count="4">
-                <text x="{{ xl.x }}" y="234" text-anchor="middle" font-family="VT323, monospace" font-size="14" fill="#4a4054">{{ xl.t }}</text>
+                <text sc-camel-x="{{ xl.x }}" y="234" text-anchor="middle" font-family="VT323, monospace" font-size="14" fill="#4a4054">{{ xl.t }}</text>
               </sc-for>
               <sc-if value="{{ tipOn }}" hint-placeholder-val="{{ false }}">
-                <line x1="{{ tipX }}" x2="{{ tipX }}" y1="14" y2="210" stroke="#17120b" stroke-width="2" stroke-dasharray="4 4"></line>
+                <line sc-camel-x1="{{ tipX }}" sc-camel-x2="{{ tipX }}" y1="14" y2="210" stroke="#17120b" stroke-width="2" stroke-dasharray="4 4"></line>
               </sc-if>
               <rect x="48" y="14" width="580" height="196" fill="transparent" style="pointer-events:all; cursor:crosshair" sc-camel-on-pointer-move="{{ trendMove }}" sc-camel-on-pointer-leave="{{ trendLeave }}"></rect>
             </svg>
             <sc-if value="{{ tipOn }}" hint-placeholder-val="{{ false }}">
               <div style="position:absolute; left:{{ tipLeft }}%; top:{{ tipTop }}%; transform:translate(-50%,-118%); background:#17120b; color:#fdf7e3; padding:6px 11px; font-size:15px; line-height:1.35; white-space:nowrap; pointer-events:none; box-shadow:4px 5px 0 rgba(60,50,80,0.3); z-index:5">
                 <div style="letter-spacing:1px; opacity:0.8">{{ tipDate }}</div>
-                <div style="font-size:17px"><b>{{ tipTotal }}</b> RESIDENTS</div>
-                <div style="opacity:0.75">{{ tipGained }} THAT DAY</div>
+                <div style="font-size:17px"><b>{{ tipTotal }}</b> {{ tipWord }}</div>
+                <div style="opacity:0.75">{{ tipGained }} {{ tipGainWord }}</div>
               </div>
             </sc-if>
           </div>
@@ -108,68 +216,88 @@
         </sc-if>
       </div>
 
+      <!-- WHERE THEY CAME FROM: the referrer each visit arrived with, as the
+           beacon reported it (yard/tools.js). It stood here as "Top
+           contributors", which needed accounts to mean anything; a hill has
+           one owner, so the ranked list is of doors instead of people. -->
       <div style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 14px; transform:rotate({{ rContrib }})">
         <div aria-hidden="true" style="position:absolute; top:-11px; right:-11px; width:16px; height:16px; background:#ffd23f; border:3px solid #17120b; border-radius:50%"></div>
-        <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Top contributors</h2>
+        <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Where they came from</h2>
         <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin:3px 0 15px">THIS PERIOD</div>
         <sc-for list="{{ contributors }}" as="cb" hint-placeholder-count="6">
           <div style="display:flex; align-items:center; gap:11px; margin-bottom:13px; padding:2px 4px" style-hover="background:rgba(255,210,63,0.3)">
             <div style="font-family:'Rye',serif; font-size:19px; width:18px; flex:none; text-align:center">{{ cb.rank }}</div>
             <div aria-hidden="true" style="flex:none; width:33px; height:33px; background:{{ cb.bg }}; border:3px solid #17120b; display:flex; align-items:center; justify-content:center; font-family:'Rye',serif; font-size:15px; color:{{ cb.fg }}; transform:rotate({{ cb.rot }}); box-shadow:2px 3px 0 rgba(60,50,80,0.18)">{{ cb.initial }}</div>
             <div style="flex:1; min-width:0; font-size:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ cb.name }}</div>
-            <div style="font-size:15px; color:#4a4054; flex:none"><b style="color:#17120b; font-size:17px">{{ cb.val }}</b> CONTRIB.</div>
+            <div style="font-size:15px; color:#4a4054; flex:none"><b style="color:#17120b; font-size:17px">{{ cb.val }}</b> VISITS</div>
           </div>
         </sc-for>
+        <sc-if value="{{ refsEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:15px; letter-spacing:1.5px; color:#4a4054; opacity:0.75; line-height:1.4; margin-bottom:8px">{{ refsNote }}</div>
+        </sc-if>
       </div>
     </section>
 
+    <!-- WHERE THE WORK HAPPENS: the whole page, zoomed out, with the pieces
+         people have put on it as heat. The picture is the page itself — the
+         yard in a frame at 1260 wide, ?embed=1 so it wears no dock and counts
+         no visit — scaled to fit; the heat is a canvas over it, painted from
+         where every piece in the period lands (a stroke's points, a stamp's
+         spot), and each piece is also charged to the part of the page it
+         landed on, which is the list beside the map and the table behind the
+         button. It used to be a made-up grid of zones by time of day. -->
     <section style="margin-bottom:30px">
-      <div style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate({{ rHeat }})">
+      <div ref="{{ heatCardRef }}" style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate({{ rHeat }})">
         <div aria-hidden="true" style="position:absolute; bottom:-11px; left:-11px; width:15px; height:15px; background:#7bc264; border:3px solid #17120b; transform:rotate(45deg)"></div>
         <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px">
           <div>
             <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Where the work happens</h2>
-            <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin-top:3px">INTERACTIONS BY ZONE &amp; TIME OF DAY · LAST 30 DAYS</div>
+            <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin-top:3px">{{ heatSub }}</div>
           </div>
           <button sc-camel-on-click="{{ toggleHeat }}" style="font-family:'VT323',monospace; font-size:15px; letter-spacing:1px; border:3px solid #17120b; background:{{ heatBtnBg }}; color:#17120b; padding:2px 10px; cursor:pointer; box-shadow:3px 4px 0 rgba(60,50,80,0.2); flex:none" style-hover="transform:translate(-1px,-1px)">{{ heatBtn }}</button>
         </div>
         <sc-if value="{{ heatChartOn }}" hint-placeholder-val="{{ true }}">
-          <div style="overflow-x:auto; padding-bottom:4px">
-            <div ref="{{ heatRef }}" style="position:relative; min-width:680px">
-              <div style="display:grid; grid-template-columns:130px repeat(8,1fr); gap:4px; margin-bottom:5px">
-                <div></div>
-                <sc-for list="{{ hours }}" as="hb" hint-placeholder-count="8">
-                  <div style="text-align:center; font-size:14px; letter-spacing:1px; color:#4a4054">{{ hb }}</div>
-                </sc-for>
-              </div>
-              <sc-for list="{{ heatRows }}" as="hrow" hint-placeholder-count="8">
-                <div style="display:grid; grid-template-columns:130px repeat(8,1fr); gap:4px; margin-bottom:4px; align-items:stretch">
-                  <div style="font-size:16px; text-align:right; padding-right:12px; align-self:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ hrow.zone }}</div>
-                  <sc-for list="{{ hrow.cells }}" as="cell" hint-placeholder-count="8">
-                    <div tabindex="0" style="height:30px; background:{{ cell.bg }}; border:2px solid #17120b; cursor:pointer; outline:none; transition:transform 0.1s" sc-camel-on-pointer-enter="{{ cell.enter }}" sc-camel-on-pointer-leave="{{ cell.leave }}" sc-camel-on-focus="{{ cell.enter }}" sc-camel-on-blur="{{ cell.leave }}" style-hover="transform:scale(1.15)" style-focus="box-shadow:0 0 0 3px #ffd23f"></div>
-                  </sc-for>
-                </div>
-              </sc-for>
+          <div style="display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap">
+            <div style="position:relative; flex:none; width:{{ mapW }}px; height:{{ mapH }}px; border:3px solid #17120b; background:#ece7f1; overflow:hidden; box-shadow:5px 6px 0 rgba(60,50,80,0.18)">
+              <iframe ref="{{ frameRef }}" src="{{ frameSrc }}" title="your page, zoomed out" tabindex="-1" aria-hidden="true" sc-camel-on-load="{{ frameLoaded }}" style="position:absolute; left:0; top:0; width:1260px; height:{{ frameH }}px; border:0; transform:scale({{ mapS }}); transform-origin:0 0; pointer-events:none; background:#ece7f1"></iframe>
+              <canvas ref="{{ heatRef }}" aria-label="where the pieces are, as heat" style="position:absolute; left:0; top:0; width:100%; height:100%; cursor:crosshair" sc-camel-on-pointer-move="{{ heatMove }}" sc-camel-on-pointer-leave="{{ heatLeave }}"></canvas>
               <sc-if value="{{ heatTipOn }}" hint-placeholder-val="{{ false }}">
-                <div style="position:absolute; left:{{ heatTipX }}px; top:{{ heatTipY }}px; transform:translate(-50%,-112%); background:#17120b; color:#fdf7e3; padding:6px 11px; font-size:15px; line-height:1.35; white-space:nowrap; pointer-events:none; box-shadow:4px 5px 0 rgba(60,50,80,0.3); z-index:5">
+                <div style="position:absolute; left:{{ heatTipX }}px; top:{{ heatTipY }}px; transform:translate(-50%,-50%); background:#17120b; color:#fdf7e3; padding:6px 11px; font-size:15px; line-height:1.35; white-space:nowrap; pointer-events:none; box-shadow:4px 5px 0 rgba(60,50,80,0.3); z-index:5">
                   <div style="font-size:17px"><b>{{ heatTipZone }}</b></div>
-                  <div style="opacity:0.8; letter-spacing:1px">{{ heatTipHour }}</div>
-                  <div style="opacity:0.85">{{ heatTipV }} INTERACTIONS</div>
+                  <div style="opacity:0.85">{{ heatTipV }}</div>
                 </div>
               </sc-if>
+              <sc-if value="{{ mapNoteOn }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute; left:0; right:0; bottom:0; padding:8px 10px; background:rgba(23,18,11,0.82); color:#fdf7e3; font-size:14px; letter-spacing:1.5px; text-align:center; line-height:1.35">{{ mapNote }}</div>
+              </sc-if>
+            </div>
+            <div style="flex:1; min-width:240px">
+              <div style="font-size:14px; letter-spacing:2px; color:#4a4054; opacity:0.8; margin-bottom:12px">BY PART OF THE PAGE</div>
+              <sc-for list="{{ zoneRows }}" as="z" hint-placeholder-count="6">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:11px; padding:2px 3px" style-hover="background:rgba(255,210,63,0.3)">
+                  <div style="width:150px; font-size:16px; flex:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ z.zone }}</div>
+                  <div style="flex:1; height:20px; border:3px solid #17120b; background:#fffcf0; position:relative; min-width:40px">
+                    <div style="position:absolute; left:0; top:0; bottom:0; width:{{ z.w }}%; box-sizing:border-box; background:{{ z.color }}; border-right:3px solid #17120b"></div>
+                  </div>
+                  <div style="width:44px; text-align:right; font-size:17px; flex:none"><b>{{ z.val }}</b></div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ zonesEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:15px; letter-spacing:1.5px; color:#4a4054; opacity:0.75; line-height:1.4">{{ zonesNote }}</div>
+              </sc-if>
+              <div style="display:flex; align-items:center; gap:8px; margin-top:18px; font-size:14px; letter-spacing:2px; color:#4a4054">LOW <div style="width:130px; height:12px; border:2px solid #17120b; background:linear-gradient(90deg, {{ rampLo }}, {{ rampHi }})"></div> HIGH</div>
             </div>
           </div>
-          <div style="display:flex; align-items:center; gap:8px; margin-top:10px; font-size:14px; letter-spacing:2px; color:#4a4054">LOW <div style="width:130px; height:12px; border:2px solid #17120b; background:linear-gradient(90deg, {{ rampLo }}, {{ rampHi }})"></div> HIGH</div>
         </sc-if>
         <sc-if value="{{ heatTableOn }}" hint-placeholder-val="{{ false }}">
           <div style="overflow-x:auto">
-            <div style="min-width:680px; border:3px solid #17120b; background:#fffcf0">
-              <div style="display:grid; grid-template-columns:150px repeat(8,1fr); padding:6px 12px; font-size:14px; letter-spacing:1px; border-bottom:3px solid #17120b; background:#ffd23f"><div>ZONE</div>
-                <sc-for list="{{ hours }}" as="hb2" hint-placeholder-count="8"><div style="text-align:right">{{ hb2 }}</div></sc-for>
+            <div style="min-width:640px; border:3px solid #17120b; background:#fffcf0">
+              <div style="display:grid; grid-template-columns:190px repeat(6,1fr); padding:6px 12px; font-size:14px; letter-spacing:1px; border-bottom:3px solid #17120b; background:#ffd23f"><div>PART OF THE PAGE</div>
+                <sc-for list="{{ kindHeads }}" as="kh" hint-placeholder-count="6"><div style="text-align:right">{{ kh }}</div></sc-for>
               </div>
               <sc-for list="{{ heatTableRows }}" as="ht" hint-placeholder-count="8">
-                <div style="display:grid; grid-template-columns:150px repeat(8,1fr); padding:3px 12px; font-size:17px; border-bottom:2px dashed rgba(23,18,11,0.18)" style-hover="background:rgba(255,210,63,0.3)"><div>{{ ht.zone }}</div>
-                  <sc-for list="{{ ht.cells }}" as="hv" hint-placeholder-count="8"><div style="text-align:right">{{ hv }}</div></sc-for>
+                <div style="display:grid; grid-template-columns:190px repeat(6,1fr); padding:3px 12px; font-size:17px; border-bottom:2px dashed rgba(23,18,11,0.18)" style-hover="background:rgba(255,210,63,0.3)"><div>{{ ht.zone }}</div>
+                  <sc-for list="{{ ht.cells }}" as="hv" hint-placeholder-count="6"><div style="text-align:right">{{ hv }}</div></sc-for>
                 </div>
               </sc-for>
             </div>
@@ -179,7 +307,7 @@
     </section>
 
     <section style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:26px; margin-bottom:30px; align-items:start">
-      <sc-for list="{{ rankedCards }}" as="rc" hint-placeholder-count="3">
+      <sc-for list="{{ rankedCards }}" as="rc" hint-placeholder-count="2">
         <div style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 12px; transform:rotate({{ rc.rot }})">
           <div aria-hidden="true" style="position:absolute; top:-11px; left:-11px; width:14px; height:14px; background:{{ rc.pip }}; border:3px solid #17120b; transform:rotate(45deg)"></div>
           <h2 style="margin:0; font-family:'Rye',serif; font-size:20px; font-weight:400">{{ rc.title }}</h2>
@@ -193,16 +321,23 @@
               <div style="width:50px; text-align:right; font-size:17px; flex:none"><b>{{ r.val }}</b></div>
             </div>
           </sc-for>
+          <sc-if value="{{ rc.emptyOn }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:15px; letter-spacing:1.5px; color:#4a4054; opacity:0.75; line-height:1.4; margin-bottom:8px">{{ rc.empty }}</div>
+          </sc-if>
         </div>
       </sc-for>
     </section>
 
+    <!-- PAST LOOKS: every save of the page, newest first. api/hill.js keeps
+         each save as a version and the newest doc carries the list; the
+         thumbnail is the pieces of that version drawn small, fetched when the
+         card is on the screen. -->
     <section style="margin-bottom:30px">
       <div style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 22px; transform:rotate({{ rLooks }})">
         <div aria-hidden="true" style="position:absolute; top:-11px; right:-11px; width:15px; height:15px; background:#e0598c; border:3px solid #17120b; border-radius:50%"></div>
         <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Past looks of your page</h2>
-        <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin:3px 0 16px">EVERY SAVED SNAPSHOT OF THE HERO, NEWEST FIRST · CLICK ONE TO PEEK</div>
-        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:20px">
+        <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin:3px 0 16px">EVERY TIME YOU PRESSED SAVE YARD, NEWEST FIRST · CLICK ONE TO PEEK</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:20px">
           <sc-for list="{{ looks }}" as="lk" hint-placeholder-count="6">
             <div sc-camel-on-click="{{ lk.open }}" role="button" tabindex="0" style="background:#fdf7e3; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.18); padding:9px 9px 11px; transform:rotate({{ lk.rot }}); cursor:pointer; transition:transform 0.15s" style-hover="transform:rotate(0deg) scale(1.05)">
               {{ lk.art }}
@@ -211,22 +346,25 @@
             </div>
           </sc-for>
         </div>
+        <sc-if value="{{ looksEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:15px; letter-spacing:1.5px; color:#4a4054; opacity:0.75; line-height:1.4">{{ looksNote }}</div>
+        </sc-if>
       </div>
     </section>
 
-    <div style="text-align:center; margin-top:38px; font-size:15px; letter-spacing:2px; color:#4a4054; opacity:0.65">MOCK DATA FOR NOW — THIS BENCH ISN'T WIRED TO A REAL HILL YET</div>
+    <div style="text-align:center; margin-top:38px; font-size:15px; letter-spacing:2px; color:#4a4054; opacity:0.65; line-height:1.6">{{ statusPage }}<br>{{ statusVisits }}</div>
   </div>
 
   <sc-if value="{{ lookOpen }}" hint-placeholder-val="{{ false }}">
     <div sc-camel-on-click="{{ closeLook }}" style="position:fixed; inset:0; background:rgba(23,18,11,0.45); z-index:30"></div>
-    <div role="dialog" aria-modal="true" aria-label="snapshot" style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-0.6deg); width:min(540px,92vw); box-sizing:border-box; background:#fdf7e3; border:5px solid #17120b; box-shadow:12px 13px 0 rgba(23,18,11,0.35); z-index:31; padding:18px 18px 20px">
+    <div role="dialog" aria-modal="true" aria-label="snapshot" style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-0.6deg); width:min(540px,92vw); max-height:92vh; overflow:auto; box-sizing:border-box; background:#fdf7e3; border:5px solid #17120b; box-shadow:12px 13px 0 rgba(23,18,11,0.35); z-index:31; padding:18px 18px 20px">
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
         <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">{{ lookDate }}</h2>
         <button sc-camel-on-click="{{ closeLook }}" aria-label="close" style="border:3px solid #17120b; background:#fdf7e3; width:32px; height:32px; font-family:'VT323',monospace; font-size:20px; line-height:1; cursor:pointer; padding:0" style-hover="background:#ffd23f">×</button>
       </div>
       {{ lookBigArt }}
       <div style="font-size:17px; margin-top:12px; line-height:1.3">{{ lookNote }}</div>
-      <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.7; margin-top:6px">SNAPSHOT SAVED AUTOMATICALLY WHEN THE HERO CHANGED</div>
+      <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.7; margin-top:6px">A VERSION KEPT WHEN YOU PRESSED SAVE YARD</div>
     </div>
   </sc-if>
 </div>
@@ -236,88 +374,204 @@
   &quot;heatRamp&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;pond blue&quot;, &quot;options&quot;: [&quot;pond blue&quot;, &quot;gnome red&quot;, &quot;grass green&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Look&quot;, &quot;description&quot;: &quot;Heatmap color ramp&quot;},
   &quot;defaultRange&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;30&quot;, &quot;options&quot;: [&quot;1&quot;, &quot;7&quot;, &quot;30&quot;, &quot;90&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Data&quot;, &quot;description&quot;: &quot;Date range shown before you click a filter&quot;}
 }">
+/* THE NUMBERS ARE THE HILL'S OWN (2026-09-17). Until now everything here came
+   out of a seeded random generator. Two sources feed it now, both the yard's:
+
+     THE PAGE  · /api/hill?hill=yard — the published doc (api/hill.js): every
+                 piece on the wall with `when` it went on, and the list of
+                 saves. Falls back to ../yard/hill.json, the copy that ships
+                 with the site, when there is no store behind the door.
+     THE VISITS · the Apps Script the waitlist posts to, ?stats=1: one row per
+                 visit as the yard's beacon reported it — [t, visitor, device,
+                 seconds, referrer]. Absent (the script not yet redeployed),
+                 the visitor cards say so and the trend shows pieces instead.
+
+   Everything is summed here, in the page, for the range chosen. */
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.C = { INK: '#17120b', CREAM: '#fdf7e3', PAPER: '#fffcf0', RED: '#e8484a', YEL: '#ffd23f', GRN: '#7bc264', BLU: '#5a8fd6', PNK: '#e0598c', MUT: '#4a4054' };
-    this.mulberry32 = seed => () => {
-      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
-      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-    const rng = this.mulberry32(0x5EED01);
-    this.HIST = 180; this.TODAY = new Date(2026, 7, 31);
+    const C = this.C = { INK: '#17120b', CREAM: '#fdf7e3', PAPER: '#fffcf0', RED: '#e8484a', YEL: '#ffd23f', GRN: '#7bc264', BLU: '#5a8fd6', PNK: '#e0598c', MUT: '#4a4054' };
     this.DOW = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     this.MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-    const gen = o => {
-      const out = []; let lv = o.base;
-      for (let i = 0; i < this.HIST; i++) {
-        const dow = this.dateFor(i).getDay();
-        const wk = (dow === 0 || dow === 6) ? o.wm : 1;
-        lv += o.drift * (0.4 + rng() * 1.2);
-        const noise = 1 + (rng() - 0.5) * o.noise;
-        const spike = rng() > o.sc ? o.ss * rng() : 0;
-        out.push(Math.max(o.floor, lv * wk * noise + spike));
-      }
-      return out;
-    };
-    this.signups = gen({ base: 3.2, drift: 0.045, wm: 1.35, noise: 0.9, sc: 0.95, ss: 18, floor: 0 }).map(Math.round);
-    this.totalRes = []; { let t = 40; this.signups.forEach(s => { t += s; this.totalRes.push(t); }); }
-    this.active = gen({ base: 30, drift: 0.35, wm: 1.2, noise: 0.5, sc: 0.9, ss: 25, floor: 4 }).map(Math.round);
-    this.avgMin = gen({ base: 7, drift: 0.01, wm: 1.15, noise: 0.4, sc: 0.92, ss: 6, floor: 1.5 });
-    this.contrib = gen({ base: 14, drift: 0.12, wm: 1.3, noise: 0.6, sc: 0.93, ss: 20, floor: 0 }).map(Math.round);
-    this.ZONES = ['The Wall', 'The Music Deck', 'The Arcade', 'The Lounge', 'Sports Car Lane', 'Signup Form', 'Big Gnome Face', 'Lawn Gnome'];
-    this.HOURS = ['12–3a', '3–6a', '6–9a', '9a–12p', '12–3p', '3–6p', '6–9p', '9p–12a'];
-    const PROF = [
-      { peak: 5.4, spread: 2.3, base: 1.00 }, { peak: 6.2, spread: 1.3, base: 0.55 },
-      { peak: 6.0, spread: 1.2, base: 0.60 }, { peak: 5.0, spread: 1.8, base: 0.42 },
-      { peak: 4.0, spread: 2.4, base: 0.30 }, { peak: 3.1, spread: 1.7, base: 0.34 },
-      { peak: 5.8, spread: 2.0, base: 0.30 }, { peak: 4.4, spread: 2.6, base: 0.24 }
-    ];
-    this.heat = PROF.map(p => this.HOURS.map((_, col) => {
-      const d = Math.min(Math.abs(col - p.peak), 8 - Math.abs(col - p.peak));
-      const g = Math.exp(-(d * d) / (2 * p.spread * p.spread));
-      return Math.round(p.base * g * (0.65 + rng() * 0.6) * 340);
-    }));
-    this.heatMax = Math.max(...this.heat.map(r => Math.max(...r)), 1);
-    const C = this.C;
-    const f3 = () => 0.85 + rng() * 0.3, f2 = () => 0.9 + rng() * 0.2;
-    this.cat = {
-      tools: [{ label: 'DRAW', base: 1120, f: f3(), color: C.RED }, { label: 'STICKER', base: 860, f: f3(), color: C.BLU }, { label: 'TEXT', base: 430, f: f3(), color: C.GRN }, { label: 'PICTURE', base: 310, f: f3(), color: C.PNK }],
-      genres: [{ label: 'KNOLL', base: 58, f: f2(), color: C.RED }, { label: 'HORROR', base: 19, f: f2(), color: C.BLU }, { label: 'ADVENTURE', base: 15, f: f2(), color: C.GRN }, { label: 'SHOOTER', base: 8, f: f2(), color: C.PNK }],
-      devices: [{ label: 'DESKTOP', base: 620, f: f2(), color: C.RED }, { label: 'MOBILE', base: 410, f: f2(), color: C.BLU }, { label: 'TABLET', base: 74, f: f2(), color: C.GRN }]
-    };
-    const POOL = ['mossy', 'pixelpete', 'juno', 'opal', 'zip', 'vinny', 'fern', 'clover', 'bramble', 'lichen', 'dewy', 'cobble', 'thistle', 'hazel', 'bracken'];
-    const AV = [C.PNK, C.RED, C.BLU, C.GRN, C.YEL];
-    this.people = POOL.map((name, i) => ({ name, weight: Math.pow(rng(), 2.2), bg: AV[i % 5], fg: AV[i % 5] === C.YEL ? C.INK : C.CREAM }));
-    this.LOOKS = [
-      { daysAgo: 0, note: 'WALL REPAINTED, 3 NEW STICKERS' },
-      { daysAgo: 6, note: 'SPORTS CAR LANE ADDED' },
-      { daysAgo: 19, note: 'SIGNUP FORM REDESIGNED' },
-      { daysAgo: 33, note: 'ARCADE CABINET SWAPPED TO SNAKE' },
-      { daysAgo: 58, note: 'NIGHT MODE SHIPPED' },
-      { daysAgo: 91, note: 'FIRST VERSION OF THE HERO' }
-    ];
-    this.state = { range: null, trendTable: false, heatTable: false, tip: null, heatTip: null, look: null };
+    // (YOUR NUMBERS) the signed-in gnome's own hill; 'yard', the owner's, only where nobody is (the page sends them to the gate)
+    const me = (/(?:^|;\s*)knoll_in=([0-9a-f]{16})(?:;|$)/.exec(document.cookie) || [])[1];
+    this.HILL = me ? 'u-' + me : 'yard';
+    this.DOOR = '/api/hill';
+    this.SHIPPED = '../yard/hill.json';
+    this.FRAME = '../yard/?embed=1';
+    this.FRAME_W = 1260;                 // the yard at this width has its column exactly 1200 wide: world px are CSS px
+    // the same deployment coming-soon.html and yard/tools.js talk to (apps-script/Code.gs)
+    this.HITS = 'https://script.google.com/macros/s/AKfycbyzyF91GruictUGhnX3_N4NwVyNuxLLpGvEUs3Thb3ObeE9MkrFerkvMrBDrPPQfcFr/exec';
+    // a piece's kind → the tool that made it (wall.js's letters)
+    this.KIND = { s: 'DRAW', p: 'DRAW', b: 'DRAW', d: 'STICKER', i: 'UPLOAD', k: 'UPLOAD', t: 'TEXT', g: 'GIF' };
+    this.KINDS = ['DRAW', 'STICKER', 'UPLOAD', 'TEXT', 'GIF'];
+    this.KCOL = { DRAW: C.RED, STICKER: C.BLU, UPLOAD: C.GRN, TEXT: C.PNK, GIF: C.YEL };
+    this.state = { range: null, trendTable: false, heatTable: false, tip: null, heatTip: null, look: null,
+                   doc: null, docFrom: '', hits: null, statsState: 'loading', looksDocs: {}, map: null };
+    this._looksDocs = {};
+    this._heatPts = [];
+    window.dash = this;                  // for the probes in lab2/perf, and the console
   }
   componentDidMount() {
     this._key = (e) => { if (e.key === 'Escape' && this.state.look != null) this.setState({ look: null }); };
     window.addEventListener('keydown', this._key);
+    this._resize = () => { this.measure(); this.paintSoon(); };
+    window.addEventListener('resize', this._resize);
+    // the picture of the page settles as its React and fonts land: measured often at first, then now and then
+    let n = 0;
+    this._tick = setInterval(() => { n++; if (n < 15 || n % 5 === 0) this.measure(); }, 1000);
+    this.load();
   }
-  componentWillUnmount() { window.removeEventListener('keydown', this._key); }
-  dateFor(i) { const d = new Date(this.TODAY); d.setDate(d.getDate() - (this.HIST - 1 - i)); return d; }
-  fmtDate(i, withYear) {
-    const d = this.dateFor(i);
-    return this.DOW[d.getDay()] + ' ' + this.MON[d.getMonth()] + ' ' + d.getDate() + (withYear ? ', ' + d.getFullYear() : '');
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this._key);
+    window.removeEventListener('resize', this._resize);
+    clearInterval(this._tick);
+    cancelAnimationFrame(this._raf);
   }
+
+  // ── the two sources ─────────────────────────────────────────────────────
+  async load() {
+    let doc = null, from = 'none';
+    try {
+      const r = await fetch(this.DOOR + '?hill=' + this.HILL, { cache: 'no-store' });
+      const v = await r.json();
+      if (v && v.ok && v.doc) { doc = v.doc; from = 'live'; }
+    } catch (e) {}
+    if (!doc && this.HILL === 'yard') {   // the copy the site ships is the owner's yard, nobody else's (YOUR NUMBERS)
+      try { const r = await fetch(this.SHIPPED, { cache: 'no-cache' }); if (r.ok) { doc = await r.json(); from = 'shipped'; } } catch (e) {}
+    }
+    if (!doc || !doc.wall) doc = { t: 0, wall: { items: [] }, flatfile: { list: [] }, looks: [] };
+    this.setState({ doc, docFrom: from }, () => this.paintSoon());
+    if (from === 'live') this.fetchLooks(doc);
+    try {
+      const r = await fetch(this.HITS + '?stats=1&hill=' + this.HILL + '&days=180');
+      const v = await r.json();
+      if (v && v.ok && Array.isArray(v.hits)) this.setState({ hits: v.hits, statsState: 'live' });
+      else this.setState({ statsState: 'off' });
+    } catch (e) { this.setState({ statsState: 'off' }); }
+  }
+  // the older versions, one at a time, for their thumbnails — the newest IS the doc
+  async fetchLooks(doc) {
+    for (const l of (doc.looks || []).slice(1, 7)) {
+      if (!l || this._looksDocs[l.t]) continue;
+      try {
+        const r = await fetch(this.DOOR + '?hill=' + this.HILL + '&at=' + l.t);
+        const v = await r.json();
+        if (v && v.ok && v.doc) { this._looksDocs[l.t] = v.doc; this.setState({ looksDocs: Object.assign({}, this._looksDocs) }); }
+      } catch (e) {}
+    }
+  }
+
+  // ── the picture of the page ─────────────────────────────────────────────
+  /* The frame shows the yard at 1260 CSS px wide, where its content column is
+     exactly 1200 — the wall's world width — so a piece's world x,y is the
+     frame's x,y once the world's own offset is added. The frame is then scaled
+     to fit a map at most 460 wide and 720 tall, and the heat canvas over it is
+     drawn in map pixels. The page's parts — the bar, the greeting, the hills,
+     every card — are read out of the frame too, and each piece is charged to
+     the smallest one it lands in. */
+  measure() {
+    const f = this._frame, card = this._heatCard;
+    if (!f || !card) return;
+    let idoc = null;
+    try { idoc = f.contentDocument; } catch (e) { return; }
+    if (!idoc || !idoc.body || !idoc.documentElement) return;
+    const world = idoc.getElementById('bench-world'), col = idoc.querySelector('#dc-root .yard-col');   // #dc-root: what React rendered, not the template still inside <x-dc>
+    if (!world || !col) return;                                       // not up yet: the last good map stands, and the timer asks again
+    /* THE PAGE'S HEIGHT IS THE COLUMN'S FOOT, plus the root's 56px of bottom
+       padding. Not the document's scrollHeight: the yard's root is min-height
+       100vh, so a document in a 2400px frame answers 2400 whatever is on it. */
+    const sy0 = (idoc.defaultView && idoc.defaultView.scrollY) || 0;
+    const frameH = col ? Math.max(600, Math.min(20000, Math.round(col.getBoundingClientRect().bottom + sy0 + 56))) : 2400;
+    const avail = Math.max(240, Math.min(460, card.clientWidth - 44));
+    const s = Math.min(avail / this.FRAME_W, 720 / frameH);
+    const sy = (idoc.defaultView && idoc.defaultView.scrollY) || 0;
+    const wr = world ? world.getBoundingClientRect() : null;
+    const map = { frameH, s: +s.toFixed(5), W: Math.round(this.FRAME_W * s), H: Math.round(frameH * s),
+                  worldLeft: wr ? Math.round(wr.left) : 30, worldTop: wr ? Math.round(wr.top + sy) : 140,
+                  zones: this.zonesOf(idoc), ready: !!(world && col) };
+    if (JSON.stringify(map) !== JSON.stringify(this.state.map)) this.setState({ map }, () => this.paintSoon());
+  }
+  zonesOf(idoc) {
+    const out = [], sy = (idoc.defaultView && idoc.defaultView.scrollY) || 0;
+    const add = (el, name) => {
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      if (r.width < 8 || r.height < 8) return;
+      out.push({ name, x: Math.round(r.left), y: Math.round(r.top + sy), w: Math.round(r.width), h: Math.round(r.height) });
+    };
+    add(idoc.querySelector('#dc-root .knoll-head'), 'THE HOUSE BAR');
+    const h1 = idoc.querySelector('#dc-root h1');
+    if (h1) add((h1.parentElement && h1.parentElement.parentElement) || h1, 'THE GREETING');
+    add(idoc.querySelector('#dc-root nav[aria-label="hills"]'), 'THE HILLS');
+    idoc.querySelectorAll('#dc-root .yard-col section').forEach(sec => {
+      const h2 = sec.querySelector('h2');
+      add(sec, sec.querySelector('.plot-yard') ? 'THE PLOT' : (h2 ? h2.textContent.trim().toUpperCase() : 'A CARD'));
+    });
+    return out;
+  }
+  // where a piece is, in world px: a stroke's points (thinned), anything else its spot
+  pointsOf(p) {
+    if (p.k === 's' || p.k === 'p' || p.k === 'b') {
+      const out = [], d = String(p.d || ''), re = /[ML](-?\d+(?:\.\d+)?)[ ,](-?\d+(?:\.\d+)?)/g;
+      let m;
+      while ((m = re.exec(d))) out.push([+m[1], +m[2]]);
+      if (out.length > 30) { const step = Math.ceil(out.length / 30); return out.filter((_, i) => i % step === 0); }
+      return out;
+    }
+    return [[+p.x || 0, +p.y || 0]];
+  }
+  zoneOf(m, q) {
+    let best = null;
+    m.zones.forEach(z => {
+      if (q[0] >= z.x && q[0] <= z.x + z.w && q[1] >= z.y && q[1] <= z.y + z.h && (!best || z.w * z.h < best.w * best.h)) best = z;
+    });
+    return best ? best.name : 'BARE PAPER';
+  }
+  paintSoon() { if (this._raf) return; this._raf = requestAnimationFrame(() => { this._raf = 0; this.drawHeat(); }); }
+  drawHeat() {
+    const cv = this._heat, m = this.state.map;
+    if (!cv || !m) return;
+    const W = m.W, H = m.H;
+    if (cv.width !== W) cv.width = W;
+    if (cv.height !== H) cv.height = H;
+    const ctx = cv.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+    const pts = this._heatPts;
+    if (!pts.length) return;
+    // soft black blobs on a scratch canvas, then coloured by how much piled up
+    const off = document.createElement('canvas');
+    off.width = W; off.height = H;
+    const o = off.getContext('2d');
+    const R = Math.max(9, Math.round(70 * m.s));             // about 70 world px of glow, whatever the picture's scale
+    pts.forEach(p => {
+      const g = o.createRadialGradient(p[0], p[1], 0, p[0], p[1], R);
+      g.addColorStop(0, 'rgba(0,0,0,0.42)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+      o.fillStyle = g; o.fillRect(p[0] - R, p[1] - R, R * 2, R * 2);
+    });
+    const img = o.getImageData(0, 0, W, H), d = img.data;
+    const lo = this.rgb('#fffbea'), hi = this.rgb(this.deep());
+    for (let i = 0; i < d.length; i += 4) {
+      const a = d[i + 3] / 255;
+      if (a < 0.03) { d[i + 3] = 0; continue; }
+      const t = Math.min(1, Math.pow(a, 0.65));
+      d[i] = Math.round(lo[0] + (hi[0] - lo[0]) * t);
+      d[i + 1] = Math.round(lo[1] + (hi[1] - lo[1]) * t);
+      d[i + 2] = Math.round(lo[2] + (hi[2] - lo[2]) * t);
+      d[i + 3] = Math.round(150 + 105 * t);
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+
+  // ── little helpers ──────────────────────────────────────────────────────
+  fmtDate(d, withYear) { return this.DOW[d.getDay()] + ' ' + this.MON[d.getMonth()] + ' ' + d.getDate() + (withYear ? ', ' + d.getFullYear() : ''); }
   fmt(n) {
     const s = n < 0 ? '-' : ''; n = Math.abs(n);
     if (n < 1000) return s + Math.round(n).toLocaleString('en-US');
     if (n < 1e6) return s + (n / 1000).toFixed(n < 10000 ? 1 : 0) + 'K';
     return s + (n / 1e6).toFixed(1) + 'M';
   }
-  fmtMin(m) { if (m < 60) return m.toFixed(1) + 'm'; return Math.floor(m / 60) + 'h ' + Math.round(m % 60) + 'm'; }
+  fmtMin(m) { if (m < 1) return Math.round(m * 60) + 's'; if (m < 60) return m.toFixed(1) + 'm'; return Math.floor(m / 60) + 'h ' + Math.round(m % 60) + 'm'; }
   niceMax(v) {
     if (v <= 0) return 10;
     const mag = Math.pow(10, Math.floor(Math.log10(v)));
@@ -330,49 +584,90 @@ class Component extends DCLogic {
     for (let i = 0; i < 12; i++) out.push(a[Math.round(i * (a.length - 1) / 11)]);
     return out;
   }
+  rgb(hex) { const p = parseInt(hex.slice(1), 16); return [(p >> 16) & 255, (p >> 8) & 255, p & 255]; }
   mix(a, b, t) {
-    const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
-    const ch = s => Math.round(((pa >> s) & 255) + (((pb >> s) & 255) - ((pa >> s) & 255)) * t);
-    return 'rgb(' + ch(16) + ',' + ch(8) + ',' + ch(0) + ')';
+    const pa = this.rgb(a), pb = this.rgb(b);
+    return 'rgb(' + pa.map((v, i) => Math.round(v + (pb[i] - v) * t)).join(',') + ')';
   }
-  lookArt(i) {
-    const h = React.createElement, C = this.C;
-    const r = this.mulberry32(0x1000 + i);
-    const bases = [C.PNK, C.BLU, C.GRN, C.YEL, C.RED];
-    const base = bases[i % 5];
-    const dots = [];
-    for (let k = 0; k < 5; k++) dots.push({ x: 16 + r() * 156, y: 42 + r() * 58, rr: 4 + r() * 6, c: bases[Math.floor(r() * 5)] });
-    return h('svg', { key: 'a', viewBox: '0 0 190 110', 'aria-hidden': true, style: { display: 'block', width: '100%', height: 'auto', background: '#fffcf0', border: '3px solid #17120b', boxSizing: 'border-box' } },
-      h('rect', { key: 'hd', width: 190, height: 26, fill: base, opacity: 0.45 }),
-      h('rect', { key: 'ln', y: 24, width: 190, height: 3, fill: '#17120b' }),
-      h('rect', { key: 'av', x: 8, y: 6, width: 14, height: 14, fill: base, stroke: '#17120b', strokeWidth: 3 }),
-      h('rect', { key: 'tt', x: 30, y: 9, width: 64, height: 8, fill: '#17120b', opacity: 0.5 }),
-      dots.map((d, k) => h('circle', { key: k, cx: d.x.toFixed(0), cy: d.y.toFixed(0), r: d.rr.toFixed(1), fill: d.c, stroke: '#17120b', strokeWidth: 3 }))
-    );
+  deep() { const D = { 'pond blue': '#2f4f8f', 'gnome red': '#9c2a2a', 'grass green': '#3c6b2f' }; return D[this.props.heatRamp] || D['pond blue']; }
+
+  /* a version of the page, drawn small: the page's paper, the column, and
+     every piece where it landed — a stroke as a thin line in its tool's
+     colour, a stamp or a note as a chip */
+  lookArt(doc, w, h, key) {
+    const el = React.createElement, m = this.state.map;
+    const FW = this.FRAME_W, FH = (m && m.frameH) || 2400, wl = m ? m.worldLeft : 30, wt = m ? m.worldTop : 140;
+    const s = Math.min(w / FW, h / FH), ox = (w - FW * s) / 2, oy = (h - FH * s) / 2;
+    const sx = x => +(ox + (wl + x) * s).toFixed(1), sy = y => +(oy + (wt + y) * s).toFixed(1);
+    const kids = [
+      el('rect', { key: 'pg', x: ox.toFixed(1), y: oy.toFixed(1), width: (FW * s).toFixed(1), height: (FH * s).toFixed(1), fill: '#ece7f1', stroke: '#17120b', strokeWidth: 1.2 }),
+      el('rect', { key: 'col', x: (ox + wl * s).toFixed(1), y: (oy + wt * s).toFixed(1), width: (1200 * s).toFixed(1), height: Math.max(0, (FH - wt) * s - 1).toFixed(1), fill: '#fdf7e3', opacity: 0.9 })
+    ];
+    if (!doc) kids.push(el('text', { key: 'wait', x: w / 2, y: h / 2, textAnchor: 'middle', fontFamily: 'VT323, monospace', fontSize: 14, fill: '#4a4054' }, 'FETCHING…'));
+    else ((doc.wall && doc.wall.items) || []).filter(Boolean).slice(0, 400).forEach((p, i) => {
+      const kd = this.KIND[p.k] || 'DRAW', col = this.KCOL[kd], pts = this.pointsOf(p);
+      if (!pts.length) return;
+      if (kd === 'DRAW' && pts.length > 1) kids.push(el('polyline', { key: i, points: pts.map(q => sx(q[0]) + ',' + sy(q[1])).join(' '), fill: 'none', stroke: col, strokeWidth: 1.6, strokeLinejoin: 'round', strokeLinecap: 'round' }));
+      else if (kd === 'DRAW') kids.push(el('circle', { key: i, cx: sx(pts[0][0]), cy: sy(pts[0][1]), r: 1.5, fill: col }));
+      else { const sz = kd === 'TEXT' ? [9, 3] : [6, 6]; kids.push(el('rect', { key: i, x: (sx(pts[0][0]) - sz[0] / 2).toFixed(1), y: (sy(pts[0][1]) - sz[1] / 2).toFixed(1), width: sz[0], height: sz[1], fill: col, stroke: '#17120b', strokeWidth: 0.8 })); }
+    });
+    return el('svg', { key, viewBox: '0 0 ' + w + ' ' + h, 'aria-hidden': true, style: { display: 'block', width: '100%', height: 'auto', background: '#fffcf0', border: '3px solid #17120b', boxSizing: 'border-box' } }, kids);
   }
+
   renderVals() {
-    const C = this.C, S = this.state, H = this.HIST;
+    const C = this.C, S = this.state, self = this;
     const jitter = this.props.jitter ?? true;
     const rot = v => jitter ? v : '0deg';
     const range = S.range ?? (+(this.props.defaultRange ?? 30) || 30);
-    const slice = a => a.slice(H - range);
-    const prev = a => a.slice(Math.max(0, H - range * 2), H - range);
+    const rangeWord = range === 1 ? 'TODAY' : 'LAST ' + range + ' DAYS';
+    const DAY = 86400000;
+    const today0 = new Date(); today0.setHours(0, 0, 0, 0);
+    const from = today0.getTime() - (range - 1) * DAY, prevFrom = from - range * DAY;
+    const days = []; for (let i = 0; i < range; i++) days.push(new Date(from + i * DAY));
+    const dayOf = t => Math.floor((t - from) / DAY);
     const sum = a => a.reduce((x, y) => x + y, 0);
-    const avg = a => a.length ? sum(a) / a.length : 0;
 
     const defs = [{ label: 'TODAY', d: 1 }, { label: 'LAST 7 DAYS', d: 7 }, { label: 'LAST 30 DAYS', d: 30 }, { label: 'LAST 90 DAYS', d: 90 }];
     const ranges = defs.map((r, i) => ({
       label: r.label, bg: r.d === range ? C.YEL : C.CREAM,
       rot: rot(i % 2 ? '1deg' : '-1deg'),
-      pick: () => this.setState({ range: r.d, tip: null })
+      pick: () => this.setState({ range: r.d, tip: null, heatTip: null }, () => this.paintSoon())
     }));
 
-    const dl = (curr, prevV, always) => {
+    // ── the page's pieces, in and before the period ─────────────────────
+    const P = ((S.doc && S.doc.wall && S.doc.wall.items) || []).filter(Boolean);
+    const when = p => +p.when || 0;
+    const inR = P.filter(p => !when(p) || when(p) >= from);          // undated pieces are the shipped page's: always on
+    const inPrev = P.filter(p => when(p) && when(p) >= prevFrom && when(p) < from);
+    const perDay = (arr, tOf) => { const out = new Array(range).fill(0); arr.forEach(x => { const i = dayOf(tOf(x)); if (i >= 0 && i < range) out[i]++; }); return out; };
+
+    // ── the visits ──────────────────────────────────────────────────────
+    const live = S.statsState === 'live', hits = S.hits || [];
+    const hIn = hits.filter(h => h[0] >= from), hPrev = hits.filter(h => h[0] >= prevFrom && h[0] < from);
+    const uniq = arr => new Set(arr.map(h => h[1])).size;
+    const firstSeen = {};
+    hits.forEach(h => { if (!(h[1] in firstSeen) || h[0] < firstSeen[h[1]]) firstSeen[h[1]] = h[0]; });
+    const newIds = Object.values(firstSeen).filter(t => t >= from).length;
+    const residents = uniq(hits);
+    const actNow = uniq(hIn) / range, actPrev = uniq(hPrev) / range;
+    const secs = a => { const v = a.map(h => +h[3] || 0).filter(x => x > 0); return v.length ? sum(v) / v.length : 0; };
+    const timeNow = secs(hIn), timePrev = secs(hPrev);
+    const uniqPerDay = () => { const sets = days.map(() => new Set()); hIn.forEach(h => { const i = dayOf(h[0]); if (i >= 0 && i < range) sets[i].add(h[1]); }); return sets.map(s => s.size); };
+    const cumUniq = () => {
+      const seen = new Set(); hits.filter(h => h[0] < from).forEach(h => seen.add(h[1]));
+      const byDay = days.map(() => []); hIn.forEach(h => { const i = dayOf(h[0]); if (i >= 0 && i < range) byDay[i].push(h[1]); });
+      let total = seen.size; const out = [], gained = [];
+      byDay.forEach(ids => { let g = 0; ids.forEach(id => { if (!seen.has(id)) { seen.add(id); total++; g++; } }); out.push(total); gained.push(g); });
+      return { out, gained };
+    };
+    const secsPerDay = () => { const s = new Array(range).fill(0), n = new Array(range).fill(0); hIn.forEach(h => { const i = dayOf(h[0]); if (i >= 0 && i < range && +h[3] > 0) { s[i] += +h[3]; n[i]++; } }); return s.map((v, i) => n[i] ? v / n[i] : 0); };
+
+    // ── the four numbers ────────────────────────────────────────────────
+    const dl = (curr, prevV) => {
       if (!prevV && !curr) return { t: '—', c: '#4a4054' };
-      if (!prevV) return { t: '+' + this.fmt(curr), c: '#3c7a2e' };
+      if (!prevV) return { t: '+' + (curr < 10 ? (Math.round(curr * 10) / 10) : this.fmt(curr)), c: '#3c7a2e' };
       const p = (curr - prevV) / prevV * 100;
-      const c = always ? '#3c7a2e' : (Math.abs(p) < 1 ? '#4a4054' : p > 0 ? '#3c7a2e' : '#b8302f');
-      return { t: (p > 0 ? '+' : '') + p.toFixed(0) + '%', c };
+      return { t: (p > 0 ? '+' : '') + p.toFixed(0) + '%', c: Math.abs(p) < 1 ? '#4a4054' : p > 0 ? '#3c7a2e' : '#b8302f' };
     };
     const spark = a => {
       const pts = this.sample12(a);
@@ -381,15 +676,16 @@ class Component extends DCLogic {
       const Y = v => 26 - ((v - min) / (max - min || 1)) * 22;
       return { pts: pts.map((v, i) => X(i).toFixed(1) + ',' + Y(v).toFixed(1)).join(' '), dx: +X(pts.length - 1).toFixed(1), dy: +Y(pts[pts.length - 1]).toFixed(1) };
     };
-    const rActive = avg(slice(this.active)), rActiveP = avg(prev(this.active));
-    const rTime = avg(slice(this.avgMin)), rTimeP = avg(prev(this.avgMin));
-    const rContrib = sum(slice(this.contrib)), rContribP = sum(prev(this.contrib));
-    const gainedTotal = sum(slice(this.signups));
+    const off = { t: 'NOT COUNTING YET', c: '#4a4054' }, flat = spark([0, 0]);
+    const cu = live ? cumUniq() : null;
     const kpiDefs = [
-      { label: 'TOTAL RESIDENTS', value: this.fmt(this.totalRes[H - 1]), d: { t: '+' + this.fmt(gainedTotal) + ' THIS PERIOD', c: '#3c7a2e' }, sp: spark(slice(this.totalRes)), pip: C.PNK },
-      { label: 'ACTIVE RESIDENTS (AVG/DAY)', value: this.fmt(Math.round(rActive)), d: dl(rActive, rActiveP), sp: spark(slice(this.active)), pip: C.BLU },
-      { label: 'AVG. TIME ON THE HILL', value: this.fmtMin(rTime), d: dl(rTime, rTimeP), sp: spark(slice(this.avgMin)), pip: C.GRN },
-      { label: 'TOTAL CONTRIBUTIONS', value: this.fmt(rContrib), d: dl(rContrib, rContribP), sp: spark(slice(this.contrib)), pip: C.RED }
+      live ? { label: 'RESIDENTS (VISITORS SEEN)', value: this.fmt(residents), d: { t: '+' + this.fmt(newIds) + ' THIS PERIOD', c: '#3c7a2e' }, sp: spark(cu.out), pip: C.PNK }
+           : { label: 'RESIDENTS (VISITORS SEEN)', value: '—', d: off, sp: flat, pip: C.PNK },
+      live ? { label: 'ACTIVE RESIDENTS (AVG/DAY)', value: actNow < 10 ? String(Math.round(actNow * 10) / 10) : this.fmt(Math.round(actNow)), d: dl(actNow, actPrev), sp: spark(uniqPerDay()), pip: C.BLU }
+           : { label: 'ACTIVE RESIDENTS (AVG/DAY)', value: '—', d: off, sp: flat, pip: C.BLU },
+      live ? { label: 'AVG. TIME ON THE HILL', value: timeNow ? this.fmtMin(timeNow / 60) : '—', d: dl(timeNow, timePrev), sp: spark(secsPerDay()), pip: C.GRN }
+           : { label: 'AVG. TIME ON THE HILL', value: '—', d: off, sp: flat, pip: C.GRN },
+      { label: 'PIECES PUT ON THE PAGE', value: this.fmt(inR.length), d: dl(inR.length, inPrev.length), sp: spark(perDay(inR.filter(when), when)), pip: C.RED }
     ];
     const kpis = kpiDefs.map((k, i) => ({
       label: k.label, value: k.value, delta: k.d.t, deltaColor: k.d.c, pip: k.pip,
@@ -397,25 +693,28 @@ class Component extends DCLogic {
       rot: rot(['-0.7deg', '0.6deg', '-0.5deg', '0.8deg'][i])
     }));
 
-    const data = slice(this.totalRes), gained = slice(this.signups);
-    const n = data.length, maxY = this.niceMax(Math.max(...data));
+    // ── the trend: residents when counted, pieces until then ────────────
+    let data, gained, trendTitle, tipWord, tipGainWord;
+    if (live) {
+      data = cu.out; gained = cu.gained; trendTitle = 'Residents over time'; tipWord = 'RESIDENTS'; tipGainWord = 'NEW THAT DAY';
+    } else {
+      const before = P.filter(p => !when(p) || when(p) < from).length;
+      gained = perDay(inR.filter(when), when);
+      data = []; let t = before; gained.forEach(g => { t += g; data.push(t); });
+      trendTitle = 'Pieces over time'; tipWord = 'PIECES'; tipGainWord = 'ADDED THAT DAY';
+    }
+    const n = data.length, maxY = this.niceMax(Math.max(...data, 0));
     const PL = 48, W = 640, plotW = W - PL - 12, plotH = 196, PT = 14;
     const X = i => PL + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW);
     const Y = v => PT + plotH - (v / maxY) * plotH;
     const grid = [];
-    for (let t = 0; t <= 4; t++) {
-      const val = maxY / 4 * t, gy = +Y(val).toFixed(1);
-      grid.push({ y: gy, ty: gy + 4, label: this.fmt(val) });
-    }
+    for (let t = 0; t <= 4; t++) { const val = maxY / 4 * t, gy = +Y(val).toFixed(1); grid.push({ y: gy, ty: gy + 4, label: this.fmt(val) }); }
     const linePts = data.map((v, i) => X(i).toFixed(1) + ',' + Y(v).toFixed(1)).join(' L ');
     const linePath = 'M ' + linePts;
     const areaPath = 'M ' + X(0).toFixed(1) + ',210 L ' + linePts + ' L ' + X(n - 1).toFixed(1) + ',210 Z';
     const labelCount = Math.min(n, 6);
     const xLabels = [];
-    for (let l = 0; l < labelCount; l++) {
-      const i = Math.round(l * (n - 1) / Math.max(1, labelCount - 1));
-      xLabels.push({ x: +X(i).toFixed(1), t: this.fmtDate(H - range + i, false) });
-    }
+    for (let l = 0; l < labelCount; l++) { const i = Math.round(l * (n - 1) / Math.max(1, labelCount - 1)); xLabels.push({ x: +X(i).toFixed(1), t: this.fmtDate(days[i], false) }); }
     const endX = +X(n - 1).toFixed(1), endY = +Y(data[n - 1]).toFixed(1);
     const tipI = S.tip;
     const trendMove = (e) => {
@@ -424,69 +723,100 @@ class Component extends DCLogic {
       i = Math.max(0, Math.min(n - 1, i));
       if (i !== this.state.tip) this.setState({ tip: i });
     };
-    const trendRows = data.map((v, i) => ({
-      date: this.fmtDate(H - range + i, true), total: this.fmt(v),
-      gained: (gained[i] >= 0 ? '+' : '') + gained[i]
-    })).reverse();
+    const trendRows = data.map((v, i) => ({ date: this.fmtDate(days[i], true), total: this.fmt(v), gained: '+' + gained[i] })).reverse();
 
-    const DEEPS = { 'pond blue': '#2f4f8f', 'gnome red': '#9c2a2a', 'grass green': '#3c6b2f' };
-    const deep = DEEPS[this.props.heatRamp] || DEEPS['pond blue'];
-    const heatRows = this.ZONES.map((z, r) => ({
-      zone: z,
-      cells: this.HOURS.map((hb, c) => {
-        const v = this.heat[r][c];
-        const t = Math.pow(v / this.heatMax, 0.8);
-        return {
-          bg: this.mix('#fffbea', deep, Math.min(1, t * 0.95 + 0.03)),
-          enter: (e) => {
-            const cr = e.currentTarget.getBoundingClientRect();
-            const wr = this._heat ? this._heat.getBoundingClientRect() : cr;
-            this.setState({ heatTip: { x: cr.left - wr.left + cr.width / 2, y: cr.top - wr.top, z, hb, v } });
-          },
-          leave: () => this.setState({ heatTip: null })
-        };
-      })
+    // ── where they came from ────────────────────────────────────────────
+    const AV = [C.PNK, C.RED, C.BLU, C.GRN, C.YEL];
+    const refs = {};
+    hIn.forEach(h => { const r = h[4] || 'direct'; refs[r] = (refs[r] || 0) + 1; });
+    const contributors = Object.entries(refs).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([host, v], i) => ({
+      rank: i + 1, name: host === 'direct' ? 'DIRECT / TYPED IN' : host, initial: host === 'direct' ? '·' : host[0].toUpperCase(),
+      bg: AV[i % 5], fg: AV[i % 5] === C.YEL ? C.INK : C.CREAM, val: this.fmt(v), rot: rot(i % 2 ? '2deg' : '-2deg')
     }));
-    const heatTableRows = this.ZONES.map((z, r) => ({ zone: z, cells: this.heat[r].map(String) }));
 
-    const scale = range / 30;
-    const mkRows = list => {
-      const rows = list.map(it => ({ label: it.label, v: it.base * scale * it.f, color: it.color }));
+    // ── the heat: every piece in the period, where it landed ────────────
+    const m = S.map, deep = this.deep();
+    const counts = {};
+    const heatPts = [];
+    if (m) {
+      inR.forEach(p => {
+        const pts = this.pointsOf(p);
+        if (!pts.length) return;
+        const q0 = [m.worldLeft + pts[0][0], m.worldTop + pts[0][1]];
+        const zn = this.zoneOf(m, q0), kd = this.KIND[p.k] || 'DRAW';
+        const c = counts[zn] || (counts[zn] = { total: 0 });
+        c.total++; c[kd] = (c[kd] || 0) + 1;
+        pts.forEach(pt => { const q = [(m.worldLeft + pt[0]) * m.s, (m.worldTop + pt[1]) * m.s]; if (q[0] > -20 && q[0] < m.W + 20 && q[1] > -20 && q[1] < m.H + 20) heatPts.push(q); });
+      });
+    }
+    this._heatPts = heatPts;
+    const zoneNames = m ? m.zones.map(z => z.name).filter((v, i, a) => a.indexOf(v) === i).concat(['BARE PAPER']) : [];
+    const zoneAll = zoneNames.map(zn => ({ zone: zn, n: counts[zn] ? counts[zn].total : 0 })).sort((a, b) => b.n - a.n);
+    const zMax = Math.max(...zoneAll.map(z => z.n), 1);
+    const zoneRows = zoneAll.filter(z => z.n > 0).slice(0, 8).map(z => ({ zone: z.zone, val: this.fmt(z.n), w: Math.max(2, Math.round(z.n / zMax * 100)), color: this.mix('#fffbea', deep, 0.35 + 0.65 * z.n / zMax) }));
+    const heatTableRows = zoneAll.map(z => ({ zone: z.zone, cells: this.KINDS.map(kd => String((counts[z.zone] && counts[z.zone][kd]) || 0)).concat([String(z.n)]) }));
+    const heatMove = (e) => {
+      if (!m) return;
+      const r = e.currentTarget.getBoundingClientRect();
+      const q = [(e.clientX - r.left) / m.s, (e.clientY - r.top) / m.s];
+      const zn = this.zoneOf(m, q);
+      if (S.heatTip && S.heatTip.zone === zn) return;
+      const z = m.zones.find(v => v.name === zn);
+      const cx = z ? (z.x + z.w / 2) * m.s : e.clientX - r.left, cy = z ? (z.y + z.h / 2) * m.s : e.clientY - r.top;
+      const cnt = counts[zn] ? counts[zn].total : 0;
+      this.setState({ heatTip: { zone: zn, x: Math.round(Math.max(60, Math.min(m.W - 60, cx))), y: Math.round(Math.max(24, Math.min(m.H - 24, cy))), v: cnt + (cnt === 1 ? ' PIECE ' : ' PIECES ') + rangeWord } });
+    };
+    const mapReady = !!m;
+    const mapNote = !mapReady ? 'DRAWING YOUR PAGE…' : !inR.length ? 'NOTHING PUT ON THE PAGE ' + rangeWord : '';
+
+    // ── tools, devices ──────────────────────────────────────────────────
+    const mkRows = (tally, colorOf) => {
+      const rows = Object.entries(tally).map(([label, v]) => ({ label, v, color: colorOf(label) }));
       const mx = Math.max(...rows.map(r => r.v), 1);
       rows.sort((a, b) => b.v - a.v);
-      return rows.map(r => ({ label: r.label, val: this.fmt(Math.round(r.v)), color: r.color, w: Math.max(2, Math.round(r.v / mx * 100)) }));
+      return rows.map(r => ({ label: r.label, val: this.fmt(r.v), color: r.color, w: Math.max(2, Math.round(r.v / mx * 100)) }));
     };
+    const toolTally = {};
+    inR.forEach(p => { const kd = this.KIND[p.k] || 'DRAW'; toolTally[kd] = (toolTally[kd] || 0) + 1; });
+    const devTally = {};
+    hIn.forEach(h => { const d = String(h[2] || 'desktop').toUpperCase(); devTally[d] = (devTally[d] || 0) + 1; });
+    const DCOL = { DESKTOP: C.RED, MOBILE: C.BLU, TABLET: C.GRN };
+    const toolRows = mkRows(toolTally, k => this.KCOL[k] || C.MUT), devRows = mkRows(devTally, k => DCOL[k] || C.MUT);
     const rankedCards = [
-      { title: 'Tools people reach for', sub: 'THIS PERIOD', rows: mkRows(this.cat.tools), rot: rot('-0.6deg'), pip: C.RED },
-      { title: 'Genre skins in use', sub: 'CURRENT SESSIONS', rows: mkRows(this.cat.genres), rot: rot('0.5deg'), pip: C.BLU },
-      { title: 'How they visit', sub: 'THIS PERIOD', rows: mkRows(this.cat.devices), rot: rot('-0.4deg'), pip: C.GRN }
+      { title: 'Tools people reach for', sub: rangeWord, rows: toolRows, rot: rot('-0.6deg'), pip: C.RED,
+        emptyOn: !toolRows.length, empty: 'NOTHING PUT ON THE PAGE ' + rangeWord + ' — PICK UP A TOOL ON YOUR YARD.' },
+      { title: 'How they visit', sub: rangeWord, rows: devRows, rot: rot('0.5deg'), pip: C.GRN,
+        emptyOn: !devRows.length, empty: live ? 'NO VISITS ' + rangeWord + '.' : 'NOT COUNTING VISITS YET — THE APPS SCRIPT WANTS ITS NEW VERSION DEPLOYED (yard/about.md).' }
     ];
 
-    const pool = sum(slice(this.contrib));
-    const wTotal = sum(this.people.map(p => p.weight));
-    const contributors = this.people
-      .map(p => ({ name: p.name, bg: p.bg, fg: p.fg, v: Math.round(pool * p.weight / wTotal) }))
-      .sort((a, b) => b.v - a.v).slice(0, 6)
-      .map((p, i) => ({
-        rank: i + 1, name: p.name, initial: p.name[0].toUpperCase(),
-        bg: p.bg, fg: p.fg, val: this.fmt(p.v),
-        rot: rot(i % 2 ? '2deg' : '-2deg')
-      }));
+    // ── past looks ──────────────────────────────────────────────────────
+    const looksList = ((S.doc && S.doc.looks) || []).filter(l => l && l.t).slice(0, 12);
+    const docAt = (l, i) => i === 0 ? S.doc : (S.looksDocs[l.t] || null);
+    const looks = looksList.map((l, i) => {
+      const next = looksList[i + 1], d = l.n - (next ? next.n : 0);
+      return {
+        art: this.lookArt(docAt(l, i), 190, 250, 'a' + l.t),
+        date: this.fmtDate(new Date(l.t), true),
+        note: l.n + (l.n === 1 ? ' PIECE' : ' PIECES') + (next ? ' · ' + (d >= 0 ? '+' : '') + d + ' SINCE THE SAVE BEFORE' : ' · THE FIRST SAVE'),
+        rot: rot(['-1.2deg', '0.9deg', '-0.7deg', '1.1deg', '-1deg', '0.8deg'][i % 6]),
+        open: () => this.setState({ look: i })
+      };
+    });
+    const lk = S.look != null ? looksList[S.look] : null;
 
-    const looks = this.LOOKS.map((l, i) => ({
-      art: this.lookArt(i),
-      date: this.fmtDate(H - 1 - l.daysAgo, true),
-      note: l.note,
-      rot: rot(['-1.2deg', '0.9deg', '-0.7deg', '1.1deg', '-1deg', '0.8deg'][i]),
-      open: () => this.setState({ look: i })
-    }));
-    const lk = S.look != null ? this.LOOKS[S.look] : null;
+    const statusPage = S.doc == null ? 'PAGE: FETCHING…'
+      : S.docFrom === 'live' ? 'PAGE: LIVE · ' + P.length + (P.length === 1 ? ' PIECE' : ' PIECES') + (S.doc.t ? ' · LAST SAVED ' + this.fmtDate(new Date(S.doc.t), true) : ' · NEVER SAVED')
+      : S.docFrom === 'shipped' ? 'PAGE: THE COPY THAT SHIPPED WITH THE SITE · ' + P.length + (P.length === 1 ? ' PIECE' : ' PIECES') + ' · NO STORE IS LINKED YET (yard/about.md)'
+      : 'PAGE: NOTHING PUBLISHED YET';
+    const statusVisits = S.statsState === 'loading' ? 'VISITS: COUNTING…'
+      : live ? 'VISITS: ' + this.fmt(hits.length) + ' COUNTED IN 180 DAYS' + (hits.length ? ' · THE FIRST ON ' + this.fmtDate(new Date(hits[0][0]), true) : '')
+      : 'VISITS: NOT COUNTING YET — THE APPS SCRIPT WANTS ITS NEW VERSION DEPLOYED (yard/about.md)';
 
     return {
       rChip: rot('1.2deg'), rTrend: rot('-0.4deg'), rContrib: rot('0.6deg'),
       rHeat: rot('0.3deg'), rLooks: rot('-0.3deg'),
       ranges, kpis,
-      trendSub: range === 1 ? 'TODAY' : 'CUMULATIVE, LAST ' + range + ' DAYS',
+      trendTitle, trendSub: range === 1 ? 'TODAY' : 'CUMULATIVE, LAST ' + range + ' DAYS',
       trendChartOn: !S.trendTable, trendTableOn: S.trendTable,
       trendBtn: S.trendTable ? 'VIEW AS CHART' : 'VIEW AS TABLE',
       trendBtnBg: S.trendTable ? C.YEL : C.CREAM,
@@ -497,34 +827,47 @@ class Component extends DCLogic {
       tipOn: tipI != null, tipX: tipI != null ? +X(tipI).toFixed(1) : 0,
       tipLeft: tipI != null ? +(X(tipI) / W * 100).toFixed(2) : 0,
       tipTop: tipI != null ? +(Y(data[tipI]) / 240 * 100).toFixed(2) : 0,
-      tipDate: tipI != null ? this.fmtDate(H - range + tipI, true) : '',
+      tipDate: tipI != null ? this.fmtDate(days[tipI], true) : '',
       tipTotal: tipI != null ? this.fmt(data[tipI]) : '',
-      tipGained: tipI != null ? (gained[tipI] >= 0 ? '+' : '') + gained[tipI] : '',
+      tipGained: tipI != null ? '+' + gained[tipI] : '',
+      tipWord, tipGainWord,
       trendMove, trendLeave: () => this.setState({ tip: null }),
       trendRows,
-      hours: this.HOURS, heatRows, heatTableRows,
-      heatRef: (el) => { this._heat = el; },
+      contributors,
+      refsEmpty: !contributors.length,
+      refsNote: live ? 'NO VISITS ' + rangeWord + '.' : 'NOT COUNTING VISITS YET — THE APPS SCRIPT WANTS ITS NEW VERSION DEPLOYED (yard/about.md).',
+      heatSub: 'PIECES ON YOUR PAGE, BY WHERE THEY LAND · ' + rangeWord,
       heatChartOn: !S.heatTable, heatTableOn: S.heatTable,
-      heatBtn: S.heatTable ? 'VIEW AS CHART' : 'VIEW AS TABLE',
+      heatBtn: S.heatTable ? 'VIEW AS MAP' : 'VIEW AS TABLE',
       heatBtnBg: S.heatTable ? C.YEL : C.CREAM,
-      toggleHeat: () => this.setState({ heatTable: !S.heatTable, heatTip: null }),
+      toggleHeat: () => this.setState({ heatTable: !S.heatTable, heatTip: null }, () => { this.measure(); this.paintSoon(); }),
+      heatCardRef: (el) => { this._heatCard = el; },
+      frameRef: (el) => { this._frame = el; },
+      heatRef: (el) => { this._heat = el; if (el) this.paintSoon(); },
+      // the frame's React mounts a moment after load: ask again a few times, then the timer takes over
+      frameLoaded: () => { [300, 1000, 2200, 4500].forEach(ms => setTimeout(() => this.measure(), ms)); },
+      frameSrc: this.FRAME, frameH: m ? m.frameH : 2400, mapS: m ? m.s : 0.3,
+      mapW: m ? m.W : 380, mapH: m ? m.H : 640,
+      heatMove, heatLeave: () => { if (S.heatTip) this.setState({ heatTip: null }); },
       heatTipOn: !!S.heatTip,
-      heatTipX: S.heatTip ? Math.round(S.heatTip.x) : 0,
-      heatTipY: S.heatTip ? Math.round(S.heatTip.y) : 0,
-      heatTipZone: S.heatTip ? S.heatTip.z : '', heatTipHour: S.heatTip ? S.heatTip.hb : '',
-      heatTipV: S.heatTip ? S.heatTip.v : '',
+      heatTipX: S.heatTip ? S.heatTip.x : 0, heatTipY: S.heatTip ? S.heatTip.y : 0,
+      heatTipZone: S.heatTip ? S.heatTip.zone : '', heatTipV: S.heatTip ? S.heatTip.v : '',
+      mapNoteOn: !!mapNote, mapNote,
+      zoneRows, zonesEmpty: !zoneRows.length,
+      zonesNote: mapReady ? 'NOTHING PUT ON THE PAGE ' + rangeWord + ' — THE MAP LIGHTS UP AS PIECES GO ON.' : 'READING THE PAGE…',
+      kindHeads: this.KINDS.concat(['ALL']), heatTableRows,
       rampLo: this.mix('#fffbea', deep, 0.03), rampHi: this.mix('#fffbea', deep, 0.98),
-      rankedCards, contributors, looks,
+      rankedCards, looks,
+      looksEmpty: !looks.length,
+      looksNote: S.docFrom === 'live' ? 'NO SAVES YET — PRESS SAVE YARD ON YOUR PAGE AND THE FIRST ONE APPEARS HERE.' : 'SAVES ARE KEPT BEHIND THE PUBLISH DOOR, WHICH THIS SITE DOES NOT HAVE YET (yard/about.md).',
+      statusPage, statusVisits,
       lookOpen: S.look != null,
-      lookBigArt: S.look != null ? this.lookArt(S.look) : null,
-      lookDate: lk ? this.fmtDate(H - 1 - lk.daysAgo, true) : '',
-      lookNote: lk ? lk.note : '',
+      lookBigArt: lk ? this.lookArt(docAt(lk, S.look), 470, 600, 'big') : null,
+      lookDate: lk ? this.fmtDate(new Date(lk.t), true) : '',
+      lookNote: lk ? lk.n + (lk.n === 1 ? ' PIECE ON THE PAGE' : ' PIECES ON THE PAGE') + ' WHEN THIS WAS SAVED' : '',
       closeLook: () => this.setState({ look: null })
     };
   }
 }
 </script>
-
-
-
 </body></html>

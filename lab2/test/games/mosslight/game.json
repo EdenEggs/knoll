@@ -1,0 +1,393 @@
+{
+  "version": 1,
+  "builtAt": "2026-09-07T23:18:08.041Z",
+  "manifest": {
+    "slug": "mosslight",
+    "title": "Mosslight",
+    "tagline": "A slow walk through a lit wood.",
+    "description": "Mosslight is a wordless walk through a painted forest where the light does the talking. There is nothing to fight and nothing to collect: you follow the glow between the trees, sit when you like, and the wood changes around you. Every frame is a soft plate of moss and ochre with no hard line in it.",
+    "developer": "Fixture Games",
+    "publisher": "Fixture Games",
+    "releaseDate": "2026-11-05",
+    "platforms": [
+      "pc",
+      "mac",
+      "switch"
+    ],
+    "genres": [
+      "exploration",
+      "cozy",
+      "painterly"
+    ],
+    "links": {
+      "itch": "https://example.com/mosslight/itch",
+      "site": "https://example.com/mosslight",
+      "press": "https://example.com/mosslight/press"
+    },
+    "assets": [
+      {
+        "id": "logo",
+        "role": "logo",
+        "file": "art/logo.png",
+        "w": 640,
+        "h": 240,
+        "alpha": true,
+        "sha256": "e2054b90ac4260ee6dccd33f97a33120876471ae6c6e9876077f57873b3c525b"
+      },
+      {
+        "id": "hero",
+        "role": "hero",
+        "file": "art/hero.webp",
+        "w": 1600,
+        "h": 900,
+        "alpha": false,
+        "sha256": "50c3767e0f5e20ee7b298c15897bec201e92816e135c88719ebd4bbf73f43c1e"
+      },
+      {
+        "id": "shot-1",
+        "role": "screenshot",
+        "file": "art/shot-1.webp",
+        "w": 960,
+        "h": 540,
+        "alpha": false,
+        "sha256": "0d45a042bd2f08c165fea386e2d16ff499f2cd9b1cb786500e99b73379c1e80c"
+      },
+      {
+        "id": "shot-2",
+        "role": "screenshot",
+        "file": "art/shot-2.webp",
+        "w": 960,
+        "h": 540,
+        "alpha": false,
+        "sha256": "86c84ff41b15fc2d98eb1262af5ee18dced2c13a250964405b83dadfa27a1c0b"
+      },
+      {
+        "id": "shot-3",
+        "role": "screenshot",
+        "file": "art/shot-3.webp",
+        "w": 960,
+        "h": 540,
+        "alpha": false,
+        "sha256": "74df0be8b71cf64a1695cbbc86b59da3fb00a16ea4233b9819d09b03a63bc2b3"
+      },
+      {
+        "id": "shot-4",
+        "role": "screenshot",
+        "file": "art/shot-4.webp",
+        "w": 960,
+        "h": 540,
+        "alpha": false,
+        "sha256": "ac7db7ea0689b35c0df1e4499a9642a2de0649d4e627a26825bdb194c5a7500c"
+      }
+    ],
+    "rights": {
+      "attested": true,
+      "by": "fixture",
+      "at": "2026-09-07T00:00:00.000Z"
+    },
+    "source": "manual"
+  },
+  "analysis": {
+    "palette": [
+      {
+        "hex": "#7e7c50",
+        "weight": 0.18893828108590632,
+        "L": 0.576933879131934,
+        "C": 0.06240365936555038,
+        "h": 105.97049343249827
+      },
+      {
+        "hex": "#9a9765",
+        "weight": 0.1860313615837009,
+        "L": 0.6666005338107045,
+        "C": 0.06872502105586295,
+        "h": 105.18676879308502
+      },
+      {
+        "hex": "#8f8c5b",
+        "weight": 0.15399863474060071,
+        "L": 0.6305470699817108,
+        "C": 0.06797499415760486,
+        "h": 105.18512298040487
+      },
+      {
+        "hex": "#868355",
+        "weight": 0.14717644008611636,
+        "L": 0.6010797331760598,
+        "C": 0.06460092522589266,
+        "h": 104.98314105715849
+      },
+      {
+        "hex": "#a7a570",
+        "weight": 0.11426581206679269,
+        "L": 0.7106230182748972,
+        "C": 0.07185085451609424,
+        "h": 106.25485157431824
+      },
+      {
+        "hex": "#71734b",
+        "weight": 0.09133372059441294,
+        "L": 0.5433440604933546,
+        "C": 0.05800681635569103,
+        "h": 110.60660262566391
+      },
+      {
+        "hex": "#a0a06a",
+        "weight": 0.07786491152068893,
+        "L": 0.6925620025407598,
+        "C": 0.07345533919990128,
+        "h": 108.17359700706898
+      },
+      {
+        "hex": "#afaa76",
+        "weight": 0.04039083832178114,
+        "L": 0.729459417645826,
+        "C": 0.07035049398831822,
+        "h": 103.32686978757106
+      }
+    ],
+    "dark": false,
+    "stats": {
+      "contrast": 0.0627,
+      "edgeDensity": 0,
+      "hfEnergy": 0.1601,
+      "outline": {
+        "present": false,
+        "weight": 0
+      },
+      "paletteCount": 55,
+      "pixelSize": 0,
+      "saturation": 0.0652
+    },
+    "vibe": null
+  },
+  "theme": {
+    "dark": false,
+    "tokens": {
+      "--paper": "#ededd6",
+      "--paper-2": "#e3e3cc",
+      "--card": "#f0f0d9",
+      "--bench-bg": "#e1e1cb",
+      "--bench-dot": "rgba(28,28,5,.06)",
+      "--drop-rgb": "28,28,5",
+      "--ink": "#1c1c05",
+      "--ink-2": "#25260e",
+      "--ink-3": "#34351d",
+      "--mute": "#87876f",
+      "--mute-2": "#a7a690",
+      "--line": "#d1d1ba",
+      "--pink": "#888852",
+      "--pink-2": "#979761",
+      "--pink-soft": "#e1e2b4",
+      "--blue": "#6e8f63",
+      "--green": "#9d7f4f",
+      "--amber": "#54937c",
+      "--field": "#ededd6",
+      "--tint": "#e9e9d1",
+      "--tint-2": "#eaead2",
+      "--chip": "#ebebd3",
+      "--hard-edge": "#040400",
+      "--sticky-a": "#dddd8f",
+      "--sticky-b": "#80ecf0",
+      "--sticky-c": "#d5d2ff",
+      "--sticky-d": "#ffc7c7",
+      "--gz-handle-bg": "#25260e",
+      "--gz-handle-ink": "#ededd6",
+      "--grip": "#53533c",
+      "--serial-ink": "#a7a690",
+      "--sk-primary": "#888852",
+      "--sk-secondary": "#6e8f63",
+      "--sk-ink": "#1c1c05",
+      "--sk-paper": "#ffffff",
+      "--sk-highlight": "#b5b68a",
+      "--sk-shadow": "#48482b",
+      "--sk-halo": "0",
+      "--display": "'Kalam','Segoe Print','Bradley Hand',cursive",
+      "--body": "'Public Sans',sans-serif",
+      "--mono": "ui-monospace,\"Cascadia Mono\",Consolas,\"SF Mono\",Menlo,monospace"
+    },
+    "fonts": {
+      "id": "hand",
+      "display": "'Kalam','Segoe Print','Bradley Hand',cursive",
+      "body": "'Public Sans',sans-serif",
+      "mono": "ui-monospace,\"Cascadia Mono\",Consolas,\"SF Mono\",Menlo,monospace"
+    },
+    "css": ":root{--paper:#ededd6;--paper-2:#e3e3cc;--card:#f0f0d9;--bench-bg:#e1e1cb;--bench-dot:rgba(28,28,5,.06);--drop-rgb:28,28,5;--ink:#1c1c05;--ink-2:#25260e;--ink-3:#34351d;--mute:#87876f;--mute-2:#a7a690;--line:#d1d1ba;--pink:#888852;--pink-2:#979761;--pink-soft:#e1e2b4;--blue:#6e8f63;--green:#9d7f4f;--amber:#54937c;--field:#ededd6;--tint:#e9e9d1;--tint-2:#eaead2;--chip:#ebebd3;--hard-edge:#040400;--sticky-a:#dddd8f;--sticky-b:#80ecf0;--sticky-c:#d5d2ff;--sticky-d:#ffc7c7;--gz-handle-bg:#25260e;--gz-handle-ink:#ededd6;--grip:#53533c;--serial-ink:#a7a690;--sk-primary:#888852;--sk-secondary:#6e8f63;--sk-ink:#1c1c05;--sk-paper:#ffffff;--sk-highlight:#b5b68a;--sk-shadow:#48482b;--sk-halo:0;--display:'Kalam','Segoe Print','Bradley Hand',cursive;--body:'Public Sans',sans-serif;--mono:ui-monospace,\"Cascadia Mono\",Consolas,\"SF Mono\",Menlo,monospace;}"
+  },
+  "style": {
+    "preset": "painterly",
+    "lineShow": false,
+    "lineWeight": 0.1,
+    "lineWobble": 0.3,
+    "linePasses": 1,
+    "corners": 0.5,
+    "shading": "painterly",
+    "texture": "canvas",
+    "paletteSize": 0,
+    "pixel": 0,
+    "saturation": 0.2511,
+    "finish": "shadow"
+  },
+  "layout": {
+    "recipe": "widescreen",
+    "open": {
+      "x": -1020,
+      "y": -1070.8,
+      "w": 2880,
+      "h": 1716.3
+    },
+    "openNarrow": {
+      "x": -1020,
+      "y": -1070.8,
+      "w": 2880,
+      "h": 1716.3
+    },
+    "slots": [
+      {
+        "kind": "pic",
+        "ref": "hero",
+        "x": -900,
+        "y": -950,
+        "w": 1600,
+        "h": 900,
+        "scale": 1,
+        "rot": 0,
+        "z": 0
+      },
+      {
+        "kind": "sticker",
+        "ref": "frame-film",
+        "x": -880,
+        "y": 80,
+        "w": 442.2,
+        "h": 445.5,
+        "scale": 3.3,
+        "rot": -2,
+        "z": 1,
+        "image": "shot-1"
+      },
+      {
+        "kind": "sticker",
+        "ref": "frame-film",
+        "x": -420,
+        "y": 80,
+        "w": 442.2,
+        "h": 445.5,
+        "scale": 3.3,
+        "rot": 2,
+        "z": 2,
+        "image": "shot-2"
+      },
+      {
+        "kind": "sticker",
+        "ref": "frame-film",
+        "x": 40,
+        "y": 80,
+        "w": 442.2,
+        "h": 445.5,
+        "scale": 3.3,
+        "rot": -2,
+        "z": 3,
+        "image": "shot-3"
+      },
+      {
+        "kind": "sticker",
+        "ref": "frame-film",
+        "x": 500,
+        "y": 80,
+        "w": 442.2,
+        "h": 445.5,
+        "scale": 3.3,
+        "rot": 2,
+        "z": 4,
+        "image": "shot-4"
+      },
+      {
+        "kind": "pic",
+        "ref": "logo",
+        "x": -860,
+        "y": -380,
+        "w": 256,
+        "h": 96,
+        "scale": 0.4,
+        "rot": 0,
+        "z": 5
+      },
+      {
+        "kind": "note",
+        "ref": "title",
+        "x": 780,
+        "y": -950,
+        "w": 960,
+        "h": 217.6,
+        "scale": 1,
+        "rot": 0,
+        "z": 6,
+        "text": "Mosslight\nA slow walk through a lit wood.",
+        "width": 960,
+        "size": 34
+      },
+      {
+        "kind": "note",
+        "ref": "description",
+        "x": 780,
+        "y": -678.4,
+        "w": 960,
+        "h": 387.04,
+        "scale": 1,
+        "rot": 0,
+        "z": 7,
+        "text": "Mosslight is a wordless walk through a painted forest where the light does the talking. There is nothing to fight and nothing to collect: you follow the glow between the trees, sit when you like, and the wood changes around you. Every frame is a soft plate of moss and ochre with no hard line in it.",
+        "width": 960,
+        "size": 34
+      },
+      {
+        "kind": "sticker",
+        "ref": "banner",
+        "x": 301.35,
+        "y": -256.25,
+        "w": 469,
+        "h": 472.5,
+        "scale": 3.5,
+        "rot": 0,
+        "z": 8,
+        "text": "2026"
+      },
+      {
+        "kind": "sticker",
+        "ref": "burst-round",
+        "x": 485.6,
+        "y": -950.8,
+        "w": 214.4,
+        "h": 216,
+        "scale": 1.6,
+        "rot": 0,
+        "z": 9
+      },
+      {
+        "kind": "sign",
+        "ref": "links",
+        "x": 780,
+        "y": -141.36,
+        "w": 960,
+        "h": 112.8,
+        "scale": 1,
+        "rot": 0,
+        "z": 10,
+        "width": 960,
+        "size": 34
+      },
+      {
+        "kind": "sticker",
+        "ref": "arrow",
+        "x": 992.8,
+        "y": -324.36,
+        "w": 214.4,
+        "h": 216,
+        "scale": 1.6,
+        "rot": 45,
+        "z": 11
+      }
+    ]
+  }
+}

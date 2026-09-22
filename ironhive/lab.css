@@ -93,7 +93,9 @@ button,input{font-family:inherit}
    server they show; anywhere else — the deployed site, which has no door for
    any of them to act through — the header is the wordmark and nothing else.
    The switch is html.lab-local, set in the head of index.html before the first
-   paint (2026-09-04). */
+   paint (2026-09-04). Since 2026-09-21 the landing header also carries the
+   account corner at its right (/account.js, which draws and styles itself,
+   and stays off the workbench). */
 .lab-hint,.lab-tools{display:none}
 html.lab-local .lab-hint{display:block}
 html.lab-local .lab-tools{display:flex}

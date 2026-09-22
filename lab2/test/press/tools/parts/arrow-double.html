@@ -1,0 +1,49 @@
+<!-- ARROW-DOUBLE — the two-headed arrow, straight and level, the "both ways"
+     / "this wide" sticker (PRESS-TABLE-PLAN.md Appendix D: tag pointer).
+     Layers: halo shadow body line highlight detail.
+
+     ONE SILHOUETTE, ten corners: tips at x=6 and x=122 on the centre line
+     y=64, the widest the box allows once the halo's 3 is added (3 and 125 —
+     nothing spills but the drop shadow); each head is 38 long and 68 tall
+     (y 30–98), the shaft between them 26 tall (y 51–77) — a head more than
+     twice the shaft's height, because a double arrow reads by its heads,
+     and a shaft this fat still reads as a bar and not a line at 40 px. The
+     two heads meet the shaft at x=44 and x=84, leaving a 40-unit shaft:
+     short, but a longer one would shrink the heads, and it is the heads
+     that say "arrow". It is level rather than tilted so it is the plain
+     glyph — the page turns it with data-rot if it wants a diagonal. The one
+     path is drawn four times: halo stroke, shadow, body and line.
+
+     THE SHADOW is the silhouette 3 down and right in skShadow, the least
+     the contract allows, so the halo's rim stays clear of the tips.
+
+     THE HIGHLIGHT is one glint on the left head's upper slope — an ellipse
+     9 × 3.5 at (26,50), turned −42° to lie along that slope (the slope runs
+     38 across for 34 up, 41.8°), and a dot of radius 2.5 up the slope from
+     it, over the shaft's shoulder.
+
+     THE DETAIL is the shaft's centre line from x=48 to x=80 dashed 4 on 5 at
+     stroke 1.5 — a motion line a plain style drops without loss. -->
+<sc-if value="{{ isArrowDouble }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M6,64 L44,30 L44,51 L84,51 L84,30 L122,64 L84,98 L84,77 L44,77 L44,98 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+    </g>
+    <g data-layer="shadow">
+      <path d="M6,64 L44,30 L44,51 L84,51 L84,30 L122,64 L84,98 L84,77 L44,77 L44,98 Z" transform="translate(3 3)" fill="{{ skShadow }}"></path>
+    </g>
+    <g data-layer="body">
+      <path d="M6,64 L44,30 L44,51 L84,51 L84,30 L122,64 L84,98 L84,77 L44,77 L44,98 Z" fill="{{ skPrimary }}"></path>
+    </g>
+    <g data-layer="line">
+      <path d="M6,64 L44,30 L44,51 L84,51 L84,30 L122,64 L84,98 L84,77 L44,77 L44,98 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="26" cy="50" rx="9" ry="3.5" transform="rotate(-42 26 50)" fill="{{ skHighlight }}"></ellipse>
+      <circle cx="40" cy="40" r="2.5" fill="{{ skHighlight }}"></circle>
+    </g>
+    <g data-layer="detail">
+      <path d="M48,64 L80,64" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="4 5"></path>
+    </g>
+  </svg>
+</sc-if>

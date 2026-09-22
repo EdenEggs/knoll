@@ -1,0 +1,30 @@
+{
+  "fixture": "pixelfort",
+  "_from": "PRESS-TABLE-PLAN.md Appendix H (2026-09-07): numbers are the plan's; where it only gave a word (high, thin) the word is kept and Phase 3 pins the number",
+  "stats": {
+    "pixelSize": 4,
+    "outline": {
+      "present": true
+    },
+    "paletteCount": {
+      "min": 16,
+      "max": 23
+    }
+  },
+  "preset": [
+    "pixel"
+  ],
+  "pairing": "pixel",
+  "recipe": [
+    "poster"
+  ],
+  "_measured": {
+    "date": "2026-09-07",
+    "by": "perf/test-style.js (Phase 3): the plan's words replaced by the bounds the test asserts; the numbers are the run's",
+    "pixelSize": 4,
+    "outline.present": true,
+    "outline.weight": 0.6,
+    "paletteCount": 17,
+    "note": "paletteCount: sixteen colours read 20/21/21/17 bins on the 512 copy's four shots (boundary mixes), 17 on the key art, 6 on the logo — lower median 17; the min is the palette's own sixteen"
+  }
+}

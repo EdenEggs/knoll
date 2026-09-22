@@ -1,0 +1,46 @@
+<!-- UNDERLINE — a squiggle, the hand-drawn wavy line that goes under a
+     word to say "this one" (PRESS-TABLE-PLAN.md Appendix D: tags pointer,
+     sketch). Layers: halo shadow body line. The body layer is empty and
+     there is no highlight and no detail, on purpose: this part is a line
+     and nothing else — one open path in the line layer, its die-cut edge
+     in the halo, and a faint copy of itself for the shadow. A stroke has
+     no face to glint and no fine work to drop.
+
+     THE SQUIGGLE is one open cubic path: three and a half waves from
+     x 6 to x 122, about 12 above and below the middle, no two crests the
+     same height and the last one falling short — the wobble that says a
+     hand drew it. It is written in an 85.3-unit frame inside a
+     scale(1.5), so that the line layer's stroke, which the contract says
+     is {{ skStroke }} and nothing else, comes out 4.5 wide at the default
+     3: a marker's line and not a pen's, and still a line that follows the
+     style pass's re-weighting. 1.5 because at 40 px the whole squiggle is
+     35 px long and a 3-unit stroke there is a hairline.
+
+     THE HALO is the same path stroked 7 in that frame, which is 10.5 in
+     the box: the 4.5-wide ink plus 3 outside it on each side, the
+     die-cut margin every part keeps.
+
+     THE SHADOW is the same path stroked in {{ skShadow }} at the same
+     width, moved 3 down and right (2 in the scaled frame — 3 in the box).
+     Under the ink it shows as a sliver along the lower right of every
+     wave, the cel shade of a raised stroke. -->
+<sc-if value="{{ isUnderline }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <g transform="scale(1.5)">
+        <path d="M4,46 C10,29 17,29 24,42 C31,55 38,56 45,42 C52,28 58,31 64,42 C70,53 75,52 81,40" fill="none" stroke="{{ skPaper }}" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"></path>
+      </g>
+    </g>
+    <g data-layer="shadow">
+      <g transform="scale(1.5) translate(2 2)">
+        <path d="M4,46 C10,29 17,29 24,42 C31,55 38,56 45,42 C52,28 58,31 64,42 C70,53 75,52 81,40" fill="none" stroke="{{ skShadow }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      </g>
+    </g>
+    <g data-layer="body"></g>
+    <g data-layer="line">
+      <g transform="scale(1.5)">
+        <path d="M4,46 C10,29 17,29 24,42 C31,55 38,56 45,42 C52,28 58,31 64,42 C70,53 75,52 81,40" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      </g>
+    </g>
+  </svg>
+</sc-if>

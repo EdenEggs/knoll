@@ -1334,6 +1334,7 @@ window.Frames = (function () {
         w0 = p.el.offsetWidth; h0 = p.el.offsetHeight;
         x0 = e.clientX; y0 = e.clientY;
         el.classList.add('sizing');
+        sizingNow = back;                          // …and how to put the corner back
         try { grip.setPointerCapture(e.pointerId); } catch (err) {}
         e.preventDefault(); e.stopPropagation();
       });
@@ -1345,10 +1346,24 @@ window.Frames = (function () {
       const done = e => {
         if (!on) return;
         on = false;
+        sizingNow = null;
         el.classList.remove('sizing');
         try { grip.releasePointerCapture(e.pointerId); } catch (err) {}
         cut(p, p.el.offsetWidth, p.el.offsetHeight, true);
         sound('drop');
+      };
+      /* AND THE OTHER ENDING: back to the size it was at the press, with
+         nothing saved and no drop to hear. A second finger on the paper is the
+         camera (lab.js: TWO FINGERS ARE THE CAMERA), so the press that was
+         pulling this corner is a press that never happened — `cut` with save
+         false is the same call the drag itself makes, which is what keeps this
+         exact rather than approximate. */
+      const back = () => {
+        if (!on) return;
+        on = false;
+        sizingNow = null;
+        el.classList.remove('sizing');
+        cut(p, w0, h0, false);
       };
       grip.addEventListener('pointerup', done);
       grip.addEventListener('pointercancel', done);
@@ -1375,6 +1390,14 @@ window.Frames = (function () {
     if (p.kit && window.Kits && Kits.adopt) Kits.adopt(el, p);
     return p;
   }
+
+  /* A CORNER BEING PULLED, and how to put it back — one of the four presses on
+     this bench that a second finger has to take back (the others are the
+     feature drag in lab.js, the wall's and the tape's). One variable and one
+     listener for the whole bench rather than one per feature: only ever one
+     corner is being pulled, because only ever one hand is on it. */
+  let sizingNow = null;
+  document.addEventListener('lab:pinch', () => { if (sizingNow) sizingNow(); });
 
   // every panel on the bench: the eighty-four with a document under them, and
   // the sign, which is drawn in this one. adopt() tells them apart.

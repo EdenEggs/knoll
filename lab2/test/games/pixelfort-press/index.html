@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en" data-lab-page="games/pixelfort-press" data-sk-style='{"preset":"pixel","lineShow":true,"lineWeight":0.9,"lineWobble":0,"linePasses":1,"corners":0,"shading":"dither","texture":"none","paletteSize":16,"pixel":4,"saturation":0.3111,"finish":"none"}'>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixelfort</title>
+<meta name="description" content="Hold the wall. Count the sunsets.">
+<link rel="icon" href="/logo/logo-icon.svg">
+<!-- A GAME PAGE. lab 2's runtime — the same lab.js, frames.js, kits.js and
+     the rest — on a page that is one game's press kit: its key art and its
+     screenshots as pictures on the paper, its words as notes, its store
+     links as a sign, and a handful of the forty stickers
+     (features/stickers-core.dc.html) stood round them in the game's own
+     colours. There is no lockup, no field of machines and no groves; what
+     is on this paper is what press/tools/build-game.js placed here from the
+     recipe (../../PRESS-TABLE-PLAN.md §9, Appendix E).
+
+     GENERATED ONCE, THEN EDITED BY HAND AND BY keep.js. build-game.js
+     writes this file the first time and refuses to write it again unless it
+     is told to force (serve.js's /build door checks the same thing over
+     again, on purpose). After that the file is the truth: the owner opens
+     the page on the local server, drags the picture, turns the sticker,
+     re-cuts the note, presses ctrl+s, and keep.js writes the new
+     data-home-x / -y / -z, data-cut and data-rot back into THESE tags — the
+     same few attributes, edited in place, never a section removed. So a
+     comment written down here survives every save, and a rebuild throws the
+     lot away. game.json beside this file keeps the recipe that started it;
+     it is the starting point, not the record.
+
+     THE PATHS ARE RELATIVE, AND THAT IS THE WHOLE TRICK. Everything inside
+     lab2/ is reached as ../../<thing> — two folders up from games/<slug>/ —
+     which lands on the same files in all three places this page is ever
+     served from: lab2/test/games/<slug>/ in the sandbox,
+     lab2/games/<slug>/ after the merge, and /games/<slug>/ deployed, where
+     vercel.json rewrites the bare /lab.js and /features/… back into lab2/.
+     That is why the sandbox is one folder deeper than the merge target.
+     Paths that LEAVE lab2/ — the logo, the site root — are written ABSOLUTE
+     (/logo/logo-icon.svg, /) per press/CONTRACTS.md §0: they resolve on
+     serve.js, whose root is site/, and on Vercel, and a ../ count could not
+     be right in both places at once.
+
+     NO robots noindex, unlike the bench: this page is the point of the
+     exercise and is meant to be found. The bench carries one because a
+     workbench is not. -->
+<!-- THE FACES ARE THE GAME'S, NOT THE HOUSE'S. fonts/fonts.css holds every
+     face the bench self-hosts; which of them this page is set in is the
+     pairing press/fonts.js chose (--display, --body, --mono, and --accent
+     for gothic), written into the token block at the foot of this head. The
+     stylesheet is loaded whole, as the bench loads it, and only the two or
+     three faces the pairing actually uses are preloaded. -->
+<!-- SELF-HOSTED since 2026-09-04: the same faces, served from lab2/fonts, so
+     nothing on this page waits on fonts.googleapis.com to paint — and the
+     features' own <link>s point at the same file, so a frame never fetches
+     a face the page already has. -->
+<!-- LOCAL, OR THE PUBLISHED PAGE. Served from the bench's own server
+     (serve.js, on localhost) this is a workbench with a game on it: the hint
+     and the row of switches show, and ctrl+s writes the arrangement back
+     through the door. Served from anywhere else it is the game's page and
+     the header is the wordmark and the way back to knoll — see THE LANDING
+     PAGE WEARS ONLY THE LOGO in lab.css. Decided here, before the
+     stylesheet, so neither side ever paints the other's header for a frame.
+     keep.js makes the same call for its own pill by knocking on the door,
+     which is the same fact asked the slow way. -->
+<script>if(/^(localhost|127.0.0.1|[::1])$/.test(location.hostname))document.documentElement.classList.add('lab-local');</script>
+<link href="../../fonts/fonts.css" rel="stylesheet">
+<!-- THE OPENING VIEW, ASKED FOR FIRST. Everything in the opening frame
+     (lab.js: WHERE IT OPENS, which reads data-open off #bench-world below)
+     is fetched from the head, before the parser has reached the scripts that
+     will use it: the faces the notes and the header are set in, and the
+     sticker sheet every kit section on this page is cut from. The sheet is
+     asked for first because it is the biggest thing this page loads (223 K,
+     forty parts in one document) and kits.js asks for it the moment its
+     script runs. The preload list on the line below is the pairing's own —
+     Fonts.preloads(id), the display's main weight and the body's 400, and no
+     more: a preload the page then does not use is a wasted request. (Its
+     placeholder is named once, here in words rather than in braces, so that a
+     generator substituting the tokens cannot fill in this paragraph.) The
+     pictures are NOT preloaded: an <image> inside a prop's svg is in the
+     markup below, which the parser reaches a few hundred bytes later, and a
+     preload for it would be the same request asked twice. -->
+<link rel="preload" href="../../fonts/VT323-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../fonts/Space-Mono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../features/stickers-core.dc.html" as="fetch" crossorigin>
+<!-- lab.css FIRST AND THE TOKENS AFTER IT, and that order is the whole of
+     how a game page wears its own colours. lab.css opens with a :root block
+     of the house's tokens — --paper, --ink, --pink, --display … — and
+     everything else in the file, and every drawing on the page, reads them
+     through var(). The block below is press/theme.js's answer for THIS game
+     (its palette, its mood, its font pairing) written as the same token
+     names, plus the seven --sk-* sticker roles kits.js reads once at load
+     (CONTRACTS §6). Two :root blocks of equal specificity, so the LATER one
+     wins, token by token: put this before lab.css and the page is Knoll pink
+     again. Inline rather than a file because it is a few hundred bytes that
+     must be in the first paint, and because it is this page's own — no other
+     page shares it. -->
+<link rel="stylesheet" href="../../lab.css">
+<style>:root{--paper:#131524;--paper-2:#1a1c2b;--card:#111322;--bench-bg:#0c0d1c;--bench-dot:rgba(246,225,201,.06);--drop-rgb:246,225,201;--ink:#f6e1c9;--ink-2:#e9d4bc;--ink-3:#d5c1a9;--mute:#6f696a;--mute-2:#4b4952;--line:#292a36;--pink:#9fc751;--pink-2:#b8e16c;--pink-soft:#27330e;--blue:#daaa72;--green:#6b5c8f;--amber:#cc9dff;--field:#131524;--tint:#171b27;--tint-2:#161a26;--chip:#151825;--hard-edge:#000005;--sticky-a:#2f4200;--sticky-b:#00424f;--sticky-c:#472a63;--sticky-d:#642210;--gz-handle-bg:#e9d4bc;--gz-handle-ink:#131524;--grip:#aa9d94;--serial-ink:#4b4952;--sk-primary:#9fc751;--sk-secondary:#d3ae6f;--sk-ink:#f3e3c8;--sk-paper:#141524;--sk-highlight:#d3f69a;--sk-shadow:#677d3f;--sk-halo:0;--display:'VT323','Courier New',monospace;--body:'Space Mono',Menlo,Consolas,monospace;--mono:'Space Mono',Menlo,Consolas,monospace;}</style>
+</head>
+<body>
+
+<!-- THE HEADER IS THE LANDING PAGE'S, PLUS A WAY BACK. No hint paragraph and
+     no switches out in the world: the wordmark, and a small "← knoll" that
+     says where this page came from. The two point at the same place on
+     purpose — the mark is knoll's signature on a page that belongs to the
+     game, and a visitor who arrived here from a store link needs something
+     that reads as *back*, which a wordmark does not. The "/ <slug>" after
+     the mark and the whole .lab-tools row are the workbench's, and lab.css
+     shows them only under html.lab-local; this is the same markup the bench
+     carries, and nothing here decides which half is drawn. -->
+<header class="lab-head">
+  <a class="lab-brand" href="/">
+    <img src="/logo/logo-icon.svg" alt="" width="26" height="26">
+    <span>knoll</span><span class="lab-slash">/</span><span class="lab-name">pixelfort-press</span>
+  </a>
+  <a class="lab-link" href="/">← knoll</a>
+  <p class="lab-hint">a game page, built by the Press Table and kept by hand from here on. It moves like lab 2: hold the <b>scroll wheel</b> (or <b>space</b>) and drag to pan, <b>ctrl+scroll</b> to zoom, <b>shift 1</b> to fit the lot on screen, <b>hold ctrl</b> to pick by the drawing rather than the box; the <b>?</b> in the corner has the rest. <b>ctrl+s</b> writes where everything stands back into this page's own index.html, through this folder's own door — never the bench's.</p>
+  <div class="lab-tools">
+    <!-- keep.js's one piece of chrome, and it starts HIDDEN. A page being
+         written back into its own file every thirty seconds should say so,
+         and a page that is only being looked at should not have a switch for
+         a thing it cannot do — so the pill appears when keep.js finds the
+         door in serve.js and stays away on the deployed site. Click it to
+         pause and to start again. -->
+    <!-- SAVE NOW, rather than within thirty seconds. Same write as the
+         autosave and no other kind: what is on the screen becomes what is in
+         this index.html, which is what 'reset layout' goes back to. It keeps
+         the autosave's company in being hidden until keep.js finds the door
+         — a button that cannot write is worse than no button. -->
+    <button type="button" id="lab-save" class="lab-save" hidden
+            title="save this arrangement as the default layout (ctrl+s) — reset layout comes back here">save layout</button>
+    <button type="button" id="lab-keep" class="lab-keep" hidden
+            title="every 30s, where everything is on this screen becomes where it is in index.html — click to pause"></button>
+    <button type="button" id="lab-reset" class="lab-link">reset layout</button>
+    <button type="button" id="lab-reset-data" class="lab-link">reset data</button>
+    <a class="lab-link" href="../../press/">press table →</a>
+  </div>
+</header>
+
+<main id="bench" class="bench" aria-label="workbench">
+
+  <!-- the world: everything on this page lives in here so the whole sheet can
+       zoom. It is not painted — the bench's grid shows through it — so the
+       canvas has no edge; this is only what the sections are pinned to.
+
+       A SECTION IS FIVE LINES AND NO CASE, exactly as on the bench:
+       data-home-x / -y is where 'home' is; data-w / -h is the size the
+       drawing is MEASURED at; the inline width and height are only what a box
+       stands at until it has been measured. A kit part's data-w / -h are the
+       NAT sizes kits.js keeps (the box the frame measured at rest) and a
+       picture's are its asset's own pixel size, so frames.js cuts every box
+       right the first time.
+
+       WHERE IT OPENS IS WRITTEN ON THIS TAG, and the four numbers are the
+       generator's. data-open is the rectangle round every slot the recipe
+       placed — the bounding box of the lot — plus 120 of margin on every side
+       (Appendix E's margin, the one the sandbox bench uses round its own
+       paper), then widened or heightened to the bench's own opening ASPECT,
+       3200 : 1390, and never made smaller than the box. The aspect is the
+       main bench's wide rectangle as lab.js has framed it since 2026-09-04
+       and not the plan's 1848 × 1928, which is stale (press/NOTES.md §D.2).
+       data-open-narrow is the same composition framed for a screen under 700
+       wide, where the WIDTH binds: the recipe's spine and the column of
+       content on it, without the paper either side, so a phone opens on
+       something it can read and scrolls to the rest. lab.js (WHERE IT OPENS)
+       reads both first and falls back to the main bench's literals — which
+       would frame empty paper 2190 units above this page's content, so a
+       generated page ALWAYS writes data-open (CONTRACTS §0). Move anything on
+       this paper and these eight numbers are the other place to look. -->
+  <div id="bench-world" class="bench-world" data-open="-2052,-1166,4599,1998" data-open-narrow="-640,-1166,1760,1998">
+
+  <section class="gz" id="gz-sticker-burst" data-gizmo="sticker-burst"
+           data-src="../../features/stickers-core.dc.html#part=burst" data-w="134" data-h="135" data-scale="3.0567"
+           data-home-x="-345" data-home-y="-1046" data-home-z="0" style="width:410px;height:413px"
+           aria-label="burst">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz gz-pic" id="gz-pic-logo" data-gizmo="pic-logo"
+           data-w="256" data-h="96" data-scale="1.25"
+           data-home-x="-300" data-home-y="-900" data-home-z="1" style="width:320px;height:120px"
+           aria-label="Pixelfort — logo">
+    <div class="gz-art">
+    <svg width="256" height="96" viewBox="0 0 256 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <image href="art/logo.webp" width="256" height="96"></image>
+    </svg>
+    </div><!-- /gz-art -->
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz gz-pic" id="gz-pic-keyart-portrait" data-gizmo="pic-keyart-portrait"
+           data-w="480" data-h="640" data-scale="1.3"
+           data-home-x="-520" data-home-y="-700" data-home-z="2" style="width:624px;height:832px"
+           aria-label="Pixelfort — keyart">
+    <div class="gz-art">
+    <svg width="480" height="640" viewBox="0 0 480 640" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <image href="art/keyart-portrait.webp" width="480" height="640"></image>
+    </svg>
+    </div><!-- /gz-art -->
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz" id="gz-sticker-tape-strip" data-gizmo="sticker-tape-strip"
+           data-src="../../features/stickers-core.dc.html#part=tape-strip" data-w="134" data-h="135" data-scale="2.5612"
+           data-home-x="-692" data-home-y="-873" data-home-z="3" data-rot="-20" style="width:343px;height:346px"
+           aria-label="tape strip">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz" id="gz-sticker-frame-polaroid" data-gizmo="sticker-frame-polaroid"
+           data-src="../../features/stickers-core.dc.html#part=frame-polaroid" data-w="134" data-h="135" data-scale="2.9"
+           data-home-x="-760" data-home-y="320" data-home-z="4" data-rot="-2" style="width:389px;height:392px"
+           aria-label="frame polaroid">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz gz-pic gz-shot" id="gz-shot-shot-1" data-gizmo="shot-shot-1"
+           data-w="75.78" data-h="75.78" data-scale="2.9"
+           data-home-x="-687" data-home-y="373" data-home-z="5" style="width:220px;height:220px"
+           aria-label="Pixelfort — screenshot">
+    <div class="gz-art">
+    <svg width="75.78" height="75.78" viewBox="25.13 18.17 75.78 75.78" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <g transform="rotate(-7 63.02 56.06)">
+        <svg x="29.02" y="22.06" width="68" height="68" viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice">
+          <image href="art/shot-1.webp" width="640" height="360"></image>
+        </svg>
+      </g>
+    </svg>
+    </div><!-- /gz-art -->
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz" id="gz-sticker-frame-polaroid-2" data-gizmo="sticker-frame-polaroid-2"
+           data-src="../../features/stickers-core.dc.html#part=frame-polaroid" data-w="134" data-h="135" data-scale="2.9"
+           data-home-x="-360" data-home-y="320" data-home-z="6" data-rot="2" style="width:389px;height:392px"
+           aria-label="frame polaroid">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz gz-pic gz-shot" id="gz-shot-shot-2" data-gizmo="shot-shot-2"
+           data-w="71.47" data-h="71.47" data-scale="2.9"
+           data-home-x="-279" data-home-y="379" data-home-z="7" style="width:207px;height:207px"
+           aria-label="Pixelfort — screenshot">
+    <div class="gz-art">
+    <svg width="71.47" height="71.47" viewBox="27.85 20.28 71.47 71.47" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <g transform="rotate(-3 63.58 56.01)">
+        <svg x="29.58" y="22.01" width="68" height="68" viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice">
+          <image href="art/shot-2.webp" width="640" height="360"></image>
+        </svg>
+      </g>
+    </svg>
+    </div><!-- /gz-art -->
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz" id="gz-sticker-frame-polaroid-3" data-gizmo="sticker-frame-polaroid-3"
+           data-src="../../features/stickers-core.dc.html#part=frame-polaroid" data-w="134" data-h="135" data-scale="2.9"
+           data-home-x="40" data-home-y="320" data-home-z="8" data-rot="-2" style="width:389px;height:392px"
+           aria-label="frame polaroid">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz gz-pic gz-shot" id="gz-shot-shot-3" data-gizmo="shot-shot-3"
+           data-w="75.78" data-h="75.78" data-scale="2.9"
+           data-home-x="113" data-home-y="373" data-home-z="9" style="width:220px;height:220px"
+           aria-label="Pixelfort — screenshot">
+    <div class="gz-art">
+    <svg width="75.78" height="75.78" viewBox="25.13 18.17 75.78 75.78" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <g transform="rotate(-7 63.02 56.06)">
+        <svg x="29.02" y="22.06" width="68" height="68" viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice">
+          <image href="art/shot-3.webp" width="640" height="360"></image>
+        </svg>
+      </g>
+    </svg>
+    </div><!-- /gz-art -->
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz" id="gz-sticker-frame-polaroid-4" data-gizmo="sticker-frame-polaroid-4"
+           data-src="../../features/stickers-core.dc.html#part=frame-polaroid" data-w="134" data-h="135" data-scale="2.9"
+           data-home-x="440" data-home-y="320" data-home-z="10" data-rot="2" style="width:389px;height:392px"
+           aria-label="frame polaroid">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz gz-pic gz-shot" id="gz-shot-shot-4" data-gizmo="shot-shot-4"
+           data-w="71.47" data-h="71.47" data-scale="2.9"
+           data-home-x="521" data-home-y="379" data-home-z="11" style="width:207px;height:207px"
+           aria-label="Pixelfort — screenshot">
+    <div class="gz-art">
+    <svg width="71.47" height="71.47" viewBox="27.85 20.28 71.47 71.47" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <g transform="rotate(-3 63.58 56.01)">
+        <svg x="29.58" y="22.01" width="68" height="68" viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice">
+          <image href="art/shot-4.webp" width="640" height="360"></image>
+        </svg>
+      </g>
+    </svg>
+    </div><!-- /gz-art -->
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz gz-note" id="gz-note-title" data-gizmo="note-title"
+           data-w="760" data-h="245"
+           data-home-x="240" data-home-y="-650" data-home-z="12" style="width:760px;height:245px"
+           aria-label="Pixelfort — Hold the wall. Count the sunsets.">
+    <div class="gz-art">
+    <svg width="760" height="245" viewBox="0 0 760 245" xmlns="http://www.w3.org/2000/svg">
+      <text x="16" y="96" style="font-family:var(--body,'Space Mono',Menlo,Consolas,monospace);font-weight:700;font-size:75px;fill:var(--ink,#26212a)">Pixelfort</text>
+      <text x="16" y="172" style="font-family:var(--body,'Space Mono',Menlo,Consolas,monospace);font-weight:400;font-size:40px;fill:var(--mute,#8b7f92)">Hold the wall. Count the</text>
+      <text x="16" y="225" style="font-family:var(--body,'Space Mono',Menlo,Consolas,monospace);font-weight:400;font-size:40px;fill:var(--mute,#8b7f92)">sunsets.</text>
+    </svg>
+    </div><!-- /gz-art -->
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz gz-note" id="gz-note-description" data-gizmo="note-description"
+           data-w="760" data-h="344"
+           data-home-x="240" data-home-y="-357" data-home-z="13" style="width:760px;height:344px"
+           aria-label="A small stone fort, a smaller garrison, and a very long summer. Pixelfort is a…">
+    <div class="gz-art">
+    <svg width="760" height="344" viewBox="0 0 760 344" xmlns="http://www.w3.org/2000/svg">
+      <text x="16" y="46" style="font-family:var(--body,'Space Mono',Menlo,Consolas,monospace);font-weight:400;font-size:30px;fill:var(--ink-2,#3c3542)">A small stone fort, a smaller garrison,</text>
+      <text x="16" y="86" style="font-family:var(--body,'Space Mono',Menlo,Consolas,monospace);font-weight:400;font-size:30px;fill:var(--ink-2,#3c3542)">and a very long summer. Pixelfort is a</text>
+      <text x="16" y="126" style="font-family:var(--body,'Space Mono',Menlo,Consolas,monospace);font-weight:400;font-size:30px;fill:var(--ink-2,#3c3542)">wall-building strategy game drawn in</text>
+      <text x="16" y="166" style="font-family:var(--body,'Space Mono',Menlo,Consolas,monospace);font-weight:400;font-size:30px;fill:var(--ink-2,#3c3542)">sixteen colours: raise towers, post</text>
+      <text x="16" y="206" style="font-family:var(--body,'Space Mono',Menlo,Consolas,monospace);font-weight:400;font-size:30px;fill:var(--ink-2,#3c3542)">knights on the battlements, and see how</text>
+      <text x="16" y="246" style="font-family:var(--body,'Space Mono',Menlo,Consolas,monospace);font-weight:400;font-size:30px;fill:var(--ink-2,#3c3542)">many dawns you can hold out for. Every</text>
+      <text x="16" y="286" style="font-family:var(--body,'Space Mono',Menlo,Consolas,monospace);font-weight:400;font-size:30px;fill:var(--ink-2,#3c3542)">sprite is hand-placed on a four-pixel</text>
+      <text x="16" y="326" style="font-family:var(--body,'Space Mono',Menlo,Consolas,monospace);font-weight:400;font-size:30px;fill:var(--ink-2,#3c3542)">grid.</text>
+    </svg>
+    </div><!-- /gz-art -->
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz" id="gz-sticker-sparkle" data-gizmo="sticker-sparkle"
+           data-src="../../features/stickers-core.dc.html#part=sparkle" data-w="134" data-h="135" data-scale="0.8"
+           data-home-x="162" data-home-y="-714" data-home-z="14" style="width:107px;height:108px"
+           aria-label="sparkle">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz" id="gz-sticker-sparkle-2" data-gizmo="sticker-sparkle-2"
+           data-src="../../features/stickers-core.dc.html#part=sparkle" data-w="134" data-h="135" data-scale="0.55"
+           data-home-x="969" data-home-y="-461" data-home-z="15" style="width:74px;height:74px"
+           aria-label="sparkle">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz gz-sign" id="gz-sign-links" data-gizmo="sign-links"
+           data-w="705" data-h="68"
+           data-home-x="240" data-home-y="73" data-home-z="16" style="width:705px;height:68px"
+           aria-label="where to get Pixelfort">
+    <div class="gz-art">
+    <svg width="705" height="68" viewBox="0 0 705 68" xmlns="http://www.w3.org/2000/svg">
+      <a href="https://example.com/pixelfort/steam" target="_blank" rel="noopener noreferrer" data-nodrag>
+        <rect x="2.25" y="4.25" width="186.5" height="61.5" rx="33" ry="33" fill="var(--ink-2,#3c3542)"></rect>
+        <rect x="2.25" y="2.25" width="186.5" height="61.5" rx="33" ry="33" fill="var(--card,#fffdfe)" stroke="var(--ink-2,#3c3542)" stroke-width="4.5"></rect>
+        <text x="36" y="49" style="font-family:var(--mono,ui-monospace,monospace);font-weight:700;font-size:30px;letter-spacing:0.18em;fill:var(--ink-3,#4a4150)">STEAM</text>
+      </a>
+      <a href="https://example.com/pixelfort" target="_blank" rel="noopener noreferrer" data-nodrag>
+        <rect x="212.25" y="4.25" width="233.5" height="61.5" rx="33" ry="33" fill="var(--ink-2,#3c3542)"></rect>
+        <rect x="212.25" y="2.25" width="233.5" height="61.5" rx="33" ry="33" fill="var(--card,#fffdfe)" stroke="var(--ink-2,#3c3542)" stroke-width="4.5"></rect>
+        <text x="246" y="49" style="font-family:var(--mono,ui-monospace,monospace);font-weight:700;font-size:30px;letter-spacing:0.18em;fill:var(--ink-3,#4a4150)">WEBSITE</text>
+      </a>
+      <a href="https://example.com/pixelfort/trailer" target="_blank" rel="noopener noreferrer" data-nodrag>
+        <rect x="469.25" y="4.25" width="233.5" height="61.5" rx="33" ry="33" fill="var(--ink-2,#3c3542)"></rect>
+        <rect x="469.25" y="2.25" width="233.5" height="61.5" rx="33" ry="33" fill="var(--card,#fffdfe)" stroke="var(--ink-2,#3c3542)" stroke-width="4.5"></rect>
+        <text x="503" y="49" style="font-family:var(--mono,ui-monospace,monospace);font-weight:700;font-size:30px;letter-spacing:0.18em;fill:var(--ink-3,#4a4150)">TRAILER</text>
+      </a>
+    </svg>
+    </div><!-- /gz-art -->
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+
+  <section class="gz" id="gz-sticker-tag-wishlist" data-gizmo="sticker-tag-wishlist"
+           data-src="../../features/stickers-core.dc.html#part=tag-wishlist" data-w="134" data-h="135" data-scale="1.6"
+           data-home-x="1040" data-home-y="53" data-home-z="17" data-text="WISHLIST" style="width:214px;height:216px"
+           aria-label="WISHLIST">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+  <!-- ▼ copies written down by keep.js — see THE COPIES BLOCK in about.md -->
+
+  <!-- ▲ copies written down by keep.js -->
+
+  </div><!-- /bench-world -->
+
+</main>
+
+<!-- the tool dock, as on the coming-soon hero and on lab 1: move / draw /
+     image / text, the ink and its colour wheel, undo and delete — and a row of options
+     above it that only shows up when the chosen tool has any. Both are
+     filled in by wall.js. -->
+<div class="tool-opts" id="tool-opts" hidden aria-label="tool options"></div>
+<div class="tool-dock" id="tool-dock" aria-label="drawing tools"></div>
+
+<!-- zoom dock -->
+<div class="zoom-dock" id="zoom-dock" aria-label="zoom">
+  <button type="button" id="zoom-fit" title="fit everything on screen (shift 1)" aria-label="fit everything on screen">⤢</button>
+  <span class="dock-rule" aria-hidden="true"></span>
+  <button type="button" id="zoom-out" title="zoom out (−)">−</button>
+  <button type="button" id="zoom-val" title="back to 100% (shift 0)">100%</button>
+  <button type="button" id="zoom-in" title="zoom in (+)">+</button>
+  <span class="dock-rule" aria-hidden="true"></span>
+  <button type="button" id="vol-btn" class="vol-btn" aria-label="the sound">
+    <svg viewBox="0 0 18 18" width="15" height="15" aria-hidden="true">
+      <path class="vol-cone" d="M3 7h3l4-3.4v10.8L6 11H3z"/>
+      <path class="vol-wave vol-w1" d="M12 6.6a3.4 3.4 0 0 1 0 4.8"/>
+      <path class="vol-wave vol-w2" d="M14.1 4.4a6.4 6.4 0 0 1 0 9.2"/>
+      <path class="vol-cross" d="M12.2 6.6l4.4 4.8M16.6 6.6l-4.4 4.8"/>
+    </svg>
+  </button>
+  <input type="range" id="vol-slider" class="vol-slider" min="0" max="100" value="70" aria-label="how loud">
+  <span class="dock-rule" aria-hidden="true"></span>
+  <button type="button" id="zoom-keys" title="how to move about" aria-label="how to move about" aria-expanded="false">?</button>
+</div>
+
+<!-- how to move about -->
+<div class="keymap" id="keymap" hidden>
+  <b>MOVING ABOUT</b>
+  <dl>
+    <dt><kbd>wheel drag</kbd></dt><dd>hold the scroll wheel down and drag — pans from anywhere</dd>
+    <dt><kbd>space</kbd><kbd>drag</kbd></dt><dd>the hand: pans over anything, features included</dd>
+    <dt><kbd>drag</kbd></dt><dd>a sleeping feature moves; bare paper pulls a band</dd>
+    <dt><kbd>scroll</kbd></dt><dd>pan up and down — <kbd>shift</kbd> for sideways</dd>
+    <dt><kbd>ctrl</kbd><kbd>scroll</kbd></dt><dd>zoom about the pointer (pinch does too)</dd>
+  </dl>
+  <hr>
+  <dl>
+    <dt><kbd>+</kbd><kbd>−</kbd></dt><dd>zoom in and out</dd>
+    <dt><kbd>shift</kbd><kbd>0</kbd></dt><dd>back to 100%</dd>
+    <dt><kbd>shift</kbd><kbd>1</kbd></dt><dd>fit every feature on screen</dd>
+    <dt><kbd>h</kbd><kbd>v</kbd></dt><dd>hand tool, then back to the pointer</dd>
+    <dt><kbd>click</kbd></dt><dd>a feature to wake it up and use it</dd>
+    <dt><kbd>shift</kbd><kbd>click</kbd></dt><dd>pick a feature, or drop it from the pick</dd>
+    <dt><kbd>ctrl</kbd><kbd>hold</kbd></dt><dd>the hitbox becomes the drawing — one sticker out of a pile</dd>
+    <dt><kbd>ctrl</kbd><kbd>s</kbd></dt><dd>save this arrangement as the default — reset layout comes back here</dd>
+    <dt><kbd>ctrl</kbd><kbd>z</kbd></dt><dd>undo — the last thing moved, or the last thing drawn</dd>
+    <dt><kbd>ctrl</kbd><kbd>c</kbd><kbd>v</kbd></dt><dd>copy what is picked, and paste a working copy of it</dd>
+    <dt><kbd>right click</kbd></dt><dd>a feature — raise it, lower it, or delete it (undo puts it back)</dd>
+    <dt><kbd>esc</kbd></dt><dd>let it go, put the pick down, drop the drawing tool</dd>
+  </dl>
+</div>
+
+<!-- NO REACT ON THIS PAGE, and that is a saving rather than an omission. The
+     bench loads react and react-dom once for every frame on it, because a
+     machine is a Design Canvas document and support.js boots it with React. A
+     v1 game page has NO machines: a picture is a raster in an svg box, a note
+     and a sign are drawings made in this page, and a sticker is a kit part —
+     kits.js pulls the shape out of the sheet's text with the DOM parser and
+     hands it to frames.js, and neither of those two files touches React
+     (verified by reading both: the only mentions in either are in their
+     headers, describing what an iframed document does). So the two <script>
+     lines the bench carries here are LEFT OUT, and 140 K of parse with them.
+     Phase 10's trailer machine — features/trailer.dc.html, a document with a
+     video embed in it — is what brings them back, and it brings back the same
+     two pinned, self-hosted builds with the same integrity hashes the bench
+     uses. -->
+<!-- THE SHEETS ARE ASKED FOR RELATIVE TO THE PAGE, and this page is two
+     folders down. kits.js holds its four sheets as 'features/<kit>.dc.html'
+     (SHEETS, CONTRACTS §7) and fetches that string, which the browser
+     resolves against the document: right for a bench sitting at the top of
+     lab2/, and games/<slug>/features/… — a 404, and forty bare stickers —
+     from here. It is fetched the instant kits.js runs, so there is no
+     reaching into Kits.SHEETS afterwards, and the section's own data-src
+     cannot help because loadSheet never reads it. So the page lends fetch the
+     two folders for exactly as long as kits.js's <script> tag takes to run,
+     and takes them straight back on the line below. Narrow on purpose: only a
+     bare 'features/…' is rewritten, so the day kits.js resolves its own
+     sheets — one line, against document.currentScript.src, which is the fix
+     this stopgap is waiting for — the guard stops matching and these three
+     lines come out with nothing else changing. Nothing else on this page
+     fetches in that window. -->
+<script>window.__labFetch=window.fetch;window.fetch=function(u,o){return window.__labFetch.call(window,typeof u==='string'&&/^features\//.test(u)?'../../'+u:u,o);};</script>
+<!-- THE KITS, before lab.js on purpose: a sticker is not a document — kits.js
+     reshapes every such section (no iframe, a .gz-art) before lab.js
+     registers it and frames.js adopts it, paints the far ones on tiles and
+     lifts the near ones live. See THE KITS in kits.js and about.md. -->
+<script src="../../kits.js"></script>
+<script>window.fetch=window.__labFetch;delete window.__labFetch;</script>
+<script src="../../lab.js"></script>
+<script src="../../vol.js"></script>
+<!-- frames.js asks for posters/index.json the moment it runs, relative to the
+     page, and nothing on the bench boots until that has answered. On a game
+     page that is games/<slug>/posters/index.json — which is why every game
+     folder holds one, '{}' until a machine on this page has a poster (plan
+     §5.4.4: perf/posters.js takes a page path). Its own two bytes rather than
+     a borrowed path, because a game page's posters are its own and pointing
+     this at the bench's index would hand this page the bench's machines. -->
+<script src="../../frames.js"></script>
+<!-- tape.js no longer has anything to do with the dock — a strip takes
+     itself down by its own ✕ now, not a button wall.js builds — so unlike
+     before, nothing here needs it ahead of wall.js. Kept in this order
+     anyway, since there is no reason to reshuffle it. -->
+<script src="../../tape.js"></script>
+<!-- the gif tool, which is GIF on the dock: a search out of KLIPY, a strip
+     linked rather than kept, stamped on the paper. BEFORE wall.js, not
+     after like tracer.js — wall.js's dock only shows GIF if window.Gif
+     already exists the moment it builds itself, and gif.js needs nothing
+     from wall.js to define itself, only window.Lab (already up, above). -->
+<script src="../../gif.js"></script>
+<script src="../../wall.js"></script>
+<!-- the quantiser the tracing table and the Press Table share — in press/, a
+     folder, beside the table's other modules; before tracer.js, which calls
+     it. Deployed, /press/… is a rewrite vercel.json gains with the merge
+     (MERGE.md); locally it is a folder two up, like everything else. -->
+<script src="../../press/palette.js"></script>
+<!-- the tracing table, which is IMAGE on the dock: a picture in, a tracing
+     out, filed in the library and stamped on the paper. After wall.js,
+     whose tool it is. -->
+<script src="../../tracer.js"></script>
+<!-- NOT sign.js. The Knoll sign is a lockup on the bench and there is none
+     here; the file is already careful about that — it looks for
+     .sign-word-row and returns at its second statement when there is none —
+     so keeping it would cost a request and buy nothing. Left out rather than
+     left in. -->
+<!-- hold ctrl and the hitbox is the drawing rather than the box round it —
+     which is how you get one sticker out of a pile. After frames.js because
+     it asks the frames what is painted under the pointer. -->
+<script src="../../ink.js"></script>
+<!-- NOT spotlight.js. It gives a page a frame opens to read the whole screen,
+     and the frames it watches are machines; a v1 game page has none, so there
+     is nothing for it to open. It comes back with the trailer, if the trailer
+     ever wants to be read rather than watched. -->
+<!-- LAST, and after frames.js on purpose: it reads Lab.gizmos and
+     Frames.panels, and a frame it asked about before frames.js had adopted it
+     would report a cut nobody made. It writes THIS file, through the door it
+     derives from the pathname — /_lab2[/<prefix>]/games/<slug>, never the
+     bench's /_lab2/default (CONTRACTS §0). -->
+<script src="../../keep.js"></script>
+<!-- NOT cursors.js. Everybody else's pointer is a bench feature and a Nostr
+     connection per visitor; a game page gets the dock and nothing more
+     (press/NOTES.md §D.7). One <script> line would put it back. -->
+</body>
+</html>

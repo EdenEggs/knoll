@@ -43,3 +43,19 @@ toem2/*.ico
 toem2/*.lnk
 toem2/*.png
 toem2/results/
+# …and the wall's editing door (api/wall.js) keeps everything — the wall,
+# the queue, who is who — in this file when it runs off Vercel with no
+# Redis; wall-seed.json beside it is the copy that ships.
+toem2/wall-db.json
+toem2/wall-db.json.tmp
+
+# Benches made by lab 2's "+ new bench" (serve.js, from lab2/bench-template):
+# each bench is the site; its backups and a folder left half-made are this
+# machine's.
+folder_*/*.keep-bak
+folder_*/*.tmp
+.folder_*.making/
+
+# The yard's publish door (api/hill.js, mounted by serve.js) keeps every local
+# save as a version here; yard/hill.json beside it is the one that ships.
+yard/looks/

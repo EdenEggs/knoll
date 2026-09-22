@@ -1,0 +1,58 @@
+<!-- HEX-GRID — a cluster of seven hexagons, one in the middle and six
+     round it, the honeycomb tile that says circuit board, sci-fi HUD,
+     tech (PRESS-TABLE-PLAN.md Appendix D: tags scifi, tech). Layers: halo
+     shadow body line highlight detail.
+
+     THE HEXES are pointy-top with a circumradius of 22, the middle one at
+     (64,64) and the six neighbours a hex-width away — √3 × 22 = 38.1 — at
+     0°, 60°, … 300°, so every pair that touches shares a whole edge and the
+     seven read as one tile and not seven stickers. 22 is the largest radius
+     the box takes: the cluster is 3√3 × 22 = 114.3 wide and 5 × 22 = 110
+     tall, 6.8..121.2 across and 9..119 down, and with the halo's 3 outside
+     that it reaches 3.8 and 124.2 — nothing spills. The silhouette of the
+     seven is an 18-gon (each outer hex shows three of its six edges), and
+     that one path is the halo's stroke and the shadow, so both are the
+     die-cut edge exactly; the body is the six outer hexes in skPrimary and
+     the middle one in skSecondary — the core the six cluster round, and the
+     one thing that makes this a HUD tile and not a bit of chicken wire.
+     The line is all seven hexes; the edges they share are stroked twice in
+     the same ink, which costs nothing and keeps each hex a hex.
+
+     THE SHADOW is the silhouette moved 3 down and right, the least the
+     contract's 3–4 allows, so that with the halo ON the shadow's rim stays
+     inside the paper edge on the diagonal: a sliver along the lower-right
+     edges, the cel shade.
+
+     THE HIGHLIGHT is one glint on the upper-left hex — an ellipse 7 × 2.5
+     laid 5 in from its upper-left edge (that edge runs from (25.9,20) to
+     (44.9,9), a −30° slope, so the ellipse is tilted −30°) at (38,19), and
+     a dot of radius 2 at (30,28), 4 in from the same hex's left edge.
+
+     THE DETAIL is every hex again at half size (radius 11, the same
+     centres) at stroke 1.5, half the default line — the inset a milled
+     tile has. A simple style drops it and the honeycomb is still the
+     honeycomb. -->
+<sc-if value="{{ isHexGrid }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M102.1,86 L121.2,75 L121.2,53 L102.1,42 L102.1,20 L83.1,9 L64,20 L44.9,9 L25.9,20 L25.9,42 L6.8,53 L6.8,75 L25.9,86 L25.9,108 L44.9,119 L64,108 L83.1,119 L102.1,108 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+    </g>
+    <g data-layer="shadow">
+      <path d="M102.1,86 L121.2,75 L121.2,53 L102.1,42 L102.1,20 L83.1,9 L64,20 L44.9,9 L25.9,20 L25.9,42 L6.8,53 L6.8,75 L25.9,86 L25.9,108 L44.9,119 L64,108 L83.1,119 L102.1,108 Z" transform="translate(3 3)" fill="{{ skShadow }}"></path>
+    </g>
+    <g data-layer="body">
+      <path d="M102.1,42 L83.1,53 L83.1,75 L102.1,86 L121.2,75 L121.2,53 Z M83.1,9 L64,20 L64,42 L83.1,53 L102.1,42 L102.1,20 Z M44.9,9 L25.9,20 L25.9,42 L44.9,53 L64,42 L64,20 Z M25.9,42 L6.8,53 L6.8,75 L25.9,86 L44.9,75 L44.9,53 Z M44.9,75 L25.9,86 L25.9,108 L44.9,119 L64,108 L64,86 Z M83.1,75 L64,86 L64,108 L83.1,119 L102.1,108 L102.1,86 Z" fill="{{ skPrimary }}"></path>
+      <path d="M64,42 L44.9,53 L44.9,75 L64,86 L83.1,75 L83.1,53 Z" fill="{{ skSecondary }}"></path>
+    </g>
+    <g data-layer="line">
+      <path d="M64,42 L44.9,53 L44.9,75 L64,86 L83.1,75 L83.1,53 Z M102.1,42 L83.1,53 L83.1,75 L102.1,86 L121.2,75 L121.2,53 Z M83.1,9 L64,20 L64,42 L83.1,53 L102.1,42 L102.1,20 Z M44.9,9 L25.9,20 L25.9,42 L44.9,53 L64,42 L64,20 Z M25.9,42 L6.8,53 L6.8,75 L25.9,86 L44.9,75 L44.9,53 Z M44.9,75 L25.9,86 L25.9,108 L44.9,119 L64,108 L64,86 Z M83.1,75 L64,86 L64,108 L83.1,119 L102.1,108 L102.1,86 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="38" cy="19" rx="7" ry="2.5" transform="rotate(-30 38 19)" fill="{{ skHighlight }}"></ellipse>
+      <circle cx="30" cy="28" r="2" fill="{{ skHighlight }}"></circle>
+    </g>
+    <g data-layer="detail">
+      <path d="M64,53 L54.5,58.5 L54.5,69.5 L64,75 L73.5,69.5 L73.5,58.5 Z M102.1,53 L92.6,58.5 L92.6,69.5 L102.1,75 L111.6,69.5 L111.6,58.5 Z M83.1,20 L73.5,25.5 L73.5,36.5 L83.1,42 L92.6,36.5 L92.6,25.5 Z M44.9,20 L35.4,25.5 L35.4,36.5 L44.9,42 L54.5,36.5 L54.5,25.5 Z M25.9,53 L16.4,58.5 L16.4,69.5 L25.9,75 L35.4,69.5 L35.4,58.5 Z M44.9,86 L35.4,91.5 L35.4,102.5 L44.9,108 L54.5,102.5 L54.5,91.5 Z M83.1,86 L73.5,91.5 L73.5,102.5 L83.1,108 L92.6,102.5 L92.6,91.5 Z" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"></path>
+    </g>
+  </svg>
+</sc-if>

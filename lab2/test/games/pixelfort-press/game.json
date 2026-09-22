@@ -1,0 +1,409 @@
+{
+  "version": 1,
+  "builtAt": "2026-09-07T19:48:53.474Z",
+  "manifest": {
+    "slug": "pixelfort-press",
+    "title": "Pixelfort",
+    "assets": [
+      {
+        "id": "keyart-portrait",
+        "role": "keyart",
+        "file": "art/keyart-portrait.webp",
+        "w": 480,
+        "h": 640,
+        "alpha": false,
+        "sha256": "f6847ee44c42c22a4197f254b79036400f0576688ac960e0fdbacf090d6051b1"
+      },
+      {
+        "id": "logo",
+        "role": "logo",
+        "file": "art/logo.webp",
+        "w": 256,
+        "h": 96,
+        "alpha": true,
+        "sha256": "fda9d06c34fcbb6e6b46de576cf6f8d585fda2eb3500208cbe5d16a6a4cd6a67"
+      },
+      {
+        "id": "shot-1",
+        "role": "screenshot",
+        "file": "art/shot-1.webp",
+        "w": 640,
+        "h": 360,
+        "alpha": false,
+        "sha256": "03ed4bc6b998d27fbd908600f8218315ca98e6b305dd9112451007c113e3d3ff"
+      },
+      {
+        "id": "shot-2",
+        "role": "screenshot",
+        "file": "art/shot-2.webp",
+        "w": 640,
+        "h": 360,
+        "alpha": false,
+        "sha256": "f3dd49b580eb59bc358c44358bb4b0c85dc4cc6e3da64c5c4b0684225bd416bb"
+      },
+      {
+        "id": "shot-3",
+        "role": "screenshot",
+        "file": "art/shot-3.webp",
+        "w": 640,
+        "h": 360,
+        "alpha": false,
+        "sha256": "e037e2cfe405646c7d313928d6205d0ca551f0485a1a210f5336155c37243c73"
+      },
+      {
+        "id": "shot-4",
+        "role": "screenshot",
+        "file": "art/shot-4.webp",
+        "w": 640,
+        "h": 360,
+        "alpha": false,
+        "sha256": "a205e27e12c2a09e48bc8cda0fb77b9e820c63d67c5c560ba05e9e3f80c1fdbe"
+      }
+    ],
+    "rights": {
+      "attested": true,
+      "by": "fixture",
+      "at": "2026-09-07T00:00:00.000Z"
+    },
+    "source": "manual",
+    "tagline": "Hold the wall. Count the sunsets.",
+    "description": "A small stone fort, a smaller garrison, and a very long summer. Pixelfort is a wall-building strategy game drawn in sixteen colours: raise towers, post knights on the battlements, and see how many dawns you can hold out for. Every sprite is hand-placed on a four-pixel grid.",
+    "developer": "Fixture Games",
+    "publisher": "Fixture Games",
+    "releaseDate": "2027",
+    "platforms": [
+      "pc",
+      "switch"
+    ],
+    "links": {
+      "steam": "https://example.com/pixelfort/steam",
+      "site": "https://example.com/pixelfort",
+      "trailer": "https://example.com/pixelfort/trailer"
+    }
+  },
+  "analysis": {
+    "palette": [
+      {
+        "hex": "#1c1f39",
+        "weight": 0.39901041666666665,
+        "L": 0.2504708006977157,
+        "C": 0.049229163425041626,
+        "h": 277.2303848411536
+      },
+      {
+        "hex": "#4a3b6b",
+        "weight": 0.27510416666666665,
+        "L": 0.3909019196830741,
+        "C": 0.08070285436082444,
+        "h": 296.9062815770146
+      },
+      {
+        "hex": "#a8d15b",
+        "weight": 0.13375,
+        "L": 0.8068735274881284,
+        "C": 0.1530786878831365,
+        "h": 125.68951839246279
+      },
+      {
+        "hex": "#8a8f96",
+        "weight": 0.061614583333333334,
+        "L": 0.6481454416837131,
+        "C": 0.011939432732375504,
+        "h": 256.71846079313826
+      },
+      {
+        "hex": "#daaa72",
+        "weight": 0.046875,
+        "L": 0.7695724039101635,
+        "C": 0.09196183208129963,
+        "h": 70.06587033787477
+      },
+      {
+        "hex": "#42682f",
+        "weight": 0.04432291666666666,
+        "L": 0.47437406238902186,
+        "C": 0.09552316640764706,
+        "h": 136.2185118526905
+      },
+      {
+        "hex": "#74a443",
+        "weight": 0.02171875,
+        "L": 0.6632461514498104,
+        "C": 0.13796546103362106,
+        "h": 131.32591032148855
+      },
+      {
+        "hex": "#e3e1df",
+        "weight": 0.017604166666666667,
+        "L": 0.9107386708304436,
+        "C": 0.0034787209072111454,
+        "h": 67.77987307296253
+      }
+    ],
+    "dark": true,
+    "stats": {
+      "pixelSize": 4,
+      "outline": {
+        "present": true,
+        "weight": 0.6
+      },
+      "paletteCount": 17,
+      "saturation": 0.076,
+      "contrast": 0.2048,
+      "hfEnergy": 0,
+      "edgeDensity": 0.1521
+    },
+    "vibeCacheKey": "bc8008a946365588f14c8775d7cf35ec1b5acb8ce929107ed69882f5a5850663"
+  },
+  "theme": {
+    "dark": true,
+    "tokens": {
+      "--paper": "#131524",
+      "--paper-2": "#1a1c2b",
+      "--card": "#111322",
+      "--bench-bg": "#0c0d1c",
+      "--bench-dot": "rgba(246,225,201,.06)",
+      "--drop-rgb": "246,225,201",
+      "--ink": "#f6e1c9",
+      "--ink-2": "#e9d4bc",
+      "--ink-3": "#d5c1a9",
+      "--mute": "#6f696a",
+      "--mute-2": "#4b4952",
+      "--line": "#292a36",
+      "--pink": "#9fc751",
+      "--pink-2": "#b8e16c",
+      "--pink-soft": "#27330e",
+      "--blue": "#daaa72",
+      "--green": "#6b5c8f",
+      "--amber": "#cc9dff",
+      "--field": "#131524",
+      "--tint": "#171b27",
+      "--tint-2": "#161a26",
+      "--chip": "#151825",
+      "--hard-edge": "#000005",
+      "--sticky-a": "#2f4200",
+      "--sticky-b": "#00424f",
+      "--sticky-c": "#472a63",
+      "--sticky-d": "#642210",
+      "--gz-handle-bg": "#e9d4bc",
+      "--gz-handle-ink": "#131524",
+      "--grip": "#aa9d94",
+      "--serial-ink": "#4b4952",
+      "--sk-primary": "#9fc751",
+      "--sk-secondary": "#d3ae6f",
+      "--sk-ink": "#f3e3c8",
+      "--sk-paper": "#141524",
+      "--sk-highlight": "#d3f69a",
+      "--sk-shadow": "#677d3f",
+      "--sk-halo": "0",
+      "--display": "'VT323','Courier New',monospace",
+      "--body": "'Space Mono',Menlo,Consolas,monospace",
+      "--mono": "'Space Mono',Menlo,Consolas,monospace"
+    },
+    "fonts": {
+      "id": "pixel",
+      "display": "'VT323','Courier New',monospace",
+      "body": "'Space Mono',Menlo,Consolas,monospace",
+      "mono": "'Space Mono',Menlo,Consolas,monospace"
+    },
+    "css": ":root{--paper:#131524;--paper-2:#1a1c2b;--card:#111322;--bench-bg:#0c0d1c;--bench-dot:rgba(246,225,201,.06);--drop-rgb:246,225,201;--ink:#f6e1c9;--ink-2:#e9d4bc;--ink-3:#d5c1a9;--mute:#6f696a;--mute-2:#4b4952;--line:#292a36;--pink:#9fc751;--pink-2:#b8e16c;--pink-soft:#27330e;--blue:#daaa72;--green:#6b5c8f;--amber:#cc9dff;--field:#131524;--tint:#171b27;--tint-2:#161a26;--chip:#151825;--hard-edge:#000005;--sticky-a:#2f4200;--sticky-b:#00424f;--sticky-c:#472a63;--sticky-d:#642210;--gz-handle-bg:#e9d4bc;--gz-handle-ink:#131524;--grip:#aa9d94;--serial-ink:#4b4952;--sk-primary:#9fc751;--sk-secondary:#d3ae6f;--sk-ink:#f3e3c8;--sk-paper:#141524;--sk-highlight:#d3f69a;--sk-shadow:#677d3f;--sk-halo:0;--display:'VT323','Courier New',monospace;--body:'Space Mono',Menlo,Consolas,monospace;--mono:'Space Mono',Menlo,Consolas,monospace;}"
+  },
+  "style": {
+    "preset": "pixel",
+    "lineShow": true,
+    "lineWeight": 0.9,
+    "lineWobble": 0,
+    "linePasses": 1,
+    "corners": 0,
+    "shading": "dither",
+    "texture": "none",
+    "paletteSize": 16,
+    "pixel": 4,
+    "saturation": 0.3111,
+    "finish": "none"
+  },
+  "layout": {
+    "recipe": "poster",
+    "open": {
+      "x": -2052.46,
+      "y": -1166.33,
+      "w": 4599.32,
+      "h": 1997.83
+    },
+    "openNarrow": {
+      "x": -640,
+      "y": -1166.33,
+      "w": 1760,
+      "h": 1997.83
+    },
+    "slots": [
+      {
+        "kind": "sticker",
+        "ref": "burst",
+        "x": -344.8,
+        "y": -1046.33,
+        "w": 409.6,
+        "h": 412.66,
+        "scale": 3.0567,
+        "rot": 0,
+        "z": 0
+      },
+      {
+        "kind": "pic",
+        "ref": "logo",
+        "x": -300,
+        "y": -900,
+        "w": 320,
+        "h": 120,
+        "scale": 1.25,
+        "rot": 0,
+        "z": 1
+      },
+      {
+        "kind": "pic",
+        "ref": "keyart-portrait",
+        "x": -520,
+        "y": -700,
+        "w": 624,
+        "h": 832,
+        "scale": 1.3,
+        "rot": 0,
+        "z": 2
+      },
+      {
+        "kind": "sticker",
+        "ref": "tape-strip",
+        "x": -691.6,
+        "y": -872.88,
+        "w": 343.2,
+        "h": 345.76,
+        "scale": 2.5612,
+        "rot": -20,
+        "z": 3
+      },
+      {
+        "kind": "sticker",
+        "ref": "frame-polaroid",
+        "x": -760,
+        "y": 320,
+        "w": 388.6,
+        "h": 391.5,
+        "scale": 2.9,
+        "rot": -2,
+        "z": 4,
+        "image": "shot-1"
+      },
+      {
+        "kind": "sticker",
+        "ref": "frame-polaroid",
+        "x": -360,
+        "y": 320,
+        "w": 388.6,
+        "h": 391.5,
+        "scale": 2.9,
+        "rot": 2,
+        "z": 5,
+        "image": "shot-2"
+      },
+      {
+        "kind": "sticker",
+        "ref": "frame-polaroid",
+        "x": 40,
+        "y": 320,
+        "w": 388.6,
+        "h": 391.5,
+        "scale": 2.9,
+        "rot": -2,
+        "z": 6,
+        "image": "shot-3"
+      },
+      {
+        "kind": "sticker",
+        "ref": "frame-polaroid",
+        "x": 440,
+        "y": 320,
+        "w": 388.6,
+        "h": 391.5,
+        "scale": 2.9,
+        "rot": 2,
+        "z": 7,
+        "image": "shot-4"
+      },
+      {
+        "kind": "note",
+        "ref": "title",
+        "x": 240,
+        "y": -650,
+        "w": 760,
+        "h": 244.6,
+        "scale": 1,
+        "rot": 0,
+        "z": 8,
+        "text": "Pixelfort\nHold the wall. Count the sunsets.",
+        "width": 760,
+        "size": 30
+      },
+      {
+        "kind": "note",
+        "ref": "description",
+        "x": 240,
+        "y": -357.4,
+        "w": 760,
+        "h": 340.8,
+        "scale": 1,
+        "rot": 0,
+        "z": 9,
+        "text": "A small stone fort, a smaller garrison, and a very long summer. Pixelfort is a wall-building strategy game drawn in sixteen colours: raise towers, post knights on the battlements, and see how many dawns you can hold out for. Every sprite is hand-placed on a four-pixel grid.",
+        "width": 760,
+        "size": 30
+      },
+      {
+        "kind": "sticker",
+        "ref": "sparkle",
+        "x": 162.4,
+        "y": -714,
+        "w": 107.2,
+        "h": 108,
+        "scale": 0.8,
+        "rot": 0,
+        "z": 10
+      },
+      {
+        "kind": "sticker",
+        "ref": "sparkle",
+        "x": 969.15,
+        "y": -460.52,
+        "w": 73.7,
+        "h": 74.25,
+        "scale": 0.55,
+        "rot": 0,
+        "z": 11
+      },
+      {
+        "kind": "sign",
+        "ref": "links",
+        "x": 240,
+        "y": 73.4,
+        "w": 760,
+        "h": 99,
+        "scale": 1,
+        "rot": 0,
+        "z": 12,
+        "width": 760,
+        "size": 30
+      },
+      {
+        "kind": "sticker",
+        "ref": "tag-wishlist",
+        "x": 1040,
+        "y": 53.4,
+        "w": 214.4,
+        "h": 216,
+        "scale": 1.6,
+        "rot": 0,
+        "z": 13,
+        "text": "WISHLIST"
+      }
+    ]
+  }
+}

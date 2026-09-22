@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<!-- YARD VIEW (2026-09-21) — a yard as somebody else sees it. A copy of
+     yard/index.html with the owner's own controls taken off (dashboard,
+     search, settings, the gnome and its tour, the hills, rename, the plot's
+     save/reset row and caption, Friends, Spaces you've visited, Your edits,
+     the greeting's hello and stats line, the fence's small print, the footer
+     line), add friend in save yard's place and Propose edits in the bar. The
+     plot's name and the owner's name come off the owner's last SAVE YARD;
+     whose yard it is comes from ?u=<account id> (see WHOSE YARD at the foot).
+     The scripts are /yard's own files; window.YARD_VIEW at the foot gives
+     this page its own storage (a visitor's edits never land in their own
+     yard) and lets the owner's latest save win over a visitor's edits.
+     Changes made to /yard do not reach this copy. -->
+<title>Yard View</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The icon sits HERE and not in the helmet, which is where this page used to
+     keep it and where /dashboard still does. The helmet is hoisted into <head>
+     by support.js, i.e. after the runtime boots — and Chrome, finding no icon
+     before then, asks for /yard/favicon.ico and logs the 404 it gets. One line
+     earlier in the document and it never asks. /signup and /login already do
+     it this way, under the same comment; this is that fix arriving here. -->
+<link rel="icon" href="../logo/logo-icon.svg">
+<!-- THE DOCK'S STYLESHEET (2026-09-17): lab 2's, linked whole for the tool dock, the
+     wall's ink, the type case and the two side panels. In the REAL head and not the
+     helmet, so the helmet's own rules — hoisted after the runtime boots — land later
+     and win every tie; the three of its rules that belong to a bench and not to a
+     page are put back in the helmet under THE DOCK'S STYLESHEET, TAMED. -->
+<link rel="stylesheet" href="../lab2/lab.css">
+<script src="../yard/support.js"></script>
+
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<!-- Public Sans 600 is the fourth face, and it is here for one thing: the switch
+     in the house bar. lab 2's in-bar controls are all --body, i.e. Public Sans,
+     and the whole point of wearing lab 2's bar is to wear it rather than to
+     approximate it. Same argument the bar itself made for Sora 800 when it
+     arrived — extending the one request this page already makes to an origin it
+     already preconnects to is the smaller change. /signup and /login carry the
+     same face out of lab2/fonts/, so it is a house face, not a new one. -->
+<!-- SELF-HOSTED since 2026-09-17: the same four faces, plus Kalam (the side panels'
+     handwriting) and the Public Sans weights the dock is set in, all out of
+     lab2/fonts — the one file lab 2 and the gate pages already load. Google's copy
+     was one origin more for faces the site already carries. -->
+<link href="../lab2/fonts/fonts.css" rel="stylesheet">
+<style>
+  body { margin: 0; background: #ece7f1; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+  ::selection { background: #ffd23f; }
+
+  /* ── THE DOCK'S STYLESHEET, TAMED (2026-09-17) ──────────────────────────
+     lab2/lab.css is linked in the real head (yard/tools.js is why). Three of
+     its rules are the bench's alone and are put back here: the bench never
+     scrolls (this page does), its body is a flex column, and it sizes
+     everything border-box — this export was drawn against the browser's
+     content-box, and re-cutting every explicit width on it is not a change
+     to make in passing. The chrome outside .yard-root keeps lab.css's own. */
+  html, body { height: auto; }
+  body { display: block; overflow: visible; overflow-x: clip; overscroll-behavior: auto; }   /* clip: the world's box is 1200 wide before its scale is read */
+  .yard-root, .yard-root * { box-sizing: content-box; }
+  /* THE WORLD (tools.js): the dock's paper, laid over the content column and
+     scaled to it. The box takes no pointer of its own — the page under it
+     works as it always did — and lab.css decides per tool whether the wall's
+     svg does; the note box and a playing gif are the two children that must. */
+  .yard-world { position: absolute; left: 0; top: 0; width: 1200px; transform-origin: 0 0; z-index: 12; pointer-events: none; }
+  .yard-world > .wall-note, .yard-world > .wall-video { pointer-events: auto; }
+  .yard-world > .wall-over { pointer-events: none; }
+  .wall-ink.wall-live { touch-action: none; }   /* a finger draws; the page does not scroll under it */
+  /* ?embed=1 — the dashboard's picture of this page: nothing to press */
+  html.yard-embed .tool-dock, html.yard-embed .tool-opts, html.yard-embed .lab-panel, html.yard-embed .lab-warn { display: none !important; }
+  html.yard-embed .yard-world, html.yard-embed .yard-world * { pointer-events: none !important; }
+  /* THE DOCK ON A PHONE: nine buttons are 548px across and a phone is 375. The
+     bench lets them run off both edges (lab.css only stands the zoom dock up);
+     here the pill wraps into two rows instead. */
+  @media (max-width: 700px) {
+    .tool-dock { flex-wrap: wrap; justify-content: center; row-gap: 2px; max-width: calc(100vw - 16px); }
+  }
+
+  /* ── THE HOUSE BAR ───────────────────────────────────────────────
+     Lab 2's header, worn here so the yard reads as a room of the site rather
+     than a page that happens to share its palette. These are lab2/lab.css's
+     .lab-head and .lab-brand rules with the token values written out
+     (--card #fdfbfd, --line #e2d4df, --ink #26212a, --display Sora): this page
+     does not load lab.css, and the only other thing it would want from it is
+     Sora 800, which the font link above now asks the same CDN for as Rye and
+     VT323. That keeps the page's fonts on one request from one origin it
+     already preconnects to; lab 2 and the two gate pages self-host theirs out
+     of lab2/fonts/, which is the other way to do it and a bigger change than
+     this one — yard has been a Google-Fonts page since it was cut.
+
+     IN NORMAL FLOW, pulled full-bleed by negative margins — not sat on top of
+     the page by position:absolute, which is what /signup and /login do. Those
+     two had to: their root is a centred flex row, and a bar joining it would
+     shove the scroll off centre. This root is an ordinary block, so the bar
+     can simply BE the first thing in it, and then a bar that ever grew taller
+     pushes the page down instead of landing on it, and the root needs no
+     position, no z-index and no padding arithmetic. It is also what lab 2's
+     own header does: flex:none in a column, not absolute.
+
+     SIX OF LAB 2'S DECLARATIONS ARE DROPPED. flex-wrap / max-height /
+     overflow are there to carry the bench's hint paragraph and its tools row,
+     and one brand link can neither wrap nor outgrow 42vh. flex:none is for
+     being a child of lab 2's column-flex body, which this is not. And
+     z-index:20 would be actively wrong here: yard's settings scrim is
+     position:fixed at 20 and its drawer at 21, so a bar at 20 ties the scrim
+     and only wins or loses the tie on tree order. With no z-index at all the
+     modal covers the bar, which is what a modal should do. AND position:relative
+     goes with it — this line said FIVE and named four for years, because that
+     sixth one is only over there to give the z-index something to be relative
+     to. Drop the z-index and it has no job left.
+
+     THE WORDMARK IS JUST 'knoll', because that is what lab 2's is. lab.css:94-97
+     hides .lab-slash and .lab-name unless html carries .lab-local — 'the "/ lab 2"
+     that says which bench this is belongs to the workbench too' — and lab 2 sets
+     that class on localhost only. So the deployed bar reads 'knoll' and nothing
+     else, and a 'knoll / yard' here would have matched the bar in front of a
+     developer rather than the one on the site. Checked by dropping .lab-local
+     off a running lab 2: the bar goes to 'knoll', 51px tall, same as this one.
+
+     The hover is lab 2's too, and it is not a .lab-brand rule — there is none.
+     It falls out of bare a:hover at lab.css:67 (0,1,1) outspecifying .lab-brand
+     (0,1,0). Here that same slot is yard's own a:hover (#b8302f, rust), which
+     would outspecify .knoll-brand for the same reason, so the class carries the
+     hover explicitly to land on lab 2's colour instead. /signup and /login use
+     #c93b82 (--pink) in this slot; lab 2 renders #a52c68, which is what this
+     matches.
+
+     THE THREE NEGATIVE MARGINS ARE THE ROOT DIV'S OWN PADDING spelled out
+     (padding:34px 30px 56px — 34 top, 30 sides) — that is the coupling to keep
+     in step: change the root's padding and change these. The margin-bottom
+     puts back the 34px of air the top padding used to give the heading. */
+  .knoll-head { display: flex; align-items: center; gap: 8px 22px; flex-wrap: wrap;
+    margin: -34px -30px 34px; padding: 12px 22px;
+    background: #fdfbfd; border-bottom: 1.5px dashed #e2d4df; }
+  .knoll-brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+    color: #26212a; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px;
+    letter-spacing: -0.01em; }
+  .knoll-brand img { display: block; }
+  .knoll-brand:hover { color: #a52c68; }
+
+  /* ── THE SWITCH ──────────────────────────────────────────────────────────
+     Two rooms belong to the same person — the yard is your plot and your
+     standing, /dashboard is the numbers off the same hill — and this is how you
+     get from one to the other. IT LIVES IN THE BAR AND NOT IN THE PAGE, which
+     is the whole of the decision: the bar is the only thing both pages have in
+     common and the only thing that is in the same place on both, so a switch in
+     it never moves, never has to be found, and does not have to be redrawn in
+     each page's own vocabulary. Put it in the headers instead and it is in two
+     different places wearing two different looks, which is a pair of links
+     rather than a switch.
+
+     IT IS DRAWN IN LAB 2's IN-BAR VOCABULARY, NOT THIS PAGE'S. The yard's own
+     controls are cream 4px-bordered stickers in VT323 with a hard drop shadow;
+     lab 2's bar has none of that — `.lab-keep` and `.lab-save` are small
+     999px-radius pills, 11.5px Public Sans 600, quiet. A yard sticker sat in
+     this bar would be a yard sticker sitting in lab 2's bar. So: `.lab-keep`'s
+     shape, border and padding (`lab.css:105`), `.lab-keep.is-saved`'s "this one
+     is lit" palette (`lab.css:130` — pink on pink-soft over #fff6fb) borrowed
+     for the hover, and `.lab-save`'s filled treatment for the page you are on,
+     in --ink rather than --pink because WHERE YOU ARE is a state, not a thing
+     that just happened.
+
+     NOTE WHICH RULE THE LIT PALETTE COMES FROM. It is `.lab-keep.is-saved`, not
+     `.lab-keep:hover` — those are different rules with different colours, and
+     an earlier draft of this comment cited the wrong one. `:hover` (`:129`) is
+     a grey nudge, `border-color:var(--mute-2); color:var(--ink-3)`, no
+     background at all. `is-saved` is the pink one. Borrowing a state's palette
+     for a hover is the right analogy here anyway — over there the pill lights
+     up because something happened; here it lights up because you are pointing
+     at the way out of this page.
+
+     TWO COLOURS ARE DARKER THAN LAB 2's, AND THAT IS DELIBERATE. lab 2 rests
+     `.lab-keep` at --mute (#8b7f92) and lights it at --pink (#c93b82); on this
+     bar those measure 3.56:1 and 4.47:1 against their own backgrounds, and at
+     11.5px WCAG AA wants 4.5:1. So the resting ink is --ink-3 (#3d3346, 11.2:1)
+     — which is the very colour lab 2 moves `.lab-keep` TO on hover, so it is
+     still lab 2's own ink — and the lit pink is #a52c68 (6.3:1), which is lab
+     2's own `.lab-save:hover` and `.lab-brand:hover`. Both are house values;
+     neither is invented. The filled pill was already fine at 15.3:1.
+
+     `aria-current="page"` is what says which is which — the correct word for
+     it, and the hook the fill is keyed off, so the machine-readable answer and
+     the visible one cannot drift apart. THE CURRENT PAGE'S PILL HAS NO `href`,
+     which is what makes `cursor:default` true: an <a> without one is not
+     focusable, not clickable and not a tab stop, so the pill cannot be pressed
+     into reloading the page you are already on — and a reload here would throw
+     away an unsent note at the fence, an open drawer and where you had
+     scrolled to. It still announces as the current page, because that is
+     `aria-current`'s job and not the href's.
+
+     The `:hover` rule has to be written out, but NOT for the reason the brand's
+     does. `.knoll-brand` is (0,1,0) and loses to this page's `a:hover` (0,1,1)
+     outright. `.knoll-switch a` is (0,1,1) and TIES it — and being later in
+     this sheet, it wins. So the rust `a:hover` never lands on a pill either
+     way; without the rule below a hovered pill would simply keep its resting
+     colour and there would be no hover at all. The rule is here to add one. */
+  .knoll-switch { display: inline-flex; align-items: center; gap: 6px; }
+  .knoll-switch a { display: inline-flex; align-items: center; border: 1.5px solid #e2d4df;
+    border-radius: 999px; padding: 3px 10px; background: #faf7f9; color: #3d3346;
+    text-decoration: none; font-family: 'Public Sans', sans-serif; font-size: 11.5px;
+    font-weight: 600; letter-spacing: 0.01em; white-space: nowrap;
+    transition: color .18s, border-color .18s, background .18s; }
+  .knoll-switch a:hover { color: #a52c68; border-color: #f9d3e6; background: #fff6fb; }
+  .knoll-switch a[aria-current="page"],
+  .knoll-switch a[aria-current="page"]:hover { background: #26212a; border-color: #26212a;
+    color: #fdfbfd; cursor: default; }
+
+  /* ── THE PLOT ────────────────────────────────────────────────────────────
+     Lab 2's forest sheet drew its parts against four keyframes and named them
+     in its own helmet; the drawings came over here verbatim, animations and
+     all, so the four have to come with them. They are one line each and kept
+     whole rather than pruned to what the twenty-three parts happen to reach
+     for today — the same argument features/forest.dc.html makes, for the same
+     reason: a part edited later brings its animation with it and finds it
+     already here. */
+  @keyframes sway { 0%, 100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.2deg); } }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+  @keyframes twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+  @keyframes leafFall { 0%, 100% { transform: translateY(0) rotate(-14deg); } 50% { transform: translateY(10px) rotate(10deg); } }
+
+  /* THE JIGGLE is not the sheet's — it is lab 2's, where a tree picked up by
+     the top of its canopy ought to shake. Same three lines, same pivot: 80%
+     rather than the drawing's own 93.333%, because a thing being carried
+     swings from nearer its middle than a thing standing in the wind does. */
+  @keyframes plotJiggle {
+    0%, 100% { transform: rotate(-4deg); }
+    25%      { transform: rotate(3.5deg); }
+    50%      { transform: rotate(-2.5deg); }
+    75%      { transform: rotate(4.5deg); }
+  }
+
+  /* A PIECE IS A BOX WITH A DRAWING FITTED INTO IT, and left/top is where its
+     FOOT is — the point the trunk meets the ground — not its top-left corner.
+     That is what makes a tree carried down the plot get bigger-looking by
+     standing in front rather than sliding out from under itself, and it is
+     why the transform below is a translate and not nothing: the script works
+     out, per part, how far up its own height the foot sits.
+
+     Percentages all the way down, of the plot box. A layout in pixels would
+     be a layout for one window width; this one is the same arrangement on a
+     phone, which is also why the plot has an aspect-ratio rather than a
+     height. */
+  .plot-piece { position: absolute; touch-action: none; cursor: grab; -webkit-user-select: none; user-select: none; }
+  .plot-piece > svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .plot-piece:focus-visible { outline: 3px solid #5a8fd6; outline-offset: 4px; }
+  .plot-piece.is-held { cursor: grabbing; }
+  .plot-piece.is-held > svg { animation: plotJiggle .3s ease-in-out infinite !important; transform-origin: 50% 80% !important; }
+
+  /* 'Reduce motion' in the settings drawer is a promise about this page, and
+     twenty-three swaying trees are the loudest thing on it. The media query
+     is the same promise made by the operating system; both are honoured, and
+     the carry-jiggle goes with them — an animation you asked not to see is
+     not less unwanted for having been asked for. */
+  .plot-yard.plot-still *, [data-plot-still] * { animation: none !important; }
+  @media (prefers-reduced-motion: reduce) { .plot-yard * { animation: none !important; } }
+  /* narrow screens: one column, tighter page gutters, smaller title */
+  @media (max-width: 860px) {
+    .yard-root { padding: 20px 14px 40px !important; }
+    .yard-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 22px !important; }
+    .yard-title { font-size: 28px !important; }
+    .yard-sub { font-size: 14px !important; letter-spacing: 2px !important; }
+
+    /* ── YARD FIX 1 of 10 (see about.md § changes to the export) ────────────
+       THE MEDIA QUERY ABOVE FIXES THE GRID AND MISSES THE HEADER, and
+       `overflow-x: clip` on .yard-root then hides that it missed it. The tool
+       cluster — dashboard, save yard, settings — is one non-wrapping flex row
+       with `flex:none`, so at 375px it cannot shrink and cannot break: it lays
+       itself out to about 466px and the last 106 of those are clipped away
+       silently. Measured on a 360px viewport: `save yard` runs 247→400, and
+       THE SETTINGS BUTTON SITS AT 414→466 — entirely off the screen, with no
+       scrollbar to reach it, because clip removes the scroll along with the
+       overflow. Settings is the only door to the display name, the reduce-
+       motion switch and sign out, so on a phone the page had none.
+
+       Letting the cluster wrap is the whole fix. `flex:1 1 auto` lets it take
+       the line it has wrapped onto rather than staying at its natural width.
+
+       THE GREETING IS THE SAME BUG WEARING THE SAME CLIP. `.yard-title` is
+       `white-space:nowrap`, so a display name of any length just keeps going:
+       "Evening, Bartholomew Underhill." measures 491px of text in a 256px box
+       and runs to x=581 on a 360px screen — a fifth of a person's own name cut
+       off, no ellipsis, nothing to scroll. The name is theirs and up to 24
+       characters by the drawer's own limit, so it wraps here instead. nowrap
+       is right on a wide screen, where it keeps the greeting on one line
+       beside the mark, and it is only overridden below 860. */
+    .yard-tools { flex-wrap: wrap !important; flex: 1 1 auto !important; }
+    .yard-title { white-space: normal !important; }
+
+    /* AND THE PLOT, which is the same bug in the page's centrepiece and the
+       one that most wants explaining. `.plot-yard` is `aspect-ratio:16/9` with
+       `min-height:300px`, and those two fight on a narrow screen: the minimum
+       height wins, and then the aspect ratio makes the box as WIDE as that
+       height requires. Measured at 375px — parent 332, plot 543. It has always
+       done this (the live page scrolled sideways to 573), and clip is what
+       turned a sideways scroll into a plot with its right-hand border simply
+       gone.
+
+       min-height is what has to go, and the reason is written down: "the box
+       has an aspect-ratio rather than a height, so the arrangement is the same
+       arrangement at any width rather than a layout for one window". Giving
+       the plot its own height or its own ratio down here would make a phone's
+       plot a different plot, and every saved percentage would land somewhere
+       else on it. So the ratio governs alone and the box is 332×187 on a
+       phone: smaller than the author's floor was reaching for, and the same
+       yard. If that floor is wanted back, it is a taller RATIO below 860 and a
+       migration for anyone who has already arranged their trees — not a
+       min-height. */
+    .plot-yard { min-height: 0 !important; }
+
+    /* ── YARD FIX 2 of 10 (see about.md § changes to the export) ────────────
+       THE COUPLING THE FILE NAMES, BROKEN BY THE LINE ABOVE IT. Twenty lines
+       up in this stylesheet the house bar's comment says it outright: the
+       three negative margins ARE the root div's own padding spelled out, "that
+       is the coupling to keep in step: change the root's padding and change
+       these." The new narrow query changes the root's padding — 34/30 down to
+       20/14 — and did not change these.
+
+       So on a phone the bar was pulled 34px up against 20px of padding and sat
+       14px ABOVE the top of the page with its top cropped off, and pulled 30px
+       out against 14px of gutter so it hung 16px past each edge, which is what
+       the measurement says: left −16, right 376, on a 360px viewport.
+
+       These two lines are the same arithmetic done again with the narrow
+       numbers, and the margin-bottom is the same 34px of air the heading used
+       to get from the top padding, now 20. Change the padding again and change
+       these again — the coupling is the point, not the numbers. */
+    .knoll-head { margin: -20px -14px 20px !important; }
+  }
+</style>
+</helmet>
+<div data-screen-label="Yard View" class="yard-root" style="min-height:100vh; box-sizing:border-box; overflow-x:clip; background:#ece7f1; background-image:radial-gradient(circle, rgba(90,70,110,0.13) 1.3px, transparent 1.3px); background-size:24px 24px; padding:34px 30px 56px; font-family:'VT323',monospace; color:#17120b">
+  <!-- THE HOUSE BAR. `../` is the site root, which vercel.json rewrites to
+       lab 2 — the same destination lab 2's own brand link uses. Locally that
+       is a 404: there is no site/index.html and the rewrite is Vercel-only.
+       Same behaviour as lab 2's brand and as the two gate pages', not a bug
+       in this one. Outside the 1200px wrapper below, because the bar is
+       full-bleed and the page's content is not. -->
+  <header class="knoll-head">
+    <a class="knoll-brand" href="../"><img src="../logo/logo-icon.svg" alt="" width="26" height="26"><span>knoll</span></a>
+    <!-- The same two lines stand in /dashboard's bar, with aria-current moved
+         across. Keep them in step; there is no shared file to put them in. -->
+    <nav class="knoll-switch" aria-label="your pages">
+      <a href="../yard/">yard</a>
+      <a href="../dashboard/">dashboard</a>
+    </nav>
+    <!-- YARD VIEW: the visitor's save. There is no door for a proposal yet, so
+         a press says so on the pill's face instead of pretending to send. -->
+    <button class="lab-save" sc-camel-on-click="{{ propose }}" title="send your edits to this yard's owner — not wired up yet" style="margin-left:auto"><span aria-live="polite">{{ proposeWord }}</span></button>
+  </header>
+
+  <div class="yard-col" style="max-width:1200px; margin:0 auto">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px 20px; margin:6px 0 50px; flex-wrap:wrap">
+      <div style="display:flex; align-items:center; gap:20px; position:relative; flex:1; min-width:280px">
+        <button ref="{{ tKRef }}" sc-camel-on-click="{{ pickFile }}" aria-label="upload a file" title="{{ kTitle }}" style="position:relative; width:56px; height:64px; padding:0; margin:0; background:#fdf7e3; color:#17120b; border:4px solid #17120b; box-shadow:6px 7px 0 rgba(60,50,80,0.2); transform:rotate(-4deg); display:flex; align-items:center; justify-content:center; font-family:'Rye',serif; font-size:34px; flex:none; cursor:pointer; transition:transform .2s cubic-bezier(.3,1.5,.5,1)" style-hover="transform:rotate(-4deg) translate(1px,1px) scale(1.04); box-shadow:5px 6px 0 rgba(60,50,80,0.2)">K
+          <div aria-hidden="true" style="position:absolute; bottom:-9px; right:-9px; width:12px; height:12px; background:#e8484a; border:3px solid #17120b; transform:rotate(45deg)"></div>
+          <input ref="{{ fileRef }}" type="file" sc-camel-on-change="{{ onFile }}" aria-hidden="true" tabindex="-1" style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none">
+        </button>
+        <div style="min-width:0">
+          <h1 class="yard-title" style="margin:0; font-family:'Rye',serif; font-size:clamp(28px, 3.6vw, 44px); font-weight:400; line-height:1.05; white-space:nowrap">{{ greetName }}</h1>
+        </div>
+      </div>
+      <!-- YARD FIX 1 of 10: the class is the only markup change; what it does
+           is in the @media block in the helmet. -->
+      <div class="yard-tools" style="display:flex; align-items:center; gap:14px; flex:none">
+        <!-- YARD VIEW: add friend, in save yard's slot. There is no friends list
+             to add to yet, so the press is this page's alone: the button pops,
+             the smiley turns, and it stays green until pressed again. -->
+        <button sc-camel-on-click="{{ addFriend }}" aria-pressed="{{ friended }}" title="add this gnome as a friend" style="height:52px; display:flex; align-items:center; gap:10px; padding:0 18px 0 14px; background:{{ friendBg }}; color:#fdf7e3; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); font-family:'VT323',monospace; font-size:20px; letter-spacing:1px; cursor:pointer; transform:rotate(-1deg); position:relative" style-hover="transform:rotate(-1deg) translate(1px,1px); box-shadow:4px 5px 0 rgba(60,50,80,0.2)">
+          <svg sc-camel-view-box="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="9.6" fill="#ffd23f" stroke="#17120b" stroke-width="2.4"></circle><circle cx="8.7" cy="9.8" r="1.6" fill="#17120b"></circle><circle cx="15.3" cy="9.8" r="1.6" fill="#17120b"></circle><path d="M7.6,13.8 Q12,18.6 16.4,13.8" fill="none" stroke="#17120b" stroke-width="2.2" stroke-linecap="round"></path></svg>
+          <span>{{ friendWord }}</span>
+        </button>
+      </div>
+    </div>
+
+
+    <div class="yard-grid" style="display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:28px; align-items:start">
+
+      <div style="display:flex; flex-direction:column; gap:28px; min-width:0">
+        <section style="min-width:0; position:relative; padding-top:48px">
+
+
+          <!-- THE HEADING AND THE THREE CONTROLS SHARE A LINE, because they
+               are about the same thing. Lab 2 keeps `save layout` / `reset
+               layout` / `reset data` up in the page header, where they answer
+               for a whole bench; here there is one plot and nothing else that
+               moves, so they sit on it. -->
+          <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px 20px; flex-wrap:wrap; margin-bottom:16px">
+            <h2 style="margin:0; font-family:'Rye',serif; font-size:32px; font-weight:400; line-height:1.2; border-bottom:4px solid transparent">{{ plotName }}</h2>
+            <!-- likes and views, up from the fence to the plot's own line (as on /yard) -->
+            <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding-bottom:6px">
+              <button sc-camel-on-click="{{ toggleLike }}" aria-pressed="{{ liked }}" style="display:flex; align-items:center; gap:8px; background:{{ likeBg }}; color:{{ likeFg }}; border:3px solid #17120b; box-shadow:3px 4px 0 rgba(60,50,80,0.25); padding:5px 12px 5px 10px; font-family:'VT323',monospace; font-size:18px; letter-spacing:1px; cursor:pointer; transform:rotate(-1.5deg)" style-hover="transform:rotate(-1.5deg) translate(1px,1px); box-shadow:2px 3px 0 rgba(60,50,80,0.25)">
+                <svg width="18" height="16" sc-camel-view-box="0 0 24 22" aria-hidden="true"><path d="M12,21 L2.5,11.5 C-0.5,8.5 1,3 5.5,2.5 C8,2.2 10.5,3.5 12,5.5 C13.5,3.5 16,2.2 18.5,2.5 C23,3 24.5,8.5 21.5,11.5 Z" fill="{{ heartFill }}" stroke="#17120b" stroke-width="2.4" stroke-linejoin="round"></path></svg>
+                <span>{{ likeCount }} LIKES</span>
+              </button>
+              <div title="visitors this month" style="display:flex; align-items:center; gap:8px; background:#fdf7e3; border:3px solid #17120b; box-shadow:3px 4px 0 rgba(60,50,80,0.25); padding:5px 12px 5px 10px; font-size:18px; letter-spacing:1px; transform:rotate(1deg)">
+                <svg width="20" height="14" sc-camel-view-box="0 0 26 16" aria-hidden="true"><path d="M1,8 C5,1 21,1 25,8 C21,15 5,15 1,8 Z" fill="#fff" stroke="#17120b" stroke-width="2.4"></path><circle cx="13" cy="8" r="3.6" fill="#17120b"></circle></svg>
+                <span>{{ viewCount }} VIEWS</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- The accent sits on a wrapper and not on the plot itself: the
+               plot CLIPS (a tree carried to the edge should go behind it
+               rather than out over the sidebar), and a diamond hung on the
+               corner of a clipping box is a triangle. -->
+          <div ref="{{ tPlotRef }}" style="position:relative">
+            <!-- ISOLATE, and not for tidiness. Depth in here is z-index off
+                 the ground line, so a tree at the bottom of the plot carries a
+                 z in the hundreds; without a stacking context of its own those
+                 numbers are the PAGE's numbers, and a tree paints straight
+                 through the settings drawer's scrim (z-index 20) and stays
+                 draggable behind an open modal. One word fixes it: every z in
+                 here is now local to the plot, and the plot itself sits at
+                 auto, under everything the page puts over it. -->
+            <div class="plot-yard{{ plotStill }}" style="position:relative; isolation:isolate; aspect-ratio:16/9; min-height:300px; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); overflow:hidden; touch-action:pan-y">
+
+              <!-- the ground: no horizon line, just the paper going green
+                   towards the bottom. A drawn horizon would fix a depth the
+                   trees are free to contradict — you can carry any of them
+                   anywhere — and every part already brings its own shadow. -->
+              <div aria-hidden="true" style="position:absolute; left:0; right:0; bottom:0; height:74%; background:linear-gradient(to bottom, rgba(123,194,100,0) 0%, rgba(123,194,100,0.18) 34%, rgba(123,194,100,0.34) 66%, rgba(123,194,100,0.55) 100%)"></div>
+
+              <sc-for list="{{ pieces }}" as="p" hint-placeholder-count="23">
+                <div class="plot-piece{{ p.held }}" role="img" tabindex="0" aria-label="{{ p.name }}" title="{{ p.name }}" sc-camel-on-pointer-down="{{ p.down }}" sc-camel-on-pointer-move="{{ p.move }}" sc-camel-on-pointer-up="{{ p.up }}" sc-camel-on-pointer-cancel="{{ p.up }}" sc-camel-on-key-down="{{ p.key }}" style="left:{{ p.x }}; top:{{ p.y }}; width:{{ p.w }}; z-index:{{ p.z }}; transform:translate(-50%,{{ p.lift }})">{{ p.art }}</div>
+              </sc-for>
+            </div>
+            <div aria-hidden="true" style="position:absolute; top:-11px; left:-11px; width:15px; height:15px; background:#5a8fd6; border:3px solid #17120b; transform:rotate(45deg)"></div>
+          </div>
+
+        </section>
+
+        <!-- THE FENCE: who came by, who liked it, and the notes they left -->
+        <section ref="{{ tFenceRef }}" style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 22px 22px; transform:rotate({{ rFence }})">
+          <div aria-hidden="true" style="position:absolute; top:-11px; left:-11px; width:15px; height:15px; background:#5a8fd6; border:3px solid #17120b; transform:rotate(45deg)"></div>
+          <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px 20px; flex-wrap:wrap; margin-bottom:16px">
+            <div>
+              <h2 style="margin:0; font-family:'Rye',serif; font-size:24px; font-weight:400">At the fence</h2>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap">
+              <div style="display:flex; align-items:center; gap:8px; background:#fdf7e3; border:3px solid #17120b; box-shadow:3px 4px 0 rgba(60,50,80,0.25); padding:5px 12px 5px 10px; font-size:18px; letter-spacing:1px; transform:rotate(-0.6deg)">
+                <svg width="18" height="16" sc-camel-view-box="0 0 24 22" aria-hidden="true"><path d="M3,2 L21,2 L21,15 L10,15 L5,20 L5,15 L3,15 Z" fill="#ffd23f" stroke="#17120b" stroke-width="2.4" stroke-linejoin="round"></path></svg>
+                <span>{{ noteCount }} NOTES</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:14px; max-height:300px; overflow-y:auto; padding-right:6px">
+            <sc-for list="{{ notes }}" as="n" hint-placeholder-count="3">
+              <div style="display:flex; gap:12px; align-items:flex-start">
+                <div aria-hidden="true" style="flex:none; width:34px; height:34px; background:{{ n.bg }}; color:{{ n.fg }}; border:3px solid #17120b; box-shadow:2px 3px 0 rgba(60,50,80,0.25); display:flex; align-items:center; justify-content:center; font-family:'Rye',serif; font-size:18px; transform:rotate({{ n.rot }})">{{ n.initial }}</div>
+                <div style="min-width:0; flex:1; background:#fffaf0; border:3px solid #17120b; padding:8px 12px 9px; position:relative">
+                  <div aria-hidden="true" style="position:absolute; left:-9px; top:11px; width:10px; height:10px; background:#fffaf0; border-left:3px solid #17120b; border-bottom:3px solid #17120b; transform:rotate(45deg)"></div>
+                  <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:baseline">
+                    <b style="font-size:17px; color:#17120b">{{ n.name }}</b>
+                    <span style="font-size:13px; letter-spacing:1px; color:#4a4054; opacity:0.7">{{ n.when }}</span>
+                  </div>
+                  <div style="font-size:17px; line-height:1.3; color:#3a3342; margin-top:2px; text-wrap:pretty">{{ n.text }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <form sc-camel-on-submit="{{ leaveNote }}" style="display:flex; gap:10px; margin-top:16px; align-items:stretch">
+            <input value="{{ draft }}" sc-camel-on-change="{{ onDraft }}" maxlength="140" placeholder="leave a note on the fence…" aria-label="leave a note" style="flex:1; min-width:0; background:#fffaf0; border:3px solid #17120b; padding:8px 12px; font-family:'VT323',monospace; font-size:18px; color:#17120b; outline:none" style-focus="box-shadow:0 0 0 3px #ffd23f">
+            <button type="submit" style="border:3px solid #17120b; background:#17120b; color:#fdf7e3; font-family:'VT323',monospace; font-size:17px; letter-spacing:1px; padding:6px 16px; cursor:pointer; box-shadow:3px 4px 0 rgba(60,50,80,0.25); white-space:nowrap" style-hover="transform:translate(1px,1px); box-shadow:2px 3px 0 rgba(60,50,80,0.25)">pin it</button>
+          </form>
+        </section>
+
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:28px">
+
+        <section style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate({{ rStand }})">
+          <div aria-hidden="true" style="position:absolute; top:-11px; left:-11px; width:15px; height:15px; background:#e0598c; border:3px solid #17120b; transform:rotate(45deg)"></div>
+          <h2 style="margin:0 0 12px; font-family:'Rye',serif; font-size:20px; font-weight:400">Your standing</h2>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px">
+            <div style="font-size:17px; letter-spacing:2px; color:#e8484a; border:3px solid #e8484a; padding:1px 10px; transform:rotate(-3deg); background:#fdf7e3; flex:none">REGULAR</div>
+            <div style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.75">GNOME IN GOOD STANDING</div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px 10px">
+            <sc-for list="{{ stats }}" as="st" hint-placeholder-count="4">
+              <div>
+                <div style="font-family:'Rye',serif; font-size:23px; line-height:1.1">{{ st.v }}</div>
+                <div style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.8; margin-top:2px">{{ st.k }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section ref="{{ tBadgeRef }}" style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate({{ rBadge }})">
+          <div aria-hidden="true" style="position:absolute; bottom:-11px; left:-11px; width:16px; height:16px; background:#ffd23f; border:3px solid #17120b; border-radius:50%"></div>
+          <h2 style="margin:0; font-family:'Rye',serif; font-size:20px; font-weight:400">Badges &amp; trophies</h2>
+          <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin:2px 0 14px">PINNED TO YOUR FENCE</div>
+          <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:12px">
+            <sc-for list="{{ badges }}" as="b" hint-placeholder-count="6">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:3px; padding:12px 6px 9px; text-align:center; background:{{ b.bg }}; border:{{ b.border }}; box-shadow:{{ b.shadow }}; transform:rotate({{ b.rot }}); opacity:{{ b.op }}">
+                {{ b.art }}
+                <span style="font-size:14.5px; letter-spacing:0.5px; line-height:1.15; color:#17120b; margin-top:3px">{{ b.name }}</span>
+                <span style="font-size:12.5px; letter-spacing:0.5px; color:#4a4054; opacity:0.75">{{ b.sub }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{
+  &quot;jitter&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Look&quot;, &quot;description&quot;: &quot;Slight sticker tilt on cards and tiles&quot;},
+  &quot;captions&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Look&quot;, &quot;description&quot;: &quot;Show the VT323 helper captions&quot;},
+  &quot;plotEmpty&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Plot&quot;, &quot;description&quot;: &quot;Empty plot (hide the sample forest)&quot;},
+  &quot;autoTour&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Tour&quot;, &quot;description&quot;: &quot;Gnome starts the tour on first visit&quot;},
+  &quot;showLockedBadges&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Badges&quot;, &quot;description&quot;: &quot;Show not-yet-earned badges as dashed slots&quot;}
+}">
+/* ── THE PLOT: LAB 2's FOREST, STANDING IN THE YARD ────────────────────────
+   Twenty-three drawings — sixteen trees, four patches of grass, three clumps
+   of mushrooms — lifted out of site/lab2/features/forest.dc.html and stood on
+   this page. The sheet over there is one Design Canvas document with a
+   {{ part }} prop and twenty-three <sc-if> arms; lab 2 points twenty-three
+   iframes at it, one per arm, and gets twenty-three features it can carry
+   about the bench.
+
+   THIS PAGE IS NOT A BENCH AND HAS NO IFRAMES. It is one document, and
+   twenty-three of them would be twenty-three copies of React and of the
+   runtime for twenty-three static drawings. So the SVG came across as SVG:
+   the table below is the export's own markup, part by part, with the four
+   palette holes the sheet fills in ({{ leafMain }}, {{ leafDark }},
+   {{ leafLite }}, {{ capA }}) already filled in at the sheet's own defaults —
+   summer leaves, a red toadstool — and the {{ sparkles }} gate resolved the
+   way its default resolves it, open. Nothing else was touched. Every path,
+   every stroke width and all four animations are the drawing's.
+
+   WHICH MEANS THE SHEET IS STILL THE ORIGINAL. If a tree is redrawn over
+   there this table does not hear about it; re-cutting it is a re-run of the
+   extraction, not a hand edit. That is the price of not shipping twenty-three
+   iframes to a settings page, and it is the right way round: the yard is a
+   place the forest is USED, and lab 2 is where it is kept.
+
+   THE COLUMNS, in order: the part's slug on the sheet (its #part= marker),
+   its name on lab 2, what kind of thing it is, the width and height of its
+   viewBox, THE FOOT — how far down its own viewBox the drawing meets the
+   ground, which is the same number the sheet uses for the sway's pivot — then
+   the default arrangement (x, y and width, all percentages of the plot box),
+   then the drop-shadow, the sway pivot and the animation off the root <svg>,
+   then the drawing. */
+/* the dashboard's picture of this page: no tour, no beacon (tools.js reads the same flag) */
+const EMBED = /[?&]embed\b/.test(location.search);
+/* how long ago, in the page's own capitals */
+function AGO(t) {
+  t = +t || 0; if (!t) return '';
+  const d = Date.now() - t, m = Math.round(d / 60000), h = Math.round(d / 3600000), day = Math.round(d / 86400000);
+  if (m < 1) return 'JUST NOW'; if (m < 60) return m + ' MIN AGO'; if (h < 24) return h + (h === 1 ? ' HOUR AGO' : ' HOURS AGO');
+  if (day === 1) return 'YESTERDAY'; if (day < 7) return day + ' DAYS AGO';
+  if (day < 30) { const w = Math.round(day / 7); return w + (w === 1 ? ' WEEK AGO' : ' WEEKS AGO'); }
+  const mo = Math.round(day / 30); return mo + (mo === 1 ? ' MONTH AGO' : ' MONTHS AGO');
+}
+const FOREST = [
+    ['the-elder', 'The Elder', 'tree', 260, 300, 93.333, 19.5, 61.5, 12.5, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '50% 93.333%', 'sway 6.2s ease-in-out infinite', '<g style="transform-origin: 130px 280px"><path d="M100,268 Q88,272 80,280 L104,280 Z" fill="#8a6a42" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M160,268 Q172,272 180,280 L156,280 Z" fill="#8a6a42" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M108,150 L152,150 L164,272 Q130,284 96,272 Z" fill="#8a6a42" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><circle cx="130" cy="214" r="10" fill="#6e5334" stroke="#17120b" stroke-width="4"></circle><circle cx="130" cy="214" r="3.5" fill="#17120b"></circle><circle cx="85" cy="108" r="52" fill="#7bc264" stroke="#17120b" stroke-width="5"></circle><circle cx="175" cy="108" r="52" fill="#7bc264" stroke="#17120b" stroke-width="5"></circle><circle cx="130" cy="64" r="54" fill="#7bc264" stroke="#17120b" stroke-width="5"></circle><circle cx="130" cy="118" r="56" fill="#7bc264"></circle><circle cx="106" cy="52" r="10" fill="rgba(255,255,255,0.3)"></circle><circle cx="88" cy="84" r="6" fill="rgba(255,255,255,0.3)"></circle><circle cx="86" cy="140" r="7" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><circle cx="168" cy="132" r="7" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><circle cx="142" cy="96" r="7" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle></g>'],
+    ['the-younger', 'The Younger', 'tree', 220, 300, 93.333, 34, 39, 9.5, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '50% 93.333%', 'sway 5.8s ease-in-out infinite 0.4s', '<g style="transform-origin: 110px 280px"><path d="M96,170 L124,170 L132,272 Q110,282 88,272 Z" fill="#8a6a42" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><circle cx="110" cy="224" r="8" fill="#6e5334" stroke="#17120b" stroke-width="4"></circle><circle cx="78" cy="112" r="40" fill="#7bc264" stroke="#17120b" stroke-width="5"></circle><circle cx="142" cy="112" r="40" fill="#7bc264" stroke="#17120b" stroke-width="5"></circle><circle cx="110" cy="54" r="44" fill="#7bc264" stroke="#17120b" stroke-width="5"></circle><circle cx="110" cy="120" r="46" fill="#7bc264"></circle><circle cx="92" cy="42" r="8" fill="rgba(255,255,255,0.3)"></circle><circle cx="80" cy="130" r="6" fill="#ffd23f" stroke="#17120b" stroke-width="3.5"></circle><circle cx="142" cy="90" r="6" fill="#ffd23f" stroke="#17120b" stroke-width="3.5"></circle><circle cx="118" cy="140" r="6" fill="#ffd23f" stroke="#17120b" stroke-width="3.5"></circle></g>'],
+    ['the-broad', 'The Broad', 'tree', 280, 300, 93.333, 79, 39.5, 11, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '50% 93.333%', 'sway 7.4s ease-in-out infinite 1.2s', '<g style="transform-origin: 140px 280px"><path d="M108,268 Q94,272 86,280 L112,280 Z" fill="#8a6a42" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M172,268 Q186,272 194,280 L168,280 Z" fill="#8a6a42" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M116,180 L164,180 L172,268 Q140,280 108,268 Z" fill="#8a6a42" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><circle cx="70" cy="142" r="46" fill="#7bc264" stroke="#17120b" stroke-width="5"></circle><circle cx="210" cy="142" r="46" fill="#7bc264" stroke="#17120b" stroke-width="5"></circle><circle cx="140" cy="98" r="56" fill="#7bc264" stroke="#17120b" stroke-width="5"></circle><circle cx="140" cy="152" r="52" fill="#7bc264"></circle><circle cx="116" cy="82" r="9" fill="rgba(255,255,255,0.3)"></circle><circle cx="62" cy="128" r="6" fill="rgba(255,255,255,0.3)"></circle><circle cx="196" cy="162" r="7" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><circle cx="88" cy="168" r="7" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle></g>'],
+    ['the-ancient', 'The Ancient', 'tree', 280, 300, 93.333, 11, 91, 18, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '50% 93.333%', 'sway 8.2s ease-in-out infinite 2.4s', '<g style="transform-origin: 140px 280px"><path d="M104,268 Q88,272 78,282 L108,282 Z" fill="#8a6a42" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M176,268 Q192,272 202,282 L172,282 Z" fill="#8a6a42" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M118,120 Q92,110 84,88" fill="none" stroke="#17120b" stroke-width="13" stroke-linecap="round"></path><path d="M118,120 Q92,110 84,88" fill="none" stroke="#8a6a42" stroke-width="6" stroke-linecap="round"></path><path d="M110,140 L170,140 L184,270 Q140,284 96,270 Z" fill="#8a6a42" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><circle cx="128" cy="200" r="10" fill="#6e5334" stroke="#17120b" stroke-width="4"></circle><circle cx="128" cy="200" r="3.5" fill="#17120b"></circle><circle cx="156" cy="242" r="7" fill="#6e5334" stroke="#17120b" stroke-width="4"></circle><circle cx="80" cy="118" r="44" fill="#7bc264" stroke="#17120b" stroke-width="5"></circle><circle cx="200" cy="118" r="44" fill="#7bc264" stroke="#17120b" stroke-width="5"></circle><circle cx="106" cy="62" r="42" fill="#7bc264" stroke="#17120b" stroke-width="5"></circle><circle cx="174" cy="62" r="42" fill="#7bc264" stroke="#17120b" stroke-width="5"></circle><circle cx="140" cy="118" r="52" fill="#7bc264"></circle><circle cx="90" cy="48" r="9" fill="rgba(255,255,255,0.3)"></circle><circle cx="206" cy="94" r="6" fill="rgba(255,255,255,0.3)"></circle><circle cx="72" cy="140" r="7" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><circle cx="152" cy="88" r="7" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><circle cx="204" cy="146" r="7" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle></g>'],
+    ['the-pine', 'The Pine', 'tree', 220, 300, 93.333, 40, 63.5, 11.5, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '50% 93.333%', 'sway 7.1s ease-in-out infinite 0.8s', '<g style="transform-origin: 110px 280px"><rect x="97" y="232" width="26" height="44" fill="#8a6a42" stroke="#17120b" stroke-width="5"></rect><path d="M110,130 L152,184 L134,180 L166,220 L146,216 L200,244 L20,244 L74,216 L54,220 L86,180 L68,184 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><path d="M110,66 L146,116 L130,112 L186,180 L34,180 L90,112 L74,116 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><path d="M110,14 L142,64 L128,60 L172,110 L48,110 L92,60 L78,64 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><line x1="88" y1="70" x2="78" y2="86" stroke="rgba(255,255,255,0.3)" stroke-width="4" stroke-linecap="round"></line><line x1="76" y1="140" x2="64" y2="158" stroke="rgba(255,255,255,0.3)" stroke-width="4" stroke-linecap="round"></line><line x1="66" y1="204" x2="52" y2="224" stroke="rgba(255,255,255,0.3)" stroke-width="4" stroke-linecap="round"></line><path d="M60,238 Q70,228 80,238" fill="none" stroke="rgba(23,18,11,0.35)" stroke-width="4" stroke-linecap="round"></path><path d="M126,168 Q136,158 146,168" fill="none" stroke="rgba(23,18,11,0.35)" stroke-width="4" stroke-linecap="round"></path><circle cx="146" cy="222" r="6" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><circle cx="74" cy="158" r="5" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><ellipse cx="98" cy="132" rx="6" ry="10" transform="rotate(-14 98 132)" fill="#8a6a42" stroke="#17120b" stroke-width="3.5"></ellipse><circle cx="110" cy="16" r="10" fill="#fdf7e3" stroke="#17120b" stroke-width="5"></circle></g>'],
+    ['slim-pine', 'Slim Pine', 'tree', 180, 300, 93.333, 19.5, 35.5, 7, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '50% 93.333%', 'sway 6.4s ease-in-out infinite 0.6s', '<g style="transform-origin: 90px 280px"><rect x="80" y="248" width="20" height="30" fill="#8a6a42" stroke="#17120b" stroke-width="5"></rect><path d="M90,168 L146,260 L34,260 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><path d="M90,118 L138,204 L42,204 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><path d="M90,68 L130,148 L50,148 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><path d="M90,20 L122,96 L58,96 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><line x1="76" y1="66" x2="70" y2="80" stroke="rgba(255,255,255,0.3)" stroke-width="4" stroke-linecap="round"></line><line x1="68" y1="164" x2="60" y2="180" stroke="rgba(255,255,255,0.3)" stroke-width="4" stroke-linecap="round"></line><line x1="62" y1="222" x2="54" y2="238" stroke="rgba(255,255,255,0.3)" stroke-width="4" stroke-linecap="round"></line><circle cx="90" cy="22" r="9" fill="#fdf7e3" stroke="#17120b" stroke-width="5"></circle></g>'],
+    ['the-spruce', 'The Spruce', 'tree', 260, 300, 93.333, 7, 64, 13, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '50% 93.333%', 'sway 7.8s ease-in-out infinite 1.8s', '<g style="transform-origin: 130px 280px"><rect x="117" y="252" width="26" height="26" fill="#8a6a42" stroke="#17120b" stroke-width="5"></rect><path d="M130,120 L172,168 L156,164 L206,232 L188,228 L226,256 L34,256 L72,228 L54,232 L104,164 L88,168 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><path d="M130,34 L164,86 L150,82 L192,140 L68,140 L110,82 L96,86 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><line x1="106" y1="80" x2="96" y2="96" stroke="rgba(255,255,255,0.3)" stroke-width="4" stroke-linecap="round"></line><line x1="92" y1="184" x2="80" y2="202" stroke="rgba(255,255,255,0.3)" stroke-width="4" stroke-linecap="round"></line><path d="M86,244 Q96,234 106,244" fill="none" stroke="rgba(23,18,11,0.35)" stroke-width="4" stroke-linecap="round"></path><circle cx="168" cy="236" r="6" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><circle cx="130" cy="36" r="10" fill="#fdf7e3" stroke="#17120b" stroke-width="5"></circle></g>'],
+    ['bent-pine', 'Bent Pine', 'tree', 220, 300, 93.333, 59, 40.5, 8.5, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '50% 93.333%', 'sway 6.9s ease-in-out infinite 1.1s', '<g style="transform-origin: 110px 280px"><path d="M100,246 Q108,262 102,278" fill="none" stroke="#17120b" stroke-width="16" stroke-linecap="round"></path><path d="M100,246 Q108,262 102,278" fill="none" stroke="#8a6a42" stroke-width="9" stroke-linecap="round"></path><path d="M124,140 L160,186 L146,182 L182,232 L166,228 L192,254 L44,254 L62,232 L50,236 L78,186 L66,190 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><path d="M112,64 L142,110 L130,106 L162,150 L58,150 L84,110 L74,114 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><path d="M98,16 L124,58 L114,54 L138,88 L62,88 L82,54 L74,58 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><line x1="86" y1="58" x2="80" y2="70" stroke="rgba(255,255,255,0.3)" stroke-width="4" stroke-linecap="round"></line><line x1="82" y1="126" x2="74" y2="138" stroke="rgba(255,255,255,0.3)" stroke-width="4" stroke-linecap="round"></line><line x1="74" y1="212" x2="64" y2="228" stroke="rgba(255,255,255,0.3)" stroke-width="4" stroke-linecap="round"></line><path d="M128,236 Q138,226 148,236" fill="none" stroke="rgba(23,18,11,0.35)" stroke-width="4" stroke-linecap="round"></path><circle cx="98" cy="18" r="9" fill="#fdf7e3" stroke="#17120b" stroke-width="5"></circle></g>'],
+    ['the-sapling', 'The Sapling', 'tree', 200, 300, 93.333, 66.5, 36.5, 8.5, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '50% 93.333%', 'sway 5.4s ease-in-out infinite 1.4s', '<g style="transform-origin: 100px 280px"><path d="M100,140 Q70,122 60,96" fill="none" stroke="#17120b" stroke-width="11" stroke-linecap="round"></path><path d="M100,140 Q70,122 60,96" fill="none" stroke="#f7f0df" stroke-width="5" stroke-linecap="round"></path><path d="M100,160 Q132,144 142,120" fill="none" stroke="#17120b" stroke-width="11" stroke-linecap="round"></path><path d="M100,160 Q132,144 142,120" fill="none" stroke="#f7f0df" stroke-width="5" stroke-linecap="round"></path><path d="M92,124 L110,124 L114,274 L86,274 Z" fill="#f7f0df" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><line x1="92" y1="156" x2="103" y2="155" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line><line x1="99" y1="188" x2="110" y2="189" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line><line x1="90" y1="220" x2="100" y2="220" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line><line x1="97" y1="250" x2="109" y2="251" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line><circle cx="58" cy="88" r="24" fill="#a8d68a" stroke="#17120b" stroke-width="5"></circle><circle cx="144" cy="110" r="26" fill="#a8d68a" stroke="#17120b" stroke-width="5"></circle><ellipse cx="100" cy="66" rx="48" ry="40" fill="#a8d68a" stroke="#17120b" stroke-width="5"></ellipse><circle cx="82" cy="48" r="8" fill="rgba(255,255,255,0.35)"></circle><g style="transform-origin: 148px 190px; animation: leafFall 3.4s ease-in-out infinite"><ellipse cx="148" cy="190" rx="10" ry="5" transform="rotate(-24 148 190)" fill="#7bc264" stroke="#17120b" stroke-width="3"></ellipse></g></g>'],
+    ['the-leaner', 'The Leaner', 'tree', 200, 300, 93.333, 60, 90, 13.5, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '55% 93.333%', 'sway 5.9s ease-in-out infinite 0.7s', '<g style="transform-origin: 110px 280px"><path d="M96,150 Q64,134 56,110" fill="none" stroke="#17120b" stroke-width="11" stroke-linecap="round"></path><path d="M96,150 Q64,134 56,110" fill="none" stroke="#f7f0df" stroke-width="5" stroke-linecap="round"></path><path d="M84,132 L102,128 L124,270 L98,274 Z" fill="#f7f0df" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><line x1="90" y1="162" x2="101" y2="160" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line><line x1="98" y1="196" x2="109" y2="195" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line><line x1="98" y1="230" x2="109" y2="230" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line><line x1="104" y1="256" x2="116" y2="256" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line><circle cx="54" cy="100" r="26" fill="#a8d68a" stroke="#17120b" stroke-width="5"></circle><ellipse cx="98" cy="76" rx="50" ry="40" fill="#a8d68a" stroke="#17120b" stroke-width="5"></ellipse><circle cx="146" cy="106" r="22" fill="#a8d68a" stroke="#17120b" stroke-width="5"></circle><circle cx="80" cy="58" r="8" fill="rgba(255,255,255,0.35)"></circle><g style="transform-origin: 152px 180px; animation: leafFall 3.8s ease-in-out infinite 0.5s"><ellipse cx="152" cy="180" rx="10" ry="5" transform="rotate(-20 152 180)" fill="#7bc264" stroke="#17120b" stroke-width="3"></ellipse></g></g>'],
+    ['the-twins', 'The Twins', 'tree', 200, 300, 93.333, 42.5, 36.5, 9, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '50% 93.333%', 'sway 6.6s ease-in-out infinite 1.3s', '<g style="transform-origin: 100px 280px"><path d="M80,140 Q72,208 78,272" fill="none" stroke="#17120b" stroke-width="15" stroke-linecap="round"></path><path d="M80,140 Q72,208 78,272" fill="none" stroke="#f7f0df" stroke-width="8" stroke-linecap="round"></path><path d="M120,146 Q128,208 122,272" fill="none" stroke="#17120b" stroke-width="15" stroke-linecap="round"></path><path d="M120,146 Q128,208 122,272" fill="none" stroke="#f7f0df" stroke-width="8" stroke-linecap="round"></path><line x1="72" y1="190" x2="81" y2="189" stroke="#17120b" stroke-width="3.5" stroke-linecap="round"></line><line x1="72" y1="234" x2="81" y2="234" stroke="#17120b" stroke-width="3.5" stroke-linecap="round"></line><line x1="121" y1="200" x2="130" y2="200" stroke="#17120b" stroke-width="3.5" stroke-linecap="round"></line><line x1="119" y1="244" x2="128" y2="245" stroke="#17120b" stroke-width="3.5" stroke-linecap="round"></line><circle cx="64" cy="112" r="34" fill="#a8d68a" stroke="#17120b" stroke-width="5"></circle><circle cx="136" cy="122" r="30" fill="#a8d68a" stroke="#17120b" stroke-width="5"></circle><circle cx="100" cy="76" r="38" fill="#a8d68a" stroke="#17120b" stroke-width="5"></circle><circle cx="84" cy="62" r="7" fill="rgba(255,255,255,0.35)"></circle><circle cx="54" cy="100" r="5" fill="rgba(255,255,255,0.35)"></circle></g>'],
+    ['the-sprout', 'The Sprout', 'tree', 160, 240, 91.667, 5, 36.5, 7.5, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '50% 91.667%', 'sway 4.6s ease-in-out infinite 0.3s', '<g style="transform-origin: 80px 220px"><path d="M74,140 L88,138 L94,214 L74,216 Z" fill="#f7f0df" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><line x1="76" y1="164" x2="86" y2="163" stroke="#17120b" stroke-width="3.5" stroke-linecap="round"></line><line x1="80" y1="192" x2="90" y2="192" stroke="#17120b" stroke-width="3.5" stroke-linecap="round"></line><path d="M80,142 Q56,132 50,112" fill="none" stroke="#17120b" stroke-width="9" stroke-linecap="round"></path><path d="M80,142 Q56,132 50,112" fill="none" stroke="#f7f0df" stroke-width="4" stroke-linecap="round"></path><ellipse cx="48" cy="104" rx="14" ry="9" transform="rotate(-30 48 104)" fill="#7bc264" stroke="#17120b" stroke-width="4"></ellipse><ellipse cx="80" cy="76" rx="38" ry="32" fill="#a8d68a" stroke="#17120b" stroke-width="5"></ellipse><circle cx="112" cy="102" r="16" fill="#a8d68a" stroke="#17120b" stroke-width="5"></circle><circle cx="66" cy="62" r="6" fill="rgba(255,255,255,0.35)"></circle><circle cx="96" cy="60" r="5" fill="#ffd23f" stroke="#17120b" stroke-width="3"></circle></g>'],
+    ['the-oak', 'The Oak', 'tree', 270, 300, 93.333, 53.5, 66.5, 13.5, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '50% 93.333%', 'sway 6.8s ease-in-out infinite 2s', '<g style="transform-origin: 135px 280px"><path d="M122,160 L104,120 Q100,110 106,102" fill="none" stroke="#17120b" stroke-width="14" stroke-linecap="round"></path><path d="M122,160 L104,120 Q100,110 106,102" fill="none" stroke="#8a6a42" stroke-width="7" stroke-linecap="round"></path><path d="M148,160 L170,124 Q176,114 172,104" fill="none" stroke="#17120b" stroke-width="14" stroke-linecap="round"></path><path d="M148,160 L170,124 Q176,114 172,104" fill="none" stroke="#8a6a42" stroke-width="7" stroke-linecap="round"></path><path d="M112,148 L158,148 L176,270 Q135,284 94,270 Z" fill="#8a6a42" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><path d="M94,270 Q80,270 70,280 L100,280 Z" fill="#8a6a42" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M176,270 Q190,270 200,280 L170,280 Z" fill="#8a6a42" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M135,148 L135,262" stroke="rgba(23,18,11,0.18)" stroke-width="3"></path><path d="M135,10 Q186,10 200,44 Q244,48 240,90 Q258,116 234,136 Q228,164 194,158 Q170,180 135,164 Q100,180 76,158 Q42,164 36,136 Q12,116 30,90 Q26,48 70,44 Q84,10 135,10 Z" fill="#7bc264" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><path d="M84,46 Q104,32 128,36" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="5" stroke-linecap="round"></path><circle cx="70" cy="112" r="7" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><circle cx="196" cy="118" r="7" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><circle cx="132" cy="132" r="7" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><ellipse cx="164" cy="72" rx="7" ry="11" transform="rotate(18 164 72)" fill="#4e8c3f" stroke="#17120b" stroke-width="3.5"></ellipse><ellipse cx="96" cy="86" rx="7" ry="11" transform="rotate(-22 96 86)" fill="#4e8c3f" stroke="#17120b" stroke-width="3.5"></ellipse></g>'],
+    ['the-acorn', 'The Acorn', 'tree', 270, 300, 93.333, 12, 40, 10.5, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '50% 93.333%', 'sway 7s ease-in-out infinite 0.9s', '<g style="transform-origin: 135px 280px"><path d="M116,150 L154,150 L170,270 Q135,282 100,270 Z" fill="#8a6a42" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><path d="M100,270 Q86,270 76,280 L106,280 Z" fill="#8a6a42" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M170,270 Q184,270 194,280 L164,280 Z" fill="#8a6a42" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M135,150 L135,262" stroke="rgba(23,18,11,0.18)" stroke-width="3"></path><path d="M135,16 Q196,16 214,58 Q248,78 236,116 Q240,152 200,160 Q170,182 135,168 Q100,182 70,160 Q30,152 34,116 Q22,78 56,58 Q74,16 135,16 Z" fill="#7bc264" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><path d="M88,44 Q110,30 136,34" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="5" stroke-linecap="round"></path><line x1="100" y1="168" x2="100" y2="180" stroke="#17120b" stroke-width="3.5" stroke-linecap="round"></line><ellipse cx="100" cy="190" rx="7" ry="10" fill="#d9a441" stroke="#17120b" stroke-width="3.5"></ellipse><path d="M92,184 Q100,178 108,184" fill="none" stroke="#8a6a42" stroke-width="6" stroke-linecap="round"></path><line x1="176" y1="164" x2="176" y2="174" stroke="#17120b" stroke-width="3.5" stroke-linecap="round"></line><ellipse cx="176" cy="184" rx="6" ry="9" fill="#d9a441" stroke="#17120b" stroke-width="3.5"></ellipse><path d="M169,178 Q176,173 183,178" fill="none" stroke="#8a6a42" stroke-width="5" stroke-linecap="round"></path></g>'],
+    ['the-hollow', 'The Hollow', 'tree', 270, 300, 93.333, 80, 64.5, 13, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '50% 93.333%', 'sway 7.6s ease-in-out infinite 1.7s', '<g style="transform-origin: 135px 280px"><path d="M108,140 L162,140 L184,270 Q135,286 86,270 Z" fill="#8a6a42" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><path d="M86,270 Q72,270 62,280 L92,280 Z" fill="#8a6a42" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M184,270 Q198,270 208,280 L178,280 Z" fill="#8a6a42" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M120,274 Q120,238 135,238 Q150,238 150,274 Z" fill="#c25e48" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><circle cx="144" cy="258" r="2.8" fill="#ffd23f" stroke="#17120b" stroke-width="2"></circle><path d="M135,10 Q186,10 200,44 Q244,48 240,90 Q258,116 234,136 Q228,164 194,158 Q170,180 135,164 Q100,180 76,158 Q42,164 36,136 Q12,116 30,90 Q26,48 70,44 Q84,10 135,10 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><path d="M84,42 Q104,28 128,32" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="5" stroke-linecap="round"></path><circle cx="76" cy="110" r="7" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><circle cx="190" cy="120" r="7" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><g style="transform-origin: 214px 190px; animation: leafFall 3.6s ease-in-out infinite 0.8s"><ellipse cx="214" cy="190" rx="10" ry="5" transform="rotate(-18 214 190)" fill="#7bc264" stroke="#17120b" stroke-width="3"></ellipse></g></g>'],
+    ['the-gnarled', 'The Gnarled', 'tree', 270, 300, 93.333, 36, 87.5, 16.5, 'drop-shadow(6px 7px 0 rgba(0,0,0,0.3))', '50% 93.333%', 'sway 8s ease-in-out infinite 2.1s', '<g style="transform-origin: 135px 280px"><path d="M126,168 Q92,150 84,118" fill="none" stroke="#17120b" stroke-width="17" stroke-linecap="round"></path><path d="M126,168 Q92,150 84,118" fill="none" stroke="#8a6a42" stroke-width="9" stroke-linecap="round"></path><path d="M146,168 Q184,152 192,122" fill="none" stroke="#17120b" stroke-width="17" stroke-linecap="round"></path><path d="M146,168 Q184,152 192,122" fill="none" stroke="#8a6a42" stroke-width="9" stroke-linecap="round"></path><path d="M118,160 Q108,196 120,226 Q112,252 118,272 L156,272 Q164,246 154,222 Q166,192 152,160 Z" fill="#8a6a42" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><circle cx="136" cy="204" r="9" fill="#6e5334" stroke="#17120b" stroke-width="4"></circle><circle cx="136" cy="204" r="3" fill="#17120b"></circle><path d="M118,272 Q104,272 94,282 L124,282 Z" fill="#8a6a42" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M156,272 Q170,272 180,282 L150,282 Z" fill="#8a6a42" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><ellipse cx="74" cy="102" rx="40" ry="32" fill="#7bc264" stroke="#17120b" stroke-width="5"></ellipse><ellipse cx="200" cy="106" rx="38" ry="30" fill="#7bc264" stroke="#17120b" stroke-width="5"></ellipse><ellipse cx="137" cy="58" rx="46" ry="36" fill="#7bc264" stroke="#17120b" stroke-width="5"></ellipse><circle cx="118" cy="44" r="8" fill="rgba(255,255,255,0.35)"></circle><circle cx="60" cy="90" r="5" fill="rgba(255,255,255,0.35)"></circle><circle cx="90" cy="118" r="6" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><circle cx="192" cy="90" r="6" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><g style="transform-origin: 226px 170px; animation: leafFall 4s ease-in-out infinite 1.2s"><ellipse cx="226" cy="170" rx="10" ry="5" transform="rotate(-16 226 170)" fill="#7bc264" stroke="#17120b" stroke-width="3"></ellipse></g></g>'],
+    ['tall-tuft', 'Tall Tuft', 'grass', 220, 130, 90.769, 30, 66, 8.5, 'drop-shadow(5px 6px 0 rgba(0,0,0,0.3))', '50% 90.769%', 'sway 4.8s ease-in-out infinite', '<g style="transform-origin: 110px 118px"><line x1="170" y1="116" x2="176" y2="74" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line><path d="M62,118 Q58,74 70,52 Q78,88 78,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M82,118 Q80,60 96,34 Q100,80 98,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M104,118 Q102,48 116,22 Q124,74 120,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M126,118 Q130,58 146,44 Q142,90 140,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M146,118 Q152,80 166,66 Q158,100 158,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><circle cx="177" cy="68" r="9" fill="#ffd23f" stroke="#17120b" stroke-width="4"></circle><circle cx="177" cy="68" r="3.5" fill="#d9a441" stroke="#17120b" stroke-width="2"></circle></g><path d="M46,118 L184,118" stroke="#17120b" stroke-width="5" stroke-linecap="round"></path>'],
+    ['meadow-mound', 'Meadow Mound', 'grass', 220, 130, 92.308, 84, 88.5, 10.5, 'drop-shadow(5px 6px 0 rgba(0,0,0,0.3))', '', '', '<path d="M55,100 Q54,72 64,58 Q70,84 68,100 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M84,92 Q84,58 96,44 Q102,74 98,92 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M112,90 Q112,54 124,42 Q130,72 126,92 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M142,96 Q144,66 156,56 Q158,84 154,98 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M14,120 Q110,76 206,120 Z" fill="#a07a4a" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><ellipse cx="66" cy="111" rx="13" ry="8" fill="#c9c3b4" stroke="#17120b" stroke-width="4"></ellipse><ellipse cx="152" cy="113" rx="9" ry="6" fill="#c9c3b4" stroke="#17120b" stroke-width="4"></ellipse><circle cx="110" cy="104" r="5" fill="#e8484a" stroke="#17120b" stroke-width="3"></circle>'],
+    ['wild-sprigs', 'Wild Sprigs', 'grass', 220, 130, 90.769, 48, 95, 10.5, 'drop-shadow(5px 6px 0 rgba(0,0,0,0.3))', '50% 90.769%', 'sway 5.6s ease-in-out infinite 0.9s', '<g style="transform-origin: 110px 118px"><line x1="96" y1="116" x2="92" y2="58" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line><circle cx="90" cy="52" r="4.5" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></circle><circle cx="97" cy="46" r="4.5" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></circle><circle cx="86" cy="44" r="4.5" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></circle><path d="M34,118 Q32,84 44,68 Q50,98 48,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M62,118 Q62,70 76,50 Q80,92 76,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M118,118 Q118,72 132,54 Q138,94 132,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M148,118 Q150,86 164,72 Q160,102 158,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><line x1="174" y1="116" x2="180" y2="88" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line><circle cx="181" cy="82" r="6" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><line x1="52" y1="116" x2="46" y2="94" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line><circle cx="45" cy="88" r="6" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle></g><path d="M26,118 L192,118" stroke="#17120b" stroke-width="5" stroke-linecap="round"></path>'],
+    ['plain-blades', 'Plain Blades', 'grass', 220, 130, 90.769, 66, 61, 8, 'drop-shadow(5px 6px 0 rgba(0,0,0,0.3))', '50% 90.769%', 'sway 5.2s ease-in-out infinite 1.6s', '<g style="transform-origin: 110px 118px"><path d="M24,118 Q22,82 32,64 Q38,96 38,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M42,118 Q40,66 54,42 Q60,88 58,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M62,118 Q62,78 74,58 Q78,94 76,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M80,118 Q78,54 94,28 Q100,76 96,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M100,118 Q100,70 112,48 Q118,90 114,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M118,118 Q118,50 134,26 Q140,74 136,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M140,118 Q140,74 152,54 Q158,94 154,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M158,118 Q158,80 170,62 Q174,96 172,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M176,118 Q178,90 188,76 Q188,102 186,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path></g>'],
+    ['grand-toadstool', 'Grand Toadstool', 'shroom', 220, 170, 90.588, 26, 96, 10.5, 'drop-shadow(5px 6px 0 rgba(0,0,0,0.3))', '', '', '<g style="animation: bob 4.4s ease-in-out infinite"><path d="M82,152 Q78,112 84,90 L114,90 Q120,112 116,152 Q99,160 82,152 Z" fill="#f7f0df" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><path d="M99,20 Q158,26 164,80 Q99,102 34,80 Q40,26 99,20 Z" fill="#e8484a" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><circle cx="76" cy="50" r="8" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></circle><circle cx="122" cy="44" r="6" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></circle><circle cx="100" cy="68" r="5" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></circle><circle cx="52" cy="66" r="4" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></circle></g><g style="animation: bob 4.4s ease-in-out infinite 0.7s"><rect x="158" y="124" width="15" height="30" rx="5" fill="#f7f0df" stroke="#17120b" stroke-width="4"></rect><path d="M165,96 Q192,100 194,124 L136,124 Q138,100 165,96 Z" fill="#e8484a" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><circle cx="164" cy="110" r="4" fill="#fdf7e3" stroke="#17120b" stroke-width="2.5"></circle></g><path d="M26,152 Q24,132 32,122 Q36,142 36,154 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M42,154 Q44,136 54,128 Q52,146 50,156 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path>'],
+    ['honey-caps', 'Honey Caps', 'shroom', 220, 170, 89.412, 71, 96, 10, 'drop-shadow(5px 6px 0 rgba(0,0,0,0.3))', '', '', '<g style="animation: bob 5s ease-in-out infinite 0.3s"><rect x="52" y="92" width="16" height="60" rx="6" fill="#f7f0df" stroke="#17120b" stroke-width="4"></rect><path d="M60,44 Q96,46 98,90 L22,90 Q24,46 60,44 Z" fill="#ffd23f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><circle cx="48" cy="64" r="2.8" fill="#d9a441"></circle><circle cx="70" cy="58" r="2.8" fill="#d9a441"></circle><circle cx="60" cy="76" r="2.8" fill="#d9a441"></circle></g><g style="animation: bob 5s ease-in-out infinite"><rect x="117" y="78" width="16" height="74" rx="6" fill="#f7f0df" stroke="#17120b" stroke-width="4"></rect><path d="M125,28 Q163,30 165,76 L85,76 Q87,30 125,28 Z" fill="#ffd23f" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><circle cx="112" cy="48" r="2.8" fill="#d9a441"></circle><circle cx="138" cy="44" r="2.8" fill="#d9a441"></circle><circle cx="126" cy="62" r="2.8" fill="#d9a441"></circle><line x1="103" y1="44" x2="112" y2="38" stroke="rgba(255,255,255,0.5)" stroke-width="3.5" stroke-linecap="round"></line></g><g style="animation: bob 5s ease-in-out infinite 0.9s"><rect x="174" y="120" width="14" height="32" rx="5" fill="#f7f0df" stroke="#17120b" stroke-width="4"></rect><path d="M181,86 Q206,88 208,116 L154,116 Q156,88 181,86 Z" fill="#ffd23f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><circle cx="176" cy="102" r="2.5" fill="#d9a441"></circle></g>'],
+    ['pink-bonnets', 'Pink Bonnets', 'shroom', 220, 170, 88.235, 92, 95, 9.5, 'drop-shadow(5px 6px 0 rgba(0,0,0,0.3))', '', '', '<g style="animation: bob 4.6s ease-in-out infinite"><path d="M96,80 Q92,120 84,150" fill="none" stroke="#17120b" stroke-width="13" stroke-linecap="round"></path><path d="M96,80 Q92,120 84,150" fill="none" stroke="#f7f0df" stroke-width="6" stroke-linecap="round"></path><path d="M70,72 Q70,26 98,26 Q126,26 126,72 Q98,86 70,72 Z" fill="#f5b8c4" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path><line x1="82" y1="42" x2="88" y2="36" stroke="rgba(255,255,255,0.55)" stroke-width="3.5" stroke-linecap="round"></line></g><g style="animation: bob 4.6s ease-in-out infinite 0.5s"><path d="M148,96 Q152,126 158,150" fill="none" stroke="#17120b" stroke-width="12" stroke-linecap="round"></path><path d="M148,96 Q152,126 158,150" fill="none" stroke="#f7f0df" stroke-width="5.5" stroke-linecap="round"></path><path d="M128,90 Q128,54 150,54 Q172,54 172,90 Q150,101 128,90 Z" fill="#f5b8c4" stroke="#17120b" stroke-width="4.5" stroke-linejoin="round"></path></g><g style="animation: bob 4.6s ease-in-out infinite 1s"><path d="M48,110 Q46,132 50,150" fill="none" stroke="#17120b" stroke-width="11" stroke-linecap="round"></path><path d="M48,110 Q46,132 50,150" fill="none" stroke="#f7f0df" stroke-width="5" stroke-linecap="round"></path><path d="M32,106 Q32,76 50,76 Q68,76 68,106 Q50,115 32,106 Z" fill="#f5b8c4" stroke="#17120b" stroke-width="4.5" stroke-linejoin="round"></path></g><g style="animation: twinkle 2.1s ease-in-out infinite 0.4s"><rect x="182" y="40" width="9" height="9" transform="rotate(45 186.5 44.5)" fill="#ffd23f" stroke="#17120b" stroke-width="3"></rect><circle cx="26" cy="52" r="4" fill="#bfe3f0" stroke="#17120b" stroke-width="3"></circle><circle cx="196" cy="122" r="4" fill="#bfe3f0" stroke="#17120b" stroke-width="3"></circle></g>'],
+].map(function (r) {
+  return { id: r[0], name: r[1], kind: r[2], vw: r[3], vh: r[4], foot: r[5],
+           home: { x: r[6], y: r[7], w: r[8] },
+           shadow: r[9], pivot: r[10], anim: r[11], art: r[12] };
+});
+
+const BY_ID = {};
+FOREST.forEach(function (p) { BY_ID[p.id] = p; });
+function CLAMP(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+/* A LAYOUT OFF THE DISK IS NOT TRUSTED. The settings blob is safe because it
+   is merged OVER a full default object, so a missing or junk field can only
+   ever be the default; a layout has no shape to merge into, so it is checked
+   by hand. Anything that is not a plain object of finite x/y is dropped, and
+   the piece falls back to where FOREST puts it. A key half-written by a
+   browser that ran out of quota, or edited by hand in devtools, should cost
+   one tree its position — not turn the whole plot into `left: NaN%`. */
+function TIDY(v) {
+  const out = {};
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return out;
+  Object.keys(v).forEach(function (k) {
+    const s = v[k];
+    if (!s || typeof s !== 'object') return;
+    const x = +s.x, y = +s.y;
+    if (!isFinite(x) || !isFinite(y)) return;
+    out[k] = { x: CLAMP(x, 1, 99), y: CLAMP(y, 8, 99) };
+  });
+  return out;
+}
+
+/* THE TOUR: four stops. The gnome points at each; the card beside it describes it. Copy is dummy for now. */
+const TOUR = [
+  { key: 'plot', where: 'inside', title: 'Your Plot', body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is your patch of the hill: drag trees and tufts about to arrange it.' },
+  { key: 'k', where: 'right', title: 'Your mark', body: 'Lorem ipsum dolor sit amet, consectetur. The K is your signature on the hill, stamped on everything you plant or leave behind.' },
+  { key: 'badge', where: 'left', title: 'Badges & trophies', body: 'Lorem ipsum dolor sit amet, consectetur adipiscing. What the hill has pinned to your fence so far, and what is still locked.' },
+  { key: 'visit', where: 'left', title: "Spaces you've visited", body: 'Lorem ipsum dolor sit amet, consectetur. Every hollow, ring and patch you have wandered into, newest first.' }
+];
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.C = { INK: '#17120b', CREAM: '#fdf7e3', RED: '#e8484a', YEL: '#ffd23f', GRN: '#7bc264', BLU: '#5a8fd6', PNK: '#e0598c' };
+    this.K = { settings: 'knoll-yardview:settings', plot: 'knoll-yardview:plot', mine: 'knoll-yardview:plot-default' };
+    const load = (k, f) => { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : f; } catch (e) { return f; } };
+    this.state = {
+      settings: Object.assign({ displayName: '', emailReplies: false, showActivity: true, reduceMotion: false }, load(this.K.settings, {})),
+      drawerOpen: false, signoutNote: false,
+      /* where the trees are now, what you kept, what is in the air, and
+         the word on the save button — see THE TWO PLACES A LAYOUT LIVES. */
+      spots: TIDY(load(this.K.plot, null)),
+      mine: load(this.K.mine, null) === null ? null : TIDY(load(this.K.mine, null)),
+      held: null, saveWord: 'save layout', keptAt: null,
+      tour: -1, pos: null, hoverHill: -1,
+      liked: !!load('knoll-yardview:liked:' + (window.YARD_HILL || 'yard'), false), likes: 0,   // a like is per yard views: null, fenceLive: false, draft: '',
+      notes: []
+    };
+    this.el = {};
+    const ref = (k) => (el) => { this.el[k] = el; };
+    this.R = { gnome: ref('gnome'), k: ref('k'), plot: ref('plot'), badge: ref('badge'), visit: ref('visit'), fence: ref('fence') };
+    this.carry = null;
+    this.art = {};
+    const self = this;
+    FOREST.forEach(function (p) { self.art[p.id] = self.drawing(p); });
+    /* THE DOCK (tools.js, 2026-09-17). The forest is the sticker drawer's first
+       kit — the same twenty-three drawings, stamped anywhere on the page — and
+       this component is what the dock's seed and publish talk to. */
+    window.yard = this;
+    if (window.YardTools) YardTools.forest(FOREST);
+  }
+  save(k, v) {
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+    // where the trees stand is part of the published page: a move marks it unsaved (tools.js)
+    if (window.YardTools && (k === this.K.plot || k === this.K.mine)) YardTools.touch();
+  }
+  forget(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  /* ── YARD FIX 6 of 10 (see about.md § changes to the export) ──────────────
+     THE ONE QUESTION "IS THIS PAGE MEANT TO BE STILL?", asked in the three
+     places the gnome and the tour move. The drawer has promised "Reduce motion
+     (calmer wobbles and pops)" since the page was built, and until now it
+     reached exactly one thing: `.plot-still` on the plot, killing the sways.
+     The plot is empty as this ships, so with the switch on the page was calm
+     everywhere it had been asked to be calm and nowhere it now moves — a gnome
+     whose head, eyes and arm track your cursor continuously and unprompted,
+     an arm that springs across the screen at every tour stop, and a smooth
+     scroll that takes the page with it. Verified in Chrome with the switch on:
+     the head still turned and the arm still animated.
+
+     Both halves of the promise are honoured, as they are for the plot: the
+     drawer's switch, and the operating system's, which says the same thing
+     without being asked. Reading matchMedia can throw in a sandboxed frame,
+     hence the try. */
+  calm() {
+    if (this.state.settings.reduceMotion) return true;
+    try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; }
+  }
+  componentDidMount() {
+    this._key = (e) => {
+      /* ── YARD FIX 4 of 10 (see about.md § changes to the export) ──────────
+         ESCAPE BELONGS TO THE TOP LAYER, and these two arms were the other way
+         round. The settings drawer is position:fixed at z-index 21 over a scrim
+         at 20; a running tour is under both. Open the drawer during a tour and
+         the first Escape reached past the thing in front of you and ended the
+         tour, leaving the drawer standing — verified in Chrome: after one
+         Escape, tour false, drawer still true. Swapping the arms is the whole
+         fix, and it keeps both single-layer cases exactly as they were.
+         The order below is the paint order read from the top down. */
+      if (e.key === 'Escape' && this.state.drawerOpen) this.setState({ drawerOpen: false, signoutNote: false });
+      else if (e.key === 'Escape' && this.state.tour >= 0) this.endTour();
+    };
+    window.addEventListener('keydown', this._key);
+    /* YARD FIX 7 of 10 (see about.md § changes to the export). A resize has to
+       re-place the bubble and the arm — the thing they point at has moved —
+       but `place()` also ends by scrolling the page to the current step, and
+       that is a thing to do when the STEP changes, not when the WINDOW does.
+       Measured: scrolled to 1283 during a tour, resized the window, landed
+       back at 594. Rotating a phone or dragging a desktop window edge threw
+       the reader back to the step they had already scrolled away from.
+       `_noScroll` is read by the one `scrollTo` at the foot of place(). */
+    this._size = () => { this._noScroll = true; this.place(); this._noScroll = false; };
+    window.addEventListener('resize', this._size);
+    // head + eyes follow the cursor (throttled to one frame)
+    this._mouse = (e) => {
+      /* YARD FIX 6 of 10. First line, before the rect: a page asked to be still
+         should not be reading layout on every mousemove either. */
+      if (this.calm()) return;
+      const g = this.el.gnome; if (!g) return;
+      const gr = g.getBoundingClientRect(), k = gr.width / 220;
+      const dx = e.clientX - (gr.left + 110 * k), dy = e.clientY - (gr.top + 115 * k);
+      let r = Math.atan2(e.clientY - (gr.top + 172 * k), e.clientX - (gr.left + 72 * k)) * 57.3 - 180; if (r <= -180) r += 360;
+      const look = { head: CLAMP(Math.atan2(dx, 320) * 57.3, -14, 14), eye: CLAMP(dx / 60, -4, 4), eyeY: CLAMP(dy / 90, -3, 3), armL: CLAMP(r, -120, 110) };
+      if (this._raf) return;
+      this._raf = requestAnimationFrame(() => { this._raf = 0; this.setState({ look: look }); });
+    };
+    window.addEventListener('mousemove', this._mouse);
+    if (window.YardTools) { YardTools.mounted(this); if (!EMBED) this.loadFence(); }
+  }
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this._key);
+    window.removeEventListener('resize', this._size);
+    window.removeEventListener('mousemove', this._mouse);
+    /* Both loops, not one. `endTour` cancels _armRaf and this did not, so a
+       component torn down mid-tour left the spring queued to setState on it.
+       Nothing unmounts this page today — it is one document with one component
+       — so it is a tidy rather than a fix, and it is here because the pairing
+       is the point: every rAF started has a cancel in the same method. */
+    cancelAnimationFrame(this._raf); cancelAnimationFrame(this._armRaf);
+    clearTimeout(this._flash); clearTimeout(this._auto); clearTimeout(this._propose);
+  }
+  setSettings(patch) {
+    const settings = Object.assign({}, this.state.settings, patch);
+    this.setState({ settings });
+    this.save(this.K.settings, settings);
+    // the two names are published with the page; the three switches are this device's
+    if (window.YardTools && (patch.displayName != null || patch.plotName != null)) YardTools.touch();
+  }
+
+  /* ── CARRYING A TREE ─────────────────────────────────────────────────────
+     Pointer capture, and then the numbers are written STRAIGHT ONTO THE NODE
+     until the thing is put down. A drag is sixty of these a second and the
+     other twenty-two drawings have not moved; going through setState for each
+     one would re-walk the whole template to change two percentages. React
+     writes the same two numbers back on the drop, off `spots`, so the node
+     and the state are never out of step for longer than a carry.
+
+     e.currentTarget, and never getElementById: the piece that got the
+     pointerdown IS the node to move, and this document may or may not be the
+     one the ids are in. */
+  grab(e, id) {
+    // one at a time: a second finger down mid-carry would take the first one's
+    // grab offset with it and the first tree would jump.
+    if (this.carry) return;
+    if (e.button != null && e.button !== 0) return;
+    const el = e.currentTarget, box = el.closest && el.closest('.plot-yard');
+    if (!box) return;
+    const r = box.getBoundingClientRect();
+    const s = this.spot(id);
+    this.carry = { id: id, el: el, box: box, at: null,
+      dx: s.x - (e.clientX - r.left) / r.width * 100,
+      dy: s.y - (e.clientY - r.top) / r.height * 100 };
+    try { el.setPointerCapture(e.pointerId); } catch (err) {}
+    e.preventDefault();
+    this.setState({ held: id });
+  }
+  haul(e, id) {
+    const d = this.carry;
+    if (!d || d.id !== id) return;
+    /* the box is re-measured every move rather than cached at the grab: the
+       wheel still scrolls the page while a tree is in the air, and a rect read
+       once at pointerdown would slide the tree by however far the page went.
+       dx/dy are in percent-of-box and survive the re-read unchanged. */
+    const r = d.box.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    d.at = {
+      x: CLAMP((e.clientX - r.left) / r.width * 100 + d.dx, 1, 99),
+      y: CLAMP((e.clientY - r.top) / r.height * 100 + d.dy, 8, 99)
+    };
+    d.el.style.left = d.at.x + '%';
+    d.el.style.top = d.at.y + '%';
+  }
+  letGo(e, id) {
+    const d = this.carry;
+    if (!d || d.id !== id) return;
+    this.carry = null;
+    try { d.el.releasePointerCapture(e.pointerId); } catch (err) {}
+    if (d.at) this.moveTo(id, d.at);
+    else this.setState({ held: null });
+  }
+  /* Arrows move a focused piece a percent at a time, shift five. The plot is
+     twenty-three things you position and there is no reason it should need a
+     mouse to do it. */
+  nudge(e, id) {
+    const step = e.shiftKey ? 5 : 1, s = this.spot(id);
+    let x = s.x, y = s.y;
+    if (e.key === 'ArrowLeft') x -= step;
+    else if (e.key === 'ArrowRight') x += step;
+    else if (e.key === 'ArrowUp') y -= step;
+    else if (e.key === 'ArrowDown') y += step;
+    else return;
+    e.preventDefault();
+    this.moveTo(id, { x: CLAMP(x, 1, 99), y: CLAMP(y, 8, 99) });
+  }
+
+  /* ── THE TWO PLACES A LAYOUT LIVES ───────────────────────────────────────
+     Lab 2 keeps where everything is in localStorage and keeps THE DEFAULT
+     LOOK in index.html, and `save layout` promotes the first into the second
+     through a door in serve.js. A page cannot write the file it was served
+     from, so out on the deployed site that button is not there at all.
+
+     This page has the same two tiers and neither of them is the file, because
+     a yard is one person's and this one is scoped to this device the way
+     everything else here is. knoll-yardview:plot is where the trees are RIGHT
+     NOW — written on every drop, so a drag is never lost to a reload.
+     knoll-yardview:plot-default is the arrangement you KEPT, which is what `reset
+     layout` comes back to. Never having pressed save leaves the second empty,
+     and then the default is the one written down in FOREST above — the
+     arrangement this page ships with, and the one a first visit gets. */
+  spot(id) {
+    const p = BY_ID[id];
+    return (this.state.spots && this.state.spots[id]) || (p && p.home) || { x: 50, y: 50 };
+  }
+  /* one string for a whole arrangement, resolved against the shipped one, so
+     'has it moved off its default' is a comparison and not a walk. */
+  mark(spots) {
+    return FOREST.map(function (p) {
+      const s = (spots && spots[p.id]) || p.home;
+      return p.id + ':' + s.x + ',' + s.y;
+    }).join('|');
+  }
+  moveTo(id, at) {
+    const spots = Object.assign({}, this.state.spots);
+    spots[id] = { x: Math.round(at.x * 10) / 10, y: Math.round(at.y * 10) / 10 };
+    this.setState({ spots: spots, held: null });
+    this.save(this.K.plot, spots);
+  }
+  /* keep.js flashes 'saved ✓' when it wrote and 'no change' when there was
+     nothing to write, and the second word is the one worth copying: a save
+     that did nothing and a save that did something look identical on a page
+     where the trees have not moved, and telling them apart is the difference
+     between a working button and a suspected broken one. */
+  /* SAVE YARD (2026-09-17). Two things at once, in this order: the arrangement
+     of the trees is kept as the default on this device, exactly as it was —
+     and then the WHOLE PAGE goes through the publish door (tools.js: publish),
+     so everyone who opens it sees the wall, the trees and the names as they
+     stand now. The button's face says what happened, for a beat; a door that
+     refuses says why, for longer. */
+  savePlot() {
+    const self = this;
+    const plotMoved = this.mark(this.state.spots) !== this.mark(this.state.mine);
+    if (plotMoved) {
+      const mine = {};
+      FOREST.forEach(function (p) { const s = self.spot(p.id); mine[p.id] = { x: s.x, y: s.y }; });
+      this.setState({ mine: mine, keptAt: new Date().toTimeString().slice(0, 5) });
+      this.save(this.K.mine, mine);
+    }
+    if (!window.YardTools) { this.said(plotMoved ? 'saved ✓' : 'no change'); return; }
+    if (!plotMoved && !YardTools.dirty()) { this.said('no change'); return; }
+    YardTools.publish(function (word, ms) { self.said(word, ms); });
+  }
+  // what of this component goes into the published doc (tools.js: collect)
+  collectDoc() {
+    const self = this, s = this.state.settings, plot = {};
+    FOREST.forEach(function (p) { const sp = self.spot(p.id); plot[p.id] = { x: sp.x, y: sp.y }; });
+    return { plot: plot, name: s.displayName || '', plotName: s.plotName || '' };
+  }
+  // …and the published doc, laid onto this component (tools.js: apply)
+  applyDoc(doc) {
+    if (!doc) return;
+    const plot = doc.plot && Object.keys(doc.plot).length ? TIDY(doc.plot) : null;
+    const patch = {};
+    if (doc.name) patch.displayName = String(doc.name).slice(0, 24);
+    if (doc.plotName) patch.plotName = String(doc.plotName).slice(0, 28);
+    const settings = Object.assign({}, this.state.settings, patch);
+    this.setState({ spots: plot ? JSON.parse(JSON.stringify(plot)) : {}, mine: plot, settings: settings, held: null });
+    if (plot) { this.save(this.K.plot, plot); this.save(this.K.mine, plot); } else { this.forget(this.K.plot); this.forget(this.K.mine); }
+    if (Object.keys(patch).length) this.save(this.K.settings, settings);
+  }
+  /* YARD VIEW: the standing and the badges are the OWNER'S, so they are
+     counted off the published page (tools.js keeps it as YardTools.published)
+     and not off the live wall — a visitor's own strokes never move them. */
+  pieces() { try { const d = window.YardTools && YardTools.published; return ((d && d.wall && d.wall.items) || []).filter(Boolean); } catch (e) { return []; } }
+  streak(ts) {
+    const days = {};
+    ts.forEach(function (t) { days[new Date(t).toDateString()] = 1; });
+    const d = new Date();
+    if (!days[d.toDateString()]) d.setDate(d.getDate() - 1);   // a streak survives until the day is out
+    let n = 0;
+    while (days[d.toDateString()]) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+  standing() {
+    const P = this.pieces(), ts = P.map(function (p) { return +p.when || 0; }).filter(Boolean);
+    const pub = window.YardTools && YardTools.published;
+    const first = ts.length ? Math.min.apply(null, ts) : (pub && pub.t) || 0;
+    const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return [
+      { v: String(P.length), k: 'CONTRIBUTIONS' }, { v: '1', k: 'HILLS JOINED' },
+      { v: this.streak(ts) + 'd', k: 'CURRENT STREAK' },
+      { v: first ? MON[new Date(first).getMonth()] + ' ' + new Date(first).getFullYear() : '—', k: 'MEMBER SINCE' }
+    ];
+  }
+  badgeList(tile, locked) {
+    const P = this.pieces(), n = P.length, notes = P.filter(function (p) { return p.k === 't'; }).length;
+    const ts = P.map(function (p) { return +p.when || 0; }).filter(Boolean);
+    const first = ts.length ? Math.min.apply(null, ts) : 0, days = first ? Math.floor((Date.now() - first) / 86400000) : 0, streak = this.streak(ts);
+    const MON = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+    const mon = function (t) { const d = new Date(t); return MON[d.getMonth()] + ' ' + d.getFullYear(); };
+    return [
+      first ? tile({ name: 'FIRST PLANTING', sub: 'earned ' + mon(first), art: this.badgeIcon('star'), rot: '1.5deg' }) : locked({ name: 'FIRST PLANTING', sub: 'put one thing on the page' }),
+      days >= 30 ? tile({ name: 'HILL TENDER', sub: 'kept a page 30 days', art: this.badgeIcon('trophy'), rot: '-2deg' }) : locked({ name: 'HILL TENDER', sub: first ? (30 - days) + ' days to go' : 'keep a page 30 days' }),
+      streak >= 3 ? tile({ name: streak + '-DAY STREAK', sub: 'still burning', art: this.badgeIcon('flame'), rot: '-1deg' }) : locked({ name: 'A STREAK', sub: 'three days running' }),
+      notes >= 10 ? tile({ name: 'WALL SCRIBBLER', sub: 'left 10 notes', art: this.badgeIcon('pencil'), rot: '2deg' }) : locked({ name: 'WALL SCRIBBLER', sub: (10 - notes) + ' notes to go' }),
+      n >= 100 ? tile({ name: '100 EDITS', sub: 'a hundred pieces', art: this.badgeIcon('trophy'), rot: '1deg' }) : locked({ name: '100 EDITS', sub: (100 - n) + ' to go' }),
+      locked({ name: "FOUNDER'S PIN", sub: 'how? nobody knows' })
+    ];
+  }
+  editList(C) {
+    const P = this.pieces().filter(function (p) { return p.when; }).sort(function (a, b) { return b.when - a.when; }).slice(0, 6);
+    if (!P.length) return [{ a: 'nothing yet —', b: 'pick up a tool', c: 'from the dock below', when: 'YOUR PAGE IS BLANK PAPER', color: C.YEL }];
+    const words = function (p) {
+      if (p.k === 't') { const t = String(p.t || ''); return ['wrote', '"' + t.slice(0, 28) + (t.length > 28 ? '…' : '') + '"', 'on your page']; }
+      if (p.k === 'd') { let s = null; try { s = window.Stickers && Stickers.get ? Stickers.get(p.f) : null; } catch (e) {} return ['stamped', s && s.name ? s.name : 'a sticker', 'on your page']; }
+      if (p.k === 'i' || p.k === 'k') return ['stamped', 'a tracing', 'from the table'];
+      if (p.k === 'g') return ['pinned', 'a gif', 'to the page'];
+      if (p.k === 'b') return ['smudged', 'the ink', ''];
+      if (p.k === 'p') return ['laid down', 'some pixels', ''];
+      return ['drew', 'a line', 'on your page'];
+    };
+    const cols = [C.RED, C.BLU, C.GRN, C.PNK, C.YEL];
+    return P.map(function (p, i) { const w = words(p); return { a: w[0], b: w[1], c: w[2], when: AGO(p.when), color: cols[i % 5] }; });
+  }
+  /* THE FENCE IS THE SHEET'S (apps-script/Code.gs, through tools.js): the notes
+     visitors leave, the likes, and the visits of the last thirty days. Until
+     the script is redeployed with those doors the fence stays this device's,
+     and says so. */
+  noteRow(n, i) {
+    const cols = [['#e05a8f', '#fdf7e3'], ['#5a8fd6', '#fdf7e3'], ['#ffd23f', '#17120b'], ['#7bc264', '#fdf7e3'], ['#e8484a', '#fdf7e3']];
+    const c = cols[i % 5], name = String(n.name || 'a gnome');
+    return { initial: name[0].toUpperCase(), name: name, when: AGO(n.t), text: String(n.text || ''), bg: c[0], fg: c[1], rot: i % 2 ? '1.5deg' : '-2deg' };
+  }
+  loadFence() {
+    const self = this;
+    YardTools.fence.load().then(function (f) {
+      if (!f || !f.ok || !Array.isArray(f.notes)) return;   // the waitlist-only script says ok too, without a fence
+      self.setState({ likes: +f.likes || 0, views: +f.views || 0, fenceLive: true,
+                      notes: (f.notes || []).map(function (n, i) { return self.noteRow(n, i); }) });
+    }).catch(function () {});
+  }
+  toggleLike() {
+    const on = !this.state.liked, self = this;
+    this.setState(function (s) { return { liked: on, likes: Math.max(0, s.likes + (on ? 1 : -1)) }; });
+    const lk = 'knoll-yardview:liked:' + (window.YARD_HILL || 'yard');
+    if (on) this.save(lk, 1); else this.forget(lk);
+    if (window.YardTools && this.state.fenceLive) YardTools.fence.like(on).then(function (f) { if (f && f.ok && f.likes != null) self.setState({ likes: +f.likes }); }).catch(function () {});
+  }
+  leaveNote(e) {
+    e.preventDefault();
+    const text = this.state.draft.trim(); if (!text) return;
+    // a visitor has no name here: settings.displayName is the owner's, off the published doc
+    const name = 'a gnome', self = this;
+    this.setState(function (s) { return { draft: '', notes: [self.noteRow({ t: Date.now(), name: name, text: text }, s.notes.length)].concat(s.notes) }; });
+    if (window.YardTools && this.state.fenceLive) YardTools.fence.note(name, text).then(function (f) {
+      if (f && f.ok && f.notes) self.setState({ notes: f.notes.map(function (n, i) { return self.noteRow(n, i); }) });
+    }).catch(function () {});
+  }
+  eyebrow() {
+    const P = this.pieces(), streak = this.streak(P.map(function (p) { return +p.when || 0; }).filter(Boolean)), notes = this.state.notes.length;
+    return [streak ? streak + '-DAY STREAK' : 'NO STREAK YET',
+            notes + (notes === 1 ? ' NOTE' : ' NOTES') + ' AT YOUR FENCE',
+            P.length + (P.length === 1 ? ' PIECE' : ' PIECES') + ' ON YOUR PAGE'].join(' · ') + '.';
+  }
+  resetPlot() {
+    const mine = this.state.mine;
+    const spots = mine ? JSON.parse(JSON.stringify(mine)) : {};
+    this.setState({ spots: spots, held: null });
+    if (mine) this.save(this.K.plot, spots); else this.forget(this.K.plot);
+  }
+  resetData() {
+    if (!window.confirm('Wipe everything your yard has saved on this device — the plot, the default layout, your settings, the lot?')) return;
+    /* ── YARD FIX 3 of 10 (see about.md § changes to the export) ────────────
+       NAMING THE THREE KEYS WAS RIGHT WHEN THERE WERE THREE. The tour and the
+       hills added two more — `knoll-yardview:tour` and `yard.favHills` — and
+       neither was added here, so "the lot" left the tour still marked as seen
+       and every favourited hill still favourited. The button's own tooltip
+       says "wipe everything your yard has saved on this device"; it was the
+       only thing on the page making a promise the code did not keep.
+
+       SWEEPING THE PREFIX INSTEAD OF LISTING THE KEYS means the next key this
+       page invents is covered the day it is invented, rather than the day
+       somebody remembers this line — which is the failure that just happened.
+       `yard.favHills` is named by hand because it is the one key that does not
+       wear the prefix; it wants renaming to `knoll-yardview:fav-hills` one day, and
+       that day is a migration, not this edit.
+
+       Reading Object.keys(localStorage) can itself throw where storage is
+       blocked, so the whole sweep is inside the try — same reasoning as
+       `save` and `forget` above it. */
+    try {
+      Object.keys(localStorage)
+        .filter(function (k) { return k.indexOf('knoll-yardview:') === 0 || k === 'yard.favHills'; })
+        .forEach(function (k) { localStorage.removeItem(k); });
+    } catch (e) {}
+    try { location.reload(); } catch (e) {}
+  }
+  /* The button says what happened to IT, on its own face, for a beat — lab 2's
+     keep.js does the same, and for the same reason: a press you cannot see the
+     result of is a press you make twice. 1600ms is its number too. */
+  said(word, ms) {
+    clearTimeout(this._flash);
+    this.setState({ saveWord: word });
+    const self = this;
+    this._flash = setTimeout(function () { self.setState({ saveWord: 'save layout' }); }, ms || 1600);
+  }
+  /* the drawing, built once. Twenty-three svg trees are twenty-three lumps of
+     markup React would otherwise re-parse on every setState; the elements are
+     immutable, so they are made in the constructor and handed back. */
+  drawing(p) {
+    return React.createElement('svg', {
+      viewBox: '0 0 ' + p.vw + ' ' + p.vh, 'aria-hidden': true,
+      style: {
+        filter: p.shadow || undefined,
+        transformOrigin: p.pivot || ('50% ' + p.foot + '%'),
+        animation: p.anim || undefined
+      },
+      dangerouslySetInnerHTML: { __html: p.art }
+    });
+  }
+  plotVals() {
+    const self = this, held = this.state.held;
+    /* THE PILL IS A STATE AND THE BUTTON IS AN EVENT — keep.js's division.
+       'moved' is what the plot IS; 'saved ✓' is what the last press DID. The
+       clock is keep.js's too, and it means the same thing: the default on
+       this device is what was on the screen at that minute. */
+    const moved = this.mark(this.state.spots) !== this.mark(this.state.mine);
+    const keptAt = this.state.keptAt;
+    /* ── YARD FIX 9 of 10 (see about.md § changes to the export) ─────────────
+       AN EMPTY PLOT CANNOT BE UNSAVED, and it was saying it was. `moved` asks
+       whether where the trees are differs from the arrangement you kept, and
+       it asks it of the STORED spots, which this page still loads whether or
+       not it draws anything with them. So a visitor who arranged their trees
+       on the previous version of this page and came back to this one met an
+       empty box wearing "MOVED — NOT SAVED" — verified by seeding a plot the
+       old page would have written and reloading.
+
+       Nothing in the empty plot can move, so nothing in it can be unsaved: the
+       pill goes quiet while the plot has no pieces. This is the one place the
+       `plotEmpty` prop had a consequence nobody had followed through, and if
+       the prop is ever flipped back to false this line stops applying on its
+       own — `planted` is true and the pill behaves exactly as it did. */
+    const planted = !(this.props.plotEmpty ?? true);
+    // the page is unsaved when a tree moved, OR the dock put something on it since the last save (tools.js)
+    const dirty = (planted && moved) || !!(window.YardTools && YardTools.dirty());
+    return {
+      plotCaption: (this.props.plotEmpty ?? true) ? 'NOTHING PLANTED YET.' : 'SIXTEEN TREES, FOUR PATCHES OF GRASS, THREE CLUMPS OF MUSHROOMS — DRAG ANY OF THEM. WHAT STANDS LOWER DOWN STANDS IN FRONT.',
+      keepShown: dirty || (planted && !!keptAt),
+      keepWord: dirty ? 'CHANGED — NOT SAVED' : keptAt ? 'DEFAULT SAVED ' + keptAt : '',
+      keepInk: dirty ? '#4a4054' : '#4e8c3f',
+      keepEdge: dirty ? 'rgba(23,18,11,0.35)' : '#4e8c3f',
+      pieces: (this.props.plotEmpty ?? true ? [] : FOREST).map(function (p) {
+        const s = self.spot(p.id);
+        return {
+          name: p.name,
+          art: self.art[p.id],
+          x: s.x + '%', y: s.y + '%', w: p.home.w + '%',
+          /* the foot, not the corner: a piece is hung by the point where its
+             drawing meets the ground, so left/top is where it STANDS. */
+          lift: '-' + p.foot + '%',
+          /* THE PILE IS THE GROUND. Lower down the plot is nearer, so z comes
+             off y and nothing has a pile order of its own. It is the one rule
+             that makes a plot of trees read as depth rather than as overlap,
+             and it costs the ability to put a small far tree in front of a
+             big near one — which is a thing a yard does not do anyway. The
+             carried piece goes over everything while it is in the air. */
+          z: held === p.id ? 2000 : Math.round(s.y * 10) + 1,
+          held: held === p.id ? ' is-held' : '',
+          down: function (e) { self.grab(e, p.id); },
+          move: function (e) { self.haul(e, p.id); },
+          up: function (e) { self.letGo(e, p.id); },
+          key: function (e) { self.nudge(e, p.id); }
+        };
+      }),
+      saveWord: this.state.saveWord,
+      /* YARD FIX 9 of 10: the same `planted` gate, on the header button's own
+         dirty mark. The dot and the filled-in background answer "there is
+         something here you have not kept", and over an empty plot there is
+         not. `moved` is reused rather than re-derived — the three lines below
+         were each computing the same comparison a fourth, fifth and sixth
+         time, off state the first line had already read. */
+      yDirty: dirty,
+      ySaveWord: this.state.saveWord === 'save layout' ? 'save yard' : this.state.saveWord,
+      ySaveBg: this.state.saveWord !== 'save layout' ? (/^not saved/.test(this.state.saveWord) ? '#b8302f' : '#4e8c3f') : (dirty ? '#17120b' : '#fdf7e3'),
+      ySaveFg: this.state.saveWord !== 'save layout' || dirty ? '#fdf7e3' : '#17120b',
+      ySaveIcon: this.state.saveWord !== 'save layout' || this.mark(this.state.spots) !== this.mark(this.state.mine) ? '#5a8fd6' : '#5a8fd6',
+      saveBg: this.state.saveWord === 'save layout' ? '#17120b' : (/^not saved/.test(this.state.saveWord) ? '#b8302f' : '#4e8c3f'),
+      plotStill: this.state.settings.reduceMotion ? ' plot-still' : '',
+      savePlot: function () { self.savePlot(); },
+      resetPlot: function () { self.resetPlot(); },
+      resetData: function () { self.resetData(); }
+    };
+  }
+
+  startTour() { this.setState({ tour: 0, pos: null }, () => this.place()); }
+  tourNext() {
+    if (this.state.tour >= TOUR.length - 1) { this.endTour(); return; }
+    this.setState({ tour: this.state.tour + 1 }, () => this.place());
+  }
+  endTour() { this.setState({ tour: -1, pos: null, tip: null }); this.save('knoll-yardview:tour', 1); this.spring = null; cancelAnimationFrame(this._armRaf); this._armRaf = 0; }
+  /* elastic arm: the hand is a spring-mass chasing its target; drag it and it snaps back with a wobble */
+  aimArm(f, t) {
+    if (!this.spring) this.spring = { x: f.x, y: f.y, vx: 0, vy: 0 };
+    this.springTo = t; this.runArm();
+  }
+  /* YARD FIX 6 of 10. The arm still points — the pointing is the tour — it just
+     arrives instead of springing. Not while the hand is being dragged: that is
+     a thing the visitor is doing with their own hand, and taking it away would
+     be reading "reduce motion" as "reduce the page". `snapArm` is what the
+     spring's own settle branch does, done at once. */
+  snapArm() {
+    const s = this.spring, t = this.springTo; if (!s || !t) return;
+    cancelAnimationFrame(this._armRaf); this._armRaf = 0;
+    s.x = t.x; s.y = t.y; s.vx = s.vy = 0;
+    this.setState({ tip: { x: t.x, y: t.y } });
+  }
+  runArm() {
+    if (this.calm() && !this.dragging) { this.snapArm(); return; }
+    if (this._armRaf) return;
+    let last = performance.now();
+    const step = (now) => {
+      this._armRaf = 0;
+      const s = this.spring, t = this.springTo; if (!s || !t) return;
+      const dt = Math.min(0.03, (now - last) / 1000); last = now;
+      if (!this.dragging) {
+        const K = 160, C = 9;
+        s.vx += (K * (t.x - s.x) - C * s.vx) * dt; s.vy += (K * (t.y - s.y) - C * s.vy) * dt;
+        s.x += s.vx * dt; s.y += s.vy * dt;
+      }
+      this.setState({ tip: { x: s.x, y: s.y } });
+      const still = !this.dragging && Math.hypot(t.x - s.x, t.y - s.y) < 0.4 && Math.hypot(s.vx, s.vy) < 3;
+      if (still) { s.x = t.x; s.y = t.y; s.vx = s.vy = 0; this.setState({ tip: { x: t.x, y: t.y } }); return; }
+      this._armRaf = requestAnimationFrame(step);
+    };
+    this._armRaf = requestAnimationFrame(step);
+  }
+  handDown(e) {
+    if (!this.spring) return;
+    e.preventDefault(); this.dragging = true;
+    const s = this.spring, ox = e.pageX - s.x, oy = e.pageY - s.y;
+    let lx = e.pageX, ly = e.pageY, lt = performance.now();
+    const move = (ev) => { s.x = ev.pageX - ox; s.y = ev.pageY - oy; const n = performance.now(), d = Math.max(8, n - lt); s.vx = (ev.pageX - lx) / d * 1000 * 0.35; s.vy = (ev.pageY - ly) / d * 1000 * 0.35; lx = ev.pageX; ly = ev.pageY; lt = n; this.setState({ tip: { x: s.x, y: s.y } }); };
+    const up = () => { this.dragging = false; window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up); this.runArm(); };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+  }
+  place() {
+    const i = this.state.tour; if (i < 0) return;
+    const step = TOUR[i], t = this.el[step.key], g = this.el.gnome;
+    if (!t || !g) return;
+    const sx = window.scrollX, sy = window.scrollY, cw = document.documentElement.clientWidth, narrow = cw < 860, W = Math.min(280, cw - 16);
+    const r = t.getBoundingClientRect(), gr = g.getBoundingClientRect();
+    const R = { left: r.left + sx, top: r.top + sy, w: r.width, h: r.height };
+    let bl, bt, tail;
+    if (step.where === 'inside') { bl = R.left + (narrow ? 8 : 26); bt = R.top + 26; tail = 'left'; }
+    else if (step.where === 'right') { bl = R.left + R.w + (narrow ? 40 : 120); bt = R.top + 40; tail = 'left'; }
+    else if (narrow) { bl = R.left; bt = R.top - 250; tail = 'bottom'; }
+    else { bl = R.left - W - 30; bt = R.top + 4; tail = 'right'; }
+    bl = CLAMP(bl, sx + 8, sx + cw - W - 8);
+    const MOB = { plot: { tx: 0.7, ty: 0, dx: 0.25, dy: -1, c1x: 1.1, c1y: -0.7 }, k: { tx: 0.9, ty: 0, dx: 0.6, dy: -1, c1x: -1.1, c1y: -0.9 }, badge: { tx: 0.7, ty: 0, dx: 0.8, dy: -1, c1x: 1.1, c1y: 0.35 }, visit: { tx: 0.4, ty: 1, dx: 0.8, dy: 1, c1x: 1.1, c1y: 0.35 } }[step.key];
+    const ax = narrow ? R.left + R.w * MOB.tx : step.where === 'inside' ? R.left + 12 : R.left - 4;
+    const ay = narrow ? R.top + R.h * MOB.ty : step.where === 'inside' ? R.top + R.h * 0.6 : step.where === 'right' ? R.top + R.h * 0.45 : R.top + R.h - 36;
+    const k = gr.width / 220, gx = gr.left + sx, gy = gr.top + sy;
+    const hx = gx + 110 * k, shY = gy + 172 * k;
+    const head = CLAMP(Math.atan2(ax - hx, 260) * 57.3, -12, 12);
+    let arm = { r: -90, l: -70, head: head, eye: CLAMP((ax - hx) / 40, -4, 4) };
+    // right arm hangs; left arm does all the pointing
+    const a = Math.atan2(ay - shY, ax - (gx + 72 * k)) * 57.3;
+    arm.l = a > 0 ? a - 180 : a + 180;
+    // stretchy: arm length in gnome units, reaching the target minus the hand
+    arm.len = 62;
+    if (narrow) arm.mobile = MOB;
+    arm.from = { x: gx + 72 * k, y: shY }; arm.to = { x: ax, y: ay };
+    this.aimArm(arm.from, arm.to);
+    this.setState({ pos: { bl: bl, bt: bt, tail: tail, ring: R, arm: arm, W: W } });
+    const vh = window.innerHeight, want = Math.min(R.top, bt) - 90;
+    /* YARD FIX 6 of 10. The tour still takes you to the thing it is pointing at
+       — that is the tour working — it just cuts rather than glides. */
+    if (this._noScroll) return;                                  /* YARD FIX 7 of 10 */
+    if (bt + 200 > sy + vh || R.top < sy) window.scrollTo({ top: Math.max(0, want), behavior: this.calm() ? 'auto' : 'smooth' });
+  }
+  tourVals() {
+    const i = this.state.tour, on = i >= 0, p = this.state.pos, s = on ? TOUR[i] : null;
+    const arm = (on && p) ? p.arm : { r: -90, l: -70, len: 62 };
+    const armEnd = 72 - (arm.len - 6);
+    // the long arm: a bowed cubic from the shoulder to the target, drawn on an overlay above everything
+    let armD = '', handT = 'translate(-999 -999)', shX = -999, shYv = -999;
+    if (arm.from) {
+      const f = arm.from, t = this.state.tip || arm.to, dx = t.x - f.x, dy = t.y - f.y, L = Math.hypot(dx, dy) || 1;
+      // out to the left from the shoulder, a big drooping loop, then in to the target from below-left
+      const B = Math.max(140, L * 0.5);
+      let c1 = { x: f.x - B, y: f.y + B * 0.35 }, c2 = { x: t.x - B * 0.7, y: t.y + B * 0.75 };
+      if (arm.mobile) {
+        // phone: out to the right from the shoulder, then in from the side the sketch shows
+        const m = arm.mobile, B2 = Math.max(170, L * 0.45);
+        c1 = { x: f.x + m.c1x * B2, y: f.y + m.c1y * B2 }; c2 = { x: t.x + m.dx * B2 * 0.8, y: t.y + m.dy * B2 * 0.8 };
+      }
+      const hs = arm.mobile ? 0.85 : 0.6;
+      const r = (v) => Math.round(v * 10) / 10;
+      armD = 'M' + r(f.x) + ',' + r(f.y) + ' C' + r(c1.x) + ',' + r(c1.y) + ' ' + r(c2.x) + ',' + r(c2.y) + ' ' + r(t.x) + ',' + r(t.y);
+      const th = Math.atan2(t.y - c2.y, t.x - c2.x) * 57.3;
+      handT = 'translate(' + r(t.x) + ' ' + r(t.y) + ') rotate(' + r(th - 245) + ') scale(' + hs + ') translate(-30 -38)';
+      shX = r(f.x); shYv = r(f.y);
+    }
+    const look = this.state.look || { head: 0, eye: 0, eyeY: 0, armL: -70 };
+    if (!arm.from && look.armL != null) arm.l = look.armL;
+    const px = (v) => Math.round(v) + 'px';
+    return {
+      tourOn: on && !!p,
+      tourStep: on ? (i + 1) + ' OF ' + TOUR.length : '',
+      tourTitle: s ? s.title : '', tourBody: s ? s.body : '',
+      tourNextWord: i === TOUR.length - 1 ? 'done \u2713' : 'next \u2192',
+      bubbleLeft: p ? px(p.bl) : '0px', bubbleTop: p ? px(Math.max(8, p.bt)) : '0px', bubbleW: p ? px(p.W || 280) : '280px',
+      tailLeft: p && p.tail === 'left' ? '-11px' : p && (p.tail === 'top' || p.tail === 'bottom') ? '22px' : 'auto',
+      tailRight: p && p.tail === 'right' ? '-11px' : 'auto',
+      tailTop: p && p.tail === 'top' ? '-11px' : p && p.tail === 'bottom' ? 'auto' : '22px',
+      tailBottom: p && p.tail === 'bottom' ? '-11px' : 'auto',
+      ringLeft: p ? px(p.ring.left - 10) : '0px', ringTop: p ? px(p.ring.top - 10) : '0px',
+      ringW: p ? px(p.ring.w + 20) : '0px', ringH: p ? px(p.ring.h + 20) : '0px',
+      armR: arm.r + 'deg', armL: arm.l + 'deg', armEnd: armEnd, armCuff: armEnd + 6, armHand: armEnd - 6, armLOpacity: arm.from ? 0 : 1, armD: armD, handT: handT, armW1: arm.mobile ? 16 : 11, armW2: arm.mobile ? 9.5 : 6, shX: shX, shY: shYv, headDeg: look.head + 'deg', pupilX: look.eye, pupilY: look.eyeY,
+      gnomeRef: this.R.gnome, tKRef: this.R.k, tPlotRef: this.R.plot, tBadgeRef: this.R.badge, tVisitRef: this.R.visit,
+      gnomeTitle: on ? '' : 'take the tour again',
+      handDown: (e) => this.handDown(e),
+      gnomeZ: on ? 19 : 3,
+      startTour: () => { if (this.state.tour < 0) this.startTour(); },
+      /* YARD FIX 5 of 10. Enter and Space are what role="button" promises. Space
+         is preventDefault'd either way — on a focused non-button it scrolls the
+         page, which is not what a press of the gnome should do. */
+      gnomeKey: (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+        e.preventDefault();
+        if (this.state.tour < 0) this.startTour();
+      },
+      tourNext: () => this.tourNext(),
+      endTour: () => this.endTour()
+    };
+  }
+  badgeIcon(kind) {
+    const h = React.createElement, C = this.C, INK = C.INK;
+    let kids = [];
+    if (kind === 'trophy') kids = [
+      h('path', { key: 1, d: 'M18,12 h24 v12 q0,12 -12,15 q-12,-3 -12,-15 z', fill: C.YEL, stroke: INK, strokeWidth: 3, strokeLinejoin: 'round' }),
+      h('path', { key: 2, d: 'M18,16 h-7 q-3,9 7,11', fill: 'none', stroke: INK, strokeWidth: 3 }),
+      h('path', { key: 3, d: 'M42,16 h7 q3,9 -7,11', fill: 'none', stroke: INK, strokeWidth: 3 }),
+      h('rect', { key: 4, x: 27, y: 39, width: 6, height: 7, fill: C.YEL, stroke: INK, strokeWidth: 3 }),
+      h('rect', { key: 5, x: 19, y: 46, width: 22, height: 7, fill: C.YEL, stroke: INK, strokeWidth: 3 })];
+    else if (kind === 'star') kids = [
+      h('polygon', { key: 1, points: '30,10 34.4,23.9 47.1,24.4 37.1,32.3 40.6,44.6 30,37.5 19.4,44.6 22.9,32.3 12.9,24.4 25.6,23.9', fill: C.GRN, stroke: INK, strokeWidth: 3, strokeLinejoin: 'round' })];
+    else if (kind === 'flame') kids = [
+      h('path', { key: 1, d: 'M30,8 Q45,26 42,38 Q40,50 30,53 Q20,50 18,38 Q15,26 30,8 z', fill: C.RED, stroke: INK, strokeWidth: 3, strokeLinejoin: 'round' }),
+      h('path', { key: 2, d: 'M30,26 Q37,34 34,43 Q32,48 30,49 Q28,48 26,43 Q23,34 30,26 z', fill: C.YEL })];
+    else if (kind === 'pencil') kids = [
+      h('g', { key: 1, transform: 'rotate(40 30 30)' },
+        h('rect', { x: 24, y: 4, width: 12, height: 6, fill: C.PNK, stroke: INK, strokeWidth: 3 }),
+        h('rect', { x: 24, y: 10, width: 12, height: 28, fill: C.BLU, stroke: INK, strokeWidth: 3 }),
+        h('path', { d: 'M24,38 h12 l-6,13 z', fill: C.CREAM, stroke: INK, strokeWidth: 3, strokeLinejoin: 'round' }))];
+    else kids = [
+      h('rect', { key: 1, x: 20, y: 28, width: 20, height: 18, rx: 3, fill: '#b9b2c0', stroke: INK, strokeWidth: 3 }),
+      h('path', { key: 2, d: 'M24,28 v-7 a6,6 0 0 1 12,0 v7', fill: 'none', stroke: INK, strokeWidth: 3 }),
+      h('circle', { key: 3, cx: 30, cy: 36, r: 2.5, fill: INK })];
+    return h('svg', { width: 38, height: 38, viewBox: '0 0 60 60', 'aria-hidden': true, style: { display: 'block' } }, kids);
+  }
+  renderVals() {
+    const C = this.C;
+    const { settings, drawerOpen, signoutNote } = this.state;
+    const jitter = this.props.jitter ?? true;
+    const showLocked = this.props.showLockedBadges ?? true;
+    const captionsOn = this.props.captions ?? true;
+    const rot = (v) => jitter ? v : '0deg';
+    const badgeTile = (b) => Object.assign({
+      bg: '#fffcf0', border: '3px solid #17120b', shadow: '4px 5px 0 rgba(60,50,80,0.18)', op: 1
+    }, b, { rot: rot(b.rot) });
+    const lockedTile = (b) => Object.assign({
+      bg: 'rgba(23,18,11,0.04)', border: '3px dashed rgba(23,18,11,0.4)', shadow: 'none', op: 0.7,
+      art: this.badgeIcon('lock')
+    }, b, { rot: '0deg' });
+    let badges = this.badgeList(badgeTile, lockedTile);
+    if (!showLocked) badges = badges.filter(b => b.op === 1);
+    const hour = new Date().getHours();
+    const hover = this.state.hoverHill;
+    let favs = this.state.favHills;
+    if (!favs) { try { favs = JSON.parse(localStorage.getItem('yard.favHills') || 'null'); } catch (_) {} favs = favs || ["Mossy's Hollow", 'The Toadstool Ring', 'Bramblewick', 'The Museum']; }
+    const HILLS = [
+      { name: "Mossy's Hollow", about: '4 NEW MARKS', here: true, mine: true, art: 'transparent' },
+    ];
+    return Object.assign(this.plotVals(), this.tourVals(), {
+      greetWord: hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening',
+      searchOpen: !!this.state.searchOpen,
+      searchText: this.state.searchText || '',
+      searchBg: this.state.searchOpen ? '#17120b' : '#fdf7e3',
+      searchFg: this.state.searchOpen ? '#fdf7e3' : '#17120b',
+      searchRef: this.searchRef || (this.searchRef = React.createRef()),
+      fileRef: this.fileRef || (this.fileRef = React.createRef()),
+      kTitle: this.state.fileName ? 'uploaded: ' + this.state.fileName + ' — click to replace' : 'upload a file',
+      pickFile: () => { if (this.fileRef && this.fileRef.current) this.fileRef.current.click(); },
+      /* YARD FIX 8 of 10 (see about.md § changes to the export). `said()` is not
+         a notification area — it writes on the SAVE BUTTON'S FACE, which is the
+         one place on this page that answers the question "did my arrangement
+         get kept?". Picking a file put "got toadstool.png ✓" on that button and
+         turned it the same green a real save turns it (verified: text
+         "got toadstool.png ✓", background rgb(78,140,63)), for a file that is
+         not saved anywhere — `fileName` goes in component state and nothing
+         writes it down. A save that did not happen must not wear the face of
+         one that did; the file's own control already reports it, through
+         `kTitle` on the K tile's tooltip. */
+      onFile: (e) => { const f = e.target.files && e.target.files[0]; if (!f) return; this.setState({ fileName: f.name }); },
+      toggleSearch: () => this.setState(s => ({ searchOpen: !s.searchOpen }), () => { if (this.state.searchOpen && this.searchRef.current) this.searchRef.current.focus(); }),
+      onSearch: e => this.setState({ searchText: e.target.value }),
+      searchKey: e => { if (e.key === 'Escape') this.setState({ searchOpen: false, searchText: '' }); },
+      submitSearch: e => { e.preventDefault(); },
+      greetName: settings.displayName || 'gnome',   // the owner's published name; /yard's fallback too
+      plotName: settings.plotName || 'Your Plot',
+      renaming: !!this.state.renaming, notRenaming: !this.state.renaming,
+      renameDraft: this.state.renameDraft == null ? (settings.plotName || 'Your Plot') : this.state.renameDraft,
+      renameRef: this.renameRef || (this.renameRef = React.createRef()),
+      startRename: () => this.setState({ renaming: true, renameDraft: settings.plotName || 'Your Plot' }, () => { const el = this.renameRef.current; if (el) { el.focus(); el.select(); } }),
+      onRename: (e) => this.setState({ renameDraft: e.target.value }),
+      renameKey: (e) => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') this.setState({ renaming: false, renameDraft: null }); },
+      commitRename: () => { if (!this.state.renaming) return; const t = (this.state.renameDraft || '').trim(); if (t && t !== settings.plotName) this.setSettings({ plotName: t }); this.setState({ renaming: false, renameDraft: null }); },
+      friends: [
+        { name: 'Mossy', hill: "Mossy's Hollow", note: 'left a pebble', on: true, col: '#7bc264', ini: 'M' },
+        { name: 'Juno', hill: "Juno's Patch", note: 'planted 2 trees', on: true, col: '#5a8fd6', ini: 'J' },
+        { name: 'Opal', hill: 'Opal Fen', note: 'quiet today', on: false, col: '#e0598c', ini: 'O' },
+        { name: 'Bram', hill: 'Bramblewick', note: 'left you a note', on: false, col: '#ffd23f', ini: 'B' }
+      ].map((f, i) => Object.assign(f, { dotBg: f.on ? '#4e8c3f' : 'transparent', dotBorder: f.on ? '#17120b' : 'rgba(23,18,11,0.4)', rot: (i % 2 ? '1.2deg' : '-1.2deg') })),
+      hills: HILLS.map((h, i) => Object.assign({}, h, {
+        href: '#hill-' + h.name.toLowerCase().replace(/[^a-z]+/g, '-'),
+        fav: favs.indexOf(h.name) >= 0,
+        flagOp: favs.indexOf(h.name) >= 0 ? 1 : (hover === i ? 0.4 : 0),
+        flagY: favs.indexOf(h.name) >= 0 ? '0px' : '26px',
+        clothOp: favs.indexOf(h.name) >= 0 ? 1 : 0,
+        poleDash: favs.indexOf(h.name) >= 0 ? 'none' : '4 3',
+        favTitle: favs.indexOf(h.name) >= 0 ? 'unfavorite ' + h.name : 'favorite ' + h.name,
+        toggleFav: (e) => { e.preventDefault(); e.stopPropagation();
+          const f = favs.slice(), k = f.indexOf(h.name); if (k >= 0) f.splice(k, 1); else f.push(h.name);
+          try { localStorage.setItem('yard.favHills', JSON.stringify(f)); } catch (_) {}
+          this.setState({ favHills: f }); },
+        lift: hover === i ? '-5px' : '0px',
+        signRot: hover === i ? (i % 2 ? '6deg' : '-6deg') : (i % 2 ? '-2deg' : '2deg'),
+        enter: () => this.setState({ hoverHill: i }),
+        leave: () => this.setState({ hoverHill: -1 })
+      })),
+      rStand: rot('-0.8deg'), rFriends: rot('0.5deg'), rBadge: rot('0.7deg'), rVisit: rot('-0.5deg'), rEdit: rot('0.6deg'), rFence: rot('-0.4deg'),
+      liked: this.state.liked, likeCount: this.state.likes, likeBg: this.state.liked ? '#e8484a' : '#fdf7e3', likeFg: this.state.liked ? '#fdf7e3' : '#17120b', heartFill: this.state.liked ? '#fdf7e3' : '#e8484a',
+      toggleLike: () => this.toggleLike(),
+      notes: this.state.notes, noteCount: this.state.notes.length, draft: this.state.draft,
+      onDraft: (e) => this.setState({ draft: e.target.value }),
+      leaveNote: (e) => this.leaveNote(e),
+      viewCount: this.state.views == null ? '—' : this.state.views,
+      eyebrow: this.eyebrow(),
+      noNotes: !this.state.notes.length,
+      noNotesWord: this.state.fenceLive ? 'NOBODY HAS LEFT A NOTE YET — BE THE FIRST.' : 'THE FENCE IS NOT WIRED TO THE SHEET YET, SO A NOTE STAYS ON THIS DEVICE (see about.md).',
+      tFenceRef: this.R.fence,
+      captionsOn,
+      stats: this.standing(),
+      badges,
+      visited: [
+        { initial: 'M', name: "Mossy's Hollow", when: 'TODAY', bg: C.PNK, fg: C.CREAM, rot: rot('-2deg') },
+        { initial: 'T', name: 'The Toadstool Ring', when: '2 DAYS AGO', bg: C.RED, fg: C.CREAM, rot: rot('1.5deg') },
+        { initial: 'J', name: "Juno's Patch", when: '5 DAYS AGO', bg: C.BLU, fg: C.CREAM, rot: rot('-1deg') },
+        { initial: 'B', name: 'Bramblewick', when: '3 WEEKS AGO', bg: C.GRN, fg: C.CREAM, rot: rot('2deg') },
+        { initial: 'O', name: 'Opal Fen', when: '2 MONTHS AGO', bg: C.YEL, fg: C.INK, rot: rot('-1.5deg') }
+      ],
+      edits: this.editList(C),
+      /* YARD VIEW: add friend and Propose edits. Neither has anywhere to send
+         to yet, so add friend is this page's own toggle and Propose edits
+         says it is not wired up; neither claims to have sent anything. The pop
+         is the Web Animations API rather than a class, so a re-render cannot
+         cut it short, and calm() keeps it still where motion is turned off. */
+      friended: !!this.state.friended,
+      friendWord: this.state.friended ? 'friends \u2713' : 'add friend',
+      friendBg: this.state.friended ? '#4e8c3f' : '#17120b',
+      addFriend: (e) => {
+        const b = e.currentTarget, adding = !this.state.friended;
+        if (adding && b.animate && !this.calm()) {
+          b.animate([{ transform: 'rotate(-1deg) scale(1)' }, { transform: 'rotate(-5deg) scale(1.14)', offset: 0.3 }, { transform: 'rotate(3deg) scale(0.95)', offset: 0.55 }, { transform: 'rotate(-2deg) scale(1.04)', offset: 0.78 }, { transform: 'rotate(-1deg) scale(1)' }], { duration: 600, easing: 'ease-out' });
+          const face = b.querySelector('svg');
+          if (face) face.animate([{ transform: 'rotate(0deg) scale(1)' }, { transform: 'rotate(210deg) scale(1.4)', offset: 0.45 }, { transform: 'rotate(360deg) scale(1)' }], { duration: 600, easing: 'ease-out' });
+        }
+        this.setState({ friended: adding });
+      },
+      proposeWord: this.state.proposeWord || 'Propose edits',
+      propose: () => {
+        clearTimeout(this._propose);
+        this.setState({ proposeWord: window.YardTools && YardTools.dirty() ? 'not wired up yet' : 'no edits yet' });
+        this._propose = setTimeout(() => this.setState({ proposeWord: null }), 2400);
+      },
+      drawerOpen,
+      openDrawer: () => this.setState({ drawerOpen: true, signoutNote: false }),
+      closeDrawer: () => this.setState({ drawerOpen: false, signoutNote: false }),
+      sName: settings.displayName,
+      onSName: (e) => this.setSettings({ displayName: e.target.value.slice(0, 24) }),
+      sEmail: settings.emailReplies,
+      onSEmail: (e) => this.setSettings({ emailReplies: e.target.checked }),
+      sActivity: settings.showActivity,
+      onSActivity: (e) => this.setSettings({ showActivity: e.target.checked }),
+      sMotion: settings.reduceMotion,
+      onSMotion: (e) => this.setSettings({ reduceMotion: e.target.checked }),
+      signOut: () => this.setState({ signoutNote: true }),
+      signoutNote
+    });
+  }
+}
+</script>
+<!-- THE DOCK (2026-09-17). tools.js is the Lab the four bench files were written
+     against, over this page instead of a camera — it makes the world and the two
+     pills before wall.js looks for them, so it goes first; gif.js before wall.js
+     because the dock only shows GIF if window.Gif is already there; the table
+     and the drawer after wall.js, whose tools they are. The forest reaches the
+     drawer from the component's constructor (YardTools.forest), not from a
+     sticker-kits.json. -->
+<!-- YARD VIEW: /yard's own five files, told this is a visitor's view (tools.js reads the flag). -->
+<script>
+  window.YARD_VIEW = true;
+  /* WHOSE YARD (tools.js reads YARD_HILL): ?u=<account id> is a profile link;
+     with none, the signed-in gnome's own yard, as everybody else sees it; and
+     signed out, the site's shared 'yard'. api/hill.js checks the name again. */
+  (function () {
+    var u = (/[?&]u=([0-9a-f]{16})(?:&|$)/.exec(location.search) || [])[1] ||
+            (/(?:^|;\s*)knoll_in=([0-9a-f]{16})(?:;|$)/.exec(document.cookie) || [])[1];
+    if (u) window.YARD_HILL = 'u-' + u;
+    /* ONE YARD AT A TIME. Whoever's yard this is, it is kept under
+       knoll-yardview:, so opening a different one first clears what the last
+       left — its wall, its names, a visitor's scratch edits — rather than
+       showing them on the wrong gnome's page. The visitor's own id (me), the
+       gif key and the per-yard likes stay. */
+    var hill = window.YARD_HILL || 'yard', P = 'knoll-yardview:';
+    try {
+      if (localStorage.getItem(P + 'hill') !== hill) {
+        ['wall', 'flatfile', 'applied', 'touched', 'settings', 'plot', 'plot-default'].forEach(function (k) { localStorage.removeItem(P + k); });
+        localStorage.setItem(P + 'hill', hill);
+      }
+    } catch (e) {}
+  })();
+</script>
+<script src="../yard/tools.js"></script>
+<script src="../yard/gif.js"></script>
+<script src="../yard/wall.js"></script>
+<script src="../yard/tracer.js"></script>
+<script src="../yard/stickers.js"></script>
+</body></html>

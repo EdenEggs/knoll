@@ -1,0 +1,52 @@
+<!-- BURST — the 12-point starburst, the "SALE!" shape, and the reference
+     part every other sticker is drawn against (PRESS-TABLE-PLAN.md Appendix
+     D: tags hype, sale, retro). Layers: halo shadow body line highlight
+     detail.
+
+     THE STAR is 24 vertices at 15° steps with a tip straight up: tips at
+     radius 60 (the widest the 128 box allows once the halo's 3 outside the
+     edge and the round join at a tip are added — the halo reaches 1 and
+     127, nothing spills), valleys at radius 46 — a depth of 14, deep enough
+     that twelve points still read as points at 40 px, shallow enough that
+     the sticker stays a disc of colour and not a set of spikes. The same
+     path is drawn four times: as the halo's stroke, as the shadow, as the
+     body and as the line, which is what makes the halo and the shadow the
+     silhouette exactly.
+
+     THE SHADOW is the silhouette moved 3 units down and right — the least
+     the contract's 3–4 allows, so that with the halo ON (a 6-wide stroke,
+     3 outside the body) the shadow's rim stays inside the paper edge on the
+     diagonal. Under the body it shows only as a sliver along the lower-right
+     edges of the tips: the cel shade.
+
+     THE HIGHLIGHT is one glint — an ellipse 10 × 4.5 tilted −40° near the
+     upper-left inner edge, at the mirror of the shadow's corner, and a dot
+     of radius 3 above it — the one shine a vinyl sticker has.
+
+     THE DETAIL is a ring of 24 short dashes on radius 34, stroke 1.5 (half
+     the default line): 24 × 8.9 = 213.6 = 2π·34, so the dashes close on
+     themselves with no seam at the top. A simple style drops it and the
+     star is still the star. -->
+<sc-if value="{{ isBurst }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M64,4 L75.9,19.6 L94,12 L96.5,31.5 L116,34 L108.4,52.1 L124,64 L108.4,75.9 L116,94 L96.5,96.5 L94,116 L75.9,108.4 L64,124 L52.1,108.4 L34,116 L31.5,96.5 L12,94 L19.6,75.9 L4,64 L19.6,52.1 L12,34 L31.5,31.5 L34,12 L52.1,19.6 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+    </g>
+    <g data-layer="shadow">
+      <path d="M64,4 L75.9,19.6 L94,12 L96.5,31.5 L116,34 L108.4,52.1 L124,64 L108.4,75.9 L116,94 L96.5,96.5 L94,116 L75.9,108.4 L64,124 L52.1,108.4 L34,116 L31.5,96.5 L12,94 L19.6,75.9 L4,64 L19.6,52.1 L12,34 L31.5,31.5 L34,12 L52.1,19.6 Z" transform="translate(3 3)" fill="{{ skShadow }}"></path>
+    </g>
+    <g data-layer="body">
+      <path d="M64,4 L75.9,19.6 L94,12 L96.5,31.5 L116,34 L108.4,52.1 L124,64 L108.4,75.9 L116,94 L96.5,96.5 L94,116 L75.9,108.4 L64,124 L52.1,108.4 L34,116 L31.5,96.5 L12,94 L19.6,75.9 L4,64 L19.6,52.1 L12,34 L31.5,31.5 L34,12 L52.1,19.6 Z" fill="{{ skPrimary }}"></path>
+    </g>
+    <g data-layer="line">
+      <path d="M64,4 L75.9,19.6 L94,12 L96.5,31.5 L116,34 L108.4,52.1 L124,64 L108.4,75.9 L116,94 L96.5,96.5 L94,116 L75.9,108.4 L64,124 L52.1,108.4 L34,116 L31.5,96.5 L12,94 L19.6,75.9 L4,64 L19.6,52.1 L12,34 L31.5,31.5 L34,12 L52.1,19.6 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="42" cy="46" rx="10" ry="4.5" transform="rotate(-40 42 46)" fill="{{ skHighlight }}"></ellipse>
+      <circle cx="54" cy="34" r="3" fill="{{ skHighlight }}"></circle>
+    </g>
+    <g data-layer="detail">
+      <circle cx="64" cy="64" r="34" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 5.9"></circle>
+    </g>
+  </svg>
+</sc-if>

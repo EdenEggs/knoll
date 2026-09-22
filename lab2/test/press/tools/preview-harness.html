@@ -1,0 +1,288 @@
+<!--
+  press/tools/preview-harness.html — the mockups, off the Press Table.
+
+  press/preview.js draws one mockup into one container and is handed
+  everything it knows. That makes it testable on its own, and this is the
+  page that does it: three fixtures, three mockups each, drawn from the
+  game.json the generator already wrote (games/<slug>/game.json, CONTRACTS
+  §10) rather than from a Press Table that does not exist yet. Nine pictures
+  and no forms, so preview.js can be looked at, screenshotted and argued
+  with before Phase 6's page is built round it — the same job
+  press/tools/no-bench.html does for kits.js's extractor half.
+
+  WHAT THE THREE MOCKUPS ARE. §10 6.2 step 4 asks for three: the same game
+  under two or three recipes, side by side, for the owner to choose between.
+  The first card of each row is the layout AS BUILT — the `layout` straight
+  out of game.json, so it is directly comparable with the photograph of the
+  real page at perf/results/phase5/game-<slug>.png. The other two are the
+  other two recipes of press/recipes.js's own ranking (Recipes.choose, then
+  Recipes.resolve on the same manifest, theme and style), which is exactly
+  what the Press Table will do. That is also the first time `scrapbook` has
+  ever been composed: OPEN.md §2 says no fixture reaches it and that the
+  first person to build one should look at it. Here it is.
+
+  EVERY CARD IS ITS OWN THEME. That is the point of the page as much as the
+  compositions are: three themes on ONE document, each painted as a block of
+  custom properties on its own container and nowhere else. If preview.js
+  ever wrote a token to :root, this page would show it at once — the three
+  cards of a row would come out in one colour, and the page's own chrome
+  would go with them. The chrome below is deliberately plain and unthemed
+  (its greys are literals, not var(--…)) so that it cannot be repainted by
+  accident and quietly hide the fault.
+
+  RUN IT (from site/, with the sandbox server up on 4322):
+
+      node lab2/test/serve.js 4322
+      http://localhost:4322/lab2/test/press/tools/preview-harness.html
+      …?w=520          the width of one card in px (default 520)
+      …?only=neonrun   one fixture instead of three
+
+  press/tools/shot-preview.js opens it and writes the pictures into
+  perf/results/press/. The page publishes what it did in a
+  <script type="application/json" id="answer"> block — a row per mockup with
+  its recipe, its box, its counts and every warning preview.js returned — so
+  the shooter can assert as well as photograph.
+
+  It loads four things: fonts/fonts.css (the faces a pairing names — a
+  mockup sets its words in the game's own face and the faces have to be on
+  the page for it to), kits.js (the extractor half, no bench), recipes.js
+  (the recipe geometry, and the NOTE/CHIP numbers preview.js borrows) and
+  preview.js. No lab.js, no frames.js, no press.css: a mockup brings its own
+  rules and this page must not lend it any.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>preview-harness — the Press Table's mockups, on their own</title>
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<style>
+  /* THE PAGE'S OWN CHROME, IN LITERALS. Not one var(--…) in here: the cards
+     below set --paper, --ink and thirty more on themselves, and a chrome
+     that read those tokens would inherit whichever card it stood next to
+     and hide the very leak this page exists to catch. */
+  html,body{margin:0;background:#fbfaf9;color:#26212a}
+  body{padding:20px 24px 60px;font:12px/1.5 ui-monospace,"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace}
+  h1{font-size:14px;margin:0 0 2px;font-weight:700}
+  p.lede{margin:0 0 20px;color:#8b7f92;max-width:80ch}
+  h2{font-size:12px;margin:26px 0 8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5d5566}
+  .row{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+  figure{margin:0}
+  .card{border:1px solid #e2dee6;border-radius:2px;overflow:hidden;line-height:0}
+  figcaption{font-size:10px;line-height:1.45;color:#8b7f92;padding-top:5px;max-width:520px}
+  figcaption b{color:#26212a;font-weight:700}
+  figcaption .warn{color:#b3261e;display:block;white-space:pre-wrap}
+  #err{color:#b3261e;white-space:pre-wrap;margin:12px 0}
+  #line{color:#5d5566}
+</style>
+</head>
+<body>
+<h1>the Press Table's mockups</h1>
+<p class="lede" id="line">asking…</p>
+<div id="err"></div>
+<div id="out"></div>
+
+<script src="../../kits.js"></script>
+<script src="../recipes.js"></script>
+<script src="../preview.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var ALL = ['pixelfort', 'mosslight', 'neonrun'];
+  var Q = new URLSearchParams(location.search);
+  /* 520 px a card: three of them and their gutters come to 1594, which is
+     the width a 1600-px shot has room for, and it is about what three
+     mockups take side by side on a laptop's Press Table. */
+  var CARD_W = Math.max(120, Math.min(2400, +Q.get('w') || 520));
+  var ONLY = Q.get('only');
+  var slugs = ONLY ? ALL.filter(function (s) { return s === ONLY; }) : ALL;
+
+  var answer = { cardWidth: CARD_W, threw: null, rows: [] };
+  var out = document.getElementById('out');
+
+  function say(msg) { document.getElementById('line').textContent = msg; }
+  function blew(e) {
+    answer.threw = String((e && e.stack) || (e && e.message) || e);
+    document.getElementById('err').textContent = answer.threw;
+    write();
+  }
+  function write() {
+    var s = document.createElement('script');
+    s.type = 'application/json'; s.id = 'answer';
+    s.textContent = JSON.stringify(answer);
+    document.body.appendChild(s);
+  }
+
+  function json(url) {
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error(url + ' ' + r.status);
+      return r.json();
+    });
+  }
+
+  /* the assets, as spec.assets wants them: the manifest's own rows with a
+     URL that resolves from THIS page (press/tools/) to the built folder */
+  function assetsOf(slug, manifest) {
+    return (manifest.assets || []).map(function (a) {
+      return { id: a.id, role: a.role, url: '../../games/' + slug + '/' + a.file, w: a.w, h: a.h };
+    });
+  }
+
+  /* The three layouts of one game: the one the generator actually wrote,
+     then press/recipes.js's own ranking for the other two. A recipe that
+     will not resolve is reported and left out rather than taking the row
+     down with it. */
+  function layoutsOf(g) {
+    var built = g.layout || {};
+    var rows = [{ recipe: built.recipe || '?', note: 'as built', layout: built }];
+    var ranked = window.Recipes.choose({ assets: g.manifest.assets, preset: g.style && g.style.preset, vibe: g.analysis && g.analysis.vibe });
+    for (var i = 0; i < ranked.length; i++) {
+      if (ranked[i] === built.recipe) continue;
+      try {
+        rows.push({
+          recipe: ranked[i], note: 'ranked ' + (i + 1),
+          layout: window.Recipes.resolve(ranked[i], {
+            manifest: g.manifest, assets: g.manifest.assets, theme: g.theme, style: g.style,
+            vibe: g.analysis && g.analysis.vibe
+          })
+        });
+      } catch (e) {
+        rows.push({ recipe: ranked[i], note: 'ranked ' + (i + 1), layout: null, error: String(e && e.message || e) });
+      }
+    }
+    return rows;
+  }
+
+  /* Every card, kept so the whole lot can be drawn a SECOND time once the
+     faces have landed. A webfont loads on demand, so the first mockup on a
+     cold page is laid out in the fallback stack and its notes wrap to the
+     wrong number of lines; document.fonts.ready cannot be waited for before
+     the first paint, because nothing has asked for a face yet. So: draw,
+     wait, draw again — which also puts preview.js's "safe to call repeatedly
+     on the same container" through its paces nine times over. */
+  var cards = [];
+
+  function card(row, g, slug, spot) {
+    var fig = document.createElement('figure');
+    var host = document.createElement('div');
+    host.className = 'card';
+    var cap = document.createElement('figcaption');
+    fig.appendChild(host);
+    fig.appendChild(cap);
+
+    if (!row.layout) {
+      var head = document.createElement('b');
+      head.textContent = slug + ' · ' + row.recipe + ' (' + row.note + ')';
+      cap.appendChild(head);
+      var e = document.createElement('span');
+      e.className = 'warn';
+      e.textContent = row.error || 'no layout';
+      cap.appendChild(e);
+      answer.rows.push({ slug: slug, recipe: row.recipe, note: row.note, error: row.error || 'no layout' });
+      return Promise.resolve(fig);
+    }
+
+    var open = row.layout.open || { w: 1, h: 1 };
+    var scale = CARD_W / open.w;
+    var spec = {
+      manifest: g.manifest,
+      assets: assetsOf(slug, g.manifest),
+      theme: g.theme,
+      style: g.style,
+      layout: row.layout,
+      stickers: spot.tray,          // the twelve the Press Table would show; preview.js fills the rest itself
+      fonts: g.theme && g.theme.fonts,
+      scale: scale
+    };
+    var seat = { host: host, cap: cap, spec: spec, row: row, slug: slug, scale: scale, at: answer.rows.length };
+    cards.push(seat);
+    answer.rows.push({ slug: slug, recipe: row.recipe, note: row.note, scale: scale });
+    return draw(seat).then(function () { return fig; });
+  }
+
+  function draw(seat) {
+    return window.Preview.render(seat.host, seat.spec).then(function (res) {
+      seat.cap.textContent = '';
+      var head = document.createElement('b');
+      head.textContent = seat.slug + ' · ' + seat.row.recipe + ' (' + seat.row.note + ')';
+      seat.cap.appendChild(head);
+      var meta = document.createElement('span');
+      meta.textContent = ' — ' + res.width + ' × ' + res.height + ' px at ' +
+        (Math.round(seat.scale * 10000) / 100) + ' %, ' + seat.spec.layout.slots.length + ' slots';
+      seat.cap.appendChild(meta);
+      for (var i = 0; i < res.warnings.length; i++) {
+        var w = document.createElement('span');
+        w.className = 'warn';
+        w.textContent = '! ' + res.warnings[i];
+        seat.cap.appendChild(w);
+      }
+      answer.rows[seat.at] = {
+        slug: seat.slug, recipe: seat.row.recipe, note: seat.row.note, scale: seat.scale,
+        width: res.width, height: res.height, slots: seat.spec.layout.slots.length, warnings: res.warnings
+      };
+    });
+  }
+
+  function oneGame(slug) {
+    var g;
+    return json('../../games/' + slug + '/game.json').then(function (loaded) {
+      g = loaded;
+      /* the tray the Press Table's own panel would be showing: the first
+         twelve parts at this game's theme and style (§10 6.2 step 4). It is
+         handed in deliberately SHORT — a recipe reaches for frames and
+         banners a twelve-part tray has not got — so that this page proves
+         preview.js fills the gaps out of its own cache rather than drawing
+         holes. */
+      return window.Preview.trayFor(g.theme, g.style, 12);
+    }).then(function (tray) {
+      var spot = { tray: tray };
+      var h2 = document.createElement('h2');
+      h2.textContent = slug + ' — ' + (g.theme.dark ? 'dark' : 'light') + ' · ' +
+        g.style.preset + ' · ' + (g.theme.fonts && g.theme.fonts.id) + ' · tray of ' + tray.length +
+        ' (' + tray.slice(0, 4).map(function (t) { return t.part; }).join(', ') + '…)';
+      out.appendChild(h2);
+      var rowEl = document.createElement('div');
+      rowEl.className = 'row';
+      out.appendChild(rowEl);
+      var rows = layoutsOf(g);
+      return rows.reduce(function (p, row) {
+        return p.then(function () {
+          return card(row, g, slug, spot).then(function (fig) { rowEl.appendChild(fig); });
+        });
+      }, Promise.resolve());
+    });
+  }
+
+  if (!window.Kits || typeof window.Kits.extractOnly !== 'function') { blew(new Error('kits.js gave no extractOnly on a page with no bench')); return; }
+  if (!window.Recipes) { blew(new Error('recipes.js is not on the page')); return; }
+  if (!window.Preview) { blew(new Error('preview.js is not on the page')); return; }
+
+  say('drawing ' + slugs.length + ' × 3 mockups at ' + CARD_W + ' px a card…');
+  slugs.reduce(function (p, slug) { return p.then(function () { return oneGame(slug); }); }, Promise.resolve())
+    .then(function () {
+      say('waiting for the faces, then drawing every card again…');
+      return document.fonts && document.fonts.ready ? document.fonts.ready : null;
+    })
+    .then(function () {
+      return cards.reduce(function (p, seat) { return p.then(function () { return draw(seat); }); }, Promise.resolve());
+    })
+    .then(function () {
+      var warned = answer.rows.reduce(function (n, r) { return n + ((r.warnings && r.warnings.length) || 0); }, 0);
+      say(answer.rows.length + ' mockups · ' + CARD_W + ' px a card · ' + warned + ' warnings · ' +
+          'window.Preview = { ' + Object.keys(window.Preview).sort().join(', ') + ' }');
+      answer.previewKeys = Object.keys(window.Preview).sort();
+      /* the whole point, checked in the page as well as by eye: not one
+         token on the document root. */
+      answer.rootTokens = (function () {
+        var s = document.documentElement.style, hit = [];
+        for (var i = 0; i < s.length; i++) if (s[i].slice(0, 2) === '--') hit.push(s[i]);
+        return hit;
+      })();
+      write();
+    })
+    .catch(blew);
+})();
+</script>
+</body>
+</html>

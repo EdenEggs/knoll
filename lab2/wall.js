@@ -634,13 +634,13 @@ window.Wall = (function () {
       // a filed tracing on the pointer is stamped where you pressed, at the
       // size the row says; nothing on the pointer asks the table for one
       const f = window.Tracer && Tracer.armed();
-      if (f) stampAt(f, p.x, p.y);
+      if (f) onTap(e, () => stampAt(f, p.x, p.y));
       else if (window.Tracer) Tracer.nudge();
     } else if (tool === 'sticker') {
       // …and a sticker out of the drawer, the same press, the same two
       // numbers, and the same drawer asked to say why when there is none
       const s = window.Stickers && Stickers.armed();
-      if (s) stickerAt(s, p.x, p.y);
+      if (s) onTap(e, () => stickerAt(s, p.x, p.y));
       else if (window.Stickers) Stickers.nudge();
     } else if (tool === 'text') {
       /* A press on a note that is already up goes BACK INTO IT rather than
@@ -648,7 +648,7 @@ window.Wall = (function () {
          click people reach for work: the first press opens the box, the second
          lands inside it and drops the caret where it was aimed. */
       const i = noteUnder(e.clientX, e.clientY);
-      if (i >= 0) editNote(i); else askNote(p);
+      onTap(e, () => { if (i >= 0) editNote(i); else askNote(p); });
     } else if (tool === 'gif') {
       /* a gif on the pointer is stamped where you pressed, at the size and
          fade the row says, the same as a tracing; nothing on the pointer
@@ -659,7 +659,7 @@ window.Wall = (function () {
          the paper with the gif tool up threw "Gif.armed is not a function"
          and no gif was ever put up by any route. (2026-09-04) */
       const g = window.Gif && Gif.armed;
-      if (g) gifAt(g, p.x, p.y);
+      if (g) onTap(e, () => gifAt(g, p.x, p.y));
       else if (window.Gif) Gif.nudge();
     }
     e.preventDefault();
@@ -706,16 +706,71 @@ window.Wall = (function () {
     e.preventDefault();
   }
 
-  function drawEnd(e) {
-    if (!live || (e && e.pointerId !== live.id)) return;
+  /* THE LINE TAKEN OFF THE GLASS AND THE LISTENERS WITH IT — what both
+     endings of a stroke do before they differ. drawEnd goes on to file what
+     was drawn; a pinch stops here and files nothing, so a second finger takes
+     back the dot the pen went down on (A SECOND FINGER, at the foot). */
+  function drawOff() {
+    if (!live) return null;
     window.removeEventListener('pointermove', drawMove, true);
     window.removeEventListener('pointerup', drawEnd, true);
     window.removeEventListener('pointercancel', drawEnd, true);
-    const g = live.g, d = live.d, pts = live.pts;
-    live.node.remove();
+    const l = live;
     live = null;
+    l.node.remove();
+    return l;
+  }
+
+  function drawEnd(e) {
+    if (!live || (e && e.pointerId !== live.id)) return;
+    const { g, d, pts } = drawOff();
     if (g) { if (d) add({ k: 'p', c: nib(), g: g, d: d }); return; }
     add({ k: 's', c: nib(), w: pw, d: pathOf(pts) });
+  }
+
+  /* ── A FINGER'S TAP IS ANSWERED ON THE WAY UP ────────────────────────────
+     Every tool whose press PUTS SOMETHING DOWN — a sticker, a tracing, a gif,
+     a note — used to do it on the way down, which is right for a mouse and
+     wrong for a hand. The first finger of a pinch is a press like any other
+     (lab.js: TWO FINGERS ARE THE CAMERA), so a bench that stamped on
+     pointerdown would leave a sticker behind every time somebody moved about.
+     Undoing them afterwards was the other way to write this; it would put a
+     piece on the paper and take it off again half a frame later, and "nothing
+     happened" is a truer answer than a flicker.
+
+     So a finger's press is REMEMBERED and answered when it comes up — if it
+     comes up where it went down, and if nothing took it away in between. A
+     mouse and a pen are untouched: neither can pinch, and making them wait
+     for the button to come back up would only make the tool feel slow.
+     (2026-09-11, ported from the iron hive.) */
+  const TAP_SLOP = 12;                   // screen px a finger may wander and still have tapped
+  let tap = null;
+
+  function tapOff() {
+    if (!tap) return;
+    window.removeEventListener('pointermove', tapMove, true);
+    window.removeEventListener('pointerup', tapUp, true);
+    window.removeEventListener('pointercancel', tapOff, true);
+    tap = null;
+  }
+  function tapMove(e) {
+    if (!tap || e.pointerId !== tap.id) return;
+    if (Math.abs(e.clientX - tap.x) + Math.abs(e.clientY - tap.y) > TAP_SLOP) tapOff();
+  }
+  function tapUp(e) {
+    if (!tap || e.pointerId !== tap.id) return;
+    const fn = tap.fn;
+    tapOff();
+    fn();
+  }
+  // the press's answer: now for a mouse or a pen, on the way up for a finger
+  function onTap(e, fn) {
+    if (e.pointerType !== 'touch') { fn(); return; }
+    tapOff();                                    // a second press supersedes the first
+    tap = { id: e.pointerId, x: e.clientX, y: e.clientY, fn: fn };
+    window.addEventListener('pointermove', tapMove, true);
+    window.addEventListener('pointerup', tapUp, true);
+    window.addEventListener('pointercancel', tapOff, true);
   }
 
   /* ── a note ───────────────────────────────────────────────────────────────
@@ -738,6 +793,9 @@ window.Wall = (function () {
      copy steps aside while the box is up, so a note is never on the paper and
      in the box at once. */
   let noteBox = null, noteIn = null;
+  /* how to take back a pull on the width tab while there is one to take back
+     — see A SECOND FINGER TAKES THE PRESS BACK, at the foot of this file */
+  let noteGrip = null;
   let noteAt = null;                     // where the box was put, which is where it pins
   /* The note being gone back into — which one, the tool it was opened from,
      its words and the ink it already had — or null while a NEW note is being
@@ -833,11 +891,14 @@ window.Wall = (function () {
         noteIn.style.width = round(nw) + 'px';
         grow();
       };
-      const up = () => {
+      const off = () => {
         window.removeEventListener('pointermove', move, true);
         window.removeEventListener('pointerup', up, true);
-        if (noteIn) noteIn.focus();
+        noteGrip = null;
       };
+      const up = () => { off(); if (noteIn) noteIn.focus(); };
+      // …and a second finger puts the box back to the width it was pressed at
+      noteGrip = () => { off(); nw = w0; if (noteIn) { noteIn.style.width = round(nw) + 'px'; grow(); } };
       window.addEventListener('pointermove', move, true);
       window.addEventListener('pointerup', up, true);
     });
@@ -1011,15 +1072,25 @@ window.Wall = (function () {
     e.preventDefault();
   }
 
-  function moveEnd(e) {
-    if (!held || (e && e.pointerId !== held.id)) return;
+  /* THE PIECE PUT DOWN AND THE LISTENERS TAKEN OFF — what both endings of a
+     drag do before they differ. moveEnd goes on to file where it was; a pinch
+     stops here, which is what makes a second finger a way OUT of a drag rather
+     than a way to commit one (A SECOND FINGER, at the foot). */
+  function letGo() {
+    if (!held) return null;
     window.removeEventListener('pointermove', moveMove, true);
     window.removeEventListener('pointerup', moveEnd, true);
     window.removeEventListener('pointercancel', moveEnd, true);
-    const { i, ox, oy } = held;
     held.node.classList.remove('wall-held');
     held.node.style.transform = '';
+    const h = held;
     held = null;
+    return h;
+  }
+
+  function moveEnd(e) {
+    if (!held || (e && e.pointerId !== held.id)) return;
+    const { i, ox, oy } = letGo();
     if (!ox && !oy) return;
     /* WHERE IT WAS, taken whole rather than as an offset to undo by. A piece
        moves three different ways depending on what it is — a stroke and a
@@ -1109,7 +1180,12 @@ window.Wall = (function () {
   function startSize(gr, e) {
     const it = S().items[+gr.dataset.i];
     if (!it || it.k !== 't') return;
-    sizing = { it, x0: W(e.clientX, e.clientY).x, w0: +gr.getAttribute('x') - it.x - 4 };
+    /* …and the width it had when the grip was pressed, which is what a pinch
+       puts back (A SECOND FINGER, at the foot). `had` rather than a number: a
+       note written before boxes had a width carries none at all, and giving it
+       one here would be a gesture that was taken back leaving a mark anyway. */
+    sizing = { it, x0: W(e.clientX, e.clientY).x, w0: +gr.getAttribute('x') - it.x - 4,
+               had: 'w' in it, was: it.w };
     window.addEventListener('pointermove', sizeMove, true);
     window.addEventListener('pointerup', sizeEnd, true);
     window.addEventListener('pointercancel', sizeEnd, true);
@@ -1124,12 +1200,18 @@ window.Wall = (function () {
     e.preventDefault();
   }
 
-  function sizeEnd() {
-    if (!sizing) return;
+  function sizeOff() {
+    if (!sizing) return null;
     window.removeEventListener('pointermove', sizeMove, true);
     window.removeEventListener('pointerup', sizeEnd, true);
     window.removeEventListener('pointercancel', sizeEnd, true);
+    const s = sizing;
     sizing = null;
+    return s;
+  }
+
+  function sizeEnd() {
+    if (!sizeOff()) return;
     store.update(() => {});              // the new width is already in there
   }
 
@@ -1573,6 +1655,28 @@ window.Wall = (function () {
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape' || tool === 'move' || noteBox) return;
     setTool('move');
+  });
+
+  /* ── A SECOND FINGER TAKES THE PRESS BACK ────────────────────────────────
+     lab.js says 'lab:pinch' the instant a second finger lands on the paper,
+     because two fingers are the camera and the first of them is already
+     holding something (TWO FINGERS ARE THE CAMERA, over there). Whatever this
+     file had hold of goes back exactly as it was, and nothing is filed: a
+     pinch is not a way to draw, stamp, move or reshape anything.
+
+     PUT BACK, NOT ENDED, and that distinction is the whole of why this is not
+     a synthetic pointerup. Every one of these gestures has an ending that
+     COMMITS — moveEnd files where the piece was, drawEnd adds the stroke,
+     sizeEnd saves the new width — so "the finger came up" is the one thing a
+     pinch must not say. This is the other half of each of them, which is why
+     each was split in two above. (2026-09-11, ported from the iron hive.) */
+  document.addEventListener('lab:pinch', () => {
+    tapOff();                            // a finger's tap that will now never be one
+    drawOff();                           // …the line, down to the dot the pen went down on
+    letGo();                             // …the piece, back where it was picked up
+    const s = sizeOff();                 // …and the note's width tab
+    if (s) { if (s.had) s.it.w = s.was; else delete s.it.w; paint(); }
+    if (noteGrip) noteGrip();
   });
 
   buildDock(); buildOpts(); markTools(); syncGrid();

@@ -1,0 +1,219 @@
+#!/usr/bin/env node
+/* verify-auth.js — the gate (api/auth.js), and the wall's door taking the
+   gate's session (api/wall.js), driven in-process over a throwaway store.
+
+   No server, no socket, no network: both modules are required with WALL_DB
+   pointed at a temp file and called with a fake request and response, the
+   way serve.js and Vercel call them. It checks what would lose an account,
+   leak one or let somebody into one if it broke: validation, the claim on
+   an address, the secret word as it is kept (and the address, which is
+   not), the two cookies and their flags, log-in and the wrong word, the
+   hour's caps, log-out, a lapsed session, other sites' posts, the one way
+   in per address, the name and the tour, and TOEM 2's door taking the
+   cookie.
+
+     node lab2/perf/verify-auth.js
+*/
+'use strict';
+const assert = require('assert');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+
+const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'knoll-auth-'));
+process.env.WALL_DB = path.join(TMP, 'wall-db.json');
+delete process.env.KV_REST_API_URL; delete process.env.UPSTASH_REDIS_REST_URL; delete process.env.VERCEL;
+delete process.env.GOOGLE_CLIENT_ID; delete process.env.GOOGLE_CLIENT_SECRET;
+process.env.ADMIN_EMAILS = 'boss@example.com';
+const ROOT = path.join(__dirname, '..', '..');
+const auth = require(path.join(ROOT, 'api', 'auth.js'));
+const wall = require(path.join(ROOT, 'api', 'wall.js'));
+const done = () => fs.rmSync(TMP, { recursive: true, force: true });
+
+let n = 0;
+const A = new Proxy(assert, { get: (a, k) => (...args) => { n++; return a[k](...args); } });   // every check counted
+
+const HERE = 'http://localhost:4321';
+function call(fn, method, url, body, headers) {
+  return new Promise(resolve => {
+    const h = Object.assign({ host: 'localhost:4321', 'x-real-ip': '10.1.1.1' }, method === 'POST' ? { origin: HERE, 'content-type': 'application/json' } : {}, headers || {});
+    Object.keys(h).forEach(k => h[k] === undefined && delete h[k]);
+    const req = { method, url, headers: h, body: method === 'POST' ? body : undefined, socket: { remoteAddress: '127.0.0.1' } };
+    const res = { statusCode: 200, headers: {}, setHeader(k, v) { this.headers[k.toLowerCase()] = v; },
+                  end(s) { let json = {}; try { json = JSON.parse(s); } catch (e) {} resolve({ status: this.statusCode, json, cookies: [].concat(this.headers['set-cookie'] || []) }); } };
+    fn(req, res).catch(e => resolve({ status: 599, json: { error: String(e && e.stack || e) }, cookies: [] }));
+  });
+}
+const gate = (body, headers) => call(auth, 'POST', '/api/auth', body, headers);
+const who = headers => call(auth, 'GET', '/api/auth', undefined, headers);
+const jar = r => { const c = {}; r.cookies.forEach(s => { const m = /^([^=]+)=([^;]*)/.exec(s); if (m) c[m[1]] = m[2]; }); return c; };
+const sent = c => ({ cookie: 'knoll_s=' + c.knoll_s + '; knoll_in=' + c.knoll_in });
+const flags = (r, name) => r.cookies.find(s => s.startsWith(name + '=')) || '';
+
+(async () => {
+  // ── who is here, with nobody signed in ──────────────────────────────────
+  let r = await who();
+  A.deepStrictEqual([r.json.ok, r.json.open, r.json.google, r.json.me], [true, true, false, null], 'nobody signed in; the gate is open; Google is not set up');
+
+  // ── signing up ──────────────────────────────────────────────────────────
+  const good = { op: 'signup', name: 'Mossy', email: 'Mossy@Example.com ', password: 'toadstool1' };
+  r = await gate(Object.assign({}, good, { name: '  ' }));   A.deepStrictEqual([r.status, r.json.code], [400, 'name'], 'a petition with no name is sent back');
+  r = await gate(Object.assign({}, good, { email: 'mossy' })); A.deepStrictEqual([r.status, r.json.code], [400, 'email'], '…and one with no proper address');
+  r = await gate(Object.assign({}, good, { password: 'short' })); A.deepStrictEqual([r.status, r.json.code], [400, 'password'], '…and one with a secret word under eight letters');
+  r = await gate(Object.assign({}, good, { password: 'x'.repeat(257) })); A.deepStrictEqual([r.status, r.json.code], [400, 'password'], '…and one too long for the lock');
+  r = await gate(good);
+  A.strictEqual(r.status, 200, 'a good petition makes an account: ' + JSON.stringify(r.json));
+  const mossy = r.json.me, c1 = jar(r);
+  A.deepStrictEqual([mossy.name, mossy.toured, mossy.id], ['Mossy', false, wall.userKey('mossy@example.com')], 'the account is the address\'s key, named, not yet toured');
+  A.ok(/^[0-9a-f]{32}$/.test(c1.knoll_s) && c1.knoll_in === mossy.id, 'two cookies: the session, and the id');
+  A.ok(/HttpOnly/.test(flags(r, 'knoll_s')) && /SameSite=Lax/.test(flags(r, 'knoll_s')) && /Max-Age=7776000/.test(flags(r, 'knoll_s')), 'the session cookie is HttpOnly, SameSite=Lax, ninety days');
+  A.ok(!/HttpOnly/.test(flags(r, 'knoll_in')) && /SameSite=Lax/.test(flags(r, 'knoll_in')), 'the id cookie is readable by the page, SameSite=Lax');
+  A.ok(!/Secure/.test(flags(r, 'knoll_s')), 'no Secure flag over plain http on localhost');
+  r = await call(auth, 'POST', '/api/auth', good, { 'x-forwarded-proto': 'https', 'x-forwarded-host': 'knoll.example', host: 'knoll.example', origin: 'https://knoll.example' });
+  A.ok(r.status === 409, '(the same petition over https is taken — see below)');
+  const rec = await wall.db('HGETALL', wall.K.user(mossy.id));
+  A.ok(/^s1\$32768\$8\$1\$[\w-]{22}\$[\w-]{43}$/.test(rec.pw), 'the secret word is kept as scrypt, with its cost and salt beside it');
+  const raw = fs.readFileSync(process.env.WALL_DB, 'utf8');
+  A.ok(!/mossy@example\.com/i.test(raw) && !raw.includes('toadstool1'), 'neither the address nor the secret word is anywhere in the store');
+  r = await gate(Object.assign({}, good, { email: '  MOSSY@example.COM', name: 'Impostor' }));
+  A.deepStrictEqual([r.status, r.json.code], [409, 'taken'], 'the same address, any case, is taken');
+  A.strictEqual((await wall.db('HGETALL', wall.K.user(mossy.id))).name, 'Mossy', '…and the account is untouched by it');
+
+  // ── who is here, signed in ──────────────────────────────────────────────
+  r = await who(sent(c1));
+  A.deepStrictEqual([r.json.me && r.json.me.id, r.json.me && r.json.me.name, r.json.me && r.json.me.toured], [mossy.id, 'Mossy', false], 'the cookie says who you are');
+
+  // ── the wall's door takes the same cookie ───────────────────────────────
+  r = await call(wall, 'GET', '/api/wall?me=1', undefined, sent(c1));
+  A.deepStrictEqual([r.status, r.json.id, r.json.name, r.json.tier], [200, mossy.id, 'Mossy', 'newcomer'], 'TOEM 2 knows the account from the cookie: a newcomer');
+  r = await call(wall, 'POST', '/api/wall', { op: 'me', name: 'Mossy M' }, Object.assign(sent(c1), { origin: 'https://evil.example' }));
+  A.deepStrictEqual([r.status, r.json.code], [403, 'origin'], 'a post to the wall riding the cookie from another site is refused');
+  r = await call(wall, 'POST', '/api/wall', { op: 'me', name: 'Mossy M' }, sent(c1));
+  A.strictEqual(r.status, 200, '…and from this site it goes through');
+
+  // ── the name, and the tour ──────────────────────────────────────────────
+  r = await gate({ op: 'name', name: 'Mossy of the Hollow and many more words' }, sent(c1));
+  A.deepStrictEqual([r.status, r.json.name], [200, 'Mossy of the Hollow and'], 'a name is cleaned, cut to 24 and trimmed');
+  r = await gate({ op: 'toured' });
+  A.deepStrictEqual([r.status, r.json.code], [401, 'who'], 'the tour is marked for a signed-in account only');
+  r = await gate({ op: 'toured' }, sent(c1));
+  r = await who(sent(c1));
+  A.strictEqual(r.json.me.toured, true, 'once shown, the tour is marked on the account');
+
+  // ── other sites, and other shapes ───────────────────────────────────────
+  r = await gate({ op: 'name', name: 'x' }, Object.assign(sent(c1), { origin: 'https://evil.example' }));
+  A.deepStrictEqual([r.status, r.json.code], [403, 'origin'], 'a post from another site is refused');
+  r = await gate({ op: 'login', email: 'a@b.co', password: 'x' }, { 'content-type': 'text/plain' });
+  A.strictEqual(r.status, 415, 'a post that is not JSON (what a form on another site can send) is refused');
+  r = await gate({ op: 'frobnicate' });
+  A.deepStrictEqual([r.status, r.json.code], [400, 'op'], 'an op the gate does not know');
+  r = await call(auth, 'PUT', '/api/auth');
+  A.strictEqual(r.status, 405, 'GET or POST only');
+
+  // ── logging in ──────────────────────────────────────────────────────────
+  r = await gate({ op: 'login', email: 'mossy@example.com', password: 'toadstool2' }, { 'x-real-ip': '10.2.2.2' });
+  A.deepStrictEqual([r.status, r.json.code], [401, 'wrong'], 'the wrong secret word is turned away');
+  const wrongMsg = r.json.error;
+  r = await gate({ op: 'login', email: 'nobody@example.com', password: 'toadstool1' }, { 'x-real-ip': '10.2.2.2' });
+  A.deepStrictEqual([r.status, r.json.error], [401, wrongMsg], 'an address with no account gets the same answer, word for word');
+  r = await gate({ op: 'login', email: 'mossy@example.com', password: 'toadstool1', remember: false }, sent(c1));
+  A.strictEqual(r.status, 200, 'the right secret word opens the gate');
+  const c2 = jar(r);
+  A.ok(!/Max-Age/.test(flags(r, 'knoll_s')), '"keep the gate unlatched" unticked: a cookie that ends with the browser');
+  A.ok(c2.knoll_s !== c1.knoll_s, 'a new session every time');
+  r = await who(sent(c1));
+  A.strictEqual(r.json.me, null, 'the session the browser came in with is over');
+  A.ok(/knoll_s=;.*Max-Age=0/.test(flags(r, 'knoll_s')) && /knoll_in=;.*Max-Age=0/.test(flags(r, 'knoll_in')), '…and a lapsed session has both its cookies cleared');
+  const ttl = JSON.parse(fs.readFileSync(process.env.WALL_DB, 'utf8')).x[wall.K.sess(wall.sha(c2.knoll_s))] - Date.now();
+  A.ok(ttl > 0 && ttl <= 86400e3 + 1000, 'unticked, the store keeps the session a day at most');
+
+  // ── the hour's caps ─────────────────────────────────────────────────────
+  for (let i = 0; i < auth.RATE.fails; i++) await gate({ op: 'login', email: 'mossy@example.com', password: 'guess' + i }, { 'x-real-ip': '10.3.3.' + (i % 250) });
+  r = await gate({ op: 'login', email: 'mossy@example.com', password: 'toadstool1' }, { 'x-real-ip': '10.4.4.4' });
+  A.deepStrictEqual([r.status, r.json.code], [429, 'rate'], 'twenty wrong words for one address in an hour, and even the right one waits');
+  let last;
+  for (let i = 0; i <= auth.RATE.login; i++) last = await gate({ op: 'login', email: 'someone' + i + '@example.com', password: 'whatever1' }, { 'x-real-ip': '10.5.5.5' });
+  A.deepStrictEqual([last.status, last.json.code], [429, 'rate'], 'sixty knocks from one address in an hour, then it waits');
+  for (let i = 0; i <= auth.RATE.signup; i++) last = await gate({ op: 'signup', name: 'n' + i, email: 'new' + i + '@example.com', password: 'toadstool1' }, { 'x-real-ip': '10.6.6.6' });
+  A.deepStrictEqual([last.status, last.json.code], [429, 'rate'], 'twenty new accounts from one address in an hour, then it waits');
+
+  // ── logging out ─────────────────────────────────────────────────────────
+  r = await gate({ op: 'logout' }, sent(c2));
+  A.ok(r.status === 200 && /knoll_s=;.*Max-Age=0/.test(flags(r, 'knoll_s')), 'logging out clears the cookies');
+  r = await who(sent(c2));
+  A.strictEqual(r.json.me, null, '…and the session is over in the store too');
+
+  // ── one address, one way in ─────────────────────────────────────────────
+  await wall.finishLogin('juno@example.com');   // Google vouched for Juno (api/wall.js: the callback)
+  r = await gate({ op: 'signup', name: 'Not Juno', email: 'juno@example.com', password: 'toadstool1' });
+  A.deepStrictEqual([r.status, r.json.code], [409, 'taken'], 'an address Google vouched for cannot be claimed with a secret word');
+  r = await gate({ op: 'login', email: 'juno@example.com', password: 'toadstool1' });
+  A.deepStrictEqual([r.status, r.json.code], [401, 'google'], '…and logging in to it with one says to use Google');
+
+  // ── the admin list wants a proved address (api/wall.js: THE ADMIN LIST WANTS A PROVED ADDRESS) ──
+  r = await gate({ op: 'signup', name: 'Not the boss', email: 'boss@example.com', password: 'toadstool1' }, { 'x-real-ip': '10.7.7.7' });
+  const boss = jar(r);
+  r = await call(wall, 'GET', '/api/wall?me=1', undefined, sent(boss));
+  A.deepStrictEqual([r.status, r.json.role], [200, 'user'], 'petitioning with an ADMIN_EMAILS address makes nobody the admin — typing it proves nothing');
+  r = await gate({ op: 'login', email: 'boss@example.com', password: 'toadstool1' }, { 'x-real-ip': '10.7.7.8' });
+  r = await call(wall, 'GET', '/api/wall?me=1', undefined, sent(jar(r)));
+  A.strictEqual(r.json.role, 'user', '…nor does logging in with it');
+  const g = await wall.finishLogin('boss2@example.com'); process.env.ADMIN_EMAILS = 'boss2@example.com';
+  const g2 = await wall.finishLogin('boss2@example.com');
+  r = await call(wall, 'GET', '/api/wall?me=1', undefined, { authorization: 'Bearer ' + g2.session });
+  A.ok(g.fresh && r.json.role === 'admin', 'Google vouching for an ADMIN_EMAILS address still makes the admin');
+
+  // ── Google, with Google played by this script ────────────────────────────
+  process.env.GOOGLE_CLIENT_ID = 'cid'; process.env.GOOGLE_CLIENT_SECRET = 'secret';
+  let vouch = 'gnome@example.com';
+  const realFetch = global.fetch;
+  global.fetch = async url => {
+    if (String(url).startsWith('https://oauth2.googleapis.com/tokeninfo')) return { json: async () => ({ aud: 'cid', email_verified: 'true', email: vouch, iss: 'accounts.google.com' }) };
+    if (String(url).startsWith('https://oauth2.googleapis.com/token')) return { json: async () => ({ id_token: 'a.b.c' }) };
+    throw new Error('this probe has no network');
+  };
+  const hop = (url, headers) => new Promise(resolve => {
+    const req = { method: 'GET', url, headers: Object.assign({ host: 'localhost:4321' }, headers || {}), socket: { remoteAddress: '127.0.0.1' } };
+    const res = { statusCode: 200, headers: {}, setHeader(k, v) { this.headers[k.toLowerCase()] = v; }, end(s) { resolve({ status: this.statusCode, headers: this.headers, text: String(s || ''), cookies: [].concat(this.headers['set-cookie'] || []) }); } };
+    wall(req, res);
+  });
+  r = await hop('/auth/google?next=' + encodeURIComponent('/toem2/?visitor'));
+  const to = new URL(r.headers.location), state = to.searchParams.get('state');
+  A.ok(r.status === 302 && to.host === 'accounts.google.com' && to.searchParams.get('redirect_uri') === 'http://localhost:4321/auth/google/callback', 'the Google button goes to Google, with this site\'s callback');
+  A.ok(new RegExp('^knoll_o=' + state + ';.*HttpOnly').test(r.cookies[0] || ''), '…and the state rides in an HttpOnly cookie of this browser\'s');
+  r = await hop('/auth/google/callback?state=' + state + '&code=abcd');
+  A.ok(r.status === 400 && /another browser/.test(r.text), 'a callback without that cookie — somebody else\'s sign-in — signs nobody in');
+  r = await hop('/auth/google/callback?state=' + state + '&code=abcd', { cookie: 'knoll_o=' + state });
+  let c = jar(r);
+  A.ok(r.status === 302 && r.headers.location === '/signup/?google=1&next=' + encodeURIComponent('/toem2/?visitor') && /^[0-9a-f]{32}$/.test(c.knoll_s) && c.knoll_in === wall.userKey(vouch),
+    'a new gnome Google vouched for is signed in and sent to /signup to be named, then on to where they were', r.headers.location);
+  A.ok(/knoll_o=;.*Max-Age=0/.test(flags(r, 'knoll_o')), '…and the state cookie is spent');
+  r = await hop('/auth/google/callback?state=' + state + '&code=abcd', { cookie: 'knoll_o=' + state });
+  A.ok(r.status === 400 && /expired/.test(r.text), 'a state is good for one callback only');
+  r = await gate({ op: 'name', name: 'Gnome Vouched' }, sent(c));
+  A.strictEqual(r.json.name, 'Gnome Vouched', 'the name form names the account');
+  r = await hop('/auth/google?next=' + encodeURIComponent('//evil.example/x'));
+  const s2 = new URL(r.headers.location).searchParams.get('state');
+  r = await hop('/auth/google/callback?state=' + s2 + '&code=abcd', { cookie: 'knoll_o=' + s2 });
+  A.strictEqual(r.headers.location, '/yard/', 'a named gnome goes straight back — and a next that leaves the site becomes the yard');
+  vouch = 'mossy@example.com';                  // has a secret word (above)
+  r = await hop('/auth/google?next=/');
+  const s3 = new URL(r.headers.location).searchParams.get('state');
+  r = await hop('/auth/google/callback?state=' + s3 + '&code=abcd', { cookie: 'knoll_o=' + s3 });
+  A.ok(r.status === 400 && /secret word/.test(r.text) && !r.cookies.some(x => x.startsWith('knoll_s=')), 'Google cannot open an account a secret word made (one address, one way in)');
+  r = await who();
+  A.strictEqual(r.json.google, true, 'with its client set, the gate says Google is there');
+  global.fetch = realFetch; delete process.env.GOOGLE_CLIENT_ID; delete process.env.GOOGLE_CLIENT_SECRET;
+
+  // ── no store behind the door (Vercel with no KV): says so ───────────────
+  process.env.VERCEL = '1';
+  wall.useStore(undefined);
+  r = await who();
+  A.deepStrictEqual([r.json.open, r.json.me], [false, null], 'with no store the gate says it is not open');
+  r = await gate(good);
+  A.deepStrictEqual([r.status, r.json.code], [503, 'no-store'], '…and a petition is a 503 that says why');
+  delete process.env.VERCEL;
+
+  done();
+  console.log('verify-auth: ' + n + ' checks, all good');
+})().catch(e => { done(); console.error('verify-auth FAILED:', e.message); process.exit(1); });

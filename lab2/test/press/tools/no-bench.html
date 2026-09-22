@@ -1,0 +1,102 @@
+<!--
+  press/tools/no-bench.html — kits.js on a page that has no bench.
+
+  The Press Table (plan Phase 6) is a page with no #bench-world, no Lab and
+  no Frames: it asks kits.js for sticker strings and puts them in plain
+  <div>s to show the owner what a style looks like. kits.js used to return
+  null on its first line when there was no world, so THIS is the page that
+  proves the split half of it (CONTRACTS §7) — the extractor, the palette
+  and the style pass — stands on its own.
+
+  The page loads ONE script and nothing else. It does not load lab.css,
+  lab.js, frames.js or ink.js, and it must not need them: if kits.js
+  reaches for a bench object on the way past, this page throws on load and
+  the check below says so instead of drawing.
+
+  What it draws, once Kits.extractOnly has answered: the count, the exact
+  key list of window.Kits, whether a #kit-layer was made (it must not be —
+  a page with no world gets no layer), and the forty stickers at the
+  palette and style typed below. The palette is DELIBERATELY not Knoll:
+  #123456 as the primary is a colour the sheet's own defaults do not hold
+  anywhere, so a sticker that comes out pink is a sticker the caller's
+  palette did not reach. Two roles are left out on purpose — skHighlight
+  and skShadow — to exercise the partial-palette clause: they must fall
+  back to the sheet's own, not to nothing.
+
+  The style is ink-sketch, Appendix C's busiest row (a wobbled line, two
+  passes, a hatched shade, a paper texture, no finish), because a style
+  that does nothing would prove nothing about the pass having run.
+
+  perf/verify-kits.js's companion, perf/verify-kits-adv.js, opens this at
+  http://localhost:4322/lab2/test/press/tools/no-bench.html and reads the
+  <script type="application/json" id="answer"> block it writes. Opened by
+  hand it is just forty stickers on white paper.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>no-bench — kits.js with no world under it</title>
+<style>
+  html,body{margin:0;background:#fff;color:#26212a}
+  body{padding:24px 28px;font-family:ui-monospace,"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;font-size:12px}
+  h1{font-size:14px;margin:0 0 2px}
+  p{margin:0 0 16px;color:#8b7f92}
+  #wrap{display:flex;flex-wrap:wrap;gap:10px;width:1120px}
+  figure{margin:0;width:134px}
+  figure svg{display:block}
+  figcaption{font-size:9px;color:#8b7f92;letter-spacing:.06em;padding-top:2px}
+  #err{color:#c93b82;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<h1>kits.js, no bench</h1>
+<p id="line">asking…</p>
+<div id="err"></div>
+<div id="wrap"></div>
+<script src="../../kits.js"></script>
+<script>
+(function () {
+  /* the caller's palette: six roles of nine, none of them Knoll's, so a
+     drawing that comes out in the sheet's pink is a drawing the palette
+     missed — and the two that are absent must come back Knoll */
+  var PALETTE = { skPrimary: '#123456', skSecondary: '#2f6f4f', skInk: '#101820',
+                  skPaper: '#fdf7ef', skStroke: 4, skText: 'NO BENCH' };
+  var STYLE = { preset: 'ink-sketch', lineShow: true, lineWeight: 0.5, lineWobble: 0.6, linePasses: 2,
+                corners: 0.2, shading: 'hatch', texture: 'paper', paletteSize: 0, pixel: 0,
+                saturation: 0.2, finish: 'none' };
+  var answer = { keys: Object.keys(window.Kits || {}).sort(), layer: !!document.getElementById('kit-layer'),
+                 threw: null, parts: 0, names: [], sample: null };
+  function write() {
+    var s = document.createElement('script');
+    s.type = 'application/json'; s.id = 'answer';
+    s.textContent = JSON.stringify(answer);
+    document.body.appendChild(s);
+    document.getElementById('line').textContent =
+      answer.parts + ' parts · window.Kits = { ' + answer.keys.join(', ') + ' } · #kit-layer: ' + answer.layer;
+  }
+  if (!window.Kits) { answer.threw = 'window.Kits is null on a page with no #bench-world'; write(); return; }
+  window.Kits.extractOnly('../../features/stickers-core.dc.html', PALETTE, STYLE).then(function (out) {
+    var names = Object.keys(out);
+    answer.parts = names.length; answer.names = names;
+    answer.sample = out[names[0]] ? { part: names[0], w: out[names[0]].w, h: out[names[0]].h,
+                                      tags: out[names[0]].tags, text: out[names[0]].text } : null;
+    answer.strings = {};
+    var wrap = document.getElementById('wrap');
+    names.forEach(function (n) {
+      answer.strings[n] = out[n].still;
+      var f = document.createElement('figure');
+      f.innerHTML = out[n].still + '<figcaption>' + n + '</figcaption>';
+      wrap.appendChild(f);
+    });
+    answer.layer = !!document.getElementById('kit-layer');
+    write();
+  }).catch(function (e) {
+    answer.threw = String(e && e.message || e);
+    document.getElementById('err').textContent = answer.threw;
+    write();
+  });
+})();
+</script>
+</body>
+</html>

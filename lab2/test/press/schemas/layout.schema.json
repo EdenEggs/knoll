@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "layout",
+  "description": "PRESS-TABLE-PLAN.md Appendix A, transcribed rule for rule; §3.5 says what it means and Appendix E holds the three recipes. World units, y growing downward; `open` is the rectangle lab.js frames on a first visit (data-open on #bench-world). Once the owner has rearranged the bench, index.html is the truth and this is only where it started. Every bound below is the plan's.",
+  "type": "object",
+  "required": ["recipe", "open", "slots"],
+  "properties": {
+    "recipe": { "enum": ["poster", "widescreen", "scrapbook"] },
+    "open":   { "type": "object", "required": ["x", "y", "w", "h"], "additionalProperties": { "type": "number" } },
+    "slots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "ref", "x", "y"],
+        "properties": {
+          "kind":  { "enum": ["pic", "sticker", "note", "sign", "machine"] },
+          "ref":   { "type": "string" },
+          "x":     { "type": "number" },
+          "y":     { "type": "number" },
+          "scale": { "type": "number", "minimum": 0.05, "maximum": 4 },
+          "rot":   { "type": "number", "minimum": -45, "maximum": 45 },
+          "z":     { "type": "integer" },
+          "text":  { "type": "string", "maxLength": 1200 },
+          "width": { "type": "number" },
+          "image": { "type": "string", "description": "an ASSET id, on a sticker slot whose part has an image-slot (frame-polaroid, frame-film, frame-ornate, frame-pixel, badge-round): the picture the generator clips into that frame. The slot's `ref` stays the PART id — CONTRACTS.md §13. Nothing here is closed against unknown keys (Appendix A sets no additionalProperties), so this row documents the key rather than admitting it; the plan's §3.5 list is the required half." }
+        }
+      }
+    }
+  }
+}

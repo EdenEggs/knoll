@@ -1,0 +1,45 @@
+{
+  "fixture": "pixelfort",
+  "hints": {
+    "dark": true
+  },
+  "rank": [
+    {
+      "preset": "pixel",
+      "score": 2.3
+    },
+    {
+      "preset": "cel",
+      "score": 7
+    },
+    {
+      "preset": "grunge",
+      "score": 7.2
+    }
+  ],
+  "stats": {
+    "contrast": 0.2048,
+    "edgeDensity": 0.1521,
+    "hfEnergy": 0,
+    "outline": {
+      "present": true,
+      "weight": 0.6
+    },
+    "paletteCount": 17,
+    "pixelSize": 4,
+    "saturation": 0.076
+  },
+  "vector": {
+    "corners": 0,
+    "finish": "shadow",
+    "linePasses": 1,
+    "lineShow": true,
+    "lineWeight": 0.6,
+    "lineWobble": 0,
+    "paletteSize": 16,
+    "pixel": 4,
+    "saturation": 0.3111,
+    "shading": "dither",
+    "texture": "scanlines"
+  }
+}

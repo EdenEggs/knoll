@@ -1,0 +1,86 @@
+{
+  "slug": "neonrun",
+  "title": "Neon Run",
+  "tagline": "Outrun the grid.",
+  "description": "An endless runner on a wireframe highway that never ends and never repeats. Two colours, one lane, no brakes: Neon Run is about the line you leave behind you and how long it glows. Built for a synth soundtrack and a dark room.",
+  "developer": "Fixture Games",
+  "publisher": "Fixture Games",
+  "releaseDate": "2027-03",
+  "platforms": [
+    "pc",
+    "ps5",
+    "xbox"
+  ],
+  "genres": [
+    "runner",
+    "synthwave",
+    "arcade"
+  ],
+  "links": {
+    "steam": "https://example.com/neonrun/steam",
+    "site": "https://example.com/neonrun",
+    "trailer": "https://example.com/neonrun/trailer"
+  },
+  "assets": [
+    {
+      "id": "logo",
+      "role": "logo",
+      "file": "art/logo.png",
+      "w": 640,
+      "h": 240,
+      "alpha": true,
+      "sha256": "ce5c71c11ab3567e29ea40933bf63b9944d2adf7677dad237cebb6f33a3ba1a6"
+    },
+    {
+      "id": "hero",
+      "role": "hero",
+      "file": "art/hero.png",
+      "w": 1600,
+      "h": 900,
+      "alpha": false,
+      "sha256": "4a0c3c4a8c8743524569637358da85853cb76ccf5750ecdc5fdcb7bc0aa06dfc"
+    },
+    {
+      "id": "shot-1",
+      "role": "screenshot",
+      "file": "art/shot-1.png",
+      "w": 960,
+      "h": 540,
+      "alpha": false,
+      "sha256": "1734f0a01b143429e9c733e9ba976130abbe574ec56c0ee9a55b5a15dfa062b4"
+    },
+    {
+      "id": "shot-2",
+      "role": "screenshot",
+      "file": "art/shot-2.png",
+      "w": 960,
+      "h": 540,
+      "alpha": false,
+      "sha256": "0f078acbc5447d355ca6344705f71fb321475382885650393e446d6fd1ff4590"
+    },
+    {
+      "id": "shot-3",
+      "role": "screenshot",
+      "file": "art/shot-3.png",
+      "w": 960,
+      "h": 540,
+      "alpha": false,
+      "sha256": "c025f273cd7858847c12592eb6bce1758d06c05de7aa0f8263fa341a3f20ac0a"
+    },
+    {
+      "id": "shot-4",
+      "role": "screenshot",
+      "file": "art/shot-4.png",
+      "w": 960,
+      "h": 540,
+      "alpha": false,
+      "sha256": "e9edf39bd229f5b71daf71427cbd424160afbe5cadf11f3fab62cc886f8f7c23"
+    }
+  ],
+  "rights": {
+    "attested": true,
+    "by": "fixture",
+    "at": "2026-09-07T00:00:00.000Z"
+  },
+  "source": "manual"
+}

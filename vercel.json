@@ -8,6 +8,9 @@
     { "source": "/", "destination": "/lab2/index.html" },
     { "source": "/coming-soon", "destination": "/coming-soon.html" },
 
+    { "source": "/auth/google", "destination": "/api/wall?op=google" },
+    { "source": "/auth/google/callback", "destination": "/api/wall?op=callback" },
+
     { "source": "/features/:path*", "destination": "/lab2/features/:path*" },
     { "source": "/fonts/:path*", "destination": "/lab2/fonts/:path*" },
     { "source": "/posters/:path*", "destination": "/lab2/posters/:path*" },

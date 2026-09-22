@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "style",
+  "description": "PRESS-TABLE-PLAN.md Appendix A, transcribed rule for rule: the style vector of Appendix B plus the preset of Appendix C. §3.4 says what it means. This is the object a page bakes as data-sk-style on <html> (CONTRACTS §5), so the ten preset ids here are the same ten Style.PRESETS holds. Every bound below is the plan's.",
+  "type": "object",
+  "required": ["preset"],
+  "properties": {
+    "preset":      { "enum": ["pixel", "flat", "outline-cartoon", "cel", "painterly", "ink-sketch", "neon", "retro-print", "grunge", "cozy-soft"] },
+    "lineShow":    { "type": "boolean" },
+    "lineWeight":  { "type": "number", "minimum": 0, "maximum": 1 },
+    "lineWobble":  { "type": "number", "minimum": 0, "maximum": 1 },
+    "linePasses":  { "type": "integer", "minimum": 1, "maximum": 3 },
+    "corners":     { "type": "number", "minimum": 0, "maximum": 1 },
+    "shading":     { "enum": ["flat", "cel", "soft", "hatch", "halftone", "dither", "painterly"] },
+    "texture":     { "enum": ["none", "paper", "noise", "scanlines", "grunge", "canvas"] },
+    "paletteSize": { "enum": [0, 4, 8, 16] },
+    "pixel":       { "type": "integer", "minimum": 0, "maximum": 16 },
+    "saturation":  { "type": "number", "minimum": 0, "maximum": 1 },
+    "finish":      { "enum": ["none", "diecut", "shadow", "glow"] }
+  }
+}

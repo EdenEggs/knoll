@@ -1,0 +1,73 @@
+<!-- FRAME-PIXEL — the chunky bevelled frame: the raised window border of
+     an old game's UI, a square band with a light edge on its top and left,
+     a dark edge on its bottom and right, and the sunken lip around the
+     picture lit the other way round, the retro page's screenshot frame
+     (PRESS-TABLE-PLAN.md Appendix D: tags retro, pixel). Layers: halo
+     shadow body line highlight detail image-slot.
+
+     THE SILHOUETTE is a square x 14..114, y 14..114 (100 × 100) and the
+     opening x 34..94 (60 × 60): a band of 20, which is chunky on purpose —
+     a bevel needs three faces across the band and each has to survive
+     40 px, where 20 units is 6 px. Square corners everywhere and no rx on
+     any rect: this frame is square by nature, and the contract's radius is
+     left off rather than written, so every style keeps it square. With the
+     3-unit line and the halo's 3 outside it the edge reaches 9.5 and
+     118.5; the shadow's rim reaches 117. Ink 78 % of the box each way.
+
+     THE BEVEL is four L-shaped faces with 45° mitres, 6 units deep each,
+     laid over the band's flat face in {{ skPrimary }}:
+       · the outer top-and-left in {{ skHighlight }} (lit from the upper
+         left, the way every bevel in a window manager was lit);
+       · the outer bottom-and-right in {{ skSecondary }} — the kit's second
+         colour stands in for the dark face, because the body may fill only
+         with the first, second and paper roles, and the shadow layer is a
+         thing the flat style removes: a bevel drawn in skShadow would fall
+         off the frame in that style;
+       · the inner top-and-left in {{ skSecondary }} and the inner
+         bottom-and-right in {{ skHighlight }} — the lip around the picture
+         slopes inward, so it is lit the other way, which is what makes the
+         picture look set INTO the frame and not stuck on it.
+     The light faces sit in the highlight layer (they are the sticker's
+     shine, and a style that dims highlights dims them together); the dark
+     faces sit in the body. Between them the flat face is 8 wide (x 20..28
+     on the left), the band's middle.
+
+     THE SHADOW is the square moved 3 down and right in {{ skShadow }} —
+     the least the contract allows — a sliver under the bottom and right
+     edges, on top of the dark bevel there, which deepens it.
+
+     THE DETAIL is the eight mitre seams, one short 45° line at each end of
+     each face, and four rivets — 4-unit squares outlined at stroke 1.5 in
+     the flat face's corners — all at half the default line. A simple style
+     drops them and the two-tone faces still say bevel; a pixel style
+     drops them and the frame is blocks of colour, which is right. -->
+<sc-if value="{{ isFramePixel }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <rect x="14" y="14" width="100" height="100" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></rect>
+    </g>
+    <g data-layer="shadow">
+      <rect x="17" y="17" width="100" height="100" fill="{{ skShadow }}"></rect>
+    </g>
+    <g data-layer="body">
+      <rect x="14" y="14" width="100" height="100" fill="{{ skPrimary }}"></rect>
+      <path d="M114,14 L114,114 L14,114 L20,108 L108,108 L108,20 Z" fill="{{ skSecondary }}"></path>
+      <path d="M28,28 L100,28 L94,34 L34,34 L34,94 L28,100 Z" fill="{{ skSecondary }}"></path>
+    </g>
+    <g data-layer="line">
+      <rect x="14" y="14" width="100" height="100" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></rect>
+      <rect x="34" y="34" width="60" height="60" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></rect>
+    </g>
+    <g data-layer="highlight">
+      <path d="M14,14 L114,14 L108,20 L20,20 L20,108 L14,114 Z" fill="{{ skHighlight }}"></path>
+      <path d="M100,28 L100,100 L28,100 L34,94 L94,94 L94,34 Z" fill="{{ skHighlight }}"></path>
+    </g>
+    <g data-layer="detail">
+      <path d="M14,14 L20,20 M114,14 L108,20 M114,114 L108,108 M14,114 L20,108 M28,28 L34,34 M100,28 L94,34 M100,100 L94,94 M28,100 L34,94" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round"></path>
+      <path d="M22,22 h4 v4 h-4 Z M102,22 h4 v4 h-4 Z M102,102 h4 v4 h-4 Z M22,102 h4 v4 h-4 Z" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linejoin="round"></path>
+    </g>
+    <g data-layer="image-slot">
+      <rect x="36" y="36" width="56" height="56" fill="{{ skPaper }}"></rect>
+    </g>
+  </svg>
+</sc-if>

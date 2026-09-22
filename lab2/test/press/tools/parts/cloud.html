@@ -1,0 +1,67 @@
+<!-- CLOUD — the puffy cloud, three bumps on a flat bottom, the cozy-weather
+     sticker (PRESS-TABLE-PLAN.md Appendix D: tags cloud, cozy). Layers:
+     halo shadow body line highlight detail. It BOBS rather than sways: a
+     cloud does not stand on the page to lean about a foot, it floats, and
+     sk-bob's 4 px down and back is the drift.
+
+     THE SHAPE is the outline of three circles on a flat base — (28,84)
+     r 20, (64,58) r 32, (100,84) r 20 — drawn as one path of a line and
+     three arcs, each arc running from where its circle meets the next to
+     where it meets the one before, over the top; the base at y 104 is
+     tangent to the two end circles (84 + 20), so the corners are round
+     and nothing kinks. The circles overlap by under 8 units, and that is
+     the whole trick: two circles that overlap a little meet at a sharp
+     notch, two that overlap a lot melt into one lump (the first draft
+     did, and read as a blob). The notches are at (32.7,64.6) and
+     (95.3,64.6); each end circle shows 194° of itself and the middle one
+     204°, and the middle crest at y 26 stands 38 above the end crests, so
+     it is one big bump between two small ones and not a row of eggs. The
+     box is 8..120 across and 26..104 down, 88 % × 61 % — a cloud is wide —
+     and with the halo's 3 outside it reaches 5 and 123. The same path is
+     the halo's stroke, the shadow, the body and the line, so the halo and
+     the shadow are the silhouette exactly.
+
+     THE BODY is skPrimary and not skPaper, though a cloud is white by
+     nature: the highlight role is tuned to sit on the primary (the bench's
+     is a lighter pink on the pink) and reads as a stain on paper, and a
+     paper cloud on a dark game page is a hole in the page. The sticker
+     is a cloud in the page's colour, which is what every part in the tray
+     is.
+
+     THE SHADOW is the silhouette moved 3 down and right, the least the
+     contract's 3–4 allows, so that with the halo ON the shadow's rim stays
+     inside the paper edge on the diagonal: a sliver under the right bump
+     and along the base, the cel shade.
+
+     THE HIGHLIGHT is one glint on the big bump's upper-left — an ellipse
+     9 × 3.5 at (47.9,38.9), the point 7 in from the circle's edge at
+     −130°, tilted −40° to lie along that edge — and a dot of radius 2.5
+     at (60,34), 7.7 in from the crown.
+
+     THE DETAIL is two inner puff lines — arcs 6 inside each end bump,
+     concentric with its circle, 70° and 60° long — at stroke 1.5, half
+     the default line: the creases a drawn cloud has. A simple style drops
+     them and the cloud is still the cloud. -->
+<sc-if value="{{ isCloud }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-bob 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M28,104 L100,104 A20,20 0 1 0 95.3,64.6 A32,32 0 1 0 32.7,64.6 A20,20 0 1 0 28,104 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+    </g>
+    <g data-layer="shadow">
+      <path d="M28,104 L100,104 A20,20 0 1 0 95.3,64.6 A32,32 0 1 0 32.7,64.6 A20,20 0 1 0 28,104 Z" transform="translate(3 3)" fill="{{ skShadow }}"></path>
+    </g>
+    <g data-layer="body">
+      <path d="M28,104 L100,104 A20,20 0 1 0 95.3,64.6 A32,32 0 1 0 32.7,64.6 A20,20 0 1 0 28,104 Z" fill="{{ skPrimary }}"></path>
+    </g>
+    <g data-layer="line">
+      <path d="M28,104 L100,104 A20,20 0 1 0 95.3,64.6 A32,32 0 1 0 32.7,64.6 A20,20 0 1 0 28,104 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="47.9" cy="38.9" rx="9" ry="3.5" transform="rotate(-40 47.9 38.9)" fill="{{ skHighlight }}"></ellipse>
+      <circle cx="60" cy="34" r="2.5" fill="{{ skHighlight }}"></circle>
+    </g>
+    <g data-layer="detail">
+      <path d="M95.2,70.8 A14,14 0 0 1 110.7,75 M14.2,81.6 A14,14 0 0 1 23.2,70.8" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round"></path>
+    </g>
+  </svg>
+</sc-if>

@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Knoll Lab 2 — press sandbox</title>
+<link rel="icon" href="/logo/logo-icon.svg">
+<!-- THE SANDBOX BENCH for the Press Table (../PRESS-TABLE-PLAN.md). This is
+     lab 2's runtime — the same lab.js, frames.js, kits.js and the rest,
+     copied into lab2/test/ with the plan's changes made to the copies — on a
+     page that is NOT the bench: no lockup, no field of machines, no groves.
+     What is on it is what the Press Table needs in order to be built and
+     measured: one caption prop, so an art panel drawn in this page is on the
+     paper (the shape every game-page note and picture takes), a stand of
+     eight kit parts, so a sprite and a live part are both on screen, and
+     the tray of forty stickers in Knoll's colours, which is what the whole
+     system is for. The live bench (../index.html) is never
+     touched; README.md in this folder says what is a copy and what is new,
+     and MERGE.md says how each piece goes back.
+
+     THE LOGO IS AN ABSOLUTE PATH (press/CONTRACTS.md §0): this folder is one
+     deeper than the merge target, so a ../ count could not be right in both
+     places, and /logo/ resolves on serve.js (root = site/) and on Vercel. -->
+<!-- Sora + Public Sans are the house faces, and the caption below is set in
+     them. VT323 is the tracing table's plates and Kalam its handwriting (the
+     table has no frame of its own, so this page loads them). The kit sheets
+     are drawn in this page too and dress themselves from the same file. -->
+<!-- SELF-HOSTED since 2026-09-04: the same faces, served from ./fonts, so
+     nothing on this bench waits on fonts.googleapis.com to paint — and the
+     features' own <link>s point at the same file (../fonts/fonts.css), so
+     a frame never fetches a face the page already has. -->
+<!-- LOCAL, OR THE LANDING PAGE. Served from the bench's own server (serve.js,
+     on localhost) this is the workbench, with its hint and its row of switches
+     in the header; served from anywhere else it is the landing page, and the
+     header is the wordmark alone — see THE LANDING PAGE WEARS ONLY THE LOGO
+     in lab.css. Decided here, before the stylesheet, so neither side ever
+     paints the other's header for a frame. keep.js makes the same call for
+     its own pill by knocking on the door, which is the same fact asked the
+     slow way. -->
+<script>if(/^(localhost|127.0.0.1|[::1])$/.test(location.hostname))document.documentElement.classList.add('lab-local');</script>
+<link href="fonts/fonts.css" rel="stylesheet">
+<!-- THE OPENING VIEW, ASKED FOR FIRST. Everything in the opening frame
+     (lab.js: WHERE IT OPENS, which reads data-open off #bench-world below)
+     is fetched from the head, before the parser has reached the scripts that
+     will use it: the two faces the caption is set in and the four kit
+     sheets kits.js draws the stand and the tray from. Every one of these is
+     used within the first second — kits.js fetches every sheet in its SHEETS
+     table at boot, whether or not a section asks for it — and the stickers
+     sheet is asked for first of the four because it is the biggest by far
+     (224 K against 37–54 K: forty parts in one document) and every one of
+     its forty is in the opening frame. There are no posters to ask for,
+     because the sandbox has no machines (posters/index.json is empty). -->
+<link rel="preload" href="fonts/Sora-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/Public-Sans-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="features/stickers-core.dc.html" as="fetch" crossorigin>
+<link rel="preload" href="features/forest.dc.html" as="fetch" crossorigin>
+<link rel="preload" href="features/gnome.dc.html" as="fetch" crossorigin>
+<link rel="preload" href="features/village.dc.html" as="fetch" crossorigin>
+<link rel="stylesheet" href="lab.css">
+</head>
+<body>
+
+<header class="lab-head">
+  <a class="lab-brand" href="/">
+    <img src="/logo/logo-icon.svg" alt="" width="26" height="26">
+    <span>knoll</span><span class="lab-slash">/</span><span class="lab-name">test</span>
+  </a>
+  <p class="lab-hint">the Press Table's sandbox: lab 2's runtime on a page of its own, with one caption and forty-eight kit parts — a stand of eight, five from the forest and three from the village, and the tray of forty stickers under it, the whole core sheet in Knoll's colours. It moves like lab 2: hold the <b>scroll wheel</b> (or <b>space</b>) and drag to pan, <b>ctrl+scroll</b> to zoom, <b>shift 1</b> to fit the lot on screen, <b>hold ctrl</b> to pick by the drawing rather than the box; the <b>?</b> in the corner has the rest. The autosave door is this folder's own server — <code>node lab2/test/serve.js 4322</code> from site/ — and never the live bench's.</p>
+  <div class="lab-tools">
+    <!-- keep.js's one piece of chrome, and it starts HIDDEN. A bench being
+         written back into this file every thirty seconds should say so, and
+         a bench that is only being looked at should not have a switch for a
+         thing it cannot do — so the pill appears when keep.js finds the door
+         in serve.js and stays away on the deployed site. Click it to pause
+         and to start again. -->
+    <!-- SAVE NOW, rather than within thirty seconds. Same write as the
+         autosave and no other kind: what is on the screen becomes what is in
+         index.html, which is what 'reset layout' goes back to. It keeps the
+         autosave's company in being hidden until keep.js finds the door —
+         a button that cannot write is worse than no button. -->
+    <button type="button" id="lab-save" class="lab-save" hidden
+            title="save this arrangement as the default layout (ctrl+s) — reset layout comes back here">save layout</button>
+    <button type="button" id="lab-keep" class="lab-keep" hidden
+            title="every 30s, where everything is on this screen becomes where it is in index.html — click to pause"></button>
+    <button type="button" id="lab-reset" class="lab-link">reset layout</button>
+    <button type="button" id="lab-reset-data" class="lab-link">reset data</button>
+    <a class="lab-link" href="/lab2/">← lab 2</a>
+    <a class="lab-link" href="press/">press table →</a>
+  </div>
+</header>
+
+<main id="bench" class="bench" aria-label="workbench">
+
+  <!-- the world: everything on the bench lives in here so the whole sheet can
+       zoom. It is not painted — the bench's grid shows through it — so the
+       canvas has no edge; this is only what the features are pinned to.
+
+       A feature is FIVE LINES AND NO CASE, exactly as on the live bench:
+       data-home-x / -y is where 'home' is; data-w / -h is the size the
+       drawing is MEASURED at; the inline width and height are only what a
+       box stands at until it has been measured. A kit part's data-w / -h are
+       the NAT sizes kits.js keeps (the box the frame measured at rest), so
+       frames.js cuts the box right first time.
+
+       WHERE IT OPENS IS WRITTEN ON THIS TAG. data-open is the rectangle round
+       EVERYTHING on this paper — the caption (0,0 to 1600,200), the stand
+       (0,400 to 1910,775) and the tray (0,900 to 1954,2075), a bounding box
+       of 0,0 to 1954,2075 — plus 120 of margin on every side, which is
+       -120,-120,2194,2315. The tray was outside this rectangle while it was
+       empty; it is the point of the page now, so the page opens on it, and
+       on a 1600 × 1000 window the fit is about 37 % — the height binds, and
+       a sticker is drawn at 50 px, which is a sprite on a tile and exactly
+       the far-field case the tray is here to hold up.
+
+       data-open-narrow is UNCHANGED and deliberately not the same rectangle:
+       -120,-120,1840,1015 is the caption band and the stand under it
+       (0..1600 across, the caption's own width, plus the same 120), because
+       on a screen under 700 wide — where the width binds — eight columns of
+       tray fit at a zoom that makes each sticker a smudge. A phone opens on
+       the caption and scrolls down to the tray.
+
+       lab.js (WHERE IT OPENS) reads them first and falls back to the main
+       bench's literals; the margin is the plan's (Appendix E), the one a
+       game page's generator uses round its own composition, so what is
+       verified here is the read a game page will be framed by. Move anything
+       on this paper and these eight numbers are the other place to look. -->
+  <div id="bench-world" class="bench-world" data-open="-120,-120,2194,2315" data-open-narrow="-120,-120,1840,1015">
+
+  <!-- ──────────────────── 00 · THE CAPTION ──────────────────── -->
+  <!-- A prop: a section with no data-src and a .gz-art drawn in this page,
+       which is the shape the sign takes on the live bench and the shape
+       every note, picture and store-sign on a game page will take (plan
+       §3.7, §5.2). frames.js sizes it like the sign: the box is a window on
+       a 1600 × 200 drawing, and no measuring happens because there is no
+       document to measure. Two lines of <text> in the house faces, inline
+       svg, no data-src — so what the ctrl-outline and the corner do to a
+       page-drawn panel can be looked at here before Phase 5 leans on it.
+       1600 × 200 is the drawing's own box: 76px of Sora 700 across thirty-one
+       characters is 1262 wide and the sub-line under it 1022 (measured in
+       Chrome with both faces loaded, perf/verify-bench.js and perf/verify-tray.js,
+       2026-09-07 — the first guess of 1420 was a fifth too wide, and the
+       sub-line was 1156 until Phase 4 shortened its words), so the box has room to
+       spare on the right, and 200 is the two baselines (84 and 150) plus
+       the descender room. -->
+  <section class="gz gz-sign" id="gz-caption" data-gizmo="caption"
+           data-w="1600" data-h="200"
+           data-home-x="0" data-home-y="0" style="width:1600px;height:200px"
+           aria-label="the press table — sandbox bench">
+    <div class="gz-art">
+    <svg width="1600" height="200" viewBox="0 0 1600 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <text x="0" y="84" style="font-family:'Sora',sans-serif;font-weight:700;font-size:76px;fill:var(--ink,#26212a);letter-spacing:-0.01em">the press table — sandbox bench</text>
+      <text x="4" y="150" style="font-family:'Public Sans',sans-serif;font-weight:400;font-size:28px;fill:var(--mute,#8b7f92)">one caption, eight kit parts on a stand, and the tray of forty stickers under them</text>
+    </svg>
+    </div><!-- /gz-art -->
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+  <!-- ──────────────────── 01 · THE STAND ──────────────────── -->
+  <!-- Eight kit parts in a row: five from the forest and three from the
+       village, so that at the opening zoom both kinds of kit part are on
+       screen at once — the tall trees big enough to be LIVE (drawn ≥ 180 px,
+       kits.js SWAY_PX) and the small pieces painted as SPRITES on a tile —
+       which is what the smoke check asks for and what every later probe
+       leans on. The row's top is y 400 (the pine, the tallest at 375) and
+       every part stands on the same ground line, y 775, so the stand reads
+       as a stand and not a shelf; the gaps are 34 between the trees, 45 from
+       the caps to the lamp post and 46 between the village pieces, eyeballed
+       once and not argued for. x runs 0 to 1910. No data-home-z: markup
+       order is pile order, left to right.
+
+       THE IDS ARE stand-<part> AND NOT forest-<part>, on purpose: the live
+       bench has a forest-the-elder and a village-lamp-post of its own, and
+       this page is served from the same origin as it on 4321. A save that
+       strayed through the live door (keep.js knocks before it derives the
+       sandbox door — CONTRACTS §0, Phase 5) would find nothing in the live
+       file to move, and a position the live bench kept in localStorage
+       (knoll-lab2:pos:<id>) does not land on a part here. -->
+  <section class="gz" id="gz-stand-the-elder" data-gizmo="stand-the-elder"
+           data-src="features/forest.dc.html#part=the-elder" data-w="306" data-h="353"
+           data-home-x="0" data-home-y="422" style="width:306px;height:353px"
+           aria-label="The Elder">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-stand-the-pine" data-gizmo="stand-the-pine"
+           data-src="features/forest.dc.html#part=the-pine" data-w="276" data-h="375"
+           data-home-x="340" data-home-y="400" style="width:276px;height:375px"
+           aria-label="The Pine">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-stand-slim-pine" data-gizmo="stand-slim-pine"
+           data-src="features/forest.dc.html#part=slim-pine" data-w="216" data-h="357"
+           data-home-x="650" data-home-y="418" style="width:216px;height:357px"
+           aria-label="Slim Pine">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-stand-the-oak" data-gizmo="stand-the-oak"
+           data-src="features/forest.dc.html#part=the-oak" data-w="316" data-h="353"
+           data-home-x="900" data-home-y="422" style="width:316px;height:353px"
+           aria-label="The Oak">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-stand-honey-caps" data-gizmo="stand-honey-caps"
+           data-src="features/forest.dc.html#part=honey-caps" data-w="265" data-h="206"
+           data-home-x="1250" data-home-y="569" style="width:265px;height:206px"
+           aria-label="Honey Caps">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-stand-lamp-post" data-gizmo="stand-lamp-post"
+           data-src="features/village.dc.html#part=lamp-post" data-w="54" data-h="178"
+           data-home-x="1560" data-home-y="597" style="width:54px;height:178px"
+           aria-label="Lamp Post">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-stand-the-well" data-gizmo="stand-the-well"
+           data-src="features/village.dc.html#part=the-well" data-w="124" data-h="152"
+           data-home-x="1660" data-home-y="623" style="width:124px;height:152px"
+           aria-label="The Well">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-stand-boulder" data-gizmo="stand-boulder"
+           data-src="features/village.dc.html#part=boulder" data-w="80" data-h="62"
+           data-home-x="1830" data-home-y="713" style="width:80px;height:62px"
+           aria-label="Boulder">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+
+  <!-- ▼ THE STICKER TRAY -->
+  <!-- ──────────────────── 02 · THE STICKER TRAY ──────────────────── -->
+  <!-- The forty parts of features/stickers-core.dc.html (PRESS-TABLE-PLAN.md
+       Appendix D), laid out as a tray so the whole kit can be seen at once:
+       eight across and five down, in the sheet's own order, read left to
+       right. This is what the Press Table is for — a game page picks a
+       handful of these out of this same sheet and wears them in its own
+       colours — and the tray is where they are looked at, dragged, re-cut
+       and ctrl-outlined before a recipe ever places one.
+
+       THEY ARE KIT PARTS, NOT MACHINES, and ADDING.md's first rule is why:
+       if it has no button, it is not a machine. Every one of the forty is a
+       drawing and nothing else — one <svg>, a sway on its root, no inputs,
+       no script — so it belongs on a sheet (ADDING.md §1, §2) and costs
+       nothing per frame: far off, kits.js paints it as a sprite on a tile;
+       near and big, it lifts the drawing into the .gz-art beside it. Forty
+       of them therefore add NO documents to this page at any zoom, which is
+       ADDING.md §5's floor and what perf/verify-tray.js holds them to
+       (Frames.panels.filter(p => p.loading).length === 0, at the opening
+       zoom and again at 20 %; smoke-bench.js writes the same count down).
+       Measured 0 and 0 on 2026-09-07. The day one of these
+       grows a button it stops being a kit part, leaves the sheet, and takes
+       a poster with it.
+
+       THE COLOURS ARE THE PAGE'S, not the drawing's. No part holds a literal
+       colour — every fill and stroke is {{ skPrimary }}, {{ skInk }},
+       {{ skPaper }} … — and kits.js fills them ONCE per page load from
+       :root's --sk-* tokens (CONTRACTS.md §6, plan §8 4.2). This page sets
+       none, so the tray wears the sheet's own defaults, which are lab.css's
+       pinks; the same forty drawings on a game page wear that game's. That
+       is the whole trick, and the tray is where it is checked by eye.
+
+       THE GRID is 260 apart in both directions from x 0, y 900: a 134-wide
+       box with 126 of paper after it, wide enough that no sticker sits in
+       its neighbour's drop-shadow and a picked-up one has room to land back.
+       Eight columns put the tray's right edge at 1954, within 44 of the
+       stand's 1910, so the two block up as one column of paper rather than
+       one overhanging the other; five rows reach y 2075. y 900 is 125 under
+       the stand's ground line at 775 — about one sticker — so the tray
+       reads as a second shelf and not as more stand.
+
+       THE BOX IS 134 × 135 for every one of the forty: the sheet's 128-unit
+       box plus the root drop-shadow's 6 right and 7 down
+       (SHEETS.stickers.spill, CONTRACTS.md §7), which is exactly what
+       kits.js's natural() computes for a kit with no NAT row. Measured, not
+       assumed: all forty parts were rendered and their layers' bounds read,
+       and not one draws past its own box — the furthest ink in the set is
+       burst's, 126.9 across and 124.3 down — so the alpha bounds never beat
+       box + spill and every part comes out at the same 134 × 135. data-w /
+       data-h and the inline width/height are that box, so frames.js cuts it
+       right on the first frame and kits.js has nothing to correct when the
+       sheet lands. -->
+  <section class="gz" id="gz-sticker-burst" data-gizmo="sticker-burst"
+           data-src="features/stickers-core.dc.html#part=burst" data-w="134" data-h="135"
+           data-home-x="0" data-home-y="900" style="width:134px;height:135px"
+           aria-label="Burst">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <!-- THE ONE STICKER THAT IS NOT THIS PAGE'S COLOUR, and the reason the
+       plain burst stands beside it: data-palette overrides two roles for
+       this section alone (CONTRACTS.md §7 — JSON, double-quoted, its own
+       quotes written &quot;, which is the form serve.js writes and reads
+       back). The body takes the sheet's own secondary blue #5871f5, and its
+       cel shadow takes that blue darkened to #3c4da7 — 0.68 of each
+       channel, the same fraction the sheet's default shadow #8a2558 is of
+       its default primary #c93b82, so the shade is the sheet's own recipe
+       in another hue. kits.js extracts it as a VARIANT, keyed on the hash
+       of the palette (plan §8 4.2), and caches it: one more extracted
+       string at boot and nothing per frame. This is the "frozen at pull
+       time" case — one sticker keeping another page's colours while the
+       other thirty-nine follow this page's --sk-* tokens. -->
+  <section class="gz" id="gz-sticker-burst-round" data-gizmo="sticker-burst-round"
+           data-src="features/stickers-core.dc.html#part=burst-round" data-w="134" data-h="135"
+           data-home-x="260" data-home-y="900" data-palette="{&quot;skPrimary&quot;:&quot;#5871f5&quot;,&quot;skShadow&quot;:&quot;#3c4da7&quot;}" style="width:134px;height:135px"
+           aria-label="Burst Round">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <!-- THE ONE STICKER WITH WORDS IN IT. banner is a text-slot part
+       (Appendix D): its <g data-layer="text"> holds {{ skText }}, empty in
+       the sheet's defaults, and data-text fills it for this section alone —
+       the same variant path as data-palette above, keyed on the same hash.
+       A part with <text> is ALWAYS live (ADDING.md §1.2: an svg image
+       cannot use the page's webfont), so this one is the tray's single live
+       part at every zoom and never becomes a sprite. That is what a text
+       slot costs, and why Appendix E's recipes place at most three.
+       Appendix D's tag-wishlist looks like the obvious place for the word
+       and is not: its WISHLIST is drawn as eight filled paths precisely so
+       that the tag CAN be a sprite, and it has no slot to fill. -->
+  <section class="gz" id="gz-sticker-banner" data-gizmo="sticker-banner"
+           data-src="features/stickers-core.dc.html#part=banner" data-w="134" data-h="135"
+           data-home-x="520" data-home-y="900" data-text="WISHLIST" style="width:134px;height:135px"
+           aria-label="Banner">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-ribbon-corner" data-gizmo="sticker-ribbon-corner"
+           data-src="features/stickers-core.dc.html#part=ribbon-corner" data-w="134" data-h="135"
+           data-home-x="780" data-home-y="900" style="width:134px;height:135px"
+           aria-label="Ribbon Corner">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-badge-round" data-gizmo="sticker-badge-round"
+           data-src="features/stickers-core.dc.html#part=badge-round" data-w="134" data-h="135"
+           data-home-x="1040" data-home-y="900" style="width:134px;height:135px"
+           aria-label="Badge Round">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-badge-shield" data-gizmo="sticker-badge-shield"
+           data-src="features/stickers-core.dc.html#part=badge-shield" data-w="134" data-h="135"
+           data-home-x="1300" data-home-y="900" style="width:134px;height:135px"
+           aria-label="Badge Shield">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-tape-strip" data-gizmo="sticker-tape-strip"
+           data-src="features/stickers-core.dc.html#part=tape-strip" data-w="134" data-h="135"
+           data-home-x="1560" data-home-y="900" style="width:134px;height:135px"
+           aria-label="Tape Strip">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-tape-x" data-gizmo="sticker-tape-x"
+           data-src="features/stickers-core.dc.html#part=tape-x" data-w="134" data-h="135"
+           data-home-x="1820" data-home-y="900" style="width:134px;height:135px"
+           aria-label="Tape X">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-frame-polaroid" data-gizmo="sticker-frame-polaroid"
+           data-src="features/stickers-core.dc.html#part=frame-polaroid" data-w="134" data-h="135"
+           data-home-x="0" data-home-y="1160" style="width:134px;height:135px"
+           aria-label="Frame Polaroid">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-frame-ornate" data-gizmo="sticker-frame-ornate"
+           data-src="features/stickers-core.dc.html#part=frame-ornate" data-w="134" data-h="135"
+           data-home-x="260" data-home-y="1160" style="width:134px;height:135px"
+           aria-label="Frame Ornate">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-frame-pixel" data-gizmo="sticker-frame-pixel"
+           data-src="features/stickers-core.dc.html#part=frame-pixel" data-w="134" data-h="135"
+           data-home-x="520" data-home-y="1160" style="width:134px;height:135px"
+           aria-label="Frame Pixel">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-frame-film" data-gizmo="sticker-frame-film"
+           data-src="features/stickers-core.dc.html#part=frame-film" data-w="134" data-h="135"
+           data-home-x="780" data-home-y="1160" style="width:134px;height:135px"
+           aria-label="Frame Film">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-arrow" data-gizmo="sticker-arrow"
+           data-src="features/stickers-core.dc.html#part=arrow" data-w="134" data-h="135"
+           data-home-x="1040" data-home-y="1160" style="width:134px;height:135px"
+           aria-label="Arrow">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-arrow-double" data-gizmo="sticker-arrow-double"
+           data-src="features/stickers-core.dc.html#part=arrow-double" data-w="134" data-h="135"
+           data-home-x="1300" data-home-y="1160" style="width:134px;height:135px"
+           aria-label="Arrow Double">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-pointer-hand" data-gizmo="sticker-pointer-hand"
+           data-src="features/stickers-core.dc.html#part=pointer-hand" data-w="134" data-h="135"
+           data-home-x="1560" data-home-y="1160" style="width:134px;height:135px"
+           aria-label="Pointer Hand">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-circle-mark" data-gizmo="sticker-circle-mark"
+           data-src="features/stickers-core.dc.html#part=circle-mark" data-w="134" data-h="135"
+           data-home-x="1820" data-home-y="1160" style="width:134px;height:135px"
+           aria-label="Circle Mark">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-underline" data-gizmo="sticker-underline"
+           data-src="features/stickers-core.dc.html#part=underline" data-w="134" data-h="135"
+           data-home-x="0" data-home-y="1420" style="width:134px;height:135px"
+           aria-label="Underline">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-bubble-speech" data-gizmo="sticker-bubble-speech"
+           data-src="features/stickers-core.dc.html#part=bubble-speech" data-w="134" data-h="135"
+           data-home-x="260" data-home-y="1420" style="width:134px;height:135px"
+           aria-label="Bubble Speech">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-bubble-thought" data-gizmo="sticker-bubble-thought"
+           data-src="features/stickers-core.dc.html#part=bubble-thought" data-w="134" data-h="135"
+           data-home-x="520" data-home-y="1420" style="width:134px;height:135px"
+           aria-label="Bubble Thought">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-bubble-shout" data-gizmo="sticker-bubble-shout"
+           data-src="features/stickers-core.dc.html#part=bubble-shout" data-w="134" data-h="135"
+           data-home-x="780" data-home-y="1420" style="width:134px;height:135px"
+           aria-label="Bubble Shout">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-tag-new" data-gizmo="sticker-tag-new"
+           data-src="features/stickers-core.dc.html#part=tag-new" data-w="134" data-h="135"
+           data-home-x="1040" data-home-y="1420" style="width:134px;height:135px"
+           aria-label="Tag New">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-tag-soon" data-gizmo="sticker-tag-soon"
+           data-src="features/stickers-core.dc.html#part=tag-soon" data-w="134" data-h="135"
+           data-home-x="1300" data-home-y="1420" style="width:134px;height:135px"
+           aria-label="Tag Soon">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-tag-wishlist" data-gizmo="sticker-tag-wishlist"
+           data-src="features/stickers-core.dc.html#part=tag-wishlist" data-w="134" data-h="135"
+           data-home-x="1560" data-home-y="1420" style="width:134px;height:135px"
+           aria-label="Tag Wishlist">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-tag-price" data-gizmo="sticker-tag-price"
+           data-src="features/stickers-core.dc.html#part=tag-price" data-w="134" data-h="135"
+           data-home-x="1820" data-home-y="1420" style="width:134px;height:135px"
+           aria-label="Tag Price">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-pin" data-gizmo="sticker-pin"
+           data-src="features/stickers-core.dc.html#part=pin" data-w="134" data-h="135"
+           data-home-x="0" data-home-y="1680" style="width:134px;height:135px"
+           aria-label="Pin">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-clip" data-gizmo="sticker-clip"
+           data-src="features/stickers-core.dc.html#part=clip" data-w="134" data-h="135"
+           data-home-x="260" data-home-y="1680" style="width:134px;height:135px"
+           aria-label="Clip">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-star" data-gizmo="sticker-star"
+           data-src="features/stickers-core.dc.html#part=star" data-w="134" data-h="135"
+           data-home-x="520" data-home-y="1680" style="width:134px;height:135px"
+           aria-label="Star">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-stars-3" data-gizmo="sticker-stars-3"
+           data-src="features/stickers-core.dc.html#part=stars-3" data-w="134" data-h="135"
+           data-home-x="780" data-home-y="1680" style="width:134px;height:135px"
+           aria-label="Stars 3">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-sparkle" data-gizmo="sticker-sparkle"
+           data-src="features/stickers-core.dc.html#part=sparkle" data-w="134" data-h="135"
+           data-home-x="1040" data-home-y="1680" style="width:134px;height:135px"
+           aria-label="Sparkle">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-heart" data-gizmo="sticker-heart"
+           data-src="features/stickers-core.dc.html#part=heart" data-w="134" data-h="135"
+           data-home-x="1300" data-home-y="1680" style="width:134px;height:135px"
+           aria-label="Heart">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-fire" data-gizmo="sticker-fire"
+           data-src="features/stickers-core.dc.html#part=fire" data-w="134" data-h="135"
+           data-home-x="1560" data-home-y="1680" style="width:134px;height:135px"
+           aria-label="Fire">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-bolt" data-gizmo="sticker-bolt"
+           data-src="features/stickers-core.dc.html#part=bolt" data-w="134" data-h="135"
+           data-home-x="1820" data-home-y="1680" style="width:134px;height:135px"
+           aria-label="Bolt">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-skull" data-gizmo="sticker-skull"
+           data-src="features/stickers-core.dc.html#part=skull" data-w="134" data-h="135"
+           data-home-x="0" data-home-y="1940" style="width:134px;height:135px"
+           aria-label="Skull">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-sword" data-gizmo="sticker-sword"
+           data-src="features/stickers-core.dc.html#part=sword" data-w="134" data-h="135"
+           data-home-x="260" data-home-y="1940" style="width:134px;height:135px"
+           aria-label="Sword">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-gear" data-gizmo="sticker-gear"
+           data-src="features/stickers-core.dc.html#part=gear" data-w="134" data-h="135"
+           data-home-x="520" data-home-y="1940" style="width:134px;height:135px"
+           aria-label="Gear">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-hex-grid" data-gizmo="sticker-hex-grid"
+           data-src="features/stickers-core.dc.html#part=hex-grid" data-w="134" data-h="135"
+           data-home-x="780" data-home-y="1940" style="width:134px;height:135px"
+           aria-label="Hex Grid">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-leaf-sprig" data-gizmo="sticker-leaf-sprig"
+           data-src="features/stickers-core.dc.html#part=leaf-sprig" data-w="134" data-h="135"
+           data-home-x="1040" data-home-y="1940" style="width:134px;height:135px"
+           aria-label="Leaf Sprig">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-mushroom" data-gizmo="sticker-mushroom"
+           data-src="features/stickers-core.dc.html#part=mushroom" data-w="134" data-h="135"
+           data-home-x="1300" data-home-y="1940" style="width:134px;height:135px"
+           aria-label="Mushroom">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-cloud" data-gizmo="sticker-cloud"
+           data-src="features/stickers-core.dc.html#part=cloud" data-w="134" data-h="135"
+           data-home-x="1560" data-home-y="1940" style="width:134px;height:135px"
+           aria-label="Cloud">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <section class="gz" id="gz-sticker-crescent" data-gizmo="sticker-crescent"
+           data-src="features/stickers-core.dc.html#part=crescent" data-w="134" data-h="135"
+           data-home-x="1820" data-home-y="1940" style="width:134px;height:135px"
+           aria-label="Crescent">
+    <div class="gz-art"></div>
+    <span class="gz-dim" aria-hidden="true"></span>
+    <button type="button" class="gz-size" data-nodrag aria-label="re-cut it — double-click to fit it to its drawing"></button>
+  </section>
+  <!-- ▲ THE STICKER TRAY -->
+
+  <!-- ▼ copies written down by keep.js — see THE COPIES BLOCK in about.md -->
+
+  <!-- ▲ copies written down by keep.js -->
+
+  </div><!-- /bench-world -->
+
+</main>
+
+<!-- the tool dock, as on the coming-soon hero and on lab 1: move / draw /
+     image / text, the ink and its colour wheel, undo and delete — and a row of options
+     above it that only shows up when the chosen tool has any. Both are
+     filled in by wall.js. -->
+<div class="tool-opts" id="tool-opts" hidden aria-label="tool options"></div>
+<div class="tool-dock" id="tool-dock" aria-label="drawing tools"></div>
+
+<!-- zoom dock -->
+<div class="zoom-dock" id="zoom-dock" aria-label="zoom">
+  <button type="button" id="zoom-fit" title="fit everything on screen (shift 1)" aria-label="fit everything on screen">⤢</button>
+  <span class="dock-rule" aria-hidden="true"></span>
+  <button type="button" id="zoom-out" title="zoom out (−)">−</button>
+  <button type="button" id="zoom-val" title="back to 100% (shift 0)">100%</button>
+  <button type="button" id="zoom-in" title="zoom in (+)">+</button>
+  <span class="dock-rule" aria-hidden="true"></span>
+  <button type="button" id="vol-btn" class="vol-btn" aria-label="the sound">
+    <svg viewBox="0 0 18 18" width="15" height="15" aria-hidden="true">
+      <path class="vol-cone" d="M3 7h3l4-3.4v10.8L6 11H3z"/>
+      <path class="vol-wave vol-w1" d="M12 6.6a3.4 3.4 0 0 1 0 4.8"/>
+      <path class="vol-wave vol-w2" d="M14.1 4.4a6.4 6.4 0 0 1 0 9.2"/>
+      <path class="vol-cross" d="M12.2 6.6l4.4 4.8M16.6 6.6l-4.4 4.8"/>
+    </svg>
+  </button>
+  <input type="range" id="vol-slider" class="vol-slider" min="0" max="100" value="70" aria-label="how loud">
+  <span class="dock-rule" aria-hidden="true"></span>
+  <button type="button" id="zoom-keys" title="how to move about" aria-label="how to move about" aria-expanded="false">?</button>
+</div>
+
+<!-- how to move about -->
+<div class="keymap" id="keymap" hidden>
+  <b>MOVING ABOUT</b>
+  <dl>
+    <dt><kbd>wheel drag</kbd></dt><dd>hold the scroll wheel down and drag — pans from anywhere</dd>
+    <dt><kbd>space</kbd><kbd>drag</kbd></dt><dd>the hand: pans over anything, features included</dd>
+    <dt><kbd>drag</kbd></dt><dd>a sleeping feature moves; bare paper pulls a band</dd>
+    <dt><kbd>scroll</kbd></dt><dd>pan up and down — <kbd>shift</kbd> for sideways</dd>
+    <dt><kbd>ctrl</kbd><kbd>scroll</kbd></dt><dd>zoom about the pointer (pinch does too)</dd>
+  </dl>
+  <hr>
+  <dl>
+    <dt><kbd>+</kbd><kbd>−</kbd></dt><dd>zoom in and out</dd>
+    <dt><kbd>shift</kbd><kbd>0</kbd></dt><dd>back to 100%</dd>
+    <dt><kbd>shift</kbd><kbd>1</kbd></dt><dd>fit every feature on screen</dd>
+    <dt><kbd>h</kbd><kbd>v</kbd></dt><dd>hand tool, then back to the pointer</dd>
+    <dt><kbd>click</kbd></dt><dd>a feature to wake it up and use it</dd>
+    <dt><kbd>shift</kbd><kbd>click</kbd></dt><dd>pick a feature, or drop it from the pick</dd>
+    <dt><kbd>ctrl</kbd><kbd>hold</kbd></dt><dd>the hitbox becomes the drawing — one tree out of a wood</dd>
+    <dt><kbd>ctrl</kbd><kbd>s</kbd></dt><dd>save this arrangement as the default — reset layout comes back here</dd>
+    <dt><kbd>ctrl</kbd><kbd>z</kbd></dt><dd>undo — the last thing moved, or the last thing drawn</dd>
+    <dt><kbd>ctrl</kbd><kbd>c</kbd><kbd>v</kbd></dt><dd>copy what is picked, and paste a working copy of it</dd>
+    <dt><kbd>right click</kbd></dt><dd>a feature — raise it, lower it, or delete it (undo puts it back)</dd>
+    <dt><kbd>esc</kbd></dt><dd>let it go, put the pick down, drop the drawing tool</dd>
+  </dl>
+</div>
+
+<!-- React ONCE, for every frame on the bench: features/prelude.js hands
+     these two into each iframe's realm and support.js then keeps them instead
+     of fetching its own — one parse instead of one per tree. Same pinned
+     build and SRI as support.js's cdn.ts, so a frame that boots early hits
+     the same cache entry. defer, so the bench never waits on unpkg: a frame
+     that outruns it just fetches its own copy, exactly as before. -->
+<!-- SELF-HOSTED since 2026-09-04: the same two builds, byte for byte (the
+     integrity hashes are the proof and still checked), served from ./vendor
+     so the bench boots with unpkg down. support.js keeps its own unpkg
+     fallback for a frame opened off the disk. -->
+<script defer src="vendor/react.production.min.js"
+        integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z"
+        crossorigin="anonymous"></script>
+<script defer src="vendor/react-dom.production.min.js"
+        integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"
+        crossorigin="anonymous"></script>
+<!-- THE KITS, before lab.js on purpose: a tree, a gnome or a village piece
+     is not a document any more — kits.js reshapes every such section (no
+     iframe, a .gz-art) before lab.js registers it and frames.js adopts it,
+     paints the far ones on tiles and lifts the near ones live. See THE
+     KITS in kits.js and about.md. -->
+<script src="kits.js"></script>
+<script src="lab.js"></script>
+<script src="vol.js"></script>
+<script src="frames.js"></script>
+<!-- tape.js no longer has anything to do with the dock — a strip takes
+     itself down by its own ✕ now, not a button wall.js builds — so unlike
+     before, nothing here needs it ahead of wall.js. Kept in this order
+     anyway, since there is no reason to reshuffle it. -->
+<script src="tape.js"></script>
+<!-- the gif tool, which is GIF on the dock: a search out of KLIPY, a strip
+     linked rather than kept, stamped on the paper. BEFORE wall.js, not
+     after like tracer.js — wall.js's dock only shows GIF if window.Gif
+     already exists the moment it builds itself, and gif.js needs nothing
+     from wall.js to define itself, only window.Lab (already up, above). -->
+<script src="gif.js"></script>
+<script src="wall.js"></script>
+<!-- the quantiser the tracing table and the Press Table share — in press/, a
+     folder, beside the table's other modules; before tracer.js, which calls it. -->
+<script src="press/palette.js"></script>
+<!-- the tracing table, which is IMAGE on the dock: a picture in, a tracing
+     out, filed in the library and stamped on the paper. After wall.js,
+     whose tool it is. -->
+<script src="tracer.js"></script>
+<!-- the sign's own one trick: click a letter, a gnome puts it overhead -->
+<script src="sign.js"></script>
+<!-- hold ctrl and the hitbox is the drawing rather than the box round it —
+     which is how you get one tree out of a wood. After frames.js because it
+     asks the frames what is painted under the pointer. -->
+<script src="ink.js"></script>
+<!-- a page a frame opens to read — the Knoll Times' issues, for now — gets
+     the whole screen: the bench dimmed edge to edge with a hole where the
+     page is, the camera glided to put it in the middle, a click anywhere in
+     the dark to put it down. After frames.js, whose panels it watches; the
+     feature says it opens things by marks in its file (ADDING.md §3). -->
+<script src="spotlight.js"></script>
+<!-- LAST, and after frames.js on purpose: it reads Lab.gizmos and
+     Frames.panels, and a frame it asked about before frames.js had adopted
+     it would report a cut nobody made. It writes this file — see keep.js. -->
+<script src="keep.js"></script>
+<!-- NOT cursors.js. Everybody else's pointer is a bench feature and a Nostr
+     connection per visitor, and a sandbox measuring the Press Table's cost
+     should not carry it (press/NOTES.md §D.7): one <script> line on the
+     live bench puts it back there, and none here. -->
+</body>
+</html>

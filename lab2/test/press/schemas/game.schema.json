@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "game",
+  "description": "games/<slug>/game.json — the envelope of CONTRACTS §10, which the plan gives as one line and this file spells out. It holds no rules of its own beyond the two below: the five parts are $refs, so there is exactly one place each of them is described and this file cannot drift from it. build-game.js writes it; the Press Table reads it back when a page is re-opened for editing.",
+  "type": "object",
+  "required": ["version", "builtAt", "manifest", "analysis", "theme", "style", "layout"],
+  "additionalProperties": false,
+  "properties": {
+    "version":  { "const": 1, "description": "CONTRACTS §10 says version 1 and nothing has bumped it. `const` rather than a minimum because a reader that meets a 2 has met a file written by a newer builder and should stop rather than guess which half it still understands." },
+    "builtAt":  { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$", "description": "The shape `new Date().toISOString()` writes, which is what stamps it — the pattern is that method's output read off, not a general ISO-8601 grammar (no offsets, no bare dates), so anything else in this field was written by hand and is probably a mistake." },
+    "manifest": { "$ref": "manifest.schema.json" },
+    "analysis": { "$ref": "analysis.schema.json" },
+    "theme":    { "$ref": "theme.schema.json" },
+    "style":    { "$ref": "style.schema.json" },
+    "layout":   { "$ref": "layout.schema.json" }
+  }
+}

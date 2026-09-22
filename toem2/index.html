@@ -26,7 +26,29 @@
      paints the other's header for a frame. keep.js makes the same call for
      its own pill by knocking on the door, which is the same fact asked the
      slow way. -->
-<script>if(/^(localhost|127.0.0.1|[::1])$/.test(location.hostname))document.documentElement.classList.add('lab-local');</script>
+<script>if(/^(localhost|127.0.0.1|[::1])$/.test(location.hostname)&&!/[?&]visitor\b/.test(location.search))document.documentElement.classList.add('lab-local');</script>
+<!-- ?visitor (2026-09-21): localhost, but the landing page — how the site shows
+     this bench, header, account corner and all, for a look at it before a push -->
+<!-- ?embed=1 — THE YARD'S PICTURE OF THIS PAGE (2026-09-21). /yard frames
+     TOEM 2 in one of its hills, zoomed out, as the wall is right now: no
+     header, no docks, no cursor room (cursors.js), nothing to press. And this
+     browser's own TOEM 2 is neither read nor written: the frame gets a
+     localStorage of its own, in memory, so it opens the way a first visit
+     does — the wall as it stands, framed as published — and seed.js's pull
+     keeps it current. The real one is the same origin's, and through it the
+     picture would send an edit left waiting on a sign-in (seed.js:
+     KEY.resume) and lay its copy of the wall over the one in another tab.
+     Where the swap does not take, the page stops rather than run on it. -->
+<script>if (/[?&]embed\b/.test(location.search)) {
+  document.documentElement.classList.add('toem-embed');
+  const mem = new Map(), own = { getItem: function (k) { k = String(k); return mem.has(k) ? mem.get(k) : null; },
+    setItem: function (k, v) { mem.set(String(k), String(v)); }, removeItem: function (k) { mem.delete(String(k)); },
+    clear: function () { mem.clear(); }, key: function (i) { return Array.from(mem.keys())[i] ?? null; }, get length() { return mem.size; } };
+  try { Object.defineProperty(window, 'localStorage', { value: own, configurable: true }); } catch (e) {}
+  if (window.localStorage !== own) window.stop();
+}</script>
+<style>html.toem-embed .lab-head, html.toem-embed .tool-dock, html.toem-embed .tool-opts, html.toem-embed .zoom-dock,
+html.toem-embed .keymap, html.toem-embed .lab-panel, html.toem-embed .lab-warn { display: none !important; }</style>
 <link href="fonts/fonts.css" rel="stylesheet">
 <!-- THE OPENING VIEW, ASKED FOR FIRST. This bench opens on bare paper, so the
      only thing the opening frame needs is the faces the header and the two
@@ -36,6 +58,12 @@
 <link rel="preload" href="fonts/Sora-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/Public-Sans-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="lab.css">
+<!-- THE ACCOUNT CORNER (2026-09-21): log in and sign up — or, signed in, your
+     gnome — and the search, at the right-hand end of the header. account.js
+     is the site's, at its root, and every page with a house bar takes it.
+     data-bench keeps it off the workbench: on localhost this header is the
+     bench's own controls (and ?visitor, above, shows it anyway). -->
+<script src="/account.js" data-bench defer></script>
 </head>
 <body>
 
@@ -250,6 +278,11 @@
      sticker-kits.json instead: Stickers.load replaces the catalogue, so a
      second caller empties it. -->
 <script src="sticker-kits.js"></script>
+<!-- the wall's history, on the live wall only: a side panel of revisions and
+     the queue, a box round every piece a revision touched, and the way to
+     undo one. After wall.js and seed.js, whose exports it reads; it does
+     nothing on the dev server's file half. -->
+<script src="history.js"></script>
 <!-- the sign's own one trick: click a letter, a gnome puts it overhead -->
 <script src="sign.js"></script>
 <!-- hold ctrl and the hitbox is the drawing rather than the box round it —

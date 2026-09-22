@@ -1,0 +1,59 @@
+<!-- STAR — the five-point star, the one you stick on a thing you liked
+     (PRESS-TABLE-PLAN.md Appendix D: tags vote, award). Layers: halo shadow
+     body line highlight detail.
+
+     THE STAR is ten vertices, a tip straight up, tips at radius 62 and inner
+     corners at 28.5 — 0.46 of the tip radius, fatter than the 0.38 of a true
+     pentagram, because at 40 px a pentagram's arms thin to nothing and a
+     sticker star is chunky. Its centre is at (64,70), not (64,64): a
+     five-point star is taller above its middle than below it (the tip
+     reaches 62 up, the two feet only 50.2 down), and 6 down is what puts the
+     drawing's own box — 5..123 across, 8..120 down — in the middle of the
+     128. With the halo's 3 outside that the left tip's halo reaches 2 and the
+     right's 126; nothing spills. The same path is the halo's stroke, the
+     shadow, the body and the line, so halo and shadow are the silhouette
+     exactly.
+
+     THE SHADOW is the silhouette moved 3 down and right, the least the
+     contract's 3–4 allows, so that with the halo on the shadow's rim stays
+     inside the paper edge on the diagonal: a sliver along the lower-right of
+     each arm, the cel shade.
+
+     THE HIGHLIGHT is one glint — an ellipse 8.5 × 2.8 laid along the
+     upper-left edge of the top arm at (60.6,32.4), tilted −67° because that
+     edge runs from the inner corner at (47.2,46.9) to the tip at (64,8) —
+     and a dot of radius 2 at (64,20.5) further up the arm, on its axis: the
+     one shine a vinyl star has. The ellipse's centre is 6.5 from that edge,
+     so its flank stops 2.2 short of the line's ink and 4 short of the inner
+     star's tip at (64,39); the first render had it 9 × 3 at (59.5,33), where
+     it lay 1.3 from the ink and read as part of the line. The dot sits where
+     the arm is 10.8 wide (its edges run 23.4° off the vertical), 1.9 clear
+     of the line on either side.
+
+     THE DETAIL is the star again at half size (tips at 31, corners at 14.25,
+     the same centre) at stroke 1.5, half the default line: the inner star a
+     printed badge carries. A simple style drops it and the star is still the
+     star. -->
+<sc-if value="{{ isStar }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M64,8 L80.8,46.9 L123,50.8 L91.1,78.8 L100.4,120.2 L64,98.5 L27.6,120.2 L36.9,78.8 L5,50.8 L47.2,46.9 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+    </g>
+    <g data-layer="shadow">
+      <path d="M64,8 L80.8,46.9 L123,50.8 L91.1,78.8 L100.4,120.2 L64,98.5 L27.6,120.2 L36.9,78.8 L5,50.8 L47.2,46.9 Z" transform="translate(3 3)" fill="{{ skShadow }}"></path>
+    </g>
+    <g data-layer="body">
+      <path d="M64,8 L80.8,46.9 L123,50.8 L91.1,78.8 L100.4,120.2 L64,98.5 L27.6,120.2 L36.9,78.8 L5,50.8 L47.2,46.9 Z" fill="{{ skPrimary }}"></path>
+    </g>
+    <g data-layer="line">
+      <path d="M64,8 L80.8,46.9 L123,50.8 L91.1,78.8 L100.4,120.2 L64,98.5 L27.6,120.2 L36.9,78.8 L5,50.8 L47.2,46.9 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="60.6" cy="32.4" rx="8.5" ry="2.8" transform="rotate(-67 60.6 32.4)" fill="{{ skHighlight }}"></ellipse>
+      <circle cx="64" cy="20.5" r="2" fill="{{ skHighlight }}"></circle>
+    </g>
+    <g data-layer="detail">
+      <path d="M64,39 L72.4,58.5 L93.5,60.4 L77.6,74.4 L82.2,95.1 L64,84.3 L45.8,95.1 L50.4,74.4 L34.5,60.4 L55.6,58.5 Z" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"></path>
+    </g>
+  </svg>
+</sc-if>

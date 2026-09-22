@@ -1,0 +1,94 @@
+<!-- FRAME-ORNATE — the gilt picture frame: a gold band with a carved boss
+     and two buds at every corner, a crest at the top and the bottom, and a
+     jewel set in each, the frame a portrait hangs in, the award's and the
+     fantasy page's screenshot frame (PRESS-TABLE-PLAN.md Appendix D: tags
+     fantasy, award). Layers: halo shadow body line highlight detail
+     image-slot.
+
+     THE SILHOUETTE is one path of 32 commands: a rectangle x 18..110,
+     y 14..114 (92 × 100, a little taller than wide, the way a frame hangs)
+     with, at each corner, a circle of radius 8 centred on the corner —
+     drawn as a three-quarter arc, the boss — and a bud of radius 4.5
+     centred 13 along each edge from it (half an arc each, their tangent
+     points half a unit clear of the boss's, so the path never doubles
+     back): the trefoil a carved corner is. A first cut had one boss per
+     corner and one on every side, and it read as a riveted plate; three
+     lobes at each corner and a plain run of band between are what make it
+     a flourish. At the middle of the top and the bottom a circle of radius
+     9, drawn as a half arc: the crest. The bosses reach x 10 and 118, the
+     crests y 5 and 123 — with the halo's 3 outside that is 2 and 126, and
+     the shadow's rim at 126: nothing passes 128, and the box is filled
+     84 % across, 92 % down. The same path is the halo's stroke, the
+     shadow, the body and the line, so the die-cut edge and the cel shade
+     follow every lobe.
+
+     THE GOLD is {{ skSecondary }}: the kit's second colour is the frame's
+     metal, and the jewels are {{ skPrimary }} — circles of radius 3.5 at
+     the centre of each boss and each crest, six in all, the first colour
+     set in the second. At 40 px a jewel is a pixel of colour in the boss,
+     which is exactly what a gem in a frame is.
+
+     THE OPENING is x 30..98, y 26..102 (68 × 76): a band of 12, thick
+     enough to carry a moulding line and still read as gold at sprite size.
+     Its outline is in the line layer at {{ skStroke }}; the image-slot's
+     paper rect is inset 2 inside it (x 32..96, y 28..100) so the picture
+     does not sit on the inner half of that stroke. The opening is square-
+     cut and takes no rx: a gilt frame's rebate has crisp corners.
+
+     THE SHADOW is the silhouette moved 3 down and right in {{ skShadow }},
+     the least the contract allows, so it stays inside the halo's rim on
+     the diagonal — a sliver down the right lobes and under the bottom
+     crest.
+
+     THE HIGHLIGHT is one glint along the band's top run, an ellipse
+     20 × 4.4 at (40,21.5): it lies in the 5-unit lane between the moulding
+     line (y 18) and the opening's outline (y 26, half a stroke in), where
+     gold leaf catches the lamp, and crosses neither. And a sparkle on the
+     top-left gem, a dot of radius 1.3 at (16.8,12.8) — the one place in a
+     boss with room for it, since the boss is 8 and the jewel with its
+     bezel takes 4.25 of that.
+
+     THE DETAIL is the moulding: an inner line 4 inside the outer edge
+     (x 22..106, y 18..110) at stroke 1.5, half the default, that gives the
+     band its step, and a ring of the same weight around each jewel — the
+     bezel. A simple style drops both and the frame is still gold with
+     bosses. -->
+<sc-if value="{{ isFrameOrnate }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M35.5,14 L55,14 A9,9 0 0 1 73,14 L92.5,14 A4.5,4.5 0 0 1 101.5,14 L102,14 A8,8 0 1 1 110,22 L110,23.5 A4.5,4.5 0 0 1 110,32.5 L110,95.5 A4.5,4.5 0 0 1 110,104.5 L110,106 A8,8 0 1 1 102,114 L101.5,114 A4.5,4.5 0 0 1 92.5,114 L73,114 A9,9 0 0 1 55,114 L35.5,114 A4.5,4.5 0 0 1 26.5,114 L26,114 A8,8 0 1 1 18,106 L18,104.5 A4.5,4.5 0 0 1 18,95.5 L18,32.5 A4.5,4.5 0 0 1 18,23.5 L18,22 A8,8 0 1 1 26,14 L26.5,14 A4.5,4.5 0 0 1 35.5,14 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+    </g>
+    <g data-layer="shadow">
+      <path d="M35.5,14 L55,14 A9,9 0 0 1 73,14 L92.5,14 A4.5,4.5 0 0 1 101.5,14 L102,14 A8,8 0 1 1 110,22 L110,23.5 A4.5,4.5 0 0 1 110,32.5 L110,95.5 A4.5,4.5 0 0 1 110,104.5 L110,106 A8,8 0 1 1 102,114 L101.5,114 A4.5,4.5 0 0 1 92.5,114 L73,114 A9,9 0 0 1 55,114 L35.5,114 A4.5,4.5 0 0 1 26.5,114 L26,114 A8,8 0 1 1 18,106 L18,104.5 A4.5,4.5 0 0 1 18,95.5 L18,32.5 A4.5,4.5 0 0 1 18,23.5 L18,22 A8,8 0 1 1 26,14 L26.5,14 A4.5,4.5 0 0 1 35.5,14 Z" transform="translate(3 3)" fill="{{ skShadow }}"></path>
+    </g>
+    <g data-layer="body">
+      <path d="M35.5,14 L55,14 A9,9 0 0 1 73,14 L92.5,14 A4.5,4.5 0 0 1 101.5,14 L102,14 A8,8 0 1 1 110,22 L110,23.5 A4.5,4.5 0 0 1 110,32.5 L110,95.5 A4.5,4.5 0 0 1 110,104.5 L110,106 A8,8 0 1 1 102,114 L101.5,114 A4.5,4.5 0 0 1 92.5,114 L73,114 A9,9 0 0 1 55,114 L35.5,114 A4.5,4.5 0 0 1 26.5,114 L26,114 A8,8 0 1 1 18,106 L18,104.5 A4.5,4.5 0 0 1 18,95.5 L18,32.5 A4.5,4.5 0 0 1 18,23.5 L18,22 A8,8 0 1 1 26,14 L26.5,14 A4.5,4.5 0 0 1 35.5,14 Z" fill="{{ skSecondary }}"></path>
+      <circle cx="18" cy="14" r="3.5" fill="{{ skPrimary }}"></circle>
+      <circle cx="110" cy="14" r="3.5" fill="{{ skPrimary }}"></circle>
+      <circle cx="110" cy="114" r="3.5" fill="{{ skPrimary }}"></circle>
+      <circle cx="18" cy="114" r="3.5" fill="{{ skPrimary }}"></circle>
+      <circle cx="64" cy="14" r="3.5" fill="{{ skPrimary }}"></circle>
+      <circle cx="64" cy="114" r="3.5" fill="{{ skPrimary }}"></circle>
+    </g>
+    <g data-layer="line">
+      <path d="M35.5,14 L55,14 A9,9 0 0 1 73,14 L92.5,14 A4.5,4.5 0 0 1 101.5,14 L102,14 A8,8 0 1 1 110,22 L110,23.5 A4.5,4.5 0 0 1 110,32.5 L110,95.5 A4.5,4.5 0 0 1 110,104.5 L110,106 A8,8 0 1 1 102,114 L101.5,114 A4.5,4.5 0 0 1 92.5,114 L73,114 A9,9 0 0 1 55,114 L35.5,114 A4.5,4.5 0 0 1 26.5,114 L26,114 A8,8 0 1 1 18,106 L18,104.5 A4.5,4.5 0 0 1 18,95.5 L18,32.5 A4.5,4.5 0 0 1 18,23.5 L18,22 A8,8 0 1 1 26,14 L26.5,14 A4.5,4.5 0 0 1 35.5,14 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      <rect x="30" y="26" width="68" height="76" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></rect>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="40" cy="21.5" rx="10" ry="2.2" fill="{{ skHighlight }}"></ellipse>
+      <circle cx="16.8" cy="12.8" r="1.3" fill="{{ skHighlight }}"></circle>
+    </g>
+    <g data-layer="detail">
+      <rect x="22" y="18" width="84" height="92" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linejoin="round"></rect>
+      <circle cx="18" cy="14" r="3.5" fill="none" stroke="{{ skInk }}" stroke-width="1.5"></circle>
+      <circle cx="110" cy="14" r="3.5" fill="none" stroke="{{ skInk }}" stroke-width="1.5"></circle>
+      <circle cx="110" cy="114" r="3.5" fill="none" stroke="{{ skInk }}" stroke-width="1.5"></circle>
+      <circle cx="18" cy="114" r="3.5" fill="none" stroke="{{ skInk }}" stroke-width="1.5"></circle>
+      <circle cx="64" cy="14" r="3.5" fill="none" stroke="{{ skInk }}" stroke-width="1.5"></circle>
+      <circle cx="64" cy="114" r="3.5" fill="none" stroke="{{ skInk }}" stroke-width="1.5"></circle>
+    </g>
+    <g data-layer="image-slot">
+      <rect x="32" y="28" width="64" height="72" fill="{{ skPaper }}"></rect>
+    </g>
+  </svg>
+</sc-if>

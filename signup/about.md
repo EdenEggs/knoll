@@ -28,8 +28,10 @@ own page, not a lab 2 iframe feature. **`/login` is its twin**, drawn from it
 and landed the same way; `login/about.md` covers what differs, and the two link
 to each other.
 
-**Nothing it collects goes anywhere.** See §5. That is the single most
-important fact on this page and the reason it is not §7.
+**Since 2026-09-21 it is a real front door.** The seal makes an account
+(`api/auth.js`), signs you in, and sends you back to the page you came
+from — or, with nowhere to go back to, to your yard, where the gnome shows a
+new gnome round. §5 has it all; the pretend server it replaced is gone.
 
 ---
 
@@ -195,38 +197,69 @@ a re-export would clobber:
 
 ---
 
-## 5 · The pretend server
+## 5 · The real gate (2026-09-21)
 
-**The form sends nothing. There is no account, no request, and the password is
-discarded.** `fetch`, `XMLHttpRequest`, `sendBeacon`, `WebSocket` and `action=`
-all appear exactly zero times in the file. Pressing the seal runs a ~2s
-animation and a `setTimeout`; "Let Google vouch for me" is a `setTimeout` and a
-hardcoded `you@gmail.com`. Reloading loses everything typed.
+**The seal lodges a petition.** Pressing it posts `{ op: 'signup', name,
+email, password }` to `/api/auth` while the hand stamps; the wax sets once the
+door has made the account and cracks on a no, with the door's own words in the
+margin (an address already on the hill, too many petitions from one doorstep, a
+gate with no store). Then, ~2.4 s later, you are sent to `?next=` — a path on
+this site and nothing else, checked the same way here and at the door
+(`api/wall.js: localPath`) — or to `/yard/`. *Into the village →* on the
+done card is that same address, for a slow browser; its words say where it
+goes (*back to TOEM 2 →* when that is where you were).
 
-Which outcome the seal reaches is the page's one Design Canvas prop, declared
-in `data-props` under the section name **"Pretend server"**:
+**What is kept**: the name, the secret word as scrypt, and when — under the
+account's key, sixteen hex of the sha256 of the address. **The address itself
+is not kept** (TOEM 2's rule, which these accounts share: `api/auth.js`'s
+head). **The session** is two cookies: `knoll_s`, HttpOnly, SameSite=Lax,
+ninety days; and `knoll_in`, the account's id and nothing else, which pages
+read to know somebody is in (`account.js`, the yard, TOEM 2).
 
-| prop | values | what it does |
-|---|---|---|
-| `outcome` | `'success'` (default) · `'taken'` | `success` seals, rolls the scroll up and shows "Welcome to Knoll." `taken` cracks the wax and writes *"someone on the hill already gets post there — log in instead?"* in the margin. |
+**The "Pretend server" prop is gone** (`outcome: 'success' | 'taken'`) — the
+door decides. `autocomplete="new-password"` is right now, so the §5 question
+it raised is settled.
 
-The default really is applied — `this.props.outcome ?? 'success'` never
-reaches its fallback, because the runtime supplies declared defaults. The
-Google path always ends in `success` regardless.
+**Google**: "Let Google vouch for me" goes to `/auth/google?next=…` when the
+site has Google set up (`GET /api/auth` says `google: true`), and says in
+the margin that it has not otherwise. A new account Google vouched for comes
+back as `?google=1`, which opens the page straight on the one-field form
+(*One thing more — what shall we call you?*); sealing it posts `{ op: 'name' }`.
+**One address, one way in**: an address with a secret word cannot be opened by
+Google, and one Google vouched for cannot be claimed with a secret word — a
+secret word proves nothing about its address, so the other way round would hand
+the account of whoever owns the address to whoever typed it first.
 
-**One thing to decide before this goes anywhere public.** Both password fields
-carry `autocomplete="new-password"`, which invites the browser's password
-manager to offer to save a credential for knoll.space — for a form that is
-theatre. Either say so on the paper (the dashboard footer already does this
-kind of thing: one line, "a drawing of the sign-up, not the real one"), or
-switch both to `autocomplete="off"`. It is currently neither.
+**Rule Book** and **Terms of Residency** are still `href="#"`: there is still
+nothing for them to point at.
 
-**This supersedes nothing.** The real capture still lives on the coming-soon
-page, which POSTs `{email, category, source}` to the Apps Script endpoint in
-`apps-script/Code.gs` and appends to a Google Sheet. `lab2/features/mailbox.dc.html`
-is a third, separate thing — a bench feature, not a page. Leave both alone.
+**Setting it up on Vercel** — what the repository cannot do for itself:
 
----
+1. **The accounts' store** (required): Storage → Marketplace → **Upstash for
+   Redis**, connected to the project, adds `KV_REST_API_URL` and
+   `KV_REST_API_TOKEN`. The same store TOEM 2's wall uses (api/wall.js). With
+   none, `GET /api/auth` says `open: false`, a press says *the gate is not
+   open on this hill yet*, and nobody can sign up.
+2. **A yard's publish** (for SAVE YARD): the Blob store in `yard/about.md` §0
+   — `BLOB_READ_WRITE_TOKEN`. A yard of one's own needs no key.
+3. *Optional* — Google: `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, with
+   `<site>/auth/google/callback` (and `http://localhost:4321/auth/google/callback`)
+   as redirect URIs. Unset, both Google buttons say so in the margin.
+   `ADMIN_EMAILS` makes TOEM 2's admin — through Google only, since a secret
+   word proves nothing about the address it was typed with. `IP_SALT` for the
+   hour's counters. Then redeploy.
+
+On the dev server nothing needs setting: `node serve.js` keeps the accounts
+in `toem2/wall-db.json` (ignored by git and the deploy, and refused by the
+server to anybody who asks for it). **Restart it** after pulling this change —
+a running serve.js has no `/api/auth`.
+
+**Checking it**: `node lab2/perf/verify-auth.js` (the door, in-process, 57
+checks) and `BASE=… node lab2/perf/probe-accounts.js` (the whole walk in a
+real Chrome, against a server with a throwaway store). The older
+`probe-signup*.js` still drive the page; the fields they report about the
+pretend outcomes (`taken` via the prop, the Google interlude) describe what
+is gone.
 
 ## 6 · Things worth knowing
 

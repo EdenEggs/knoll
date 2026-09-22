@@ -1,0 +1,86 @@
+{
+  "slug": "mosslight",
+  "title": "Mosslight",
+  "tagline": "A slow walk through a lit wood.",
+  "description": "Mosslight is a wordless walk through a painted forest where the light does the talking. There is nothing to fight and nothing to collect: you follow the glow between the trees, sit when you like, and the wood changes around you. Every frame is a soft plate of moss and ochre with no hard line in it.",
+  "developer": "Fixture Games",
+  "publisher": "Fixture Games",
+  "releaseDate": "2026-11-05",
+  "platforms": [
+    "pc",
+    "mac",
+    "switch"
+  ],
+  "genres": [
+    "exploration",
+    "cozy",
+    "painterly"
+  ],
+  "links": {
+    "itch": "https://example.com/mosslight/itch",
+    "site": "https://example.com/mosslight",
+    "press": "https://example.com/mosslight/press"
+  },
+  "assets": [
+    {
+      "id": "logo",
+      "role": "logo",
+      "file": "art/logo.png",
+      "w": 640,
+      "h": 240,
+      "alpha": true,
+      "sha256": "e2054b90ac4260ee6dccd33f97a33120876471ae6c6e9876077f57873b3c525b"
+    },
+    {
+      "id": "hero",
+      "role": "hero",
+      "file": "art/hero.png",
+      "w": 1600,
+      "h": 900,
+      "alpha": false,
+      "sha256": "e018332772e0fdf8a6a677ed0a620dc9845c7104bba3db11d7eaca26cad52c8c"
+    },
+    {
+      "id": "shot-1",
+      "role": "screenshot",
+      "file": "art/shot-1.png",
+      "w": 960,
+      "h": 540,
+      "alpha": false,
+      "sha256": "35e8dfcc2dc324bf291001c9f75ee4d827744dd9b562338b7ffc4c1a7523d804"
+    },
+    {
+      "id": "shot-2",
+      "role": "screenshot",
+      "file": "art/shot-2.png",
+      "w": 960,
+      "h": 540,
+      "alpha": false,
+      "sha256": "9406cbba91a9cab998123f0cea145c4928e61a41861738cd3dcfb1a3c5cf48de"
+    },
+    {
+      "id": "shot-3",
+      "role": "screenshot",
+      "file": "art/shot-3.png",
+      "w": 960,
+      "h": 540,
+      "alpha": false,
+      "sha256": "e218462c82f07895b3d92069aa4b77b3aa2181b3e715aedef0dd2af5947f17d4"
+    },
+    {
+      "id": "shot-4",
+      "role": "screenshot",
+      "file": "art/shot-4.png",
+      "w": 960,
+      "h": 540,
+      "alpha": false,
+      "sha256": "b4fe87d51eb2b3f3722ec9abeb3da1c4347fb03685a0fb4db57e236ba6da6f52"
+    }
+  ],
+  "rights": {
+    "attested": true,
+    "by": "fixture",
+    "at": "2026-09-07T00:00:00.000Z"
+  },
+  "source": "manual"
+}

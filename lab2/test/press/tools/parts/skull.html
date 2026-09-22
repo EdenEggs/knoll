@@ -1,0 +1,65 @@
+<!-- SKULL — the small skull (PRESS-TABLE-PLAN.md Appendix D: tags skull,
+     horror, grunge — skull is a motif the vision call matches). Layers:
+     halo shadow body line highlight detail.
+
+     THE BONE is {{ skPaper }}, not a colour: a skull is the colour of the
+     page's white, so on the bench it is a white sticker with dark sockets
+     and on a dark game page it is a dark skull drawn in light ink with
+     light sockets — the neon-sign skull, which is what a dark page wants.
+     The sockets and the nose are {{ skInk }}, the same as the outline, so
+     the two always read as holes against the bone whatever the palette.
+
+     THE SILHOUETTE is one path: a dome 84 wide (22..106) whose top is at
+     y 9, cheeks curving in to a jaw 56 wide (36..92) that ends at y 116
+     with corners of radius 6 — dome to jaw is 3:2, which is the cartoon
+     proportion (a real skull is nearer 5:4 and reads as a face, not a
+     skull, at 40 px). 22..106 by 9..116, so the height fills the box and
+     the width is two thirds of it. The same path is the halo's stroke, the
+     shadow, the body and the line, so the die-cut edge and the cel shade
+     are the silhouette exactly.
+
+     THE SOCKETS are two ellipses 26 × 28 at (45,60) and (83,60), each
+     rotated 12° toward the nose so the skull glowers instead of stares;
+     the nose is a 15-tall triangle with a rounded base. THE TEETH are a
+     14-tall band across the bottom of the jaw: one horizontal at y 102 and
+     three verticals at x 50, 64, 78, so four teeth, each 14 wide — the
+     count the skull emoji shows, and the fewest that still say teeth.
+     They are outlines, so they live in the line layer at the full weight;
+     teeth are not a detail.
+
+     THE SHADOW is the silhouette moved 3 down and right, the least the
+     contract allows (burst says why).
+
+     THE HIGHLIGHT is one glint high on the dome's left, an ellipse 9 × 4 at
+     −35° following the curve, and a dot of radius 2.5 above it.
+
+     THE DETAIL is a crack: a 1.5 stroke (half the default line) zigzagging
+     four points down the right of the dome from (82,18) to (86,44). A
+     simple style drops it and the skull is still the skull. -->
+<sc-if value="{{ isSkull }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M22,54 C22,26 41,9 64,9 C87,9 106,26 106,54 C106,68 100,78 92,86 L92,110 Q92,116 86,116 L42,116 Q36,116 36,110 L36,86 C28,78 22,68 22,54 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+    </g>
+    <g data-layer="shadow">
+      <path d="M22,54 C22,26 41,9 64,9 C87,9 106,26 106,54 C106,68 100,78 92,86 L92,110 Q92,116 86,116 L42,116 Q36,116 36,110 L36,86 C28,78 22,68 22,54 Z" transform="translate(3 3)" fill="{{ skShadow }}"></path>
+    </g>
+    <g data-layer="body">
+      <path d="M22,54 C22,26 41,9 64,9 C87,9 106,26 106,54 C106,68 100,78 92,86 L92,110 Q92,116 86,116 L42,116 Q36,116 36,110 L36,86 C28,78 22,68 22,54 Z" fill="{{ skPaper }}"></path>
+      <ellipse cx="45" cy="60" rx="13" ry="14" transform="rotate(-12 45 60)" fill="{{ skInk }}"></ellipse>
+      <ellipse cx="83" cy="60" rx="13" ry="14" transform="rotate(12 83 60)" fill="{{ skInk }}"></ellipse>
+      <path d="M64,78 L58,93 Q64,97 70,93 Z" fill="{{ skInk }}"></path>
+    </g>
+    <g data-layer="line">
+      <path d="M22,54 C22,26 41,9 64,9 C87,9 106,26 106,54 C106,68 100,78 92,86 L92,110 Q92,116 86,116 L42,116 Q36,116 36,110 L36,86 C28,78 22,68 22,54 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+      <path d="M36,102 L92,102 M50,102 L50,116 M64,102 L64,116 M78,102 L78,116" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="44" cy="27" rx="9" ry="4" transform="rotate(-35 44 27)" fill="{{ skHighlight }}"></ellipse>
+      <circle cx="57" cy="17" r="2.5" fill="{{ skHighlight }}"></circle>
+    </g>
+    <g data-layer="detail">
+      <path d="M82,18 L86,28 L80,35 L86,44" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"></path>
+    </g>
+  </svg>
+</sc-if>

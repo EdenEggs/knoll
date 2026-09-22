@@ -19,7 +19,8 @@ fit it in the lock and turn it; the shackle springs open on the way through.
 Served at `/login`, alongside `/lab`, `/lab2`, `/yard`, `/dashboard` and
 `/signup`.
 
-**Nothing it collects goes anywhere.** See §4.
+**Since 2026-09-21 the gate is real**: turning the key opens an account made at
+`/signup` and sends you back where you came from. See §4.
 
 ---
 
@@ -88,39 +89,28 @@ these pages.
 
 ---
 
-## 4 · The pretend gate
+## 4 · The gate (2026-09-21)
 
-**Nothing is sent.** `fetch`, `XMLHttpRequest`, `sendBeacon`, `WebSocket` and
-`action=` all appear exactly zero times. Turning the key runs a ~2.2s animation
-and a `setTimeout`; "Google knows me — let me through" is a `setTimeout`.
+Turning the key posts `{ op: 'login', email, password, remember }` to
+`/api/auth` while the hand fetches, carries, fits and turns it: the lock
+opens once the door says yes and jams on a no — the ejected key, the wagging
+hand, the jostled lock and the note in the margin are the export's, and the
+note's words are now the door's (*that is not the secret word the gate
+remembers*, the same for an address with no account; *this address comes in
+with Google*; the hour's caps). The pretend server — `pw === '0'` — is gone.
 
-Unlike `/signup`, **this page declares no Design Canvas props at all** — its
-script tag is a bare `data-dc-script=""`. The failure path is hardcoded
-instead:
+Then you go to `?next=` (a path on this site, checked as `/signup` checks it)
+or to your yard; *the gate swings open · into the village →* is the same
+address, worded for where it goes. **Keep the gate unlatched for me** is real:
+ticked, ninety days; unticked, a cookie that ends with the browser (and a day
+at most in the store). **Google knows me** goes to Google when the site has
+Google set up, and says so in the margin when it has not. **Forgotten it? ask
+the gatekeeper** says, in the margin, that the gatekeeper cannot post a new key
+yet — there is no post; the address is not even kept (`signup/about.md` §5).
 
-```js
-const outcome = this.state.pw === '0' ? 'wrong' : 'success';   // pretend server
-```
-
-So **type `0` as the secret word to see the key jam.** Anything else opens the
-gate. The wrong path ejects the key, wags the hand, jostles the lock and writes
-*"that is not the secret word the gate remembers"* in the margin.
-
-The lock's states, in order: `idle` → `reach` → `grip` → `carry` → `insert` →
-`turn` → `cooling` → `set`, or `eject` → `cracked` on a wrong word. The label
-beside it reads **TURN THE KEY** → **TURNING…** → **UNLOCKED**.
-
-Validation is two rules: a real-looking email, and a non-empty secret word
-(*"the gate wants a secret word before it opens"*) — no eight-character minimum
-here, since you are not choosing one.
-
-The *keep the gate unlatched for me* tick defaults to **on** and is state only;
-nothing reads it.
-
-Three links go nowhere: *forgotten it? ask the gatekeeper*, *Terms of
-Residency*, and *into the village →* on the success card.
-
----
+**Terms of Residency** is still `href="#"`. `signup/about.md` §5 has the
+setup on Vercel and the probes; `probe-login.js` still drives the page, and
+its happy path now needs an account that exists.
 
 ## 5 · Changes to the export
 

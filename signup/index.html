@@ -30,6 +30,9 @@
         integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"
         crossorigin="anonymous"></script>
 <script src="./support.js"></script>
+<!-- THE ACCOUNT CORNER (account.js, 2026-09-21): the search, and the other gate — the
+     button for this one is left off — at the right of the house bar -->
+<script src="/account.js" defer></script>
 
 </head>
 <body>
@@ -254,7 +257,7 @@
               </button>
               <div style="font-style: italic; font-size: 13px; opacity: 0.6; text-align: center; margin-top: -4px">a letter of introduction, in lieu of a secret word</div>
             </div>
-            <div style="font-style: italic; font-size: 14.5px; opacity: 0.7; text-align: center">Already a resident? <a href="../login/" style="color: #b83739">Log in at the gate</a></div>
+            <div style="font-style: italic; font-size: 14.5px; opacity: 0.7; text-align: center">Already a resident? <a href="{{ loginHref }}" style="color: #b83739">Log in at the gate</a></div>
             </sc-if>
           </form>
           <div style="height: 16px; background: #e4d9bb; border-top: 2px solid rgba(23,18,11,0.25)"></div>
@@ -329,7 +332,13 @@
     <sc-if value="{{ done }}" hint-placeholder-val="{{ false }}">
       <div style="position: absolute; left: 0; right: 0; top: 60px; text-align: center; display: flex; flex-direction: column; gap: 6px; align-items: center">
         <div style="font-family: Rye, serif; font-size: 28px; color: #17120b">Welcome to Knoll.</div>
-        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">your key is in the post · <a href="#" style="text-decoration: none">into the village →</a></div>
+        <!-- THE DOOR OUT OF THE GATE. The export drew this line and pointed it
+             at `#`; the village it means is /yard, which is where a resident
+             lands. Nothing was signed up for — §5 still holds, the form sends
+             nothing and this link is the only thing on the page that goes
+             anywhere — but the walk from the gate to your own plot is the one
+             journey these two pages are for, and it may as well be walkable. -->
+        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">you are one of us now · <a href="{{ nextHref }}" style="text-decoration: none">{{ nextWord }}</a></div>
       </div>
     </sc-if>
     <sc-if value="{{ interlude }}" hint-placeholder-val="{{ false }}">
@@ -383,10 +392,32 @@
   <div aria-live="polite" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{ liveMsg }}</div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script="" data-props="{&quot;outcome&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;success&quot;,&quot;options&quot;:[&quot;success&quot;,&quot;taken&quot;],&quot;tsType&quot;:&quot;'success' | 'taken'&quot;,&quot;section&quot;:&quot;Pretend server&quot;}}">
+<script type="text/x-dc" data-dc-script="">
+/* ── THE PETITION IS REAL (2026-09-21) ───────────────────────────────────────
+   Until today the seal set for anybody and cracked only when the "Pretend
+   server" prop said 'taken'; that prop is gone. Pressing the seal now lodges
+   the petition with the door (api/auth.js) while the hand stamps it: the wax
+   sets once the door has made the account, and cracks on a no, with the
+   door's own words in the margin — an address already on the hill, too many
+   petitions from one doorstep, a gate with no store behind it. Then you go
+   back where you came from: ?next=, a path on this site and nothing else
+   (api/wall.js: localPath), or your yard — where, it being your first time,
+   the gnome shows you round. "Let Google vouch for me" goes to Google when
+   this site has Google set up (and says so in the margin when it has not);
+   a new account Google vouched for comes back here as ?google=1, straight to
+   the one-field form, to be named. */
+const NEXT = (function () { const v = new URLSearchParams(location.search).get('next') || ''; return v.length <= 512 && /^\/(?![\/\\])[^\s\\]*$/.test(v) ? v : '/yard/'; })();
+const NEXT_WORD = /^\/yard\//.test(NEXT) ? 'into the village →' : /^\/toem2\//.test(NEXT) ? 'back to TOEM 2 →' : NEXT === '/' ? 'back to the hill →' : 'back where you were →';
+const VIA_GOOGLE = /[?&]google=1\b/.test(location.search);
+const GATE = body => fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+  .then(r => r.json().catch(() => ({})).then(o => Object.assign({ http: r.status }, o)))
+  .catch(() => ({ ok: false, http: 0, error: 'the gate did not answer — are you online?' }));
+const GATE_SAYS = { 'no-store': 'the gate is not open on this hill yet — come back soon' };
+let GATE_INFO = null;                          // what the door says about itself (is Google set up?), asked once
+const gateInfo = () => GATE_INFO || (GATE_INFO = fetch('/api/auth', { cache: 'no-store' }).then(r => r.json()).catch(() => ({})));
 class Component extends DCLogic {
   state = { pose: 'point', paperH: '0px', paperT: 'none', swung: false, focused: null, name: '', email: '', pw: '', pw2: '', showPw: false,
-    errs: {}, seal: 'idle', asleep: false, narrow: false, jostle: false, hatSlip: false, done: false, live: '', rolledUp: false };
+    errs: {}, seal: 'idle', asleep: false, narrow: false, jostle: false, hatSlip: false, done: false, live: '', rolledUp: false, viaGoogle: VIA_GOOGLE };
   refs = {};
   r = (k) => (el) => { this.refs[k] = el; };
   armInkRef = this.r('armInk'); armCoatRef = this.r('armCoat'); cuffRef = this.r('cuff'); cuffRef2 = this.r('cuff2');
@@ -498,21 +529,14 @@ class Component extends DCLogic {
   }
   togglePw = () => this.setState((s) => ({ showPw: !s.showPw }));
 
+  // (THE PETITION IS REAL) away to Google and back through api/wall.js's sign-in — or, with no Google here, a note
   onGoogle = () => {
     if (this.state.seal !== 'idle' && this.state.seal !== 'cracked') return;
-    this.setState({ seal: 'cooling', errs: {}, live: 'Asking Google to vouch for you' });
-    setTimeout(() => {
-      // roll up, then come back down as the short form: just a name
-      this.setState({ seal: 'set', live: 'Google vouches for you. What shall we call you?' });
-      setTimeout(() => this.setState({ paperT: 'height 380ms cubic-bezier(.6,0,.8,1)', paperH: '0px', rolledUp: true, open: false }), 400);
-      setTimeout(() => this.setState({ interlude: true }), 800);
-      setTimeout(() => this.setState({ interlude: false, rolledUp: false, viaGoogle: true, seal: 'idle', focused: null, errs: {} }, () => {
-        const h = this.refs.paperInner ? this.refs.paperInner.scrollHeight + 6 : 400;
-        this.setState({ paperT: 'height 600ms cubic-bezier(.3,1.35,.5,1)', paperH: h + 'px' });
-        setTimeout(() => { this.setState({ swung: true, open: true, errs: {}, live: '' }); if (this.refs.name) this.refs.name.focus(); }, 600);
-        setTimeout(() => this.setState({ swung: false }), 2000);
-      }), 2300);
-    }, 1400);
+    gateInfo().then(g => {
+      if (g && g.google) { this.setState({ seal: 'cooling', errs: {}, live: 'Asking Google to vouch for you' }); location.assign('/auth/google?next=' + encodeURIComponent(NEXT)); return; }
+      const msg = 'Google cannot vouch for anybody on this hill yet — an address and a secret word will do';
+      this.setState({ errs: Object.assign({}, this.state.errs, { email: msg }), live: msg }); this.m.noteAt = 'email'; this.m.noteT = performance.now();
+    });
   };
 
   // ─── the seal ───
@@ -523,7 +547,9 @@ class Component extends DCLogic {
     if (this.state.seal !== 'idle' && this.state.seal !== 'cracked') return;
     const errs = {}; (this.state.viaGoogle ? ['name'] : ['name', 'email', 'pw', 'pw2']).forEach((f) => { const er = this.validate(f); if (er) errs[f] = er; });
     if (Object.keys(errs).length) { this.setState({ errs, live: Object.values(errs)[0] }); this.m.noteAt = Object.keys(errs)[0]; this.m.noteT = performance.now(); return; }
-    const outcome = this.state.viaGoogle ? 'success' : (this.props.outcome ?? 'success');
+    // the door is asked now, and has answered by the time the wax is cool (THE PETITION IS REAL)
+    const asked = this.state.viaGoogle ? GATE({ op: 'name', name: this.state.name.trim() })
+      : GATE({ op: 'signup', name: this.state.name.trim(), email: this.state.email.trim(), password: this.state.pw });
     // the hand reaches for the stamp first (~350ms), then grips, lifts, thumps
     this.setState({ seal: 'reach', errs: {} });
     setTimeout(() => this.setState({ seal: 'grip' }), 380);
@@ -531,16 +557,20 @@ class Component extends DCLogic {
     setTimeout(() => this.setState({ seal: 'press', jostle: true, hatSlip: true }), 640);
     setTimeout(() => this.setState({ seal: 'wax' }), 760);
     setTimeout(() => this.setState({ seal: 'cooling', jostle: false, live: 'Sealing your petition' }), 1080);
-    setTimeout(() => {
-      if (outcome === 'taken') {
-        this.setState({ seal: 'cracked', errs: { email: 'someone on the hill already gets post there — log in instead?' }, live: 'someone on the hill already gets post there — log in instead?' });
-        this.m.noteAt = 'email'; this.m.noteT = performance.now();
+    Promise.all([asked, new Promise(r => setTimeout(r, 2060))]).then(([out]) => {
+      if (!out.ok) {
+        const google = this.state.viaGoogle;
+        const f = google ? 'name' : ({ name: 'name', password: 'pw' }[out.code] || 'email');
+        const msg = GATE_SAYS[out.code] || (google && out.code === 'who' ? 'that Google sign-in has lapsed — go back and let Google vouch again' : out.error) || 'the wax would not take';
+        this.setState({ seal: 'cracked', errs: { [f]: msg }, live: msg });
+        this.m.noteAt = f; this.m.noteT = performance.now();
       } else {
         this.setState({ seal: 'set', live: 'Welcome to Knoll' });
         setTimeout(() => this.setState({ paperT: 'height 380ms cubic-bezier(.6,0,.8,1)', paperH: '0px', rolledUp: true, open: false }), 500);
         setTimeout(() => this.setState({ done: true }), 950);
+        setTimeout(() => location.assign(NEXT), 2400);   // and on into the village; the card's link is there for a slow one
       }
-    }, 2060);
+    });
   };
 
   // ─── the loop ───
@@ -692,7 +722,8 @@ class Component extends DCLogic {
       sealLabel: s.seal === 'set' ? 'SEALED' : (busy ? 'SEALING…' : 'PRESS SEAL'),
       sealHint: s.seal === 'cracked' ? 'the wax cracked; see the margin' : (busy ? 'the wax is cooling' : 'thump it, and your petition is lodged'),
       done: s.done, liveMsg: s.live, interlude: !!s.interlude,
-      viaGoogle: !!s.viaGoogle, fullForm: !s.viaGoogle, googleEmail: 'you@gmail.com',
+      viaGoogle: !!s.viaGoogle, fullForm: !s.viaGoogle, googleEmail: 'your Google address',   // the address is not kept, so not known here either
+      nextHref: NEXT, nextWord: NEXT_WORD, loginHref: '../login/?next=' + encodeURIComponent(NEXT),
       heading: s.viaGoogle ? 'One thing more — what shall we call you?' : 'Hear ye — a new resident petitions the hill',
       subhead: s.viaGoogle ? 'Form 1-C · Choice of Name · vouched for by Google' : 'Form 1-B · Application for Residency · see Rule Book §2',
       handOpacity: this.m.rest ? 0.92 : 1,

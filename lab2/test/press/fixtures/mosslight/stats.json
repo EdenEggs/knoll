@@ -1,0 +1,45 @@
+{
+  "fixture": "mosslight",
+  "hints": {
+    "dark": false
+  },
+  "rank": [
+    {
+      "preset": "painterly",
+      "score": 2.6
+    },
+    {
+      "preset": "flat",
+      "score": 3.6
+    },
+    {
+      "preset": "cozy-soft",
+      "score": 4.7
+    }
+  ],
+  "stats": {
+    "contrast": 0.0627,
+    "edgeDensity": 0,
+    "hfEnergy": 0.1601,
+    "outline": {
+      "present": false,
+      "weight": 0
+    },
+    "paletteCount": 55,
+    "pixelSize": 0,
+    "saturation": 0.0652
+  },
+  "vector": {
+    "corners": 0.3,
+    "finish": "diecut",
+    "linePasses": 1,
+    "lineShow": false,
+    "lineWeight": 0,
+    "lineWobble": 0,
+    "paletteSize": 0,
+    "pixel": 0,
+    "saturation": 0.2511,
+    "shading": "painterly",
+    "texture": "paper"
+  }
+}

@@ -1,0 +1,51 @@
+<!-- HEART — the plain heart, the "loved it" sticker (PRESS-TABLE-PLAN.md
+     Appendix D: tags vote, cozy). Layers: halo shadow body line highlight
+     detail.
+
+     THE SHAPE is one closed path of six cubics, the same path drawn four
+     times (halo stroke, shadow, body, line) so the halo and the shadow are
+     the silhouette exactly, as burst.html does it. The lobes crest at y 12
+     and the point sits at y 118; the widest span is 8..120 at y 48 — a box
+     of 112 × 106, 88 % × 83 %, the most the 128 box takes once the halo's
+     3 outside the edge and the shadow's 3 down-right are counted (the halo
+     reaches 5 and 123, the shadow's rim 123 and 121; nothing spills). The
+     cleft between the lobes is 16 deep (y 28 against the crests' 12):
+     shallower and the top reads as a single bump at 40 px, deeper and the
+     lobes split into two drops.
+
+     THE SHADOW is the silhouette moved 3 down and right — the least the
+     contract allows, so that with the halo ON (3 outside the body) the
+     shadow's rim stays inside the paper edge on the diagonal. It shows as
+     a sliver down the right lobe and the lower-right flank: the cel shade.
+
+     THE HIGHLIGHT is one glint on the left lobe — an ellipse 11 × 5 tilted
+     −40° at (34,36), the mirror of the shadow's corner, and a dot of radius
+     3.2 above it at (48,25), the way a vinyl heart catches the lamp.
+
+     THE DETAIL is a single cel-shade stroke inside the lower-right edge,
+     stroke 1.5 (half the default line), set 7 units in from the outline so
+     that a band of colour ~5 wide stays between the two inks. A simple
+     style drops it and the heart is still the heart. -->
+<sc-if value="{{ isHeart }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <path d="M64,118 C40,98 8,80 8,48 C8,26 24,12 42,12 C54,12 62,20 64,28 C66,20 74,12 86,12 C104,12 120,26 120,48 C120,80 88,98 64,118 Z" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></path>
+    </g>
+    <g data-layer="shadow">
+      <path d="M64,118 C40,98 8,80 8,48 C8,26 24,12 42,12 C54,12 62,20 64,28 C66,20 74,12 86,12 C104,12 120,26 120,48 C120,80 88,98 64,118 Z" transform="translate(3 3)" fill="{{ skShadow }}"></path>
+    </g>
+    <g data-layer="body">
+      <path d="M64,118 C40,98 8,80 8,48 C8,26 24,12 42,12 C54,12 62,20 64,28 C66,20 74,12 86,12 C104,12 120,26 120,48 C120,80 88,98 64,118 Z" fill="{{ skPrimary }}"></path>
+    </g>
+    <g data-layer="line">
+      <path d="M64,118 C40,98 8,80 8,48 C8,26 24,12 42,12 C54,12 62,20 64,28 C66,20 74,12 86,12 C104,12 120,26 120,48 C120,80 88,98 64,118 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="34" cy="36" rx="11" ry="5" transform="rotate(-40 34 36)" fill="{{ skHighlight }}"></ellipse>
+      <circle cx="48" cy="25" r="3.2" fill="{{ skHighlight }}"></circle>
+    </g>
+    <g data-layer="detail">
+      <path d="M108,60 C108,82 84,96 68,106" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round"></path>
+    </g>
+  </svg>
+</sc-if>

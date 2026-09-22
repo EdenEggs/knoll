@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "vibe",
+  "description": "PRESS-TABLE-PLAN.md Appendix F, transcribed rule for rule: the JSON the vision call answers with, and the menus it must answer from. It is the model's only vocabulary — `never invent ids` in the system prompt is this file. It lands in analysis.vibe. `preset`, `alternates` and `fontPairing` are $refs rather than copies so a preset added to style.schema.json or a pairing added to theme.schema.json cannot be a menu the model is not offered.",
+  "type": "object",
+  "required": ["artStyle", "mood", "motifs", "preset", "alternates", "fontPairing", "recipe", "harmony", "confidence"],
+  "properties": {
+    "artStyle":    { "enum": ["pixel", "hand-painted", "vector-flat", "cel-shaded-3d", "realistic-3d", "low-poly", "ink", "collage", "claymation", "other"] },
+    "mood":        { "type": "array", "minItems": 1, "maxItems": 3, "items": { "enum": ["cozy", "whimsical", "dread", "gritty", "neon", "epic", "melancholy", "chaotic", "serene", "retro"] } },
+    "motifs":      { "type": "array", "minItems": 3, "maxItems": 5, "items": { "enum": ["magic", "fire", "storm", "skull", "sword", "gear", "leaf", "mushroom", "cloud", "moon", "star", "heart", "water", "ice", "crystal", "robot", "ship", "spaceship", "castle", "forest", "city", "desert", "ocean", "cat", "fox", "dragon", "ghost", "lantern", "book", "key", "potion", "coin", "music", "flower", "bone", "eye", "mask", "car", "train", "plant"] } },
+    "preset":      { "$ref": "style.schema.json#/properties/preset" },
+    "alternates":  { "type": "array", "maxItems": 2, "items": { "$ref": "style.schema.json#/properties/preset" } },
+    "fontPairing": { "$ref": "theme.schema.json#/properties/fonts/properties/id" },
+    "recipe":      { "enum": ["poster", "widescreen", "scrapbook"] },
+    "harmony":     { "enum": ["calm", "loud"] },
+    "confidence":  { "type": "number", "minimum": 0, "maximum": 1 },
+    "why":         { "type": "string", "maxLength": 300 }
+  }
+}

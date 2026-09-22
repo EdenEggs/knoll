@@ -1,0 +1,33 @@
+{
+  "fixture": "neonrun",
+  "_from": "PRESS-TABLE-PLAN.md Appendix H (2026-09-07): numbers are the plan's; where it only gave a word (high, thin) the word is kept and Phase 3 pins the number",
+  "stats": {
+    "dark": true,
+    "saturation": {
+      "min": 0.065
+    },
+    "outline": {
+      "present": true,
+      "weight": {
+        "max": 0.3
+      }
+    }
+  },
+  "preset": [
+    "neon"
+  ],
+  "pairing": "scifi",
+  "recipe": [
+    "widescreen"
+  ],
+  "harmony": "loud",
+  "_measured": {
+    "date": "2026-09-07",
+    "by": "perf/test-style.js (Phase 3): the plan's words replaced by the bounds the test asserts; the numbers are the run's",
+    "dark": true,
+    "saturation": 0.1051,
+    "outline.present": true,
+    "outline.weight": 0.3,
+    "note": "saturation: 0.0843–0.0878 a plate, 0.2050 the logo, mean 0.1051; 0.065 chroma is style.js's SAT_LINE (0.25 normalised), the line the vector calls saturated at. weight: bright runs at half depth have a median of 2 px on a dark plate (pooled median luma 0.078) → 0.3"
+  }
+}

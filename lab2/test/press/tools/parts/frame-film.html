@@ -1,0 +1,86 @@
+<!-- FRAME-FILM — one cell of a film strip: a dark band cut at both ends,
+     a row of sprocket holes along the top and another along the bottom,
+     the picture in the cell between them, the cinema page's screenshot
+     frame (PRESS-TABLE-PLAN.md Appendix D: tags cinema, screenshot).
+     Layers: halo shadow body line highlight detail image-slot.
+
+     THE STRIP is x 6..122, y 16..112 (116 × 96): it runs nearly the full
+     width because a strip is a thing that has been cut from a longer one,
+     and the cut ends at the box's sides say so. With the 3-unit line and
+     the halo's 3 outside it the edge sits at 1.5 and 126.5, the shadow's
+     rim at 125; nothing passes 128. Ink 91 % across, 75 % down — a strip
+     is wider than tall by nature, and the cell keeps it from being a mere
+     bar.
+
+     THE FILM is {{ skPrimary }}: real stock is black, but a sticker's
+     black is its ink, and a frame all in ink would swallow its own
+     outline; the kit's first colour is the film, and the holes and the
+     cell show {{ skPaper }} through it, which is how a strip held up to
+     the light looks.
+
+     THE SPROCKET HOLES are four to a row, 14 × 10, on a 26 pitch centred
+     on the box (x 18..32, 44..58, 70..84, 96..110), in bands 18 tall
+     (y 16..34 and 94..112), each hole 4 in from the band's edge. Four and
+     not the eight of a real perforation: at 40 px a hole is 4 px wide and
+     the gap between them 4 px, the coarsest that still counts as a row.
+     They are square-cut (no rx — a 14-wide hole rounded at the style's
+     radius of 10 or 14 would turn into a pill). Each hole is outlined in
+     the line layer at {{ skStroke }}: with the fill gone the row of eight
+     small rectangles is still what says film.
+
+     THE CELL is x 18..110, y 36..92 (92 × 56, the 1.6:1 of a wide frame),
+     2 clear of the sprocket bands, outlined in the line layer; the image-
+     slot's paper rect is inset 2 (x 20..108, y 38..90) so the picture does
+     not sit on the inner half of that stroke and thin it.
+
+     THE SHADOW is the strip moved 3 down and right in {{ skShadow }} — the
+     least the contract allows — a sliver under the bottom edge and down
+     the cut at the right.
+
+     THE HIGHLIGHT is one glint on the film's face at the upper left,
+     standing in the 9-unit gap between the cut end and the first hole:
+     an ellipse 2.5 × 5.5 at (12,24), tilted −15° — the sheen of the
+     emulsion side, upright because that gap is taller than it is wide (a
+     first cut laid it along the top edge and it straddled the corner's
+     outline). No second dot: the band is holes and gaps, and a dot in a
+     gap reads as one more hole.
+
+     THE DETAIL is the edge code: three short dashes on the bottom band
+     between each pair of holes, stroke 1.5 (half the default line), the
+     frame numbers printed along a strip that a sticker cannot spell out.
+     A simple style drops them and the holes still say film. -->
+<sc-if value="{{ isFrameFilm }}">
+  <svg width="128" height="128" sc-camel-view-box="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(6px 7px 0 rgba(0,0,0,.3)); animation: sk-sway 4.2s ease-in-out -1.1s infinite alternate">
+    <g data-layer="halo" style="display:none">
+      <rect x="6" y="16" width="116" height="96" fill="none" stroke="{{ skPaper }}" stroke-width="6" stroke-linejoin="round"></rect>
+    </g>
+    <g data-layer="shadow">
+      <rect x="9" y="19" width="116" height="96" fill="{{ skShadow }}"></rect>
+    </g>
+    <g data-layer="body">
+      <rect x="6" y="16" width="116" height="96" fill="{{ skPrimary }}"></rect>
+      <rect x="18" y="20" width="14" height="10" fill="{{ skPaper }}"></rect>
+      <rect x="44" y="20" width="14" height="10" fill="{{ skPaper }}"></rect>
+      <rect x="70" y="20" width="14" height="10" fill="{{ skPaper }}"></rect>
+      <rect x="96" y="20" width="14" height="10" fill="{{ skPaper }}"></rect>
+      <rect x="18" y="98" width="14" height="10" fill="{{ skPaper }}"></rect>
+      <rect x="44" y="98" width="14" height="10" fill="{{ skPaper }}"></rect>
+      <rect x="70" y="98" width="14" height="10" fill="{{ skPaper }}"></rect>
+      <rect x="96" y="98" width="14" height="10" fill="{{ skPaper }}"></rect>
+    </g>
+    <g data-layer="line">
+      <rect x="6" y="16" width="116" height="96" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></rect>
+      <rect x="18" y="36" width="92" height="56" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></rect>
+      <path d="M18,20 h14 v10 h-14 Z M44,20 h14 v10 h-14 Z M70,20 h14 v10 h-14 Z M96,20 h14 v10 h-14 Z M18,98 h14 v10 h-14 Z M44,98 h14 v10 h-14 Z M70,98 h14 v10 h-14 Z M96,98 h14 v10 h-14 Z" fill="none" stroke="{{ skInk }}" stroke-width="{{ skStroke }}" stroke-linejoin="round" stroke-linecap="round"></path>
+    </g>
+    <g data-layer="highlight">
+      <ellipse cx="12" cy="24" rx="2.5" ry="5.5" transform="rotate(-15 12 24)" fill="{{ skHighlight }}"></ellipse>
+    </g>
+    <g data-layer="detail">
+      <path d="M35,103 h2 M38.5,103 h2 M42,103 h2 M61,103 h2 M64.5,103 h2 M68,103 h2 M87,103 h2 M90.5,103 h2 M94,103 h2" fill="none" stroke="{{ skInk }}" stroke-width="1.5" stroke-linecap="round"></path>
+    </g>
+    <g data-layer="image-slot">
+      <rect x="20" y="38" width="88" height="52" fill="{{ skPaper }}"></rect>
+    </g>
+  </svg>
+</sc-if>

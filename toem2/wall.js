@@ -241,6 +241,16 @@ window.Wall = (function () {
      rather than left to throw at the first paint. */
   if (!Array.isArray(S().items)) store.update(st => { st.items = []; });
   else if (S().items.some(it => !it)) store.update(st => { st.items = st.items.filter(Boolean); });
+  /* EVERY PIECE HAS A NAME (2026-09-17): `n`, minted once and kept for good,
+     so a piece can be told apart from every other on a server that holds the
+     same wall for everybody (toem2/seed.js, api/wall.js). The INDEX is still
+     what this session calls a piece — the pick, a move in flight and every
+     undo closure hold one — and `n` is only what the wire calls it. Anything
+     unnamed is named here, at boot, for the same reason dead slots are
+     dropped here and only here: it is the one moment nothing is pointing at
+     anything. (`id` was not used because a video already keeps its YouTube
+     id under that key.) Lab.uid is the tracing table's own id scheme. */
+  if (S().items.some(it => it && !it.n)) store.update(st => { st.items.forEach(it => { if (it && !it.n) it.n = Lab.uid(); }); });
 
   // tool choices are a mood, not a document — they live for the session only,
   // the same way the hero treats them
@@ -935,7 +945,13 @@ window.Wall = (function () {
   function undo() {
     const top = made.length ? made[made.length - 1].at : 0;
     if (window.Lab && Lab.undoTop && Lab.undoTop() > top) return Lab.undoMove();
-    if (made.length) made.pop();
+    /* NOTHING PUT UP THIS SESSION, NOTHING TO TAKE OFF (2026-09-17). Both
+       stacks empty at a fresh load, and this used to pop the last piece on
+       the wall anyway — a stray ctrl+z on a page just opened took the newest
+       piece off the paper. On the live wall that is a delete a SUBMIT would
+       carry, so it is nothing now. */
+    if (!made.length) return false;
+    made.pop();
     store.update(st => { st.items.pop(); });
     return true;
   }
@@ -989,6 +1005,7 @@ window.Wall = (function () {
      nothing here drops a piece, ever, and nothing here moves one. */
   function add(item) {
     mark('ink');
+    if (!item.n) item.n = Lab.uid();     // named at birth — see EVERY PIECE HAS A NAME
     store.update(st => { st.items.push(item); });
   }
 
@@ -1507,6 +1524,7 @@ window.Wall = (function () {
         if (vid) {
           st.items[ed.i] = Object.assign(vid,
             { x: round(old.x + VID[0] / 2), y: round(old.y) },
+            old.n ? { n: old.n } : {},   // the same piece, under its own name (see EVERY PIECE HAS A NAME)
             isFinite(old.L) ? { L: old.L } : {});
           return;
         }
@@ -1779,6 +1797,32 @@ window.Wall = (function () {
     if (!pick.size) return;
     pick.clear();
     paint();
+  }
+  /* THE PICK, BY NAME (2026-09-17): seed.js's review of an edit picks the
+     pieces that edit touched, and it knows them by `n`, never by index (see
+     EVERY PIECE HAS A NAME). A Set or a list of names; the pick becomes
+     exactly those. */
+  function pickN(names) {
+    const want = names instanceof Set ? names : new Set(names || []);
+    pick.clear();
+    S().items.forEach((it, i) => { if (it && want.has(it.n)) pick.add(i); });
+    paint();
+  }
+  // …and the camera brought to it: the pick's box, with room round it, the
+  // way shift 1 frames the whole bench
+  function fitPick() {
+    const items = S().items;
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    picked().forEach(i => {
+      const b = boxOf(items[i], byIndex(i));
+      if (!b) return;
+      x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h);
+    });
+    if (!isFinite(x0) || !window.Lab || !Lab.camTo) return false;
+    const br = Lab.bench.getBoundingClientRect(), pad = 80;
+    const z = Math.max(0.02, Math.min(1, (br.width - pad * 2) / Math.max(x1 - x0, 1), (br.height - pad * 2) / Math.max(y1 - y0, 1)));
+    Lab.camTo(z, br.width / 2 - (x0 + x1) / 2 * z, br.height / 2 - (y0 + y1) / 2 * z, 340);
+    return true;
   }
   /* every item the band touched, added to the pick or replacing it. TOUCHED
      and not enclosed, which is lab.js's rule for features and is wanted twice
@@ -2264,6 +2308,9 @@ window.Wall = (function () {
       // a copy has never been through the pile, whatever it was copied off:
       // it lands on top, the way anything newly put up does (see order)
       delete it.L;
+      // …and it is a NEW piece, whatever it was copied off: its own name, and
+      // not one of the plates' own however canon the original (api/wall.js)
+      it.n = Lab.uid(); delete it.c;
       /* a stroke and a square of pixel art carry their position INSIDE the
          path data, the same three-way split moveEnd makes — and pixel art
          moves by whole cells or it stops being pixel art */
@@ -3315,6 +3362,8 @@ window.Wall = (function () {
 
   return { store, setTool, get tool() { return tool; },
            band, clearPick,              // lab.js: the band was let go, or the pick put down
+           pickN, fitPick,               // seed.js: the pieces an edit touched, and the camera on them
+           boxOf,                        // history.js: where a piece is, for the boxes it draws round a revision's changes
            bounds,                       // …and how far what is on the wall reaches
            copy, paste, dropClip, flip,  // …and its ctrl+c, ctrl+v and shift H/V
            get picked() { return picked().length; },

@@ -1,0 +1,30 @@
+{
+  "fixture": "mosslight",
+  "_from": "PRESS-TABLE-PLAN.md Appendix H (2026-09-07): numbers are the plan's; where it only gave a word (high, thin) the word is kept and Phase 3 pins the number",
+  "stats": {
+    "dark": false,
+    "outline": {
+      "present": false
+    },
+    "hfEnergy": {
+      "min": 0.1
+    }
+  },
+  "preset": [
+    "painterly",
+    "cozy-soft"
+  ],
+  "pairing": "hand",
+  "recipe": [
+    "widescreen",
+    "scrapbook"
+  ],
+  "_measured": {
+    "date": "2026-09-07",
+    "by": "perf/test-style.js (Phase 3): the plan's words replaced by the bounds the test asserts; the numbers are the run's",
+    "dark": false,
+    "outline.present": false,
+    "hfEnergy": 0.1601,
+    "note": "hfEnergy: 0.1289–0.2184 a plate; 0.1 is style.js's HF_HIGH, the line the vector calls painterly at"
+  }
+}
