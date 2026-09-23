@@ -245,7 +245,10 @@
          where every piece in the period lands (a stroke's points, a stamp's
          spot), and each piece is also charged to the part of the page it
          landed on, which is the list beside the map and the table behind the
-         button. It used to be a made-up grid of zones by time of day. -->
+         button. It used to be a made-up grid of zones by time of day.
+         The frame's sc-camel-src, not src (the yard's YARD FIX 10 prefix): the
+         browser reads the raw template too, and loaded /dashboard/{{ frameSrc }}
+         — the whole 404 page, in a hidden frame — on every visit. -->
     <section style="margin-bottom:30px">
       <div ref="{{ heatCardRef }}" style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate({{ rHeat }})">
         <div aria-hidden="true" style="position:absolute; bottom:-11px; left:-11px; width:15px; height:15px; background:#7bc264; border:3px solid #17120b; transform:rotate(45deg)"></div>
@@ -259,7 +262,7 @@
         <sc-if value="{{ heatChartOn }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap">
             <div style="position:relative; flex:none; width:{{ mapW }}px; height:{{ mapH }}px; border:3px solid #17120b; background:#ece7f1; overflow:hidden; box-shadow:5px 6px 0 rgba(60,50,80,0.18)">
-              <iframe ref="{{ frameRef }}" src="{{ frameSrc }}" title="your page, zoomed out" tabindex="-1" aria-hidden="true" sc-camel-on-load="{{ frameLoaded }}" style="position:absolute; left:0; top:0; width:1260px; height:{{ frameH }}px; border:0; transform:scale({{ mapS }}); transform-origin:0 0; pointer-events:none; background:#ece7f1"></iframe>
+              <iframe ref="{{ frameRef }}" sc-camel-src="{{ frameSrc }}" title="your page, zoomed out" tabindex="-1" aria-hidden="true" sc-camel-on-load="{{ frameLoaded }}" style="position:absolute; left:0; top:0; width:1260px; height:{{ frameH }}px; border:0; transform:scale({{ mapS }}); transform-origin:0 0; pointer-events:none; background:#ece7f1"></iframe>
               <canvas ref="{{ heatRef }}" aria-label="where the pieces are, as heat" style="position:absolute; left:0; top:0; width:100%; height:100%; cursor:crosshair" sc-camel-on-pointer-move="{{ heatMove }}" sc-camel-on-pointer-leave="{{ heatLeave }}"></canvas>
               <sc-if value="{{ heatTipOn }}" hint-placeholder-val="{{ false }}">
                 <div style="position:absolute; left:{{ heatTipX }}px; top:{{ heatTipY }}px; transform:translate(-50%,-50%); background:#17120b; color:#fdf7e3; padding:6px 11px; font-size:15px; line-height:1.35; white-space:nowrap; pointer-events:none; box-shadow:4px 5px 0 rgba(60,50,80,0.3); z-index:5">
