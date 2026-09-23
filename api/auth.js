@@ -78,18 +78,8 @@ async function spend(who, cap) {             // one more against the hour; false
 }
 const spent = async who => +(await db('GET', K.rl(who, hour()))) || 0;
 const meOf = (u, rec) => ({ id: u, name: rec.name || '', n: +rec.n || 0, tag: W.tagOf(rec), toured: rec.toured === '1', made: +rec.made || 0, avatar: rec.avatar || '' });
-/* THE PICTURE: the yard's K and the corner's face (yard/index.html: THE
-   PICTURE). The yard cuts it to a 128-pixel square JPEG in the browser, so
-   the gate takes exactly that and nothing else — a JPEG data: URL, its first
-   bytes a JPEG's, a size well past what the yard sends but nowhere near a
-   photograph's — because every page's GET carries it back. It is only ever
-   drawn as an <img>. */
-const PIC_MAX = 60000, PIC_HEAD = 'data:image/jpeg;base64,';
-function cleanPic(v) {
-  if (typeof v !== 'string' || v.length > PIC_MAX || !/^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(v)) return '';
-  const b = Buffer.from(v.slice(PIC_HEAD.length, PIC_HEAD.length + 8), 'base64');
-  return b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff ? v : '';
-}
+// THE PICTURE: the yard's K and the corner's face (yard/index.html: THE PICTURE) — checked the way a space's is (api/wall.js: A PICTURE)
+const cleanPic = W.cleanPic;
 async function current(req) {                 // the account behind this request's session, record and all
   const s = sessionOf(req);
   if (!s) return null;

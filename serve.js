@@ -377,7 +377,8 @@ function serve(req, res) {
       if (!p.endsWith('/')) { res.writeHead(302, { Location: p + '/' }); res.end(); return; }
       return send(req, res, path.join(file, 'index.html'));
     }
-    if (err) return notFound(res);
+    // a one-word address with no file is a space's (api/wall.js: SPACES), as vercel.json's last rewrite has it
+    if (err) return /^\/[a-z0-9][a-z0-9-]*\/?$/i.test(p) ? send(req, res, path.join(ROOT, 'space.html')) : notFound(res);
     send(req, res, file);
   });
 }
@@ -509,12 +510,21 @@ try { wallApi = require('./api/wall.js'); } catch (e) { console.log('  ! api/wal
 const AUTH_API = '/api/auth';
 let authApi = null;
 try { authApi = require('./api/auth.js'); } catch (e) { console.log('  ! api/auth.js did not load: ' + e.message); }
+// /api/friends: friends, invites and the yard's bell (2026-09-23) — the same module again, the same store
+const FRIENDS_API = '/api/friends';
+let friendsApi = null;
+try { friendsApi = require('./api/friends.js'); } catch (e) { console.log('  ! api/friends.js did not load: ' + e.message); }
 
 function handle(req, res) {
   const url = req.url.split('?')[0];
   if (url === AUTH_API) {                      // see THE GATE
     if (!authApi) { answer(res, 500, { ok: false, error: 'api/auth.js did not load' }); return; }
     authApi(req, res).catch(e => answer(res, 500, { ok: false, error: String((e && e.message) || e) }));
+    return;
+  }
+  if (url === FRIENDS_API) {
+    if (!friendsApi) { answer(res, 500, { ok: false, error: 'api/friends.js did not load' }); return; }
+    friendsApi(req, res).catch(e => answer(res, 500, { ok: false, error: String((e && e.message) || e) }));
     return;
   }
   if (url === WALL_API || WALL_AUTH.test(url)) {   // see THE WALL DOOR OF TOEM 2

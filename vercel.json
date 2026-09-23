@@ -29,7 +29,10 @@
     { "source": "/tracer.js", "destination": "/lab2/tracer.js" },
     { "source": "/gif.js", "destination": "/lab2/gif.js" },
     { "source": "/cursors.js", "destination": "/lab2/cursors.js" },
-    { "source": "/spotlight.js", "destination": "/lab2/spotlight.js" }
+    { "source": "/spotlight.js", "destination": "/lab2/spotlight.js" },
+
+    { "source": "/:slug([a-z0-9][a-z0-9-]*)", "destination": "/space.html" },
+    { "source": "/:slug([a-z0-9][a-z0-9-]*)/", "destination": "/space.html" }
   ],
   "headers": [
     {

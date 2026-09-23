@@ -131,8 +131,8 @@ What is real now: the eyebrow, VIEWS (30 days), LIKES, the notes, **Your
 standing** (pieces, streak of days with a piece, member since the first piece),
 **Badges** (earned off the same counts; the pin is still nobody's), **Your
 edits** (the six newest pieces, in words), and — on this device only —
-**Spaces you've visited** and the **hills** you saved from it (§5). **Friends**
-is empty until there is a way to make one.
+**Spaces you've visited** and the **hills** you saved from it (§5). Since
+2026-09-23 **Friends**, **the bell** and **the spaces you made** are real too (§5a).
 
 **`plotEmpty` is back to true** (2026-09-21, §3, §12): the plot ships blank,
 as §3 describes. It was false from 2026-09-17; flip it again to plant the
@@ -623,7 +623,7 @@ down; the visit stays in the history, its flag lowered there too. Nothing is
 saved until you save it, and there is no bin any more — every hill up there is
 one you chose. Name, link and frame come from the page's own `SPACES` table,
 never from storage. Beside the hills, one dashed "unclaimed" mound says `create
-page` (a `#new-hill` link nothing handles yet — clickable, goes nowhere).
+page`, and opens Create a Space (§5a).
 
 **The fence** is "At the fence" (its subtitle and its not-wired notice came off
 2026-09-22, as Yard View's already had): a like count
@@ -631,12 +631,33 @@ you can toggle, a view count, and three notes on tilted paper with initial
 avatars. You can leave a note; it is prepended to `this.state.notes` and lost on
 reload, which is the honest behaviour for a page with no server.
 
-**Friends** is empty ("GNOMES YOU KNOW · NONE YET") until there is a way to
-make one; each would be a gnome with an online dot, the hill they are on and
-what they last did.
+**Friends** are real now (§5a).
 
 The things in these that ARE stored are the spaces you saved, under
 `yard.favHills`, and the spaces you visited, under `knoll-yard:visits` — see §7.
+
+## 5a · Spaces, friends and the bell (2026-09-23)
+
+**Create a Space** is `yard/new/` — the Design Canvas export of that name,
+unpacked like the 404 page (every blob was a file the site already keeps).
+The `create page` mound opens it. It makes a real page (api/wall.js: SPACES):
+the name is its address, `knoll.space/<slug>` (the form shows this host's), and
+`space.html` draws it there — vercel.json's last two rewrites and serve.js send
+every one-word address with no file behind it to that page. **Two an account**;
+the mound, once you have made both, shows YOU CAN ONLY HAVE 2 SPACES PER
+ACCOUNT instead of going, and the form says the same before you fill it. The
+"?" beside the title is the space's picture (the K's 128px JPEG cut). Steps 3
+and 4 are still the export's COMING LATER / PLACEHOLDERS, kept with the space
+as chosen. The spaces you made stand first on the hills, with no flag (they
+are yours, not saved), their picture in the grass.
+
+**Friends** (api/friends.js) are both ways: ask by tag (`Mossy#3`) in the
+Friends box, where your own tag is written; the other gnome says yes or no in
+**the bell**, which also hears your yes and every **invite** to a space — sent
+by its maker from the form's step 5 or the space's own page. The bell's number
+is what came since it was last opened. `lab2/perf/verify-friends.js` checks the
+door; the form, the space and the bell were driven with two accounts in
+headless Chrome.
 
 ---
 

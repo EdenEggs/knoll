@@ -72,13 +72,14 @@
    is not kept. A Bearer header still works, for toem2/session.js and the
    probes.
 
-   MORE PAGES THAN ONE (2026-09-22). TOEM 2 was the first page; a moderator
-   can make another (op 'page'), and each is a wall of its own — its doc,
+   MORE PAGES THAN ONE (2026-09-22). TOEM 2 was the first page; since
+   2026-09-23 any gnome can make another — two each, a moderator as many as
+   the site needs (SPACES, below) — and each is a wall of its own — its doc,
    revisions, log, queue and contested pieces under keys of its own (THE
    STORE'S MAP, below) — edited through this same door with a `page` beside
    the op. The accounts, their standing and their caps are the site's, not a
-   page's. What a new page looks like is not designed yet: it opens blank,
-   and nothing links to it.
+   page's. Its wall opens blank and nothing draws it yet: its address,
+   knoll.space/<slug>, shows its sign (space.html).
 
    A NAME IS NOT AN ACCOUNT (2026-09-22). Any number of gnomes may be called
    Mossy; each gets a number with it — Mossy#1, Mossy#2, up to #1,000,000 —
@@ -317,7 +318,7 @@ const dbm = cmds => storeFor().many(cmds);
    migration, so a feature not designed yet adds fields, not keys.
 
    ACCOUNTS — the site's
-     user:<u>          hash    made seen name n role pw toured banned struck strikes
+     user:<u>          hash    made seen name n role pw toured banned struck strikes avatar noted
      users             zset    every account, scored by when it was made
      names:<u>         list    {name, n, at, by} — every name it has gone by, newest first
      tagn:<name>       string  how many have taken that name (lower-cased): the last #n given
@@ -329,8 +330,9 @@ const dbm = cmds => storeFor().many(cmds);
      fp:<u>:<day>      set     the pieces touched today, any page (the footprint)
      pending:<u>       list    edits of theirs waiting, any page · pendingip:<h> the same by address
    PAGES
-     page:<slug>       hash    made title kind by — every page but the first
+     page:<slug>       hash    made title kind by, and its look: palette inks mod feats pic — every page but the first
      pages             zset    those pages, scored by when they were made
+     spaces:<u>        set     the pages an account made (SPACES: two, unless a moderator)
      doc rev log rev:<n> queue contested
                                a page's wall: bare for toem2 (toem2:doc), p:<slug>: before
                                the rest for any other (toem2:p:<slug>:doc) — pageKeys()
@@ -340,15 +342,21 @@ const dbm = cmds => storeFor().many(cmds);
      propdoc:<id>      string  …the yard it proposes, while it is open
      props:<hill>      list    the open ones, for that yard's owner to decide
      propsby:<u>       list    the open ones this account has made · propsip:<h> the same by address
+   FRIENDS — api/friends.js
+     friends:<u>       set     the accounts it is friends with, both ways
+     asks:<u>          set     the accounts asking to be its friend
+     notes:<u>         list    its bell, newest first: {kind ask|friend|invite, from, at, slug, title}
+     invited:<slug>    set     the accounts invited to a space
    THE MODERATORS' RECORD
      audit             list    roles, bans, pages made, decisions on others' behalf */
 const K = {
   user: u => P + 'user:' + u, users: P + 'users', names: u => P + 'names:' + u, tagN: name => P + 'tagn:' + name, tags: P + 'tags',
   sess: h => P + 'sess:' + h, oauth: s => P + 'oauth:' + s, days: u => P + 'days:' + u, rl: (who, hour) => P + 'rl:' + who + ':' + hour,
   fp: (u, day) => P + 'fp:' + u + ':' + day, pending: u => P + 'pending:' + u, pendingIp: h => P + 'pendingip:' + h,
-  page: s => P + 'page:' + s, pages: P + 'pages', edit: id => P + 'edit:' + id,
+  page: s => P + 'page:' + s, pages: P + 'pages', spaces: u => P + 'spaces:' + u, edit: id => P + 'edit:' + id,
   prop: id => P + 'prop:' + id, propDoc: id => P + 'propdoc:' + id, props: hill => P + 'props:' + hill,
-  propsBy: u => P + 'propsby:' + u, propsIp: h => P + 'propsip:' + h, audit: P + 'audit'
+  propsBy: u => P + 'propsby:' + u, propsIp: h => P + 'propsip:' + h, audit: P + 'audit',
+  friends: u => P + 'friends:' + u, asks: u => P + 'asks:' + u, notes: u => P + 'notes:' + u, invited: s => P + 'invited:' + s
 };
 function pageKeys(slug) {
   const p = slug === HOME ? P : P + 'p:' + slug + ':';
@@ -372,6 +380,18 @@ const userKey = email => sha(String(email).trim().toLowerCase()).slice(0, 16);
 const admins = () => String(process.env.ADMIN_EMAILS || '').toLowerCase().split(/[,\s]+/).filter(Boolean);
 const summary = f => ({ rev: f.rev, edit: f.edit, by: f.by, name: f.name, how: f.how, via: f.via, cls: f.cls, at: f.at, of: f.of,
                         n: { put: Object.keys(f.put).length, del: f.del.length, art: f.art || 0 } });
+/* A PICTURE: an account's (the yard's K and the corner's face — api/auth.js)
+   or a space's (its "?" at /yard/new/). The page cuts it to a 128-pixel
+   square JPEG in the browser, so the door takes exactly that and nothing
+   else — a JPEG data: URL, its first bytes a JPEG's, a size well past what
+   the page sends but nowhere near a photograph's — because every GET that
+   carries it carries all of it. It is only ever drawn as an <img>. */
+const PIC_MAX = 60000, PIC_HEAD = 'data:image/jpeg;base64,';
+function cleanPic(v) {
+  if (typeof v !== 'string' || v.length > PIC_MAX || !/^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(v)) return '';
+  const b = Buffer.from(v.slice(PIC_HEAD.length, PIC_HEAD.length + 8), 'base64');
+  return b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff ? v : '';
+}
 
 // ── who ───────────────────────────────────────────────────────────────────
 const bearer = req => { const m = /^Bearer\s+(\S+)$/i.exec(String(req.headers.authorization || '')); return m && SESS_RE.test(m[1]) ? m[1] : null; };
@@ -1023,15 +1043,50 @@ async function opRole(req, res, me, body) {
   await audit(me.id, 'role', { user: u, role: body.role != null ? body.role : undefined, banned: body.banned != null ? !!body.banned : undefined });
   answer(res, 200, { ok: true, user: u, role: body.role != null ? body.role : theirs, banned: body.banned != null ? !!body.banned : rec.banned === '1' });
 }
-// a new page (MORE PAGES THAN ONE): a moderator's to make, for now
+/* ── SPACES (2026-09-23) ──────────────────────────────────────────────────
+   A page is anybody's to make now, at /yard/new/ ("Create a space"): two an
+   account, and a moderator's are not counted. It lives at knoll.space/<slug>
+   — vercel.json and serve.js hand every one-word address the site has no
+   file for to space.html, which asks ?space= for it — so a slug may not be a
+   word the site already answers at (RESERVED; a file there would win). Its
+   look rides on its record: the paper, the inks, who may edit and which
+   tools (those two are the form's COMING LATER and PLACEHOLDERS, kept as
+   chosen), and a picture checked like an account's (A PICTURE).
+   ponytail: RESERVED is a list — a new top-level folder is a word here; and
+   a space is not renamed or taken down yet. */
+const SPACES_MAX = 2;
+const RESERVED = new Set(['404', 'api', 'apps-script', 'auth', 'coming-soon', 'dashboard', 'features', 'fonts', 'ironhive', 'lab', 'lab2',
+                          'login', 'logo', 'posters', 'privacy', 'signup', 'uploads', 'vendor', 'yard', 'yardview']);
+// the form's four papers (yard/new/: PALETTES, keep in step), which space.html and the yard's hills draw with
+const PAPERS = {
+  yard:   { paper: '#fdf7e3', ink: '#17120b', card: '#fffcf0', line: '#d9cdb0', mute: '#4a4054', accent: '#e8484a' },
+  knoll:  { paper: '#faf7f9', ink: '#26212a', card: '#fdfbfd', line: '#e2d4df', mute: '#8b7f92', accent: '#c93b82' },
+  bench:  { paper: '#efe7ed', ink: '#2e2636', card: '#fdfbfd', line: '#e2d4df', mute: '#8b7f92', accent: '#f59321' },
+  sticky: { paper: '#ffe27a', ink: '#26212a', card: '#fff4c2', line: '#d9bd55', mute: '#5a5140', accent: '#c93b82' }
+};
+const MODS = ['open', 'friends', 'approve', 'read'];
+const listOf = s => { try { const v = JSON.parse(s || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+function lookOf(body) {                        // what a post says the space looks like, cut to what the form offers
+  const inks = Array.isArray(body.inks) ? body.inks.filter(c => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c)).map(c => c.toLowerCase()) : [];
+  return { palette: PAPERS[body.palette] ? body.palette : 'yard', inks: JSON.stringify([...new Set(inks)].slice(0, 10)),
+           mod: MODS.includes(body.mod) ? body.mod : 'open', feats: JSON.stringify(Array.isArray(body.feats) ? body.feats.slice(0, 6).map(Boolean) : []),
+           pic: cleanPic(body.pic) };
+}
+const spaceOf = (slug, p) => Object.assign({ slug, title: p.title || slug, by: p.by || '', made: +p.made || 0, palette: PAPERS[p.palette] ? p.palette : 'yard',
+  inks: listOf(p.inks), mod: p.mod || 'open', feats: listOf(p.feats), pic: p.pic || '' }, PAPERS[p.palette] || PAPERS.yard);
 async function opPage(req, res, me, body) {
-  if (!isMod(me)) throw bad(403, 'role', 'making a page is a moderator\'s, for now');
-  const slug = String(body.slug || '').toLowerCase(), title = text(body.title, 60) || slug, now = Date.now();
+  const slug = String(body.slug || '').toLowerCase(), title = text(body.title, 60) || slug, now = Date.now(), mine = K.spaces(me.id), counted = !isMod(me);
+  const full = () => bad(409, 'full', 'you can only have ' + SPACES_MAX + ' spaces per account');
   if (!SLUG_RE.test(slug)) throw bad(400, 'slug', 'a page is named in lower-case letters, numbers and dashes — 32 at most');
-  if (slug === HOME || !(await db('HSETNX', K.page(slug), 'made', String(now)))) throw bad(409, 'taken', 'there is a page called that already');
-  await dbm([['HSET', K.page(slug), 'title', title, 'kind', 'wall', 'by', me.id], ['ZADD', K.pages, now, slug]]);
+  if (counted && (await db('SCARD', mine)) >= SPACES_MAX) throw full();
+  if (slug === HOME || RESERVED.has(slug) || !(await db('HSETNX', K.page(slug), 'made', String(now)))) throw bad(409, 'taken', 'there is a page called that already');
+  await db('SADD', mine, slug);
+  // counted again once claimed: two made at once, both past the count, and neither stands
+  if (counted && (await db('SCARD', mine)) > SPACES_MAX) { await dbm([['SREM', mine, slug], ['DEL', K.page(slug)]]); throw full(); }
+  const look = lookOf(body);
+  await dbm([['HSET', K.page(slug), 'title', title, 'kind', 'wall', 'by', me.id, ...Object.entries(look).flat()], ['ZADD', K.pages, now, slug]]);
   await audit(me.id, 'page', { page: slug, title });
-  answer(res, 200, { ok: true, page: { slug, title, kind: 'wall', by: me.id, made: now } });
+  answer(res, 200, { ok: true, page: spaceOf(slug, Object.assign({ made: now, title, by: me.id }, look)) });
 }
 
 // ── GET ───────────────────────────────────────────────────────────────────
@@ -1058,6 +1113,19 @@ async function get(req, res, q, op) {
   if (q.get('pages')) {                         // the first page, and every one made since
     const slugs = await db('ZRANGEBYSCORE', K.pages, '-inf', '+inf'), recs = await dbm(slugs.map(s => ['HGETALL', K.page(s)]));
     return answer(res, 200, { ok: true, pages: [{ slug: HOME, title: 'TOEM 2', kind: 'wall' }].concat(recs.map((p, i) => ({ slug: slugs[i], title: p.title, kind: p.kind, by: p.by, made: +p.made }))) });
+  }
+  if (q.get('space')) {                         // one space, for its own address (space.html): anybody's to read
+    const slug = String(q.get('space')).toLowerCase(), p = SLUG_RE.test(slug) && slug !== HOME ? await db('HGETALL', K.page(slug)) : {};
+    if (!p.made) return answer(res, 404, { ok: false, code: 'page', error: 'no such space' });
+    const [name, n] = p.by ? await dbm([['HGET', K.user(p.by), 'name'], ['HGET', K.user(p.by), 'n']]) : [];
+    return answer(res, 200, { ok: true, space: Object.assign(spaceOf(slug, p), { tag: tagOf({ name, n }) }) }, CACHE.log);
+  }
+  if (q.get('spaces')) {                        // the spaces this account made, oldest first: the yard's hills, and whether it may make another
+    const me = await whoIs(req);
+    if (!me) return answer(res, 401, { ok: false, code: 'who', error: 'not signed in' });
+    const slugs = await db('SMEMBERS', K.spaces(me.id)), recs = await dbm(slugs.map(s => ['HGETALL', K.page(s)]));
+    const spaces = recs.map((p, i) => spaceOf(slugs[i], p)).filter(s => s.made).sort((a, b) => a.made - b.made);
+    return answer(res, 200, { ok: true, max: SPACES_MAX, full: !isMod(me) && spaces.length >= SPACES_MAX, spaces });
   }
   if (q.get('audit')) {
     if (!isMod(await whoIs(req))) return answer(res, 403, { ok: false, code: 'role', error: 'the record is the moderators\'' });
@@ -1183,4 +1251,4 @@ Object.assign(handler, { storeFor, useStore: s => { STORE = s; }, db, dbm, K, pa
 // …and for api/auth.js (the accounts) and api/hill.js (a yard of one's own, and proposals to it): who
 // is asking, the session's two cookies, the names, and the checks a piece that other people's browsers will draw has to pass
 Object.assign(handler, { whoIs, isMod, sessionOf, setSession, clearSession, sameSite, localPath, answer, readBody, Bad, bad, text, sha, ipHash,
-                         rename, cleanName, tagOf, ensureTag, audit, cleanRecord, cleanTracing, KINDS, GIF_RE, VID_RE, USER_RE, SESSION_DAYS });
+                         rename, cleanName, tagOf, foldName, ensureTag, audit, cleanRecord, cleanTracing, cleanPic, KINDS, GIF_RE, VID_RE, USER_RE, SLUG_RE, SESSION_DAYS });

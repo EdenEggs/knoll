@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy · Knoll</title>
+<!-- WHAT KNOLL KEEPS (2026-09-23): the privacy page Google asks a published "Sign in
+     with Google" app to link to (Google Cloud project knoll-509514, Branding). Every
+     line is what the code does — api/auth.js, api/wall.js, api/hill.js,
+     api/friends.js — so a change to what they keep is a change to this page. -->
+<link rel="icon" href="/logo/logo-icon.svg">
+<link rel="stylesheet" href="/lab2/fonts/fonts.css">
+<script src="/account.js" defer></script>
+<style>
+  body { margin: 0; min-height: 100vh; background: #ece7f1; background-image: radial-gradient(circle, rgba(90,70,110,0.13) 1.3px, transparent 1.3px); background-size: 24px 24px;
+    color: #17120b; font-family: 'VT323', monospace; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+  ::selection { background: #ffd23f; }
+  .knoll-head { display: flex; align-items: center; gap: 22px; padding: 12px 22px; background: #fdfbfd; border-bottom: 1.5px dashed #e2d4df; }
+  .knoll-brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #26212a; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: -0.01em; }
+  .knoll-brand img { display: block; }
+  .knoll-brand:hover { color: #a52c68; }
+  main { max-width: 760px; margin: 40px auto 60px; padding: 26px 30px 30px; background: #fdf7e3; border: 5px solid #17120b; box-shadow: 9px 10px 0 rgba(60,50,80,0.2); transform: rotate(-0.3deg); }
+  h1 { margin: 0 0 6px; font-family: 'Rye', serif; font-size: clamp(28px, 5vw, 40px); font-weight: 400; }
+  h2 { margin: 26px 0 6px; font-family: 'Rye', serif; font-size: 21px; font-weight: 400; }
+  p { margin: 0 0 10px; font-size: 20px; line-height: 1.35; color: #3a3342; }
+  .eyebrow { font-size: 15px; letter-spacing: 2px; color: #4a4054; opacity: 0.8; }
+  @media (max-width: 700px) { main { margin: 20px 12px 40px; padding: 20px 18px 22px; transform: none; } }
+</style>
+</head>
+<body>
+<header class="knoll-head">
+  <a class="knoll-brand" href="/"><img src="/logo/logo-icon.svg" alt="" width="26" height="26"><span>knoll</span></a>
+</header>
+<main>
+  <h1>What Knoll keeps</h1>
+  <div class="eyebrow">PRIVACY · LAST CHANGED 23 SEPTEMBER 2026</div>
+
+  <h2>Your account</h2>
+  <p>A name, and the number that comes with it (Mossy#3); the last fifty names the account has gone by; your secret word as a one-way scrypt hash, never the word itself; when the account was made and last seen; and a small picture, if you give it one.</p>
+  <p>Your email address is not stored. Knoll keeps a sixteen-character fingerprint of it (the start of its SHA-256 hash), which is how the gate finds your account when you log in.</p>
+
+  <h2>Signing in with Google</h2>
+  <p>Knoll asks Google for your email address and nothing else (the <i>openid</i> and <i>email</i> scopes). It is used once, to find or make your account the same way, and is not kept — nor is anything else from your Google account.</p>
+
+  <h2>Cookies</h2>
+  <p><b>knoll_s</b> is your session: ninety days, or until the browser closes if you asked not to be remembered, and no script on any page can read it. <b>knoll_in</b> says which account is signed in, so pages can draw your corner. <b>knoll_o</b> lives ten minutes, while Google signs you in. There are no advertising or tracking cookies, and no third-party analytics.</p>
+
+  <h2>What you make</h2>
+  <p>Your yard, your edits to the walls, the notes you pin, the spaces you create (their names, colours and pictures), your friends, friend requests, invites, and the notifications about them. Your yard, your spaces, your tag and your edits, once they are live, are there for other gnomes to see — that is what they are for.</p>
+
+  <h2>Your network address</h2>
+  <p>Not stored. A salted one-way hash of it is used, for a while, to slow floods of posts and to keep anybody from approving or voting on their own edits.</p>
+
+  <h2>On your device</h2>
+  <p>The yard keeps your layout, your settings and your unsent drafts in your browser's own storage. Clearing the site's data there removes them.</p>
+
+  <h2>Where it lives</h2>
+  <p>Knoll is hosted by Vercel, which also keeps the yards' files, and its records are kept by Upstash; both in the United States.</p>
+
+  <h2>Taking it away</h2>
+  <p>Write to <a href="mailto:knoll.space@gmail.com">knoll.space@gmail.com</a> from the address you signed up with, and your account and what is attached to it will be deleted.</p>
+</main>
+</body>
+</html>

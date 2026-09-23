@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create a space · Knoll</title>
+<!-- CREATE A SPACE (2026-09-23): the Design Canvas export "Create a Space"
+     (Downloads/assets), unpacked the way the 404 page was. Every blob in its bundle
+     was byte-identical to a file the site already keeps — support.js, lab2/vendor's
+     React (with the same integrity hashes), lab2/fonts — so those are what load. The
+     yard's "create page" mound opens it. Root-absolute urls, like 404.html's, so the
+     page reads the same at /yard/new and /yard/new/.
+     What it makes is real (api/wall.js: SPACES): a page at knoll.space/<slug>, two an
+     account; the friends in step 5 are yours (api/friends.js), and Create sends them
+     the invite. Steps 3 and 4 are still the export's COMING LATER and PLACEHOLDERS —
+     kept with the space as chosen, and nothing reads them yet. -->
+<link rel="icon" href="/logo/logo-icon.svg">
+<!-- Signed out, to the gate first. And the knoll-yard: keys on this device are ONE
+     account's — the form's draft is knoll-yard:new-hill — so this is the yard head's
+     own check (yard/index.html: THE YARD IS YOURS), minus the dashboard's picture,
+     which never comes here. KEEP THE TWO IN STEP. -->
+<script>(function () {
+  var id = (/(?:^|;\s*)knoll_in=([0-9a-f]{16})(?:;|$)/.exec(document.cookie) || [])[1];
+  if (!id) { location.replace('/login/?next=' + encodeURIComponent(location.pathname + location.search)); return; }
+  try {
+    var was = localStorage.getItem('knoll-yard:owner');
+    if (was === id) return;
+    var kept = !was && (+localStorage.getItem('knoll-yard:touched') || 0) > (+localStorage.getItem('knoll-yard:applied') || 0);
+    if (!kept) Object.keys(localStorage).forEach(function (k) { if (k.indexOf('knoll-yard:') === 0 || k === 'yard.favHills') localStorage.removeItem(k); });
+    localStorage.setItem('knoll-yard:owner', id);
+  } catch (e) {}
+})();</script>
+<script src="/lab2/vendor/react.production.min.js"
+        integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z"
+        crossorigin="anonymous"></script>
+<script src="/lab2/vendor/react-dom.production.min.js"
+        integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"
+        crossorigin="anonymous"></script>
+<script src="/support.js"></script>
+<!-- the account corner, as on every page with the house bar -->
+<script src="/account.js" defer></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="/lab2/fonts/fonts.css">
+<style>
+  body { margin: 0; background: #ece7f1; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+  ::selection { background: #ffd23f; }
+  .yard-root, .yard-root * { box-sizing: content-box; }
+  .knoll-head { display: flex; align-items: center; gap: 22px; margin: -34px -30px 34px; padding: 12px 22px; background: #fdfbfd; border-bottom: 1.5px dashed #e2d4df; }
+  .knoll-brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #26212a; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: -0.01em; }
+  .knoll-brand img { display: block; }
+  .knoll-brand:hover { color: #a52c68; }
+  .knoll-switch { display: inline-flex; align-items: center; gap: 6px; }
+  .knoll-switch a { display: inline-flex; align-items: center; border: 1.5px solid #e2d4df; border-radius: 999px; padding: 3px 10px; background: #faf7f9; color: #3d3346; text-decoration: none; font-family: 'Public Sans', sans-serif; font-size: 11.5px; font-weight: 600; letter-spacing: 0.01em; white-space: nowrap; transition: color .18s, border-color .18s, background .18s; }
+  .knoll-switch a:hover { color: #a52c68; border-color: #f9d3e6; background: #fff6fb; }
+  .knoll-switch a[aria-current="page"], .knoll-switch a[aria-current="page"]:hover { background: #26212a; border-color: #26212a; color: #fdfbfd; cursor: default; }
+  .new-grid { display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 28px; align-items: start; }
+  .new-preview { position: sticky; top: 24px; }
+  @media (max-width: 960px) {
+    .new-grid { grid-template-columns: minmax(0,1fr); }
+    .new-preview { position: static; max-width: 400px; }
+  }
+  @media (max-width: 860px) {
+    .yard-root { padding: 20px 14px 40px !important; }
+    .knoll-head { margin: -20px -14px 20px !important; }
+    .yard-title { font-size: 28px !important; }
+  }
+</style>
+</helmet>
+<div data-screen-label="Create Page" class="yard-root" style="min-height:100vh; box-sizing:border-box; overflow-x:clip; background:#ece7f1; background-image:radial-gradient(circle, rgba(90,70,110,0.13) 1.3px, transparent 1.3px); background-size:24px 24px; padding:34px 30px 56px; font-family:'VT323',monospace; color:#17120b">
+  <!-- the house bar, with the knoll mark where the export drew a stand-in disc -->
+  <header class="knoll-head">
+    <a class="knoll-brand" href="/"><img src="/logo/logo-icon.svg" alt="" width="26" height="26"><span>knoll</span></a>
+    <nav class="knoll-switch" aria-label="your pages">
+      <a href="/yard/">yard</a>
+      <a href="/dashboard/">dashboard</a>
+    </nav>
+  </header>
+
+  <div style="max-width:1200px; margin:0 auto">
+
+    <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:16px 20px; flex-wrap:wrap; margin:6px 0 40px">
+      <div style="display:flex; align-items:flex-start; gap:20px; min-width:0">
+        <!-- THE PICTURE (2026-09-23): the ? is the page's picture once it has one — the
+             yard's K, for a space: cut square, 128 across, a JPEG, kept in the draft and
+             sent with Create (api/wall.js: A PICTURE) -->
+        <button sc-camel-on-click="{{ pickPic }}" aria-label="{{ picTitle }}" title="{{ picTitle }}" style="position:relative; width:56px; height:64px; padding:0; margin:0; background:#fdf7e3; border:4px {{ picEdge }} #17120b; box-shadow:6px 7px 0 rgba(60,50,80,0.2); transform:rotate(-4deg); display:flex; align-items:center; justify-content:center; font-family:'Rye',serif; font-size:34px; flex:none; color:#17120b; cursor:pointer; transition:transform .2s cubic-bezier(.3,1.5,.5,1)" style-hover="transform:rotate(-4deg) translate(1px,1px) scale(1.04); box-shadow:5px 6px 0 rgba(60,50,80,0.2)">?
+          <sc-if value="{{ hasPic }}" hint-placeholder-val="{{ false }}">
+            <img sc-camel-src="{{ pic }}" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block">
+          </sc-if>
+          <input ref="{{ fileRef }}" type="file" accept="image/*" sc-camel-on-change="{{ onFile }}" aria-hidden="true" tabindex="-1" style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none">
+        </button>
+        <div style="min-width:0">
+          <h1 class="yard-title" style="margin:0; font-family:'Rye',serif; font-size:clamp(28px, 3.6vw, 44px); font-weight:400; line-height:1.05">Create a space</h1>
+        </div>
+      </div>
+      <a href="/yard/" title="back to your yard" style="height:52px; display:flex; align-items:center; gap:10px; padding:0 18px 0 14px; background:#fdf7e3; color:#17120b; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); font-family:'VT323',monospace; font-size:20px; letter-spacing:1px; text-decoration:none; transform:rotate(1deg); flex:none" style-hover="transform:rotate(1deg) translate(1px,1px); box-shadow:4px 5px 0 rgba(60,50,80,0.2)">
+        <svg sc-camel-view-box="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M18,12 L6,12 M11,7 L6,12 L11,17" fill="none" stroke="#17120b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <span>back to the yard</span>
+      </a>
+    </div>
+
+    <div class="new-grid">
+      <div style="display:flex; flex-direction:column; gap:30px; min-width:0">
+
+        <!-- 1 · NAME -->
+        <section style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 22px 22px; transform:rotate(-0.4deg)">
+          <div aria-hidden="true" style="position:absolute; top:-11px; left:-11px; width:15px; height:15px; background:#5a8fd6; border:3px solid #17120b; transform:rotate(45deg)"></div>
+          <div style="display:flex; align-items:baseline; gap:14px; margin-bottom:14px">
+            <div aria-hidden="true" style="font-family:'Rye',serif; font-size:30px; line-height:1; color:#e8484a">1</div>
+            <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Name the page</h2>
+          </div>
+          <div style="font-size:15px; letter-spacing:2px; color:#4a4054; margin-bottom:8px">PAGE NAME</div>
+          <input value="{{ name }}" sc-camel-on-input="{{ onName }}" sc-camel-max-length="28" placeholder="what the signpost says" aria-label="page name" style="box-sizing:border-box; width:100%; border:3px solid #17120b; background:#fffcf0; padding:7px 10px; font-family:'VT323',monospace; font-size:20px; color:#17120b; box-shadow:2px 3px 0 rgba(60,50,80,0.18); outline:none" style-focus="box-shadow:0 0 0 3px #ffd23f">
+          <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:8px; font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.8">
+            <span>IT LIVES AT <b style="color:#17120b; opacity:1">{{ path }}</b></span>
+            <span>{{ nameLeft }} LEFT</span>
+          </div>
+        </section>
+
+        <!-- 2 · COLOURS -->
+        <section style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 22px 22px; transform:rotate(0.5deg); z-index:20">
+          <div aria-hidden="true" style="position:absolute; top:-11px; right:-11px; width:15px; height:15px; background:#ffd23f; border:3px solid #17120b; border-radius:50%"></div>
+          <div style="display:flex; align-items:baseline; gap:14px; margin-bottom:14px">
+            <div aria-hidden="true" style="font-family:'Rye',serif; font-size:30px; line-height:1; color:#e8484a">2</div>
+            <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Pick the colours</h2>
+          </div>
+          <div style="font-size:15px; letter-spacing:2px; color:#4a4054; margin-bottom:10px">THE PAPER · ONE SET</div>
+          <div role="radiogroup" aria-label="palette" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:14px; margin-bottom:22px">
+            <sc-for list="{{ palettes }}" as="p" hint-placeholder-count="4">
+              <button role="radio" aria-checked="{{ p.on }}" sc-camel-on-click="{{ p.pick }}" style="display:flex; flex-direction:column; gap:8px; padding:10px 10px 8px; background:{{ p.paper }}; border:{{ p.border }}; box-shadow:{{ p.shadow }}; cursor:pointer; text-align:left; transform:rotate({{ p.rot }}); font-family:'VT323',monospace; color:{{ p.ink }}" style-hover="transform:rotate(0deg) translate(1px,1px)">
+                <div style="display:flex; gap:0; height:26px; border:2.5px solid #17120b">
+                  <sc-for list="{{ p.swatches }}" as="c" hint-placeholder-count="5"><div style="flex:1; background:{{ c }}"></div></sc-for>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:6px">
+                  <span style="font-size:17px; letter-spacing:0.5px">{{ p.name }}</span>
+                  <span style="font-size:13px; letter-spacing:1px; opacity:0.75">{{ p.mark }}</span>
+                </div>
+              </button>
+            </sc-for>
+          </div>
+          <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:15px; letter-spacing:2px; color:#4a4054; margin-bottom:10px">
+            <span>THE INKS · PICK UP TO 10</span>
+            <span style="opacity:0.8">{{ inkCount }} / 10</span>
+          </div>
+          <div role="group" aria-label="inks" style="display:flex; flex-wrap:wrap; gap:12px">
+            <sc-for list="{{ inks }}" as="k" hint-placeholder-count="10">
+              <button aria-pressed="{{ k.on }}" aria-label="{{ k.name }}" title="{{ k.name }}" sc-camel-on-click="{{ k.pick }}" style="width:38px; height:38px; padding:0; background:{{ k.hex }}; border:3px solid #17120b; box-shadow:{{ k.shadow }}; cursor:pointer; transform:{{ k.t }}; transition:transform .2s cubic-bezier(.3,1.5,.5,1); display:flex; align-items:center; justify-content:center" style-hover="transform:scale(1.08) rotate(-6deg)">
+                <sc-if value="{{ k.on }}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" sc-camel-view-box="0 0 24 24" width="20" height="20"><path d="M5,12.5 L10,17 L19,7" fill="none" stroke="{{ k.tick }}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
+              </button>
+            </sc-for>
+            <div ref="{{ wheelRef }}" style="position:relative">
+              <button title="pick an exact colour" aria-label="add a custom ink" aria-expanded="{{ wheelOn }}" sc-camel-on-click="{{ toggleWheel }}" style="width:38px; height:38px; padding:0; box-sizing:border-box; border:3px dashed #17120b; background:#fffcf0; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .2s cubic-bezier(.3,1.5,.5,1)" style-hover="transform:scale(1.08) rotate(-6deg)">
+                <svg aria-hidden="true" sc-camel-view-box="0 0 24 24" width="20" height="20"><path d="M12,5 L12,19 M5,12 L19,12" fill="none" stroke="#17120b" stroke-width="3.4" stroke-linecap="round"></path></svg>
+              </button>
+              <sc-if value="{{ wheelOn }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute; right:-8px; top:calc(100% + 12px); z-index:30; width:200px; padding:12px; border-radius:14px; background:#2a2432; border:2px solid #17120b; box-shadow:0 2px 0 #17120b, 0 16px 34px -16px rgba(40,30,50,0.6); display:flex; flex-direction:column; align-items:center; gap:11px; cursor:default">
+                  <div title="hue round the rim, paler towards the middle" sc-camel-on-pointer-down="{{ discDown }}" sc-camel-on-pointer-move="{{ wheelMove }}" sc-camel-on-pointer-up="{{ wheelUp }}" sc-camel-on-pointer-cancel="{{ wheelUp }}" style="position:relative; width:160px; height:160px; border-radius:50%; cursor:crosshair; touch-action:none; background:radial-gradient(circle closest-side, #fff 0, rgba(255,255,255,0) 100%), conic-gradient(#f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); box-shadow:0 0 0 2px rgba(255,255,255,0.14)">
+                    <i style="position:absolute; left:{{ dotX }}; top:{{ dotY }}; width:16px; height:16px; margin:-8px 0 0 -8px; box-sizing:border-box; border-radius:50%; border:2.5px solid #fff; box-shadow:0 0 0 1.5px rgba(0,0,0,0.45); pointer-events:none; background:{{ wheelHex }}"></i>
+                  </div>
+                  <div title="brightness" sc-camel-on-pointer-down="{{ valDown }}" sc-camel-on-pointer-move="{{ wheelMove }}" sc-camel-on-pointer-up="{{ wheelUp }}" sc-camel-on-pointer-cancel="{{ wheelUp }}" style="position:relative; width:100%; height:14px; border-radius:7px; cursor:pointer; touch-action:none; background:linear-gradient(90deg, #000, {{ valTop }}); box-shadow:0 0 0 2px rgba(255,255,255,0.14)">
+                    <i style="position:absolute; top:50%; left:{{ valX }}; width:16px; height:16px; margin:-8px 0 0 -8px; box-sizing:border-box; border-radius:50%; border:2.5px solid #fff; box-shadow:0 0 0 1.5px rgba(0,0,0,0.45); pointer-events:none; background:{{ wheelHex }}"></i>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px; width:100%">
+                    <input value="{{ hexBox }}" maxlength="7" spellcheck="false" autocomplete="off" aria-label="hex" sc-camel-on-change="{{ onHex }}" sc-camel-on-blur="{{ hexDone }}" sc-camel-on-key-down="{{ hexKey }}" style="width:76px; flex:none; box-sizing:border-box; border:0; border-radius:7px; padding:5px 7px; background:rgba(255,255,255,0.1); color:#f3eef6; font-family:'VT323',monospace; font-size:15px; letter-spacing:0.04em; outline:none">
+                    <span style="display:flex; gap:5px; margin-left:auto">
+                      <sc-for list="{{ houseChips }}" as="c" hint-placeholder-count="5">
+                        <button title="{{ c.hex }}" aria-label="{{ c.hex }}" sc-camel-on-click="{{ c.pick }}" style="width:16px; height:16px; padding:0; border-radius:50%; cursor:pointer; background:{{ c.hex }}; border:1.5px solid rgba(255,255,255,0.35); transition:transform .1s" style-hover="transform:scale(1.2); border-color:#fff"></button>
+                      </sc-for>
+                    </span>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3 · MODERATION -->
+        <section style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 22px 22px; transform:rotate(-0.3deg)">
+          <div aria-hidden="true" style="position:absolute; bottom:-11px; left:-11px; width:15px; height:15px; background:#e0598c; border:3px solid #17120b; transform:rotate(45deg)"></div>
+          <div style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:14px">
+            <div style="display:flex; align-items:baseline; gap:14px">
+              <div aria-hidden="true" style="font-family:'Rye',serif; font-size:30px; line-height:1; color:#e8484a">3</div>
+              <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Who may edit</h2>
+            </div>
+            <div style="font-size:14px; letter-spacing:2px; color:#e8484a; border:3px solid #e8484a; padding:1px 10px; transform:rotate(-2deg); background:#fdf7e3">COMING LATER</div>
+          </div>
+          <div role="radiogroup" aria-label="moderation" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:12px">
+            <sc-for list="{{ mods }}" as="m" hint-placeholder-count="4">
+              <button role="radio" aria-checked="{{ m.on }}" sc-camel-on-click="{{ m.pick }}" style="display:flex; align-items:flex-start; gap:12px; padding:12px 14px; background:{{ m.bg }}; border:3px solid #17120b; box-shadow:{{ m.shadow }}; cursor:pointer; text-align:left; font-family:'VT323',monospace; color:#17120b; transform:rotate({{ m.rot }})" style-hover="transform:rotate(0deg) translate(1px,1px)">
+                <div aria-hidden="true" style="flex:none; width:16px; height:16px; margin-top:3px; border:3px solid #17120b; border-radius:50%; background:{{ m.dot }}"></div>
+                <div style="min-width:0">
+                  <div style="font-size:19px; line-height:1.1">{{ m.name }}</div>
+                  <div style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.8; margin-top:4px; line-height:1.3">{{ m.sub }}</div>
+                </div>
+              </button>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- 4 · FEATURES -->
+        <section style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 22px 22px; transform:rotate(0.4deg)">
+          <div aria-hidden="true" style="position:absolute; top:-11px; left:-11px; width:15px; height:15px; background:#7bc264; border:3px solid #17120b; transform:rotate(45deg)"></div>
+          <div style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:14px">
+            <div style="display:flex; align-items:baseline; gap:14px">
+              <div aria-hidden="true" style="font-family:'Rye',serif; font-size:30px; line-height:1; color:#e8484a">4</div>
+              <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">What visitors can do</h2>
+            </div>
+            <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; white-space:nowrap">{{ featCount }} OF {{ featTotal }} ON</div>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:10px 18px">
+            <sc-for list="{{ feats }}" as="f" hint-placeholder-count="6">
+              <label style="display:flex; align-items:center; gap:11px; font-size:18px; cursor:pointer; padding:6px 0">
+                <input type="checkbox" checked="{{ f.on }}" sc-camel-on-change="{{ f.toggle }}" style="width:18px; height:18px; accent-color:#e8484a; flex:none; margin:0">
+                <span style="border-bottom:3px dashed rgba(23,18,11,0.35); padding-bottom:1px; color:#4a4054">{{ f.name }}</span>
+              </label>
+            </sc-for>
+          </div>
+          <div style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.75; margin-top:12px">PLACEHOLDERS — THE REAL LIST OF FEATURES IS STILL BEING SETTLED.</div>
+        </section>
+
+        <!-- 5 · INVITE: your friends (api/friends.js); Create sends each one ticked an invite, to their bell -->
+        <section style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 22px 22px; transform:rotate(-0.5deg)">
+          <div aria-hidden="true" style="position:absolute; top:-11px; right:-11px; width:15px; height:15px; background:#5a8fd6; border:3px solid #17120b; transform:rotate(45deg)"></div>
+          <div style="display:flex; align-items:baseline; gap:14px; margin-bottom:14px">
+            <div aria-hidden="true" style="font-family:'Rye',serif; font-size:30px; line-height:1; color:#e8484a">5</div>
+            <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Invite friends along</h2>
+          </div>
+          <div style="font-size:15px; letter-spacing:2px; color:#4a4054; margin-bottom:8px">A LINK TO SEND</div>
+          <div style="display:flex; gap:10px; align-items:stretch">
+            <input value="{{ inviteLink }}" sc-camel-read-only="{{ true }}" aria-label="invite link" sc-camel-on-focus="{{ selectAll }}" style="flex:1; min-width:0; box-sizing:border-box; background:#fffcf0; border:3px solid #17120b; padding:8px 12px; font-family:'VT323',monospace; font-size:18px; color:#17120b; outline:none; box-shadow:2px 3px 0 rgba(60,50,80,0.18); white-space:nowrap; overflow:hidden; text-overflow:ellipsis" style-focus="box-shadow:0 0 0 3px #ffd23f">
+            <button sc-camel-on-click="{{ copyLink }}" style="border:3px solid #17120b; background:{{ copyBg }}; color:{{ copyFg }}; font-family:'VT323',monospace; font-size:17px; letter-spacing:1px; padding:6px 16px; cursor:pointer; box-shadow:3px 4px 0 rgba(60,50,80,0.25); white-space:nowrap; min-width:88px" style-hover="transform:translate(1px,1px); box-shadow:2px 3px 0 rgba(60,50,80,0.25)">{{ copyWord }}</button>
+          </div>
+          <div style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.75; margin-top:8px">ANYONE WITH IT CAN COME IN. THE LINK IS MINTED WHEN THE PAGE IS.</div>
+
+          <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:15px; letter-spacing:2px; color:#4a4054; margin:22px 0 10px">
+            <span>GNOMES YOU KNOW</span>
+            <span style="opacity:0.8">{{ invitedCount }} INVITED</span>
+          </div>
+          <sc-if value="{{ noFriends }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8">NONE YET — SEND THE LINK INSTEAD, OR ADD A FRIEND BY THEIR TAG IN YOUR YARD.</div>
+          </sc-if>
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:10px">
+            <sc-for list="{{ friends }}" as="f" hint-placeholder-count="3">
+              <button aria-pressed="{{ f.on }}" sc-camel-on-click="{{ f.toggle }}" style="display:flex; align-items:center; gap:12px; padding:8px 12px 8px 10px; background:{{ f.bg }}; border:3px solid #17120b; box-shadow:3px 3px 0 rgba(60,50,80,0.18); text-align:left; color:#17120b; cursor:pointer; transform:rotate({{ f.rot }}); transition:transform .2s cubic-bezier(.3,1.5,.5,1); font-family:'VT323',monospace" style-hover="transform:rotate(0deg) translate(1px,1px); box-shadow:2px 2px 0 rgba(60,50,80,0.18)">
+                <div style="position:relative; flex:none; width:38px; height:38px">
+                  <svg aria-hidden="true" sc-camel-view-box="0 0 60 90" width="30" height="45" style="position:absolute; left:4px; top:-6px; overflow:visible">
+                    <path d="M20,50 L40,50 L48,86 L12,86 Z" fill="{{ f.col }}" stroke="#17120b" stroke-width="3" stroke-linejoin="round"></path>
+                    <circle cx="30" cy="40" r="12" fill="#f0cfae" stroke="#17120b" stroke-width="3"></circle>
+                    <path d="M18,44 Q30,52 42,44 Q44,62 30,66 Q16,62 18,44 Z" fill="#f7f0df" stroke="#17120b" stroke-width="3"></path>
+                    <path d="M30,4 L46,34 L14,34 Z" fill="#e8484a" stroke="#17120b" stroke-width="3" stroke-linejoin="round"></path>
+                  </svg>
+                </div>
+                <div style="min-width:0; flex:1">
+                  <div style="font-family:'Rye',serif; font-size:17px; line-height:1.1">{{ f.name }}</div>
+                  <div style="font-size:13px; letter-spacing:1.2px; color:#4a4054; opacity:0.8; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ f.hill }}</div>
+                </div>
+                <div aria-hidden="true" style="flex:none; width:18px; height:18px; border:3px solid #17120b; background:{{ f.box }}; display:flex; align-items:center; justify-content:center">
+                  <sc-if value="{{ f.on }}" hint-placeholder-val="{{ false }}"><svg sc-camel-view-box="0 0 24 24" width="16" height="16"><path d="M5,12.5 L10,17 L19,7" fill="none" stroke="#fdf7e3" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
+                </div>
+              </button>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- 6 · TERMS + CLAIM -->
+        <section style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 22px 22px; transform:rotate(0.3deg)">
+          <div aria-hidden="true" style="position:absolute; bottom:-11px; right:-11px; width:15px; height:15px; background:#e8484a; border:3px solid #17120b; border-radius:50%"></div>
+          <div style="display:flex; align-items:baseline; gap:14px; margin-bottom:14px">
+            <div aria-hidden="true" style="font-family:'Rye',serif; font-size:30px; line-height:1; color:#e8484a">6</div>
+            <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Sign here</h2>
+          </div>
+          <label style="display:flex; align-items:flex-start; gap:11px; font-size:18px; cursor:pointer; line-height:1.3">
+            <input type="checkbox" checked="{{ agreed }}" sc-camel-on-change="{{ onAgree }}" style="width:18px; height:18px; accent-color:#e8484a; flex:none; margin:3px 0 0">
+            <span>I agree to the <a href="#terms">terms and conditions</a> and I'll keep this hill a decent place to stand.</span>
+          </label>
+          <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-top:20px; border-top:3px dashed rgba(23,18,11,0.35); padding-top:18px">
+            <button sc-camel-on-click="{{ claim }}" disabled="{{ cantClaim }}" title="{{ claimTitle }}" style="height:52px; display:flex; align-items:center; gap:10px; padding:0 20px 0 16px; background:{{ claimBg }}; color:{{ claimFg }}; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); font-family:'VT323',monospace; font-size:21px; letter-spacing:1px; cursor:{{ claimCursor }}; opacity:{{ claimOp }}; transform:rotate(-1deg)" style-hover="transform:rotate(-1deg) translate(1px,1px); box-shadow:4px 5px 0 rgba(60,50,80,0.2)">
+              <svg aria-hidden="true" sc-camel-view-box="0 0 30 44" width="20" height="30" style="overflow:visible"><line x1="6" y1="2" x2="6" y2="44" stroke="{{ claimFg }}" stroke-width="3" stroke-linecap="round"></line><path d="M7,3 L28,10 L7,19 Z" fill="#5a8fd6" stroke="{{ claimFg }}" stroke-width="2.5" stroke-linejoin="round"></path></svg>
+              <span>{{ claimWord }}</span>
+            </button>
+            <div role="status" style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.8; line-height:1.4">{{ claimNote }}
+              <sc-if value="{{ made }}" hint-placeholder-val="{{ false }}"><a href="{{ madeHref }}" style="margin-left:4px">open it</a></sc-if>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- THE PREVIEW: the page as it would open, small -->
+      <div class="new-preview">
+        <section aria-label="preview" style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate(0.6deg)">
+          <div aria-hidden="true" style="position:absolute; top:-11px; right:-11px; width:15px; height:15px; background:#e8484a; border:3px solid #17120b; transform:rotate(45deg)"></div>
+          <h2 style="margin:0 0 16px; font-family:'Rye',serif; font-size:20px; font-weight:400">How it will open</h2>
+
+          <div style="border:4px solid #17120b; background:{{ pvPaper }}; background-image:radial-gradient({{ pvDot }} 1px, transparent 1px); background-size:14px 14px; aspect-ratio:4/3; position:relative; overflow:hidden; font-family:'Public Sans',sans-serif; color:{{ pvInk }}">
+            <!-- the bar -->
+            <div style="display:flex; align-items:center; gap:8px; padding:7px 10px; background:{{ pvCard }}; border-bottom:1px dashed {{ pvLine }}">
+              <span aria-hidden="true" style="display:block; width:12px; height:12px; border-radius:50%; background:{{ pvInk }}"></span>
+              <span style="font-family:'Sora',sans-serif; font-weight:800; font-size:10px; letter-spacing:-0.01em">knoll</span>
+              <span style="font-size:9px; font-weight:600; color:{{ pvMute }}">/</span>
+              <span style="font-family:'Sora',sans-serif; font-weight:700; font-size:10px; color:{{ pvAccent }}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ pvName }}</span>
+              <span style="margin-left:auto; display:inline-flex; gap:3px">
+                <sc-for list="{{ pvGnomes }}" as="g" hint-placeholder-count="2"><span aria-hidden="true" style="display:block; width:10px; height:10px; border-radius:50%; background:{{ g }}; border:1.5px solid {{ pvInk }}"></span></sc-for>
+              </span>
+            </div>
+            <!-- the picture, over the sign, as the space's own page has it (space.html).
+                 sc-camel-src, as for the ?: a plain src is fetched from the raw template -->
+            <sc-if value="{{ hasPic }}" hint-placeholder-val="{{ false }}">
+              <img sc-camel-src="{{ pic }}" alt="" style="position:absolute; left:50%; top:44%; width:40px; height:40px; margin:-68px 0 0 -20px; object-fit:cover; border:3px solid #17120b; box-sizing:border-box; transform:rotate(-4deg); background:#fdf7e3">
+            </sc-if>
+            <!-- the sign, on the paper -->
+            <div style="position:absolute; left:50%; top:44%; transform:translate(-50%,-50%) rotate(-3deg); background:#c89b62; border:3px solid #17120b; box-shadow:3px 3px 0 rgba(60,50,80,0.25); padding:4px 14px; font-family:'VT323',monospace; font-size:20px; letter-spacing:0.5px; color:#17120b; white-space:nowrap; max-width:80%; overflow:hidden; text-overflow:ellipsis">{{ pvName }}</div>
+            <div style="position:absolute; left:50%; top:44%; width:5px; height:34px; margin-left:-2.5px; margin-top:14px; background:#8a6a42; border:2px solid #17120b; box-sizing:border-box"></div>
+            <!-- the inks, as chips -->
+            <div style="position:absolute; left:10px; top:54px; display:grid; grid-template-rows:repeat(5, 14px); grid-auto-flow:column; gap:5px">
+              <sc-for list="{{ pvInks }}" as="c" hint-placeholder-count="3"><span aria-hidden="true" style="display:block; width:14px; height:14px; background:{{ c }}; border:2px solid #17120b"></span></sc-for>
+            </div>
+            <!-- the moderation stamp -->
+            <div style="position:absolute; right:10px; top:52px; font-family:'VT323',monospace; font-size:11px; letter-spacing:1.5px; color:{{ pvAccent }}; border:2px solid {{ pvAccent }}; padding:0 6px; transform:rotate(3deg); background:{{ pvCard }}">{{ pvMod }}</div>
+            <!-- the dock -->
+            <div style="position:absolute; left:50%; bottom:10px; transform:translateX(-50%); display:flex; align-items:center; gap:3px; padding:4px; border-radius:9px; background:{{ pvDock }}; border:1.5px solid #0f0c12; box-shadow:0 1.5px 0 #0f0c12; max-width:94%">
+              <sc-for list="{{ pvTools }}" as="t" hint-placeholder-count="6">
+                <span style="display:inline-flex; flex-direction:column; align-items:center; gap:2px; padding:3px 5px 2px; border-radius:5px; color:#fff; opacity:{{ t.op }}; background:{{ t.bg }}">
+                  <span aria-hidden="true" style="display:block; width:9px; height:9px; border-radius:2px; background:currentColor"></span>
+                  <span style="font-size:5.5px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap">{{ t.name }}</span>
+                </span>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:8px; margin-top:14px; font-size:16px; line-height:1.3; color:#3a3342">
+            <sc-for list="{{ summary }}" as="s" hint-placeholder-count="5">
+              <div style="display:flex; gap:10px">
+                <div aria-hidden="true" style="flex:none; width:9px; height:9px; background:{{ s.color }}; border:2px solid #17120b; transform:rotate(45deg); margin-top:6px"></div>
+                <div style="min-width:0">{{ s.a }} <b style="color:#17120b">{{ s.b }}</b></div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div style="text-align:center; font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.75; margin-top:48px">NOTHING IS MADE UNTIL YOU CLAIM IT — LEAVE AND THIS FORM STAYS ON THIS DEVICE.</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="">
+// keep in step with api/wall.js's PAPERS (the space's page and the yard's hills draw from those)
+const PALETTES = [
+  { id: 'yard',  name: 'Yard',      paper: '#fdf7e3', ink: '#17120b', card: '#fffcf0', line: '#d9cdb0', mute: '#4a4054', accent: '#e8484a', dock: '#17120b', swatches: ['#fdf7e3', '#17120b', '#e8484a', '#ffd23f', '#5a8fd6'] },
+  { id: 'knoll', name: 'Knoll',     paper: '#faf7f9', ink: '#26212a', card: '#fdfbfd', line: '#e2d4df', mute: '#8b7f92', accent: '#c93b82', dock: '#2e2636', swatches: ['#faf7f9', '#26212a', '#c93b82', '#5871f5', '#2fae76'] },
+  { id: 'bench', name: 'Bench',     paper: '#efe7ed', ink: '#2e2636', card: '#fdfbfd', line: '#e2d4df', mute: '#8b7f92', accent: '#f59321', dock: '#2e2636', swatches: ['#efe7ed', '#2e2636', '#f59321', '#5871f5', '#fdfbfd'] },
+  { id: 'sticky', name: 'Sticky pad', paper: '#ffe27a', ink: '#26212a', card: '#fff4c2', line: '#d9bd55', mute: '#5a5140', accent: '#c93b82', dock: '#26212a', swatches: ['#ffe27a', '#ffb3c9', '#a9d7f2', '#c2e6a2', '#26212a'] },
+];
+const HOUSE = ['#26212a', '#ef4d98', '#5871f5', '#2fae76', '#f59321'];
+const hx2 = n => ('0' + Math.round(Math.max(0, Math.min(255, n))).toString(16)).slice(-2);
+const toHex = (h, s, v) => { const f = n => { const k = (n + h / 60) % 6; return v - v * s * Math.max(0, Math.min(k, 4 - k, 1)); }; return '#' + hx2(f(5) * 255) + hx2(f(3) * 255) + hx2(f(1) * 255); };
+const toHsv = (hex) => {
+  const m = /^#?([0-9a-f]{6})$/i.exec((hex || '').trim()); if (!m) return null;
+  const r = parseInt(m[1].slice(0, 2), 16) / 255, g = parseInt(m[1].slice(2, 4), 16) / 255, b = parseInt(m[1].slice(4), 16) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; let h = 0;
+  if (d) h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return { h: (h * 60 + 360) % 360, s: mx ? d / mx : 0, v: mx };
+};
+const INKS = [
+  ['#e8484a', 'red'], ['#ffd23f', 'yellow'], ['#7bc264', 'green'], ['#5a8fd6', 'blue'], ['#e0598c', 'pink'],
+  ['#c93b82', 'knoll pink'], ['#5871f5', 'knoll blue'], ['#2fae76', 'knoll green'], ['#f59321', 'amber'], ['#17120b', 'ink'],
+];
+const MODS = [
+  { id: 'open',    name: 'Open',       sub: 'ANYONE WHO FINDS IT MAY DRAW ON IT' },
+  { id: 'friends', name: 'Friends only', sub: 'GNOMES YOU INVITED; EVERYONE ELSE LOOKS' },
+  { id: 'approve', name: 'Approve first', sub: 'EDITS WAIT AT THE GATE UNTIL YOU NOD' },
+  { id: 'read',    name: 'Read-only',  sub: 'YOURS ALONE; VISITORS ONLY LOOK' },
+];
+const FEATS = ['Feature one', 'Feature two', 'Feature three', 'Feature four', 'Feature five', 'Feature six'];
+const COATS = ['#7bc264', '#e0598c', '#ffd23f', '#5a8fd6', '#f59321'];   // a friend's coat, by their id
+const KEY = 'knoll-yard:new-hill';
+const slug = (s) => (s || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 32).replace(/-+$/, '');
+// where it will live: this site's own address (knoll.space live), so the link is true wherever the form is
+const HOST = location.host.replace(/^www\./, '');
+const json = (url, body) => fetch(url, body ? { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : { cache: 'no-store', credentials: 'same-origin' })
+  .then(r => r.json()).catch(() => ({ ok: false, error: 'the hill did not answer — try again in a moment' }));
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) {}
+    this.state = Object.assign({
+      name: '', palette: 'yard', inks: ['#e8484a', '#5a8fd6'], mod: 'open',
+      feats: [true, true, true, false, false, false], invited: [], agreed: false, pic: '',
+    }, saved, { copied: false, claimed: false, join: Math.random().toString(36).slice(2, 8), friends: [], full: false, busy: false, made: null, note: '', picNote: '' });
+  }
+  keep(patch) {
+    this.setState(patch, () => {
+      const s = this.state;
+      try { localStorage.setItem(KEY, JSON.stringify({ name: s.name, palette: s.palette, inks: s.inks, custom: s.custom || [], mod: s.mod, feats: s.feats, invited: s.invited, agreed: s.agreed, pic: s.pic })); } catch (e) {}
+    });
+  }
+  wheelRef = React.createRef();
+  fileRef = React.createRef();
+  componentDidMount() {
+    this._away = (e) => { if (this.state.wheelOn && this.wheelRef.current && !this.wheelRef.current.contains(e.target)) this.setState({ wheelOn: false, hexDraft: null }); };
+    this._esc = (e) => { if (e.key === 'Escape' && this.state.wheelOn) this.setState({ wheelOn: false, hexDraft: null }); };
+    document.addEventListener('pointerdown', this._away); document.addEventListener('keydown', this._esc);
+    // your friends, for step 5; and whether you have made your two already
+    json('/api/friends').then(v => { if (v.ok) this.setState({ friends: v.friends }); });
+    json('/api/wall?spaces=1').then(v => { if (v.ok) this.setState({ full: !!v.full }); });
+  }
+  componentWillUnmount() { clearTimeout(this._t); clearTimeout(this._picT); document.removeEventListener('pointerdown', this._away); document.removeEventListener('keydown', this._esc); }
+  openWheel() { this._slot = null; this.setState({ wheelOn: true, hexDraft: null, hsv: toHsv(this.state.inks[this.state.inks.length - 1]) || { h: 330, s: 0.7, v: 0.94 } }); }
+  grab(e, which) {
+    this._turning = which; this._el = e.currentTarget; this.turn(e);
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+    e.preventDefault();
+  }
+  turn(e) {
+    const r = this._el.getBoundingClientRect(), hsv = Object.assign({}, this.state.hsv);
+    if (this._turning === 'disc') {
+      const R = r.width / 2, dx = e.clientX - (r.left + R), dy = e.clientY - (r.top + R);
+      hsv.h = (Math.atan2(dy, dx) * 180 / Math.PI + 450) % 360; hsv.s = Math.min(1, Math.hypot(dx, dy) / R);
+    } else hsv.v = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    this.setState({ hsv, hexDraft: null });
+  }
+  addCustom(hexIn) {
+    const s = this.state, hex = hexIn.toLowerCase();
+    let custom = (s.custom || []).slice(), inks = s.inks.slice();
+    const prev = this._slot;
+    if (prev) { custom = custom.filter(c => c !== prev); inks = inks.filter(c => c !== prev); }
+    const known = INKS.some(([h]) => h === hex);
+    if (!known && !custom.includes(hex)) { custom.push(hex); this._slot = hex; } else this._slot = null;
+    if (!inks.includes(hex)) inks = inks.length < 10 ? inks.concat(hex) : inks.slice(0, 9).concat(hex);
+    this.keep({ custom, inks });
+  }
+  /* THE PICTURE: the yard's K cut (yard/index.html: THE PICTURE) — square from the
+     middle, 128 across, a JPEG on cream — into the draft, and up with Create */
+  setPic(file) {
+    const note = (word) => { clearTimeout(this._picT); this.setState({ picNote: word }); this._picT = setTimeout(() => this.setState({ picNote: '' }), 6000); };
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onerror = () => { URL.revokeObjectURL(url); note('that picture would not open — try a JPEG or a PNG'); };
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const S = 128, c = document.createElement('canvas'), w = img.naturalWidth, h = img.naturalHeight, m = Math.min(w, h);
+      c.width = c.height = S;
+      const g = c.getContext('2d');
+      g.fillStyle = '#fdf7e3'; g.fillRect(0, 0, S, S);
+      g.drawImage(img, (w - m) / 2, (h - m) / 2, m, m, 0, 0, S, S);
+      clearTimeout(this._picT);
+      this.keep({ pic: c.toDataURL('image/jpeg', 0.85), picNote: '' });
+    };
+    img.src = url;
+  }
+  /* CREATE: the space (api/wall.js op 'page'), then the friends ticked in step 5 hear
+     of it (api/friends.js op 'invite'). The draft goes once it stands; the door's own
+     word is what the note says when it does not. */
+  async make(sl) {
+    const s = this.state, title = s.name.trim();
+    this.setState({ busy: true, note: '' });
+    const out = await json('/api/wall', { op: 'page', slug: sl, title, palette: s.palette, inks: s.inks, mod: s.mod, feats: s.feats, pic: s.pic });
+    if (!out.ok) { this.setState({ busy: false, full: out.code === 'full' || s.full, note: out.error ? out.error.charAt(0).toUpperCase() + out.error.slice(1) + '.' : 'That did not take — try again.' }); return; }
+    const ids = s.invited.filter(id => s.friends.some(f => f.id === id));
+    const sent = ids.length ? await json('/api/friends', { op: 'invite', slug: sl, ids }) : null;
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    this.setState({ busy: false, claimed: true, made: { slug: sl }, note: 'Your hill stands at ' + HOST + '/' + sl + '. It is on the horizon in your yard.' +
+      (sent && sent.ok && sent.sent ? ' ' + sent.sent + (sent.sent === 1 ? ' friend' : ' friends') + ' invited.' : '') });
+  }
+  renderVals() {
+    const s = this.state, pal = PALETTES.find(p => p.id === s.palette) || PALETTES[0];
+    const hsv = s.hsv || { h: 330, s: 0.7, v: 0.94 }, wheelHex = toHex(hsv.h, hsv.s, hsv.v);
+    const sl = slug(s.name), path = HOST + '/' + (sl || '…');
+    const friends = s.friends.map((f, i) => ({ id: f.id, name: f.tag.replace(/#\d+$/, ''), hill: f.tag.toUpperCase(), col: COATS[parseInt(f.id.slice(0, 2), 16) % COATS.length], rot: ['-0.8deg', '0.6deg', '-0.4deg'][i % 3] }));
+    const coming = friends.filter(f => s.invited.includes(f.id));
+    const featCount = s.feats.filter(Boolean).length;
+    const mod = MODS.find(m => m.id === s.mod) || MODS[0];
+    const cant = !sl || !s.agreed || s.claimed || s.busy || s.full;
+    const inviteLink = sl ? location.origin + '/' + sl + '?join=' + s.join : 'name the page first…';
+    const light = (hex) => { const n = parseInt(hex.slice(1), 16); return ((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000 > 150; };
+    const FULL = 'You can only have 2 spaces per account.';
+    return {
+      name: s.name, path, nameLeft: 28 - s.name.length,
+      onName: (e) => this.keep({ name: e.target.value.slice(0, 28), claimed: false, made: null, note: '' }),
+      pic: s.pic, hasPic: !!s.pic, picEdge: s.pic ? 'solid' : 'dashed',
+      picTitle: s.picNote || (s.pic ? "the page's picture — click to change it" : 'give the page a picture'),
+      fileRef: this.fileRef,
+      pickPic: () => { if (this.fileRef.current) this.fileRef.current.click(); },
+      onFile: (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) this.setPic(f); },
+      palettes: PALETTES.map((p, i) => ({
+        name: p.name, paper: p.paper, ink: p.ink, swatches: p.swatches, on: p.id === s.palette,
+        mark: p.id === s.palette ? 'PICKED ✓' : '', rot: ['-0.8deg', '0.7deg', '-0.4deg', '0.9deg'][i],
+        border: p.id === s.palette ? '3px solid #17120b' : '3px dashed rgba(23,18,11,0.45)',
+        shadow: p.id === s.palette ? '4px 5px 0 rgba(60,50,80,0.25)' : 'none',
+        pick: () => this.keep({ palette: p.id }),
+      })),
+      wheelRef: this.wheelRef, wheelOn: !!s.wheelOn,
+      toggleWheel: () => s.wheelOn ? this.setState({ wheelOn: false }) : this.openWheel(),
+      dotX: (80 + Math.cos((hsv.h - 90) * Math.PI / 180) * hsv.s * 80) + 'px',
+      dotY: (80 + Math.sin((hsv.h - 90) * Math.PI / 180) * hsv.s * 80) + 'px',
+      valX: (hsv.v * 100) + '%', valTop: toHex(hsv.h, hsv.s, 1), wheelHex,
+      hexBox: s.hexDraft != null ? s.hexDraft : wheelHex,
+      discDown: (e) => this.grab(e, 'disc'), valDown: (e) => this.grab(e, 'val'),
+      wheelMove: (e) => { if (this._turning) this.turn(e); },
+      wheelUp: () => { if (!this._turning) return; this._turning = null; this.addCustom(wheelHex); },
+      onHex: (e) => this.setState({ hexDraft: e.target.value }),
+      hexKey: (e) => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') this.setState({ wheelOn: false, hexDraft: null }); },
+      hexDone: () => {
+        const v = (s.hexDraft || '').trim(), h = toHsv(v.startsWith('#') ? v : '#' + v);
+        if (h) { this.setState({ hsv: h, hexDraft: null }); this.addCustom(toHex(h.h, h.s, h.v)); } else this.setState({ hexDraft: null });
+      },
+      houseChips: HOUSE.map(hex => ({ hex, pick: () => { this.setState({ hsv: toHsv(hex), hexDraft: null }); this.addCustom(hex); } })),
+      inks: INKS.concat((s.custom || []).map(h => [h, 'custom ' + h])).map(([hex, name]) => {
+        const on = s.inks.includes(hex);
+        return { hex, name, on, tick: light(hex) ? '#17120b' : '#fdf7e3',
+          shadow: on ? '3px 4px 0 rgba(60,50,80,0.3)' : 'none', t: on ? 'rotate(-4deg) scale(1.08)' : 'none',
+          pick: () => {
+            if (on) { if (s.inks.length > 1) this.keep({ inks: s.inks.filter(c => c !== hex) }); }
+            else if (s.inks.length < 10) this.keep({ inks: s.inks.concat(hex) });
+          } };
+      }),
+      inkCount: s.inks.length,
+      mods: MODS.map((m, i) => ({ name: m.name, sub: m.sub, on: m.id === s.mod, rot: ['-0.5deg', '0.4deg', '-0.3deg', '0.6deg'][i],
+        bg: m.id === s.mod ? '#fffcf0' : 'transparent', dot: m.id === s.mod ? '#e8484a' : 'transparent',
+        shadow: m.id === s.mod ? '4px 5px 0 rgba(60,50,80,0.25)' : 'none', pick: () => this.keep({ mod: m.id }) })),
+      feats: FEATS.map((n, i) => ({ name: n, on: s.feats[i], toggle: () => { const f = s.feats.slice(); f[i] = !f[i]; this.keep({ feats: f }); } })),
+      featCount, featTotal: FEATS.length,
+      inviteLink, copyWord: s.copied ? 'copied ✓' : 'copy', copyBg: s.copied ? '#7bc264' : '#17120b', copyFg: s.copied ? '#17120b' : '#fdf7e3',
+      selectAll: (e) => e.target.select(),
+      copyLink: () => {
+        if (!sl) return;
+        const done = () => { this.setState({ copied: true }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ copied: false }), 1600); };
+        if (navigator.clipboard) navigator.clipboard.writeText(inviteLink).then(done, done); else done();
+      },
+      friends: friends.map(f => { const on = s.invited.includes(f.id); return Object.assign({}, f, { on, bg: on ? '#fffcf0' : '#fdf7e3', box: on ? '#17120b' : 'transparent',
+        toggle: () => this.keep({ invited: on ? s.invited.filter(x => x !== f.id) : s.invited.concat(f.id) }) }); }),
+      noFriends: !friends.length, invitedCount: coming.length,
+      agreed: s.agreed, onAgree: (e) => this.keep({ agreed: e.target.checked }),
+      cantClaim: cant, claimWord: s.claimed ? 'created ✓' : s.busy ? 'making…' : 'Create',
+      claimBg: s.claimed ? '#7bc264' : cant ? '#fdf7e3' : '#17120b', claimFg: s.claimed || cant ? '#17120b' : '#fdf7e3',
+      claimCursor: cant ? 'not-allowed' : 'pointer', claimOp: cant && !s.claimed ? 0.55 : 1,
+      claimTitle: s.full && !s.claimed ? FULL : !sl ? 'name the page first' : !s.agreed ? 'agree to the terms first' : 'make the page',
+      claimNote: s.note || (s.full ? FULL : !sl ? 'Needs a name (stop 1).' : !s.agreed ? 'Needs your signature above.' : ''),
+      made: !!s.made, madeHref: s.made ? '/' + s.made.slug : '#',
+      claim: () => { if (!cant) this.make(sl); },
+      pvPaper: pal.paper, pvInk: pal.ink, pvCard: pal.card, pvLine: pal.line, pvMute: pal.mute, pvAccent: pal.accent, pvDock: pal.dock,
+      pvDot: 'rgba(38,33,42,0.10)', pvName: s.name.trim() || 'Unnamed hill', pvInks: s.inks, pvMod: mod.name.toUpperCase(),
+      pvGnomes: ['#f0cfae'].concat(coming.map(f => f.col)),
+      pvTools: [{ name: 'move', op: 1, bg: pal.accent }].concat(FEATS.map((n, i) => ({ name: 'F' + (i + 1), op: s.feats[i] ? 0.85 : 0.22, bg: 'transparent' }))),
+      summary: [
+        { a: 'Named', b: s.name.trim() || '—', color: '#5a8fd6' },
+        { a: 'On', b: pal.name + ' paper, ' + s.inks.length + (s.inks.length === 1 ? ' ink' : ' inks'), color: '#ffd23f' },
+        { a: 'Edits are', b: mod.name.toLowerCase(), color: '#e0598c' },
+        { a: 'Visitors get', b: featCount + ' of ' + FEATS.length + ' features', color: '#7bc264' },
+        { a: 'Coming along:', b: coming.length ? coming.map(f => f.name).join(', ') : 'nobody yet', color: '#e8484a' },
+      ],
+    };
+  }
+}
+</script>
+
+
+</body></html>

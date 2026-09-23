@@ -36,8 +36,9 @@ function call(method, url, body, token, ip) {
   });
 }
 const U = { adm: 'a'.repeat(16), nu: 'b'.repeat(16), nu2: 'c'.repeat(16), tr: 'd'.repeat(16), mod: 'e'.repeat(16), mod2: 'f'.repeat(16), con: '1'.repeat(16), ban: '2'.repeat(16), nu3: '3'.repeat(16),
-            nu4: '4'.repeat(16), con2: '5'.repeat(16), tr2: '6'.repeat(16), tr3: '7'.repeat(16), tr4: '8'.repeat(16), tr5: '9'.repeat(16), nu6: 'ab'.repeat(8) };
-const ROLE = { adm: 'admin', mod: 'mod', mod2: 'mod', tr: 'trusted', tr2: 'trusted', tr3: 'trusted', tr4: 'trusted', tr5: 'trusted' };
+            nu4: '4'.repeat(16), con2: '5'.repeat(16), tr2: '6'.repeat(16), tr3: '7'.repeat(16), tr4: '8'.repeat(16), tr5: '9'.repeat(16), nu6: 'ab'.repeat(8),
+            sp: 'ac'.repeat(8), nu7: 'ad'.repeat(8) };
+const ROLE = { adm: 'admin', mod: 'mod', mod2: 'mod', tr: 'trusted', tr2: 'trusted', tr3: 'trusted', tr4: 'trusted', tr5: 'trusted', sp: 'trusted' };
 const realDb = path.join(__dirname, 'wall-db.json'), realDbBefore = fs.existsSync(realDb);
 const T = {};
 const GET = (q, who) => call('GET', '/api/wall' + (q || ''), null, who ? T[who] : null);
@@ -318,7 +319,6 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
     r = await GET('?at=0'); check('?at=0 → 400', r.status === 400); r = await GET('?at=99999'); check('?at=99999 → 404', r.status === 404);
 
     // ── 17 · more pages than one ─────────────────────────────────────────
-    r = await POST({ op: 'page', slug: 'meadow', title: 'The Meadow' }, 'tr'); check('only a moderator makes a page, for now', r.status === 403, brief(r));
     r = await POST({ op: 'page', slug: 'Bad Slug!' }, 'mod'); check('a page is named in lower-case letters, numbers and dashes', r.status === 400 && r.json.code === 'slug', brief(r));
     r = await POST({ op: 'page', slug: 'toem2' }, 'mod'); check('…and not after the first page', r.status === 409, brief(r));
     r = await POST({ op: 'page', slug: 'meadow', title: 'The Meadow' }, 'mod'); check('a moderator makes one', r.json.ok && r.json.page.slug === 'meadow', j(r.json));
@@ -342,6 +342,28 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
     r = await GET('?audit=1', 'tr'); check("the moderators' record is theirs", r.status === 403);
     r = await GET('?audit=1', 'mod2'); check('…and not a banned moderator\'s (section 11 banned one)', r.status === 403);
     r = await GET('?audit=1', 'mod'); check('…and it says who made the page, and who banned whom', r.json.audit.some(e => e.what === 'page' && e.page === 'meadow' && e.by === U.mod) && r.json.audit.some(e => e.what === 'role' && e.banned === true), j(r.json.audit.slice(0, 3)));
+
+    // ── 18 · spaces: a page anybody makes, two each ──────────────────────
+    const JPEG = 'data:image/jpeg;base64,' + Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 16]).toString('base64');
+    r = await POST({ op: 'page', slug: 'yard', title: 'Yard' }, 'sp'); check('a space may not take a word the site already answers at', r.status === 409 && r.json.code === 'taken', brief(r));
+    r = await POST({ op: 'page', slug: 'hollow', title: 'Mossy Hollow', palette: 'sticky', inks: ['#E8484A', '#e8484a', 'red', '#5a8fd6'], mod: 'read', feats: [true, 0, 'x'], pic: JPEG }, 'sp');
+    check('a gnome makes a space, its look cut to what the form offers', r.json.ok && r.json.page.slug === 'hollow' && r.json.page.paper === '#ffe27a' && j(r.json.page.inks) === j(['#e8484a', '#5a8fd6']) &&
+          r.json.page.mod === 'read' && j(r.json.page.feats) === j([true, false, true]) && r.json.page.pic === JPEG, brief(r));
+    r = await POST({ op: 'page', slug: 'glen', title: 'The Glen', palette: 'plaid', mod: 'anyone', pic: 'data:image/png;base64,iVBORw0KGgo=' }, 'sp');
+    check('…a second, where a paper, a rule or a picture the form does not offer falls back', r.json.ok && r.json.page.palette === 'yard' && r.json.page.mod === 'open' && r.json.page.pic === '', brief(r));
+    r = await POST({ op: 'page', slug: 'dell', title: 'The Dell' }, 'sp'); check('…and not a third: two an account', r.status === 409 && r.json.code === 'full' && /only have 2 spaces per account/.test(r.json.error), brief(r));
+    r = await GET('?space=dell'); check('…and the refused one was never claimed', r.status === 404);
+    r = await GET('?spaces=1', 'sp'); check('?spaces lists its own, oldest first, and says it is full', r.json.ok && j(r.json.spaces.map(s => s.slug)) === j(['hollow', 'glen']) && r.json.full === true && r.json.max === 2, j({ full: r.json.full, n: (r.json.spaces || []).length }));
+    r = await GET('?spaces=1'); check('…to the account signed in, and nobody else', r.status === 401);
+    r = await GET('?space=hollow'); check('?space answers anybody: the name, the look, and whose it is', r.json.ok && r.json.space.title === 'Mossy Hollow' && r.json.space.accent === '#c93b82' && /^sp#\d+$/.test(r.json.space.tag) && r.json.space.by === U.sp, j(r.json.space && r.json.space.tag));
+    check('…kept at the edge ten seconds, like the log', /s-maxage=10/.test(r.headers['cache-control']));
+    r = await GET('?space=toem2'); check('the first page is not a space', r.status === 404);
+    r = await GET('?space=' + encodeURIComponent('../doc')); check('…nor is a path', r.status === 404);
+    r = await GET('?page=hollow'); check("a space's wall opens blank, like any page's", r.json.rev === 1 && r.json.wall.items.length === 0, brief(r));
+    r = await POST({ op: 'page', slug: 'hollow', title: 'Mine Now' }, 'mod'); check("a space's address is its maker's", r.status === 409 && r.json.code === 'taken');
+    r = await POST({ op: 'page', slug: 'meadow-2' }, 'mod'); const m3r = await POST({ op: 'page', slug: 'meadow-3' }, 'mod');
+    check("a moderator's pages are not counted", r.json.ok && m3r.json.ok && (await GET('?spaces=1', 'mod')).json.full === false, brief(m3r));
+    r = await POST({ op: 'page', slug: 'nook', title: 'Nook' }, 'nu7'); check('a newcomer makes one too', r.json.ok && r.json.page.by === U.nu7, brief(r));
 
     // ── 14 · nothing else was touched ────────────────────────────────────
     check('the real wall-seed.json is untouched', hash(SEED) === seedBefore);
