@@ -130,9 +130,9 @@ moderation tool.
 What is real now: the eyebrow, VIEWS (30 days), LIKES, the notes, **Your
 standing** (pieces, streak of days with a piece, member since the first piece),
 **Badges** (earned off the same counts; the pin is still nobody's), **Your
-edits** (the six newest pieces, in words). Still written down, with no
-backing: **Friends**, **Spaces you've visited**, the **hills** strip, and the
-search box.
+edits** (the six newest pieces, in words), and — on this device only —
+**Spaces you've visited** and the **hills** you saved from it (§5). **Friends**
+is empty until there is a way to make one.
 
 **`plotEmpty` is back to true** (2026-09-21, §3, §12): the plot ships blank,
 as §3 describes. It was false from 2026-09-17; flip it again to plant the
@@ -175,12 +175,22 @@ signed-in gnome's own page**:
   an edit to it (the drawer, the greeting) is sent to the account as well —
   what the account corner and TOEM 2 call you. The fallback is `gnome`, not
   `Morgan`.
-- **The yard's own search box** opens the account corner's search
-  (`account.js`), which finds the site's places by name.
+- **No search box of its own** (2026-09-22): the account corner's lens in the
+  bar is the one search.
+- **The K is your picture** (2026-09-22): press it and pick an image; it is
+  cut square from the middle, 128 across, a JPEG on cream, and kept on the
+  account (`api/auth.js`: THE PICTURE — op `avatar`, a JPEG `data:` URL of at
+  most 60 000 characters whose bytes are a JPEG's, back in every `me`). It
+  goes over the K once the door has it; a refusal says why in the line under
+  the greeting for six seconds. There is no taking it off yet, only another
+  in its place. Yard View's K is still a plain K.
 
 Across the top, at the right of the house bar, is the **account corner**
 (`/account.js`, on every page with a bar): the search, and your gnome's head —
-eyes on the pointer — linking here (on this page, named and not a link).
+eyes on the pointer — or your picture in its place, linking here (on this
+page, the menu with LOG OUT). This device keeps the last picture the door gave
+it for the account signed in (`knoll-account:pic`), so a page draws it at once;
+signed out, it is forgotten.
 
 ---
 
@@ -583,16 +593,16 @@ without clearing the key.
 
 Three regions arrived with the tour and are worth knowing are **mock**, in the
 same way §7 says "standing" is mock: they are written down in `renderVals()`,
-nothing is fetched, and nothing but the favourites and the binned hills is
-stored. (The one hill's mound is the exception to "nothing is fetched": it is a
-live page, below.)
+nothing is fetched, and nothing but the saved spaces and the visits is stored.
+(The one hill's mound is the exception to "nothing is fetched": it is a live
+page, below.)
 
 **The hills** are a horizon strip under the greeting: mounds on a line, each
-one a hill you belong to, with a signpost, your gnome standing on the one you
-were on last, and a flag on the ones you have contributed to. Hovering lifts a
-mound and tilts its sign. **`HILLS` currently holds exactly one entry, and it
-is real (2026-09-21): `TOEM 2`**, standing where the export had `Mossy's
-Hollow`. Its sign links to `/toem2/`, and its mound is **the page itself**: an
+one a space you saved, with a signpost, your gnome standing on the one you
+were on last, and its flag raised. Hovering lifts a
+mound and tilts its sign. **`SPACES` currently holds exactly one entry, and it
+is real (2026-09-21): `TOEM 2`**, the hill that stood where the export had
+`Mossy's Hollow`. Its sign links to `/toem2/`, and its mound is **the page itself**: an
 `<iframe>` of `../toem2/?embed=1` at 800 × 520, scaled by 0.2 to the mound's
 160 × 104 inside, `inert` so nothing in it takes a focus or a click. It is the
 wall as it is now, not a picture of it — the embed opens the way a first visit
@@ -602,27 +612,31 @@ is the head of `toem2/index.html`; `toem2/probe-embed.js` holds it to that. The
 dashboard's picture of this page (`?embed=1` here) draws the mound without the
 frame — a whole second bench for a 60px dome.
 
-Opposite the flag stands a **bin**: it takes a hill off your horizon, by name,
-into `knoll-yard:hills-gone` (§7) — unless the hill is flagged. A flagged hill
-cannot be binned: the bin says so in its label (`aria-disabled`), and a press on
-it shakes the flag (a blink instead, under reduce motion, §6). Nothing puts a
-binned hill back yet but `reset data`. Beside them, one dashed "unclaimed" mound
-says `create page` (a `#new-hill` link nothing handles yet — clickable, goes
-nowhere). The default favourites list names **four** hills — `TOEM 2`, flagged
-the way `Mossy's Hollow` was, and three (`The Toadstool Ring`, `Bramblewick`,
-`The Museum`) with no entry to be favourited.
+**The hills are the spaces you saved; Spaces you've visited is where you went**
+(2026-09-22). `account.js` writes a visit — path and time, into
+`knoll-yard:visits` (§7) — on a space's page when you are signed in; never from
+a picture of one (`?embed`). The history lists them newest first ("NOWHERE YET"
+until there is one), each a link, with **a flag** beside it: raised, the space
+is saved into `yard.favHills` and stands on the hills, in the order saved, your
+gnome on the one you were on last. The same flag on a hill, lowered, takes it
+down; the visit stays in the history, its flag lowered there too. Nothing is
+saved until you save it, and there is no bin any more — every hill up there is
+one you chose. Name, link and frame come from the page's own `SPACES` table,
+never from storage. Beside the hills, one dashed "unclaimed" mound says `create
+page` (a `#new-hill` link nothing handles yet — clickable, goes nowhere).
 
-**The fence** is "At the fence — who came by, and what they left": a like count
+**The fence** is "At the fence" (its subtitle and its not-wired notice came off
+2026-09-22, as Yard View's already had): a like count
 you can toggle, a view count, and three notes on tilted paper with initial
 avatars. You can leave a note; it is prepended to `this.state.notes` and lost on
 reload, which is the honest behaviour for a page with no server.
 
-**Friends** is four gnomes with an online dot, the hill they are on and what
-they last did.
+**Friends** is empty ("GNOMES YOU KNOW · NONE YET") until there is a way to
+make one; each would be a gnome with an online dot, the hill they are on and
+what they last did.
 
-The things in these three that ARE stored are the favourite flag on a hill,
-under `yard.favHills`, and the hills the bin took off, under
-`knoll-yard:hills-gone` — see §7.
+The things in these that ARE stored are the spaces you saved, under
+`yard.favHills`, and the spaces you visited, under `knoll-yard:visits` — see §7.
 
 ---
 
@@ -664,8 +678,8 @@ which is what "calmer" ought to mean rather than "nothing at all".
 | `knoll-yard:plot` | where each piece is now — `{ "the-oak": { x, y }, … }`, percentages, x/y only |
 | `knoll-yard:plot-default` | the arrangement `save layout` kept; what `reset layout` returns to |
 | `knoll-yard:owner` | the account these keys belong to (§0a); another account signing in sweeps them first. (`knoll-yard:tour`, the tour's old per-device mark, is no longer written or read.) |
-| `yard.favHills` | a JSON array of favourited hill names |
-| `knoll-yard:hills-gone` | a JSON array of the hill names the bin took off (§5). Both lists read as their defaults when what is stored is not an array. |
+| `yard.favHills` | a JSON array of the names of the spaces you saved, in the order saved — the hills (§5) |
+| `knoll-yard:visits` | a JSON array of `{ path, at }`, newest first, at most 12 — the spaces you visited, written by `/account.js` (§5). Both lists read as empty when what is stored is not an array. |
 | `knoll-yard:wall` `knoll-yard:flatfile` `knoll-yard:gif` | the dock's stores (tools.js: `Lab.store`) — the pieces, the tracing library, the gif tool's key |
 | `knoll-yard:touched` `knoll-yard:applied` | when a hand last wrote to the wall or the library; the `t` of the published doc last laid on the paper (§0, which page you see) |
 | `knoll-yard:key` `knoll-yard:me` `knoll-yard:liked` | the owner's key for the door; this browser's visitor id for the beacon; whether this browser liked the fence |

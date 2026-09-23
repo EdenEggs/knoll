@@ -1,7 +1,8 @@
 /* ── account.js — THE ACCOUNT CORNER ────────────────────────────────────────
    The right-hand end of the house bar, on every page of the site: a search
    like the yard's, and then either LOG IN and SIGN UP or — signed in — your
-   gnome, whose eyes follow the pointer and who takes you to your yard. One
+   gnome, whose eyes follow the pointer and who takes you to your yard (or,
+   once you have given the yard's K one, your picture: YOUR PICTURE). One
    file, so it is one corner everywhere; a page takes it with one tag.
 
    WHO IS SIGNED IN is known twice. At once, from the knoll_in cookie
@@ -52,10 +53,41 @@
     .then(v => (v && v.ok ? told(v.me || null) : unsure()))   // null only when the door says nobody is signed in
     .catch(unsure);
 
-  const api = window.KnollAccount = { id, me, gate, find: () => {} };
+  /* YOUR PICTURE is the door's (api/auth.js: THE PICTURE), and this device
+     keeps the last one it saw for the account signed in here, so a page
+     draws it at once instead of a gnome that turns into it. Signed out, or
+     the door saying there is none, and it is not kept. The yard sets it
+     (yard/index.html: THE PICTURE) through setPic. */
+  const PIC = 'knoll-account:pic', isPic = s => typeof s === 'string' && s.indexOf('data:image/jpeg;base64,') === 0;
+  const picOf = () => { try { const c = JSON.parse(localStorage.getItem(PIC)); return c && c.id === id && isPic(c.src) ? c.src : ''; } catch (e) { return ''; } };
+  const keepPic = src => { try { if (id && isPic(src)) localStorage.setItem(PIC, JSON.stringify({ id, src })); else localStorage.removeItem(PIC); } catch (e) {} };
+  if (!id) keepPic('');
+  me.then(who => { if (who === null || (who && who.avatar != null)) keepPic(who && who.avatar); });
+  let showPic = () => {};                  // the corner's, once there is one (below)
 
-  const bench = tag && tag.hasAttribute('data-bench') && document.documentElement.classList.contains('lab-local');
-  if (bench || /[?&]embed\b/.test(location.search)) return;   // the workbench's header, and the dashboard's picture of the yard
+  const api = window.KnollAccount = { id, me, gate, find: () => {}, pic: picOf, setPic: src => { keepPic(src); showPic(src); } };
+
+  if (/[?&]embed\b/.test(location.search)) return;   // the dashboard's picture of the yard, the yard's pictures of a space
+
+  /* ── the visit ─────────────────────────────────────────────────────────
+     The yard's Spaces you've visited is where you have been (yard/index.html:
+     THE HILLS ARE WHAT YOU SAVED), so a space you open, signed in, goes to the
+     front of knoll-yard:visits — a path and a time, and the yard maps the
+     path to a space by its own table. A picture of a space (?embed, the
+     yard's own mounds) returned above and is no visit. The yard's owner check clears the list with the rest of
+     knoll-yard: when somebody else signs in on this device.
+     ponytail: one device's list, not the account's; a door op if it must follow you. */
+  const SPACES = ['/toem2/'];
+  if (id && SPACES.indexOf(location.pathname) >= 0) try {
+    const k = 'knoll-yard:visits';
+    let v = JSON.parse(localStorage.getItem(k));
+    if (!Array.isArray(v)) v = [];
+    v = [{ path: location.pathname, at: Date.now() }].concat(v.filter(x => x && x.path !== location.pathname)).slice(0, 12);
+    localStorage.setItem(k, JSON.stringify(v));
+  } catch (e) {}
+
+  // the workbench's header is the bench's own controls: no corner there (a visit there still counts, above)
+  if (tag && tag.hasAttribute('data-bench') && document.documentElement.classList.contains('lab-local')) return;
 
   // ── the corner ──────────────────────────────────────────────────────────
   const css = document.createElement('style');
@@ -88,14 +120,25 @@
     '#knoll-account .ka-hits:empty{display:none}',
     "#knoll-account .ka-hits a{display:block;padding:6px 10px;color:" + INK + ";text-decoration:none;font:17px/1.1 'VT323',monospace;letter-spacing:1px;text-transform:uppercase}",
     '#knoll-account .ka-hits a:hover,#knoll-account .ka-hits a.is-first{background:#ffd23f;color:' + INK + '}',
+    // the gnome's menu, on the yard: the search's list, hung under the corner's right end
+    '#knoll-account .ka-menu{position:absolute;top:calc(100% + 12px);right:0;width:150px;margin:0;padding:4px 0;list-style:none;z-index:30;',
+    '  background:' + CREAM + ';border:2.5px solid ' + INK + ';box-shadow:3px 3px 0 rgba(60,50,80,.22)}',
+    "#knoll-account .ka-menu button{display:block;width:100%;padding:6px 10px;border:0;background:none;color:" + INK + ";text-align:left;cursor:pointer;font:17px/1.1 'VT323',monospace;letter-spacing:1px;text-transform:uppercase}",
+    '#knoll-account .ka-menu button:hover,#knoll-account .ka-menu button:focus-visible{background:#ffd23f;outline:0}',
+    '#knoll-account .ka-me[role="button"]{cursor:pointer}',
     "#knoll-account .ka-none{padding:6px 10px;font:15px/1.3 'VT323',monospace;letter-spacing:1px;color:#4a4054}",
     '#knoll-account .ka-me{display:block;height:42px;margin:-8px 2px -8px 4px;line-height:0;color:inherit;text-decoration:none}',
     '#knoll-account .ka-me[href]{cursor:pointer}',
     '#knoll-account .ka-me svg{display:block;overflow:visible;transition:transform .2s cubic-bezier(.3,1.5,.5,1)}',
     '#knoll-account .ka-me[href]:hover svg{transform:translateY(-2px) rotate(-4deg)}',
+    // your picture, where it has one: the gnome's head gives it its place, in the buttons' frame
+    '#knoll-account .ka-me.ka-has-pic svg{display:none}',
+    '#knoll-account .ka-pic{display:block;width:30px;height:30px;margin:6px 0;object-fit:cover;background:' + CREAM + ';border:2.5px solid ' + INK + ';',
+    '  box-shadow:3px 3px 0 rgba(60,50,80,.22);transition:transform .2s cubic-bezier(.3,1.5,.5,1)}',
+    '#knoll-account .ka-me[href]:hover .ka-pic{transform:translateY(-2px) rotate(-4deg)}',
     '.lab-head.ka-open{overflow:visible}',            // lab.css clips the bar (for the workbench's long hint); an open search hangs below it
     '@media (max-width:560px){#knoll-account{gap:7px}#knoll-account .ka-btn{padding:0 8px;font-size:16px}#knoll-account .ka-lens{padding:0}}',
-    '@media (prefers-reduced-motion:reduce){#knoll-account .ka-btn,#knoll-account .ka-me svg{transition:none}}'
+    '@media (prefers-reduced-motion:reduce){#knoll-account .ka-btn,#knoll-account .ka-me svg,#knoll-account .ka-pic{transition:none}}'
   ].join('\n');
 
   const corner = document.createElement('div');
@@ -134,11 +177,18 @@
       '<rect x="54" y="84" width="112" height="22" rx="11" fill="#b83739" stroke="#17120b" stroke-width="5"/>' +
       '<rect x="68" y="90" width="26" height="6" rx="3" fill="rgba(255,255,255,0.35)"/>' +
       '<circle cx="110" cy="12" r="10" fill="#fdf7e3" stroke="#17120b" stroke-width="5"/>' +
-    '</g></svg></a>';
+    '</g></svg><img class="ka-pic" alt="" hidden></a>' +
+    '<ul class="ka-menu" hidden><li><button type="button" class="ka-out">log out</button></li><li class="ka-none" hidden>the door did not answer — try again</li></ul>';
   const $ = s => corner.querySelector(s);
   const lens = $('.ka-lens'), box = $('.ka-box'), input = $('input'), hits = $('.ka-hits');
   const inBtn = $('.ka-in'), upBtn = $('.ka-up'), gnome = $('.ka-me'), eyes = $('.ka-eyes'), head = $('.ka-head');
+  const menu = $('.ka-menu'), outBtn = $('.ka-out'), outNote = menu.querySelector('.ka-none'), pic = $('.ka-pic');
   let bar = null;                        // the house bar the corner stands in (mount(), below)
+  showPic = src => {
+    const on = isPic(src);
+    if (on) pic.src = src; else pic.removeAttribute('src');
+    pic.hidden = !on; gnome.classList.toggle('ka-has-pic', on);
+  };
 
   // ── signed in, or not ───────────────────────────────────────────────────
   function draw(who) {
@@ -147,11 +197,17 @@
     upBtn.hidden = on || PAGE === 'signup';
     gnome.hidden = !on;
     if (on) {
-      const name = who.name || '';
+      const name = who.tag || who.name || '';     // Mossy#3 (api/wall.js: THE NAMES)
       gnome.setAttribute('aria-label', name ? name + '’s yard' : 'your yard');
       gnome.title = name ? 'your yard — ' + name : 'your yard';
-      // the yard is the page you are on: named, not a link back to itself
-      if (PAGE === 'yard') { gnome.removeAttribute('href'); gnome.setAttribute('aria-current', 'page'); }
+      showPic(who.avatar != null ? who.avatar : picOf());   // the door's word on it, or — before it has answered — this device's
+      // the yard is the page you are on: not a link back to itself, but the menu with LOG OUT in it
+      if (PAGE === 'yard') {
+        gnome.removeAttribute('href'); gnome.setAttribute('aria-current', 'page');
+        gnome.setAttribute('role', 'button'); gnome.tabIndex = 0;
+        gnome.setAttribute('aria-haspopup', 'true'); gnome.setAttribute('aria-expanded', String(!menu.hidden));
+        gnome.title = 'you — ' + (name || 'gnome');
+      }
       else gnome.href = '/yard/';
     } else {
       inBtn.href = gate('login');
@@ -194,7 +250,7 @@
   window.addEventListener('scroll', forget, { passive: true, capture: true });
   window.addEventListener('resize', forget, { passive: true });
   window.addEventListener('mousemove', e => {
-    if (still || gnome.hidden) return;
+    if (still || gnome.hidden || !pic.hidden) return;   // a picture has no eyes to turn
     mx = e.clientX; my = e.clientY;
     if (raf) return;
     raf = requestAnimationFrame(() => {
@@ -211,11 +267,8 @@
   const PLACES = [                         // name, where, the other words it answers to, who it is for
     ['Knoll — the front page', '/', 'home hill lab front knoll'],
     ['TOEM 2', '/toem2/', 'toem wall plates levels game'],
-    ['The Iron Hive', '/ironhive/', 'iron hive bench'],
     ['Your yard', '/yard/', 'profile plot mine settings gnome', 'in'],
-    ['Your dashboard', '/dashboard/', 'numbers stats visits likes', 'in'],
-    ['Log in', '/login/', 'gate sign in', 'out'],
-    ['Sign up', '/signup/', 'join petition residency account new', 'out']
+    ['Your dashboard', '/dashboard/', 'numbers stats visits likes', 'in']
   ];
   function list() {
     const words = input.value.toLowerCase().split(/\s+/).filter(Boolean);
@@ -224,7 +277,7 @@
     hits.textContent = '';
     found.forEach((p, i) => {
       const li = document.createElement('li'), a = document.createElement('a');
-      a.href = p[3] === 'out' ? gate(p[1].slice(1, -1)) : p[1];
+      a.href = p[1];
       a.textContent = p[0];
       if (i === 0 && words.length) a.className = 'is-first';
       li.appendChild(a); hits.appendChild(li);
@@ -262,6 +315,25 @@
   });
   document.addEventListener('pointerdown', e => { if (!box.hidden && !corner.contains(e.target)) open(false); }, true);
   api.find = text => open(true, String(text == null ? '' : text));
+
+  // ── the gnome's menu (the yard only: everywhere else the gnome is a link) ─
+  function menuOpen(on) {
+    menu.hidden = !on; outNote.hidden = true;
+    if (PAGE === 'yard') gnome.setAttribute('aria-expanded', String(on));
+    if (bar) bar.classList.toggle('ka-open', on || !box.hidden);
+    if (on) outBtn.focus();
+  }
+  gnome.addEventListener('click', e => { if (PAGE !== 'yard') return; e.preventDefault(); menuOpen(menu.hidden); });
+  gnome.addEventListener('keydown', e => { if (PAGE === 'yard' && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); menuOpen(menu.hidden); } });
+  menu.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); menuOpen(false); gnome.focus(); } });
+  document.addEventListener('pointerdown', e => { if (!menu.hidden && !corner.contains(e.target)) menuOpen(false); }, true);
+  // the same door and the same way out as the yard's settings drawer (yard/index.html: signOut)
+  outBtn.addEventListener('click', () => {
+    outBtn.disabled = true;
+    fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ op: 'logout' }) })
+      .then(r => r.json(), () => null).catch(() => null)
+      .then(out => { if (out && out.ok) return location.assign('/login/'); outBtn.disabled = false; outNote.hidden = false; });
+  });
 
   // ── into the bar ────────────────────────────────────────────────────────
   const live = () => Array.from(document.querySelectorAll('.lab-head, .knoll-head')).find(el => el.isConnected && !el.closest('x-dc')) || null;

@@ -9,8 +9,8 @@
    an address, the secret word as it is kept (and the address, which is
    not), the two cookies and their flags, log-in and the wrong word, the
    hour's caps, log-out, a lapsed session, other sites' posts, the one way
-   in per address, the name and the tour, and TOEM 2's door taking the
-   cookie.
+   in per address, the name, the tour and the picture, and TOEM 2's door
+   taking the cookie.
 
      node lab2/perf/verify-auth.js
 */
@@ -65,6 +65,7 @@ const flags = (r, name) => r.cookies.find(s => s.startsWith(name + '=')) || '';
   A.strictEqual(r.status, 200, 'a good petition makes an account: ' + JSON.stringify(r.json));
   const mossy = r.json.me, c1 = jar(r);
   A.deepStrictEqual([mossy.name, mossy.toured, mossy.id], ['Mossy', false, wall.userKey('mossy@example.com')], 'the account is the address\'s key, named, not yet toured');
+  A.deepStrictEqual([mossy.n, mossy.tag], [1, 'Mossy#1'], 'the first Mossy is Mossy#1');
   A.ok(/^[0-9a-f]{32}$/.test(c1.knoll_s) && c1.knoll_in === mossy.id, 'two cookies: the session, and the id');
   A.ok(/HttpOnly/.test(flags(r, 'knoll_s')) && /SameSite=Lax/.test(flags(r, 'knoll_s')) && /Max-Age=7776000/.test(flags(r, 'knoll_s')), 'the session cookie is HttpOnly, SameSite=Lax, ninety days');
   A.ok(!/HttpOnly/.test(flags(r, 'knoll_in')) && /SameSite=Lax/.test(flags(r, 'knoll_in')), 'the id cookie is readable by the page, SameSite=Lax');
@@ -99,6 +100,61 @@ const flags = (r, name) => r.cookies.find(s => s.startsWith(name + '=')) || '';
   r = await gate({ op: 'toured' }, sent(c1));
   r = await who(sent(c1));
   A.strictEqual(r.json.me.toured, true, 'once shown, the tour is marked on the account');
+
+  // ── the picture (api/auth.js: THE PICTURE) ──────────────────────────────
+  const JPEG = 'data:image/jpeg;base64,' + Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4, 5]).toString('base64');
+  A.strictEqual(r.json.me.avatar, '', 'an account starts with no picture');
+  r = await gate({ op: 'avatar', avatar: JPEG });
+  A.deepStrictEqual([r.status, r.json.code], [401, 'who'], 'a picture goes on a signed-in account only');
+  for (const [v, what] of [['data:image/svg+xml;base64,' + Buffer.from('<svg onload="alert(1)"/>').toString('base64'), 'an SVG'],
+                           ['data:image/jpeg;base64,' + Buffer.from('<html>no jpeg</html>').toString('base64'), 'a JPEG in name only'],
+                           [JPEG + 'A'.repeat(60000 - JPEG.length + 1), 'a picture one character past the size'],
+                           [{ src: JPEG }, 'a picture that is not a string'], ['javascript:alert(1)', 'an address for a picture']]) {
+    r = await gate({ op: 'avatar', avatar: v }, sent(c1));
+    A.deepStrictEqual([r.status, r.json.code], [400, 'avatar'], 'the gate refuses ' + what);
+  }
+  r = await gate({ op: 'avatar', avatar: JPEG }, sent(c1));
+  A.strictEqual(r.status, 200, 'a small JPEG goes on');
+  r = await who(sent(c1));
+  A.strictEqual(r.json.me.avatar, JPEG, '…and comes back with who you are, which every page asks');
+
+  // ── the numbers (api/wall.js: THE NAMES) ────────────────────────────────
+  r = await gate({ op: 'name', name: 'Mossy' }, sent(c1));
+  A.deepStrictEqual([r.json.name, r.json.n, r.json.tag], ['Mossy', 1, 'Mossy#1'], 'going back to a name one has had gives back its number');
+  r = await gate({ op: 'name', name: 'MOSSY' }, sent(c1));
+  A.strictEqual(r.json.tag, 'MOSSY#1', '…and so does changing only its capitals');
+  r = await gate(Object.assign({}, good, { email: 'other@example.com', name: 'mossy' }), { 'x-real-ip': '10.8.8.8' });
+  const other = jar(r);
+  A.deepStrictEqual([r.status, r.json.me.tag], [200, 'mossy#2'], 'a second gnome may be called Mossy too — capitals or none, they are mossy#2');
+  A.strictEqual(await wall.db('HGET', wall.K.tags, 'mossy#2'), wall.userKey('other@example.com'), 'a tag says whose it is');
+  r = await gate({ op: 'name', name: 'Mossy#1' }, sent(other));
+  A.strictEqual(r.json.tag, 'Mossy1#1', 'a # typed into a name is no tag: it is dropped');
+  const gone = (await wall.db('LRANGE', wall.K.names(mossy.id), 0, -1)).map(s => JSON.parse(s).name);
+  A.deepStrictEqual(gone, ['MOSSY', 'Mossy', 'Mossy of the Hollow and', 'Mossy M', 'Mossy'], 'every name an account has gone by is kept, newest first');
+  await wall.db('SET', wall.K.tagN('crowded'), String(wall.TAG_MAX));
+  r = await gate(Object.assign({}, good, { email: 'crowd@example.com', name: 'Crowded' }), { 'x-real-ip': '10.8.8.9' });
+  A.deepStrictEqual([r.status, r.json.code], [409, 'name-full'], 'a name a million gnomes have taken is full');
+  r = await gate(Object.assign({}, good, { email: 'crowd@example.com', name: 'Roomy' }), { 'x-real-ip': '10.8.8.9' });
+  A.deepStrictEqual([r.status, r.json.me && r.json.me.tag], [200, 'Roomy#1'], '…and the address it was refused with is not held: another name takes it');
+  const old = 'fe'.repeat(8), oldIn = () => ({ cookie: 'knoll_s=' + oldS + '; knoll_in=' + old });
+  await wall.db('HSET', wall.K.user(old), 'made', '5', 'name', 'Old Timer', 'role', 'user');
+  const oldS = await wall.mintSession(old);
+  r = await who(oldIn());
+  A.strictEqual(r.json.me.tag, 'Old Timer#1', 'an account named before the numbers is numbered the first time it is seen');
+  r = await call(auth, 'GET', '/api/auth?users=1', undefined, sent(c1));
+  A.deepStrictEqual([r.status, r.json.code], [403, 'role'], 'the list of accounts is not for everybody');
+  await wall.db('HSET', wall.K.user(mossy.id), 'role', 'mod');
+  r = await call(auth, 'GET', '/api/auth?users=1', undefined, sent(c1));
+  A.ok(r.status === 200 && r.json.count === 4 && r.json.users.map(x => x.tag).sort().join() === 'MOSSY#1,Mossy1#1,Old Timer#1,Roomy#1' && r.json.users[3].tag === 'Old Timer#1',
+    'a moderator gets every account with its tag, newest first — the one from before the numbers counted too: ' + JSON.stringify(r.json.users && r.json.users.map(x => x.tag)));
+  A.ok(!JSON.stringify(r.json).includes('@') && !JSON.stringify(r.json).includes('s1$'), '…and no address or secret word in it');
+  await wall.db('HSET', wall.K.user(mossy.id), 'banned', '1');
+  r = await call(auth, 'GET', '/api/auth?users=1', undefined, sent(c1));
+  A.strictEqual(r.status, 403, 'a banned moderator gets no list');
+  await wall.db('HSET', wall.K.user(mossy.id), 'role', 'user', 'banned', '0');
+  await wall.db('HSET', wall.K.user(old), 'banned', '1');
+  r = await gate({ op: 'name', name: 'Anew' }, oldIn());
+  A.deepStrictEqual([r.status, r.json.code], [403, 'banned'], 'a banned account keeps the name it has');
 
   // ── other sites, and other shapes ───────────────────────────────────────
   r = await gate({ op: 'name', name: 'x' }, Object.assign(sent(c1), { origin: 'https://evil.example' }));

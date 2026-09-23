@@ -95,7 +95,7 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
     d = await doc(); check('the wall has the moved piece, and 384 pieces still', d.rev === 2 && at(d, pick.n).x === moved.x && d.wall.items.length === 384);
     r = await GET('?log=1'); const l0 = r.json.log[0];
     check("the log's head is revision 2, by the newcomer, approved by the admin", l0.rev === 2 && l0.by === U.nu && l0.via === U.adm && l0.how === 'approved' && l0.n.put === 1, j(l0));
-    const rev2 = JSON.parse(await API.db('GET', API.K.revN(2)));
+    const rev2 = JSON.parse(await API.db('GET', API.pageKeys(API.HOME).revN(2)));
     check('the revision keeps the put and what the piece was before', rev2.put[pick.n].x === moved.x && rev2.prev[pick.n].x === pick.x);
     r = await GET('?edit=' + e1); check('the edit reads live, at revision 2', r.json.edit.status === 'live' && r.json.edit.rev === 2);
     r = await POST({ op: 'review', edit: e2, do: 'reject', why: 'not there' }, 'adm'); check('the admin rejects the other', r.json.status === 'rejected');
@@ -316,6 +316,32 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
     r = await edit('con2', {}, [v5.n]); const m5 = r.json.edit; r = await POST({ op: 'review', edit: m5, do: 'reject', why: 'no' }, 'mod'); check('…or vetoes one', r.json.status === 'rejected');
     r = await GET('?at=2'); check('?at=2 is revision 2, with its put and what was before', r.json.rev && r.json.rev.rev === 2 && !!r.json.rev.prev && !!r.json.rev.put, j(Object.keys(r.json.rev || {})));
     r = await GET('?at=0'); check('?at=0 → 400', r.status === 400); r = await GET('?at=99999'); check('?at=99999 → 404', r.status === 404);
+
+    // ── 17 · more pages than one ─────────────────────────────────────────
+    r = await POST({ op: 'page', slug: 'meadow', title: 'The Meadow' }, 'tr'); check('only a moderator makes a page, for now', r.status === 403, brief(r));
+    r = await POST({ op: 'page', slug: 'Bad Slug!' }, 'mod'); check('a page is named in lower-case letters, numbers and dashes', r.status === 400 && r.json.code === 'slug', brief(r));
+    r = await POST({ op: 'page', slug: 'toem2' }, 'mod'); check('…and not after the first page', r.status === 409, brief(r));
+    r = await POST({ op: 'page', slug: 'meadow', title: 'The Meadow' }, 'mod'); check('a moderator makes one', r.json.ok && r.json.page.slug === 'meadow', j(r.json));
+    r = await POST({ op: 'page', slug: 'meadow' }, 'adm'); check('…once', r.status === 409 && r.json.code === 'taken');
+    r = await GET('?pages=1'); check('?pages lists the first page and the new one', j(r.json.pages.map(p => p.slug)) === j(['toem2', 'meadow']) && r.json.pages[1].title === 'The Meadow', j(r.json.pages));
+    r = await GET('?page=nowhere'); check('a page nobody made is a 404', r.status === 404 && r.json.code === 'page');
+    r = await POST({ op: 'edit', page: '../doc', base: 1, put: { [nm(199)]: fresh() }, del: [] }, 'adm'); check('…and so is an edit to one', r.status === 404, brief(r));
+    const toemRev = await head();
+    r = await GET('?page=meadow'); check('a new page opens blank, at revision 1', r.json.rev === 1 && r.json.wall.items.length === 0 && r.json.flatfile.list.length === 0, brief(r));
+    r = await POST({ op: 'edit', page: 'meadow', base: 1, put: { [nm(200)]: fresh() }, del: [] }, 'adm');
+    check("the admin's edit to it is live, at the page's own revision 2", r.json.status === 'live' && r.json.rev === 2, brief(r));
+    check("…and TOEM 2's wall has not moved", (await head()) === toemRev);
+    r = await POST({ op: 'edit', page: 'meadow', base: 2, put: { [nm(201)]: fresh() }, del: [] }, 'nu6'); const mq = r.json.edit;
+    check("a newcomer's edit to it waits, in the page's own queue", r.json.status === 'queued' && (await GET('?queue=1&page=meadow')).json.queue.some(e => e.id === mq) && !(await GET('?queue=1')).json.queue.some(e => e.id === mq), brief(r));
+    r = await POST({ op: 'review', edit: mq, do: 'approve' }, 'mod'); d = (await GET('?page=meadow')).json;
+    check('approved, it lands on its own page — found from the edit, not the request', r.json.rev === 3 && !!at(d, nm(201)) && (await head()) === toemRev && (await GET('?edit=' + mq)).json.edit.page === 'meadow', brief(r));
+    r = await GET('?log=1&page=meadow'); check('the page keeps its own log', j(r.json.log.map(e => e.rev)) === j([3, 2, 1]), j(r.json.log.map(e => e.rev)));
+    check("…its entries carry the author's tag", /#\d+$/.test(r.json.log[1].name) && r.json.log[1].by === U.adm, r.json.log[1].name);
+    r = await POST({ op: 'revert', page: 'meadow', rev: 2 }, 'adm'); d = (await GET('?page=meadow')).json;
+    check('a revert names its page: the piece comes off the meadow, and TOEM 2 is untouched', r.json.status === 'live' && !at(d, nm(200)) && (await head()) === toemRev, brief(r));
+    r = await GET('?audit=1', 'tr'); check("the moderators' record is theirs", r.status === 403);
+    r = await GET('?audit=1', 'mod2'); check('…and not a banned moderator\'s (section 11 banned one)', r.status === 403);
+    r = await GET('?audit=1', 'mod'); check('…and it says who made the page, and who banned whom', r.json.audit.some(e => e.what === 'page' && e.page === 'meadow' && e.by === U.mod) && r.json.audit.some(e => e.what === 'role' && e.banned === true), j(r.json.audit.slice(0, 3)));
 
     // ── 14 · nothing else was touched ────────────────────────────────────
     check('the real wall-seed.json is untouched', hash(SEED) === seedBefore);

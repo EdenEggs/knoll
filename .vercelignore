@@ -30,3 +30,8 @@ folder_*/*.keep-bak
 folder_*/*.tmp
 .folder_*.making
 yard/looks
+yard/*.bat
+yard/*.lnk
+yard/*.ico
+YardView/*.lnk
+YardView/*.ico

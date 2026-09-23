@@ -44,8 +44,40 @@
    paths (the tracing table's own shape and nothing else — api/wall.js's
    cleanTracing), a video's id and size, a gif's address (KLIPY's hosts).
 
+   PROPOSALS (2026-09-22). A profile is a gnome's name and their yard. The
+   owner changes either whenever they like (a save here; op 'name' at
+   api/auth.js). Anybody else signed in may PROPOSE a change — a new name for
+   them, their yard as the proposer would have it, or both, and a line on
+   why — and it waits for the owner to take it or leave it. A moderator may
+   leave it for them (spam, say), and never takes one: nobody's name or yard
+   changes but by their own hand.
+
+     POST { op: 'propose', hill: 'u-<id>', name?, doc?, why? } → { ok, id }
+          { op: 'decide', id, do: 'accept' | 'decline' | 'withdraw', why?, force? }
+     GET  ?proposals=1&hill=u-<id>   the open ones (the owner, a moderator)
+          ?proposal=<id>             one, with its yard (the owner, the proposer, a moderator)
+
+   Taking a yard puts it up as the owner's own save would, a version like
+   any other. It was proposed against the yard as it stood (`base`, that
+   save's t): if the owner has saved since, taking it would throw that save
+   away, so it is refused as stale unless the owner says `force`. A proposed
+   yard is checked as a save is (clean()) before it is kept; the proposer may
+   withdraw it; open ones lapse after PROP_DAYS, and a decided one keeps its
+   record — not its yard — PROP_KEEP days. Caps: PROP_BY open per proposer,
+   PROP_IP per address, PROP_ON per yard, PROPS_HOUR an hour, PROP_MAX bytes.
+
+   A banned account publishes nothing, and proposes and decides nothing.
+
    ponytail: a save is two Blob advanced operations — Hobby's 2,000 a month
-   is a thousand saves across every yard on the site. */
+   is a thousand saves across every yard on the site. And a proposal is the
+   whole yard, not a patch: the yard's pieces carry no names to patch by
+   (TOEM 2's do — api/wall.js); when they do, a proposal can be only the
+   pieces it changes, and merge with the owner's saves instead of waiting on
+   them. A yard over PROP_MAX cannot be proposed whole. The stale check
+   reads latest.json through the Blob store's 60 s edge cache, so a save
+   made in the minute before can slip past it — as it can past the looks
+   list of a save made that soon after another; a cache-busting read (a MISS,
+   one simple operation) is the upgrade if that ever bites. */
 'use strict';
 
 const fs = require('fs');
@@ -60,6 +92,8 @@ const KEEP = 40;                             // versions kept per hill
 const MAX_BODY = 4 * 1024 * 1024;            // Vercel's own body limit is 4.5 MB
 const HILL = /^(yard|u-[0-9a-f]{16})$/, MINE = /^u-[0-9a-f]{16}$/;
 const SAVES = 30;                            // an hour, per yard of one's own
+const PROP_RE = /^p[a-z0-9]{12,40}$/, PROP_MAX = 1024 * 1024;   // a proposed yard: the wall's own cap on a post (api/wall.js)
+const PROP_BY = 3, PROP_IP = 6, PROP_ON = 20, PROPS_HOUR = 10, PROP_DAYS = 7, PROP_KEEP = 30;
 
 // ── replies ───────────────────────────────────────────────────────────────
 function answer(res, status, out) {
@@ -188,7 +222,8 @@ function clean(d) {
 }
 
 // ── GET ───────────────────────────────────────────────────────────────────
-async function get(res, q) {
+async function get(req, res, q) {
+  if (q.get('proposal') || q.get('proposals')) return readProposals(req, res, q);
   const hill = q.get('hill') || 'yard';
   if (!HILL.test(hill)) return answer(res, 400, { ok: false, error: 'not a hill' });
   const st = storeFor();
@@ -208,6 +243,7 @@ async function get(res, q) {
 async function post(req, res) {
   let body;
   try { body = await readBody(req); } catch (e) { return answer(res, 400, { ok: false, error: e.message }); }
+  if (body && body.op) return proposalOp(req, res, body);   // a save is a hill and a doc; anything with an op is a PROPOSAL's
   const hill = str(body.hill || 'yard', 32);
   if (!HILL.test(hill)) return answer(res, 400, { ok: false, error: 'not a hill' });
 
@@ -219,10 +255,9 @@ async function post(req, res) {
     if (!W.storeFor()) return answer(res, 503, { ok: false, error: 'this site has no store for accounts yet, so nobody is signed in to publish' });
     const me = await W.whoIs(req);
     if (!me) return answer(res, 401, { ok: false, code: 'who', error: 'your sign-in has lapsed — log in again to save' });
+    if (me.banned) return answer(res, 403, { ok: false, code: 'banned', error: 'this account may not publish' });
     if ('u-' + me.id !== hill) return answer(res, 403, { ok: false, code: 'theirs', error: 'that yard is somebody else\'s' });
-    const k = W.K.rl('hill:' + me.id, Math.floor(Date.now() / 36e5)), n = await W.db('INCR', k);
-    if (n === 1) await W.db('EXPIRE', k, 3600);
-    if (n > SAVES) return answer(res, 429, { ok: false, code: 'rate', error: SAVES + ' saves in an hour is the most a yard takes — try again in a while' });
+    if (!(await withinHour('hill:' + me.id, SAVES))) return answer(res, 429, { ok: false, code: 'rate', error: SAVES + ' saves in an hour is the most a yard takes — try again in a while' });
   } else if (want) {
     const got = req.headers['x-knoll-key'];
     if (!got || !sameSecret(got, want)) return answer(res, 401, { ok: false, error: 'this yard wants its owner\'s key' });
@@ -232,25 +267,133 @@ async function post(req, res) {
 
   let doc;
   try { doc = clean(body.doc); } catch (e) { return answer(res, 400, { ok: false, error: e.message }); }
+  answer(res, 200, Object.assign({ ok: true, store: st.kind }, await save(st, hill, doc)));
+}
+// a clean doc goes up: latest, and a version beside it — the owner's save, or a proposal they took
+async function save(st, hill, doc) {
   const t = Date.now(), n = doc.wall.items.length;
   const prev = await st.get('hills/' + hill + '/latest.json');
   const was = (prev && Array.isArray(prev.looks) ? prev.looks : []).filter(l => l && Number.isFinite(+l.t));
   const looks = [{ t, n }].concat(was).slice(0, KEEP);
   Object.assign(doc, { hill, t, looks });
-
   await st.put('hills/' + hill + '/v/' + t + '.json', doc, 31536000);
   await st.put('hills/' + hill + '/latest.json', doc, 60);
   await st.del(was.slice(KEEP - 1).map(l => 'hills/' + hill + '/v/' + l.t + '.json'));   // the versions that fell off the end
-  answer(res, 200, { ok: true, t, n, looks, store: st.kind });
+  return { t, n, looks };
+}
+async function withinHour(who, cap) {        // one more against the hour (api/wall.js's rl: keys); false once past the cap
+  const k = W.K.rl(who, Math.floor(Date.now() / 36e5)), n = await W.db('INCR', k);
+  if (n === 1) await W.db('EXPIRE', k, 3600);
+  return n <= cap;
+}
+
+// ── PROPOSALS ─────────────────────────────────────────────────────────────
+async function openOnes(key) {               // a list of proposal ids, kept to the ones still open
+  const ids = await W.db('LRANGE', key, 0, -1);
+  if (!ids.length) return [];
+  const raws = await W.dbm(ids.map(id => ['GET', W.K.prop(id)])), open = [], gone = [];
+  raws.forEach((raw, i) => { const p = raw && JSON.parse(raw); if (p && p.status === 'open') open.push(p); else gone.push(['LREM', key, 0, ids[i]]); });
+  if (gone.length) await W.dbm(gone);
+  return open;
+}
+async function proposalOp(req, res, body) {
+  if (!W.sameSite(req)) return answer(res, 403, { ok: false, code: 'origin', error: 'that post came from another site' });
+  if (!W.storeFor()) return answer(res, 503, { ok: false, error: 'this site has no store for accounts yet' });
+  const me = await W.whoIs(req);
+  if (!me) return answer(res, 401, { ok: false, code: 'who', error: 'sign in to do that' });
+  if (me.banned) return answer(res, 403, { ok: false, code: 'banned', error: 'this account may not change anybody\'s yard' });
+  if (body.op === 'propose') return propose(req, res, me, body);
+  if (body.op === 'decide') return decide(res, me, body);
+  answer(res, 400, { ok: false, code: 'op', error: 'no such op' });
+}
+async function propose(req, res, me, body) {
+  const hill = str(body.hill, 32), owner = hill.slice(2);
+  if (!MINE.test(hill)) return answer(res, 400, { ok: false, error: 'a proposal goes to a gnome\'s own yard' });
+  if (owner === me.id) return answer(res, 400, { ok: false, code: 'yours', error: 'it is your own yard — change it and save' });
+  if (!(await W.db('HGET', W.K.user(owner), 'made'))) return answer(res, 404, { ok: false, code: 'user', error: 'no such gnome' });
+  const to = {};
+  let doc = null;
+  if (body.name != null && !(to.name = W.cleanName(body.name))) return answer(res, 400, { ok: false, code: 'name', error: 'a proposed name has to be a name' });
+  if (body.doc != null) {
+    try { doc = JSON.stringify(clean(body.doc)); } catch (e) { return answer(res, 400, { ok: false, code: 'doc', error: e.message }); }
+    if (doc.length > PROP_MAX) return answer(res, 413, { ok: false, code: 'size', error: 'a proposed yard can be ' + (PROP_MAX >> 10) + ' KB at most' });
+    Object.assign(to, { doc: true, pieces: JSON.parse(doc).wall.items.length });
+  }
+  if (!to.name && !doc) return answer(res, 400, { ok: false, code: 'empty', error: 'propose a name, or a yard, or both' });
+  const st = storeFor();
+  if (doc && st.kind === 'none') return answer(res, 503, { ok: false, error: 'this site has no store for yards yet' });
+  if (!(await withinHour('prop:' + me.id, PROPS_HOUR))) return answer(res, 429, { ok: false, code: 'rate', error: PROPS_HOUR + ' proposals in an hour is plenty — try again in a while' });
+  const ip = W.ipHash(req);
+  const [mine, here, there] = await Promise.all([openOnes(W.K.propsBy(me.id)), openOnes(W.K.propsIp(ip)), openOnes(W.K.props(hill))]);
+  if (mine.length >= PROP_BY) return answer(res, 429, { ok: false, code: 'full', error: 'you have ' + PROP_BY + ' proposals waiting already — wait for one of them' });
+  if (here.length >= PROP_IP) return answer(res, 429, { ok: false, code: 'full', error: 'this address has ' + PROP_IP + ' proposals waiting already' });
+  if (there.length >= PROP_ON) return answer(res, 429, { ok: false, code: 'full', error: 'that yard has ' + PROP_ON + ' proposals waiting already' });
+  const latest = doc ? await st.get('hills/' + hill + '/latest.json') : null;
+  const id = 'p' + Date.now().toString(36) + crypto.randomBytes(6).toString('hex'), ex = PROP_DAYS * 86400;
+  const p = { id, hill, by: me.id, name: me.tag || me.name, at: Date.now(), base: latest ? latest.t : 0, why: W.text(body.why, 140), to, status: 'open' };
+  const cmds = [['SET', W.K.prop(id), JSON.stringify(p), 'EX', ex], ['RPUSH', W.K.props(hill), id], ['RPUSH', W.K.propsBy(me.id), id],
+                ['RPUSH', W.K.propsIp(ip), id], ['EXPIRE', W.K.propsIp(ip), ex]];
+  if (doc) cmds.push(['SET', W.K.propDoc(id), doc, 'EX', ex]);
+  await W.dbm(cmds);
+  answer(res, 200, { ok: true, id, status: 'open' });
+}
+async function decide(res, me, body) {
+  const id = String(body.id || ''), what = body.do;
+  if (!PROP_RE.test(id) || !['accept', 'decline', 'withdraw'].includes(what)) return answer(res, 400, { ok: false, code: 'decide', error: 'decide wants a proposal id, and accept, decline or withdraw' });
+  const raw = await W.db('GET', W.K.prop(id));
+  if (!raw) return answer(res, 404, { ok: false, code: 'proposal', error: 'no such proposal (an open one lapses after ' + PROP_DAYS + ' days)' });
+  const p = JSON.parse(raw), owner = p.hill.slice(2);
+  if (p.status !== 'open') return answer(res, 409, { ok: false, code: 'decided', error: 'that proposal is ' + p.status + ' already' });
+  const may = what === 'withdraw' ? p.by === me.id : what === 'accept' ? me.id === owner : me.id === owner || W.isMod(me);
+  if (!may) return answer(res, 403, { ok: false, code: 'theirs', error: { withdraw: 'only its proposer withdraws a proposal', accept: 'only the yard\'s owner takes a change to it', decline: 'that is for the yard\'s owner to decide' }[what] });
+  if (what === 'accept') {
+    const st = storeFor();
+    let doc = null;
+    if (p.to.doc) {
+      if (st.kind === 'none') return answer(res, 503, { ok: false, error: 'this site has no store for yards yet' });
+      const latest = await st.get('hills/' + p.hill + '/latest.json');
+      if ((latest ? latest.t : 0) !== p.base && !body.force) return answer(res, 409, { ok: false, code: 'stale', error: 'the yard has been saved since this was proposed — look again, or take it anyway (force)', t: latest && latest.t });
+      try { doc = clean(JSON.parse((await W.db('GET', W.K.propDoc(id))) || 'null')); }
+      catch (e) { return answer(res, 409, { ok: false, code: 'doc', error: 'that yard no longer passes the checks a save does: ' + e.message }); }
+    }
+    if (p.to.name) await W.rename(owner, p.to.name, p.by);   // first: a name that cannot be had leaves the yard as it was, and the proposal open
+    if (doc) p.took = (await save(st, p.hill, doc)).t;
+  }
+  Object.assign(p, { status: { accept: 'accepted', decline: 'declined', withdraw: 'withdrawn' }[what], decided: { by: me.id, at: Date.now() } });
+  if (body.why) p.answer = W.text(body.why, 140);
+  await W.dbm([['SET', W.K.prop(id), JSON.stringify(p), 'EX', PROP_KEEP * 86400], ['DEL', W.K.propDoc(id)],
+               ['LREM', W.K.props(p.hill), 0, id], ['LREM', W.K.propsBy(p.by), 0, id]]);
+  if (me.id !== owner && me.id !== p.by) await W.audit(me.id, 'proposal', { id, hill: p.hill, status: p.status });   // a moderator, declining on the owner's behalf
+  answer(res, 200, { ok: true, id, status: p.status, t: p.took });
+}
+async function readProposals(req, res, q) {
+  if (!W.storeFor()) return answer(res, 503, { ok: false, error: 'this site has no store for accounts yet' });
+  const me = await W.whoIs(req);
+  if (!me) return answer(res, 401, { ok: false, code: 'who', error: 'sign in to see proposals' });
+  const id = q.get('proposal');
+  if (id) {
+    if (!PROP_RE.test(id)) return answer(res, 400, { ok: false, error: 'not a proposal id' });
+    const raw = await W.db('GET', W.K.prop(id));
+    if (!raw) return answer(res, 404, { ok: false, code: 'proposal', error: 'no such proposal' });
+    const p = JSON.parse(raw);
+    if (p.by !== me.id && p.hill !== 'u-' + me.id && !W.isMod(me)) return answer(res, 403, { ok: false, code: 'theirs', error: 'that proposal is between two other gnomes' });
+    if (p.status === 'open' && p.to.doc) p.doc = JSON.parse((await W.db('GET', W.K.propDoc(id))) || 'null');
+    return answer(res, 200, { ok: true, proposal: p });
+  }
+  const hill = q.get('hill') || '';
+  if (!MINE.test(hill)) return answer(res, 400, { ok: false, error: 'not a gnome\'s yard' });
+  if (hill !== 'u-' + me.id && !W.isMod(me)) return answer(res, 403, { ok: false, code: 'theirs', error: 'those are for the yard\'s owner' });
+  answer(res, 200, { ok: true, proposals: await openOnes(W.K.props(hill)) });
 }
 
 module.exports = async function handler(req, res) {
   try {
     const q = new URL(req.url, 'http://x').searchParams;
-    if (req.method === 'GET') return await get(res, q);
+    if (req.method === 'GET') return await get(req, res, q);
     if (req.method === 'POST') return await post(req, res);
     answer(res, 405, { ok: false, error: 'GET or POST' });
   } catch (e) {
+    if (e instanceof W.Bad) return answer(res, e.status, { ok: false, code: e.code, error: e.message });   // a name that cannot be had, from api/wall.js
     answer(res, 500, { ok: false, error: String((e && e.message) || e) });
   }
 };

@@ -456,9 +456,13 @@
               </g>
             </svg>
           </div>
-        <button ref="{{ tKRef }}" sc-camel-on-click="{{ pickFile }}" aria-label="upload a file" title="{{ kTitle }}" style="position:relative; width:56px; height:64px; padding:0; margin:0; background:#fdf7e3; color:#17120b; border:4px solid #17120b; box-shadow:6px 7px 0 rgba(60,50,80,0.2); transform:rotate(-4deg); display:flex; align-items:center; justify-content:center; font-family:'Rye',serif; font-size:34px; flex:none; cursor:pointer; transition:transform .2s cubic-bezier(.3,1.5,.5,1)" style-hover="transform:rotate(-4deg) translate(1px,1px) scale(1.04); box-shadow:5px 6px 0 rgba(60,50,80,0.2)">K
+        <button ref="{{ tKRef }}" sc-camel-on-click="{{ pickFile }}" aria-label="{{ kTitle }}" title="{{ kTitle }}" style="position:relative; width:56px; height:64px; padding:0; margin:0; background:#fdf7e3; color:#17120b; border:4px solid #17120b; box-shadow:6px 7px 0 rgba(60,50,80,0.2); transform:rotate(-4deg); display:flex; align-items:center; justify-content:center; font-family:'Rye',serif; font-size:34px; flex:none; cursor:pointer; transition:transform .2s cubic-bezier(.3,1.5,.5,1)" style-hover="transform:rotate(-4deg) translate(1px,1px) scale(1.04); box-shadow:5px 6px 0 rgba(60,50,80,0.2)">K
+          <!-- THE PICTURE: yours, over the K, once you have given it one -->
+          <sc-if value="{{ hasPic }}" hint-placeholder-val="{{ false }}">
+            <img src="{{ pic }}" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block">
+          </sc-if>
           <div aria-hidden="true" style="position:absolute; bottom:-9px; right:-9px; width:12px; height:12px; background:#e8484a; border:3px solid #17120b; transform:rotate(45deg)"></div>
-          <input ref="{{ fileRef }}" type="file" sc-camel-on-change="{{ onFile }}" aria-hidden="true" tabindex="-1" style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none">
+          <input ref="{{ fileRef }}" type="file" accept="image/*" sc-camel-on-change="{{ onFile }}" aria-hidden="true" tabindex="-1" style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none">
         </button>
         <div style="min-width:0">
           <h1 class="yard-title" style="margin:0; font-family:'Rye',serif; font-size:clamp(28px, 3.6vw, 44px); font-weight:400; line-height:1.05; white-space:nowrap">{{ greetWord }}, <sc-if value="{{ naming }}" hint-placeholder-val="{{ false }}"><input ref="{{ nameRef }}" value="{{ nameDraft }}" sc-camel-on-change="{{ onNameDraft }}" sc-camel-on-key-down="{{ nameKey }}" sc-camel-on-blur="{{ commitName }}" aria-label="your name" maxlength="24" style="margin:0; padding:0 4px; font:inherit; color:inherit; background:#fdf7e3; border:0; border-bottom:4px dashed #17120b; outline:0; width:{{ nameW }}"></sc-if><sc-if value="{{ notNaming }}" hint-placeholder-val="{{ true }}"><button sc-camel-on-click="{{ startName }}" title="change your name" style="margin:0; padding:0; font:inherit; color:inherit; background:transparent; border:0; border-bottom:4px solid transparent; cursor:text; display:inline-flex; align-items:baseline; gap:10px" style-hover="border-bottom-color:rgba(23,18,11,0.35)"><span>{{ greetName }}.</span><svg aria-hidden="true" sc-camel-view-box="0 0 24 24" width="18" height="18" style="opacity:0.5; flex:none"><path d="M4,20 L8,19 L19,8 L16,5 L5,16 Z" fill="none" stroke="#17120b" stroke-width="2.4" stroke-linejoin="round"></path><line x1="14" y1="7" x2="17" y2="10" stroke="#17120b" stroke-width="2.4"></line></svg></button></sc-if></h1>
@@ -499,14 +503,6 @@
           <svg sc-camel-view-box="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="3" y="3" width="8" height="8" fill="none" stroke="#17120b" stroke-width="2.4" stroke-linejoin="round"></rect><rect x="13" y="3" width="8" height="8" fill="#e8484a" stroke="#17120b" stroke-width="2.4" stroke-linejoin="round"></rect><rect x="3" y="13" width="8" height="8" fill="#5a8fd6" stroke="#17120b" stroke-width="2.4" stroke-linejoin="round"></rect><rect x="13" y="13" width="8" height="8" fill="none" stroke="#17120b" stroke-width="2.4" stroke-linejoin="round"></rect></svg>
           <span>dashboard</span>
         </a>
-        <sc-if value="{{ searchOpen }}" hint-placeholder-val="{{ false }}">
-          <form sc-camel-on-submit="{{ submitSearch }}" style="display:flex; align-items:center; height:52px; background:#fdf7e3; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:0 14px; box-sizing:border-box; width:clamp(150px, 28vw, 300px)">
-            <input ref="{{ searchRef }}" value="{{ searchText }}" sc-camel-on-change="{{ onSearch }}" sc-camel-on-key-down="{{ searchKey }}" placeholder="search hills, gnomes, marks" aria-label="search" style="flex:1; min-width:0; height:100%; border:0; outline:0; background:transparent; font:inherit; font-size:16px; letter-spacing:1.5px; color:#17120b; text-transform:uppercase">
-          </form>
-        </sc-if>
-        <button sc-camel-on-click="{{ toggleSearch }}" aria-label="search" title="search" style="width:52px; height:52px; background:{{ searchBg }}; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; flex:none" style-hover="transform:rotate(-8deg)">
-          <svg sc-camel-view-box="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="10" cy="10" r="6.2" fill="none" stroke="{{ searchFg }}" stroke-width="2.6"></circle><line x1="14.6" y1="14.6" x2="21" y2="21" stroke="{{ searchFg }}" stroke-width="2.8" stroke-linecap="round"></line></svg>
-        </button>
         <button sc-camel-on-click="{{ savePlot }}" title="save your yard (ctrl+s)" style="height:52px; display:flex; align-items:center; gap:10px; padding:0 18px 0 14px; background:{{ ySaveBg }}; color:{{ ySaveFg }}; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); font-family:'VT323',monospace; font-size:20px; letter-spacing:1px; cursor:pointer; transform:rotate(-1deg); position:relative" style-hover="transform:rotate(-1deg) translate(1px,1px); box-shadow:4px 5px 0 rgba(60,50,80,0.2)">
           <svg sc-camel-view-box="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4,3 L17,3 L21,7 L21,21 L4,21 Z" fill="{{ ySaveIcon }}" stroke="#17120b" stroke-width="2.4" stroke-linejoin="round"></path><rect x="7" y="3" width="9" height="6" fill="#fdf7e3" stroke="#17120b" stroke-width="2.2"></rect><rect x="7.5" y="13" width="9" height="8" fill="#fdf7e3" stroke="#17120b" stroke-width="2.2"></rect></svg>
           <span>{{ ySaveWord }}</span>
@@ -524,7 +520,8 @@
     <div class="yard-grid" style="display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:28px; align-items:start">
 
       <div style="display:flex; flex-direction:column; gap:28px; min-width:0">
-    <!-- THE HILLS: one horizon, each mound a canvas. Sorted by most recently edited. -->
+    <!-- THE HILLS: one horizon, each mound a canvas. The spaces you saved, in the order you saved them
+         (the flags in Spaces you've visited, below). -->
     <nav aria-label="hills" style="margin:0 -8px 8px; position:relative">
       <div style="display:flex; align-items:flex-end; gap:0; overflow-x:auto; overflow-y:hidden; padding:70px 8px 0; scrollbar-width:thin">
         <sc-for list="{{ hills }}" as="h" hint-placeholder-count="6">
@@ -542,18 +539,8 @@
                 <circle cx="30" cy="5" r="4" fill="#fdf7e3" stroke="#17120b" stroke-width="2.5"></circle>
               </svg>
             </sc-if>
-            <!-- your bin, opposite the flag (its centre mirrors the pole's): takes the hill off
-                 your horizon — but never a flagged one; pressed on a flagged hill, the flag shakes.
-                 Ahead of the flag in the markup so a keyboard meets them left to right. -->
-            <button class="hill-btn" sc-camel-on-click="{{ h.bin }}" aria-disabled="{{ h.fav }}" aria-label="{{ h.binTitle }}" title="{{ h.binTitle }}" style="position:absolute; left:20px; bottom:calc(100% - 30px); width:44px; height:52px; padding:0; margin:0; background:transparent; border:0; cursor:{{ h.binCursor }}; opacity:{{ h.binOp }}; transition:opacity .2s; display:flex; align-items:flex-end; justify-content:center" style-hover="opacity:1" style-focus-visible="opacity:1">
-              <svg aria-hidden="true" sc-camel-view-box="0 0 24 28" width="20" height="23" style="display:block; margin-bottom:14px">
-                <path d="M9,4.5 V2 H15 V4.5" fill="none" stroke="#17120b" stroke-width="2.4" stroke-linejoin="round"></path>
-                <path d="M4.5,8.5 L6.5,26 H17.5 L19.5,8.5 Z" fill="#9aa3ad" stroke="#17120b" stroke-width="2.4" stroke-linejoin="round"></path>
-                <path d="M10,12.5 L10.5,22 M14,12.5 L13.5,22" stroke="#17120b" stroke-width="2" stroke-linecap="round"></path>
-                <rect x="2" y="4.5" width="20" height="4" rx="1" fill="#fdf7e3" stroke="#17120b" stroke-width="2.4"></rect>
-              </svg>
-            </button>
-            <!-- your flag, on hills you've contributed to -->
+            <!-- your flag: every hill here is one you saved. Lowered, the hill comes down —
+                 and stays in Spaces you've visited, where the same flag puts it back up. -->
             <button class="hill-btn hill-flag" sc-camel-on-click="{{ h.toggleFav }}" aria-pressed="{{ h.fav }}" aria-label="{{ h.favTitle }}" title="{{ h.favTitle }}" style="position:absolute; right:14px; bottom:calc(100% - 30px); width:44px; height:52px; padding:0; margin:0; background:transparent; border:0; cursor:pointer; opacity:{{ h.flagOp }}; transition:opacity .2s; display:flex; align-items:flex-end; justify-content:center" style-hover="opacity:1" style-focus-visible="opacity:1">
               <svg aria-hidden="true" sc-camel-view-box="0 0 30 44" width="22" height="32" style="overflow:visible; display:block; transform-origin:20% 100%">
                 <line x1="6" y1="2" x2="6" y2="44" stroke="#17120b" stroke-width="3" stroke-linecap="round" stroke-dasharray="{{ h.poleDash }}"></line>
@@ -683,7 +670,6 @@
           <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px 20px; flex-wrap:wrap; margin-bottom:16px">
             <div>
               <h2 style="margin:0; font-family:'Rye',serif; font-size:24px; font-weight:400">At the fence</h2>
-              <div style="font-size:14px; letter-spacing:2px; color:#4a4054; opacity:0.75; margin-top:4px">WHO CAME BY, AND WHAT THEY LEFT</div>
             </div>
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap">
               <div style="display:flex; align-items:center; gap:8px; background:#fdf7e3; border:3px solid #17120b; box-shadow:3px 4px 0 rgba(60,50,80,0.25); padding:5px 12px 5px 10px; font-size:18px; letter-spacing:1px; transform:rotate(-0.6deg)">
@@ -694,9 +680,6 @@
           </div>
 
           <div style="display:flex; flex-direction:column; gap:14px; max-height:300px; overflow-y:auto; padding-right:6px">
-            <sc-if value="{{ noNotes }}" hint-placeholder-val="{{ false }}">
-              <div style="font-size:15px; letter-spacing:1.5px; color:#4a4054; opacity:0.75; line-height:1.4">{{ noNotesWord }}</div>
-            </sc-if>
             <sc-for list="{{ notes }}" as="n" hint-placeholder-count="3">
               <div style="display:flex; gap:12px; align-items:flex-start">
                 <div aria-hidden="true" style="flex:none; width:34px; height:34px; background:{{ n.bg }}; color:{{ n.fg }}; border:3px solid #17120b; box-shadow:2px 3px 0 rgba(60,50,80,0.25); display:flex; align-items:center; justify-content:center; font-family:'Rye',serif; font-size:18px; transform:rotate({{ n.rot }})">{{ n.initial }}</div>
@@ -742,7 +725,7 @@
         <section style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate({{ rFriends }})">
           <div aria-hidden="true" style="position:absolute; top:-11px; right:-11px; width:15px; height:15px; background:#5a8fd6; border:3px solid #17120b; transform:rotate(45deg)"></div>
           <h2 style="margin:0; font-family:'Rye',serif; font-size:20px; font-weight:400">Friends</h2>
-          <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin:2px 0 14px">GNOMES YOU KNOW · 2 ABOUT</div>
+          <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin:2px 0 14px">GNOMES YOU KNOW · NONE YET</div>
           <div style="display:flex; flex-direction:column; gap:10px">
             <sc-for list="{{ friends }}" as="f" hint-placeholder-count="4">
               <a href="#gnome" title="{{ f.name }}" style="display:flex; align-items:center; gap:12px; padding:8px 10px; background:#fdf7e3; border:3px solid #17120b; box-shadow:3px 3px 0 rgba(60,50,80,0.18); text-decoration:none; color:#17120b; transform:rotate({{ f.rot }}); transition:transform .2s cubic-bezier(.3,1.5,.5,1)" style-hover="transform:rotate(0deg) translate(1px,1px); box-shadow:2px 2px 0 rgba(60,50,80,0.18)">
@@ -783,14 +766,27 @@
         <section ref="{{ tVisitRef }}" style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate({{ rVisit }})">
           <div aria-hidden="true" style="position:absolute; top:-11px; right:-11px; width:15px; height:15px; background:#7bc264; border:3px solid #17120b; transform:rotate(45deg)"></div>
           <h2 style="margin:0 0 14px; font-family:'Rye',serif; font-size:20px; font-weight:400">Spaces you've visited</h2>
+          <!-- WHERE YOU HAVE BEEN (2026-09-22), newest first — and beside each, the hills' flag:
+               raised, the space is saved and stands on your hills up top. -->
+          <sc-if value="{{ noVisits }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8">NOWHERE YET — A SPACE YOU OPEN LANDS HERE.</div>
+          </sc-if>
           <div style="display:flex; flex-direction:column; gap:12px; max-height:250px; overflow-y:auto; padding-right:4px">
             <sc-for list="{{ visited }}" as="v" hint-placeholder-count="5">
-              <div style="display:flex; align-items:center; gap:11px">
-                <div aria-hidden="true" style="flex:none; width:33px; height:33px; background:{{ v.bg }}; border:3px solid #17120b; display:flex; align-items:center; justify-content:center; font-family:'Rye',serif; font-size:15px; color:{{ v.fg }}; transform:rotate({{ v.rot }}); box-shadow:2px 3px 0 rgba(60,50,80,0.18)">{{ v.initial }}</div>
-                <div style="min-width:0">
-                  <div style="font-size:18px; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ v.name }}</div>
-                  <div style="font-size:13.5px; letter-spacing:1px; color:#4a4054; opacity:0.75; margin-top:1px">VISITED {{ v.when }}</div>
-                </div>
+              <div style="display:flex; align-items:center; gap:8px">
+                <a href="{{ v.href }}" title="{{ v.name }}" style="flex:1; min-width:0; display:flex; align-items:center; gap:11px; color:#17120b; text-decoration:none">
+                  <div aria-hidden="true" style="flex:none; width:33px; height:33px; background:{{ v.bg }}; border:3px solid #17120b; display:flex; align-items:center; justify-content:center; font-family:'Rye',serif; font-size:15px; color:{{ v.fg }}; transform:rotate({{ v.rot }}); box-shadow:2px 3px 0 rgba(60,50,80,0.18)">{{ v.initial }}</div>
+                  <div style="min-width:0">
+                    <div style="font-size:18px; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ v.name }}</div>
+                    <div style="font-size:13.5px; letter-spacing:1px; color:#4a4054; opacity:0.75; margin-top:1px">VISITED {{ v.when }}</div>
+                  </div>
+                </a>
+                <button class="hill-btn" sc-camel-on-click="{{ v.toggleFav }}" aria-pressed="{{ v.fav }}" aria-label="{{ v.favTitle }}" title="{{ v.favTitle }}" style="flex:none; width:36px; height:40px; padding:0; margin:0; background:transparent; border:0; cursor:pointer; opacity:{{ v.flagOp }}; transition:opacity .2s; display:flex; align-items:center; justify-content:center" style-hover="opacity:1" style-focus-visible="opacity:1">
+                  <svg aria-hidden="true" sc-camel-view-box="0 0 30 44" width="17" height="25" style="overflow:visible; display:block">
+                    <line x1="6" y1="2" x2="6" y2="44" stroke="#17120b" stroke-width="3" stroke-linecap="round" stroke-dasharray="{{ v.poleDash }}"></line>
+                    <path d="M7,3 L28,10 L7,19 Z" fill="{{ v.cloth }}" stroke="#17120b" stroke-width="2.5" stroke-linejoin="round"></path>
+                  </svg>
+                </button>
               </div>
             </sc-for>
           </div>
@@ -1002,6 +998,7 @@ class Component extends DCLogic {
     this.state = {
       settings: Object.assign({ displayName: '', emailReplies: false, showActivity: true, reduceMotion: false }, load(this.K.settings, {})),
       drawerOpen: false, signoutNote: false,
+      pic: (window.KnollAccount && KnollAccount.pic && KnollAccount.pic()) || '', picNote: '',   // THE PICTURE: this device's copy until the door answers
       /* where the trees are now, what you kept, what is in the air, and
          the word on the save button — see THE TWO PLACES A LAYOUT LIVES. */
       spots: TIDY(load(this.K.plot, null)),
@@ -1107,6 +1104,7 @@ class Component extends DCLogic {
       // the cookie said somebody, and the door says the session has lapsed: to the gate after all (THE YARD IS YOURS)
       if (a === null && !EMBED) { location.replace('/login/?next=' + encodeURIComponent(location.pathname + location.search)); return; }
       if (!a) return;
+      if (a.avatar != null) this.setState({ pic: a.avatar });   // THE PICTURE, as the door has it
       // a yard that has never been named goes by the account's name (setSettings is for edits, so this one is not sent back)
       if (a.name && !this.state.settings.displayName) { const settings = Object.assign({}, this.state.settings, { displayName: a.name }); this.setState({ settings }); this.save(this.K.settings, settings); }
       if (a.toured || EMBED || !(this.props.autoTour ?? true)) return;
@@ -1124,7 +1122,7 @@ class Component extends DCLogic {
        — so it is a tidy rather than a fix, and it is here because the pairing
        is the point: every rAF started has a cancel in the same method. */
     cancelAnimationFrame(this._raf); cancelAnimationFrame(this._armRaf);
-    clearTimeout(this._flash); clearTimeout(this._auto);
+    clearTimeout(this._flash); clearTimeout(this._auto); clearTimeout(this._picT);
   }
   setSettings(patch) {
     const settings = Object.assign({}, this.state.settings, patch);
@@ -1417,6 +1415,33 @@ class Component extends DCLogic {
     const self = this;
     this._flash = setTimeout(function () { self.setState({ saveWord: 'save layout' }); }, ms || 1600);
   }
+  /* THE PICTURE (2026-09-22): the K is your picture once you give it one —
+     cut square from the middle, 128 across, a JPEG on cream (so a transparent
+     one keeps no black), kept on the account (api/auth.js: THE PICTURE), and
+     the corner's face on every page (account.js: YOUR PICTURE). It goes up
+     once the door has it, not before; one the door or the browser turned
+     down says why under the greeting for a moment. */
+  setPic(file) {
+    const note = (word) => { clearTimeout(this._picT); this.setState({ picNote: word }); this._picT = setTimeout(() => this.setState({ picNote: '' }), 6000); };
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onerror = () => { URL.revokeObjectURL(url); note('that picture would not open — try a JPEG or a PNG'); };
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const S = 128, c = document.createElement('canvas'), w = img.naturalWidth, h = img.naturalHeight, s = Math.min(w, h);
+      c.width = c.height = S;
+      const g = c.getContext('2d');
+      g.fillStyle = this.C.CREAM; g.fillRect(0, 0, S, S);
+      g.drawImage(img, (w - s) / 2, (h - s) / 2, s, s, 0, 0, S, S);
+      const pic = c.toDataURL('image/jpeg', 0.85);
+      this.gate({ op: 'avatar', avatar: pic }).then(out => {
+        if (!out || !out.ok) { note((out && out.error) || 'the picture did not take — try again'); return; }
+        clearTimeout(this._picT);
+        this.setState({ pic, picNote: '' });
+        if (window.KnollAccount && KnollAccount.setPic) KnollAccount.setPic(pic);
+      });
+    };
+    img.src = url;
+  }
   /* the drawing, built once. Twenty-three svg trees are twenty-three lumps of
      markup React would otherwise re-parse on every setState; the elements are
      immutable, so they are made in the constructor and handed back. */
@@ -1693,32 +1718,41 @@ class Component extends DCLogic {
     const hover = this.state.hoverHill;
     // two lists this device keeps; anything but an array there (a hand-edited key, an older shape) reads as the default
     const kept = (k, d) => { let v = null; try { v = JSON.parse(localStorage.getItem(k)); } catch (_) {} return Array.isArray(v) ? v : d; };
-    const favs = this.state.favHills || kept('yard.favHills', ['TOEM 2', 'The Toadstool Ring', 'Bramblewick', 'The Museum']);
-    const gone = this.state.goneHills || kept('knoll-yard:hills-gone', []);
-    /* TOEM 2 (2026-09-21) is the first real page on the horizon, standing where
-       the export had Mossy's Hollow — flagged by default, as that hill was — and
-       its mound is the page itself, live (the frame in the template). A binned
-       hill is kept off by name under knoll-yard:hills-gone, so resetData's sweep
-       and a new owner's clear (the head of this file) both bring it back.
-       href and frame are this file's own constants: a hill that ever comes from
-       data wants both held to this site's own paths first — a frame's src and a
-       link's href are both places a javascript: address runs. */
-    const HILLS = [
-      { name: 'TOEM 2', about: '4 NEW MARKS', here: true, href: '../toem2/', frame: '../toem2/?embed=1', art: '#efe7ed' },
-    ].filter(h => gone.indexOf(h.name) < 0);
+    const favs = this.state.favHills || kept('yard.favHills', []);   // nothing saved until you save it
+    /* THE HILLS ARE WHAT YOU SAVED, THE HISTORY IS WHERE YOU WENT (2026-09-22).
+       Spaces you've visited is knoll-yard:visits (account.js: the visit),
+       newest first, and the flag beside each one saves it — by name, into
+       yard.favHills — onto the hills, in the order saved, with your gnome on
+       the one you were on last. The same flag, lowered on either, takes it
+       down again; the visit stays in the history. Storage says only a name, a
+       path and a time; the name shown, href and frame come from SPACES, this
+       file's own constants — a frame's src and a link's href are both places a
+       javascript: address runs, so nothing from storage goes in either. A new
+       space is a line here and a path in account.js's SPACES. */
+    const SPACES = {
+      '/toem2/': { name: 'TOEM 2', href: '../toem2/', frame: '../toem2/?embed=1', art: '#efe7ed', col: C.BLU }
+    };
+    const visits = kept('knoll-yard:visits', []).filter(v => v && SPACES[v.path] && +v.at);
+    const at = {}; visits.forEach(v => { at[v.path] = +v.at; });
+    const pathOf = name => Object.keys(SPACES).find(p => SPACES[p].name === name);
+    const HILLS = favs.map(pathOf).filter(Boolean).map(p => Object.assign({}, SPACES[p], { path: p,
+      about: at[p] ? 'VISITED ' + AGO(at[p]) : 'SAVED', here: !!visits.length && visits[0].path === p }));
+    // the one flag, on a hill and beside a visit: raised is saved
+    const flagVals = name => { const fav = favs.indexOf(name) >= 0; return {
+      fav, favTitle: (fav ? 'take ' + name + ' off your hills' : 'save ' + name + ' to your hills'),
+      toggleFav: (e) => { e.preventDefault(); e.stopPropagation();
+        const f = favs.slice(), k = f.indexOf(name); if (k >= 0) f.splice(k, 1); else f.push(name);
+        try { localStorage.setItem('yard.favHills', JSON.stringify(f)); } catch (_) {}
+        this.setState({ favHills: f, hoverHill: -1 }); } }; };
     return Object.assign(this.plotVals(), this.tourVals(), {
       greetWord: hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening',
       bellOpen: !!this.state.bellOpen,
       bellBg: this.state.bellOpen ? '#17120b' : '#fdf7e3',
       bellFg: this.state.bellOpen ? '#fdf7e3' : '#17120b',
       toggleBell: () => this.setState(s => ({ bellOpen: !s.bellOpen })),
-      searchOpen: !!this.state.searchOpen,
-      searchText: this.state.searchText || '',
-      searchBg: this.state.searchOpen ? '#17120b' : '#fdf7e3',
-      searchFg: this.state.searchOpen ? '#fdf7e3' : '#17120b',
-      searchRef: this.searchRef || (this.searchRef = React.createRef()),
       fileRef: this.fileRef || (this.fileRef = React.createRef()),
-      kTitle: this.state.fileName ? 'uploaded: ' + this.state.fileName + ' — click to replace' : 'upload a file',
+      kTitle: this.state.picNote || (this.state.pic ? 'your picture — click to change it' : 'give yourself a picture'),
+      pic: this.state.pic, hasPic: !!this.state.pic,
       pickFile: () => { if (this.fileRef && this.fileRef.current) this.fileRef.current.click(); },
       /* YARD FIX 8 of 10 (see about.md § changes to the export). `said()` is not
          a notification area — it writes on the SAVE BUTTON'S FACE, which is the
@@ -1729,12 +1763,10 @@ class Component extends DCLogic {
          not saved anywhere — `fileName` goes in component state and nothing
          writes it down. A save that did not happen must not wear the face of
          one that did; the file's own control already reports it, through
-         `kTitle` on the K tile's tooltip. */
-      onFile: (e) => { const f = e.target.files && e.target.files[0]; if (!f) return; this.setState({ fileName: f.name }); },
-      toggleSearch: () => this.setState(s => ({ searchOpen: !s.searchOpen }), () => { if (this.state.searchOpen && this.searchRef.current) this.searchRef.current.focus(); }),
-      onSearch: e => this.setState({ searchText: e.target.value }),
-      searchKey: e => { if (e.key === 'Escape') this.setState({ searchOpen: false, searchText: '' }); },
-      submitSearch: e => { e.preventDefault(); if (window.KnollAccount) KnollAccount.find(this.state.searchText); },
+         `kTitle` on the K tile's tooltip. Since 2026-09-22 the file IS kept —
+         it is your picture (THE PICTURE) — and it still answers on its own
+         control, the K, never on the save button. */
+      onFile: (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) this.setPic(f); },
       greetName: myName,
       /* THE NAME, CLICK TO EDIT (2026-09-21): the plot rename's pattern, on the
          greeting. It writes the same displayName the drawer's DISPLAY NAME
@@ -1755,40 +1787,15 @@ class Component extends DCLogic {
       onRename: (e) => this.setState({ renameDraft: e.target.value }),
       renameKey: (e) => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') this.setState({ renaming: false, renameDraft: null }); },
       commitRename: () => { if (!this.state.renaming) return; const t = (this.state.renameDraft || '').trim(); if (t && t !== settings.plotName) this.setSettings({ plotName: t }); this.setState({ renaming: false, renameDraft: null }); },
-      friends: [
-        { name: 'Mossy', hill: "Mossy's Hollow", note: 'left a pebble', on: true, col: '#7bc264', ini: 'M' },
-        { name: 'Juno', hill: "Juno's Patch", note: 'planted 2 trees', on: true, col: '#5a8fd6', ini: 'J' },
-        { name: 'Opal', hill: 'Opal Fen', note: 'quiet today', on: false, col: '#e0598c', ini: 'O' },
-        { name: 'Bram', hill: 'Bramblewick', note: 'left you a note', on: false, col: '#ffd23f', ini: 'B' }
-      ].map((f, i) => Object.assign(f, { dotBg: f.on ? '#4e8c3f' : 'transparent', dotBorder: f.on ? '#17120b' : 'rgba(23,18,11,0.4)', rot: (i % 2 ? '1.2deg' : '-1.2deg') })),
-      hills: HILLS.map((h, i) => { const fav = favs.indexOf(h.name) >= 0; return Object.assign({}, h, {
+      // no friends until there is a way to make one (each: name, hill, note, col, dotBg, dotBorder, rot)
+      friends: [],
+      hills: HILLS.map((h, i) => { const fl = flagVals(h.name), fav = fl.fav; return Object.assign({}, h, fl, {
         href: h.href || '#hill-' + h.name.toLowerCase().replace(/[^a-z]+/g, '-'),
-        fav,
         flagOp: fav ? 1 : (hover === i ? 0.4 : 0),
         flagY: fav ? '0px' : '26px',
         clothOp: fav ? 1 : 0,
         poleDash: fav ? 'none' : '4 3',
-        favTitle: (fav ? 'unfavorite ' : 'favorite ') + h.name,
-        toggleFav: (e) => { e.preventDefault(); e.stopPropagation();
-          const f = favs.slice(), k = f.indexOf(h.name); if (k >= 0) f.splice(k, 1); else f.push(h.name);
-          try { localStorage.setItem('yard.favHills', JSON.stringify(f)); } catch (_) {}
-          this.setState({ favHills: f }); },
         hasFrame: !!h.frame && !EMBED, frameTitle: h.name + ', as it is now',   // not in the dashboard's picture: a whole second bench for a 60px dome
-        binOp: hover === i ? 0.4 : 0,
-        binCursor: fav ? 'not-allowed' : 'pointer',
-        binTitle: fav ? h.name + ' is flagged — unflag it to take it off' : 'take ' + h.name + ' off your hills',
-        bin: (e) => { e.preventDefault(); e.stopPropagation();
-          if (fav) {   // a flagged hill stays, and its flag says so: a shake — a blink, where motion is turned down
-            const flag = e.currentTarget.parentElement.querySelector('.hill-flag svg');
-            if (flag && flag.animate) flag.animate(this.calm()
-              ? [{ opacity: 1 }, { opacity: 0.2 }, { opacity: 1 }, { opacity: 0.2 }, { opacity: 1 }]
-              : [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-18deg)' }, { transform: 'rotate(14deg)' }, { transform: 'rotate(-9deg)' }, { transform: 'rotate(4deg)' }, { transform: 'rotate(0deg)' }],
-              { duration: 650, easing: 'ease-out' });
-            return;
-          }
-          const g = gone.concat(h.name);
-          try { localStorage.setItem('knoll-yard:hills-gone', JSON.stringify(g)); } catch (_) {}
-          this.setState({ goneHills: g, hoverHill: -1 }); },
         lift: hover === i ? '-5px' : '0px',
         signRot: hover === i ? (i % 2 ? '6deg' : '-6deg') : (i % 2 ? '-2deg' : '2deg'),
         enter: () => this.setState({ hoverHill: i }),
@@ -1801,20 +1808,15 @@ class Component extends DCLogic {
       onDraft: (e) => this.setState({ draft: e.target.value }),
       leaveNote: (e) => this.leaveNote(e),
       viewCount: this.state.views == null ? '—' : this.state.views,
-      eyebrow: this.eyebrow(),
-      noNotes: !this.state.notes.length,
-      noNotesWord: this.state.fenceLive ? 'NOBODY HAS LEFT A NOTE YET — BE THE FIRST.' : 'THE FENCE IS NOT WIRED TO THE SHEET YET, SO A NOTE STAYS ON THIS DEVICE (see about.md).',
+      eyebrow: this.state.picNote ? this.state.picNote.toUpperCase() + '.' : this.eyebrow(),   // THE PICTURE's word, for a moment
       tFenceRef: this.R.fence,
       captionsOn,
       stats: this.standing(),
       badges,
-      visited: [
-        { initial: 'M', name: "Mossy's Hollow", when: 'TODAY', bg: C.PNK, fg: C.CREAM, rot: rot('-2deg') },
-        { initial: 'T', name: 'The Toadstool Ring', when: '2 DAYS AGO', bg: C.RED, fg: C.CREAM, rot: rot('1.5deg') },
-        { initial: 'J', name: "Juno's Patch", when: '5 DAYS AGO', bg: C.BLU, fg: C.CREAM, rot: rot('-1deg') },
-        { initial: 'B', name: 'Bramblewick', when: '3 WEEKS AGO', bg: C.GRN, fg: C.CREAM, rot: rot('2deg') },
-        { initial: 'O', name: 'Opal Fen', when: '2 MONTHS AGO', bg: C.YEL, fg: C.INK, rot: rot('-1.5deg') }
-      ],
+      visited: visits.map((v, i) => { const s = SPACES[v.path], fl = flagVals(s.name); return Object.assign(fl, {
+        initial: s.name.charAt(0), name: s.name, href: s.href, when: AGO(v.at), bg: s.col, fg: C.CREAM, rot: rot(i % 2 ? '1.5deg' : '-2deg'),
+        flagOp: fl.fav ? 1 : 0.55, poleDash: fl.fav ? 'none' : '4 3', cloth: fl.fav ? '#5a8fd6' : 'transparent' }); }),
+      noVisits: !visits.length,
       edits: this.editList(C),
       drawerOpen,
       openDrawer: () => this.setState({ drawerOpen: true, signoutNote: false }),

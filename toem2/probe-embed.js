@@ -7,12 +7,16 @@
         header, no docks and no cursor room — sends nothing, and leaves every
         knoll-toem2: key byte for byte as it was. On the real storage this is
         the page that would have posted that edit.
-     2  the hill, on a signed-in yard: TOEM 2's sign, a link to /toem2/, and in
-        the mound an inert frame of /toem2/?embed=1 at 160 × 104 — and no frame
-        in the dashboard's picture of the yard (?embed=1)
-     3  the bin: on a flagged hill the flag shakes and the hill stays;
-        unflagged, the hill goes, and stays gone after a reload; stored lists
-        that are not arrays read as the defaults instead of throwing
+     2  the history and the hill, on a signed-in yard: Spaces you've visited
+        says nowhere yet, and there is no hill; after a visit TOEM 2 heads the
+        history but is not on the hills; its flag there saves it, and up goes
+        the hill — its sign, a link to /toem2/, your gnome, and in the mound an
+        inert frame of /toem2/?embed=1 at 160 × 104 — and no frame in the
+        dashboard's picture of the yard (?embed=1)
+     3  kept and taken down: the hill is still there after a reload; lowering
+        its flag takes it down and leaves it in the history, flag lowered
+        there too; stored lists that are not arrays read as empty instead of
+        throwing
 
    The gate and the wall's door are answered by the probe itself (route): no
    account is made, and nothing reaches the server but GETs.
@@ -90,13 +94,27 @@ async function signedIn(ctx) {
       await ctx.close();
     }
 
-    // ── 2 · the hill: TOEM 2, the page itself in its mound ────────────────────
+    // ── 2 · the history, and the flag that puts a space on the hills ──────────
     const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 } });
     await signedIn(ctx);
     const p = await ctx.newPage();
     p.on('pageerror', e => errors.push('2: ' + e.message));
-    await p.goto(BASE + '/yard/', { waitUntil: 'load' });
+    const V = p.locator('#dc-root section', { has: p.locator('h2', { hasText: "Spaces you've visited" }) });
+    const yard = async () => { await p.goto(BASE + '/yard/', { waitUntil: 'load' }); await V.waitFor({ timeout: 20000 }); await p.waitForTimeout(800); };
+    const rows = async () => (await V.locator('a[href]').allTextContents()).map(t => t.replace(/\s+/g, ' ').trim());
+    const onHills = () => p.evaluate(sel => !!document.querySelector(sel), HILL);
+    await yard();
+    say(!(await rows()).length && /NOWHERE YET/.test(await V.textContent()) && !(await onHills()), 'nowhere visited: the history says so, and there is no hill');
+    await p.goto(BASE + '/toem2/', { waitUntil: 'domcontentloaded' });   // the visit (account.js)
+    await yard();
+    let r = await rows();
+    say(r.length === 1 && /^T ?TOEM 2 ?VISITED JUST NOW$/.test(r[0]) && !(await onHills()),
+      'after a visit, TOEM 2 heads the history, visited just now — and is not on the hills until it is saved', JSON.stringify(r));
+    await V.locator('button[aria-label="save TOEM 2 to your hills"]').click();
     await p.waitForSelector(HILL + ' iframe', POLL);
+    say((await V.locator('button[aria-label="take TOEM 2 off your hills"]').getAttribute('aria-pressed', { timeout: 5000 })) === 'true',
+      "its flag saves it: up goes the hill, and the history's flag stands raised");
+    say(await p.evaluate(sel => !!document.querySelector(sel + ' [aria-label="you are here"]'), HILL), 'your gnome stands on it: the space you were on last');
     const hill = await p.evaluate(sel => {
       const a = document.querySelector(sel), f = a.querySelector('iframe'), r = f.getBoundingClientRect();
       return { sign: a.textContent.includes('TOEM 2'), src: f.getAttribute('src'), inert: f.inert, w: Math.round(r.width), h: Math.round(r.height) };
@@ -109,29 +127,21 @@ async function signedIn(ctx) {
     say(await q.evaluate(sel => !document.querySelector(sel + ' iframe'), HILL), "no frame in the dashboard's picture of the yard (?embed=1)");
     await q.close();
 
-    // ── 3 · the bin ───────────────────────────────────────────────────────────
+    // ── 3 · kept, and taken down ──────────────────────────────────────────────
     await p.bringToFront();
+    await yard();
+    say(await onHills(), 'saved, the hill is still there after a reload');
     await p.hover(HILL);
-    await p.click(HILL + ' button[aria-label^="TOEM 2 is flagged"]', { force: true });   // aria-disabled, which playwright will not press unforced
-    const shook = await p.evaluate(sel => {
-      const a = document.querySelector(sel);
-      return { stays: !!a, shaking: a ? a.querySelector('.hill-flag svg').getAnimations().length : 0 };
-    }, HILL);
-    say(shook.stays && shook.shaking > 0 && new URL(p.url()).pathname === '/yard/', 'the bin on a flagged hill shakes the flag, and the hill stays', JSON.stringify(shook));
     await p.click(HILL + ' .hill-flag');
-    await p.click(HILL + ' button[aria-label^="take TOEM 2 off"]');
     await p.waitForFunction(sel => !document.querySelector(sel), HILL, POLL);
-    const gone = await p.evaluate(() => localStorage.getItem('knoll-yard:hills-gone'));
-    await p.reload({ waitUntil: 'load' });
-    await p.waitForSelector('#dc-root nav[aria-label="hills"]', POLL);
-    await p.waitForTimeout(800);
-    say(gone === '["TOEM 2"]' && (await p.evaluate(sel => !document.querySelector(sel), HILL)), 'unflagged, the bin takes the hill off — and it stays off after a reload', gone);
-    await p.evaluate(() => { localStorage.setItem('yard.favHills', '{"not":"an array"}'); localStorage.setItem('knoll-yard:hills-gone', '"TOEM 2"'); });
+    r = await rows();
+    say(r.length === 1 && (await V.locator('button[aria-label="save TOEM 2 to your hills"]').getAttribute('aria-pressed', { timeout: 5000 })) !== 'true',
+      'lowered on the hill, the flag takes it down — and it stays in the history, flag lowered there too', JSON.stringify(r));
+    await p.evaluate(() => { localStorage.setItem('yard.favHills', '{"not":"an array"}'); localStorage.setItem('knoll-yard:visits', '"TOEM 2"'); });
     const n = errors.length;
-    await p.reload({ waitUntil: 'load' });
-    await p.waitForSelector(HILL, POLL);
-    say(errors.length === n && (await p.evaluate(sel => document.querySelector(sel + ' .hill-flag').getAttribute('aria-pressed'), HILL)) === 'true',
-      'stored lists that are not arrays read as the defaults, not as a crash', errors.slice(n).join(' | '));
+    await yard();
+    say(errors.length === n && !(await onHills()) && !(await rows()).length,
+      'stored lists that are not arrays read as empty, not as a crash', errors.slice(n).join(' | '));
     await ctx.close();
   } catch (e) {
     say(false, 'the probe ran to the end', String((e && e.stack) || e).split('\n').slice(0, 3).join(' | '));

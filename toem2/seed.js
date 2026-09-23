@@ -278,7 +278,7 @@ window.Seed = (function () {
   const canon = rec => JSON.stringify(rec, Object.keys(rec).sort());   // key order is not a change
   const title = () => {
     if (!LIVE) return TITLE;
-    const who = me ? 'you: ' + (me.name || 'gnome ' + me.id.slice(0, 6)) + ' · ' + me.tier +
+    const who = me ? 'you: ' + (me.tag || me.name || 'gnome ' + me.id.slice(0, 6)) + ' · ' + me.tier +
                      (me.rep ? ' · ' + me.rep + ' standing day' + (me.rep === 1 ? '' : 's') : '') : 'not signed in';
     return who + ' — submit (ctrl+s) puts what you changed on the wall for everybody' +
            (isMod() ? '; shift-click makes this view the opening one too' : '') + '.';

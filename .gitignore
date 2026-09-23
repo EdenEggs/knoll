@@ -59,3 +59,12 @@ folder_*/*.tmp
 # The yard's publish door (api/hill.js, mounted by serve.js) keeps every local
 # save as a version here; yard/hill.json beside it is the one that ships.
 yard/looks/
+
+# The one-click starter beside the yard, and its two shortcuts (Yard.lnk here,
+# Yard View.lnk in YardView/, both running yard/start-yard.bat) with their icons:
+# this machine, the way the benches' own .bat, .lnk and .ico are.
+yard/*.bat
+yard/*.lnk
+yard/*.ico
+YardView/*.lnk
+YardView/*.ico

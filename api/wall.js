@@ -72,10 +72,21 @@
    is not kept. A Bearer header still works, for toem2/session.js and the
    probes.
 
-   ponytail: one wall ('toem2'); the prefix is the one line to change for a
-   second bench — but it is the ACCOUNTS' prefix too (user:, sess:, oauth:),
-   so a second bench keeps these three where they are. Reads ship the whole
-   doc (~260 KB) — past ~2 MB, tracings move out to keys of their own. */
+   MORE PAGES THAN ONE (2026-09-22). TOEM 2 was the first page; a moderator
+   can make another (op 'page'), and each is a wall of its own — its doc,
+   revisions, log, queue and contested pieces under keys of its own (THE
+   STORE'S MAP, below) — edited through this same door with a `page` beside
+   the op. The accounts, their standing and their caps are the site's, not a
+   page's. What a new page looks like is not designed yet: it opens blank,
+   and nothing links to it.
+
+   A NAME IS NOT AN ACCOUNT (2026-09-22). Any number of gnomes may be called
+   Mossy; each gets a number with it — Mossy#1, Mossy#2, up to #1,000,000 —
+   and the two together, the TAG, are one gnome's and nobody else's, for good
+   (THE NAMES, below). Every name an account has gone by is kept.
+
+   ponytail: reads ship the whole doc (~260 KB) — past ~2 MB, tracings move
+   out to keys of their own. */
 'use strict';
 
 const fs = require('fs');
@@ -101,6 +112,10 @@ const RATE = { newcomer: 3, contributor: 12, trusted: 30, mod: 1e9, admin: 1e9, 
 const TIER_REP = { contributor: 3, trusted: 10 };
 const STRIKE = 5, STRIKES_BAN = 2, STRIKE_DAYS = 30, APPROVER_COST = 2;
 const MOTION_HOURS = 72, MOTION_QUORUM = 3, CONTESTED_HOURS = 24;
+const TAG_MAX = 1000000;                      // the most gnomes one name takes: Mossy#1 … Mossy#1000000
+const NAMES_KEEP = 50, AUDIT_KEEP = 1000;     // names kept per account; entries kept in the moderators' record
+const HOME = 'toem2';                         // the first page: its keys are the store's oldest, and stay put
+const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/;
 
 const REV_DAYS = 180;                        // a revision's full record (what a revert needs) is kept this long; the log's summary outlives it
 const UNDO_MAX = 50;                          // revisions one undo call takes back, so the function ends before its clock does
@@ -260,6 +275,8 @@ function fileStore(file) {
       case 'ZADD': { const z = d.z[k] = d.z[k] || {}; let n = 0; for (let i = 2; i + 1 < cmd.length; i += 2) { if (z[str(cmd[i + 1])] == null) n++; z[str(cmd[i + 1])] = num(cmd[i]); } return n; }
       case 'ZRANGEBYSCORE': { const z = d.z[k] || {}, lo = bound(cmd[2]), hi = bound(cmd[3]); return Object.keys(z).filter(m => z[m] >= lo && z[m] <= hi).sort((a, b) => z[a] - z[b]); }
       case 'ZREMRANGEBYSCORE': { const z = d.z[k] || {}, lo = bound(cmd[2]), hi = bound(cmd[3]); let n = 0; Object.keys(z).forEach(m => { if (z[m] >= lo && z[m] <= hi) { delete z[m]; n++; } }); return n; }
+      case 'ZCARD': return Object.keys(d.z[k] || {}).length;
+      case 'ZREVRANGE': { const z = d.z[k] || {}; return range(Object.keys(z).sort((a, b) => z[b] - z[a]), cmd[2], cmd[3]); }
       case 'EVAL': {
         if (cmd[1] !== CAS) throw new Error('the file store knows one script, and this is not it');
         const nk = num(cmd[2]), keys = cmd.slice(3, 3 + nk).map(str), args = cmd.slice(3 + nk).map(str);
@@ -294,12 +311,55 @@ function storeFor() {
 }
 const db = (...cmd) => storeFor().one(...cmd);
 const dbm = cmds => storeFor().many(cmds);
+/* ── THE STORE'S MAP (2026-09-22) ─────────────────────────────────────────
+   Every key the site keeps. The prefix says toem2: because TOEM 2 came
+   first; it is the whole site's now. Hashes grow a field without a
+   migration, so a feature not designed yet adds fields, not keys.
+
+   ACCOUNTS — the site's
+     user:<u>          hash    made seen name n role pw toured banned struck strikes
+     users             zset    every account, scored by when it was made
+     names:<u>         list    {name, n, at, by} — every name it has gone by, newest first
+     tagn:<name>       string  how many have taken that name (lower-cased): the last #n given
+     tags              hash    '<name>#<n>' → the account; a tag is never given twice
+     sess:<sha>        string  a session → its account (expires)
+     oauth:<state>     string  a Google sign-in on its way (ten minutes)
+     days:<u>          set     standing days — rep, earned on any page
+     rl:<who>:<hour>   string  the hour's counters
+     fp:<u>:<day>      set     the pieces touched today, any page (the footprint)
+     pending:<u>       list    edits of theirs waiting, any page · pendingip:<h> the same by address
+   PAGES
+     page:<slug>       hash    made title kind by — every page but the first
+     pages             zset    those pages, scored by when they were made
+     doc rev log rev:<n> queue contested
+                               a page's wall: bare for toem2 (toem2:doc), p:<slug>: before
+                               the rest for any other (toem2:p:<slug>:doc) — pageKeys()
+     edit:<id>         string  one edit, waiting or decided, naming its page (none: toem2)
+   PROFILES — a profile is an account's name and its yard (api/hill.js)
+     prop:<id>         string  a change somebody else proposes to a gnome's yard or name
+     propdoc:<id>      string  …the yard it proposes, while it is open
+     props:<hill>      list    the open ones, for that yard's owner to decide
+     propsby:<u>       list    the open ones this account has made · propsip:<h> the same by address
+   THE MODERATORS' RECORD
+     audit             list    roles, bans, pages made, decisions on others' behalf */
 const K = {
-  doc: P + 'doc', rev: P + 'rev', log: P + 'log', queue: P + 'queue',
-  revN: n => P + 'rev:' + n, edit: id => P + 'edit:' + id, user: u => P + 'user:' + u, days: u => P + 'days:' + u,
-  sess: h => P + 'sess:' + h, oauth: s => P + 'oauth:' + s, rl: (who, hour) => P + 'rl:' + who + ':' + hour,
-  fp: (u, day) => P + 'fp:' + u + ':' + day, pending: u => P + 'pending:' + u, pendingIp: h => P + 'pendingip:' + h, contested: P + 'contested'
+  user: u => P + 'user:' + u, users: P + 'users', names: u => P + 'names:' + u, tagN: name => P + 'tagn:' + name, tags: P + 'tags',
+  sess: h => P + 'sess:' + h, oauth: s => P + 'oauth:' + s, days: u => P + 'days:' + u, rl: (who, hour) => P + 'rl:' + who + ':' + hour,
+  fp: (u, day) => P + 'fp:' + u + ':' + day, pending: u => P + 'pending:' + u, pendingIp: h => P + 'pendingip:' + h,
+  page: s => P + 'page:' + s, pages: P + 'pages', edit: id => P + 'edit:' + id,
+  prop: id => P + 'prop:' + id, propDoc: id => P + 'propdoc:' + id, props: hill => P + 'props:' + hill,
+  propsBy: u => P + 'propsby:' + u, propsIp: h => P + 'propsip:' + h, audit: P + 'audit'
 };
+function pageKeys(slug) {
+  const p = slug === HOME ? P : P + 'p:' + slug + ':';
+  return { slug, doc: p + 'doc', rev: p + 'rev', log: p + 'log', queue: p + 'queue', contested: p + 'contested', revN: n => p + 'rev:' + n };
+}
+async function pageOf(slug) {                 // a page named in a request: the first, or one a moderator made
+  if (slug == null || slug === '' || slug === HOME) return pageKeys(HOME);
+  if (!SLUG_RE.test(String(slug)) || !(await db('HGET', K.page(slug), 'made'))) throw bad(404, 'page', 'no such page');
+  return pageKeys(String(slug));
+}
+const pageOfEdit = ed => pageKeys(ed.page || HOME);   // an edit from before pages is TOEM 2's
 
 // ── small things ──────────────────────────────────────────────────────────
 const sha = s => crypto.createHash('sha256').update(String(s), 'utf8').digest('hex');
@@ -315,13 +375,13 @@ const summary = f => ({ rev: f.rev, edit: f.edit, by: f.by, name: f.name, how: f
 
 // ── who ───────────────────────────────────────────────────────────────────
 const bearer = req => { const m = /^Bearer\s+(\S+)$/i.exec(String(req.headers.authorization || '')); return m && SESS_RE.test(m[1]) ? m[1] : null; };
-const isMod = me => !!me && (me.role === 'mod' || me.role === 'admin');
+const isMod = me => !!me && !me.banned && (me.role === 'mod' || me.role === 'admin');   // a banned moderator moderates nothing, reads included
 async function profile(u, rec, rep) {
   if (rep == null) rep = await db('SCARD', K.days(u));
   const role = ROLES.includes(rec.role) ? rec.role : 'user';
   const tier = role === 'admin' || role === 'mod' || role === 'trusted' ? role
              : rep >= TIER_REP.trusted ? 'trusted' : rep >= TIER_REP.contributor ? 'contributor' : 'newcomer';
-  return { id: u, name: rec.name || '', role, rep, tier, banned: rec.banned === '1', strikes: +(rec.strikes || 0) };
+  return { id: u, name: rec.name || '', n: +rec.n || 0, tag: tagOf(rec), role, rep, tier, banned: rec.banned === '1', strikes: +(rec.strikes || 0) };
 }
 /* ── THE SITE'S SESSION IS A COOKIE (2026-09-21) ────────────────────────────
    knoll_s carries the session: HttpOnly, so no script on any page — nor
@@ -365,7 +425,7 @@ async function whoIs(req) {
   if (!u || !USER_RE.test(u)) return null;
   const [rec, rep] = await dbm([['HGETALL', K.user(u)], ['SCARD', K.days(u)]]);
   if (!rec || !Object.keys(rec).length) return null;
-  return profile(u, rec, rep);
+  return profile(u, await ensureTag(u, rec), rep);
 }
 async function mintSession(u, days) {
   const s = crypto.randomBytes(16).toString('hex');
@@ -390,8 +450,62 @@ async function finishLogin(email, days, proved = true) {
   if (fresh) sets.push('made', now, 'name', '', 'role', 'user');
   if (proved && admins().includes(String(email).trim().toLowerCase())) sets.push('role', 'admin');
   else if (rec.role === 'admin') sets.push('role', 'user');
-  await db('HSET', K.user(u), ...sets);
+  await dbm([['HSET', K.user(u), ...sets], ['ZADD', K.users, +(rec.made || now), u]]);   // counted among the accounts (again is harmless)
   return { user: u, session: await mintSession(u, days), fresh, named: !!rec.name };
+}
+
+/* ── THE NAMES (2026-09-22) ─────────────────────────────────────────────────
+   Anybody may be called anything; the number beside a name is what tells
+   two Mossies apart. It is claimed when a name is taken — the next one that
+   name has given, counted per name with capitals and compatibility forms
+   folded (NFKC) — and the TAG, name#n, is that account's from then on:
+   numbers only go up, so no tag is ever handed to somebody else, and an old
+   one still says whose it was. Going back to a name one has had, or only
+   changing its capitals, gives back the same number rather than a new one.
+   Every name, and who gave it (the gnome, or somebody whose proposal they
+   took — api/hill.js), is kept in names:<u>.
+
+   ponytail: look-alikes across scripts (a Cyrillic а for a Latin a) are two
+   names with two counters — the number still tells them apart; a skeleton
+   (Unicode TR39) is the upgrade if impersonation becomes a thing. A name
+   gone from the newest NAMES_KEEP gets a new number if it comes back. */
+const cleanName = v => text(String(v == null ? '' : v).replace(/#/g, ''), CAP.name).trim();   // # is the tag's own mark; the cut can end on a space
+const tagOf = rec => (rec.name ? rec.name + (rec.n ? '#' + rec.n : '') : '');
+const foldName = name => String(name).normalize('NFKC').toLowerCase();
+async function claimTag(u, name, rec) {
+  const key = foldName(name);
+  if (rec.n && rec.name && foldName(rec.name) === key) return +rec.n;
+  const had = (await db('LRANGE', K.names(u), 0, -1)).map(s => JSON.parse(s)).find(h => h.n && foldName(h.name) === key);
+  if (had) return had.n;
+  const n = await db('INCR', K.tagN(key));
+  if (n > TAG_MAX) throw bad(409, 'name-full', 'a million gnomes are called that already — choose another name');
+  await db('HSET', K.tags, key + '#' + n, u);
+  return n;
+}
+async function rename(u, raw, by) {
+  const name = cleanName(raw);
+  if (!name) throw bad(400, 'name', 'every gnome has a name; even Nameless is one');
+  const rec = await db('HGETALL', K.user(u));
+  if (!rec || !rec.made) throw bad(404, 'user', 'no such gnome');
+  if (rec.banned === '1') throw bad(403, 'banned', 'this account may not change its name');
+  if (rec.name === name && rec.n) return { name, n: +rec.n, tag: tagOf(rec) };
+  const n = await claimTag(u, name, rec);
+  await dbm([['HSET', K.user(u), 'name', name, 'n', String(n)],
+             ['LPUSH', K.names(u), JSON.stringify(Object.assign({ name, n, at: Date.now() }, by && by !== u ? { by } : {}))],
+             ['LTRIM', K.names(u), 0, NAMES_KEEP - 1]]);
+  return { name, n, tag: tagOf({ name, n }) };
+}
+// an account named before the numbers: numbered — and counted — the first time it is seen
+async function ensureTag(u, rec) {
+  if (!rec.name || rec.n) return rec;
+  let n;
+  try { n = await claimTag(u, rec.name, rec); } catch (e) { if (e instanceof Bad) return rec; throw e; }   // a full name: stays unnumbered, still signed in
+  await dbm([['HSET', K.user(u), 'n', String(n)], ['ZADD', K.users, +rec.made || Date.now(), u],
+             ['LPUSH', K.names(u), JSON.stringify({ name: rec.name, n, at: Date.now() })]]);
+  return Object.assign(rec, { n: String(n) });
+}
+async function audit(by, what, extra) {        // the moderators' record: who did what, and to whom
+  await dbm([['LPUSH', K.audit, JSON.stringify(Object.assign({ at: Date.now(), by, what }, extra || {}))], ['LTRIM', K.audit, 0, AUDIT_KEEP - 1]]);
 }
 
 const ipOf = req => String(req.headers['x-real-ip'] || String(req.headers['x-forwarded-for'] || '').split(',')[0] || (req.socket && req.socket.remoteAddress) || '?').trim();
@@ -410,21 +524,26 @@ async function rateOk(me, req) {
 }
 
 // ── the wall ──────────────────────────────────────────────────────────────
-async function loadDoc() {
-  let raw = await db('GET', K.doc);
-  if (raw == null) {                          // the store's very first visitor: the shipped wall becomes revision 1
-    const seed = require('../toem2/wall-seed.json');
-    const items = (seed.wall && seed.wall.items || []).filter(it => it && typeof it === 'object' && typeof it.k === 'string');
-    let n = 0;
-    items.forEach(it => { if (!it.n) it.n = Date.now().toString(36) + (n++).toString(36) + Math.floor(Math.random() * 1e6).toString(36); });   // a seed from before mint.js
-    const doc = { rev: 1, cam: seed.cam, cam_narrow: seed.cam_narrow, wall: { items }, flatfile: { list: (seed.flatfile && seed.flatfile.list || []).filter(t => t && t.id) } };
+const BLANK_CAM = { z: 1, cx: 0, cy: 0, w: 2560 }, BLANK_NARROW = { z: 0.4, cx: 0, cy: 0, w: 412 };   // a new page's camera, until a moderator's edit moves it
+async function loadDoc(pg) {
+  let raw = await db('GET', pg.doc);
+  if (raw == null) {                          // the page's very first visitor: TOEM 2's shipped wall — or, for a newer page, a blank one — becomes revision 1
+    let doc = { rev: 1, cam: BLANK_CAM, cam_narrow: BLANK_NARROW, wall: { items: [] }, flatfile: { list: [] } }, from = 'a blank page';
+    if (pg.slug === HOME) {
+      const seed = require('../toem2/wall-seed.json');
+      const items = (seed.wall && seed.wall.items || []).filter(it => it && typeof it === 'object' && typeof it.k === 'string');
+      let n = 0;
+      items.forEach(it => { if (!it.n) it.n = Date.now().toString(36) + (n++).toString(36) + Math.floor(Math.random() * 1e6).toString(36); });   // a seed from before mint.js
+      doc = { rev: 1, cam: seed.cam, cam_narrow: seed.cam_narrow, wall: { items }, flatfile: { list: (seed.flatfile && seed.flatfile.list || []).filter(t => t && t.id) } };
+      from = 'wall-seed.json';
+    }
     const json = JSON.stringify(doc);
-    if (await db('SET', K.doc, json, 'NX')) {
-      const full = { rev: 1, edit: null, by: 'seed', name: 'wall-seed.json', how: 'seed', cls: 'seed', at: Date.now(), put: {}, del: [], prev: {} };
-      await dbm([['SET', K.rev, '1'], ['SET', K.revN(1), JSON.stringify(full)], ['LPUSH', K.log, JSON.stringify(summary(full))]]);
+    if (await db('SET', pg.doc, json, 'NX')) {
+      const full = { rev: 1, edit: null, by: 'seed', name: from, how: 'seed', cls: 'seed', at: Date.now(), put: {}, del: [], prev: {} };
+      await dbm([['SET', pg.rev, '1'], ['SET', pg.revN(1), JSON.stringify(full)], ['LPUSH', pg.log, JSON.stringify(summary(full))]]);
       return doc;
     }
-    raw = await db('GET', K.doc);
+    raw = await db('GET', pg.doc);
   }
   return JSON.parse(raw);
 }
@@ -586,11 +705,11 @@ function applyPatch(doc, patch) {
 /* Did any revision after `from`, up to `to`, touch a piece this patch
    touches? Too far behind to ask cheaply is answered "yes": the sender
    rebases on the wall as it stands, which is what it would have done. */
-async function overlaps(patch, from, to) {
+async function overlaps(pg, patch, from, to) {
   if (to <= from) return false;
   if (to - from > 50) return true;
   const revs = [];
-  for (let r = from + 1; r <= to; r++) revs.push(['GET', K.revN(r)]);
+  for (let r = from + 1; r <= to; r++) revs.push(['GET', pg.revN(r)]);
   const mine = new Set(Object.keys(patch.put).concat(patch.del));
   return (await dbm(revs)).some(raw => { const e = raw && JSON.parse(raw); return !!e && Object.keys(e.put).concat(e.del).some(n => mine.has(n)); });
 }
@@ -598,14 +717,14 @@ async function overlaps(patch, from, to) {
    ('check') goes on if none of the pieces it touches were among the ones
    that moved, and is 409 otherwise — the sender sees the wall as it stands
    and tries again. A moderator's apply ('retry') simply goes again. */
-async function commit(doc, patch, entry, stale) {
+async function commit(pg, doc, patch, entry, stale) {
   for (let tries = 0; tries < 3; tries++) {
     const { next, json, prev } = applyPatch(doc, patch);
     const full = Object.assign({ rev: next.rev, at: Date.now(), put: patch.put, del: patch.del, prev }, entry);
-    const ok = await db('EVAL', CAS, 4, K.rev, K.doc, K.log, K.revN(next.rev), String(doc.rev), json, JSON.stringify(summary(full)), JSON.stringify(full));
+    const ok = await db('EVAL', CAS, 4, pg.rev, pg.doc, pg.log, pg.revN(next.rev), String(doc.rev), json, JSON.stringify(summary(full)), JSON.stringify(full));
     if (ok === 1 || ok === '1') return { rev: next.rev, touched: Object.keys(patch.put).concat(patch.del) };
-    const now = await loadDoc();
-    if (stale === 'check' && await overlaps(patch, doc.rev, now.rev)) throw bad(409, 'stale', 'the wall has moved since this edit was made', { rev: now.rev, doc: now });
+    const now = await loadDoc(pg);
+    if (stale === 'check' && await overlaps(pg, patch, doc.rev, now.rev)) throw bad(409, 'stale', 'the wall has moved since this edit was made', { rev: now.rev, doc: now });
     doc = now;
   }
   throw bad(503, 'busy', 'the wall is busy — try again in a moment');
@@ -615,16 +734,16 @@ async function takeDays(u, n) {
   if (gone.length) await db('SREM', K.days(u), ...gone);
 }
 // the pieces a revert touched are contested for a day; an edit touching one waits
-async function contest(ids) {
+async function contest(pg, ids) {
   if (!ids.length) return;
   const until = Date.now() + CONTESTED_HOURS * 3600e3, args = [];
   ids.forEach(n => args.push(until, n));
-  await db('ZADD', K.contested, ...args);
+  await db('ZADD', pg.contested, ...args);
 }
-async function contested(ids) {
+async function contested(pg, ids) {
   const now = Date.now();
-  await db('ZREMRANGEBYSCORE', K.contested, '-inf', now);
-  const hot = new Set(await db('ZRANGEBYSCORE', K.contested, now, '+inf'));
+  await db('ZREMRANGEBYSCORE', pg.contested, '-inf', now);
+  const hot = new Set(await db('ZRANGEBYSCORE', pg.contested, now, '+inf'));
   return ids.some(n => hot.has(n));
 }
 async function credit(u, touched) {
@@ -635,20 +754,20 @@ async function credit(u, touched) {
 }
 
 // ── the queue ─────────────────────────────────────────────────────────────
-async function sweepQueue() {
-  const ids = await db('LRANGE', K.queue, 0, -1);
+async function sweepQueue(pg) {
+  const ids = await db('LRANGE', pg.queue, 0, -1);
   if (!ids.length) return;
   const raws = await dbm(ids.map(id => ['GET', K.edit(id)])), cmds = [];
   for (const raw of raws) { const e = raw && JSON.parse(raw); if (e && e.status === 'motion') await settleMotion(e, { id: 'vote', name: 'the vote' }); }
   const again = await dbm(ids.map(id => ['GET', K.edit(id)]));
   again.forEach((raw, i) => {
     const id = ids[i], e = raw && JSON.parse(raw);
-    if (!e) { cmds.push(['LREM', K.queue, 0, id]); return; }
+    if (!e) { cmds.push(['LREM', pg.queue, 0, id]); return; }
     if (e.status === 'motion') return;
-    if (e.status !== 'queued') { cmds.push(['LREM', K.queue, 0, id], ['LREM', K.pending(e.by), 0, id]); return; }
+    if (e.status !== 'queued') { cmds.push(['LREM', pg.queue, 0, id], ['LREM', K.pending(e.by), 0, id]); return; }
     if (Date.now() - e.at > QUEUE_DAYS * 86400e3) {
       e.status = 'expired';
-      cmds.push(['SET', K.edit(id), JSON.stringify(e), 'EX', EDIT_DAYS * 86400], ['LREM', K.queue, 0, id], ['LREM', K.pending(e.by), 0, id]);
+      cmds.push(['SET', K.edit(id), JSON.stringify(e), 'EX', EDIT_DAYS * 86400], ['LREM', pg.queue, 0, id], ['LREM', K.pending(e.by), 0, id]);
     }
   });
   if (cmds.length) await dbm(cmds);
@@ -665,49 +784,49 @@ async function sweepPending(key) {           // a list of edit ids, kept to the 
   if (cmds.length) await dbm(cmds);
   return live;
 }
-let sweptAt = 0;                              // the queue's expiry sweep runs at most once a minute per instance: a read must not be a write
-async function sweepQueueSometimes() { if (Date.now() - sweptAt < SWEEP_MS) return; sweptAt = Date.now(); await sweepQueue(); }
-async function enqueue(me, patch, cls, req, status) {
+const sweptAt = {};                           // a page's expiry sweep runs at most once a minute per instance: a read must not be a write
+async function sweepQueueSometimes(pg) { if (Date.now() - (sweptAt[pg.slug] || 0) < SWEEP_MS) return; sweptAt[pg.slug] = Date.now(); await sweepQueue(pg); }
+async function enqueue(pg, me, patch, cls, req, status) {
   const ip = ipHash(req);
-  const mine = await sweepPending(K.pending(me.id)), here = await sweepPending(K.pendingIp(ip)), all = await db('LLEN', K.queue);
+  const mine = await sweepPending(K.pending(me.id)), here = await sweepPending(K.pendingIp(ip)), all = await db('LLEN', pg.queue);
   if (mine.length >= CAP.pending) throw bad(429, 'queue-full', 'you have ' + CAP.pending + ' edits waiting for a look already — wait for one of them');
   if (here.length >= CAP.pendingIp) throw bad(429, 'queue-full', 'this address has ' + CAP.pendingIp + ' edits waiting for a look already — wait for one of them');
   if (all >= CAP.queue) throw bad(503, 'queue-full', 'the queue is full for now — try again later');
   const id = newId();
-  const rec = { id, by: me.id, name: me.name, ip, at: Date.now(), base: patch.base, put: patch.put, del: patch.del, art: patch.art, cls, status: status || 'queued' };
+  const rec = { id, page: pg.slug, by: me.id, name: me.tag || me.name, ip, at: Date.now(), base: patch.base, put: patch.put, del: patch.del, art: patch.art, cls, status: status || 'queued' };
   if (rec.status === 'motion') { rec.votes = {}; rec.voters = {}; }
-  await dbm([['SET', K.edit(id), JSON.stringify(rec)], ['RPUSH', K.queue, id], ['RPUSH', K.pending(me.id), id], ['RPUSH', K.pendingIp(ip), id], ['EXPIRE', K.pendingIp(ip), QUEUE_DAYS * 86400]]);
+  await dbm([['SET', K.edit(id), JSON.stringify(rec)], ['RPUSH', pg.queue, id], ['RPUSH', K.pending(me.id), id], ['RPUSH', K.pendingIp(ip), id], ['EXPIRE', K.pendingIp(ip), QUEUE_DAYS * 86400]]);
   return id;
 }
 async function settle(ed, status, me, extra) {
   Object.assign(ed, { status, decided: { by: me.id, at: Date.now() } }, extra || {});
   if (status === 'live') ed.art = (ed.art || []).length;   // the tracings are on the wall now
-  const cmds = [['SET', K.edit(ed.id), JSON.stringify(ed), 'EX', EDIT_DAYS * 86400], ['LREM', K.queue, 0, ed.id], ['LREM', K.pending(ed.by), 0, ed.id]];
+  const cmds = [['SET', K.edit(ed.id), JSON.stringify(ed), 'EX', EDIT_DAYS * 86400], ['LREM', pageOfEdit(ed).queue, 0, ed.id], ['LREM', K.pending(ed.by), 0, ed.id]];
   if (ed.ip) cmds.push(['LREM', K.pendingIp(ed.ip), 0, ed.id]);
   await dbm(cmds);
 }
 
 // ── the ops ───────────────────────────────────────────────────────────────
-async function opEdit(req, res, me, body) {
+async function opEdit(pg, req, res, me, body) {
   const patch = cleanPatch(body, isMod(me));
-  const doc = await loadDoc();
+  const doc = await loadDoc(pg);
   if (patch.base !== doc.rev) {              // behind — but on pieces nobody else has touched since, it goes on as it stands
-    if (patch.base > doc.rev || await overlaps(patch, patch.base, doc.rev)) throw bad(409, 'stale', 'the wall has moved since this edit was made', { rev: doc.rev, doc });
+    if (patch.base > doc.rev || await overlaps(pg, patch, patch.base, doc.rev)) throw bad(409, 'stale', 'the wall has moved since this edit was made', { rev: doc.rev, doc });
     patch.base = doc.rev;
   }
   const c = classify(patch, doc, me);
   const foot = isMod(me) ? 0 : await db('SCARD', K.fp(me.id, today()));
   let to = decide(me, c.cls, foot + c.touched.length), why = foot + c.touched.length > CAP.footprint ? 'footprint' : c.cls;
   if (to === 'no') throw bad(400, 'drastic', 'this edit is drastic (' + reason(c) + ') — that takes standing here, or a moderator');
-  if (to === 'live' && !isMod(me) && await contested(c.touched)) { to = 'queued'; why = 'contested'; }
+  if (to === 'live' && !isMod(me) && await contested(pg, c.touched)) { to = 'queued'; why = 'contested'; }
   if (to === 'queued') {
     const motion = c.cls === 'drastic';                    // a moderator never gets here: theirs is live
-    const id = await enqueue(me, patch, c.cls, req, motion ? 'motion' : 'queued');
+    const id = await enqueue(pg, me, patch, c.cls, req, motion ? 'motion' : 'queued');
     return answer(res, 200, { ok: true, status: motion ? 'motion' : 'queued', edit: id, cls: c.cls, why: motion ? reason(c) : why });
   }
-  const id = newId();
-  const r = await commit(doc, patch, { edit: id, by: me.id, name: me.name, how: 'live', cls: c.cls, art: patch.art.length }, 'check');
-  await db('SET', K.edit(id), JSON.stringify({ id, by: me.id, name: me.name, at: Date.now(), base: patch.base, put: patch.put, del: patch.del, art: patch.art.length, cls: c.cls, status: 'live', rev: r.rev }), 'EX', EDIT_DAYS * 86400);
+  const id = newId(), name = me.tag || me.name;
+  const r = await commit(pg, doc, patch, { edit: id, by: me.id, name, how: 'live', cls: c.cls, art: patch.art.length }, 'check');
+  await db('SET', K.edit(id), JSON.stringify({ id, page: pg.slug, by: me.id, name, at: Date.now(), base: patch.base, put: patch.put, del: patch.del, art: patch.art.length, cls: c.cls, status: 'live', rev: r.rev }), 'EX', EDIT_DAYS * 86400);
   await credit(me.id, r.touched);
   answer(res, 200, { ok: true, status: 'live', rev: r.rev, edit: id, cls: c.cls });
 }
@@ -739,7 +858,7 @@ async function opReview(req, res, me, body) {
    skipped, art already there is not doubled, and nothing left to do is
    still a decision. */
 async function applyEdit(ed, me, how) {
-  const doc = await loadDoc();
+  const pg = pageOfEdit(ed), doc = await loadDoc(pg);
   const patch = { base: doc.rev, put: JSON.parse(JSON.stringify(ed.put)), del: ed.del.slice(), art: ed.art || [] };
   let c;
   try { c = classify(patch, doc, me); }
@@ -748,7 +867,7 @@ async function applyEdit(ed, me, how) {
     await settle(ed, 'live', me, { rev: doc.rev, nothing: true });
     return { status: 'live', rev: doc.rev, nothing: true };
   }
-  const r = await commit(doc, patch, { edit: ed.id, by: ed.by, name: ed.name, how, via: me.id, cls: ed.cls, art: patch.art.length }, 'retry');
+  const r = await commit(pg, doc, patch, { edit: ed.id, by: ed.by, name: ed.name, how, via: me.id, cls: ed.cls, art: patch.art.length }, 'retry');
   await settle(ed, 'live', me, { rev: r.rev });
   await credit(ed.by, r.touched);
   return { status: 'live', rev: r.rev, cls: c.cls };
@@ -788,8 +907,8 @@ async function settleMotion(ed, me) {
 }
 
 // a strike on a moderator's revision is the admin's to give, and nobody strikes the admin
-async function strikable(rev, me) {
-  const raw = await db('GET', K.revN(rev));
+async function strikable(pg, rev, me) {
+  const raw = await db('GET', pg.revN(rev));
   if (!raw) throw bad(404, 'rev', 'no such revision');
   const by = JSON.parse(raw).by;
   if (!by || !USER_RE.test(by)) return;
@@ -801,12 +920,12 @@ async function strikable(rev, me) {
    goes — for the pieces still as that revision left them. One changed since
    is left alone and counted. Through the same classifier as any edit, so a
    newcomer cannot undo a large one; a moderator's goes straight on. */
-async function revertRev(rev, me, how, strike, req) {
-  const raw = await db('GET', K.revN(rev));
+async function revertRev(pg, rev, me, how, strike, req) {
+  const raw = await db('GET', pg.revN(rev));
   if (!raw) throw bad(404, 'rev', 'no such revision');
   const was = JSON.parse(raw);
   if (was.how === 'seed') throw bad(400, 'rev', 'revision 1 is the shipped wall');
-  const doc = await loadDoc();
+  const doc = await loadDoc(pg);
   const byN = new Map(doc.wall.items.map(it => [it.n, it]));
   const put = {}, del = [];
   let skipped = 0;
@@ -830,12 +949,12 @@ async function revertRev(rev, me, how, strike, req) {
     const to = decide(me, c.cls, 0);
     if (to !== 'live') {
       if (to === 'no') throw bad(400, 'drastic', 'undoing that is a drastic edit — ask a moderator');
-      const id = await enqueue(me, patch, c.cls, req);
+      const id = await enqueue(pg, me, patch, c.cls, req);
       return { queued: id, cls: c.cls, skipped, by: was.by };
     }
   }
-  const r = await commit(doc, patch, { edit: newId(), by: me.id, name: me.name, how, of: rev, cls: c.cls }, 'retry');
-  await contest(r.touched);
+  const r = await commit(pg, doc, patch, { edit: newId(), by: me.id, name: me.tag || me.name, how, of: rev, cls: c.cls }, 'retry');
+  await contest(pg, r.touched);
   if (strike && was.by && USER_RE.test(was.by)) {
     await penalise(was.by);
     if (was.via && USER_RE.test(was.via) && was.via !== was.by) await takeDays(was.via, APPROVER_COST);   // whoever waved it through
@@ -855,28 +974,28 @@ async function penalise(u) {
   if (gone.length) cmds.push(['SREM', K.days(u), ...gone]);
   await dbm(cmds);
 }
-async function opRevert(req, res, me, body, strike) {
+async function opRevert(pg, req, res, me, body, strike) {
   const rev = Math.floor(+body.rev);
   if (!(rev > 1)) throw bad(400, 'rev', 'revert wants a revision number');
   if (strike && !isMod(me)) throw bad(403, 'role', 'a strike is a moderator\'s');
   if (!isMod(me) && me.tier === 'newcomer') throw bad(403, 'role', 'reverting takes standing here — three days of edits');
-  if (strike) await strikable(rev, me);
-  const r = await revertRev(rev, me, (strike ? 'strike' : 'revert') + ':' + rev, strike, req);
+  if (strike) await strikable(pg, rev, me);
+  const r = await revertRev(pg, rev, me, (strike ? 'strike' : 'revert') + ':' + rev, strike, req);
   answer(res, 200, Object.assign({ ok: true, status: r.queued ? 'queued' : 'live' }, r));
 }
 /* Everything one person put up since a revision, taken back down in one
    go, newest first — so a chain of moves to one piece unwinds in order. */
-async function opUndo(req, res, me, body) {
+async function opUndo(pg, req, res, me, body) {
   if (!isMod(me)) throw bad(403, 'role', 'undoing a person is a moderator\'s');
   const u = String(body.user || ''), since = Math.max(2, Math.floor(+body.since) || 2);
   if (!USER_RE.test(u)) throw bad(400, 'user', 'undo wants a user id');
   const role = await db('HGET', K.user(u), 'role');
   if (role === 'admin' || (role === 'mod' && me.role !== 'admin')) throw bad(403, 'role', 'that is a moderator\'s work — only the admin undoes those');
-  const log = (await db('LRANGE', K.log, 0, LOG_KEEP - 1)).map(s => JSON.parse(s));
+  const log = (await db('LRANGE', pg.log, 0, LOG_KEEP - 1)).map(s => JSON.parse(s));
   const all = log.filter(e => e.by === u && e.rev >= since && (e.how === 'live' || e.how === 'approved' || e.how === 'motion' || e.how === 'fiat')).map(e => e.rev);
   const revs = all.slice(0, UNDO_MAX);        // the newest so many; the rest on the next press
   let done = 0, skipped = 0;
-  for (const rev of revs) { const r = await revertRev(rev, me, 'undo:' + u + ':' + rev, false, req); if (!r.nothing) done++; skipped += r.skipped; }
+  for (const rev of revs) { const r = await revertRev(pg, rev, me, 'undo:' + u + ':' + rev, false, req); if (!r.nothing) done++; skipped += r.skipped; }
   if (body.strike) await penalise(u);
   answer(res, 200, { ok: true, reverted: done, of: all.length, more: all.length - revs.length, skipped });
 }
@@ -901,7 +1020,18 @@ async function opRole(req, res, me, body) {
   }
   if (!sets.length) throw bad(400, 'role', 'role wants a role, or banned');
   await db('HSET', K.user(u), ...sets);
+  await audit(me.id, 'role', { user: u, role: body.role != null ? body.role : undefined, banned: body.banned != null ? !!body.banned : undefined });
   answer(res, 200, { ok: true, user: u, role: body.role != null ? body.role : theirs, banned: body.banned != null ? !!body.banned : rec.banned === '1' });
+}
+// a new page (MORE PAGES THAN ONE): a moderator's to make, for now
+async function opPage(req, res, me, body) {
+  if (!isMod(me)) throw bad(403, 'role', 'making a page is a moderator\'s, for now');
+  const slug = String(body.slug || '').toLowerCase(), title = text(body.title, 60) || slug, now = Date.now();
+  if (!SLUG_RE.test(slug)) throw bad(400, 'slug', 'a page is named in lower-case letters, numbers and dashes — 32 at most');
+  if (slug === HOME || !(await db('HSETNX', K.page(slug), 'made', String(now)))) throw bad(409, 'taken', 'there is a page called that already');
+  await dbm([['HSET', K.page(slug), 'title', title, 'kind', 'wall', 'by', me.id], ['ZADD', K.pages, now, slug]]);
+  await audit(me.id, 'page', { page: slug, title });
+  answer(res, 200, { ok: true, page: { slug, title, kind: 'wall', by: me.id, made: now } });
 }
 
 // ── GET ───────────────────────────────────────────────────────────────────
@@ -925,9 +1055,18 @@ async function get(req, res, q, op) {
     delete e.ip; delete e.voters;               // the author's address and the voters' are nobody's business
     return answer(res, 200, { ok: true, edit: Object.assign(e, e.votes ? tally(e) : {}) });
   }
+  if (q.get('pages')) {                         // the first page, and every one made since
+    const slugs = await db('ZRANGEBYSCORE', K.pages, '-inf', '+inf'), recs = await dbm(slugs.map(s => ['HGETALL', K.page(s)]));
+    return answer(res, 200, { ok: true, pages: [{ slug: HOME, title: 'TOEM 2', kind: 'wall' }].concat(recs.map((p, i) => ({ slug: slugs[i], title: p.title, kind: p.kind, by: p.by, made: +p.made }))) });
+  }
+  if (q.get('audit')) {
+    if (!isMod(await whoIs(req))) return answer(res, 403, { ok: false, code: 'role', error: 'the record is the moderators\'' });
+    return answer(res, 200, { ok: true, audit: (await db('LRANGE', K.audit, 0, 199)).map(s => JSON.parse(s)) });
+  }
+  const pg = await pageOf(q.get('page'));       // the rest are one page's: TOEM 2's unless another is named
   if (q.get('queue')) {
-    await sweepQueueSometimes();
-    const ids = await db('LRANGE', K.queue, 0, -1);
+    await sweepQueueSometimes(pg);
+    const ids = await db('LRANGE', pg.queue, 0, -1);
     const queue = (await dbm(ids.map(id => ['GET', K.edit(id)]))).filter(Boolean).map(r => JSON.parse(r))
       .map(e => Object.assign({ id: e.id, by: e.by, name: e.name, at: e.at, cls: e.cls, status: e.status, n: { put: Object.keys(e.put).length, del: e.del.length, art: (e.art || []).length } },
                               e.status === 'motion' ? tally(e) : {}));
@@ -936,18 +1075,18 @@ async function get(req, res, q, op) {
   if (q.get('at')) {
     const n = Math.floor(+q.get('at'));
     if (!(n >= 1)) return answer(res, 400, { ok: false, code: 'rev', error: 'not a revision number' });
-    const raw = await db('GET', K.revN(n));
+    const raw = await db('GET', pg.revN(n));
     return raw ? answer(res, 200, { ok: true, rev: JSON.parse(raw) }, CACHE.rev) : answer(res, 404, { ok: false, code: 'rev', error: 'no such revision (a revision\'s record is kept ' + REV_DAYS + ' days)' });
   }
   if (q.get('log')) {
     const n = +q.get('log') > 1 ? Math.min(LOG_KEEP, +q.get('log')) : 100;
-    return answer(res, 200, { ok: true, log: (await db('LRANGE', K.log, 0, n - 1)).map(s => JSON.parse(s)) }, CACHE.log);
+    return answer(res, 200, { ok: true, log: (await db('LRANGE', pg.log, 0, n - 1)).map(s => JSON.parse(s)) }, CACHE.log);
   }
   if (q.get('rev') != null) {
-    const rev = await db('GET', K.rev);
+    const rev = await db('GET', pg.rev);
     if (rev != null && +q.get('rev') === +rev) return answer(res, 200, { ok: true, rev: +rev, same: true }, CACHE.doc);
   }
-  answer(res, 200, Object.assign({ ok: true }, await loadDoc()), CACHE.doc);
+  answer(res, 200, Object.assign({ ok: true }, await loadDoc(pg)), CACHE.doc);
 }
 
 // ── sign-in ───────────────────────────────────────────────────────────────
@@ -1018,19 +1157,16 @@ async function handler(req, res) {
     if (body.op === 'logout') { await db('DEL', K.sess(sha(sessionOf(req)))); if (!bearer(req)) clearSession(res, req); return answer(res, 200, { ok: true }); }
     if (me.banned) return answer(res, 403, { ok: false, code: 'banned', error: 'this account may not edit the wall' });
     if (!(await rateOk(me, req))) return answer(res, 429, { ok: false, code: 'rate', error: 'that is a lot in one hour — take a breath' });
-    switch (body.op) {
-      case 'edit': return await opEdit(req, res, me, body);
+    switch (body.op) {                            // review and vote find their page in the edit itself
+      case 'edit': return await opEdit(await pageOf(body.page), req, res, me, body);
       case 'review': return await opReview(req, res, me, body);
       case 'vote': return await opVote(req, res, me, body);
-      case 'revert': return await opRevert(req, res, me, body, false);
-      case 'strike': return await opRevert(req, res, me, body, true);
-      case 'undo': return await opUndo(req, res, me, body);
+      case 'revert': return await opRevert(await pageOf(body.page), req, res, me, body, false);
+      case 'strike': return await opRevert(await pageOf(body.page), req, res, me, body, true);
+      case 'undo': return await opUndo(await pageOf(body.page), req, res, me, body);
       case 'role': return await opRole(req, res, me, body);
-      case 'me': {
-        const name = text(body.name, CAP.name);
-        await db('HSET', K.user(me.id), 'name', name);
-        return answer(res, 200, { ok: true, name });
-      }
+      case 'page': return await opPage(req, res, me, body);
+      case 'me': return answer(res, 200, Object.assign({ ok: true }, await rename(me.id, body.name, me.id)));
       default: return answer(res, 400, { ok: false, code: 'op', error: 'no such op' });
     }
   } catch (e) {
@@ -1043,8 +1179,8 @@ async function handler(req, res) {
 
 module.exports = handler;
 // for the probes: the store (and a way to swap it), the keys, and the two things a test signs in with
-Object.assign(handler, { storeFor, useStore: s => { STORE = s; }, db, dbm, K, CAP, LINE, RATE, TIER_REP, MOTION_HOURS, mintSession, finishLogin, userKey, CAS });
-// …and for api/auth.js (the accounts) and api/hill.js (a yard of one's own): who is asking, the
-// session's two cookies, and the checks a piece that other people's browsers will draw has to pass
-Object.assign(handler, { whoIs, sessionOf, setSession, clearSession, sameSite, localPath, answer, readBody, Bad, bad, text, sha, ipHash,
-                         cleanRecord, cleanTracing, KINDS, GIF_RE, VID_RE, USER_RE, SESSION_DAYS });
+Object.assign(handler, { storeFor, useStore: s => { STORE = s; }, db, dbm, K, pageKeys, HOME, CAP, LINE, RATE, TIER_REP, MOTION_HOURS, TAG_MAX, mintSession, finishLogin, userKey, CAS });
+// …and for api/auth.js (the accounts) and api/hill.js (a yard of one's own, and proposals to it): who
+// is asking, the session's two cookies, the names, and the checks a piece that other people's browsers will draw has to pass
+Object.assign(handler, { whoIs, isMod, sessionOf, setSession, clearSession, sameSite, localPath, answer, readBody, Bad, bad, text, sha, ipHash,
+                         rename, cleanName, tagOf, ensureTag, audit, cleanRecord, cleanTracing, KINDS, GIF_RE, VID_RE, USER_RE, SESSION_DAYS });

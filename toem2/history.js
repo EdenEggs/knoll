@@ -128,13 +128,13 @@ window.History = (function () {
       const m = me();
       const you = el('p', 'th-me');
       if (m) {
-        you.append('you: ', Object.assign(el('b'), { textContent: m.name || 'gnome ' + m.id.slice(0, 6) }), ' · ' + m.tier + (m.rep ? ' · ' + m.rep + ' standing day' + (m.rep === 1 ? '' : 's') : ''), ' ');
+        you.append('you: ', Object.assign(el('b'), { textContent: m.tag || m.name || 'gnome ' + m.id.slice(0, 6) }), ' · ' + m.tier + (m.rep ? ' · ' + m.rep + ' standing day' + (m.rep === 1 ? '' : 's') : ''), ' ');
         const ren = el('button', 'th-link', 'rename'); ren.type = 'button';
         ren.addEventListener('click', async () => {
           const name = driven ? '' : (prompt('What should the wall call you? (24 letters at most)', m.name || '') || '').trim().slice(0, 24);
           if (!name) return;
           const out = await post({ op: 'me', name });
-          if (out.ok) { m.name = out.name; render.all(); }
+          if (out.ok) { m.name = out.name; m.tag = out.tag; render.all(); }
         });
         you.append(ren);
       } else you.textContent = 'not signed in — looking is free; submitting asks for a Google sign-in';

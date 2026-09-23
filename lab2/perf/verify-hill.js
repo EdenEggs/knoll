@@ -139,6 +139,92 @@ const tracing = extra => Object.assign({ id: 'tr1abcdefg', name: 'a leaf', w: 10
   A.strictEqual(r.status, 200, 'the owner\'s key has nothing to do with a yard of one\'s own');
   delete process.env.KNOLL_OWNER_KEY;
 
+  // ── proposals: anybody proposes, the owner (or a moderator) decides ─────
+  const ow = '0a'.repeat(8), pr = '0b'.repeat(8), th = '0c'.repeat(8), md = '0d'.repeat(8), bn = '0e'.repeat(8), S = {};
+  for (const [id, name, role] of [[ow, 'Owner', 'user'], [pr, 'Pal', 'user'], [th, 'Third', 'user'], [md, 'Mod', 'mod'], [bn, 'Banned', 'user']]) {
+    await W.db('HSET', W.K.user(id), 'made', '1', 'name', name, 'role', role);
+    S[id] = await W.mintSession(id);
+  }
+  await W.db('HSET', W.K.user(bn), 'banned', '1');
+  const by = id => Object.assign(as(S[id]), { 'x-real-ip': '10.9.0.' + id.charCodeAt(1) });
+  const P = (body, id) => call('POST', '/api/hill', body, by(id));
+  const G = (q, id) => call('GET', '/api/hill?' + q, undefined, by(id));
+  const idea = { wall: { items: [{ k: 't', t: 'from a friend', x: 1, y: 2 }] }, plotName: 'Their idea' };
+  r = await P({ hill: 'u-' + ow, doc: { wall: { items: [{ k: 's', d: 'M0 0' }] } } }, ow);
+  A.strictEqual(r.status, 200, '(the owner saves their yard)');
+  r = await P({ op: 'propose', hill: 'u-' + ow, doc: idea, why: 'a note for you' }, pr);
+  A.ok(r.status === 200 && r.body.status === 'open', 'somebody else proposes a yard for the owner: ' + JSON.stringify(r.body));
+  const p1 = r.body.id;
+  r = await P({ op: 'propose', hill: 'u-' + pr, doc: idea }, pr);
+  A.deepStrictEqual([r.status, r.body.code], [400, 'yours'], 'one\'s own yard is saved, not proposed to');
+  r = await P({ op: 'propose', hill: 'u-' + 'ff'.repeat(8), doc: idea }, pr);
+  A.strictEqual(r.status, 404, 'a yard nobody owns takes no proposals');
+  r = await P({ op: 'propose', hill: 'u-' + ow, doc: { flatfile: { list: [tracing({ d: '<img src=x onerror=alert(1)>' })] } } }, pr);
+  A.deepStrictEqual([r.status, r.body.code], [400, 'doc'], 'a proposed yard is checked as a save is: markup in a tracing is refused');
+  r = await P({ op: 'propose', hill: 'u-' + ow }, pr);
+  A.deepStrictEqual([r.status, r.body.code], [400, 'empty'], 'a proposal proposes something');
+  r = await call('POST', '/api/hill', { op: 'propose', hill: 'u-' + ow, doc: idea }, Object.assign(by(pr), { origin: 'https://evil.example' }));
+  A.deepStrictEqual([r.status, r.body.code], [403, 'origin'], 'a proposal posted from another site is refused');
+  r = await call('POST', '/api/hill', { op: 'propose', hill: 'u-' + ow, doc: idea }, ORIGIN);
+  A.deepStrictEqual([r.status, r.body.code], [401, 'who'], 'a proposal wants somebody signed in');
+  r = await P({ op: 'propose', hill: 'u-' + ow, doc: idea }, bn);
+  A.deepStrictEqual([r.status, r.body.code], [403, 'banned'], 'a banned account proposes nothing');
+  r = await P({ hill: 'u-' + bn, doc: idea }, bn);
+  A.deepStrictEqual([r.status, r.body.code], [403, 'banned'], '…and publishes nothing, not even its own yard');
+
+  r = await G('proposals=1&hill=u-' + ow, ow);
+  const inbox = r.body.proposals || [];
+  A.ok(inbox.length === 1 && inbox[0].id === p1 && inbox[0].name === 'Pal#1' && inbox[0].to.pieces === 1 && inbox[0].doc === undefined && inbox[0].why === 'a note for you',
+    'the owner\'s inbox lists it — who, why, how many pieces — without the yard itself: ' + JSON.stringify(inbox));
+  r = await G('proposals=1&hill=u-' + ow, th);
+  A.deepStrictEqual([r.status, r.body.code], [403, 'theirs'], 'nobody else reads the owner\'s inbox');
+  r = await G('proposal=' + p1, th);
+  A.strictEqual(r.status, 403, '…nor one of its proposals');
+  r = await G('proposal=' + p1, pr);
+  A.ok(r.status === 200 && r.body.proposal.doc.plotName === 'Their idea', 'the proposer reads theirs back, yard and all');
+  r = await P({ op: 'decide', id: p1, do: 'accept' }, pr);
+  A.deepStrictEqual([r.status, r.body.code], [403, 'theirs'], 'the proposer does not decide');
+  r = await P({ hill: 'u-' + ow, doc: { wall: { items: [{ k: 's', d: 'M9 9' }] } } }, ow);
+  r = await P({ op: 'decide', id: p1, do: 'accept' }, ow);
+  A.deepStrictEqual([r.status, r.body.code], [409, 'stale'], 'the owner saved since it was proposed: taking it would lose that save, so it is stale');
+  r = await P({ op: 'decide', id: p1, do: 'accept', force: true }, ow);
+  A.ok(r.status === 200 && r.body.status === 'accepted' && r.body.t > 0, 'taken anyway (force), it goes up: ' + JSON.stringify(r.body));
+  r = await call('GET', '/api/hill?hill=u-' + ow);
+  A.ok(r.body.doc.plotName === 'Their idea' && r.body.doc.looks.length === 3, '…as the yard, a version like any other');
+  r = await P({ op: 'decide', id: p1, do: 'decline' }, ow);
+  A.deepStrictEqual([r.status, r.body.code], [409, 'decided'], 'a decided proposal stays decided');
+  A.strictEqual(await W.db('GET', W.K.propDoc(p1)), null, '…and the yard it carried is not kept once it is decided');
+
+  r = await P({ op: 'propose', hill: 'u-' + ow, name: 'Bramble#7' }, pr);
+  const p2 = r.body.id;
+  r = await P({ op: 'decide', id: p2, do: 'decline', why: 'no thanks' }, ow);
+  r = await G('proposal=' + p2, pr);
+  A.ok(r.body.proposal.status === 'declined' && r.body.proposal.answer === 'no thanks' && (await W.db('HGET', W.K.user(ow), 'name')) === 'Owner', 'a name proposed and declined: the owner is who they were');
+  r = await P({ op: 'propose', hill: 'u-' + ow, name: 'Bramble' }, pr);
+  const p3 = r.body.id;
+  r = await P({ op: 'decide', id: p3, do: 'accept' }, md);
+  A.deepStrictEqual([r.status, r.body.code], [403, 'theirs'], 'not even a moderator takes a change for the owner');
+  r = await P({ op: 'decide', id: p3, do: 'accept' }, ow);
+  const hist = JSON.parse((await W.db('LRANGE', W.K.names(ow), 0, 0))[0]);
+  A.ok(r.status === 200 && hist.name === 'Bramble' && hist.n === 1 && hist.by === pr, 'the owner takes the name: Bramble#1, and who proposed it is written down');
+  r = await P({ op: 'propose', hill: 'u-' + ow, name: 'Spam' }, pr);
+  r = await P({ op: 'decide', id: r.body.id, do: 'decline' }, md);
+  A.ok(r.body.status === 'declined' && JSON.parse((await W.db('LRANGE', W.K.audit, 0, 0))[0]).what === 'proposal', 'a moderator may decline one for the owner, and the moderators\' record says so');
+  r = await P({ op: 'propose', hill: 'u-' + ow, name: 'Thistle' }, pr);
+  const p4 = r.body.id;
+  r = await P({ op: 'decide', id: p4, do: 'withdraw' }, th);
+  A.strictEqual(r.status, 403, 'only its proposer withdraws a proposal');
+  r = await P({ op: 'decide', id: p4, do: 'withdraw' }, pr);
+  A.strictEqual(r.body.status, 'withdrawn', '…who can');
+  const out = [];
+  for (let i = 0; i < 4; i++) out.push((await P({ op: 'propose', hill: 'u-' + ow, name: 'Idea' + i }, pr)).status);
+  A.deepStrictEqual(out, [200, 200, 200, 429], 'three open proposals per gnome, then wait for one of them');
+  r = await G('proposals=1&hill=u-' + ow, md);
+  A.strictEqual(r.body.proposals.length, 3, 'a moderator reads any inbox');
+  await W.db('HSET', W.K.user(md), 'banned', '1');
+  r = await G('proposals=1&hill=u-' + ow, md);
+  A.strictEqual(r.status, 403, '…and a banned one, none but their own');
+
   // deployed with no store: shut, and says so
   process.env.VERCEL = '1';
   r = await call('POST', '/api/hill', { hill: HILL, doc });
