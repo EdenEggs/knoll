@@ -324,9 +324,17 @@ const MIME = {
    the mtime moved. ETag first (milliseconds, so two saves in one second
    still tell apart), Last-Modified as the fallback for a client that only
    kept the date. */
+// a path with nothing at it gets the site's 404 page, the way Vercel serves 404.html
+function notFound(res) {
+  fs.readFile(path.join(ROOT, '404.html'), (err, buf) => {
+    res.writeHead(404, { 'content-type': err ? 'text/plain' : MIME['.html'] });
+    res.end(err ? '404' : buf);
+  });
+}
+
 function send(req, res, file) {
   fs.stat(file, (err, st) => {
-    if (err || !st.isFile()) { res.writeHead(404, { 'content-type': 'text/plain' }); res.end('404'); return; }
+    if (err || !st.isFile()) return notFound(res);
     const etag = 'W/"' + st.size.toString(36) + '-' + Math.round(st.mtimeMs).toString(36) + '"';
     const headers = {
       'content-type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream',
@@ -369,7 +377,7 @@ function serve(req, res) {
       if (!p.endsWith('/')) { res.writeHead(302, { Location: p + '/' }); res.end(); return; }
       return send(req, res, path.join(file, 'index.html'));
     }
-    if (err) { res.writeHead(404, { 'content-type': 'text/plain' }); res.end('404 ' + p); return; }
+    if (err) return notFound(res);
     send(req, res, file);
   });
 }

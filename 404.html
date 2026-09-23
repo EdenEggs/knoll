@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Not found · Knoll</title>
+<!-- THE SITE'S 404 (2026-09-22): the Design Canvas export "Not Found", unpacked the way
+     /signup and /login were. Every blob in its bundle was byte-identical to a file the
+     site already keeps (support.js, lab2/vendor's React, lab2/fonts), so those are what
+     load. Vercel answers any address it has nothing at with this file, and serve.js does
+     the same locally, AT that address, so every url here is root-absolute: a "./" or
+     "../" would resolve against /wherever/you/were/ and miss. React before the runtime,
+     blocking, for the reasons /login's head gives. -->
+<link rel="icon" href="/logo/logo-icon.svg">
+<script src="/lab2/vendor/react.production.min.js"
+        integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z"
+        crossorigin="anonymous"></script>
+<script src="/lab2/vendor/react-dom.production.min.js"
+        integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"
+        crossorigin="anonymous"></script>
+<script src="/support.js"></script>
+<!-- the account corner, as on every page with the house bar -->
+<script src="/account.js" defer></script>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/lab2/fonts/fonts.css">
+<style>
+  body { margin: 0; background: #ece7f1; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+  ::selection { background: #ffd23f; }
+  /* THE HOUSE BAR — lab 2's header, same block as /yard and /dashboard. In normal
+     flow, pulled full-bleed by the root's own padding spelled out as negative
+     margins (34 top, 30 sides). Change the root's padding and change these. */
+  .knoll-head { display: flex; align-items: center; gap: 22px; margin: -34px -30px 0; padding: 12px 22px;
+    background: #fdfbfd; border-bottom: 1.5px dashed #e2d4df; }
+  .knoll-brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+    color: #26212a; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: -0.01em; }
+  .knoll-brand img { display: block; }
+  .knoll-brand:hover { color: #a52c68; }
+  .nf-ground { margin: 0 -30px; }
+  @keyframes sway { 0%, 100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.2deg); } }
+  @keyframes tumbleIn { 0% { transform: translateY(-70vh) rotate(-300deg); } 72% { transform: translateY(0) rotate(0deg); } 86% { transform: translateY(-12px) rotate(4deg); } 100% { transform: translateY(0) rotate(0deg); } }
+  @keyframes hatPop { 0% { transform: translateY(0) rotate(0deg); } 35% { transform: translateY(-24px) rotate(-8deg); } 100% { transform: translateY(0) rotate(0deg); } }
+  @media (max-width: 860px) {
+    .nf-root { padding: 20px 14px 0 !important; }
+    .knoll-head { margin: -20px -14px 0 !important; }
+    .nf-ground { margin: 0 -14px !important; }
+    .nf-main { padding-top: 28px !important; }
+    .nf-gnome { width: 100px !important; height: 141px !important; margin-right: -8px !important; }
+    .nf-board { padding: 20px 18px 22px !important; }
+  }
+  @media (prefers-reduced-motion: reduce) { .nf-root * { animation: none !important; } }
+</style>
+</helmet>
+<div data-screen-label="Not found" class="nf-root" style="min-height: 100vh; box-sizing: border-box; padding: 34px 30px 0; display: flex; flex-direction: column; position: relative; overflow: clip; background-color: #ece7f1; background-image: radial-gradient(circle, rgba(90,70,110,0.13) 1.2px, transparent 1.4px); background-size: 22px 22px; color: #17120b; font-family: 'Kalam', cursive">
+  <!-- the house bar, with the knoll mark where the export drew a stand-in disc -->
+  <header class="knoll-head">
+    <a class="knoll-brand" href="/"><img src="/logo/logo-icon.svg" alt="" width="26" height="26"><span>knoll</span></a>
+  </header>
+
+  <!-- shared drawings: the village pine, and the eight wrong things -->
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs>
+    <path id="pine" d="M0,-440 L58,-328 L30,-336 L88,-222 L48,-232 L116,-114 L62,-126 L134,0 L-134,0 L-62,-126 L-116,-114 L-48,-232 L-88,-222 L-30,-336 L-58,-328 Z"></path>
+    <g id="it-sock">
+      <path d="M20,16 L44,16 L44,38 Q44,50 34,53 L20,58 Q9,60 8,50 Q8,43 17,40 L20,38 Z" fill="#e0598c" stroke="#17120b" stroke-width="3" stroke-linejoin="round"></path>
+      <path d="M21,25 L43,25 M21,32 L43,32" stroke="#fdf7e3" stroke-width="3" stroke-linecap="round"></path>
+      <rect x="18" y="6" width="28" height="12" rx="3" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></rect>
+    </g>
+    <g id="it-shroom">
+      <rect x="26" y="32" width="12" height="24" rx="5" fill="#f7f0df" stroke="#17120b" stroke-width="3"></rect>
+      <path d="M32,8 Q56,10 58,34 Q32,42 6,34 Q8,10 32,8 Z" fill="#e8484a" stroke="#17120b" stroke-width="3" stroke-linejoin="round"></path>
+      <circle cx="22" cy="20" r="4" fill="#fdf7e3" stroke="#17120b" stroke-width="2"></circle>
+      <circle cx="40" cy="16" r="3" fill="#fdf7e3" stroke="#17120b" stroke-width="2"></circle>
+      <circle cx="44" cy="28" r="2.5" fill="#fdf7e3" stroke="#17120b" stroke-width="2"></circle>
+    </g>
+    <g id="it-four">
+      <text x="32" y="54" text-anchor="middle" font-family="Rye, serif" font-size="56" fill="#ffd23f" stroke="#17120b" stroke-width="3" stroke-linejoin="round" sc-camel-paint-order="stroke">4</text>
+    </g>
+    <g id="it-acorn">
+      <path d="M18,28 Q18,54 32,58 Q46,54 46,28 Z" fill="#a07a4a" stroke="#17120b" stroke-width="3" stroke-linejoin="round"></path>
+      <path d="M24,34 Q24,46 30,50" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="3" stroke-linecap="round"></path>
+      <path d="M14,28 Q32,8 50,28 Q32,34 14,28 Z" fill="#6b4a2e" stroke="#17120b" stroke-width="3" stroke-linejoin="round"></path>
+      <line x1="32" y1="12" x2="34" y2="4" stroke="#17120b" stroke-width="3" stroke-linecap="round"></line>
+    </g>
+    <g id="it-boot">
+      <path d="M18,8 L36,8 L36,34 L50,42 Q56,46 54,52 L14,52 Q10,48 12,42 L18,38 Z" fill="#8a6a42" stroke="#17120b" stroke-width="3" stroke-linejoin="round"></path>
+      <path d="M12,52 L54,52 L54,58 L12,58 Z" fill="#5b4632" stroke="#17120b" stroke-width="3" stroke-linejoin="round"></path>
+      <path d="M22,16 L32,20 M22,24 L32,28 M22,32 L30,36" stroke="#fdf7e3" stroke-width="2.5" stroke-linecap="round"></path>
+    </g>
+    <g id="it-cup">
+      <ellipse cx="32" cy="55" rx="17" ry="4" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></ellipse>
+      <path d="M50,30 Q62,30 60,40 Q58,46 49,45" fill="none" stroke="#17120b" stroke-width="3" stroke-linecap="round"></path>
+      <path d="M14,24 Q14,52 32,52 Q50,52 50,24 Z" fill="#fdf7e3" stroke="#17120b" stroke-width="3" stroke-linejoin="round"></path>
+      <path d="M15,32 L49,32" stroke="#5a8fd6" stroke-width="4"></path>
+      <path d="M24,16 Q20,10 24,4 M34,16 Q30,10 34,4" fill="none" stroke="#17120b" stroke-width="2" stroke-linecap="round" opacity="0.45"></path>
+    </g>
+    <g id="it-key">
+      <path d="M28,28 L54,54 M46,46 L52,40 M40,40 L46,34" fill="none" stroke="#17120b" stroke-width="9" stroke-linecap="round"></path>
+      <path d="M28,28 L54,54 M46,46 L52,40 M40,40 L46,34" fill="none" stroke="#d9a441" stroke-width="4" stroke-linecap="round"></path>
+      <circle cx="20" cy="20" r="12" fill="#d9a441" stroke="#17120b" stroke-width="3"></circle>
+      <circle cx="20" cy="20" r="4.5" fill="#ece7f1" stroke="#17120b" stroke-width="2.5"></circle>
+    </g>
+    <g id="it-post">
+      <rect x="8" y="16" width="48" height="34" rx="2" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></rect>
+      <path d="M8,16 L32,38 L56,16" fill="none" stroke="#17120b" stroke-width="3" stroke-linejoin="round"></path>
+      <path d="M14,44 L26,44" stroke="#17120b" stroke-width="2" stroke-linecap="round" opacity="0.4"></path>
+      <circle cx="32" cy="38" r="6" fill="#b83739" stroke="#17120b" stroke-width="2.5"></circle>
+    </g>
+  </defs></svg>
+
+  <!-- pines from the village kit, standing in the grass at the corners -->
+  <svg aria-hidden="true" width="112" height="180" sc-camel-view-box="-146 -452 292 464" style="position: absolute; left: 120px; bottom: 96px; z-index: 0; pointer-events: none"><use href="#pine" fill="#1e1633"></use></svg>
+  <svg aria-hidden="true" width="90" height="145" sc-camel-view-box="-146 -452 292 464" style="position: absolute; right: 150px; bottom: 100px; z-index: 0; pointer-events: none"><use href="#pine" fill="#1e1633"></use></svg>
+  <svg aria-hidden="true" width="200" height="370" sc-camel-view-box="-30 190 300 555" style="position: absolute; left: -14px; bottom: 26px; z-index: 2; pointer-events: none; filter: drop-shadow(9px 10px 0 rgba(0,0,0,0.28)); transform-origin: 50% 100%; animation: sway 6s ease-in-out infinite">
+    <rect x="94" y="638" width="46" height="94" fill="#6b4a2e" stroke="#17120b" stroke-width="6"></rect>
+    <circle cx="117" cy="702" r="7" fill="#5c3a22" stroke="#17120b" stroke-width="3"></circle>
+    <use href="#pine" transform="translate(117,660) scale(1.05)" fill="#35693c" stroke="#17120b" stroke-width="7" stroke-linejoin="round"></use>
+    <g transform="translate(117,660) scale(1.05)" stroke="#5a9e58" stroke-width="5" stroke-linecap="round" fill="none"><path d="M-58,-96 Q-20,-82 30,-92"></path><path d="M-40,-206 Q-8,-194 28,-202"></path><path d="M-26,-306 Q0,-298 20,-304"></path></g>
+  </svg>
+  <svg aria-hidden="true" width="150" height="278" sc-camel-view-box="-30 190 300 555" style="position: absolute; right: 16px; bottom: 30px; z-index: 2; pointer-events: none; filter: drop-shadow(9px 10px 0 rgba(0,0,0,0.28)); transform-origin: 50% 100%; animation: sway 7s ease-in-out infinite 1.3s">
+    <rect x="94" y="638" width="46" height="94" fill="#6b4a2e" stroke="#17120b" stroke-width="6"></rect>
+    <use href="#pine" transform="translate(117,660) scale(1.05)" fill="#35693c" stroke="#17120b" stroke-width="7" stroke-linejoin="round"></use>
+    <g transform="translate(117,660) scale(1.05)" stroke="#5a9e58" stroke-width="5" stroke-linecap="round" fill="none"><path d="M-58,-96 Q-20,-82 30,-92"></path><path d="M-40,-206 Q-8,-194 28,-202"></path></g>
+  </svg>
+
+  <main class="nf-main" style="flex: 1; display: flex; align-items: flex-end; justify-content: center; padding: 48px 0 0; position: relative; z-index: 3">
+    <div style="display: flex; align-items: flex-end; justify-content: center; width: 100%; max-width: 720px">
+
+      <!-- THE GNOME, 220x310 drawn at 0.6; his left shoulder at (74,168) is where the arm grows from -->
+      <div ref="{{ gnomeRef }}" class="nf-gnome" aria-hidden="true" style="flex: none; width: 132px; height: 186px; margin: 0 -14px -12px 0; position: relative; z-index: 2; pointer-events: none">
+        <svg width="132" height="186" sc-camel-view-box="0 0 220 310" style="display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(6px 7px 0 rgba(0,0,0,0.3))">
+          <g ref="{{ bodyRef }}" style="transform-origin: 110px 300px">
+            <line x1="92" y1="252" x2="88" y2="292" stroke="#17120b" stroke-width="20" stroke-linecap="round"></line>
+            <line x1="92" y1="252" x2="88" y2="292" stroke="#5b4632" stroke-width="11" stroke-linecap="round"></line>
+            <ellipse cx="82" cy="298" rx="14" ry="9" fill="#8a6a42" stroke="#17120b" stroke-width="5"></ellipse>
+            <line x1="128" y1="252" x2="132" y2="292" stroke="#17120b" stroke-width="20" stroke-linecap="round"></line>
+            <line x1="128" y1="252" x2="132" y2="292" stroke="#5b4632" stroke-width="11" stroke-linecap="round"></line>
+            <ellipse cx="138" cy="298" rx="14" ry="9" fill="#8a6a42" stroke="#17120b" stroke-width="5"></ellipse>
+            <!-- his other arm, down at his side, on the trowel -->
+            <path d="M146,168 L172,240" stroke="#17120b" stroke-width="23" stroke-linecap="round"></path>
+            <path d="M146,168 L172,240" stroke="#4a72d4" stroke-width="13" stroke-linecap="round"></path>
+            <line x1="168" y1="226" x2="186" y2="268" stroke="#17120b" stroke-width="12" stroke-linecap="round"></line>
+            <line x1="168" y1="226" x2="186" y2="268" stroke="#8a6a42" stroke-width="6" stroke-linecap="round"></line>
+            <path d="M176,266 L198,266 L192,302 L182,302 Z" fill="#c9c3b4" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+            <circle cx="174" cy="244" r="12" fill="#f0cfae" stroke="#17120b" stroke-width="5"></circle>
+            <path d="M70,150 L150,150 L182,258 L38,258 Z" fill="#5a8fd6" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+            <path d="M110,150 L110,258" stroke="rgba(23,18,11,0.18)" stroke-width="3"></path>
+            <circle cx="110" cy="250" r="10" fill="#ffd23f" stroke="#17120b" stroke-width="4"></circle>
+            <circle cx="74" cy="168" r="14" fill="#4a72d4" stroke="#17120b" stroke-width="5"></circle>
+            <g ref="{{ headRef }}" style="transform-origin: 110px 140px">
+              <ellipse cx="72" cy="116" rx="8" ry="11" fill="#f5b8c4" stroke="#17120b" stroke-width="4"></ellipse>
+              <ellipse cx="148" cy="116" rx="8" ry="11" fill="#f5b8c4" stroke="#17120b" stroke-width="4"></ellipse>
+              <circle cx="110" cy="112" r="40" fill="#f0cfae" stroke="#17120b" stroke-width="5"></circle>
+              <path d="M64,118 Q110,148 156,118 Q166,225 110,242 Q54,225 64,118 Z" fill="#f7f0df" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+              <g style="transform: translateY({{ browLift }}px); transition: transform 0.2s ease-out">
+                <sc-if value="{{ moodPuzzled }}" hint-placeholder-val="{{ true }}">
+                  <path d="M82,88 Q91,78 100,86" fill="none" stroke="#17120b" stroke-width="4" stroke-linecap="round"></path>
+                  <path d="M120,95 Q128,92 137,94" fill="none" stroke="#17120b" stroke-width="4" stroke-linecap="round"></path>
+                </sc-if>
+                <sc-if value="{{ moodCheerful }}" hint-placeholder-val="{{ false }}">
+                  <path d="M83,95 Q92,87 100,93" fill="none" stroke="#17120b" stroke-width="4" stroke-linecap="round"></path>
+                  <path d="M120,93 Q128,87 137,95" fill="none" stroke="#17120b" stroke-width="4" stroke-linecap="round"></path>
+                </sc-if>
+                <sc-if value="{{ moodGrumpy }}" hint-placeholder-val="{{ false }}">
+                  <path d="M83,87 Q92,92 101,97" fill="none" stroke="#17120b" stroke-width="4" stroke-linecap="round"></path>
+                  <path d="M119,97 Q128,92 137,87" fill="none" stroke="#17120b" stroke-width="4" stroke-linecap="round"></path>
+                </sc-if>
+              </g>
+              <circle cx="93" cy="114" r="9" fill="#ffffff" stroke="#17120b" stroke-width="4"></circle>
+              <circle cx="127" cy="114" r="9" fill="#ffffff" stroke="#17120b" stroke-width="4"></circle>
+              <g ref="{{ pupilsRef }}">
+                <circle cx="93" cy="115" r="4" fill="#17120b"></circle>
+                <circle cx="127" cy="115" r="4" fill="#17120b"></circle>
+              </g>
+              <sc-if value="{{ moodPuzzled }}" hint-placeholder-val="{{ true }}">
+                <ellipse cx="110" cy="148" rx="5" ry="6" fill="#5b3324" stroke="#17120b" stroke-width="4"></ellipse>
+              </sc-if>
+              <sc-if value="{{ moodCheerful }}" hint-placeholder-val="{{ false }}">
+                <path d="M99,143 Q110,159 121,143 Z" fill="#5b3324" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path>
+              </sc-if>
+              <sc-if value="{{ moodGrumpy }}" hint-placeholder-val="{{ false }}">
+                <path d="M100,152 Q110,143 120,152" fill="none" stroke="#17120b" stroke-width="4" stroke-linecap="round"></path>
+              </sc-if>
+              <ellipse cx="91" cy="136" rx="11" ry="5.5" transform="rotate(-24 91 136)" fill="#fffaf0" stroke="#17120b" stroke-width="4"></ellipse>
+              <ellipse cx="129" cy="136" rx="11" ry="5.5" transform="rotate(24 129 136)" fill="#fffaf0" stroke="#17120b" stroke-width="4"></ellipse>
+              <circle cx="110" cy="126" r="13" fill="#e8a583" stroke="#17120b" stroke-width="5"></circle>
+              <circle cx="106" cy="122" r="3.5" fill="rgba(255,255,255,0.55)"></circle>
+              <g style="transform-origin: 62px 95px; animation: {{ hatAnim }}">
+                <path d="M110,10 L158,90 L62,90 Z" fill="#e8484a" stroke="#17120b" stroke-width="5" stroke-linejoin="round"></path>
+                <rect x="96" y="50" width="14" height="14" transform="rotate(-12 103 57)" fill="#b83739" stroke="#17120b" stroke-width="3" stroke-dasharray="4 3"></rect>
+                <rect x="54" y="84" width="112" height="22" rx="11" fill="#b83739" stroke="#17120b" stroke-width="5"></rect>
+                <rect x="68" y="90" width="26" height="6" rx="3" fill="rgba(255,255,255,0.35)"></rect>
+                <circle cx="110" cy="12" r="10" fill="#fdf7e3" stroke="#17120b" stroke-width="5"></circle>
+              </g>
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <!-- THE SIGN, staked in the grass -->
+      <div style="flex: 0 1 560px; min-width: 0; position: relative; padding-bottom: 58px">
+        <div aria-hidden="true" style="position: absolute; left: 38px; bottom: -28px; width: 20px; height: 96px; background: #8a6a42; border: 4px solid #17120b; box-sizing: border-box; border-radius: 2px 2px 4px 4px; box-shadow: inset 5px 0 0 rgba(23,18,11,0.18)"></div>
+        <div aria-hidden="true" style="position: absolute; right: 46px; bottom: -28px; width: 20px; height: 96px; background: #8a6a42; border: 4px solid #17120b; box-sizing: border-box; border-radius: 2px 2px 4px 4px; box-shadow: inset 5px 0 0 rgba(23,18,11,0.18)"></div>
+        <section class="nf-board" style="position: relative; background: #fdf7e3; border: 5px solid #17120b; box-shadow: 9px 10px 0 rgba(60,50,80,0.2); padding: 26px 30px 28px; transform: rotate(-0.8deg)">
+          <div aria-hidden="true" style="position: absolute; top: -11px; left: -11px; width: 15px; height: 15px; background: #e8484a; border: 3px solid #17120b; transform: rotate(45deg)"></div>
+          <div style="display: flex; flex-wrap: wrap; gap: 2px 14px; font-family: VT323, monospace; font-size: 18px; letter-spacing: 3px; line-height: 1.3; color: #4a4054">
+            <span>NOTICE No. 404</span><span>·</span><span>NOTHING AT THIS ADDRESS</span>
+          </div>
+          <h1 style="margin: 10px 0 0; font-family: Rye, serif; font-weight: 400; font-size: clamp(32px, 5.6vw, 54px); line-height: 1.02; color: #17120b; text-wrap: balance">There’s no page here.</h1>
+          <p style="margin: 14px 0 0; font-size: 18px; line-height: 1.45; max-width: 34em; text-wrap: pretty">Whatever you came for isn’t at this address. The gnome is checking past the edges of the window, in case it rolled off.</p>
+          <div aria-live="polite" style="margin-top: 16px; padding-top: 12px; border-top: 2px dotted rgba(23,18,11,0.35); font-family: VT323, monospace; font-size: 19px; letter-spacing: 2px; line-height: 1.3; color: #17120b; min-height: 25px">{{ foundLine }}</div>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; margin-top: 18px">
+            <a href="/" style="display: inline-flex; align-items: center; padding: 10px 16px 8px; background: #ffd23f; border: 4px solid #17120b; box-shadow: 4px 4px 0 rgba(23,18,11,0.55); color: #17120b; text-decoration: none; font-family: VT323, monospace; font-size: 21px; letter-spacing: 2px; line-height: 1; transition: transform 0.08s" style-hover="transform: translate(-1px,-1px); background: #ffdc5c" style-active="transform: translate(2px,2px); box-shadow: 2px 2px 0 rgba(23,18,11,0.55)">← BACK TO THE FRONT PAGE</a>
+            <button type="button" sc-camel-on-click="{{ lookAgain }}" aria-disabled="{{ lookBusy }}" style="display: inline-flex; align-items: center; padding: 10px 16px 8px; background: #fdf7e3; border: 4px solid #17120b; box-shadow: 4px 4px 0 rgba(23,18,11,0.55); color: #17120b; cursor: pointer; font-family: VT323, monospace; font-size: 21px; letter-spacing: 2px; line-height: 1; opacity: {{ lookOpacity }}; transition: transform 0.08s, opacity 0.2s" style-hover="transform: translate(-1px,-1px); background: #fffaf0" style-active="transform: translate(2px,2px); box-shadow: 2px 2px 0 rgba(23,18,11,0.55)">{{ lookLabel }}</button>
+          </div>
+          <div style="margin-top: 12px; font-style: italic; font-size: 14px; opacity: 0.7">{{ hint }}</div>
+        </section>
+        <svg aria-hidden="true" width="110" height="65" sc-camel-view-box="0 0 220 130" style="position: absolute; left: -8px; bottom: -56px; overflow: visible; pointer-events: none; filter: drop-shadow(4px 5px 0 rgba(0,0,0,0.25))">
+          <g style="transform-origin: 110px 118px; animation: sway 5.2s ease-in-out infinite 1.6s"><path d="M24,118 Q22,82 32,64 Q38,96 38,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M42,118 Q40,66 54,42 Q60,88 58,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M62,118 Q62,78 74,58 Q78,94 76,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M80,118 Q78,54 94,28 Q100,76 96,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M100,118 Q100,70 112,48 Q118,90 114,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M118,118 Q118,50 134,26 Q140,74 136,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M140,118 Q140,74 152,54 Q158,94 154,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M158,118 Q158,80 170,62 Q174,96 172,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M176,118 Q178,90 188,76 Q188,102 186,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path></g>
+        </svg>
+        <svg aria-hidden="true" width="110" height="65" sc-camel-view-box="0 0 220 130" style="position: absolute; right: -10px; bottom: -56px; overflow: visible; pointer-events: none; filter: drop-shadow(4px 5px 0 rgba(0,0,0,0.25))">
+          <g style="transform-origin: 110px 118px; animation: sway 5.6s ease-in-out infinite 0.9s"><line x1="96" y1="116" x2="92" y2="58" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line><circle cx="90" cy="52" r="4.5" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></circle><circle cx="97" cy="46" r="4.5" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></circle><circle cx="86" cy="44" r="4.5" fill="#fdf7e3" stroke="#17120b" stroke-width="3"></circle><path d="M34,118 Q32,84 44,68 Q50,98 48,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M62,118 Q62,70 76,50 Q80,92 76,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M118,118 Q118,72 132,54 Q138,94 132,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M148,118 Q150,86 164,72 Q160,102 158,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><line x1="174" y1="116" x2="180" y2="88" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line><circle cx="181" cy="82" r="6" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle><line x1="52" y1="116" x2="46" y2="94" stroke="#17120b" stroke-width="4" stroke-linecap="round"></line><circle cx="45" cy="88" r="6" fill="#e8484a" stroke="#17120b" stroke-width="3.5"></circle></g>
+        </svg>
+      </div>
+    </div>
+  </main>
+
+  <!-- THE GROUND: grass over soil, full-bleed; the wrong things pile up here -->
+  <div class="nf-ground" aria-hidden="true" style="position: relative; flex: none; height: 112px; z-index: 1; background: #7bc264; border-top: 5px solid #17120b; box-sizing: border-box">
+    <div style="position: absolute; left: 0; right: 0; top: 0; height: 12px; background: #4e8c3f; opacity: 0.45"></div>
+    <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: #a07a4a; border-top: 4px solid #17120b"></div>
+    <svg width="120" height="71" sc-camel-view-box="0 0 220 130" style="position: absolute; top: -58px; left: 5%; overflow: visible"><g style="transform-origin: 110px 118px; animation: sway 5.2s ease-in-out infinite"><path d="M42,118 Q40,66 54,42 Q60,88 58,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M62,118 Q62,78 74,58 Q78,94 76,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M80,118 Q78,54 94,28 Q100,76 96,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M100,118 Q100,70 112,48 Q118,90 114,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M118,118 Q118,50 134,26 Q140,74 136,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M140,118 Q140,74 152,54 Q158,94 154,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path></g></svg>
+    <svg width="120" height="71" sc-camel-view-box="0 0 220 130" style="position: absolute; top: -58px; left: 46%; overflow: visible"><g style="transform-origin: 110px 118px; animation: sway 4.8s ease-in-out infinite 0.7s"><path d="M42,118 Q40,66 54,42 Q60,88 58,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M80,118 Q78,54 94,28 Q100,76 96,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M100,118 Q100,70 112,48 Q118,90 114,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M118,118 Q118,50 134,26 Q140,74 136,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M158,118 Q158,80 170,62 Q174,96 172,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path></g></svg>
+    <svg width="120" height="71" sc-camel-view-box="0 0 220 130" style="position: absolute; top: -58px; left: 78%; overflow: visible"><g style="transform-origin: 110px 118px; animation: sway 5.6s ease-in-out infinite 1.4s"><path d="M62,118 Q62,78 74,58 Q78,94 76,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M80,118 Q78,54 94,28 Q100,76 96,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M118,118 Q118,50 134,26 Q140,74 136,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M140,118 Q140,74 152,54 Q158,94 154,118 Z" fill="#7bc264" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path><path d="M158,118 Q158,80 170,62 Q174,96 172,118 Z" fill="#4e8c3f" stroke="#17120b" stroke-width="4" stroke-linejoin="round"></path></g></svg>
+    <sc-for list="{{ pile }}" as="p" hint-placeholder-count="0">
+      <div style="position: absolute; left: {{ p.left }}; bottom: {{ p.bottom }}; width: 40px; height: 40px; animation: tumbleIn 1.1s cubic-bezier(.4,.9,.5,1) both">
+        <svg width="40" height="40" sc-camel-view-box="0 0 64 64" style="display: block; overflow: visible; transform: rotate({{ p.rot }}); filter: drop-shadow(3px 3px 0 rgba(0,0,0,0.25))"><use href="{{ p.href }}"></use></svg>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- THE STRETCHY ARM: shoulder → elbow → wrist, drawn each frame; thins as it stretches -->
+  <svg aria-hidden="true" style="position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 6; overflow: visible">
+    <path ref="{{ armInkRef }}" d="M0,0" fill="none" stroke="#17120b" stroke-width="22" stroke-linecap="round"></path>
+    <path ref="{{ armCoatRef }}" d="M0,0" fill="none" stroke="#5a8fd6" stroke-width="12" stroke-linecap="round"></path>
+    <line ref="{{ cuffRef }}" x1="0" y1="0" x2="0" y2="0" stroke="#17120b" stroke-width="12" stroke-linecap="round"></line>
+    <line ref="{{ cuffRef2 }}" x1="0" y1="0" x2="0" y2="0" stroke="#fdf7e3" stroke-width="6" stroke-linecap="round"></line>
+  </svg>
+  <!-- THE HAND, and whatever it came back with -->
+  <div ref="{{ handRef }}" aria-hidden="true" style="position: fixed; left: 0; top: 0; width: 56px; height: 56px; pointer-events: none; z-index: 7; will-change: transform">
+    <div ref="{{ handInnerRef }}" style="position: relative; width: 56px; height: 56px; transform-origin: 30% 30%; transition: transform 0.09s ease-out">
+      <sc-if value="{{ holding }}" hint-placeholder-val="{{ false }}">
+        <svg width="44" height="44" sc-camel-view-box="0 0 64 64" style="position: absolute; left: 6px; top: -26px; overflow: visible; filter: drop-shadow(3px 3px 0 rgba(23,18,11,0.25))"><use href="{{ heldHref }}"></use></svg>
+      </sc-if>
+      <sc-if value="{{ posePoint }}" hint-placeholder-val="{{ true }}">
+        <svg width="56" height="56" sc-camel-view-box="0 0 56 56" style="position: absolute; left: 0; top: 0; display: block; overflow: visible; filter: drop-shadow(3px 3px 0 rgba(23,18,11,0.25))">
+          <path d="M22,50 Q10,48 12,34 L14,26 Q14,20 19,20 L20,27 L12,8 Q10,2 15,2 Q19,2 21,8 L26,20 L30,20 Q36,18 39,23 L44,25 Q49,27 47,33 Q50,36 47,42 Q48,50 40,52 Q32,54 22,50 Z" fill="#f0cfae" stroke="#17120b" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path d="M30,22 L31,32 M39,24 L38,33 M46,32 L42,40" fill="none" stroke="#17120b" stroke-width="2" stroke-linecap="round" opacity="0.6"></path>
+        </svg>
+      </sc-if>
+      <sc-if value="{{ poseGrab }}" hint-placeholder-val="{{ false }}">
+        <svg width="56" height="56" sc-camel-view-box="0 0 56 56" style="position: absolute; left: 0; top: 0; display: block; overflow: visible; filter: drop-shadow(3px 3px 0 rgba(23,18,11,0.25))">
+          <path d="M20,52 Q8,48 10,36 Q10,28 12,22 Q12,14 18,14 L20,24 Q22,8 28,8 Q33,8 32,22 Q36,8 42,10 Q46,12 44,24 Q50,16 53,22 Q55,28 50,38 Q52,48 42,52 Q30,55 20,52 Z" fill="#f0cfae" stroke="#17120b" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path d="M20,26 L21,34 M32,24 L32,34 M44,26 L42,36" fill="none" stroke="#17120b" stroke-width="2" stroke-linecap="round" opacity="0.6"></path>
+        </svg>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;mood&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;puzzled&quot;,&quot;options&quot;:[&quot;puzzled&quot;,&quot;cheerful&quot;,&quot;grumpy&quot;],&quot;tsType&quot;:&quot;'puzzled' | 'cheerful' | 'grumpy'&quot;,&quot;section&quot;:&quot;The gnome&quot;},&quot;autoHunt&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;The gnome&quot;},&quot;hoard&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;The gnome&quot;}}">
+class Component extends DCLogic {
+  state = { pose: 'point', phase: 'follow', held: null, found: null, pile: [], count: 0, coarse: false, lift: 0, hatAnim: 'none' };
+  refs = {};
+  r = (k) => (el) => { this.refs[k] = el; };
+  armInkRef = this.r('armInk'); armCoatRef = this.r('armCoat'); cuffRef = this.r('cuff'); cuffRef2 = this.r('cuff2');
+  handRef = this.r('hand'); handInnerRef = this.r('handInner'); gnomeRef = this.r('gnome'); headRef = this.r('head'); pupilsRef = this.r('pupils'); bodyRef = this.r('body');
+  // motion state lives here, not in state: the loop writes the DOM directly
+  m = { mx: 0, my: 0, hasMouse: false, hx: 0, hy: 0, hvx: 0, hvy: 0, ex: 0, ey: 0, evx: 0, evy: 0, init: false, rot: 0, lean: 0, squash: 0, lastSpeed: 0, last: 0, lastMove: 0, lastHunt: 0, out: null, t0: 0, still: false };
+  ITEMS = [
+    { id: 'sock', href: '#it-sock', line: 'ONE SOCK · NOT IT' },
+    { id: 'shroom', href: '#it-shroom', line: 'A TOADSTOOL · NOT IT' },
+    { id: 'four', href: '#it-four', line: 'ANOTHER 4 · WE HAVE PLENTY' },
+    { id: 'acorn', href: '#it-acorn', line: 'AN ACORN · PROMISING · NOT IT' },
+    { id: 'boot', href: '#it-boot', line: 'SOMEBODY’S BOOT · NOT IT' },
+    { id: 'cup', href: '#it-cup', line: 'A TEACUP, STILL WARM · NOT IT' },
+    { id: 'key', href: '#it-key', line: 'A KEY · TO WHAT, UNCLEAR' },
+    { id: 'post', href: '#it-post', line: 'POST FOR A DIFFERENT HILL' },
+  ];
+
+  componentDidMount() {
+    const mq = (q) => !!(window.matchMedia && window.matchMedia(q).matches);
+    this.m.still = mq('(prefers-reduced-motion: reduce)');
+    if (mq('(hover: none)')) this.setState({ coarse: true });
+    window.addEventListener('mousemove', this.onMove);
+    document.addEventListener('mouseout', this.onOut);
+    this.raf = requestAnimationFrame(this.tick);
+    this.firstT = setTimeout(() => { if ((this.props.autoHunt ?? true) && this.state.phase === 'follow') this.hunt(); }, 2600);
+  }
+  componentWillUnmount() {
+    cancelAnimationFrame(this.raf); clearTimeout(this.firstT); clearTimeout(this.seq);
+    window.removeEventListener('mousemove', this.onMove); document.removeEventListener('mouseout', this.onOut);
+  }
+  onMove = (e) => { const m = this.m; m.mx = e.clientX; m.my = e.clientY; m.hasMouse = true; m.lastMove = performance.now(); };
+  // the cursor left the window: reach after it through whichever edge it went out of
+  onOut = (e) => {
+    if (e.relatedTarget || this.state.phase !== 'follow') return;
+    const x = e.clientX, y = e.clientY, w = window.innerWidth, h = window.innerHeight;
+    const edge = [['left', x], ['right', w - x], ['top', y], ['bottom', h - y]].sort((a, b) => a[1] - b[1])[0][0];
+    this.hunt(edge);
+  };
+  lookAgain = () => { if (this.state.phase === 'follow') this.hunt(); };
+  clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+  hunt(edge) {
+    const m = this.m, w = window.innerWidth, h = window.innerHeight;
+    if (!edge) { const o = ['left', 'right', 'top', 'left', 'right', 'bottom']; edge = o[Math.floor(Math.random() * o.length)]; }
+    const side = edge === 'left' || edge === 'right';
+    const along = m.hasMouse ? (side ? m.my : m.mx) : (side ? h * 0.4 : w * 0.5);
+    const pad = 180;
+    m.out = side ? { x: edge === 'left' ? -pad : w + pad, y: this.clamp(along, 60, h - 60) } : { x: this.clamp(along, 60, w - 60), y: edge === 'top' ? -pad : h + pad };
+    m.t0 = performance.now(); m.lastHunt = m.t0;
+    let pick; do { pick = this.ITEMS[Math.floor(Math.random() * this.ITEMS.length)]; } while (pick.id === this.lastId);
+    this.lastId = pick.id;
+    clearTimeout(this.seq);
+    this.setState({ phase: 'out' });
+    this.seq = setTimeout(() => {
+      this.setState((s) => ({ phase: 'show', held: pick, found: pick, count: s.count + 1, lift: 1, hatAnim: 'hatPop 0.55s cubic-bezier(.3,1.4,.5,1) both' }));
+      this.seq = setTimeout(() => {
+        this.setState((s) => {
+          const keep = (this.props.hoard ?? true) && s.pile.length < 24;
+          const pile = keep ? s.pile.concat([{ href: pick.href, left: (58 + Math.random() * 28).toFixed(1) + '%', bottom: (28 + Math.random() * 34).toFixed(0) + 'px', rot: (Math.random() * 70 - 35).toFixed(0) + 'deg' }]) : s.pile;
+          return { phase: 'follow', held: null, pile, lift: 0, hatAnim: 'none' };
+        });
+      }, 2600);
+    }, 1750);
+  }
+
+  // the shoulder joint (74,168 of 220x310) in viewport coords, following the body's lean about its feet (110,300)
+  shoulder() {
+    const g = this.refs.gnome; if (!g) return null;
+    const r = g.getBoundingClientRect(), sc = r.width / 220, th = this.m.lean * Math.PI / 180;
+    const dx = (74 - 110) * sc, dy = (168 - 300) * sc;
+    return { x: r.left + 110 * sc + dx * Math.cos(th) - dy * Math.sin(th), y: r.top + 300 * sc + dx * Math.sin(th) + dy * Math.cos(th), sc, left: r.left, top: r.top };
+  }
+  // where the hand wants to be. fwd = the angle the pose's fingers point at when unrotated
+  target(now, sh) {
+    const m = this.m, s = this.state, w = window.innerWidth, h = window.innerHeight;
+    if (s.phase === 'out' && m.out) {
+      const rum = now - m.t0 > 650 && !m.still;
+      const jx = rum ? Math.sin(now / 41) * 9 : 0, jy = rum ? Math.cos(now / 29) * 7 : 0;
+      return { x: m.out.x + jx, y: m.out.y + jy, pose: 'grab', fwd: 90, aimX: m.out.x * 2 - sh.x, aimY: m.out.y * 2 - sh.y, k: 70, damp: 0.85 };
+    }
+    if (s.phase === 'show') return { x: Math.max(34, sh.x - 46), y: sh.y - 86, pose: 'grab', rot: 0, k: 120, damp: 0.8 };
+    if (!m.hasMouse) return { x: sh.x - 26, y: sh.y + 74, pose: 'point', fwd: 116, aimX: sh.x - 90, aimY: sh.y + 150 };
+    return { x: Math.min(w - 24, m.mx + 26), y: Math.min(h - 24, m.my + 28), pose: 'point', fwd: 116, aimX: m.mx, aimY: m.my };
+  }
+
+  tick = (now) => {
+    this.raf = requestAnimationFrame(this.tick);
+    const m = this.m, s = this.state, R = this.refs;
+    const dt = Math.min(0.05, (now - (m.last || now)) / 1000) || 0.016; m.last = now;
+    const sh = this.shoulder(); if (!sh) return;
+    if (!m.init) { m.hx = sh.x - 26; m.hy = sh.y + 74; m.ex = sh.x - 10; m.ey = sh.y + 40; m.init = true; }
+    const t = this.target(now, sh);
+    // hand: a spring toward the target (snaps when motion is reduced)
+    const kH = t.k || 140, dH = 2 * Math.sqrt(kH) * (t.damp || 0.9);
+    if (m.still) { const a = Math.min(1, dt * 12); m.hx += (t.x - m.hx) * a; m.hy += (t.y - m.hy) * a; m.hvx = m.hvy = 0; }
+    else { m.hvx += ((t.x - m.hx) * kH - m.hvx * dH) * dt; m.hvy += ((t.y - m.hy) * kH - m.hvy * dH) * dt; m.hx += m.hvx * dt; m.hy += m.hvy * dt; }
+    // elbow: a slower spring toward a sagging midpoint
+    const dist = Math.hypot(m.hx - sh.x, m.hy - sh.y);
+    const sag = Math.min(140, 10 + dist * 0.2);
+    const tx = (sh.x + m.hx) / 2, ty = (sh.y + m.hy) / 2 + sag;
+    const kE = 90, dE = 2 * Math.sqrt(kE) * 0.75;
+    if (m.still) { m.ex = tx; m.ey = ty; }
+    else { m.evx += ((tx - m.ex) * kE - m.evx * dE) * dt; m.evy += ((ty - m.ey) * kE - m.evy * dE) * dt; m.ex += m.evx * dt; m.ey += m.evy * dt; }
+    // the further it stretches, the thinner it gets
+    const thin = this.clamp(1 - Math.max(0, dist - 220) / 1600, 0.5, 1);
+    // hand rotation: point the pose's fingers at the aim, lean into travel
+    const want = t.rot != null ? t.rot : Math.atan2(t.aimY - m.hy, t.aimX - m.hx) * 57.3 + t.fwd;
+    const da = ((want - m.rot + 540) % 360) - 180; m.rot += da * Math.min(1, dt * 10);
+    // wrist: the heel of the hand (30,50 in the 56 box at hx-14,hy-10), rotated about the pivot (30%,30%)
+    const rr = m.rot * Math.PI / 180, pvx = m.hx - 14 + 16.8, pvy = m.hy - 10 + 16.8, hx0 = 13.2, hy0 = 33.2;
+    const wx = pvx + hx0 * Math.cos(rr) - hy0 * Math.sin(rr), wy = pvy + hx0 * Math.sin(rr) + hy0 * Math.cos(rr);
+    const d = 'M' + sh.x.toFixed(1) + ',' + sh.y.toFixed(1) + ' Q' + m.ex.toFixed(1) + ',' + m.ey.toFixed(1) + ' ' + wx.toFixed(1) + ',' + wy.toFixed(1);
+    if (R.armInk && R.armCoat) {
+      R.armInk.setAttribute('d', d); R.armInk.setAttribute('stroke-width', (22 * thin).toFixed(1));
+      R.armCoat.setAttribute('d', d); R.armCoat.setAttribute('stroke-width', (12 * thin).toFixed(1));
+    }
+    let tnx = wx - m.ex, tny = wy - m.ey; const tl = Math.hypot(tnx, tny) || 1; tnx /= tl; tny /= tl;
+    const cx = wx - tnx * 4, cy = wy - tny * 4, px = -tny * 8 * thin, py = tnx * 8 * thin;
+    [R.cuff, R.cuff2].forEach((c) => { if (c) { c.setAttribute('x1', cx - px); c.setAttribute('y1', cy - py); c.setAttribute('x2', cx + px); c.setAttribute('y2', cy + py); } });
+    const speed = Math.hypot(m.hvx, m.hvy), decel = Math.max(0, m.lastSpeed - speed); m.lastSpeed = speed;
+    m.squash = Math.max(m.squash * (1 - dt * 9), Math.min(0.18, decel * 0.0012));
+    const tilt = m.rot + this.clamp(m.hvx * 0.015, -10, 10);
+    if (R.hand) R.hand.style.transform = 'translate(' + (m.hx - 14).toFixed(1) + 'px,' + (m.hy - 10).toFixed(1) + 'px)';
+    if (R.handInner) R.handInner.style.transform = 'rotate(' + tilt.toFixed(1) + 'deg) scale(' + (1 + m.squash).toFixed(3) + ',' + (1 - m.squash).toFixed(3) + ')';
+    if (t.pose !== s.pose) this.setState({ pose: t.pose });
+    // the body leans after a far reach
+    const wantLean = dist > 260 ? this.clamp((m.hx - sh.x) / 70, -9, 9) : 0;
+    m.lean += (wantLean - m.lean) * Math.min(1, dt * 6);
+    if (R.body) R.body.style.transform = 'rotate(' + m.lean.toFixed(2) + 'deg)';
+    // head and eyes: on the hand while it is busy, otherwise on the cursor
+    if (R.head) {
+      const hx0c = sh.left + 110 * sh.sc, hy0c = sh.top + 112 * sh.sc;
+      const busy = s.phase !== 'follow' || !m.hasMouse;
+      const lx = busy ? m.hx : m.mx, ly = busy ? m.hy : m.my;
+      const ang = this.clamp(Math.atan2(lx - hx0c, 220) * 57.3, -14, 14);
+      R.head.style.transform = 'rotate(' + ang.toFixed(1) + 'deg)';
+      const dl = Math.hypot(lx - hx0c, ly - hy0c) || 1, k = Math.min(1, dl / 300);
+      if (R.pupils) R.pupils.style.transform = 'translate(' + ((lx - hx0c) / dl * 5 * k).toFixed(1) + 'px,' + ((ly - hy0c) / dl * 4 * k).toFixed(1) + 'px)';
+    }
+    // left alone long enough, he goes and has another look himself
+    if ((this.props.autoHunt ?? true) && s.phase === 'follow' && now > 4000 && now - m.lastHunt > 11000 && now - m.lastMove > 4000) this.hunt();
+  };
+
+  renderVals() {
+    const s = this.state, mood = this.props.mood ?? 'puzzled', n = s.count;
+    const foundLine = s.phase === 'show' && s.found ? 'FOUND · ' + s.found.line
+      : (n === 0 ? 'FOUND SO FAR · NOTHING' : 'FOUND SO FAR · ' + n + (n === 1 ? ' WRONG THING' : ' WRONG THINGS') + ' · 0 PAGES');
+    const busy = s.phase !== 'follow';
+    return {
+      armInkRef: this.armInkRef, armCoatRef: this.armCoatRef, cuffRef: this.cuffRef, cuffRef2: this.cuffRef2,
+      handRef: this.handRef, handInnerRef: this.handInnerRef, gnomeRef: this.gnomeRef, headRef: this.headRef, pupilsRef: this.pupilsRef, bodyRef: this.bodyRef,
+      foundLine, pile: s.pile, holding: !!s.held, heldHref: s.held ? s.held.href : '',
+      posePoint: s.pose === 'point', poseGrab: s.pose === 'grab',
+      lookAgain: this.lookAgain, lookBusy: busy, lookOpacity: busy ? 0.55 : 1,
+      lookLabel: s.phase === 'out' ? 'LOOKING…' : (s.phase === 'show' ? 'HMM.' : 'LOOK AGAIN'),
+      hint: s.coarse ? 'tap “look again” and he’ll have another rummage' : 'move your mouse off the window and he’ll reach after it',
+      moodPuzzled: mood === 'puzzled', moodCheerful: mood === 'cheerful', moodGrumpy: mood === 'grumpy',
+      browLift: s.lift ? -7 : 0, hatAnim: s.hatAnim,
+    };
+  }
+}
+</script>
+
+
+</body></html>
