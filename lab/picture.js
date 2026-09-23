@@ -55,6 +55,10 @@ window.Picture = (function () {
   const LIMIT = 24;
   const RECENT = 6;                     // how many stay on the dock, this session only
 
+  // ponytail: the klipy tab is parked for now (2026-09-22). It just says "coming soon" and
+  // nothing goes out to KLIPY; false brings the search, the key box and the fine print back.
+  const SOON = true;
+
   const store = Lab.store('picture', () => ({ key: '', last: '' }));
   const S = () => store.get();
 
@@ -111,7 +115,7 @@ window.Picture = (function () {
           'under 900KB. nothing is uploaded anywhere; there is nowhere to upload it to.</p>' +
       '</div>' +
 
-      '<div class="pic-pane" data-pane="klipy" hidden>' +
+      '<div class="pic-pane" data-pane="klipy" hidden>' + (SOON ? '<p class="pic-fine">coming soon</p>' :
         '<form class="pic-search">' +
           '<input type="search" class="pic-q" placeholder="search for a gif…" maxlength="60" ' +
             'aria-label="search klipy" autocomplete="off">' +
@@ -128,7 +132,7 @@ window.Picture = (function () {
             'this browser can read it, so put a test key here rather than a live one.</p>' +
         '</div>' +
         '<p class="pic-mark">gifs by <a href="https://klipy.com/" target="_blank" ' +
-          'rel="noopener">KLIPY</a><button type="button" class="pic-linky" data-pic-key>key</button></p>' +
+          'rel="noopener">KLIPY</a><button type="button" class="pic-linky" data-pic-key>key</button></p>') +
       '</div>' +
 
       '<p class="pic-say" role="status"></p>';
@@ -153,7 +157,7 @@ window.Picture = (function () {
       b.setAttribute('aria-selected', String(b.dataset.picTab === t)));
     sheet.querySelectorAll('[data-pane]').forEach(p => { p.hidden = p.dataset.pane !== t; });
     say('');
-    if (t === 'klipy') {
+    if (t === 'klipy' && !SOON) {
       keyRow(!S().key);
       if (!results.length) trending();
       setTimeout(() => { const i = q('.pic-q'); if (i) i.focus(); }, 0);
@@ -390,10 +394,12 @@ window.Picture = (function () {
     // the bench's own keys must not fire while somebody is typing in here
     sheet.addEventListener('keydown', e => e.stopPropagation());
 
-    q('.pic-search').addEventListener('submit', e => { e.preventDefault(); search(q('.pic-q').value); });
-    q('.pic-keyin').addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); q('.pic-keysave').click(); }
-    });
+    if (!SOON) {
+      q('.pic-search').addEventListener('submit', e => { e.preventDefault(); search(q('.pic-q').value); });
+      q('.pic-keyin').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); q('.pic-keysave').click(); }
+      });
+    }
 
     const file = q('.pic-file');
     file.addEventListener('change', () => {

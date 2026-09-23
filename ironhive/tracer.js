@@ -140,7 +140,8 @@ window.Tracer = (function () {
         /* TRACE IT, with the ink-flow gauge stood in its own box beside it —
            the export's arrangement, and where the old machine's INK FLOW
            panel went. The needle still swings while a trace runs; what that
-           panel had to SAY has moved to the note at the foot of the body. */
+           panel had to SAY went to a note at the foot of the body, which came
+           off on 2026-09-22 (see say()). */
         '<div class="tr-run">' +
           '<button type="button" class="tr-go" id="tr-trace" disabled>TRACE IT</button>' +
           '<div class="tr-flow" title="ink flow"><i class="tr-gauge"><b id="tr-needle"></b><u></u></i></div>' +
@@ -167,8 +168,6 @@ window.Tracer = (function () {
           '<button type="button" class="tr-btn" id="tr-save" disabled title="file the tracing in the library">SAVE TO LIBRARY</button>' +
           '<button type="button" class="tr-btn" id="tr-clear" disabled>CLEAR</button>' +
         '</div>' +
-        '<div class="tr-note"><i></i>1. lay down a picture · 2. set the dials · 3. TRACE IT' +
-          '<small id="tr-status">drop a picture to begin</small></div>' +
       '</div>' +
       '<div class="lp-foot" id="tr-file-box">' +
         '<div class="lp-head">' +
@@ -210,6 +209,9 @@ window.Tracer = (function () {
     return panel;
   }
 
+  // ponytail: #tr-status went with the note (2026-09-22), so say() is quiet and its lines (a
+  // full library, a blank picture) go unseen; flash() still shakes the drop. Give an element
+  // that id again to hear them.
   const say = msg => { const s = $('tr-status'); if (s) s.textContent = msg; };
   // the ink-flow needle: at rest to the left, swung over while a trace runs
   const needle = deg => { const n = $('tr-needle'); if (n) n.style.transform = 'rotate(' + deg + 'deg)'; };

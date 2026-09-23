@@ -1413,13 +1413,6 @@ body.lp-resizing{user-select:none;cursor:ew-resize}
 .tr-btn:active{transform:translate(3px,4px);box-shadow:1px 1px 0 rgba(10,7,14,.55)}
 .tr-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:4px 5px 0 rgba(10,7,14,.55);background:#332b3c}
 #tr-save{flex:1;border-radius:9px 12px 8px 11px}
-/* the sticky note, its tape torn over the corner — the steps on top, and
-   under them whatever the table has to say for itself just now */
-.tr-note{background:#332b3c;border:3px solid #100c16;border-radius:4px 10px 5px 11px;padding:9px 12px 8px;
-  position:relative;margin-top:4px;font-weight:700;font-size:14px;line-height:1.35;color:#f4f0f7}
-.tr-note i{position:absolute;top:-10px;right:14px;width:58px;height:18px;background:rgba(255,158,208,.55);
-  border:3px solid #100c16;border-radius:3px;transform:rotate(-3deg)}
-.tr-note small{display:block;font-weight:400;font-size:13px;opacity:.85}
 /* THE FLAT FILE: four across, the way the export draws it */
 .tr-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
 .tr-slot{aspect-ratio:1;box-sizing:border-box;background:#332b3c;border:3px dashed #100c16;

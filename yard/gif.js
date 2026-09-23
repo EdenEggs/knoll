@@ -73,6 +73,10 @@ window.Gif = (function () {
      do it with. (2026-09-04) */
   const HOUSE_KEY = '';
 
+  // ponytail: the gif search is parked for now (2026-09-22). The row just says "coming soon"
+  // and nothing goes out to KLIPY; false brings the search, the key box and the fine print back.
+  const SOON = true;
+
   const store = Lab.store('gif', () => ({ key: '', last: '' }));
   const S = () => store.get();
   const keyNow = () => (S().key || '').trim() || HOUSE_KEY;
@@ -368,6 +372,7 @@ window.Gif = (function () {
      changed, so this hands back a string rather than keeping a panel of its
      own the way the tracing table does. */
   function opts() {
+    if (SOON) return '<span class="opt-lab">GIF</span><span class="opt-say">coming soon</span>';
     const q = esc(S().last || '');
     let html = '<span class="opt-lab">GIF</span>' +
       '<span class="opt-set opt-gif-bar">' +
@@ -457,7 +462,7 @@ window.Gif = (function () {
   // key to ask with — going down leaves the pointer armed, the way IMAGE
   // leaves a tracing on it, so switching tools and back does not lose it
   function tool(on) {
-    if (on && keyNow() && !results.length) trending();
+    if (on && !SOON && keyNow() && !results.length) trending();
   }
 
   return { opts, onOpt, tool, nudge, get armed() { return armed; } };

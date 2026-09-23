@@ -169,8 +169,6 @@ window.Tracer = (function () {
           '</div>' +
         '</div>' +
         '<div class="tr-side">' +
-          '<div class="tr-note"><i></i>1. lay down a picture<br>2. set the dials<br>3. TRACE IT<br>' +
-            '<span>save it to the library, then drag it out onto the paper — or click it to see it large.</span></div>' +
           '<div class="tr-file" id="tr-file-box">' +
             '<div class="tr-file-bar"><div class="tr-plate">LIBRARY</div></div>' +
             '<div class="tr-slots" id="tr-slots"></div>' +
