@@ -835,6 +835,19 @@ body[data-wall-tool="delete"] .gz:not(.gz-copy){pointer-events:none}
 .wall-note-grip::before{content:"";width:2px;height:16px;border-radius:2px;background:var(--pink);opacity:.75}
 .wall-note-hint{position:absolute;left:1px;top:calc(100% + 7px);margin:0;white-space:nowrap;
   pointer-events:none;font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--mute-2)}
+/* ── carried by its frame, counted, and written on something (2026-09-22) ──
+   The border and padding are the box's handle: drag them and the note goes with
+   the pointer, while the words stay for writing in. Over the top right corner,
+   how many of the hundred characters are left, pink for the last ten. And the
+   type case's BACKGROUND swatches: a square of each, none struck through. */
+.wall-note{cursor:move}
+.wall-note-in{cursor:text}
+.wall-note-left{position:absolute;right:2px;bottom:calc(100% + 6px);font-family:var(--mono);font-size:10px;
+  letter-spacing:.04em;color:var(--mute-2);white-space:nowrap}
+.wall-note-left.wall-note-low{color:var(--pink)}
+.opt-bg i{display:block;width:14px;height:14px;border-radius:4px;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.45)}
+.opt-bg i:not([style]){background:linear-gradient(135deg,transparent 43%,var(--gz-handle-ink) 43% 57%,transparent 57%)}
+.opt-btn.opt-bg{opacity:1}          /* a dimmed swatch shows a colour it does not paint */
 
 /* and the tab that reshapes a note once it is on the paper: nothing at all
    until the move tool is up, then a hint of one until you are on it */

@@ -114,6 +114,8 @@ window.Wall = (function () {
   const PIX = [0, 10, 20, 40];           // 0 is a free hand; the rest are cells, in world units
   const GRID = 20;                       // what the bench is ruled at when nothing has re-cut it
   const NW = [90, 1400];                 // how narrow and how wide a note may be reshaped to
+  const NOTE_MAX = 100;                // how many characters a note may hold (2026-09-22)
+  const NOTE_SLOP = 5;                  // screen px a press on a note may shiver and still open it
   const LH = 1.32;                       // a line of a note, as a multiple of its size
   const SK = ['hat', 'gnome', 'toadstool', 'beard', 'lantern'];
   /* Three weights per face, not one. `w` is the single weight a font had
@@ -155,6 +157,21 @@ window.Wall = (function () {
   ];
   const PADS = { y: '--sticky-a', p: '--sticky-b', b: '--sticky-c', g: '--sticky-d' };
   const pad = k => 'var(' + (PADS[k] || PADS.y) + ')';
+  /* WHAT A NOTE IS WRITTEN ON (2026-09-22). The type case's BACKGROUND swatches: none, or a
+     block of colour behind the words cut to the box they were typed in, so a note pins looking
+     the way it looked while it was written. Token names, so a background re-mixes with the
+     skin the way an ink does; a note stores the index, 0 being none, and an index this list
+     has not got paints as none. It stands in for a sticky, never beside one. */
+  const BGS = [
+    { n: 'none', k: '' },
+    { n: 'white', k: 'field' },
+    { n: 'yellow', k: 'sticky-a' },
+    { n: 'pink', k: 'sticky-b' },
+    { n: 'blue', k: 'sticky-c' },
+    { n: 'green', k: 'sticky-d' },
+    { n: 'dark', k: 'ink' }
+  ];
+  const bgOf = v => (BGS[v | 0] || BGS[0]).k;
   const MAX = 600;                       // pieces before the oldest starts dropping
 
   const store = Lab.store('wall', () => ({ items: [] }));
@@ -165,7 +182,7 @@ window.Wall = (function () {
   let tool = 'move', ci = 1, pw = 1, po = 0, fo = 0, sk = 0, pi = 0, nw = 260, iz = 1;
   // …and the rest of the type case: bold, italic, underline, which edge the
   // words line up on, and where in TSZ the size is
-  let fb = 0, fi = 0, fu = 0, fa = 0, fz = DEF_Z;
+  let fb = 0, fi = 0, fu = 0, fa = 0, fz = DEF_Z, fbg = 0;   // …and fbg, what it is written on (BGS)
 
   /* An ink is one of two things, and a saved mark can hold either: a HOUSE
      COLOUR, which is an index into PAL kept as a token so it re-mixes itself
@@ -438,7 +455,13 @@ window.Wall = (function () {
       n.x = n.it.x + (n.al === 1 ? (bw - n.w) / 2 : n.al === 2 ? bw - n.w : 0);
     });
     written.forEach(n => {
-      if (n.k) {
+      /* A BACKGROUND (BGS) is the box the note was typed in, minus its border: the note's whole
+         width and the box's own 12 and 9 of padding round the words, at its 9 of corner. */
+      const bg = bgOf(n.it.bg);
+      if (bg) n.g.insertBefore(el('rect', { class: 'wall-bg', x: round(n.it.x - 12),
+        y: round(n.it.y - n.h / 2 - 9), width: round((n.it.w || n.w) + 24), height: round(n.h + 18),
+        rx: 9, fill: 'var(--' + bg + ')' }), n.words);
+      else if (n.k) {
         const art = el('g', { class: 'wall-sticky' });
         art.innerHTML = stickyArt(n.k, n.x, n.it.y, n.w, n.sz, n.h);
         n.g.insertBefore(art, n.words);  // the pad first, words on top of it
@@ -568,7 +591,8 @@ window.Wall = (function () {
          click people reach for work: the first press opens the box, the second
          lands inside it and drops the caret where it was aimed. */
       const i = noteUnder(e.clientX, e.clientY);
-      if (i >= 0) editNote(i); else askNote(p);
+      // …and a drag carries it, a click opens it (carryNote, 2026-09-22)
+      if (i >= 0) carryNote(i, e); else askNote(p);
     } else if (tool === 'gif') {
       /* a gif on the pointer is stamped where you pressed, at the size and
          fade the row says, the same as a tracing; nothing on the pointer
@@ -681,13 +705,14 @@ window.Wall = (function () {
 
     noteBox = document.createElement('div');
     noteBox.className = 'wall-note';
+    noteBox.dataset.handle = '';         // …so a finger on its frame carries it, not the camera (lab.js: HANDS_OFF)
     noteBox.style.left = p.x + 'px';
     noteBox.style.top = p.y + 'px';
 
     noteIn = document.createElement('textarea');
     noteIn.className = 'wall-note-in';
     noteIn.rows = 1;
-    noteIn.maxLength = 400;
+    noteIn.maxLength = NOTE_MAX;
     noteIn.placeholder = 'say something…';
     noteIn.style.width = round(nw) + 'px';
     if (editing) noteIn.value = editing.t;
@@ -700,9 +725,19 @@ window.Wall = (function () {
 
     const hint = document.createElement('p');
     hint.className = 'wall-note-hint';
-    hint.textContent = 'enter to pin it · shift+enter for a new line · ctrl b/i/u · ctrl [ ] for size';
+    hint.textContent = 'enter to pin it · drag the edge to move it · shift+enter for a new line · ctrl b/i/u · ctrl [ ] for size';
 
-    noteBox.append(noteIn, grip, hint);
+    /* HOW MANY ARE LEFT (2026-09-22), over the box's top right corner: the box takes NOTE_MAX
+       characters and no more, and the count turns pink for the last ten. A note from before the
+       limit can hold more; it says how far over it is, and still pins. */
+    const ta = noteIn, left = document.createElement('span');
+    left.className = 'wall-note-left';
+    const count = () => {
+      const n = NOTE_MAX - ta.value.length;
+      left.textContent = n < 0 ? -n + ' over' : n + ' left';
+      left.classList.toggle('wall-note-low', n <= 10);
+    };
+    noteBox.append(noteIn, grip, hint, left);
     world.appendChild(noteBox);
     styleNote();
     buildOpts();                         // the type case comes up WITH the box
@@ -711,7 +746,8 @@ window.Wall = (function () {
     // over all of them: coming back to add something is the ordinary case
     if (editing) noteIn.setSelectionRange(noteIn.value.length, noteIn.value.length);
 
-    noteIn.addEventListener('input', grow);
+    count();
+    noteIn.addEventListener('input', () => { grow(); count(); });
     noteIn.addEventListener('keydown', ev => {
       /* The word-processor keys. Only the ones a browser will actually let a
          page have: ctrl B / I / U are free inside an editable box, and ctrl [
@@ -743,6 +779,22 @@ window.Wall = (function () {
       if (ev.target === noteIn) return;
       ev.preventDefault();
       noteIn.focus();
+      /* …AND THE FRAME IS THE HANDLE (2026-09-22). Pressed and dragged, the box goes with the
+         pointer and the note pins where the box was left — no putting the text tool down for
+         the move tool. */
+      if (ev.button) return;
+      const x0 = ev.clientX, y0 = ev.clientY, at = noteAt;
+      const place = q => { noteAt = q; if (noteBox) { noteBox.style.left = q.x + 'px'; noteBox.style.top = q.y + 'px'; } };
+      const move = m => place({ x: round(at.x + (m.clientX - x0) / Lab.zoom),
+                                y: round(at.y + (m.clientY - y0) / Lab.zoom), moved: true });
+      const off = () => {
+        window.removeEventListener('pointermove', move, true);
+        window.removeEventListener('pointerup', off, true);
+        window.removeEventListener('pointercancel', off, true);
+      };
+      window.addEventListener('pointermove', move, true);
+      window.addEventListener('pointerup', off, true);
+      window.addEventListener('pointercancel', off, true);
     });
 
     grip.addEventListener('pointerdown', ev => {
@@ -782,6 +834,7 @@ window.Wall = (function () {
     fz = z < 0 ? DEF_Z : z;
     fb = it.b == null ? (Math.abs(ff.b - ff.w) <= Math.abs(ff.r - ff.w) ? 1 : 0) : (it.b ? 1 : 0);
     fi = it.i ? 1 : 0; fu = it.u ? 1 : 0; fa = it.a || 0;
+    fbg = bgOf(it.bg) ? it.bg | 0 : 0;    // …and what it is written on
     if (it.w) nw = clamp(NW[0], NW[1], it.w);
     // …and the swatch shows the note's own ink once the box is up: styleNote paints it
 
@@ -824,6 +877,9 @@ window.Wall = (function () {
     noteIn.style.fontSize = TSZ[fz] + 'px';
     noteIn.style.textAlign = CSS_AL[fa];
     noteIn.style.color = ink(curInk());
+    // …and what it is written on, on the box itself, the moment a swatch is pressed (2026-09-22)
+    const bg = bgOf(fbg);
+    if (noteBox) noteBox.style.background = bg ? 'var(--' + bg + ')' : '';
     grow();
   }
 
@@ -855,7 +911,9 @@ window.Wall = (function () {
         if (!st.items[ed.i]) return;     // taken off the wall while it was open
         if (!t) { st.items.splice(ed.i, 1); return; }
         Object.assign(st.items[ed.i], { c: c, f: fo, t: t, sz: TSZ[fz],
-          w: round(nw), b: fb, i: fi, u: fu, a: fa });
+          w: round(nw), b: fb, i: fi, u: fu, a: fa, bg: fbg },
+          // …and where the box was carried to, if it was (2026-09-22)
+          p.moved ? { x: round(p.x + 10), y: round(p.y) } : {});
       });
       return;
     }
@@ -865,7 +923,7 @@ window.Wall = (function () {
     // is a note from after the type case existed, and typeOf reads the absence
     // of `b` as "this one predates all of it, leave it alone"
     if (t) add({ k: 't', c: c, f: fo, x: round(p.x + 10), y: round(p.y), t,
-                 sz: TSZ[fz], w: round(nw), b: fb, i: fi, u: fu, a: fa });
+                 sz: TSZ[fz], w: round(nw), b: fb, i: fi, u: fu, a: fa, bg: fbg });
   }
   // let go of the reference BEFORE pulling the box out of the page: removing a
   // focused element fires blur synchronously, and blur is what commits a note,
@@ -885,6 +943,44 @@ window.Wall = (function () {
 
   /* ── moving what is already there ───────────────────────────────────────── */
   let held = null;
+  /* A NOTE IS CARRIED BY THE TEXT TOOL TOO (2026-09-22). Press one and move, and it goes where
+     you take it, the way the move tool would, without the text tool being put down; let go
+     where you pressed and you are writing it. Past NOTE_SLOP screen px the press is handed to
+     the move tool's own drag below (held, moveMove, moveEnd), so it is filed and undone the way
+     any move is. */
+  let carry = null;
+  function carryOff() {
+    if (!carry) return null;
+    window.removeEventListener('pointermove', carryMove, true);
+    window.removeEventListener('pointerup', carryUp, true);
+    window.removeEventListener('pointercancel', carryOff, true);
+    const c = carry;
+    carry = null;
+    return c;
+  }
+  function carryNote(i, e) {
+    carryOff();
+    const node = svg.querySelector('.wall-item[data-i="' + i + '"]');
+    if (!node) { editNote(i); return; }
+    carry = { i, node, id: e.pointerId, cx: e.clientX, cy: e.clientY, at: W(e.clientX, e.clientY) };
+    window.addEventListener('pointermove', carryMove, true);
+    window.addEventListener('pointerup', carryUp, true);
+    window.addEventListener('pointercancel', carryOff, true);
+  }
+  function carryMove(e) {
+    if (!carry || e.pointerId !== carry.id) return;
+    if (Math.abs(e.clientX - carry.cx) + Math.abs(e.clientY - carry.cy) <= NOTE_SLOP) return;
+    const c = carryOff();
+    held = { i: c.i, id: c.id, node: c.node, ox: 0, oy: 0, px: c.at.x, py: c.at.y };
+    c.node.classList.add('wall-held');
+    window.addEventListener('pointermove', moveMove, true);
+    window.addEventListener('pointerup', moveEnd, true);
+    window.addEventListener('pointercancel', moveEnd, true);
+    moveMove(e);
+  }
+  function carryUp(e) {
+    if (carry && e.pointerId === carry.id) editNote(carryOff().i);
+  }
   svg.addEventListener('pointerdown', e => {
     if (tool !== 'move' || document.body.classList.contains('lab-hand')) return;
     const gr = e.target.closest('.wall-grip');
@@ -1195,7 +1291,14 @@ window.Wall = (function () {
         grp('ALIGN', ['left', 'centred', 'right'].map((n, i) =>
           '<button type="button" class="opt-btn opt-al" data-al="' + i + '" title="' + n + '" aria-label="' + n + '">' +
           '<svg viewBox="0 0 18 18" width="14" height="14" aria-hidden="true">' + alignIcon(i) + '</svg>' +
-          '</button>').join(''));
+          '</button>').join('')) + rule +
+
+        /* WHAT IT IS WRITTEN ON (2026-09-22): a swatch per background, none first and struck
+           through. The box being written in takes it the moment it is pressed (styleNote). */
+        grp('BACKGROUND', BGS.map((g, i) =>
+          '<button type="button" class="opt-btn opt-bg" data-bg="' + i + '" title="' + g.n +
+          '" aria-label="background: ' + g.n + '"><i' + (g.k ? ' style="background:var(--' + g.k + ')"' : '') +
+          '></i></button>').join(''));
     } else if (tool === 'gif' && window.Gif) {
       html = Gif.opts();                 // the search bar, and what came back from it
     }
@@ -1223,7 +1326,7 @@ window.Wall = (function () {
     on('.opt-pw', { k: 'pw', v: pw }); on('.opt-sk', { k: 'sk', v: sk }); on('.opt-px', { k: 'px', v: pi });
     on('.opt-iz', { k: 'iz', v: iz });
     on('.opt-po', { k: 'po', v: po }); on('.opt-fo', { k: 'fo', v: fo });
-    on('.opt-al', { k: 'al', v: fa });
+    on('.opt-al', { k: 'al', v: fa }); on('.opt-bg', { k: 'bg', v: fbg });
     // B, I and U are each on or off rather than one-of-many, so they do not go
     // through the same "is this the chosen index" test as everything else
     const flag = { b: fb, i: fi, u: fu };
@@ -1432,7 +1535,7 @@ window.Wall = (function () {
   opts.addEventListener('click', e => {
     const gif = e.target.closest('[data-gif]');
     if (gif) { if (window.Gif) Gif.onOpt(gif); return; }
-    const b = e.target.closest('[data-pw],[data-sk],[data-po],[data-fo],[data-px],[data-z],[data-ty],[data-al],[data-iz]');
+    const b = e.target.closest('[data-pw],[data-sk],[data-po],[data-fo],[data-px],[data-z],[data-ty],[data-al],[data-iz],[data-bg]');
     if (!b) return;
     if (b.dataset.px != null) { pi = +b.dataset.px; syncGrid(); buildOpts(); return; }
     // the size readout is part of the row, so stepping it redraws the row
@@ -1447,6 +1550,7 @@ window.Wall = (function () {
     if (b.dataset.po != null) po = +b.dataset.po;
     if (b.dataset.fo != null) fo = +b.dataset.fo;
     if (b.dataset.al != null) fa = +b.dataset.al;
+    if (b.dataset.bg != null) fbg = +b.dataset.bg;
     markOpts();
     styleNote();                         // …and the note being written follows
   });
