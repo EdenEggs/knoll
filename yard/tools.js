@@ -182,10 +182,11 @@
     store, warn, prefix: PREFIX,
     uid: () => (Date.now().toString(36) + (uidN++).toString(36) + Math.floor(Math.random() * 1e6).toString(36)),
     stamp: () => ++clock,
-    remember(back) { if (typeof back !== 'function') return; moves.push({ at: ++clock, back }); if (moves.length > 60) moves.shift(); },
+    remember(back) { if (typeof back !== 'function') return; moves.push({ at: ++clock, back }); if (moves.length > 60) moves.shift(); if (window.Wall && Wall.forgetRedo) Wall.forgetRedo(); },
     undoTop: () => (moves.length ? moves[moves.length - 1].at : 0),
     undoMove() { const m = moves.pop(); if (!m) return false; m.back(); return true; },
     undo() { if (window.Wall && Wall.undo) return Wall.undo(); return Lab.undoMove(); },
+    redo() { return !!(window.Wall && Wall.redo && Wall.redo()); },   // the dock's other button (2026-09-24)
     // the bench's furniture, absent here: no grid to re-cut, no features to register or copy, no menu
     grid() {}, register() {}, place() {}, gizmos: [], isCopy: () => false, deleteCopy: () => false, menuUp: false,
     resetData: () => stores.forEach(s => s.reset())
@@ -194,9 +195,68 @@
 
   const typing = t => !!(t && t.closest && t.closest('input,textarea,select,[contenteditable],[contenteditable="true"]'));
   document.addEventListener('keydown', e => {
-    if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey || typing(e.target)) return;
-    if (e.key === 'z' || e.key === 'Z') { e.preventDefault(); Lab.undo(); }
+    if (!(e.ctrlKey || e.metaKey) || e.altKey || typing(e.target)) return;
+    const k = e.key.toLowerCase();
+    if (k === 'z' && !e.shiftKey) { e.preventDefault(); Lab.undo(); }
+    else if ((k === 'z' && e.shiftKey) || (k === 'y' && !e.shiftKey)) { e.preventDefault(); Lab.redo(); }   // redo (2026-09-24)
   });
+
+  /* ── DRAGGING BARE PAPER: THE BAND (2026-09-24) ──────────────────────────
+     lab.js's gesture, brought to this page. With the move tool up, press on
+     nothing in particular — the page, a gap between cards, the plot's empty
+     paper — pull a rectangle out, and every piece it touches is picked
+     (Wall.band: TOUCHED, not enclosed); drag any one of them afterwards and
+     the whole pick goes (wall.js: THE CREW). Shift adds to the pick. A press
+     that never travelled, and Escape, put the pick down. A mouse gesture
+     only, as on the bench: a finger scrolls the page.
+
+     BARE is anything that does not want the press for itself: not the cards,
+     the title or the tools (.yard-ui), not the dock, not a tree on the plot
+     (.plot-piece), not the wall's own pieces, not a control. The band is
+     drawn in screen pixels (lab.css: .lab-band) and anchored on the world,
+     so it stays where you started it if the page scrolls under you. */
+  const bandEl = document.createElement('div');
+  bandEl.className = 'lab-band'; bandEl.hidden = true;
+  document.body.appendChild(bandEl);
+  let sweep = null;
+  const BUSY = '.yard-ui,.tool-dock,.tool-opts,.lab-panel,.lab-warn,.knoll-head,.wall-item,.wall-note,.wall-video,.plot-piece,' +
+               'a,button,input,textarea,select,label,summary,[contenteditable],[role=button],[role=dialog],[data-handle]';
+  const bare = t => !!(t && t.closest) && !t.closest(BUSY);
+  const moveTool = () => !!window.Wall && Wall.tool === 'move';
+  function drawSweep() {
+    const a = Lab.toScreen(sweep.wx, sweep.wy);
+    bandEl.style.left = Math.min(a.x, sweep.cx) + 'px'; bandEl.style.top = Math.min(a.y, sweep.cy) + 'px';
+    bandEl.style.width = Math.abs(sweep.cx - a.x) + 'px'; bandEl.style.height = Math.abs(sweep.cy - a.y) + 'px';
+  }
+  function endSweep(e) {
+    if (!sweep) return;
+    const was = sweep; sweep = null;
+    bandEl.hidden = true; document.body.classList.remove('lab-banding');
+    if (!window.Wall) return;
+    if (!was.live) { if (!was.add) Wall.clearPick(); return; }   // a press that never travelled puts the pick down
+    if (e) { was.cx = e.clientX; was.cy = e.clientY; }
+    const far = Lab.toWorld(was.cx, was.cy);
+    Wall.band(Math.min(was.wx, far.x), Math.min(was.wy, far.y), Math.max(was.wx, far.x), Math.max(was.wy, far.y), was.add);
+  }
+  document.addEventListener('pointerdown', e => {
+    if (sweep || e.pointerType !== 'mouse' || e.button !== 0 || !moveTool() || !bare(e.target)) return;
+    const w = Lab.toWorld(e.clientX, e.clientY);
+    sweep = { id: e.pointerId, wx: w.x, wy: w.y, x0: e.clientX, y0: e.clientY, cx: e.clientX, cy: e.clientY, live: false, add: e.shiftKey };
+    e.preventDefault();                  // no text selection, no focus change: bare paper has nothing else to give
+  }, true);
+  document.addEventListener('pointermove', e => {
+    if (!sweep || e.pointerId !== sweep.id) return;
+    if (!sweep.live) {
+      if (Math.abs(e.clientX - sweep.x0) + Math.abs(e.clientY - sweep.y0) < 4) return;   // still a click
+      sweep.live = true; bandEl.hidden = false; document.body.classList.add('lab-banding');
+      if (!sweep.add) Wall.clearPick();
+    }
+    sweep.cx = e.clientX; sweep.cy = e.clientY; drawSweep(); e.preventDefault();
+  }, true);
+  document.addEventListener('pointerup', e => { if (sweep && e.pointerId === sweep.id) endSweep(e); }, true);
+  document.addEventListener('pointercancel', e => { if (sweep && e.pointerId === sweep.id) endSweep(e); }, true);
+  window.addEventListener('blur', () => endSweep());
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !typing(e.target) && moveTool()) Wall.clearPick(); });
 
   // ── the published page ──────────────────────────────────────────────────
   let comp = null, pending = null, published = null;

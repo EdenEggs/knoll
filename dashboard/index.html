@@ -287,7 +287,6 @@
             <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Where the work happens</h2>
             <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin-top:3px">{{ heatSub }}</div>
           </div>
-          <button sc-camel-on-click="{{ toggleHeat }}" style="font-family:'VT323',monospace; font-size:15px; letter-spacing:1px; border:3px solid #17120b; background:{{ heatBtnBg }}; color:#17120b; padding:2px 10px; cursor:pointer; box-shadow:3px 4px 0 rgba(60,50,80,0.2); flex:none" style-hover="transform:translate(-1px,-1px)">{{ heatBtn }}</button>
         </div>
         <sc-if value="{{ heatChartOn }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap">
@@ -319,20 +318,6 @@
                 <div style="font-size:15px; letter-spacing:1.5px; color:#4a4054; opacity:0.75; line-height:1.4">{{ zonesNote }}</div>
               </sc-if>
               <div style="display:flex; align-items:center; gap:8px; margin-top:18px; font-size:14px; letter-spacing:2px; color:#4a4054">LOW <div style="width:130px; height:12px; border:2px solid #17120b; background:linear-gradient(90deg, {{ rampLo }}, {{ rampHi }})"></div> HIGH</div>
-            </div>
-          </div>
-        </sc-if>
-        <sc-if value="{{ heatTableOn }}" hint-placeholder-val="{{ false }}">
-          <div style="overflow-x:auto">
-            <div style="min-width:640px; border:3px solid #17120b; background:#fffcf0">
-              <div style="display:grid; grid-template-columns:190px repeat(6,1fr); padding:6px 12px; font-size:14px; letter-spacing:1px; border-bottom:3px solid #17120b; background:#ffd23f"><div>PART OF THE PAGE</div>
-                <sc-for list="{{ kindHeads }}" as="kh" hint-placeholder-count="6"><div style="text-align:right">{{ kh }}</div></sc-for>
-              </div>
-              <sc-for list="{{ heatTableRows }}" as="ht" hint-placeholder-count="8">
-                <div style="display:grid; grid-template-columns:190px repeat(6,1fr); padding:3px 12px; font-size:17px; border-bottom:2px dashed rgba(23,18,11,0.18)" style-hover="background:rgba(255,210,63,0.3)"><div>{{ ht.zone }}</div>
-                  <sc-for list="{{ ht.cells }}" as="hv" hint-placeholder-count="6"><div style="text-align:right">{{ hv }}</div></sc-for>
-                </div>
-              </sc-for>
             </div>
           </div>
         </sc-if>
@@ -444,7 +429,7 @@ class Component extends DCLogic {
     this.KIND = { s: 'DRAW', p: 'DRAW', b: 'DRAW', d: 'STICKER', i: 'UPLOAD', k: 'UPLOAD', t: 'TEXT', g: 'GIF' };
     this.KINDS = ['DRAW', 'STICKER', 'UPLOAD', 'TEXT', 'GIF'];
     this.KCOL = { DRAW: C.RED, STICKER: C.BLU, UPLOAD: C.GRN, TEXT: C.PNK, GIF: C.YEL };
-    this.state = { range: null, trendTable: false, heatTable: false, tip: null, heatTip: null, look: null,
+    this.state = { range: null, trendTable: false, tip: null, heatTip: null, look: null,
                    doc: null, docFrom: '', hits: null, statsState: 'loading', looksDocs: {}, map: null,
                    space: null, rules: null, log: [], queue: [], spaces: [], spacesFull: false, meName: '' };
     this._looksDocs = {};
@@ -836,7 +821,6 @@ class Component extends DCLogic {
     const zoneAll = zoneNames.map(zn => ({ zone: zn, n: counts[zn] ? counts[zn].total : 0 })).sort((a, b) => b.n - a.n);
     const zMax = Math.max(...zoneAll.map(z => z.n), 1);
     const zoneRows = zoneAll.filter(z => z.n > 0).slice(0, 8).map(z => ({ zone: z.zone, val: this.fmt(z.n), w: Math.max(2, Math.round(z.n / zMax * 100)), color: this.mix('#fffbea', deep, 0.35 + 0.65 * z.n / zMax) }));
-    const heatTableRows = zoneAll.map(z => ({ zone: z.zone, cells: this.KINDS.map(kd => String((counts[z.zone] && counts[z.zone][kd]) || 0)).concat([String(z.n)]) }));
     const heatMove = (e) => {
       if (!m) return;
       const r = e.currentTarget.getBoundingClientRect();
@@ -929,10 +913,7 @@ class Component extends DCLogic {
       refsEmpty: !contributors.length,
       refsNote: SP ? 'VISITS ARE NOT COUNTED ON A SPACE YET — THE WALL COUNTS EDITS INSTEAD.' : live ? 'NO VISITS ' + rangeWord + '.' : 'NOT COUNTING VISITS YET — THE APPS SCRIPT WANTS ITS NEW VERSION DEPLOYED (yard/about.md).',
       heatSub: 'PIECES ON YOUR PAGE, BY WHERE THEY LAND · ' + rangeWord,
-      heatChartOn: !S.heatTable, heatTableOn: S.heatTable,
-      heatBtn: S.heatTable ? 'VIEW AS MAP' : 'VIEW AS TABLE',
-      heatBtnBg: S.heatTable ? C.YEL : C.CREAM,
-      toggleHeat: () => this.setState({ heatTable: !S.heatTable, heatTip: null }, () => { this.measure(); this.paintSoon(); }),
+      heatChartOn: true,               // the table view was taken out (2026-09-24): the map is the one view
       heatCardRef: (el) => { this._heatCard = el; },
       frameRef: (el) => { this._frame = el; },
       heatRef: (el) => { this._heat = el; if (el) this.paintSoon(); },
@@ -947,7 +928,6 @@ class Component extends DCLogic {
       mapNoteOn: !!mapNote, mapNote,
       zoneRows, zonesEmpty: !zoneRows.length,
       zonesNote: SP ? 'A WALL IS ONE PAPER — THE PICTURE IS THE WALL AS IT STANDS.' : mapReady ? 'NOTHING PUT ON THE PAGE ' + rangeWord + ' — THE MAP LIGHTS UP AS PIECES GO ON.' : 'READING THE PAGE…',
-      kindHeads: this.KINDS.concat(['ALL']), heatTableRows,
       rampLo: this.mix('#fffbea', deep, 0.03), rampHi: this.mix('#fffbea', deep, 0.98),
       rankedCards, looks,
       looksEmpty: !looks.length,

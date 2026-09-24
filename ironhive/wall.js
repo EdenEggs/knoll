@@ -953,9 +953,50 @@ window.Wall = (function () {
      "the thing you just did". */
   const made = [];
   const stamp = () => (window.Lab && Lab.stamp ? Lab.stamp() : 0);
-  const mark = k => { made.push({ k, at: stamp() }); };
+  const mark = k => { made.push({ k, at: stamp() }); forgetRedo(); };
 
+  /* ── AND REDO (2026-09-24): the other button. What an undo took back is kept
+     as a SNAPSHOT — the wall's items and, on a bench, where the features stand
+     and how they are piled (Lab.snapshot) — taken just before the undo and
+     again just after. Redo puts the first back and files the second with
+     Lab.remember, so undo can take the redo back, and the two keep swapping
+     until something new is done: a mark, a move, a paste, anything that
+     files an entry, empties the redo pile the way every editor's does. What
+     cannot be put back is not offered: a paste or a hiding taken back has
+     removed or remade elements (Lab.snapshot's `count` moves), so that undo
+     empties the pile instead. Nothing here is saved: like undo, redo is a
+     memory of this session. */
+  const redos = [], REDOS = 60;
+  let redoing = false;
+  function forgetRedo() { if (!redoing) redos.length = 0; }
+  const snap = () => ({ items: JSON.stringify(S().items), bench: window.Lab && Lab.snapshot ? Lab.snapshot() : null });
+  const same = (a, b) => a.items === b.items && (!a.bench || !b.bench || a.bench.sig === b.bench.sig);
+  function restore(s) {
+    if (s.bench && window.Lab && Lab.restore) Lab.restore(s.bench);
+    store.update(st => { st.items = JSON.parse(s.items); });
+  }
   function undo() {
+    const before = snap();
+    if (!undoOnce()) return false;
+    const after = snap();
+    if (same(before, after)) return true;                       // nothing changed, so nothing to put back
+    if (after.bench && before.bench && after.bench.count !== before.bench.count) redos.length = 0;
+    else { redos.push({ before, after }); if (redos.length > REDOS) redos.shift(); }
+    return true;
+  }
+  function redo() {
+    const r = redos.pop();
+    if (!r) return false;
+    redoing = true;
+    try {
+      restore(r.before);
+      if (window.Lab && Lab.remember) Lab.remember(() => restore(r.after));   // …and undo takes the redo back
+    } finally { redoing = false; }
+    return true;
+  }
+
+
+  function undoOnce() {                 // one step back, on whichever stack is newer — undo() above wraps it for redo
     const top = made.length ? made[made.length - 1].at : 0;
     if (window.Lab && Lab.undoTop && Lab.undoTop() > top) return Lab.undoMove();
     if (made.length) made.pop();
@@ -2820,6 +2861,9 @@ window.Wall = (function () {
         '<button type="button" class="dock-btn dock-mini" id="dock-undo" title="Undo — ctrl Z" aria-label="Undo, ctrl Z">' +
         '<svg viewBox="0 0 18 18" width="15" height="15" aria-hidden="true">' +
         '<path d="M7 4 3 7.5 7 11V8.5h4a3 3 0 0 1 0 6H8v2h3a5 5 0 0 0 0-10H7z"/></svg><span>Undo</span></button>' +
+        '<button type="button" class="dock-btn dock-mini" id="dock-redo" title="Redo — ctrl shift Z" aria-label="Redo, ctrl shift Z">' +
+        '<svg viewBox="0 0 18 18" width="15" height="15" aria-hidden="true">' +
+        '<path d="M11 4 15 7.5 11 11V8.5H7a3 3 0 0 0 0 6h3v2H7a5 5 0 0 1 0-10h4z"/></svg><span>Redo</span></button>' +
         /* delete is a TOOL, not a one-shot action like undo was — data-tool
            puts it through the same setTool()/markTools() wiring as move, draw,
            sticker and text, it just happens to sit in the mini group rather
@@ -3066,6 +3110,7 @@ window.Wall = (function () {
     const chip = e.target.closest('[data-house]');
     if (chip) { setInk(+chip.dataset.house); loadWheel(); return; }
     if (e.target.closest('#dock-undo')) { undo(); return; }
+    if (e.target.closest('#dock-redo')) { redo(); return; }
   });
 
   /* ── THE WHEEL ────────────────────────────────────────────────
@@ -3402,5 +3447,6 @@ window.Wall = (function () {
            paint,                        // tracer.js: a stamp is drawn from the library, so the library changing repaints
            mark,                         // …and tells undo what it just put up
            undo,                         // the button, and lab.js's ctrl+z
+           redo, forgetRedo,             // …its opposite (2026-09-24), and what a new entry tells the redo pile
            PAL, PW, PEN, PO, SK, FONTS, STICKIES, STAMPS, stickyArt };
 })();

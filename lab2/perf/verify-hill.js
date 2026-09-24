@@ -242,6 +242,33 @@ const tracing = extra => Object.assign({ id: 'tr1abcdefg', name: 'a leaf', w: 10
   r = await call('POST', '/api/hill', { hill: HILL, doc }, { 'x-knoll-key': 'sesamee' });
   A.strictEqual(r.status, 401, 'a wrong key does not');
 
+  // ── the Blob store's PUT, the way Vercel's API (x-api-version 12) wants it (2026-09-24) ──
+  // The pathname rides in ?pathname=, not in the URL path — a path got 400 "Invalid
+  // pathname" and no yard on Vercel ever saved. Vercel is played by this script.
+  {
+    process.env.BLOB_READ_WRITE_TOKEN = 'vercel_blob_rw_STOREID_secret';
+    const calls = []; const realFetch = global.fetch;
+    global.fetch = async (url, init) => {
+      calls.push({ url: String(url), init: init || {} });
+      const write = !!(init && init.method);                       // reads carry no method and find nothing
+      return { ok: write, status: write ? 200 : 404, json: async () => ({ url: String(url) }), text: async () => '' };
+    };
+    r = await call('POST', '/api/hill', { hill: HILL, doc }, { 'x-knoll-key': 'sesame' });
+    A.strictEqual(r.status, 200, 'a publish into Blob goes through: ' + JSON.stringify(r.body).slice(0, 200));
+    const puts = calls.filter(c => c.init.method === 'PUT');
+    A.strictEqual(puts.length, 2, 'two PUTs: the version, then latest');
+    const pu = new URL(puts[0].url);
+    A.ok(pu.origin + pu.pathname === 'https://blob.vercel-storage.com/' && /^hills\/yard\/v\/\d+\.json$/.test(pu.searchParams.get('pathname')),
+      'the pathname rides in ?pathname= and the URL path is bare: ' + puts[0].url);
+    A.strictEqual(new URL(puts[1].url).searchParams.get('pathname'), 'hills/yard/latest.json', '…and latest.json goes the same way');
+    const h = puts[0].init.headers;
+    A.ok(h.authorization === 'Bearer vercel_blob_rw_STOREID_secret' && h['x-api-version'] === '12' && h['x-vercel-blob-store-id'] === 'STOREID'
+      && h['x-vercel-blob-access'] === 'public' && h['x-allow-overwrite'] === '1' && h['x-add-random-suffix'] === '0' && h['x-content-type'] === 'application/json',
+      'the headers @vercel/blob sends: token, version, store id, public access, overwrite, no suffix, content type: ' + JSON.stringify(h));
+    A.ok(calls.some(c => !c.init.method && c.url === 'https://STOREID.public.blob.vercel-storage.com/hills/yard/latest.json'), 'latest.json is read from the store\'s public URL first');
+    global.fetch = realFetch; delete process.env.BLOB_READ_WRITE_TOKEN;
+  }
+
   A.ok(!fs.existsSync(path.join(ROOT, 'u-' + u)) && !fs.existsSync(path.join(ROOT, 'yard', 'looks', 'u-' + u)), 'nothing landed in the site');
   done();
   console.log('verify-hill: ' + n + ' checks, all good');

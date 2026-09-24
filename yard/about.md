@@ -194,6 +194,44 @@ signed out, it is forgotten.
 
 ---
 
+## 0b · Under the UI, the band, redo — and the save that never landed (2026-09-24)
+
+Four things, all asked for by the owner the same evening.
+
+**The save never landed on Vercel.** Every yard save in production answered
+`400 Invalid pathname` from Vercel Blob: `api/hill.js` put the pathname in the
+URL path, and the API it names (`x-api-version: 12`, what @vercel/blob 2.x
+sends) wants it as `?pathname=…`. Fixed in the store's `put`; the file store
+(local) never noticed. `verify-hill.js` now plays Vercel and checks the request
+shape.
+
+**The UI stands over the ink.** The world (tools.js) is `z-index:12`; the
+title, the gnome, the tools row (14, so the bell's list clears the cards), the
+hills row, the plot's heading, the fence and the cards are `.yard-ui` at 13, so
+a stroke, a note or a sticker passes UNDER them. The plot's board stays under
+the world on purpose — it is the one surface pieces are meant to sit on. While
+a drawing tool is live, `.yard-ui` is `pointer-events:none`, so a stroke can
+start on a card and cross it; in move mode the cards take the pointer again.
+
+**The band.** lab.js's drag-to-select, in tools.js: with the move tool, press
+bare paper (the page, a gap, the board's empty paper), pull a rectangle, and
+every piece it touches is picked (`Wall.band`); drag one and the whole pick
+goes; shift adds; a click on bare paper or Escape puts the pick down. Mouse
+only, as on the bench. Trees on the plot are not pieces and are not picked.
+
+**Redo, on every dock.** A Redo button beside Undo (ctrl+shift+Z, ctrl+Y) on
+this page, lab 2, TOEM 2, the iron hive, the old lab and the bench template.
+It is a snapshot: wall.js takes the items (and, on a bench, `Lab.snapshot` —
+feature places and the pile) just before and after an undo, and redo puts the
+"before" back while filing the "after" with `Lab.remember`, so undo can take
+the redo back. Anything new done empties the redo pile (`Wall.forgetRedo`,
+called from `mark` and `Lab.remember`). A paste or a hiding taken back cannot
+be put back (elements gone or remade), so that undo empties the pile instead.
+
+Checks: `node lab2/perf/probe-yard-ink.js` (yard: layering, band, redo) and
+`node lab2/perf/probe-bench-redo.js` (lab 2 / TOEM 2 / hive docks, a feature
+carried and taken back and forth), both headless Chrome on a safe server.
+
 ## 1 · What this is
 
 **Your Yard** is a personal home base: a plot you arrange yourself, the hill

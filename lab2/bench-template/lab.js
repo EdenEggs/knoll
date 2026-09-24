@@ -219,6 +219,24 @@ window.Lab = (function () {
     if (typeof back !== 'function') return;
     moves.push({ at: stamp(), back });
     if (moves.length > MOVES) moves.shift();
+    if (window.Wall && Wall.forgetRedo) Wall.forgetRedo();   // something new was done: what undo took back stays taken (2026-09-24)
+  }
+
+  /* THE BENCH AS IT STANDS, for wall.js's redo (2026-09-24): where every
+     feature is and how they are piled — enough to put back what an undo of a
+     move, a raise, a lower or a reset took away. `count` is how many features
+     and hidings there are: a paste or a hiding taken back changes it, and
+     those cannot be put back (the elements are gone, or remade), so wall.js
+     drops its redo pile when it moves. `sig` is the same facts as one string,
+     for telling an undo that changed nothing from one that did. */
+  function snapshot() {
+    const crew = gizmos.map(g => ({ el: g.el, x: parseFloat(g.el.style.left || 0), y: parseFloat(g.el.style.top || 0) }));
+    return { crew, pile: pile(), count: gizmos.length + ':' + stash.length,
+             sig: gizmos.map(g => (g.el.dataset.gizmo || '') + ':' + g.el.style.left + ',' + g.el.style.top + ',' + g.rank).join('|') };
+  }
+  function restore(s) {
+    s.crew.forEach(b => { if (rec(b.el)) place(b.el, b.x, b.y, true); });
+    unpile(s.pile.filter(([g]) => gizmos.indexOf(g) >= 0));
   }
 
   /* The features' own way in, and the only one this file uses: a crew,
@@ -250,6 +268,7 @@ window.Lab = (function () {
     if (window.Wall && Wall.undo) return Wall.undo();
     return undoMove();
   }
+  const redo = () => !!(window.Wall && Wall.redo && Wall.redo());   // the redo pile is wall.js's too (2026-09-24)
 
   /* ── COPY, AND PASTE ─────────────────────────────────────────────────────
      ctrl+c takes what is PICKED, and if nothing is picked, whatever is awake
@@ -2280,10 +2299,10 @@ window.Lab = (function () {
       if (e.key === '+' || e.key === '=') { setZoom(Z * 1.2); e.preventDefault(); }
       else if (e.key === '-' || e.key === '_') { setZoom(Z / 1.2); e.preventDefault(); }
       else if (e.key === '0') { setZoom(1); e.preventDefault(); }
-      // ctrl+z is the dock's undo button under the other hand. Shift is left
-      // alone: there is no redo on this bench, and swallowing ctrl+shift+z to
-      // do a second undo is worse than letting the browser have it.
+      // ctrl+z is the dock's undo button under the other hand, and
+      // ctrl+shift+z (or ctrl+y) its redo, since 2026-09-24
       else if (e.key.toLowerCase() === 'z' && !e.shiftKey) { undo(); e.preventDefault(); }
+      else if ((e.key.toLowerCase() === 'z' && e.shiftKey) || e.key.toLowerCase() === 'y') { redo(); e.preventDefault(); }
       /* …and only swallowed when they DID something: with nothing picked and
          nothing awake, ctrl+c is still the browser's, and copying the words
          out of a feature goes on working.
@@ -2484,7 +2503,7 @@ window.Lab = (function () {
        the camera is clamped inside. wall.js says this whenever its store is
        written; the features say it in here already. */
     forget,
-    stamp, remember, undoTop, undoMove, undo, copy, paste, deleteCopy, isCopy,
+    stamp, remember, undoTop, undoMove, undo, redo, snapshot, restore, copy, paste, deleteCopy, isCopy,
     raise, lower, remove, rankOf, menuAt, closeMenu, onMenu,
     /* IS THE MENU UP? A getter, because menuOn is a live variable and a
        property here would hand out whatever it was at boot. wall.js asks

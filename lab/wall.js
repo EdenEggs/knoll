@@ -353,8 +353,8 @@ window.Wall = (function () {
      It is not saved. After a reload undo pops ink, exactly as it always did —
      which is the right amount of memory for a button whose whole promise is
      "the thing you just did". */
-  const made = [];
-  const mark = (k, id) => { made.push({ k, id }); };
+  const made = [], redos = [];         // …and what undo took off, for the Redo button beside it (2026-09-24)
+  const mark = (k, id) => { made.push({ k, id }); redos.length = 0; };
 
   function add(item) {
     mark('ink');
@@ -675,6 +675,9 @@ window.Wall = (function () {
         '<button type="button" class="dock-btn dock-mini" id="dock-undo" title="Undo" aria-label="Undo">' +
         '<svg viewBox="0 0 18 18" width="15" height="15" aria-hidden="true">' +
         '<path d="M7 4 3 7.5 7 11V8.5h4a3 3 0 0 1 0 6H8v2h3a5 5 0 0 0 0-10H7z"/></svg><span>Undo</span></button>' +
+        '<button type="button" class="dock-btn dock-mini" id="dock-redo" title="Redo" aria-label="Redo">' +
+        '<svg viewBox="0 0 18 18" width="15" height="15" aria-hidden="true">' +
+        '<path d="M11 4 15 7.5 11 11V8.5H7a3 3 0 0 0 0 6h3v2H7a5 5 0 0 1 0-10h4z"/></svg><span>Redo</span></button>' +
         '<button type="button" class="dock-btn dock-mini" id="dock-clear" title="Clear the wall" aria-label="Clear the wall">' +
         '<svg viewBox="0 0 18 18" width="15" height="15" aria-hidden="true">' +
         '<path d="M4 5h10l-1 10H5zM7 2h4v2H7z"/></svg><span>Clear</span></button>' +
@@ -794,10 +797,18 @@ window.Wall = (function () {
     if (e.target.closest('#dock-undo')) {
       while (made.length && made[made.length - 1].k === 'pic') {
         const p = made.pop();
-        if (window.Picture && Picture.undo(p.id)) return;   // gone already? keep stepping back
+        if (window.Picture && Picture.undo(p.id)) { redos.length = 0; return; }   // gone already? keep stepping back — and a tracing taken back has no way back
       }
+      if (!S().items.length) return;
+      const before = JSON.stringify(S().items);
       if (made.length) made.pop();
       store.update(st => { st.items.pop(); });
+      redos.push(before); if (redos.length > 60) redos.shift();
+      return;
+    }
+    if (e.target.closest('#dock-redo')) {               // the ink as it stood before the last undo
+      const items = redos.pop();
+      if (items) store.update(st => { st.items = JSON.parse(items); });
       return;
     }
     if (e.target.closest('#dock-clear')) {

@@ -142,9 +142,12 @@ const blob = {
     return r.json();
   },
   async put(name, obj, maxAge) {
-    const r = await fetch(BLOB_API + '/' + name, {
+    // THE PATHNAME RIDES IN THE QUERY, NOT THE PATH (2026-09-24): x-api-version 12 — what
+    // @vercel/blob 2.x sends as requestApi('?pathname=…') — answers a pathname in the URL
+    // path with 400 "Invalid pathname", which is what every yard save on Vercel got until now.
+    const r = await fetch(BLOB_API + '/?' + new URLSearchParams({ pathname: name }), {
       method: 'PUT',
-      headers: blobHeaders({ 'x-content-type': 'application/json', 'x-add-random-suffix': '0',
+      headers: blobHeaders({ 'x-vercel-blob-access': 'public', 'x-content-type': 'application/json', 'x-add-random-suffix': '0',
                              'x-allow-overwrite': '1', 'x-cache-control-max-age': String(maxAge) }),
       body: JSON.stringify(obj)
     });
