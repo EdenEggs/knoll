@@ -77,7 +77,7 @@ const txt = p => p.evaluate(() => document.body.innerText.replace(/\s+/g, ' ').t
     out.firstVisitFlag = await p.evaluate(() => localStorage.getItem('knoll-signup:seen'));
     await p.reload(); await p.waitForTimeout(2000);
     out.secondVisitOpens = await p.evaluate(() =>
-      !!document.body.innerText.includes('Let it be known that'));
+      !!document.body.innerText.includes('Username'));
   }
 
   console.log(JSON.stringify(out, null, 2));

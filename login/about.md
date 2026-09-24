@@ -22,6 +22,8 @@ Served at `/login`, alongside `/lab`, `/lab2`, `/yard`, `/dashboard` and
 **Since 2026-09-21 the gate is real**: turning the key opens an account made at
 `/signup` and sends you back where you came from. See §4.
 
+**Plain words (2026-09-23).** The copy is now ordinary log-in wording (Email / Password, "Forgot your password?", "Remember me", "Log in", "Continue with Google", "Don't have an account? Sign up"), with the labels above their inputs as real `<label for>`s. The quoted strings elsewhere in this file are the export's originals; the mechanics are unchanged. `node lab2/perf/probe-gate-google.js` walks this page, /signup and the Google flow in headless Chrome.
+
 ---
 
 ## 2 · The files

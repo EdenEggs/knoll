@@ -33,6 +33,8 @@ to each other.
 from — or, with nowhere to go back to, to your yard, where the gnome shows a
 new gnome round. §5 has it all; the pretend server it replaced is gone.
 
+**Plain words (2026-09-23).** The copy on the page is now ordinary sign-up wording (Username / Email / Password / Confirm password, "Sign up", "Continue with Google", "Already have an account? Log in"), and the field labels moved above their inputs as real `<label for>`s. The quoted strings elsewhere in this file are the export's originals; the mechanics they describe are unchanged. Server messages in `api/auth.js` and the Google sign-in pages in `api/wall.js` were made plain the same day; `node lab2/perf/probe-gate-google.js` walks both pages and the Google flow in headless Chrome.
+
 ---
 
 ## 2 · The files

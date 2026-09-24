@@ -145,12 +145,12 @@
             <div style="display: flex; flex-direction: column; gap: 14px; font-size: 18px; line-height: 1.5">
               <!-- name -->
               <div style="position: relative">
-                <div>Let it be known that</div>
+                <label for="f-name" style="display: block">Username</label>
                 <div style="position: relative; border-bottom: 2px dotted rgba(23,18,11,0.5)">
                   <input ref="{{ nameRef }}" id="f-name" name="name" type="text" autocomplete="nickname" value="{{ name }}" sc-camel-on-change="{{ onName }}" sc-camel-on-focus="{{ onFocusName }}" sc-camel-on-blur="{{ onBlurName }}" aria-describedby="e-name" style="display: block; width: 100%; box-sizing: border-box; background: transparent; border: 0; outline: none; padding: 4px 0 3px; font-family: 'Public Sans', sans-serif; font-size: 17px; color: #3b2a1a; caret-color: #3b2a1a">
                   <div style="position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: #17120b; transform-origin: left; transform: scaleX({{ nameLine }}); transition: transform 0.35s ease-out"></div>
                 </div>
-                <label for="f-name" style="display: block; font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(what the other gnomes call you)</label>
+                <div style="font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(the name other people will see)</div>
                 <sc-if value="{{ nameErr }}" hint-placeholder-val="{{ false }}">
                   <div id="e-name" style="position: {{ notePos }}; left: 100%; top: 0; margin-left: {{ noteMl }}; width: {{ noteW }}; color: #b83739; font-size: 15px; line-height: 1.3; transform: rotate(-2deg); display: flex; gap: 6px; align-items: flex-start; margin-top: {{ noteMt }}">
                     <svg width="34" height="20" sc-camel-view-box="0 0 34 20" style="flex: none; margin-top: 3px"><path d="M32,4 Q20,2 4,14 M12,15 L3,14 L8,7" fill="none" stroke="#b83739" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -161,18 +161,18 @@
               <sc-if value="{{ viaGoogle }}" hint-placeholder-val="{{ false }}">
                 <div style="display: flex; align-items: center; gap: 10px; font-size: 16px; opacity: 0.85">
                   <svg width="18" height="18" sc-camel-view-box="0 0 48 48" aria-hidden="true" style="flex: none"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-2.8-.4-4H24v8.1h12.8c-.3 2.2-1.7 5.4-4.8 7.6l7.4 5.7c4.4-4.1 7.1-10.1 7.1-17.4z"></path><path fill="#FBBC05" d="M10.5 28.7c-.5-1.5-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C1 16.5 0 20.1 0 24s1 7.5 2.6 10.8l7.9-6.1z"></path><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2 1.4-4.8 2.4-8.5 2.4-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"></path></svg>
-                  <span>vouched for by Google, reachable by post at <strong style="font-family: 'Public Sans', sans-serif; font-weight: 500; color: #3b2a1a">{{ googleEmail }}</strong></span>
+                  <span>Signed in with Google, using <strong style="font-family: 'Public Sans', sans-serif; font-weight: 500; color: #3b2a1a">{{ googleEmail }}</strong></span>
                 </div>
               </sc-if>
               <sc-if value="{{ fullForm }}" hint-placeholder-val="{{ true }}">
               <!-- email -->
               <div style="position: relative">
-                <div>reachable by post at</div>
+                <label for="f-email" style="display: block">Email</label>
                 <div style="position: relative; border-bottom: 2px dotted rgba(23,18,11,0.5)">
                   <input ref="{{ emailRef }}" id="f-email" name="email" type="email" autocomplete="email" value="{{ email }}" sc-camel-on-change="{{ onEmail }}" sc-camel-on-focus="{{ onFocusEmail }}" sc-camel-on-blur="{{ onBlurEmail }}" aria-describedby="e-email" style="display: block; width: 100%; box-sizing: border-box; background: transparent; border: 0; outline: none; padding: 4px 0 3px; font-family: 'Public Sans', sans-serif; font-size: 17px; color: #3b2a1a; caret-color: #3b2a1a">
                   <div style="position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: #17120b; transform-origin: left; transform: scaleX({{ emailLine }}); transition: transform 0.35s ease-out"></div>
                 </div>
-                <label for="f-email" style="display: block; font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(email)</label>
+                <div style="font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(you'll use this to log in)</div>
                 <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}">
                   <div id="e-email" style="position: {{ notePos }}; left: 100%; top: 0; margin-left: {{ noteMl }}; width: {{ noteW }}; color: #b83739; font-size: 15px; line-height: 1.3; transform: rotate(1.5deg); display: flex; gap: 6px; align-items: flex-start; margin-top: {{ noteMt }}">
                     <svg width="34" height="20" sc-camel-view-box="0 0 34 20" style="flex: none; margin-top: 3px"><path d="M32,4 Q20,2 4,14 M12,15 L3,14 L8,7" fill="none" stroke="#b83739" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -182,13 +182,13 @@
               </div>
               <!-- password -->
               <div style="position: relative">
-                <div>and guarding the secret word</div>
+                <label for="f-pw" style="display: block">Password</label>
                 <div style="position: relative; border-bottom: 2px dotted rgba(23,18,11,0.5); display: flex; align-items: center; gap: 8px">
                   <input ref="{{ pwRef }}" id="f-pw" name="password" type="{{ pwType }}" autocomplete="new-password" value="{{ pw }}" sc-camel-on-change="{{ onPw }}" sc-camel-on-focus="{{ onFocusPw }}" sc-camel-on-blur="{{ onBlurPw }}" aria-describedby="e-pw" style="display: block; flex: 1; min-width: 0; background: transparent; border: 0; outline: none; padding: 4px 0 3px; font-family: 'Public Sans', sans-serif; font-size: 17px; color: #3b2a1a; caret-color: #3b2a1a; letter-spacing: {{ pwSpacing }}">
                   <button type="button" sc-camel-on-click="{{ togglePw }}" aria-pressed="{{ showPw }}" style="flex: none; background: transparent; border: 0; padding: 2px 4px; cursor: pointer; font-family: VT323, monospace; font-size: 16px; letter-spacing: 1px; color: #17120b; opacity: 0.7" style-hover="opacity: 1">{{ pwToggleLabel }}</button>
                   <div style="position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: #17120b; transform-origin: left; transform: scaleX({{ pwLine }}); transition: transform 0.35s ease-out"></div>
                 </div>
-                <label for="f-pw" style="display: block; font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(password — eight letters or more)</label>
+                <div style="font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(at least 8 characters)</div>
                 <sc-if value="{{ pwErr }}" hint-placeholder-val="{{ false }}">
                   <div id="e-pw" style="position: {{ notePos }}; left: 100%; top: 0; margin-left: {{ noteMl }}; width: {{ noteW }}; color: #b83739; font-size: 15px; line-height: 1.3; transform: rotate(-1deg); display: flex; gap: 6px; align-items: flex-start; margin-top: {{ noteMt }}">
                     <svg width="34" height="20" sc-camel-view-box="0 0 34 20" style="flex: none; margin-top: 3px"><path d="M32,4 Q20,2 4,14 M12,15 L3,14 L8,7" fill="none" stroke="#b83739" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -198,12 +198,12 @@
               </div>
               <!-- confirm -->
               <div style="position: relative">
-                <div>(and, to be sure of it, once more)</div>
+                <label for="f-pw2" style="display: block">Confirm password</label>
                 <div style="position: relative; border-bottom: 2px dotted rgba(23,18,11,0.5)">
                   <input ref="{{ pw2Ref }}" id="f-pw2" name="password2" type="{{ pwType }}" autocomplete="new-password" value="{{ pw2 }}" sc-camel-on-change="{{ onPw2 }}" sc-camel-on-focus="{{ onFocusPw2 }}" sc-camel-on-blur="{{ onBlurPw2 }}" aria-describedby="e-pw2" style="display: block; width: 100%; box-sizing: border-box; background: transparent; border: 0; outline: none; padding: 4px 0 3px; font-family: 'Public Sans', sans-serif; font-size: 17px; color: #3b2a1a; caret-color: #3b2a1a; letter-spacing: {{ pwSpacing }}">
                   <div style="position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: #17120b; transform-origin: left; transform: scaleX({{ pw2Line }}); transition: transform 0.35s ease-out"></div>
                 </div>
-                <label for="f-pw2" style="display: block; font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(the same secret word, again)</label>
+                <div style="font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(type your password again)</div>
                 <sc-if value="{{ pw2Err }}" hint-placeholder-val="{{ false }}">
                   <div id="e-pw2" style="position: {{ notePos }}; left: 100%; top: 0; margin-left: {{ noteMl }}; width: {{ noteW }}; color: #b83739; font-size: 15px; line-height: 1.3; transform: rotate(1deg); display: flex; gap: 6px; align-items: flex-start; margin-top: {{ noteMt }}">
                     <svg width="34" height="20" sc-camel-view-box="0 0 34 20" style="flex: none; margin-top: 3px"><path d="M32,4 Q20,2 4,14 M12,15 L3,14 L8,7" fill="none" stroke="#b83739" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -212,12 +212,12 @@
                 </sc-if>
               </div>
               </sc-if>
-              <div>hereby wishes to join the hill, and by pressing the seal agrees to abide by the <a href="#" style="color: #b83739">Rule Book</a> and the <a href="#" style="color: #b83739">Terms of Residency</a>.</div>
+              <div>By signing up, you agree to our <a href="#" style="color: #b83739">Rules</a> and <a href="#" style="color: #b83739">Terms of Service</a>.</div>
             </div>
 
             <!-- the seal -->
             <div style="display: flex; align-items: center; gap: 18px; margin-top: 6px; position: relative">
-              <button ref="{{ sealRef }}" type="submit" disabled="{{ sealBusy }}" sc-camel-on-mouse-enter="{{ onSealEnter }}" sc-camel-on-mouse-leave="{{ onSealLeave }}" aria-label="Press seal to submit" style="position: relative; width: 84px; height: 96px; flex: none; background: transparent; border: 0; padding: 0; cursor: {{ sealCursor }}">
+              <button ref="{{ sealRef }}" type="submit" disabled="{{ sealBusy }}" sc-camel-on-mouse-enter="{{ onSealEnter }}" sc-camel-on-mouse-leave="{{ onSealLeave }}" aria-label="Sign up" style="position: relative; width: 84px; height: 96px; flex: none; background: transparent; border: 0; padding: 0; cursor: {{ sealCursor }}">
                 <!-- where the wax goes -->
                 <div style="position: absolute; left: 12px; bottom: 6px; width: 60px; height: 60px; border-radius: 50%; border: 2.5px dashed rgba(23,18,11,0.35); box-sizing: border-box"></div>
                 <sc-if value="{{ waxOn }}" hint-placeholder-val="{{ false }}">
@@ -240,24 +240,23 @@
               <div style="display: flex; flex-direction: column; gap: 3px">
                 <div style="font-family: VT323, monospace; font-size: 22px; letter-spacing: 3px; color: #17120b">{{ sealLabel }}</div>
                 <div style="font-style: italic; font-size: 14px; opacity: 0.65">{{ sealHint }}</div>
-                <div style="font-family: VT323, monospace; font-size: 14px; letter-spacing: 1px; opacity: 0.6">pressing the seal is your signature</div>
               </div>
             </div>
             <sc-if value="{{ fullForm }}" hint-placeholder-val="{{ true }}">
             <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
               <div style="display: flex; align-items: center; gap: 10px; width: 100%">
                 <div style="flex: 1; height: 0; border-top: 2px dotted rgba(23,18,11,0.4)"></div>
-                <div style="font-family: VT323, monospace; font-size: 16px; letter-spacing: 2px; color: #17120b; opacity: 0.65; white-space: nowrap">OR, BY OTHER POST</div>
+                <div style="font-family: VT323, monospace; font-size: 16px; letter-spacing: 2px; color: #17120b; opacity: 0.65; white-space: nowrap">OR</div>
                 <div style="flex: 1; height: 0; border-top: 2px dotted rgba(23,18,11,0.4)"></div>
               </div>
               <button type="button" sc-camel-on-click="{{ onGoogle }}" disabled="{{ sealBusy }}" style="display: flex; align-items: center; gap: 12px; width: 100%; max-width: 300px; box-sizing: border-box; padding: 9px 16px 8px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 8px 11px 7px 10px; box-shadow: 4px 4px 0 rgba(23,18,11,0.55); cursor: pointer; font-family: 'Kalam', cursive; font-size: 16px; color: #17120b; text-align: left; transition: transform 0.08s" style-hover="background: #fffaf0; transform: translate(-1px,-1px)" style-active="transform: translate(2px,2px); box-shadow: 2px 2px 0 rgba(23,18,11,0.55)">
                 <svg width="22" height="22" sc-camel-view-box="0 0 48 48" aria-hidden="true" style="flex: none"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-2.8-.4-4H24v8.1h12.8c-.3 2.2-1.7 5.4-4.8 7.6l7.4 5.7c4.4-4.1 7.1-10.1 7.1-17.4z"></path><path fill="#FBBC05" d="M10.5 28.7c-.5-1.5-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C1 16.5 0 20.1 0 24s1 7.5 2.6 10.8l7.9-6.1z"></path><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2 1.4-4.8 2.4-8.5 2.4-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"></path></svg>
-                <span style="flex: 1">Let Google vouch for me</span>
+                <span style="flex: 1">Continue with Google</span>
                 <span style="font-family: VT323, monospace; font-size: 14px; letter-spacing: 1px; opacity: 0.6">→</span>
               </button>
-              <div style="font-style: italic; font-size: 13px; opacity: 0.6; text-align: center; margin-top: -4px">a letter of introduction, in lieu of a secret word</div>
+              <div style="font-style: italic; font-size: 13px; opacity: 0.6; text-align: center; margin-top: -4px">no password needed</div>
             </div>
-            <div style="font-style: italic; font-size: 14.5px; opacity: 0.7; text-align: center">Already a resident? <a href="{{ loginHref }}" style="color: #b83739">Log in at the gate</a></div>
+            <div style="font-style: italic; font-size: 14.5px; opacity: 0.7; text-align: center">Already have an account? <a href="{{ loginHref }}" style="color: #b83739">Log in</a></div>
             </sc-if>
           </form>
           <div style="height: 16px; background: #e4d9bb; border-top: 2px solid rgba(23,18,11,0.25)"></div>
@@ -338,13 +337,13 @@
              nothing and this link is the only thing on the page that goes
              anywhere — but the walk from the gate to your own plot is the one
              journey these two pages are for, and it may as well be walkable. -->
-        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">you are one of us now · <a href="{{ nextHref }}" style="text-decoration: none">{{ nextWord }}</a></div>
+        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">your account is ready · <a href="{{ nextHref }}" style="text-decoration: none">{{ nextWord }}</a></div>
       </div>
     </sc-if>
     <sc-if value="{{ interlude }}" hint-placeholder-val="{{ false }}">
       <div style="position: absolute; left: 0; right: 0; top: 60px; text-align: center; display: flex; flex-direction: column; gap: 6px; align-items: center">
-        <div style="font-family: Rye, serif; font-size: 24px; color: #17120b">Google vouches for you.</div>
-        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">one thing more · what shall we call you?</div>
+        <div style="font-family: Rye, serif; font-size: 24px; color: #17120b">Signed in with Google.</div>
+        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">one more thing · pick a username</div>
       </div>
     </sc-if>
   </div>
@@ -407,12 +406,12 @@
    a new account Google vouched for comes back here as ?google=1, straight to
    the one-field form, to be named. */
 const NEXT = (function () { const v = new URLSearchParams(location.search).get('next') || ''; return v.length <= 512 && /^\/(?![\/\\])[^\s\\]*$/.test(v) ? v : '/yard/'; })();
-const NEXT_WORD = /^\/yard\//.test(NEXT) ? 'into the village →' : /^\/toem2\//.test(NEXT) ? 'back to TOEM 2 →' : NEXT === '/' ? 'back to the hill →' : 'back where you were →';
+const NEXT_WORD = /^\/yard\//.test(NEXT) ? 'go to your yard →' : /^\/toem2\//.test(NEXT) ? 'back to TOEM 2 →' : NEXT === '/' ? 'back to the home page →' : 'back where you were →';
 const VIA_GOOGLE = /[?&]google=1\b/.test(location.search);
 const GATE = body => fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
   .then(r => r.json().catch(() => ({})).then(o => Object.assign({ http: r.status }, o)))
-  .catch(() => ({ ok: false, http: 0, error: 'the gate did not answer — are you online?' }));
-const GATE_SAYS = { 'no-store': 'the gate is not open on this hill yet — come back soon' };
+  .catch(() => ({ ok: false, http: 0, error: 'could not reach the server — are you online?' }));
+const GATE_SAYS = { 'no-store': 'accounts are not available on this site yet — please try again later' };
 let GATE_INFO = null;                          // what the door says about itself (is Google set up?), asked once
 const gateInfo = () => GATE_INFO || (GATE_INFO = fetch('/api/auth', { cache: 'no-store' }).then(r => r.json()).catch(() => ({})));
 class Component extends DCLogic {
@@ -511,10 +510,10 @@ class Component extends DCLogic {
   onBlurName = () => this.blurField('name'); onBlurEmail = () => this.blurField('email'); onBlurPw = () => this.blurField('pw');
   validate(f) {
     const s = this.state;
-    if (f === 'name') return s.name.trim() ? '' : 'every gnome has a name; even Nameless is one';
-    if (f === 'email') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email) ? '' : (s.email.includes('@') ? 'the postmaster wants a proper address after the @' : 'no @ in this one; the postmaster won\u2019t find you');
-    if (f === 'pw') return s.pw.length >= 8 ? '' : 'a secret word wants eight letters at least';
-    if (f === 'pw2') return s.pw2 === s.pw ? '' : 'the two secret words disagree; try once more';
+    if (f === 'name') return s.name.trim() ? '' : 'please enter a username';
+    if (f === 'email') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email) ? '' : 'please enter a valid email address';
+    if (f === 'pw') return s.pw.length >= 8 ? '' : 'your password must be at least 8 characters';
+    if (f === 'pw2') return s.pw2 === s.pw ? '' : 'the passwords do not match';
     return '';
   }
   blurField(f) {
@@ -533,8 +532,8 @@ class Component extends DCLogic {
   onGoogle = () => {
     if (this.state.seal !== 'idle' && this.state.seal !== 'cracked') return;
     gateInfo().then(g => {
-      if (g && g.google) { this.setState({ seal: 'cooling', errs: {}, live: 'Asking Google to vouch for you' }); location.assign('/auth/google?next=' + encodeURIComponent(NEXT)); return; }
-      const msg = 'Google cannot vouch for anybody on this hill yet — an address and a secret word will do';
+      if (g && g.google) { this.setState({ seal: 'cooling', errs: {}, live: 'Redirecting to Google' }); location.assign('/auth/google?next=' + encodeURIComponent(NEXT)); return; }
+      const msg = 'Google sign-in is not available yet — please sign up with an email and password';
       this.setState({ errs: Object.assign({}, this.state.errs, { email: msg }), live: msg }); this.m.noteAt = 'email'; this.m.noteT = performance.now();
     });
   };
@@ -556,12 +555,12 @@ class Component extends DCLogic {
     setTimeout(() => this.setState({ seal: 'lift' }), 520);
     setTimeout(() => this.setState({ seal: 'press', jostle: true, hatSlip: true }), 640);
     setTimeout(() => this.setState({ seal: 'wax' }), 760);
-    setTimeout(() => this.setState({ seal: 'cooling', jostle: false, live: 'Sealing your petition' }), 1080);
+    setTimeout(() => this.setState({ seal: 'cooling', jostle: false, live: 'Creating your account' }), 1080);
     Promise.all([asked, new Promise(r => setTimeout(r, 2060))]).then(([out]) => {
       if (!out.ok) {
         const google = this.state.viaGoogle;
         const f = google ? 'name' : ({ name: 'name', password: 'pw' }[out.code] || 'email');
-        const msg = GATE_SAYS[out.code] || (google && out.code === 'who' ? 'that Google sign-in has lapsed — go back and let Google vouch again' : out.error) || 'the wax would not take';
+        const msg = GATE_SAYS[out.code] || (google && out.code === 'who' ? 'your Google sign-in has expired — please continue with Google again' : out.error) || 'something went wrong — please try again';
         this.setState({ seal: 'cracked', errs: { [f]: msg }, live: msg });
         this.m.noteAt = f; this.m.noteT = performance.now();
       } else {
@@ -719,13 +718,13 @@ class Component extends DCLogic {
       waxOn: wax, waxSet: s.seal === 'set', waxCracked: s.seal === 'cracked',
       waxColor: s.seal === 'wax' ? '#f05a5c' : (s.seal === 'cracked' ? '#8e2a2c' : '#b83739'),
       stampY: held ? '-22px' : (down ? '10px' : '0px'), stampSx: down ? 1.12 : 1, stampSy: down ? 0.86 : 1,
-      sealLabel: s.seal === 'set' ? 'SEALED' : (busy ? 'SEALING…' : 'PRESS SEAL'),
-      sealHint: s.seal === 'cracked' ? 'the wax cracked; see the margin' : (busy ? 'the wax is cooling' : 'thump it, and your petition is lodged'),
+      sealLabel: s.seal === 'set' ? 'DONE' : (busy ? 'SIGNING UP…' : 'SIGN UP'),
+      sealHint: s.seal === 'cracked' ? 'something went wrong — see the note by the field' : (busy ? 'creating your account…' : 'press the seal to create your account'),
       done: s.done, liveMsg: s.live, interlude: !!s.interlude,
-      viaGoogle: !!s.viaGoogle, fullForm: !s.viaGoogle, googleEmail: 'your Google address',   // the address is not kept, so not known here either
+      viaGoogle: !!s.viaGoogle, fullForm: !s.viaGoogle, googleEmail: 'your Google email',   // the address is not kept, so not known here either
       nextHref: NEXT, nextWord: NEXT_WORD, loginHref: '../login/?next=' + encodeURIComponent(NEXT),
-      heading: s.viaGoogle ? 'One thing more — what shall we call you?' : 'Hear ye — a new resident petitions the hill',
-      subhead: s.viaGoogle ? 'Form 1-C · Choice of Name · vouched for by Google' : 'Form 1-B · Application for Residency · see Rule Book §2',
+      heading: s.viaGoogle ? 'One more thing — pick a username' : 'Create your account',
+      subhead: s.viaGoogle ? 'Signed in with Google' : 'Sign up for Knoll',
       handOpacity: this.m.rest ? 0.92 : 1,
       armZ: busy ? 4 : 2,
       posePoint: p === 'point', poseQuill: p === 'quill', poseGrab: p === 'grab', poseThumb: p === 'thumb', posePalm: p === 'palm',

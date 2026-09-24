@@ -144,12 +144,11 @@
             <div style="display: flex; flex-direction: column; gap: 14px; font-size: 18px; line-height: 1.5">
               <!-- email -->
               <div style="position: relative">
-                <div>Halt — who goes there? A resident reachable by post at</div>
+                <label for="f-email" style="display: block">Email</label>
                 <div style="position: relative; border-bottom: 2px dotted rgba(23,18,11,0.5)">
                   <input ref="{{ emailRef }}" id="f-email" name="email" type="email" autocomplete="email" value="{{ email }}" sc-camel-on-change="{{ onEmail }}" sc-camel-on-focus="{{ onFocusEmail }}" sc-camel-on-blur="{{ onBlurEmail }}" aria-describedby="e-email" style="display: block; width: 100%; box-sizing: border-box; background: transparent; border: 0; outline: none; padding: 4px 0 3px; font-family: 'Public Sans', sans-serif; font-size: 17px; color: #3b2a1a; caret-color: #3b2a1a">
                   <div style="position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: #17120b; transform-origin: left; transform: scaleX({{ emailLine }}); transition: transform 0.35s ease-out"></div>
                 </div>
-                <label for="f-email" style="display: block; font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(email)</label>
                 <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}">
                   <div id="e-email" style="position: {{ notePos }}; left: 100%; top: 0; margin-left: {{ noteMl }}; width: {{ noteW }}; color: #b83739; font-size: 15px; line-height: 1.3; transform: rotate(1.5deg); display: flex; gap: 6px; align-items: flex-start; margin-top: {{ noteMt }}">
                     <svg width="34" height="20" sc-camel-view-box="0 0 34 20" style="flex: none; margin-top: 3px"><path d="M32,4 Q20,2 4,14 M12,15 L3,14 L8,7" fill="none" stroke="#b83739" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -159,13 +158,13 @@
               </div>
               <!-- password -->
               <div style="position: relative">
-                <div>bearing the secret word</div>
+                <label for="f-pw" style="display: block">Password</label>
                 <div style="position: relative; border-bottom: 2px dotted rgba(23,18,11,0.5); display: flex; align-items: center; gap: 8px">
                   <input ref="{{ pwRef }}" id="f-pw" name="password" type="{{ pwType }}" autocomplete="current-password" value="{{ pw }}" sc-camel-on-change="{{ onPw }}" sc-camel-on-focus="{{ onFocusPw }}" sc-camel-on-blur="{{ onBlurPw }}" aria-describedby="e-pw" style="display: block; flex: 1; min-width: 0; background: transparent; border: 0; outline: none; padding: 4px 0 3px; font-family: 'Public Sans', sans-serif; font-size: 17px; color: #3b2a1a; caret-color: #3b2a1a; letter-spacing: {{ pwSpacing }}">
                   <button type="button" sc-camel-on-click="{{ togglePw }}" aria-pressed="{{ showPw }}" style="flex: none; background: transparent; border: 0; padding: 2px 4px; cursor: pointer; font-family: VT323, monospace; font-size: 16px; letter-spacing: 1px; color: #17120b; opacity: 0.7" style-hover="opacity: 1">{{ pwToggleLabel }}</button>
                   <div style="position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: #17120b; transform-origin: left; transform: scaleX({{ pwLine }}); transition: transform 0.35s ease-out"></div>
                 </div>
-                <label for="f-pw" style="display: block; font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(password) · <a href="#" sc-camel-on-click="{{ onForgot }}" style="color: #b83739; font-style: italic">forgotten it? ask the gatekeeper</a></label>
+                <div style="font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px"><a href="#" sc-camel-on-click="{{ onForgot }}" style="color: #b83739; font-style: italic">Forgot your password?</a></div>
                 <sc-if value="{{ pwErr }}" hint-placeholder-val="{{ false }}">
                   <div id="e-pw" style="position: {{ notePos }}; left: 100%; top: 0; margin-left: {{ noteMl }}; width: {{ noteW }}; color: #b83739; font-size: 15px; line-height: 1.3; transform: rotate(-1deg); display: flex; gap: 6px; align-items: flex-start; margin-top: {{ noteMt }}">
                     <svg width="34" height="20" sc-camel-view-box="0 0 34 20" style="flex: none; margin-top: 3px"><path d="M32,4 Q20,2 4,14 M12,15 L3,14 L8,7" fill="none" stroke="#b83739" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -177,7 +176,7 @@
 
             <!-- the lock, and the key that fits it -->
             <div style="display: flex; align-items: center; gap: 14px; margin-top: 6px; position: relative">
-              <button ref="{{ sealRef }}" type="submit" disabled="{{ sealBusy }}" sc-camel-on-mouse-enter="{{ onSealEnter }}" sc-camel-on-mouse-leave="{{ onSealLeave }}" aria-label="Turn the key to log in" style="position: relative; width: 162px; height: 100px; flex: none; background: transparent; border: 0; padding: 0; cursor: {{ sealCursor }}">
+              <button ref="{{ sealRef }}" type="submit" disabled="{{ sealBusy }}" sc-camel-on-mouse-enter="{{ onSealEnter }}" sc-camel-on-mouse-leave="{{ onSealLeave }}" aria-label="Log in" style="position: relative; width: 162px; height: 100px; flex: none; background: transparent; border: 0; padding: 0; cursor: {{ sealCursor }}">
                 <!-- the padlock -->
                 <div style="position: absolute; left: 8px; top: 4px; width: 64px; height: 94px; animation: {{ lockAnim }}; transform-origin: 50% 80%">
                   <div style="position: absolute; left: 12px; top: 0; width: 40px; height: 46px; border: 7px solid #17120b; border-bottom: 0; border-radius: 22px 22px 0 0; box-sizing: border-box; transform-origin: 100% 100%; transform: {{ shackleT }}; transition: transform 0.4s cubic-bezier(.3,1.4,.5,1)">
@@ -208,24 +207,24 @@
               <div style="display: flex; flex-direction: column; gap: 3px">
                 <div style="font-family: VT323, monospace; font-size: 22px; letter-spacing: 3px; color: #17120b">{{ sealLabel }}</div>
                 <div style="font-style: italic; font-size: 14px; opacity: 0.65">{{ sealHint }}</div>
-                <label style="display: flex; align-items: center; gap: 8px; font-style: italic; font-size: 14px; opacity: 0.75; cursor: pointer; margin-top: 2px"><input type="checkbox" checked="{{ remember }}" sc-camel-on-change="{{ onRemember }}" style="width: 15px; height: 15px; accent-color: #b83739; margin: 0"><span>keep the gate unlatched for me</span></label>
-                <div style="font-style: italic; font-size: 13px; opacity: 0.65; margin-top: 4px">by signing in you agree to the <a href="#" style="color: #b83739">Terms of Residency</a></div>
+                <label style="display: flex; align-items: center; gap: 8px; font-style: italic; font-size: 14px; opacity: 0.75; cursor: pointer; margin-top: 2px"><input type="checkbox" checked="{{ remember }}" sc-camel-on-change="{{ onRemember }}" style="width: 15px; height: 15px; accent-color: #b83739; margin: 0"><span>Remember me</span></label>
+                <div style="font-style: italic; font-size: 13px; opacity: 0.65; margin-top: 4px">By logging in, you agree to our <a href="#" style="color: #b83739">Terms of Service</a></div>
               </div>
             </div>
             <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
               <div style="display: flex; align-items: center; gap: 10px; width: 100%">
                 <div style="flex: 1; height: 0; border-top: 2px dotted rgba(23,18,11,0.4)"></div>
-                <div style="font-family: VT323, monospace; font-size: 16px; letter-spacing: 2px; color: #17120b; opacity: 0.65; white-space: nowrap">OR, BY OTHER POST</div>
+                <div style="font-family: VT323, monospace; font-size: 16px; letter-spacing: 2px; color: #17120b; opacity: 0.65; white-space: nowrap">OR</div>
                 <div style="flex: 1; height: 0; border-top: 2px dotted rgba(23,18,11,0.4)"></div>
               </div>
               <button type="button" sc-camel-on-click="{{ onGoogle }}" disabled="{{ sealBusy }}" style="display: flex; align-items: center; gap: 12px; width: 100%; max-width: 300px; box-sizing: border-box; padding: 9px 16px 8px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 8px 11px 7px 10px; box-shadow: 4px 4px 0 rgba(23,18,11,0.55); cursor: pointer; font-family: 'Kalam', cursive; font-size: 16px; color: #17120b; text-align: left; transition: transform 0.08s" style-hover="background: #fffaf0; transform: translate(-1px,-1px)" style-active="transform: translate(2px,2px); box-shadow: 2px 2px 0 rgba(23,18,11,0.55)">
                 <svg width="22" height="22" sc-camel-view-box="0 0 48 48" aria-hidden="true" style="flex: none"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-2.8-.4-4H24v8.1h12.8c-.3 2.2-1.7 5.4-4.8 7.6l7.4 5.7c4.4-4.1 7.1-10.1 7.1-17.4z"></path><path fill="#FBBC05" d="M10.5 28.7c-.5-1.5-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C1 16.5 0 20.1 0 24s1 7.5 2.6 10.8l7.9-6.1z"></path><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2 1.4-4.8 2.4-8.5 2.4-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"></path></svg>
-                <span style="flex: 1">Google knows me — let me through</span>
+                <span style="flex: 1">Continue with Google</span>
                 <span style="font-family: VT323, monospace; font-size: 14px; letter-spacing: 1px; opacity: 0.6">→</span>
               </button>
-              <div style="font-style: italic; font-size: 13px; opacity: 0.6; text-align: center; margin-top: -4px">a familiar face, in lieu of a secret word</div>
+              <div style="font-style: italic; font-size: 13px; opacity: 0.6; text-align: center; margin-top: -4px">no password needed</div>
             </div>
-            <div style="font-style: italic; font-size: 14.5px; opacity: 0.7; text-align: center">New to the hill? <a href="{{ signupHref }}" style="color: #b83739">Petition for residency</a></div>
+            <div style="font-style: italic; font-size: 14.5px; opacity: 0.7; text-align: center">Don't have an account? <a href="{{ signupHref }}" style="color: #b83739">Sign up</a></div>
           </form>
           <div style="height: 16px; background: #e4d9bb; border-top: 2px solid rgba(23,18,11,0.25)"></div>
         </div>
@@ -303,7 +302,7 @@
              which is the village as far as this site has one. Nothing was logged
              in to; the form still sends nothing. /yard's SIGN OUT is the way
              back here, and it says the same thing about what it does not do. -->
-        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">the gate swings open · <a href="{{ nextHref }}" style="text-decoration: none">{{ nextWord }}</a></div>
+        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">you're logged in · <a href="{{ nextHref }}" style="text-decoration: none">{{ nextWord }}</a></div>
       </div>
     </sc-if>
   </div>
@@ -364,11 +363,11 @@
    browser. And "Google knows me" goes to Google, when this site has Google
    set up, and says so in the margin when it has not. */
 const NEXT = (function () { const v = new URLSearchParams(location.search).get('next') || ''; return v.length <= 512 && /^\/(?![\/\\])[^\s\\]*$/.test(v) ? v : '/yard/'; })();
-const NEXT_WORD = /^\/yard\//.test(NEXT) ? 'into the village →' : /^\/toem2\//.test(NEXT) ? 'back to TOEM 2 →' : NEXT === '/' ? 'back to the hill →' : 'back where you were →';
+const NEXT_WORD = /^\/yard\//.test(NEXT) ? 'go to your yard →' : /^\/toem2\//.test(NEXT) ? 'back to TOEM 2 →' : NEXT === '/' ? 'back to the home page →' : 'back where you were →';
 const GATE = body => fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
   .then(r => r.json().catch(() => ({})).then(o => Object.assign({ http: r.status }, o)))
-  .catch(() => ({ ok: false, http: 0, error: 'the gate did not answer — are you online?' }));
-const GATE_SAYS = { 'no-store': 'the gate is not open on this hill yet — come back soon' };
+  .catch(() => ({ ok: false, http: 0, error: 'could not reach the server — are you online?' }));
+const GATE_SAYS = { 'no-store': 'accounts are not available on this site yet — please try again later' };
 let GATE_INFO = null;                          // what the door says about itself (is Google set up?), asked once
 const gateInfo = () => GATE_INFO || (GATE_INFO = fetch('/api/auth', { cache: 'no-store' }).then(r => r.json()).catch(() => ({})));
 class Component extends DCLogic {
@@ -466,9 +465,9 @@ class Component extends DCLogic {
   onBlurName = () => this.blurField('name'); onBlurEmail = () => this.blurField('email'); onBlurPw = () => this.blurField('pw');
   validate(f) {
     const s = this.state;
-    if (f === 'name') return s.name.trim() ? '' : 'every gnome has a name; even Nameless is one';
-    if (f === 'email') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email) ? '' : (s.email.includes('@') ? 'the postmaster wants a proper address after the @' : 'no @ in this one; the postmaster won\u2019t find you');
-    if (f === 'pw') return s.pw ? '' : 'the gate wants a secret word before it opens';
+    if (f === 'name') return s.name.trim() ? '' : 'please enter a username';
+    if (f === 'email') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email) ? '' : 'please enter a valid email address';
+    if (f === 'pw') return s.pw ? '' : 'please enter your password';
     return '';
   }
   blurField(f) {
@@ -488,12 +487,12 @@ class Component extends DCLogic {
   onGoogle = () => {
     if (this.state.seal !== 'idle' && this.state.seal !== 'cracked') return;
     gateInfo().then(g => {
-      if (g && g.google) { this.setState({ seal: 'cooling', errs: {}, live: 'Asking Google to vouch for you' }); location.assign('/auth/google?next=' + encodeURIComponent(NEXT)); return; }
-      this.note('email', 'Google cannot vouch for anybody on this hill yet — your address and secret word will do');
+      if (g && g.google) { this.setState({ seal: 'cooling', errs: {}, live: 'Redirecting to Google' }); location.assign('/auth/google?next=' + encodeURIComponent(NEXT)); return; }
+      this.note('email', 'Google sign-in is not available yet — please log in with your email and password');
     });
   };
   note(f, msg) { this.setState({ errs: Object.assign({}, this.state.errs, { [f]: msg }), live: msg }); this.m.noteAt = f; this.m.noteT = performance.now(); }
-  onForgot = (e) => { e.preventDefault(); this.note('pw', 'the gatekeeper cannot post a new key yet — try the words you usually use'); };
+  onForgot = (e) => { e.preventDefault(); this.note('pw', 'password reset is not available yet — please try the password you usually use'); };
 
   // ─── the lock ───
   onSealEnter = () => { this.m.sealHover = true; };
@@ -511,10 +510,10 @@ class Component extends DCLogic {
     setTimeout(() => this.setState({ seal: 'carry' }), 520);
     setTimeout(() => this.setState({ seal: 'insert' }), 980);
     setTimeout(() => this.setState({ seal: 'turn', jostle: true, hatSlip: true }), 1180);
-    setTimeout(() => this.setState({ seal: 'cooling', jostle: false, live: 'Turning the key' }), 1500);
+    setTimeout(() => this.setState({ seal: 'cooling', jostle: false, live: 'Logging you in' }), 1500);
     Promise.all([asked, new Promise(r => setTimeout(r, 2200))]).then(([out]) => {
       if (!out.ok) {
-        const f = out.code === 'email' ? 'email' : 'pw', msg = GATE_SAYS[out.code] || out.error || 'the gate did not open';
+        const f = out.code === 'email' ? 'email' : 'pw', msg = GATE_SAYS[out.code] || out.error || 'could not log you in — please try again';
         this.setState({ seal: 'eject' });
         setTimeout(() => this.setState({ seal: 'cracked', errs: { [f]: msg }, live: msg }), 120);
         this.m.wagT = performance.now();   // no, no, no — then the note
@@ -679,13 +678,13 @@ class Component extends DCLogic {
       keyT: carried || inLock ? 'translate(-56px,6px) rotate(0deg)' : 'rotate(-12deg)', keyOp: inLock ? 0 : 1,
       keyInLock: inLock, keyTurn: turning ? 90 : 0,
       shackleT: s.seal === 'set' ? 'translateY(-10px) rotate(28deg)' : 'none',
-      sealLabel: s.seal === 'set' ? 'UNLOCKED' : (busy ? 'TURNING…' : 'TURN THE KEY'),
-      sealHint: s.seal === 'cracked' ? 'the key jammed; see the margin' : (busy ? 'the lock is stiff' : 'and the gate swings open'),
+      sealLabel: s.seal === 'set' ? 'DONE' : (busy ? 'LOGGING IN…' : 'LOG IN'),
+      sealHint: s.seal === 'cracked' ? 'something went wrong — see the note by the field' : (busy ? 'logging you in…' : 'press the key to log in'),
       done: s.done, liveMsg: s.live, interlude: !!s.interlude,
       remember: s.remember, onRemember: this.onRemember, onForgot: this.onForgot,
       nextHref: NEXT, nextWord: NEXT_WORD, signupHref: '../signup/?next=' + encodeURIComponent(NEXT),
-      heading: 'Hear ye — a resident returns to the hill',
-      subhead: 'Form 2-A · Passage at the Gate · see Rule Book §4',
+      heading: 'Welcome back',
+      subhead: 'Log in to Knoll',
       handOpacity: this.m.rest ? 0.92 : 1,
       armZ: busy ? 4 : 2,
       posePoint: p === 'point', poseQuill: p === 'quill', poseGrab: p === 'grab', poseThumb: p === 'thumb', posePalm: p === 'palm',
