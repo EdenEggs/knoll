@@ -325,6 +325,12 @@ window.Seed = (function () {
         rules.hour = l && l.ok ? l.log.filter(e => e.at > Date.now() - 36e5).length : null;
       }
     } catch (e) {}
+    if (rules && !HOME) {                      // a space's bench wears the space's name (2026-09-24)
+      const n = document.querySelector('.lab-name');
+      if (n && rules.title) n.textContent = rules.title;
+      if (rules.title) document.title = 'Knoll · ' + rules.title;
+    }
+    if (rules && window.Wall && Wall.setInks) Wall.setInks(rules.inks || []);   // …and offers only its inks on the dock (wall.js: THE INKS OF A SPACE)
     paintStamp(); hintDock();
     return rules;
   }
@@ -352,7 +358,8 @@ window.Seed = (function () {
     if (!hasSession()) out.push({ text: 'log in to edit for everybody', links: GATE });
     else if (!me) out.push({ text: 'you: signed in' });
     else out.push({ text: 'you: ' + (owner() ? 'the maker' : keeper() ? 'a keeper' : canVote() ? 'a voter — ' + (me.rep || 0) + ' standing day' + (me.rep === 1 ? '' : 's') : 'no standing yet — a day of live edits on TOEM 2 earns a vote') });
-    if (owner() || (HOME && isMod())) out.push({ text: '', links: [['the rules', () => { closePop(); if (window.History) History.open('rules'); }]] });
+    if (owner() || (HOME && isMod())) out.push({ text: '', links: [['the rules', () => { closePop(); if (window.History) History.open('rules'); }]].concat(
+      owner() && !HOME ? [['settings', () => location.assign('/settings/?space=' + encodeURIComponent(PAGE))], ['dashboard', () => location.assign('/dashboard/?space=' + encodeURIComponent(PAGE))]] : []) });   // the maker's doors, now the space opens on this bench (2026-09-24)
     return out;
   }
   function buildStamp() {

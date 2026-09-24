@@ -401,3 +401,5 @@ module.exports = async function handler(req, res) {
   }
 };
 module.exports.clean = clean;
+// for api/gallery.js, which keeps a page's photos in the same Blob store: the door, its headers, a name's public url, and the delete
+module.exports.blob = { api: BLOB_API, headers: blobHeaders, url: publicUrl, token, del: names => blob.del(names) };

@@ -79,14 +79,14 @@ const tags = list => list.map(f => f.tag).sort();
   // ── invites, to a space ─────────────────────────────────────────────────
   r = await call(wall, 'POST', '/api/wall', { op: 'page', slug: 'hollow', title: 'Mossy Hollow' }, G.Mossy.h); A.strictEqual(r.json.ok, true, 'Mossy makes a space');
   r = await act('Mossy', { op: 'invite', slug: 'hollow', ids: [G.Juno.id, G.Bram.id, G.Pip.id, G.Juno.id, 'x'] });
-  A.deepStrictEqual([r.json.ok, r.json.sent], [true, 2], 'and invites his two friends to it — not Pip, who is not one');
+  A.deepStrictEqual([r.json.ok, r.json.sent], [true, 3], 'and invites his two friends and Pip to it — a friend or not, an account is enough (2026-09-24); "x" is nobody');
   r = await see('Juno');
   A.deepStrictEqual([r.json.notes[0].kind, r.json.notes[0].slug, r.json.notes[0].title, r.json.notes[0].from.tag, r.json.unseen], ['keeper', 'hollow', 'Mossy Hollow', 'Mossy#1', 1], "the invite is in Juno's bell, with the space's address — and it makes her a keeper (2026-09-24)");
-  r = await see('Pip'); A.strictEqual(r.json.notes.length, 0, "…and not in Pip's");
+  r = await see('Pip'); A.deepStrictEqual([r.json.notes.length, r.json.notes[0] && r.json.notes[0].kind], [1, 'keeper'], "…and in Pip's, who is no friend but keeps it now");
   r = await act('Mossy', { op: 'invite', slug: 'hollow', ids: [G.Juno.id] }); A.strictEqual(r.json.sent, 0, 'nobody is invited twice');
   r = await act('Juno', { op: 'invite', slug: 'hollow', ids: [G.Mossy.id] }); A.deepStrictEqual([r.status, r.json.code], [403, 'owner'], 'only its maker invites to a space');
   r = await act('Mossy', { op: 'invite', slug: 'nowhere', ids: [G.Juno.id] }); A.strictEqual(r.status, 404, 'a space nobody made has nobody to invite');
-  A.deepStrictEqual((await wall.db('SMEMBERS', wall.K.invited('hollow'))).sort(), [G.Juno.id, G.Bram.id].sort(), 'who was invited is kept with the space');
+  A.deepStrictEqual((await wall.db('SMEMBERS', wall.K.invited('hollow'))).sort(), [G.Juno.id, G.Bram.id, G.Pip.id].sort(), 'who was invited is kept with the space');
 
   // ── and the rest ────────────────────────────────────────────────────────
   r = await act('Mossy', { op: 'drop', id: G.Bram.id }); A.strictEqual(r.json.ok, true, 'Mossy drops Bram');

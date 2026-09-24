@@ -138,10 +138,14 @@
             </sc-for>
           </div>
           <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:15px; letter-spacing:2px; color:#4a4054; margin-bottom:10px">
-            <span>THE INKS · PICK UP TO 10</span>
-            <span style="opacity:0.8">{{ inkCount }} / 10</span>
+            <span>THE INKS · ALL, OR PICK UP TO 10</span>
+            <span style="opacity:0.8">{{ inkCount }}</span>
           </div>
           <div role="group" aria-label="inks" style="display:flex; flex-wrap:wrap; gap:12px">
+            <!-- ALL COLOURS (2026-09-24): ticked, the page's dock has the wheel and every colour; untick it and pick, and the dock offers only the picks -->
+            <button role="checkbox" aria-checked="{{ allInks }}" aria-label="all colours" title="{{ allTitle }}" sc-camel-on-click="{{ toggleAll }}" style="width:38px; height:38px; padding:0; box-sizing:border-box; border:3px solid #17120b; box-shadow:{{ allShadow }}; cursor:pointer; transform:{{ allT }}; transition:transform .2s cubic-bezier(.3,1.5,.5,1); display:flex; align-items:center; justify-content:center; background:conic-gradient(#e8484a, #ffd23f, #7bc264, #5a8fd6, #e0598c, #e8484a)" style-hover="transform:scale(1.08) rotate(-6deg)">
+              <sc-if value="{{ allInks }}" hint-placeholder-val="{{ true }}"><svg aria-hidden="true" sc-camel-view-box="0 0 24 24" width="22" height="22"><path d="M5,12.5 L10,17 L19,7" fill="none" stroke="#17120b" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5,12.5 L10,17 L19,7" fill="none" stroke="#fdf7e3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
+            </button>
             <sc-for list="{{ inks }}" as="k" hint-placeholder-count="10">
               <button aria-pressed="{{ k.on }}" aria-label="{{ k.name }}" title="{{ k.name }}" sc-camel-on-click="{{ k.pick }}" style="width:38px; height:38px; padding:0; background:{{ k.hex }}; border:3px solid #17120b; box-shadow:{{ k.shadow }}; cursor:pointer; transform:{{ k.t }}; transition:transform .2s cubic-bezier(.3,1.5,.5,1); display:flex; align-items:center; justify-content:center" style-hover="transform:scale(1.08) rotate(-6deg)">
                 <sc-if value="{{ k.on }}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" sc-camel-view-box="0 0 24 24" width="20" height="20"><path d="M5,12.5 L10,17 L19,7" fill="none" stroke="{{ k.tick }}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
@@ -178,7 +182,7 @@
           <div aria-hidden="true" style="position:absolute; bottom:-11px; left:-11px; width:15px; height:15px; background:#e0598c; border:3px solid #17120b; transform:rotate(45deg)"></div>
           <div style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:14px">
             <div style="display:flex; align-items:baseline; gap:14px">
-              <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">How wild is it</h2>
+              <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Who can edit</h2>
             </div>
             <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; white-space:nowrap">{{ levelLine }}</div>
           </div>
@@ -201,6 +205,65 @@
                 <button sc-camel-on-click="{{ p.pick }}" aria-pressed="{{ p.on }}" style="font-family:'VT323',monospace; font-size:17px; letter-spacing:1px; padding:3px 12px; background:{{ p.bg }}; color:{{ p.fg }}; border:3px solid #17120b; cursor:pointer; box-shadow:{{ p.shadow }}" style-hover="transform:translate(1px,1px)">{{ p.name }}</button>
               </sc-for>
               <span style="font-size:13px; letter-spacing:1px; color:#4a4054; opacity:0.75">AT MIDNIGHT UTC · A CHANGE TAKES EFFECT AT THE NEXT CLOSE</span>
+            </div>
+          </sc-if>
+          <!-- THE MODERATORS (2026-09-24): who keeps a tended or council page — your friends first, a tick each, and then anyone at all by
+               name: the search asks api/friends.js ?find= and a hit joins the keepers. Saved with the rest (invite / uninvite). -->
+          <sc-if value="{{ showMods }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:15px; letter-spacing:2px; color:#4a4054; margin:22px 0 10px">
+              <span>MODERATORS · THEY DRAW LIVE AND DECIDE WHAT STAYS</span>
+              <span style="opacity:0.8">{{ invitedCount }} KEEPING IT</span>
+            </div>
+            <sc-if value="{{ noFriends }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin-bottom:10px">NO FRIENDS YET — FIND ANYONE BY NAME BELOW, OR ADD A FRIEND BY THEIR TAG IN YOUR YARD.</div>
+            </sc-if>
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:10px">
+            <sc-for list="{{ friends }}" as="f" hint-placeholder-count="3">
+              <button aria-pressed="{{ f.on }}" sc-camel-on-click="{{ f.toggle }}" style="display:flex; align-items:center; gap:12px; padding:8px 12px 8px 10px; background:{{ f.bg }}; border:3px solid #17120b; box-shadow:3px 3px 0 rgba(60,50,80,0.18); text-align:left; color:#17120b; cursor:pointer; transform:rotate({{ f.rot }}); transition:transform .2s cubic-bezier(.3,1.5,.5,1); font-family:'VT323',monospace" style-hover="transform:rotate(0deg) translate(1px,1px); box-shadow:2px 2px 0 rgba(60,50,80,0.18)">
+                <div style="position:relative; flex:none; width:38px; height:38px">
+                  <svg aria-hidden="true" sc-camel-view-box="0 0 60 90" width="30" height="45" style="position:absolute; left:4px; top:-6px; overflow:visible">
+                    <path d="M20,50 L40,50 L48,86 L12,86 Z" fill="{{ f.col }}" stroke="#17120b" stroke-width="3" stroke-linejoin="round"></path>
+                    <circle cx="30" cy="40" r="12" fill="#f0cfae" stroke="#17120b" stroke-width="3"></circle>
+                    <path d="M18,44 Q30,52 42,44 Q44,62 30,66 Q16,62 18,44 Z" fill="#f7f0df" stroke="#17120b" stroke-width="3"></path>
+                    <path d="M30,4 L46,34 L14,34 Z" fill="#e8484a" stroke="#17120b" stroke-width="3" stroke-linejoin="round"></path>
+                  </svg>
+                </div>
+                <div style="min-width:0; flex:1">
+                  <div style="font-family:'Rye',serif; font-size:17px; line-height:1.1">{{ f.name }}</div>
+                  <div style="font-size:13px; letter-spacing:1.2px; color:#4a4054; opacity:0.8; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ f.hill }}</div>
+                </div>
+                <div aria-hidden="true" style="flex:none; width:18px; height:18px; border:3px solid #17120b; background:{{ f.box }}; display:flex; align-items:center; justify-content:center">
+                  <sc-if value="{{ f.on }}" hint-placeholder-val="{{ false }}"><svg sc-camel-view-box="0 0 24 24" width="16" height="16"><path d="M5,12.5 L10,17 L19,7" fill="none" stroke="#fdf7e3" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
+                </div>
+              </button>
+            </sc-for>
+          </div>
+            <sc-if value="{{ hasOthers }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:12px">
+                <sc-for list="{{ others }}" as="o" hint-placeholder-count="2">
+                  <span style="display:inline-flex; align-items:center; gap:10px; padding:6px 8px 6px 12px; background:#fffcf0; border:3px solid #17120b; box-shadow:3px 3px 0 rgba(60,50,80,0.18); font-family:'VT323',monospace; transform:rotate({{ o.rot }})">
+                    <span style="font-family:'Rye',serif; font-size:16px; line-height:1.1">{{ o.name }}</span>
+                    <span style="font-size:13px; letter-spacing:1.2px; color:#4a4054; opacity:0.8">{{ o.hill }}</span>
+                    <button sc-camel-on-click="{{ o.drop }}" aria-label="{{ o.dropLabel }}" title="{{ o.dropLabel }}" style="width:26px; height:26px; padding:0; border:2.5px solid #17120b; background:#fdf7e3; color:#17120b; cursor:pointer; font-family:'VT323',monospace; font-size:20px; line-height:1">×</button>
+                  </span>
+                </sc-for>
+              </div>
+            </sc-if>
+            <div style="font-size:15px; letter-spacing:2px; color:#4a4054; margin:16px 0 8px">ADD BY USERNAME</div>
+            <div style="max-width:440px">
+              <input value="{{ q }}" sc-camel-on-input="{{ onFind }}" placeholder="start typing a name…" aria-label="find a gnome by name" autocomplete="off" sc-camel-max-length="24" style="box-sizing:border-box; width:100%; border:3px solid #17120b; background:#fffcf0; padding:7px 10px; font-family:'VT323',monospace; font-size:19px; color:#17120b; box-shadow:2px 3px 0 rgba(60,50,80,0.18); outline:none" style-focus="box-shadow:0 0 0 3px #ffd23f">
+              <sc-if value="{{ hasHits }}" hint-placeholder-val="{{ false }}">
+                <div role="listbox" aria-label="gnomes by that name" style="display:flex; flex-direction:column; gap:8px; margin-top:10px">
+                  <sc-for list="{{ hits }}" as="h" hint-placeholder-count="2">
+                    <button role="option" sc-camel-on-click="{{ h.add }}" style="display:flex; align-items:center; gap:12px; padding:7px 12px; background:#fdf7e3; border:3px solid #17120b; box-shadow:3px 3px 0 rgba(60,50,80,0.18); text-align:left; color:#17120b; cursor:pointer; font-family:'VT323',monospace" style-hover="transform:translate(1px,1px); box-shadow:2px 2px 0 rgba(60,50,80,0.18)">
+                      <span style="font-family:'Rye',serif; font-size:16px; line-height:1.1">{{ h.name }}</span>
+                      <span style="font-size:13px; letter-spacing:1.2px; color:#4a4054; opacity:0.8">{{ h.hill }}</span>
+                      <span style="margin-left:auto; font-size:15px; letter-spacing:1px">+ add</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <div style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.75; margin-top:8px; min-height:18px">{{ findNote }}</div>
             </div>
           </sc-if>
         </section>
@@ -236,36 +299,7 @@
             <input value="{{ inviteLink }}" sc-camel-read-only="{{ true }}" aria-label="invite link" sc-camel-on-focus="{{ selectAll }}" style="flex:1; min-width:0; box-sizing:border-box; background:#fffcf0; border:3px solid #17120b; padding:8px 12px; font-family:'VT323',monospace; font-size:18px; color:#17120b; outline:none; box-shadow:2px 3px 0 rgba(60,50,80,0.18); white-space:nowrap; overflow:hidden; text-overflow:ellipsis" style-focus="box-shadow:0 0 0 3px #ffd23f">
             <button sc-camel-on-click="{{ copyLink }}" style="border:3px solid #17120b; background:{{ copyBg }}; color:{{ copyFg }}; font-family:'VT323',monospace; font-size:17px; letter-spacing:1px; padding:6px 16px; cursor:pointer; box-shadow:3px 4px 0 rgba(60,50,80,0.25); white-space:nowrap; min-width:88px" style-hover="transform:translate(1px,1px); box-shadow:2px 3px 0 rgba(60,50,80,0.25)">{{ copyWord }}</button>
           </div>
-          <div style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.75; margin-top:8px">ANYONE WITH IT CAN COME IN. THE FRIENDS TICKED BELOW ARE ITS KEEPERS: THEY DRAW LIVE AND DECIDE WHAT WAITS.</div>
-
-          <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:15px; letter-spacing:2px; color:#4a4054; margin:22px 0 10px">
-            <span>KEEPERS · YOUR FRIENDS</span>
-            <span style="opacity:0.8">{{ invitedCount }} KEEPING IT</span>
-          </div>
-          <sc-if value="{{ noFriends }}" hint-placeholder-val="{{ false }}">
-            <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8">NO FRIENDS YET — ADD ONE BY THEIR TAG IN YOUR YARD, AND THEY CAN KEEP THIS HILL WITH YOU.</div>
-          </sc-if>
-          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:10px">
-            <sc-for list="{{ friends }}" as="f" hint-placeholder-count="3">
-              <button aria-pressed="{{ f.on }}" sc-camel-on-click="{{ f.toggle }}" style="display:flex; align-items:center; gap:12px; padding:8px 12px 8px 10px; background:{{ f.bg }}; border:3px solid #17120b; box-shadow:3px 3px 0 rgba(60,50,80,0.18); text-align:left; color:#17120b; cursor:pointer; transform:rotate({{ f.rot }}); transition:transform .2s cubic-bezier(.3,1.5,.5,1); font-family:'VT323',monospace" style-hover="transform:rotate(0deg) translate(1px,1px); box-shadow:2px 2px 0 rgba(60,50,80,0.18)">
-                <div style="position:relative; flex:none; width:38px; height:38px">
-                  <svg aria-hidden="true" sc-camel-view-box="0 0 60 90" width="30" height="45" style="position:absolute; left:4px; top:-6px; overflow:visible">
-                    <path d="M20,50 L40,50 L48,86 L12,86 Z" fill="{{ f.col }}" stroke="#17120b" stroke-width="3" stroke-linejoin="round"></path>
-                    <circle cx="30" cy="40" r="12" fill="#f0cfae" stroke="#17120b" stroke-width="3"></circle>
-                    <path d="M18,44 Q30,52 42,44 Q44,62 30,66 Q16,62 18,44 Z" fill="#f7f0df" stroke="#17120b" stroke-width="3"></path>
-                    <path d="M30,4 L46,34 L14,34 Z" fill="#e8484a" stroke="#17120b" stroke-width="3" stroke-linejoin="round"></path>
-                  </svg>
-                </div>
-                <div style="min-width:0; flex:1">
-                  <div style="font-family:'Rye',serif; font-size:17px; line-height:1.1">{{ f.name }}</div>
-                  <div style="font-size:13px; letter-spacing:1.2px; color:#4a4054; opacity:0.8; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ f.hill }}</div>
-                </div>
-                <div aria-hidden="true" style="flex:none; width:18px; height:18px; border:3px solid #17120b; background:{{ f.box }}; display:flex; align-items:center; justify-content:center">
-                  <sc-if value="{{ f.on }}" hint-placeholder-val="{{ false }}"><svg sc-camel-view-box="0 0 24 24" width="16" height="16"><path d="M5,12.5 L10,17 L19,7" fill="none" stroke="#fdf7e3" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
-                </div>
-              </button>
-            </sc-for>
-          </div>
+          <div style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.75; margin-top:8px">ANYONE WITH IT CAN COME IN. WHO KEEPS IT — THE MODERATORS — IS SET UNDER WHO CAN EDIT, ABOVE.</div>
         </section>
 
         <!-- SAVE BAR -->
@@ -352,7 +386,7 @@ const INKS = [
   ['#e8484a', 'red'], ['#ffd23f', 'yellow'], ['#7bc264', 'green'], ['#5a8fd6', 'blue'], ['#e0598c', 'pink'],
   ['#c93b82', 'knoll pink'], ['#5871f5', 'knoll blue'], ['#2fae76', 'knoll green'], ['#f59321', 'amber'], ['#17120b', 'ink'],
 ];
-/* HOW WILD IS IT (api/wall.js: THREE LEVELS OF CHAOS), as on the form at /yard/new/ */
+/* WHO CAN EDIT (api/wall.js: THREE LEVELS OF CHAOS), as on the form at /yard/new/ — and, on a tended or council page, its moderators */
 const MODS = [
   { id: 1, name: 'Tended',    stamp: 'KEEPERS DECIDE',  sub: 'ANYONE MAY ADD AND PROPOSE; THE KEEPERS SAY WHAT STAYS', col: '#2f8f5b' },
   { id: 2, name: 'Council',   stamp: 'AYE OR NAY',      sub: 'EVERY CHANGE FROM A NON-KEEPER IS A MOTION ON THE BALLOT; WHAT CARRIES GOES UP', col: '#b8860b' },
@@ -366,12 +400,12 @@ const SLUG = String(new URLSearchParams(location.search).get('space') || '').toL
 const OK_SLUG = /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/.test(SLUG);
 const HOST = location.host.replace(/^www\./, '');
 const KEY = 'knoll-dashboard:space-settings:' + SLUG;          // an unsaved draft, on this device
-const FIELDS = ['name', 'palette', 'inks', 'custom', 'chaos', 'period', 'feats', 'invited', 'pic'];
+const FIELDS = ['name', 'palette', 'inks', 'custom', 'chaos', 'period', 'feats', 'invited', 'others', 'pic'];   // others: the keepers who are not friends, by tag, so a draft can name them
 const pick = s => { const o = {}; FIELDS.forEach(k => { o[k] = s[k]; }); return o; };
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const json = (url, body) => fetch(url, body ? { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : { cache: 'no-store', credentials: 'same-origin' })
   .then(r => r.json()).catch(() => ({ ok: false, error: 'the hill did not answer — try again in a moment' }));
-const BLANK = { name: '', palette: 'yard', inks: ['#e8484a'], custom: [], chaos: 1, period: 3, feats: [true, true, true, false, false, false], invited: [], pic: '' };
+const BLANK = { name: '', palette: 'yard', inks: [], custom: [], chaos: 1, period: 3, feats: [true, true, true, false, false, false], invited: [], others: [], pic: '' };
 
 /* THE SETTINGS OF A SPACE (2026-09-24): what /yard/new/ chose, changed after. Reads the
    space (api/wall.js ?space=), its rules (?rules=: the level, the period, the six
@@ -385,7 +419,7 @@ class Component extends DCLogic {
     super(props);
     let draft = {};
     try { draft = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) {}
-    this.state = Object.assign({}, BLANK, draft, { saved: Object.assign({}, BLANK), loaded: false, mine: false, friends: [], space: null, busy: false, justSaved: false, note: '', picNote: '', copied: false, gone: !OK_SLUG });
+    this.state = Object.assign({}, BLANK, draft, { saved: Object.assign({}, BLANK), loaded: false, mine: false, friends: [], space: null, busy: false, justSaved: false, note: '', picNote: '', copied: false, gone: !OK_SLUG, q: '', hits: [], finding: false });
   }
   keep(patch) {
     this.setState(patch, () => { try { localStorage.setItem(KEY, JSON.stringify(pick(this.state))); } catch (e) {} });
@@ -398,16 +432,30 @@ class Component extends DCLogic {
     document.addEventListener('pointerdown', this._away); document.addEventListener('keydown', this._esc);
     this.load();
   }
-  componentWillUnmount() { clearTimeout(this._t); clearTimeout(this._picT); document.removeEventListener('pointerdown', this._away); document.removeEventListener('keydown', this._esc); }
+  componentWillUnmount() { clearTimeout(this._t); clearTimeout(this._picT); clearTimeout(this._findT); document.removeEventListener('pointerdown', this._away); document.removeEventListener('keydown', this._esc); }
+  /* THE SEARCH (2026-09-24): a name's start, asked of api/friends.js ?find= a beat after the last keystroke; friends and the keepers already here are not offered twice */
+  find(q) {
+    q = q.slice(0, 24);
+    this.setState({ q, finding: !!q.trim(), hits: q.trim() ? this.state.hits : [] });
+    clearTimeout(this._findT);
+    if (!q.trim() || !this.state.mine) return;
+    this._findT = setTimeout(async () => {
+      const out = await json('/api/friends?find=' + encodeURIComponent(q.trim()));
+      if (this.state.q !== q) return;                                                     // typed past this one
+      const s = this.state, taken = new Set(s.invited.concat(s.friends.map(f => f.id)));
+      this.setState({ finding: false, hits: out.ok ? out.users.filter(u => !taken.has(u.id)) : [] });
+    }, 250);
+  }
   async load() {
     if (!OK_SLUG) { this.setState({ loaded: true, gone: true, note: 'WHICH SPACE? OPEN THIS FROM YOUR DASHBOARD OR FROM THE SPACE ITSELF.' }); return; }
     const [sp, rules, fr] = await Promise.all([json('/api/wall?space=' + SLUG), json('/api/wall?rules=1&page=' + SLUG), json('/api/friends')]);
     if (!sp.ok) { this.setState({ loaded: true, gone: true, note: sp.code === 'page' ? 'NOTHING STANDS AT ' + HOST + '/' + SLUG + '.' : 'THE HILL DID NOT ANSWER — TRY AGAIN IN A MOMENT.' }); return; }
     const s = sp.space, mine = !!(rules.ok && rules.owner);
     const keepers = rules.ok ? rules.keepers.map(k => k.id).filter(id => id !== s.by) : [];
-    const saved = { name: s.title, palette: s.palette, inks: s.inks.length ? s.inks : ['#e8484a'], custom: s.inks.filter(h => !INKS.some(([x]) => x === h)),
+    const others = rules.ok ? rules.keepers.filter(k => k.id !== s.by && k.tag).map(k => ({ id: k.id, tag: k.tag })) : [];   // by tag, for the ones who are not friends
+    const saved = { name: s.title, palette: s.palette, inks: s.inks, custom: s.inks.filter(h => !INKS.some(([x]) => x === h)),
                     chaos: rules.ok ? rules.chaos : (typeof s.chaos === 'number' ? s.chaos : 1), period: rules.ok ? rules.period : (s.period || 3),
-                    feats: rules.ok ? rules.feats : (s.feats || BLANK.feats), invited: keepers, pic: /^data:image\/jpeg;base64,/.test(s.pic) ? s.pic : '' };
+                    feats: rules.ok ? rules.feats : (s.feats || BLANK.feats), invited: keepers, others, pic: /^data:image\/jpeg;base64,/.test(s.pic) ? s.pic : '' };
     let draft = {};
     try { draft = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) {}
     document.title = s.title + ' settings · Knoll';
@@ -490,6 +538,7 @@ class Component extends DCLogic {
     const path = HOST + '/' + (SLUG || '…');
     const friends = s.friends.map((f, i) => ({ id: f.id, name: f.tag.replace(/#\d+$/, ''), hill: f.tag.toUpperCase(), col: COATS[parseInt(f.id.slice(0, 2), 16) % COATS.length], rot: ['-0.8deg', '0.6deg', '-0.4deg'][i % 3] }));
     const coming = friends.filter(f => s.invited.includes(f.id));
+    const others = (s.others || []).filter(o => s.invited.includes(o.id) && !friends.some(f => f.id === o.id));   // the keepers who are not friends
     const featCount = s.feats.filter(Boolean).length;
     const mod = MODS.find(m => m.id === s.chaos) || MODS[0], periodName = (PERIODS.find(p => p[0] === s.period) || PERIODS[1])[1].toLowerCase();
     const kindsOn = FEATS.filter((n, i) => s.feats[i]).map(n => n.toLowerCase());
@@ -536,11 +585,15 @@ class Component extends DCLogic {
         return { hex, name, on, tick: light(hex) ? '#17120b' : '#fdf7e3',
           shadow: on ? '3px 4px 0 rgba(60,50,80,0.3)' : 'none', t: on ? 'rotate(-4deg) scale(1.08)' : 'none',
           pick: () => {
-            if (on) { if (s.inks.length > 1) this.keep({ inks: s.inks.filter(c => c !== hex) }); }
+            if (on) this.keep({ inks: s.inks.filter(c => c !== hex) });          // the last one off is every colour again
             else if (s.inks.length < 10) this.keep({ inks: s.inks.concat(hex) });
           } };
       }),
-      inkCount: s.inks.length,
+      // ALL COLOURS (2026-09-24): no inks picked is every colour — the wheel on the page's dock; a pick narrows the dock to the picks (toem2/wall.js: THE INKS OF A SPACE)
+      allInks: !s.inks.length, inkCount: s.inks.length ? s.inks.length + ' / 10' : 'ALL COLOURS',
+      allTitle: s.inks.length ? 'every colour — the wheel on the dock' : 'all colours: the wheel on the dock. Untick to pick up to 10',
+      allShadow: s.inks.length ? 'none' : '3px 4px 0 rgba(60,50,80,0.3)', allT: s.inks.length ? 'none' : 'rotate(-4deg) scale(1.08)',
+      toggleAll: () => this.keep({ inks: s.inks.length ? [] : [INKS[0][0]] }),
       mods: MODS.map((m, i) => ({ name: m.name, sub: m.sub, stamp: m.stamp, col: m.col, on: m.id === s.chaos, rot: ['-0.5deg', '0.4deg', '-0.3deg', '0.6deg'][i],
         bg: m.id === s.chaos ? '#fffcf0' : 'transparent', dot: m.id === s.chaos ? '#e8484a' : 'transparent',
         shadow: m.id === s.chaos ? '4px 5px 0 rgba(60,50,80,0.25)' : 'none', pick: () => this.keep({ chaos: m.id }) })),
@@ -550,7 +603,7 @@ class Component extends DCLogic {
         shadow: s.period === d ? '3px 4px 0 rgba(60,50,80,0.25)' : 'none', pick: () => this.keep({ period: d }) })),
       feats: FEATS.map((n, i) => ({ name: n, on: s.feats[i], toggle: () => { const f = s.feats.slice(); f[i] = !f[i]; this.keep({ feats: f }); } })),
       featCount, featTotal: FEATS.length,
-      featNote: s.chaos === 3 ? 'WILD — EVERYTHING IS EVERYONE\'S; THESE SWITCHES WAIT FOR A TAMER DAY.' : s.chaos === 0 ? 'READ-ONLY — NOBODY ELSE DRAWS, WHATEVER IS TICKED.' : 'OFF MEANS THE KEEPERS ONLY. THE KEEPERS ARE YOU AND THE FRIENDS TICKED BELOW.',
+      featNote: s.chaos === 3 ? 'WILD — EVERYTHING IS EVERYONE\'S; THESE SWITCHES WAIT FOR A TAMER DAY.' : s.chaos === 0 ? 'READ-ONLY — NOBODY ELSE DRAWS, WHATEVER IS TICKED.' : 'OFF MEANS THE KEEPERS ONLY. THE KEEPERS ARE YOU AND THE MODERATORS UNDER WHO CAN EDIT.',
       inviteLink, copyWord: s.copied ? 'copied ✓' : 'copy', copyBg: s.copied ? '#7bc264' : '#17120b', copyFg: s.copied ? '#17120b' : '#fdf7e3',
       selectAll: (e) => e.target.select(),
       copyLink: () => {
@@ -559,7 +612,15 @@ class Component extends DCLogic {
       },
       friends: friends.map(f => { const on = s.invited.includes(f.id); return Object.assign({}, f, { on, bg: on ? '#fffcf0' : '#fdf7e3', box: on ? '#17120b' : 'transparent',
         toggle: () => { if (s.mine) this.keep({ invited: on ? s.invited.filter(x => x !== f.id) : s.invited.concat(f.id) }); } }); }),
-      noFriends: !friends.length, invitedCount: coming.length,
+      noFriends: !friends.length, invitedCount: s.invited.length,
+      // WHO CAN EDIT: the moderators, on a tended or council page
+      showMods: s.chaos === 1 || s.chaos === 2, hasOthers: others.length > 0,
+      others: others.map((o, i) => ({ id: o.id, name: o.tag.replace(/#\d+$/, ''), hill: o.tag.toUpperCase(), rot: ['-0.6deg', '0.5deg'][i % 2], dropLabel: 'take ' + o.tag + ' off the keepers',
+        drop: () => { if (s.mine) this.keep({ invited: s.invited.filter(x => x !== o.id) }); } })),
+      q: s.q, onFind: (e) => this.find(e.target.value), hasHits: s.hits.length > 0,
+      hits: s.hits.map(h => ({ id: h.id, name: h.tag.replace(/#\d+$/, ''), hill: h.tag.toUpperCase(),
+        add: () => { if (!s.mine) return; this.keep({ invited: s.invited.concat(h.id), others: (s.others || []).filter(o => o.id !== h.id).concat({ id: h.id, tag: h.tag }) }); this.setState({ q: '', hits: [] }); } })),
+      findNote: !s.mine ? 'THE MAKER PICKS THE MODERATORS.' : s.q.trim() && !s.finding && !s.hits.length ? 'NOBODY GOES BY THAT NAME.' : s.finding ? 'LOOKING…' : 'ANYONE WITH AN ACCOUNT — A FRIEND OR NOT.',
       clean: !changed, discardCursor: changed ? 'pointer' : 'default', discardOp: changed ? 1 : 0.4,
       discard: () => { this._slot = null; try { localStorage.removeItem(KEY); } catch (e) {} this.setState(Object.assign({}, s.saved)); },
       cantSave, saveWord: s.busy ? 'saving…' : s.justSaved && !changed ? 'saved ✓' : 'Save changes',
@@ -575,10 +636,10 @@ class Component extends DCLogic {
       pvTools: [{ name: 'move', op: 1, bg: pal.accent }].concat(['ink', 'stkr', 'note', 'trace', 'embed', 'others'].map((n, i) => ({ name: n, op: s.chaos === 3 || s.feats[i] ? 0.85 : 0.22, bg: 'transparent' }))),
       summary: [
         { a: 'Named', b: s.name.trim() || '—', color: '#5a8fd6' },
-        { a: 'On', b: pal.name + ' paper, ' + s.inks.length + (s.inks.length === 1 ? ' ink' : ' inks'), color: '#ffd23f' },
+        { a: 'On', b: pal.name + ' paper, ' + (s.inks.length ? s.inks.length + (s.inks.length === 1 ? ' ink' : ' inks') : 'all colours'), color: '#ffd23f' },
         { a: 'The hill is', b: s.chaos === 2 ? 'a council, ' + periodName + ' ballot' : mod.name.toLowerCase(), color: '#e0598c' },
         { a: 'Everyone may', b: s.chaos === 3 ? 'do everything' : s.chaos === 0 ? 'only look' : kindsOn.length ? kindsOn.join(', ') : 'only look; the keepers add', color: '#7bc264' },
-        { a: 'Keepers:', b: 'you' + (coming.length ? ', ' + coming.map(f => f.name).join(', ') : ''), color: '#e8484a' },
+        { a: 'Keepers:', b: 'you' + (coming.length || others.length ? ', ' + coming.map(f => f.name).concat(others.map(o => o.tag.replace(/#\d+$/, ''))).join(', ') : ''), color: '#e8484a' },
       ],
     };
   }

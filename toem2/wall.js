@@ -2885,6 +2885,42 @@ window.Wall = (function () {
     { k: 'gif', n: 'GIF', i: '<path fill-rule="evenodd" d="M2 3.5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm1 1.7v7.6h12V5.2z"/><path d="M7.3 7.2v4.6l4-2.3z"/>', needs: 'Gif' }
   ].filter(t => !t.needs || window[t.needs]);
 
+  /* ONE INK. The swatch shows what the next mark is made in — a house
+     token painted by the skin, or a hex off the wheel — and the COLOUR
+     button beside it opens the wheel; pressing the swatch does too,
+     since a swatch you can press and nothing happens is a swatch you
+     press twice. The wheel is built here, inside the group, so it hangs
+     off the dock wherever the dock is. */
+  function palMarkup() {
+    return '<button type="button" class="dock-sw" id="dock-ink" aria-label="the ink" title="the ink the next mark is made in — press to change it" style="--sw:' + ink(nib()) + '"></button>' +
+      '<button type="button" class="dock-btn dock-mini" id="dock-wheel" title="Colour — pick one off the wheel" aria-label="Colour" aria-expanded="false">' +
+      '<i class="dock-wheel-ico" aria-hidden="true"></i><span>Colour</span></button>' +
+      wheelMarkup();
+  }
+  /* THE INKS OF A SPACE (2026-09-24). A page made with inks of its own
+     (yard/new and settings: THE INKS) offers exactly those on the dock — a
+     swatch each, no wheel, no COLOUR button — and the next mark is made in
+     whichever is pressed; a mark's colour is the hex itself, as off the wheel.
+     No inks (TOEM 2 itself, or a space that ticked ALL COLOURS) is the one
+     swatch and the wheel above. seed.js hands the list over with the page's
+     rules, which land after the dock is built, so the group is rebuilt here. */
+  let inks = [];
+  function setInks(list) {
+    inks = (Array.isArray(list) ? list : []).filter(c => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c)).map(c => c.toLowerCase()).slice(0, 10);
+    const pal = dock.querySelector('.dock-pal'); if (!pal) return;
+    closeWheel();
+    if (!inks.length) { pal.innerHTML = palMarkup(); paintInk(); return; }
+    const cur = curInk();
+    if (typeof cur !== 'string' || !inks.includes(cur.toLowerCase())) setInk(inks[0]);   // the next mark is in one of them
+    pal.innerHTML = inks.map(c => '<button type="button" class="dock-sw dock-inks" data-ink="' + c + '" title="' + c + ' — press to draw in it" aria-label="ink ' + c + '" style="--sw:' + c + '"></button>').join('');
+    markInks();
+  }
+  function markInks() {
+    if (!inks.length) return;
+    const cur = String(curInk()).toLowerCase();
+    dock.querySelectorAll('[data-ink]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.ink === cur)));
+  }
+
   function buildDock() {
     dock.innerHTML =
       '<div class="dock-grp">' + TOOLS.map(t =>
@@ -2892,17 +2928,7 @@ window.Wall = (function () {
         (t.ico || '<svg viewBox="0 0 18 18" width="16" height="16" aria-hidden="true">' + t.i + '</svg>') +
         '<span>' + t.n + '</span></button>').join('') + '</div>' +
       '<span class="dock-rule" aria-hidden="true"></span>' +
-      '<div class="dock-grp dock-pal">' +
-        /* ONE INK. The swatch shows what the next mark is made in — a house
-           token painted by the skin, or a hex off the wheel — and the COLOUR
-           button beside it opens the wheel; pressing the swatch does too,
-           since a swatch you can press and nothing happens is a swatch you
-           press twice. The wheel is built here, inside the group, so it hangs
-           off the dock wherever the dock is. */
-        '<button type="button" class="dock-sw" id="dock-ink" aria-label="the ink" title="the ink the next mark is made in — press to change it" style="--sw:' + ink(nib()) + '"></button>' +
-        '<button type="button" class="dock-btn dock-mini" id="dock-wheel" title="Colour — pick one off the wheel" aria-label="Colour" aria-expanded="false">' +
-        '<i class="dock-wheel-ico" aria-hidden="true"></i><span>Colour</span></button>' +
-        wheelMarkup() + '</div>' +
+      '<div class="dock-grp dock-pal">' + palMarkup() + '</div>' +
       '<span class="dock-rule" aria-hidden="true"></span>' +
       '<div class="dock-grp">' +
         '<button type="button" class="dock-btn dock-mini" id="dock-undo" title="Undo — ctrl Z" aria-label="Undo, ctrl Z">' +
@@ -3152,6 +3178,8 @@ window.Wall = (function () {
 
   dock.addEventListener('click', e => {
     const t = e.target.closest('[data-tool]'); if (t) { setTool(t.dataset.tool); return; }
+    const sw = e.target.closest('[data-ink]');                        // a space's own inks: press one and draw in it
+    if (sw) { setInk(sw.dataset.ink); return; }
     // the swatch and the COLOUR button are one control: either opens the wheel
     if (e.target.closest('#dock-ink,#dock-wheel')) { toggleWheel(); return; }
     const chip = e.target.closest('[data-house]');
@@ -3222,6 +3250,7 @@ window.Wall = (function () {
   function paintInk() {
     const sw = $('dock-ink');
     if (sw) sw.style.setProperty('--sw', ink(curInk()));
+    markInks();                            // …or, on a space with inks of its own, the pressed one
   }
 
   function drawWheel() {
@@ -3328,7 +3357,7 @@ window.Wall = (function () {
      writing should still pin what you wrote, exactly as it always has. */
   const keepCaret = e => { if (noteBox && e.target.closest('button')) e.preventDefault(); };
   opts.addEventListener('pointerdown', keepCaret);
-  dock.addEventListener('pointerdown', e => { if (e.target.closest('#dock-ink,#dock-wheel,.wheel-chip')) keepCaret(e); });
+  dock.addEventListener('pointerdown', e => { if (e.target.closest('#dock-ink,#dock-wheel,.wheel-chip,[data-ink]')) keepCaret(e); });
 
   opts.addEventListener('click', e => {
     const gif = e.target.closest('[data-gif]');
@@ -3497,5 +3526,6 @@ window.Wall = (function () {
            mark,                         // …and tells undo what it just put up
            undo,                         // the button, and lab.js's ctrl+z
            redo, forgetRedo,             // …its opposite (2026-09-24), and what a new entry tells the redo pile
+           setInks, get inks() { return inks.slice(); },   // seed.js: a space's own inks, the only colours the dock offers there
            PAL, PW, PEN, PO, SK, FONTS, STICKIES, STAMPS, stickyArt };
 })();

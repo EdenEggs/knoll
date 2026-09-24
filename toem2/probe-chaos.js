@@ -123,11 +123,20 @@ async function waitPort() {
     check('a stranger on the settings page looks, and cannot save', await page.locator('button:has-text("Save changes")').isDisabled());
     await page.close();
 
-    // ── 3 · the space's face ──────────────────────────────────────────────
+    // ── 3 · the space's address IS its wall (2026-09-24) ──────────────────
     page = await maker.ctx.newPage();
-    await page.goto(BASE + '/probe-hollow');
-    await page.waitForSelector('#stamp:not([hidden])', { timeout: 20000 });
-    check('the face wears the level and the way in, and the maker gets the gear', (await page.locator('#stamp').textContent()) === 'TENDED · KEEPERS DECIDE' && await page.locator('a.sp-btn[href="/toem2/?page=probe-hollow"]').count() === 1 && await page.locator('a.sp-btn[href="/settings/?space=probe-hollow"]').count() === 1);
+    await page.goto(BASE + '/probe-hollow?live=1');
+    await page.waitForURL(/\/toem2\/\?page=probe-hollow/, { timeout: 20000 });
+    await page.waitForFunction(() => window.Seed && !!Seed.rules && document.querySelector('#toem-chaos') && !document.querySelector('#toem-chaos').hidden, null, { timeout: 30000 });
+    check('the address opens the bench itself: the toolbar, the stamp, the space\'s own name', await page.locator('#tool-dock [data-tool]').count() > 0 && (await page.locator('#toem-chaos').textContent()) === 'TENDED · the keepers decide' && (await page.locator('.lab-name').textContent()) === 'Probe Hollow Two', await page.locator('.lab-name').textContent());
+    await page.click('#toem-chaos');
+    check('…and the maker\'s doors hang off the stamp: the rules, the settings, the dashboard', await page.locator('#toem-chaos-pop button:has-text("settings")').count() === 1 && await page.locator('#toem-chaos-pop button:has-text("dashboard")').count() === 1);
+    check('a space with no inks of its own keeps the wheel', await page.locator('#dock-wheel').count() === 1 && await page.locator('[data-ink]').count() === 0);
+    await page.close();
+    page = await maker.ctx.newPage();
+    await page.goto(BASE + '/nowhere-at-all');
+    await page.waitForFunction(() => /nothing here/.test(document.body.textContent), null, { timeout: 20000 });
+    check('an address with nothing at it still says so', await page.locator('#sign').textContent() === 'nothing here');
     await page.close();
 
     // ── 4 · the wall: the stamp, a keeper's live edit, a stranger's proposal ──
@@ -199,8 +208,8 @@ async function waitPort() {
     // ── 6 · the dashboard and the yard ────────────────────────────────────
     page = await maker.ctx.newPage();
     await page.goto(BASE + '/dashboard/?space=probe-hollow');
-    await page.waitForFunction(() => /Probe Hollow Two Dashboard/.test(document.body.textContent), null, { timeout: 30000 });
-    check('the dashboard is "<name> Dashboard", with the gear to the settings and the wall', await page.locator('a[href="/settings/?space=probe-hollow"]').count() >= 1 && await page.locator('a[href="/toem2/?page=probe-hollow"]').count() >= 1);
+    await page.waitForFunction(() => /Maker Profile Dashboard/.test(document.body.textContent), null, { timeout: 30000 });
+    check('the dashboard is "<name> Profile Dashboard", with the gear to the settings and the space\'s chip — and no second door to the wall', /Maker Profile Dashboard/.test(await page.locator('h1').textContent()) && await page.locator('a[href="/settings/?space=probe-hollow"]').count() >= 1 && await page.locator('a[href="/probe-hollow"]').count() >= 1 && await page.locator('a[href="/toem2/?page=probe-hollow"]').count() === 0, await page.locator('h1').textContent());
     check('…its numbers are the wall\'s: pieces, edits, the ballot, how wild', /PIECES ON THE WALL/.test(await page.textContent('body')) && /ON THE BALLOT/.test(await page.textContent('body')) && /HOW WILD/.test(await page.textContent('body')));
     check('…and the strip of your spaces names this one with its level', /YOUR SPACES/.test(await page.textContent('body')) && await page.locator('text=COUNCIL').count() >= 1);
     await page.close();

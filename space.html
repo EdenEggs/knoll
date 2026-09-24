@@ -5,15 +5,13 @@
 <title>A space · Knoll</title>
 <!-- A SPACE'S OWN ADDRESS (2026-09-23): knoll.space/<slug>. vercel.json's last two
      rewrites and serve.js send every one-word address with no file behind it here,
-     so every url in this page is root-absolute, as in 404.html. It draws what
-     api/wall.js keeps for the space (?space=): its name on a sign, its picture, its
-     paper and its inks — the form's "How it looks" (yard/new/), full size — and,
-     since 2026-09-24, its RULES: the level it runs at (THREE LEVELS OF CHAOS) as a
-     stamp under the sign, the ballot's clock on a council, and the way in: "go to
-     the wall" opens the bench on this page (toem2/index.html ?page=). Its maker
-     gets the gear (settings/) and the dashboard; anybody else signed in can ask
-     the maker to be friends. Nothing here is trusted by anybody but the reader:
-     every colour is the door's table's, every word is cut to its length. -->
+     so every url in this page is root-absolute, as in 404.html. It asks api/wall.js
+     whether the space stands (?space=) and, if it does, opens THE BENCH ON IT
+     (toem2/index.html ?page=) — since 2026-09-24 the space IS its wall, toolbar and
+     all, and the cover this page used to draw (the sign, the stamp, "go to the
+     wall") is gone. What is left is the other answer: nothing stands at that
+     address, and, signed in, the way to make something. Nothing here is trusted
+     by anybody but the reader: every word is cut to its length. -->
 <link rel="icon" href="/logo/logo-icon.svg">
 <link rel="stylesheet" href="/lab2/fonts/fonts.css">
 <script src="/account.js" defer></script>
@@ -81,16 +79,7 @@
   const $ = id => document.getElementById(id);
   const slug = decodeURIComponent(location.pathname.split('/')[1] || '').toLowerCase();
   const me = (/(?:^|;\s*)knoll_in=([0-9a-f]{16})(?:;|$)/.exec(document.cookie) || [])[1] || null;
-  const say = t => { $('note').textContent = t; };
-  const post = body => fetch('/api/friends', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
-    .then(r => r.json()).catch(() => ({ ok: false, error: 'the friends list did not answer — try again' }));
   const read = q => fetch('/api/wall' + q, { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json()).catch(() => null);
-  const LEVEL = { 0: 'READ-ONLY · YOURS ALONE', 1: 'TENDED · KEEPERS DECIDE', 2: 'COUNCIL · AYE OR NAY', 3: 'WILD · NOTHING IS SAFE' };
-  const WORD = { 0: 'THE MAKER ALONE DRAWS HERE. EVERYBODY ELSE LOOKS.', 1: 'ANYONE MAY DRAW; THE KEEPERS DECIDE WHAT STAYS.',
-                 2: 'CHANGES GO TO THE BALLOT; A STANDING DAY ON TOEM 2 LETS YOU VOTE.', 3: 'NOTHING IS SAFE HERE. THE HISTORY KEEPS EVERYTHING.' };
-  const closesIn = t => { const ms = t - Date.now(); if (!(ms > 0)) return 'NOW'; const h = ms / 36e5; return h >= 48 ? 'IN ' + Math.floor(h / 24) + 'D ' + Math.floor(h % 24) + 'H' : h >= 1 ? 'IN ' + Math.floor(h) + 'H ' + Math.floor((ms % 36e5) / 6e4) + 'M' : 'IN ' + Math.max(1, Math.floor(ms / 6e4)) + ' MIN'; };
-  const btn = (text, href, light, svg) => { const a = document.createElement('a'); a.className = 'sp-btn' + (light ? ' is-light' : ''); a.href = href; if (svg) a.insertAdjacentHTML('afterbegin', svg); a.append(text); return a; };
-  const GEAR = '<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="3.6" stroke-dasharray="3.53 3.53"></circle><circle cx="12" cy="12" r="6.6" fill="none" stroke="currentColor" stroke-width="2.6"></circle><circle cx="12" cy="12" r="2.3" fill="currentColor"></circle></svg>';
   $('crumb').textContent = slug;
 
   const out = await read('?space=' + encodeURIComponent(slug));
@@ -104,44 +93,11 @@
     return;
   }
 
-  // the look: every colour here comes from api/wall.js's own table or its hex check, never as typed
-  ['paper', 'ink', 'card', 'line', 'mute', 'accent'].forEach(k => document.documentElement.style.setProperty('--' + k, sp[k]));
+  // THE SPACE IS ITS WALL (2026-09-24): a space that stands opens straight on the bench,
+  // toolbar and all — no cover, no "go to the wall" — the address bar naming the page
   document.title = sp.title + ' · Knoll';
-  $('crumb').textContent = $('sign').textContent = sp.title;
-  sp.inks.forEach(hex => { const s = document.createElement('span'); s.style.background = hex; $('inks').appendChild(s); });
-  if (/^data:image\/jpeg;base64,/.test(sp.pic)) { $('pic').src = sp.pic; $('pic').hidden = false; }
-  $('by').textContent = 'A SPACE BY ' + (sp.tag || 'A GNOME').toUpperCase() + ' · ' + new Date(sp.made).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase();
-  // the rules: the level as a stamp, the ballot's clock on a council
-  const chaos = [0, 1, 2, 3].includes(sp.chaos) ? sp.chaos : 1;
-  $('stamp').textContent = LEVEL[chaos]; $('stamp').hidden = false;
-  $('line').textContent = WORD[chaos];
-  if (chaos === 2) read('?ballot=1&page=' + encodeURIComponent(sp.slug)).then(b => {
-    if (!b || !b.ok) return;
-    const n = b.queue.length;
-    $('line').textContent = (n ? n + ' ON THE BALLOT' : 'THE BALLOT IS EMPTY') + ' · CLOSES ' + closesIn(b.closesAt || sp.closesAt) + ' · ' + WORD[2];
-  });
-  // the way in, and the maker's doors
-  $('row').append(btn('go to the wall', '/toem2/?page=' + encodeURIComponent(sp.slug)));
-  if (me && sp.by === me) {
-    $('row').append(btn('settings', '/settings/?space=' + encodeURIComponent(sp.slug), true, GEAR), btn('dashboard', '/dashboard/?space=' + encodeURIComponent(sp.slug), true));
-  }
-  if (!me) { say('LOG IN TO DRAW FOR EVERYBODY, OR TO ASK ' + (sp.tag || 'THE MAKER').toUpperCase() + ' TO BE FRIENDS.'); return; }
-  if (sp.by === me) return;
-
-  const fr = await fetch('/api/friends', { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json()).catch(() => null);
-  if (!fr || !fr.ok) return;
-  const rules = await read('?rules=1&page=' + encodeURIComponent(sp.slug));
-  if (rules && rules.ok && rules.keeper) say('YOU KEEP THIS HILL WITH ' + (sp.tag || 'ITS MAKER').toUpperCase() + '.');
-  // a visitor: the maker, as a friend
-  const ask = $('ask'), known = fr.friends.some(f => f.id === sp.by);
-  ask.textContent = known ? 'friends ✓' : 'ask ' + sp.tag + ' to be friends';
-  ask.disabled = known; ask.hidden = !sp.tag;
-  ask.onclick = async () => {
-    ask.disabled = true;
-    const r = await post({ op: 'ask', tag: sp.tag });
-    if (r.ok) { ask.textContent = r.friends ? 'friends ✓' : 'asked ✓'; say(r.friends ? '' : 'IT IS IN THEIR BELL.'); }
-    else { ask.disabled = false; say(String(r.error || 'that did not work').toUpperCase() + '.'); }
-  };
+  $('sign').textContent = sp.title;
+  location.replace('/toem2/?page=' + encodeURIComponent(sp.slug) + (location.search.length > 1 ? '&' + location.search.slice(1) : ''));   // ?join=, ?live=1 ride along
 })();
 </script>
 </body>

@@ -129,7 +129,10 @@
 
     <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:30px">
       <div style="display:flex; align-items:center; gap:20px">
-        <div aria-hidden="true" style="position:relative; width:56px; height:64px; background:#fdf7e3; border:4px solid #17120b; box-shadow:6px 7px 0 rgba(60,50,80,0.2); transform:rotate(-4deg); display:flex; align-items:center; justify-content:center; font-family:'Rye',serif; font-size:34px; flex:none">K
+        <!-- the picture from your yard (account.js: the same one the corner wears), or the K until there is one -->
+        <div aria-hidden="true" style="position:relative; width:56px; height:64px; background:#fdf7e3; border:4px solid #17120b; box-shadow:6px 7px 0 rgba(60,50,80,0.2); transform:rotate(-4deg); display:flex; align-items:center; justify-content:center; font-family:'Rye',serif; font-size:34px; flex:none; overflow:visible">
+          <sc-if value="{{ hasPic }}" hint-placeholder-val="{{ false }}"><img sc-camel-src="{{ picSrc }}" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover"></sc-if>
+          <sc-if value="{{ noPic }}" hint-placeholder-val="{{ true }}">K</sc-if>
           <div style="position:absolute; bottom:-9px; right:-9px; width:12px; height:12px; background:#e8484a; border:3px solid #17120b; transform:rotate(45deg)"></div>
         </div>
         <div>
@@ -142,15 +145,15 @@
       <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap">
         <a href="{{ chipHref }}" title="{{ chipTitle }}" style="font-size:17px; letter-spacing:1px; background:#fdf7e3; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:6px 14px; transform:rotate({{ rChip }}); color:#17120b; text-decoration:none" style-hover="transform:rotate({{ rChip }}) translate(1px,1px); box-shadow:4px 5px 0 rgba(60,50,80,0.2)">{{ chipLabel }} · <b>{{ chipPath }}</b></a>
         <sc-if value="{{ isSpace }}" hint-placeholder-val="{{ false }}">
-          <a href="{{ wallHref }}" title="the wall" style="font-size:17px; letter-spacing:1px; background:#fdf7e3; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:6px 14px; transform:rotate(-1deg); color:#17120b; text-decoration:none" style-hover="transform:rotate(-1deg) translate(1px,1px); box-shadow:4px 5px 0 rgba(60,50,80,0.2)">THE WALL</a>
-          <!-- THE GEAR (2026-09-24): the space's settings — its name, its look, how wild it is, its keepers (settings/) -->
+          <!-- THE GEAR (2026-09-24): the space's settings — its name, its look, who can edit, its keepers (settings/). The space's
+               own chip beside it IS the wall now, so there is no second door to it. -->
           <a href="{{ gearHref }}" title="settings" aria-label="settings" style="display:inline-flex; align-items:center; gap:8px; font-size:17px; letter-spacing:1px; background:#17120b; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:6px 14px; transform:rotate(1deg); color:#fdf7e3; text-decoration:none" style-hover="transform:rotate(1deg) translate(1px,1px); box-shadow:4px 5px 0 rgba(60,50,80,0.2)"><svg sc-camel-view-box="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="3.6" stroke-dasharray="3.53 3.53"></circle><circle cx="12" cy="12" r="6.6" fill="none" stroke="currentColor" stroke-width="2.6"></circle><circle cx="12" cy="12" r="2.3" fill="currentColor"></circle></svg><span>SETTINGS</span></a>
         </sc-if>
       </div>
     </div>
 
     <!-- YOUR SPACES (2026-09-24): the pages you made (api/wall.js ?spaces=), each with its level and what waits there,
-         and the doors to it — its page, its wall, its numbers here, its settings -->
+         and the doors to it — its page (which is its wall), its numbers here, its settings -->
     <sc-if value="{{ spacesOn }}" hint-placeholder-val="{{ false }}">
       <section aria-label="your spaces" style="display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-bottom:28px">
         <div style="font-size:15px; letter-spacing:2px; color:#4a4054; opacity:0.8">YOUR SPACES</div>
@@ -160,8 +163,7 @@
             <span style="font-size:13px; letter-spacing:2px; color:{{ sp.col }}; border:2.5px solid {{ sp.col }}; padding:0 7px; transform:rotate(-3deg); background:#fdf7e3">{{ sp.level }}</span>
             <span style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.85">{{ sp.about }}</span>
             <span style="display:inline-flex; gap:8px; margin-left:4px">
-              <a href="{{ sp.face }}" title="its page" style="font-size:15px; letter-spacing:1px; color:#17120b; text-decoration:none; border:2.5px solid #17120b; padding:1px 8px; background:#fdf7e3">/{{ sp.slug }}</a>
-              <a href="{{ sp.wall }}" title="the wall" style="font-size:15px; letter-spacing:1px; color:#17120b; text-decoration:none; border:2.5px solid #17120b; padding:1px 8px; background:#fdf7e3">wall</a>
+              <a href="{{ sp.face }}" title="its page — the wall" style="font-size:15px; letter-spacing:1px; color:#17120b; text-decoration:none; border:2.5px solid #17120b; padding:1px 8px; background:#fdf7e3">/{{ sp.slug }}</a>
               <a href="{{ sp.gear }}" title="settings" aria-label="{{ sp.gearLabel }}" style="display:inline-flex; align-items:center; color:#17120b; border:2.5px solid #17120b; padding:1px 6px; background:#fdf7e3"><svg sc-camel-view-box="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="3.6" stroke-dasharray="3.53 3.53"></circle><circle cx="12" cy="12" r="6.6" fill="none" stroke="currentColor" stroke-width="2.6"></circle><circle cx="12" cy="12" r="2.3" fill="currentColor"></circle></svg></a>
             </span>
           </div>
@@ -488,7 +490,10 @@ class Component extends DCLogic {
   // the spaces you made, for the strip under the title; and your name, for the yard's own title
   async loadSpaces() {
     try { const v = await fetch('/api/wall?spaces=1', { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json()); if (v && v.ok) this.setState({ spaces: v.spaces, spacesFull: !!v.full }); } catch (e) {}
-    if (window.KnollAccount && KnollAccount.me) KnollAccount.me.then(a => { if (a && a.name) { this.setState({ meName: a.name }); if (!this.SPACE) document.title = a.name + ' dashboard · Knoll'; } }).catch(() => {});
+    if (window.KnollAccount && KnollAccount.me) {
+      if (KnollAccount.pic && KnollAccount.pic()) this.setState({ mePic: KnollAccount.pic() });   // this device's copy first, the door's word when it comes
+      KnollAccount.me.then(a => { if (a && a.name) { this.setState({ meName: a.name, mePic: a.avatar || (KnollAccount.pic ? KnollAccount.pic() : '') || '' }); document.title = a.name + ' Profile Dashboard · Knoll'; } }).catch(() => {});
+    }
   }
   // the older versions, one at a time, for their thumbnails — the newest IS the doc
   async fetchLooks(doc) {
@@ -935,17 +940,19 @@ class Component extends DCLogic {
       statusPage, statusVisits,
       // whose numbers these are (A SPACE'S NUMBERS)
       isSpace: !!SP,
-      dashTitle: (SP ? (spc ? spc.title : SP) : ((S.doc && S.doc.settings && S.doc.settings.displayName) || S.meName || 'Your')) + ' Dashboard',
+      // whose it is (2026-09-24): "<name> Profile Dashboard", the space's numbers or the yard's alike — and the yard's picture in the corner
+      dashTitle: (S.meName || (S.doc && S.doc.settings && S.doc.settings.displayName) || 'Your') + ' Profile Dashboard',
+      hasPic: !!S.mePic, noPic: !S.mePic, picSrc: S.mePic || '',
       dashSub: SP ? '· ' + (LEVEL[chaos] || 'TENDED') + ' · ' + (chaos === 2 && rules ? 'THE BALLOT CLOSES ' + closesIn(rules.closes) : rules ? rules.keepers.length + (rules.keepers.length === 1 ? ' KEEPER' : ' KEEPERS') : 'A SPACE') + ' ·'
                   : '· EVERY VISITOR COUNTED BY HAND · GNOME-CERTIFIED ·',
       chipHref: SP ? '/' + SP : '../yard/', chipTitle: SP ? 'open the space' : 'open your page', chipLabel: SP ? 'THE SPACE' : 'YOUR HILL', chipPath: SP ? '/' + SP : '/yard',
-      wallHref: SP ? '/toem2/?page=' + SP : '', gearHref: SP ? '/settings/?space=' + SP : '',
+      gearHref: SP ? '/settings/?space=' + SP : '',
       spacesOn: S.spaces.length > 0 || !SP, canMake: !S.spacesFull,
       spaces: S.spaces.filter(s => /^[a-z0-9-]{1,32}$/.test(s.slug)).map((s, i) => ({
         slug: s.slug, title: s.title, level: LEVEL[s.chaos] || 'TENDED', col: LCOL[s.chaos] || LCOL[1],
         about: s.waiting ? s.waiting + (s.chaos === 2 ? ' ON THE BALLOT' : ' WAITING') : 'NOTHING WAITS',
         bg: s.slug === SP ? '#ffd23f' : '#fdf7e3', rot: rot(i % 2 ? '0.6deg' : '-0.6deg'),
-        face: '/' + s.slug, wall: '/toem2/?page=' + s.slug, dash: '/dashboard/?space=' + s.slug, gear: '/settings/?space=' + s.slug, gearLabel: 'settings for ' + s.title
+        face: '/' + s.slug, dash: '/dashboard/?space=' + s.slug, gear: '/settings/?space=' + s.slug, gearLabel: 'settings for ' + s.title
       })),
       lookOpen: S.look != null,
       lookBigArt: lk ? this.lookArt(docAt(lk, S.look), 470, 600, 'big') : null,

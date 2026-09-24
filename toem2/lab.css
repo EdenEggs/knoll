@@ -832,6 +832,8 @@ body.lab-banding{user-select:none;-webkit-user-select:none}
 .dock-sw{width:24px;height:24px;padding:0;border-radius:50%;cursor:pointer;background:var(--sw);
   border:2px solid rgba(255,255,255,.28);transition:transform .1s,border-color .12s}
 .dock-sw:hover{transform:scale(1.12);border-color:#fff}
+/* a space's own inks (wall.js: THE INKS OF A SPACE): one swatch each in the wheel's place, the pressed one ringed */
+.dock-inks[aria-pressed="true"]{border-color:#fff;box-shadow:0 0 0 2px var(--gz-handle-bg),0 0 0 4px #fff}
 .dock-pal{position:relative;gap:6px;padding-left:3px}
 .dock-wheel-ico{display:block;width:16px;height:16px;border-radius:50%;
   background:conic-gradient(#ff3b3b,#ffd23f,#59d36a,#3fd0ff,#5871f5,#e259f0,#ff3b3b);

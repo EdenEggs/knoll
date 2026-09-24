@@ -418,8 +418,10 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
     r = await GET('?rules=1&page=brook', 'kp1'); check("an invited friend is a keeper of the space, and ?rules names both by tag", r.json.keeper === true && r.json.keepers.length === 2 && /^kp1#\d+$/.test(r.json.keepers[1].tag), j(r.json.keepers));
     r = await pedit('kp1', 'brook', { [nm(320)]: fresh('d') }); check("…and edits live there, standing days or none", r.json.status === 'live', brief(r));
     await API.db('SREM', API.K.friends(U.mk1), U.kp1);
-    r = await pedit('kp1', 'brook', { [nm(320)]: fresh('d', { x: 40 }) }); check('friends no longer: keeper no longer — the same hand waits', r.json.status === 'queued', brief(r));
-    await API.db('SADD', API.K.friends(U.mk1), U.kp1);
+    r = await pedit('kp1', 'brook', { [nm(320)]: fresh('d', { x: 40 }) }); check('friends no longer, still invited: still a keeper — the hand goes live (invited is invited, 2026-09-24)', r.json.status === 'live', brief(r));
+    await API.db('SREM', API.K.invited('brook'), U.kp1);
+    r = await pedit('kp1', 'brook', { [nm(320)]: fresh('d', { x: 44 }) }); check('uninvited: keeper no longer — the same hand waits', r.json.status === 'queued', brief(r));
+    await API.db('SADD', API.K.friends(U.mk1), U.kp1); await API.db('SADD', API.K.invited('brook'), U.kp1);
     const dozen = {}; for (let i = 0; i < 12; i++) dozen[nm(330 + i)] = fresh('d', { x: i * 10 });
     r = await pedit('mk1', 'brook', dozen); r = await pedit('mk1', 'brook', {}, Object.keys(dozen)); check("the maker takes twelve pieces off their own space: live — it is their page", r.json.status === 'live', brief(r));
     r = await edit('mk1', {}, [canonOf(await doc())[2].n]); check('…and on TOEM 2 the same newcomer is refused a drastic edit, as ever', r.status === 400 && r.json.code === 'drastic', brief(r));

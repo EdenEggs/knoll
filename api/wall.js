@@ -384,6 +384,9 @@ const dbm = cmds => storeFor().many(cmds);
      invited:<slug>    set     the accounts invited to a space — its keepers, while they are still the maker's friends
    THE TOWN BOARD AND THE CHAT — api/board.js
      board:<slug>:<ch> list    a page's news · updates · forum (threads and replies) · chat, newest first, trimmed
+   THE PHOTO ALBUM — api/gallery.js
+     album:<slug>      list    a page's photos, newest first, trimmed: {id, by, at, cap, where, src, key} — the picture is a file (Blob, or toem2/album/)
+     album:<slug>:like:<id> set  who gave the photo a heart
    THE MODERATORS' RECORD
      audit             list    roles, bans, watches, pages made, settings, invites, reviews, closes, reverts, strikes, undos, hides */
 const K = {
@@ -394,7 +397,8 @@ const K = {
   prop: id => P + 'prop:' + id, propDoc: id => P + 'propdoc:' + id, props: hill => P + 'props:' + hill,
   propsBy: u => P + 'propsby:' + u, propsIp: h => P + 'propsip:' + h, audit: P + 'audit',
   friends: u => P + 'friends:' + u, asks: u => P + 'asks:' + u, notes: u => P + 'notes:' + u, invited: s => P + 'invited:' + s,
-  lock: id => P + 'lock:' + id, board: (s, ch) => P + 'board:' + s + ':' + ch
+  lock: id => P + 'lock:' + id, board: (s, ch) => P + 'board:' + s + ':' + ch,
+  album: s => P + 'album:' + s, albumLike: (s, id) => P + 'album:' + s + ':like:' + id
 };
 function pageKeys(slug) {
   const p = slug === HOME ? P : P + 'p:' + slug + ':';
@@ -1312,12 +1316,14 @@ const spaceOf = (slug, p) => Object.assign({ slug, title: p.title || slug, by: p
 async function rulesOf(pg, me) {
   const slug = pg.slug, p = await db('HGETALL', K.page(slug));
   const by = p.by && USER_RE.test(p.by) ? p.by : '';
-  const [invited, friends] = by ? await dbm([['SMEMBERS', K.invited(slug)], ['SMEMBERS', K.friends(by)]]) : [[], []];
-  const fr = new Set(friends), keepers = (by ? [by] : []).concat(invited.filter(u => fr.has(u) && u !== by));
+  const invited = by ? await db('SMEMBERS', K.invited(slug)) : [];
+  // the keepers: the maker and whoever they invited — a friend or not, since 2026-09-24 (settings: WHO CAN EDIT adds anyone by name)
+  const keepers = (by ? [by] : []).concat(invited.filter(u => u !== by));
   const owner = !!me && !!by && by === me.id;
   const keeper = owner || (!!me && !me.watched && (isMod(me) || keepers.includes(me.id) || (slug === HOME && me.tier === 'trusted')));
   return Object.assign({ page: slug, by, keepers, owner, keeper, feats: featsOf(listOf(p.feats)),
-                         title: slug === HOME ? 'TOEM 2' : (p.title || slug), palette: PAPERS[p.palette] ? p.palette : 'yard' }, chaosOf(p));
+                         title: slug === HOME ? 'TOEM 2' : (p.title || slug), palette: PAPERS[p.palette] ? p.palette : 'yard',
+                         inks: listOf(p.inks) }, chaosOf(p));   // the inks: the only colours the dock offers there; none = every colour
 }
 function cleanLook(v) {                        // a look a patch or a settings post proposes: the sign's words, the paper, the inks — nothing else
   if (!v || typeof v !== 'object' || Array.isArray(v)) return undefined;

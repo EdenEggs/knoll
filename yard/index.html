@@ -1084,7 +1084,7 @@ class Component extends DCLogic {
       liked: !!load('knoll-yard:liked', false), likes: 0, views: null, fenceLive: false, draft: '',
       notes: [],
       // FRIENDS AND THE BELL (api/friends.js) · YOUR SPACES (api/wall.js: SPACES) — both the door's, loaded at mount
-      fr: null, askDraft: '', askNote: '', mine: [], full: false, fullNote: false
+      fr: null, askDraft: '', askNote: '', spaces: [], full: false, fullNote: false   // spaces, not mine: mine (above) is the kept plot, an object (2026-09-24)
     };
     this.el = {};
     const ref = (k) => (el) => { this.el[k] = el; };
@@ -1215,7 +1215,7 @@ class Component extends DCLogic {
      and two is all an account makes — the mound says so rather than open the form */
   loadSpaces() {
     fetch('/api/wall?spaces=1', { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json())
-      .then(v => { if (v && v.ok) this.setState({ mine: v.spaces, full: !!v.full }); }).catch(() => {});
+      .then(v => { if (v && v.ok) this.setState({ spaces: Array.isArray(v.spaces) ? v.spaces : [], full: !!v.full }); }).catch(() => {});
   }
   componentWillUnmount() {
     clearTimeout(this._fullT);
@@ -1407,7 +1407,7 @@ class Component extends DCLogic {
     const first = w && this.state.whoMade ? this.state.whoMade : ts.length ? Math.min.apply(null, ts) : (pub && pub.t) || 0;
     const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return [
-      { v: String(w ? (w.live || 0) + (w.okd || 0) : P.length), k: w ? 'EDITS ON THE WALLS' : 'CONTRIBUTIONS' }, { v: String(1 + (this.state.mine || []).length), k: 'HILLS OF YOURS' },
+      { v: String(w ? (w.live || 0) + (w.okd || 0) : P.length), k: w ? 'EDITS ON THE WALLS' : 'CONTRIBUTIONS' }, { v: String(1 + (this.state.spaces || []).length), k: 'HILLS OF YOURS' },
       { v: (w ? w.streak || 0 : this.streak(ts)) + 'd', k: 'CURRENT STREAK' },
       { v: first ? new Date(first).getDate() + ' ' + MON[new Date(first).getMonth()] + ' ' + new Date(first).getFullYear() : '—', k: 'MEMBER SINCE' }
     ];
@@ -1861,7 +1861,7 @@ class Component extends DCLogic {
        this file — so the href is built from a slug that must look like one, the colour
        is the door's own table's, and a picture must be a JPEG's data: URL. */
     const LEVEL = { 0: 'READ-ONLY', 1: 'TENDED', 2: 'COUNCIL', 3: 'WILD' };
-    const MINE = this.state.mine.filter(s => /^[a-z0-9-]{1,32}$/.test(s.slug)).map(s => ({ name: s.title, href: '/' + s.slug, art: /^#[0-9a-f]{6}$/.test(s.paper) ? s.paper : C.CREAM,
+    const MINE = (Array.isArray(this.state.spaces) ? this.state.spaces : []).filter(s => /^[a-z0-9-]{1,32}$/.test(s.slug)).map(s => ({ name: s.title, href: '/' + s.slug, art: /^#[0-9a-f]{6}$/.test(s.paper) ? s.paper : C.CREAM,
       pic: /^data:image\/jpeg;base64,/.test(s.pic) ? s.pic : '', here: false, saved: false,
       about: 'YOURS · ' + (LEVEL[s.chaos] || 'TENDED') + (s.waiting ? ' · ' + s.waiting + (s.chaos === 2 ? ' ON THE BALLOT' : ' WAITING') : '') }));
     // the one flag, on a hill and beside a visit: raised is saved

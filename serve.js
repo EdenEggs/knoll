@@ -361,6 +361,14 @@ function serve(req, res) {
   // the front page is lab 2: vercel.json rewrites / to it, and here it is a hop to its own folder,
   // so every page's knoll in the corner (href="../") lands on lab 2 on both hosts
   if (p === '/') { res.writeHead(302, { Location: '/lab2/' }); res.end(); return; }
+  // THE ALBUM'S PICTURES (api/gallery.js, 2026-09-24) live beside the wall's store — toem2/album/ here, or wherever
+  // $WALL_DB points a probe — and are served from there under /toem2/album/, so the address is the same either way
+  if (p.startsWith('/toem2/album/')) {
+    const albumDir = path.join(path.dirname(process.env.WALL_DB || path.join(ROOT, 'toem2', 'wall-db.json')), 'album');
+    const pic = path.resolve(albumDir, '.' + p.slice('/toem2/album'.length));
+    if (!pic.startsWith(albumDir + path.sep)) { res.writeHead(403, { 'content-type': 'text/plain' }); res.end('no'); return; }
+    return send(req, res, pic);
+  }
   const file = path.resolve(ROOT, '.' + p);
   if (file !== ROOT && !file.startsWith(ROOT + path.sep)) {
     res.writeHead(403, { 'content-type': 'text/plain' }); res.end('no'); return;
@@ -520,6 +528,10 @@ try { friendsApi = require('./api/friends.js'); } catch (e) { console.log('  ! a
 const BOARD_API = '/api/board';
 let boardApi = null;
 try { boardApi = require('./api/board.js'); } catch (e) { console.log('  ! api/board.js did not load: ' + e.message); }
+// /api/gallery: the photo album (2026-09-24) — the same module again, the same store; its pictures land in toem2/album/
+const GALLERY_API = '/api/gallery';
+let galleryApi = null;
+try { galleryApi = require('./api/gallery.js'); } catch (e) { console.log('  ! api/gallery.js did not load: ' + e.message); }
 
 function handle(req, res) {
   const url = req.url.split('?')[0];
@@ -536,6 +548,11 @@ function handle(req, res) {
   if (url === BOARD_API) {
     if (!boardApi) { answer(res, 500, { ok: false, error: 'api/board.js did not load' }); return; }
     boardApi(req, res).catch(e => answer(res, 500, { ok: false, error: String((e && e.message) || e) }));
+    return;
+  }
+  if (url === GALLERY_API) {
+    if (!galleryApi) { answer(res, 500, { ok: false, error: 'api/gallery.js did not load' }); return; }
+    galleryApi(req, res).catch(e => answer(res, 500, { ok: false, error: String((e && e.message) || e) }));
     return;
   }
   if (url === WALL_API || WALL_AUTH.test(url)) {   // see THE WALL DOOR OF TOEM 2

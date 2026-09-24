@@ -21,6 +21,7 @@ toem2/results
 toem2/probe-*.js
 toem2/wall-db.json
 toem2/wall-db.json.tmp
+toem2/album
 toem2/mint.js
 toem2/pull-wall.js
 serve.js

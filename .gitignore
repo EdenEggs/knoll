@@ -48,6 +48,8 @@ toem2/results/
 # Redis; wall-seed.json beside it is the copy that ships.
 toem2/wall-db.json
 toem2/wall-db.json.tmp
+# …and the photo album's pictures (api/gallery.js) land beside it, off Vercel
+toem2/album/
 
 # Benches made by lab 2's "+ new bench" (serve.js, from lab2/bench-template):
 # each bench is the site; its backups and a folder left half-made are this

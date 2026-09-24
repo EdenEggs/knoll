@@ -61,6 +61,16 @@ async function get(req, res) {
   }
   const me = await whoIs(req);
   if (!me) throw bad(401, 'who', 'sign in to see your friends');
+  if (q.get('find') != null) {                 // ?find=<the start of a name> → up to eight accounts that go by it (settings: WHO CAN EDIT); signed in, so nobody lists the town from outside
+    const key = W.foldName(String(q.get('find')).trim()).slice(0, 24);
+    if (!key) return answer(res, 200, { ok: true, users: [] });
+    // ponytail: the whole tags hash, read and filtered here — fine to a few thousand accounts; a lex index (ZRANGEBYLEX) past that
+    const tags = await db('HGETALL', K.tags);
+    const ids = [...new Set(Object.keys(tags).filter(t => t.startsWith(key)).sort().map(t => tags[t]))].filter(u => USER_RE.test(u) && u !== me.id).slice(0, 12);
+    const banned = ids.length ? await dbm(ids.map(u => ['HGET', K.user(u), 'banned'])) : [];
+    const found = ids.filter((u, i) => banned[i] !== '1').slice(0, 8), tag = await tagsOf(found);
+    return answer(res, 200, { ok: true, users: found.map(u => ({ id: u, tag: tag[u] })) });
+  }
   const [friends, asks, raw, noted] = await dbm([['SMEMBERS', K.friends(me.id)], ['SMEMBERS', K.asks(me.id)],
                                                 ['LRANGE', K.notes(me.id), 0, -1], ['HGET', K.user(me.id), 'noted']]);
   const asked = new Set();
@@ -104,8 +114,10 @@ async function post(req, res) {
       const slug = String(body.slug == null ? '' : body.slug).toLowerCase(), p = SLUG_RE.test(slug) ? await db('HGETALL', K.page(slug)) : {};
       if (!p.made) throw bad(404, 'page', 'no such space');
       if (p.by !== me.id) throw bad(403, 'owner', 'only the gnome who made a space invites to it');
-      const mine = new Set(await db('SMEMBERS', K.friends(me.id)));
-      const to = [...new Set(Array.isArray(body.ids) ? body.ids.map(String) : [])].filter(u => mine.has(u));
+      // anyone with an account, friend or not (2026-09-24: the settings' WHO CAN EDIT finds them by name); a banned one is not asked
+      const ids = [...new Set(Array.isArray(body.ids) ? body.ids.map(String).filter(u => USER_RE.test(u) && u !== me.id) : [])];
+      const recs = ids.length ? await dbm(ids.map(u => ['HGETALL', K.user(u)])) : [];
+      const to = ids.filter((u, i) => recs[i] && recs[i].made && recs[i].banned !== '1');
       const fresh = to.length ? await dbm(to.map(u => ['SADD', K.invited(slug), u])) : [];
       const sent = to.filter((u, i) => fresh[i]);
       for (const u of sent) await tell(u, 'keeper', me.id, { slug, title: p.title || slug });

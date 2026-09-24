@@ -144,10 +144,14 @@
             </sc-for>
           </div>
           <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:15px; letter-spacing:2px; color:#4a4054; margin-bottom:10px">
-            <span>THE INKS · PICK UP TO 10</span>
-            <span style="opacity:0.8">{{ inkCount }} / 10</span>
+            <span>THE INKS · ALL, OR PICK UP TO 10</span>
+            <span style="opacity:0.8">{{ inkCount }}</span>
           </div>
           <div role="group" aria-label="inks" style="display:flex; flex-wrap:wrap; gap:12px">
+            <!-- ALL COLOURS (2026-09-24): ticked, the page's dock has the wheel and every colour; untick it and pick, and the dock offers only the picks -->
+            <button role="checkbox" aria-checked="{{ allInks }}" aria-label="all colours" title="{{ allTitle }}" sc-camel-on-click="{{ toggleAll }}" style="width:38px; height:38px; padding:0; box-sizing:border-box; border:3px solid #17120b; box-shadow:{{ allShadow }}; cursor:pointer; transform:{{ allT }}; transition:transform .2s cubic-bezier(.3,1.5,.5,1); display:flex; align-items:center; justify-content:center; background:conic-gradient(#e8484a, #ffd23f, #7bc264, #5a8fd6, #e0598c, #e8484a)" style-hover="transform:scale(1.08) rotate(-6deg)">
+              <sc-if value="{{ allInks }}" hint-placeholder-val="{{ true }}"><svg aria-hidden="true" sc-camel-view-box="0 0 24 24" width="22" height="22"><path d="M5,12.5 L10,17 L19,7" fill="none" stroke="#17120b" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5,12.5 L10,17 L19,7" fill="none" stroke="#fdf7e3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
+            </button>
             <sc-for list="{{ inks }}" as="k" hint-placeholder-count="10">
               <button aria-pressed="{{ k.on }}" aria-label="{{ k.name }}" title="{{ k.name }}" sc-camel-on-click="{{ k.pick }}" style="width:38px; height:38px; padding:0; background:{{ k.hex }}; border:3px solid #17120b; box-shadow:{{ k.shadow }}; cursor:pointer; transform:{{ k.t }}; transition:transform .2s cubic-bezier(.3,1.5,.5,1); display:flex; align-items:center; justify-content:center" style-hover="transform:scale(1.08) rotate(-6deg)">
                 <sc-if value="{{ k.on }}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" sc-camel-view-box="0 0 24 24" width="20" height="20"><path d="M5,12.5 L10,17 L19,7" fill="none" stroke="{{ k.tick }}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
@@ -407,7 +411,7 @@ class Component extends DCLogic {
     let saved = {};
     try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) {}
     this.state = Object.assign({
-      name: '', palette: 'yard', inks: ['#e8484a', '#5a8fd6'], chaos: 1, period: 3,
+      name: '', palette: 'yard', inks: [], chaos: 1, period: 3,
       feats: [true, true, true, false, false, false], invited: [], agreed: false, pic: '',
     }, saved, { copied: false, claimed: false, join: Math.random().toString(36).slice(2, 8), friends: [], full: false, busy: false, made: null, note: '', picNote: '' });
   }
@@ -482,8 +486,10 @@ class Component extends DCLogic {
     const sent = ids.length ? await json('/api/friends', { op: 'invite', slug: sl, ids }) : null;
     try { localStorage.removeItem(KEY); } catch (e) {}
     const level = (MODS.find(m => m.id === s.chaos) || MODS[0]).name.toLowerCase();
-    this.setState({ busy: false, claimed: true, made: { slug: sl }, note: 'Your hill stands at ' + HOST + '/' + sl + ', ' + (level === 'council' ? 'a council' : level) + '. It is on the horizon in your yard.' +
-      (sent && sent.ok && sent.sent ? ' ' + sent.sent + (sent.sent === 1 ? ' friend' : ' friends') + ' invited — they keep it with you.' : '') });
+    this.setState({ busy: false, claimed: true, made: { slug: sl }, note: 'Created! Your hill stands at ' + HOST + '/' + sl + ', ' + (level === 'council' ? 'a council' : level) + '. It is on the horizon in your yard.' +
+      (sent && sent.ok && sent.sent ? ' ' + sent.sent + (sent.sent === 1 ? ' friend' : ' friends') + ' invited — they keep it with you.' : '') + ' Taking you there…' });
+    // and then to the page itself (2026-09-24): the word first, the hop a moment after — "open it" is there for the impatient
+    clearTimeout(this._go); this._go = setTimeout(() => location.assign('/' + sl), 2200);
   }
   renderVals() {
     const s = this.state, pal = PALETTES.find(p => p.id === s.palette) || PALETTES[0];
@@ -534,11 +540,15 @@ class Component extends DCLogic {
         return { hex, name, on, tick: light(hex) ? '#17120b' : '#fdf7e3',
           shadow: on ? '3px 4px 0 rgba(60,50,80,0.3)' : 'none', t: on ? 'rotate(-4deg) scale(1.08)' : 'none',
           pick: () => {
-            if (on) { if (s.inks.length > 1) this.keep({ inks: s.inks.filter(c => c !== hex) }); }
+            if (on) this.keep({ inks: s.inks.filter(c => c !== hex) });          // the last one off is every colour again
             else if (s.inks.length < 10) this.keep({ inks: s.inks.concat(hex) });
           } };
       }),
-      inkCount: s.inks.length,
+      // ALL COLOURS (2026-09-24): no inks picked is every colour — the wheel on the page's dock; a pick narrows the dock to the picks (toem2/wall.js: THE INKS OF A SPACE)
+      allInks: !s.inks.length, inkCount: s.inks.length ? s.inks.length + ' / 10' : 'ALL COLOURS',
+      allTitle: s.inks.length ? 'every colour — the wheel on the dock' : 'all colours: the wheel on the dock. Untick to pick up to 10',
+      allShadow: s.inks.length ? 'none' : '3px 4px 0 rgba(60,50,80,0.3)', allT: s.inks.length ? 'none' : 'rotate(-4deg) scale(1.08)',
+      toggleAll: () => this.keep({ inks: s.inks.length ? [] : [INKS[0][0]] }),
       mods: MODS.map((m, i) => ({ name: m.name, sub: m.sub, stamp: m.stamp, col: m.col, on: m.id === s.chaos, rot: ['-0.5deg', '0.4deg', '-0.3deg', '0.6deg'][i],
         bg: m.id === s.chaos ? '#fffcf0' : 'transparent', dot: m.id === s.chaos ? '#e8484a' : 'transparent',
         shadow: m.id === s.chaos ? '4px 5px 0 rgba(60,50,80,0.25)' : 'none', pick: () => this.keep({ chaos: m.id }) })),
@@ -573,7 +583,7 @@ class Component extends DCLogic {
       pvTools: [{ name: 'move', op: 1, bg: pal.accent }].concat(['ink', 'stkr', 'note', 'trace', 'embed', 'others'].map((n, i) => ({ name: n, op: s.chaos === 3 || s.feats[i] ? 0.85 : 0.22, bg: 'transparent' }))),
       summary: [
         { a: 'Named', b: s.name.trim() || '—', color: '#5a8fd6' },
-        { a: 'On', b: pal.name + ' paper, ' + s.inks.length + (s.inks.length === 1 ? ' ink' : ' inks'), color: '#ffd23f' },
+        { a: 'On', b: pal.name + ' paper, ' + (s.inks.length ? s.inks.length + (s.inks.length === 1 ? ' ink' : ' inks') : 'all colours'), color: '#ffd23f' },
         { a: 'The hill is', b: s.chaos === 2 ? 'a council, ' + periodName + ' ballot' : mod.name.toLowerCase(), color: '#e0598c' },
         { a: 'Everyone may', b: s.chaos === 3 ? 'do everything' : s.chaos === 0 ? 'only look' : kindsOn.length ? kindsOn.join(', ') : 'only look; the keepers add', color: '#7bc264' },
         { a: 'Keepers:', b: 'you' + (coming.length ? ', ' + coming.map(f => f.name).join(', ') : ''), color: '#e8484a' },
