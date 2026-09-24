@@ -126,6 +126,19 @@ const waitPort = (port, tries = 80) => new Promise((res, rej) => { const t = () 
       await p.keyboard.press('Control+Shift+z'); await p.waitForTimeout(200);
       ok(await left() === moved, 'redo moves it again', await left() + ' vs ' + moved);
     } else console.log('  (skip: the press did not catch the stroke, ' + one.l + ' → ' + moved + ')');
+    // ── the sticker tool moves a piece: press one and drag (PRESS AND HOLD) ──
+    await p.click('#tool-dock [data-tool="sticker"]'); await p.waitForTimeout(300);
+    ok(await p.evaluate(() => document.querySelector('.wall-ink').classList.contains('wall-holdable') && getComputedStyle(document.querySelector('.wall-ink path.wall-item')).pointerEvents === 'auto'), 'with the sticker tool up the pieces answer the pointer');
+    await p.click('#tool-dock [data-tool="draw"]'); await p.waitForTimeout(150);
+    await stroke(bp.x + 520, bp.y + 30);   // well to the right of the sticker drawer, which opens on the left
+    await p.click('#tool-dock [data-tool="sticker"]'); await p.waitForTimeout(300);
+    const sp = await p.evaluate(() => { const r = [...document.querySelectorAll('.wall-ink path.wall-item')].pop().getBoundingClientRect(); return { l: Math.round(r.left), x: r.left + 4, y: r.top + 3, under: (document.elementFromPoint(r.left + 4, r.top + 3) || {}).tagName }; });
+    ok(sp.under === 'path', 'the press point is the piece itself, not the drawer', JSON.stringify(sp));
+    await p.mouse.move(sp.x, sp.y); await p.mouse.down(); for (let i = 1; i <= 6; i++) { await p.mouse.move(sp.x + i * 10, sp.y); await p.waitForTimeout(16); } await p.mouse.up(); await p.waitForTimeout(300);
+    const spl = await p.evaluate(() => Math.round([...document.querySelectorAll('.wall-ink path.wall-item')].pop().getBoundingClientRect().left));
+    ok(spl - sp.l >= 50, 'a drag on a piece with the sticker tool carries it (' + sp.l + ' → ' + spl + ')');
+    ok(await count() === n0 + 1, '…and stamps nothing', await count());
+    await p.click('#tool-dock [data-tool="move"]'); await p.waitForTimeout(150);
     // ── the dashboard: the map has no table view any more; the trend keeps its toggle ──
     await p.goto(BASE + '/dashboard/'); await p.waitForTimeout(3500);
     const dash = await p.evaluate(() => { const h = [...document.querySelectorAll('h2')].find(e => /Where the work happens/.test(e.textContent)); const sec = h && h.closest('section'); return { found: !!sec, mapToggle: sec ? [...sec.querySelectorAll('button')].filter(b => /VIEW AS (TABLE|MAP)/.test(b.textContent)).length : -1, table: sec ? /VIEW AS TABLE/.test(sec.innerText) : null, trendToggle: [...document.querySelectorAll('button')].filter(b => /VIEW AS (TABLE|CHART)/.test(b.textContent)).length, map: sec ? !!sec.querySelector('canvas') : false }; });

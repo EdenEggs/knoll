@@ -9,6 +9,28 @@
      before then, asks for /yard/favicon.ico and logs the 404 it gets. One line
      earlier in the document and it never asks. /signup and /login already do
      it this way, under the same comment; this is that fix arriving here. -->
+<!-- THE YARD HAS A NAME (2026-09-24). /yard/<name> is a yard's own address: <name> for the
+     first gnome by that name, <name>~2 for the next (their tag's #, which cannot ride in a URL).
+     vercel.json and serve.js send /yard/<name> here; api/friends says whose it is; the owner
+     stays (the address bar says so, below in componentDidMount), a visitor goes on to /YardView,
+     and a name nobody goes by falls back to your own yard or the gate. A trailing slash is taken
+     off first, so every ../ below still means the site root. First in the head, before any
+     link, so a redirect costs no fetches. -->
+<script>(function () {
+  var m = /^\/yard\/([^/]+)\/?$/.exec(location.pathname);
+  if (!m) return;
+  var raw = m[1], who;
+  try { who = decodeURIComponent(raw); } catch (e) { who = raw; }
+  if (who === 'new') { location.replace('/yard/new/'); return; }
+  if (location.pathname.slice(-1) === '/') { location.replace('/yard/' + raw + location.search + location.hash); return; }
+  window.YARD_WHO = who;
+  var me = (/(?:^|;\s*)knoll_in=([0-9a-f]{16})(?:;|$)/.exec(document.cookie) || [])[1];
+  var t = /^(.+)~(\d{1,7})$/.exec(who), tag = t ? t[1] + '#' + t[2] : who + '#1';
+  fetch('/api/friends?who=' + encodeURIComponent(tag), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
+    if (v && v.ok && v.id) { if (v.id !== me) location.replace('/YardView/?u=' + v.id); return; }
+    location.replace(me ? '/yard/' : '/login/?next=' + encodeURIComponent('/yard/' + raw));
+  }).catch(function () {});
+})();</script>
 <link rel="icon" href="../logo/logo-icon.svg">
 <!-- THE YARD IS YOURS (2026-09-21). Since /signup made accounts (api/auth.js)
      this is the signed-in gnome's own page: signed out, you go to the gate
@@ -22,7 +44,7 @@
      knoll_in is the cookie that says which account is in (api/wall.js). -->
 <script>(function () {
   var id = (/(?:^|;\s*)knoll_in=([0-9a-f]{16})(?:;|$)/.exec(document.cookie) || [])[1];
-  if (!id) { if (!/[?&]embed\b/.test(location.search)) location.replace('/login/?next=' + encodeURIComponent(location.pathname + location.search)); return; }
+  if (!id) { if (!/[?&]embed\b/.test(location.search) && !window.YARD_WHO) location.replace('/login/?next=' + encodeURIComponent(location.pathname + location.search)); return; }   // a visitor at /yard/<name> is sent on above
   try {
     var was = localStorage.getItem('knoll-yard:owner');
     if (was === id) return;
@@ -1041,6 +1063,8 @@ const TOUR = [
   { key: 'visit', where: 'left', title: "Spaces you've visited", body: 'Lorem ipsum dolor sit amet, consectetur. Every hollow, ring and patch you have wandered into, newest first.' }
 ];
 
+// a tag's place in a yard's address (THE YARD HAS A NAME, in the head): Mossy#1 → Mossy, Mossy#3 → Mossy~3
+const yardSlug = tag => { const m = /^(.+)#(\d+)$/.exec(String(tag || '')); return m ? encodeURIComponent(m[1]) + (+m[2] === 1 ? '' : '~' + m[2]) : ''; };
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -1156,8 +1180,10 @@ class Component extends DCLogic {
     const me = window.KnollAccount ? KnollAccount.me : fetch('/api/auth', { cache: 'no-store' }).then(r => r.json()).then(v => (v && v.ok ? v.me : undefined)).catch(() => undefined);
     me.then(a => {
       // the cookie said somebody, and the door says the session has lapsed: to the gate after all (THE YARD IS YOURS)
-      if (a === null && !EMBED) { location.replace('/login/?next=' + encodeURIComponent(location.pathname + location.search)); return; }
+      if (a === null && !EMBED && !window.YARD_WHO) { location.replace('/login/?next=' + encodeURIComponent(location.pathname + location.search)); return; }
       if (!a) return;
+      // THE YARD HAS A NAME: the address bar says whose this is (history only — the page is the same one)
+      if (a.tag && !EMBED) { const s = yardSlug(a.tag); if (s && location.pathname !== '/yard/' + s) history.replaceState(null, '', '/yard/' + s + location.search + location.hash); }
       if (a.avatar != null) this.setState({ pic: a.avatar });   // THE PICTURE, as the door has it
       // YOUR STANDING (2026-09-24): the wall's own count — standing days, streak, what landed (api/wall.js ?who=); the pieces here stand in until it lands
       if (a.id && !EMBED) fetch('/api/wall?who=' + a.id, { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json()).then(w => { if (w && w.ok) this.setState({ who: w.who, whoMade: +a.made || 0 }); }).catch(() => {});

@@ -1440,6 +1440,15 @@ class Component extends DCLogic {
     var u = (/[?&]u=([0-9a-f]{16})(?:&|$)/.exec(location.search) || [])[1] ||
             (/(?:^|;\s*)knoll_in=([0-9a-f]{16})(?:;|$)/.exec(document.cookie) || [])[1];
     if (u) window.YARD_HILL = 'u-' + u;
+    /* THE YARD HAS A NAME (2026-09-24): a profile link (?u=) shows the yard's own address,
+       /yard/<name>, once the wall says whose it is — history only; reloading that address
+       comes back here through yard/index.html. Your own yard seen as a visitor keeps this
+       page's address, since /yard/<you> is the page you edit. */
+    var mine = (/(?:^|;\s*)knoll_in=([0-9a-f]{16})(?:;|$)/.exec(document.cookie) || [])[1];
+    if (u && /[?&]u=/.test(location.search) && u !== mine) fetch('/api/wall?who=' + u, { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (w) {
+      var t = w && w.ok && w.who && /^(.+)#(\d+)$/.exec(w.who.tag || '');
+      if (t) history.replaceState(null, '', '/yard/' + encodeURIComponent(t[1]) + (+t[2] === 1 ? '' : '~' + t[2]));
+    }).catch(function () {});
     /* ONE YARD AT A TIME. Whoever's yard this is, it is kept under
        knoll-yardview:, so opening a different one first clears what the last
        left — its wall, its names, a visitor's scratch edits — rather than

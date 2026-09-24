@@ -701,6 +701,10 @@ window.Wall = (function () {
       if (f) onTap(e, () => stampAt(f, p.x, p.y));
       else if (window.Tracer) Tracer.nudge();
     } else if (tool === 'sticker') {
+      // a press on a sticker already there: hold it or drag it and it is picked
+      // up; tap it and another is stamped on top (PRESS AND HOLD, below)
+      const t = e.target.closest('.wall-item');
+      if (t) { armGrab(t, e); e.preventDefault(); e.stopPropagation(); return; }
       // …and a sticker out of the drawer, the same press, the same two
       // numbers, and the same drawer asked to say why when there is none
       const s = window.Stickers && Stickers.armed();
@@ -1175,19 +1179,68 @@ window.Wall = (function () {
     const gr = e.target.closest('.wall-grip');
     if (gr) { startSize(gr, e); return; }
     const t = e.target.closest('.wall-item');
-    if (!t) return;
+    if (!t || !takeHold(t, e)) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+
+  /* TAKING HOLD OF A PIECE — the move tool's press, and the sticker tool's
+     hold (PRESS AND HOLD, below): the same drag, so one function. */
+  function takeHold(t, e) {
     const i = +t.dataset.i;
-    const it = S().items[i];
-    if (!it) return;
+    if (!S().items[i]) return false;
     const p = W(e.clientX, e.clientY);
     held = { i, id: e.pointerId, node: t, ox: 0, oy: 0, px: p.x, py: p.y };
     t.classList.add('wall-held');
     window.addEventListener('pointermove', moveMove, true);
     window.addEventListener('pointerup', moveEnd, true);
     window.addEventListener('pointercancel', moveEnd, true);
-    e.preventDefault();
-    e.stopPropagation();
-  }, true);
+    return true;
+  }
+
+  /* ── PRESS AND HOLD, with the sticker tool up (2026-09-24, TOEM 2's wall.js's referee) ──
+     A press on a sticker already stamped could mean two things — another one
+     on top, because overlapping is how a scene gets built, or picking this one
+     up — and it commits to neither at first: a clock, a watch for movement,
+     and the first of three endings decides.
+       · the clock runs out ....... you are holding it: pick it up
+       · the pointer moves ........ you are dragging it: pick it up
+       · you let go before either . it was a tap: stamp another one there
+     The anchor handed on is the ORIGINAL press, so the piece keeps its grip on
+     the point you pressed. lab.css's .wall-holdable is what lets the pieces
+     answer the pointer while this tool is up. */
+  const GRAB_MS = 180;        // long enough that stamping never feels sticky
+  const GRAB_SLOP = 3;        // world px of wobble that is still a tap
+  let grab = null;
+  function grabOff() {
+    if (!grab) return null;
+    clearTimeout(grab.timer);
+    window.removeEventListener('pointermove', grabMove, true);
+    window.removeEventListener('pointerup', grabEnd, true);
+    window.removeEventListener('pointercancel', grabEnd, true);
+    const g = grab; grab = null; return g;
+  }
+  function armGrab(t, e) {
+    grabOff();                                   // a second press supersedes the first
+    const p = W(e.clientX, e.clientY);
+    grab = { t, id: e.pointerId, x: p.x, y: p.y, ev: e, timer: setTimeout(take, GRAB_MS) };
+    window.addEventListener('pointermove', grabMove, true);
+    window.addEventListener('pointerup', grabEnd, true);
+    window.addEventListener('pointercancel', grabEnd, true);
+  }
+  function take() { const g = grabOff(); if (g) takeHold(g.t, g.ev); }
+  function grabMove(e) {
+    if (!grab || e.pointerId !== grab.id) return;
+    const p = W(e.clientX, e.clientY);
+    if (Math.abs(p.x - grab.x) > GRAB_SLOP || Math.abs(p.y - grab.y) > GRAB_SLOP) take();
+  }
+  function grabEnd(e) {
+    if (!grab || (e && e.pointerId !== grab.id)) return;
+    const g = grabOff();
+    const s = window.Stickers && Stickers.armed();
+    if (s) stickerAt(s, g.x, g.y);
+    else if (window.Stickers) Stickers.nudge();
+  }
 
   /* Two presses on a note is the way back into it, and the pieces answer the
      pointer themselves in move mode — so this needs no hit test of its own.
@@ -1563,6 +1616,7 @@ window.Wall = (function () {
     svg.classList.toggle('wall-live', tool !== 'move' && tool !== 'delete');
     svg.classList.toggle('wall-picking', tool === 'move');
     svg.classList.toggle('wall-deleting', tool === 'delete');
+    svg.classList.toggle('wall-holdable', tool === 'sticker');   // the pieces answer a press: a hold or a drag moves one (PRESS AND HOLD)
   }
   function markOpts() {
     const on = (sel, v) => opts.querySelectorAll(sel).forEach(b =>

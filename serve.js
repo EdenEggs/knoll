@@ -378,6 +378,8 @@ function serve(req, res) {
       return send(req, res, path.join(file, 'index.html'));
     }
     // a one-word address with no file is a space's (api/wall.js: SPACES), as vercel.json's last rewrite has it
+    // /yard/<name> is a yard's own address (yard/index.html: THE YARD HAS A NAME), as vercel.json's /yard/:who rewrite has it
+    if (err && /^\/yard\/[^/]+\/?$/i.test(p) && !/^\/yard\/new\/?$/i.test(p)) return send(req, res, path.join(ROOT, 'yard', 'index.html'));
     if (err) return /^\/[a-z0-9][a-z0-9-]*\/?$/i.test(p) ? send(req, res, path.join(ROOT, 'space.html')) : notFound(res);
     send(req, res, file);
   });

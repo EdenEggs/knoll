@@ -53,6 +53,12 @@ async function befriend(me, u) {
 }
 
 async function get(req, res) {
+  const q = new URL(req.url, 'http://x').searchParams;
+  if (q.get('who')) {                          // whose tag is this? anybody's to ask — a yard's address is its owner's name (yard/index.html: THE YARD HAS A NAME)
+    const u = await byTag(q.get('who'));
+    if (!u) throw bad(404, 'who', 'nobody goes by that tag');
+    return answer(res, 200, { ok: true, id: u, tag: (await tagsOf([u]))[u] });
+  }
   const me = await whoIs(req);
   if (!me) throw bad(401, 'who', 'sign in to see your friends');
   const [friends, asks, raw, noted] = await dbm([['SMEMBERS', K.friends(me.id)], ['SMEMBERS', K.asks(me.id)],

@@ -232,6 +232,30 @@ Checks: `node lab2/perf/probe-yard-ink.js` (yard: layering, band, redo) and
 `node lab2/perf/probe-bench-redo.js` (lab 2 / TOEM 2 / hive docks, a feature
 carried and taken back and forth), both headless Chrome on a safe server.
 
+## 0c · The yard has a name, and stickers move with the sticker tool (2026-09-24)
+
+**/yard/<name> is a yard's own address.** `<name>` for the first gnome by
+that name, `<name>~2` for the next (the tag's #, which cannot ride in a URL).
+vercel.json's `/yard/:who` rewrite and serve.js send it to this page, whose
+first head script asks `api/friends?who=<tag>` whose it is: the owner stays
+(and, once the door says their tag, the address bar is set to their own
+address by `history.replaceState` — on a plain `/yard/` too); a visitor is
+sent on to `/YardView/?u=<id>`, which then shows the pretty address itself
+(history only: reloading it comes back through here); a name nobody goes by
+falls back to your own yard, or the gate when signed out. A trailing slash is
+taken off first so every `../` in the page still means the site root; `new` is
+kept for `/yard/new/`. Friends' links still go straight to `/YardView/?u=`
+(one load) and wear the pretty address on arrival. Check:
+`node lab2/perf/probe-yard-url.js` (15).
+
+**Stickers move with the sticker tool.** wall.js has always had a referee for
+a press on a sticker with the sticker tool up (PRESS AND HOLD: hold or drag
+picks it up, a tap stamps another) — but the `.wall-holdable` rule that lets
+the pieces answer the pointer was in TOEM 2's and the hive's lab.css and not
+in lab 2's, which this page and YardView load, so every press stamped. The rule
+is in lab2/lab.css now, and lab 2's older wall.js got the referee too. Checked
+in probe-yard-ink.js and probe-bench-redo.js.
+
 ## 1 · What this is
 
 **Your Yard** is a personal home base: a plot you arrange yourself, the hill

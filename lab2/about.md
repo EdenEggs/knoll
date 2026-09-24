@@ -1037,3 +1037,18 @@ before touching it — particularly:
 - `features/bare.css` — why the rule lives in a file and not in JavaScript
 - `kits.js` — **THE KITS**, the three grades, and **THE INK**
 - `frames.js` — **THE POSTERS**
+
+## The dock, 2026-09-24: Redo, and stickers that move
+
+- **Redo** stands beside Undo on every dock (here, TOEM 2, the iron hive, the yard, the old
+  lab and the bench template): ctrl+shift+Z or ctrl+Y. wall.js keeps a snapshot of the
+  items — and, on a bench, `Lab.snapshot` (feature places and the pile) — from just before
+  and after each undo; redo puts the first back and files the second with `Lab.remember`,
+  so undo takes the redo back. Anything new done empties the pile (`Wall.forgetRedo`); a
+  paste or a hiding taken back cannot be redone and empties it too.
+- **The sticker tool moves stickers**: a press on a piece with the sticker tool up is a
+  hold or a drag that picks it up, or a tap that stamps another on top (PRESS AND HOLD in
+  wall.js, ported here from TOEM 2's). lab.css's `.wall-holdable` is what lets the pieces
+  answer the pointer; it was missing from this file's lab.css, which the yard loads too.
+- Checks: `node lab2/perf/probe-bench-redo.js` (lab 2, TOEM 2, hive, old lab) and
+  `node lab2/perf/probe-yard-ink.js`.

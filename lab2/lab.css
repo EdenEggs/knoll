@@ -791,6 +791,9 @@ body.lab-hand .wall-ink,body.lab-panning .wall-ink{pointer-events:none!important
 .wall-picking .wall-item:hover{outline:none;filter:drop-shadow(0 0 3px var(--pink))}
 /* a stroke is a hairline to the hit-tester unless it is given some girth */
 .wall-picking path.wall-item{stroke-linecap:round}
+/* the sticker tool up: the pieces answer the pointer so a press on one can be a hold or a drag (wall.js: PRESS AND HOLD) — 2026-09-24, the rule TOEM 2's lab.css had and this one lacked, which is why no sticker could be moved on the yard without the move tool */
+.wall-holdable .wall-item{pointer-events:auto}
+.wall-holdable path.wall-item{stroke-linecap:round}
 .wall-item.wall-held{cursor:grabbing;filter:drop-shadow(0 4px 6px rgba(var(--drop-rgb),.45))}
 /* the delete tool reads the paper the same way move does — see markTools()
    in wall.js — so it is the same two rules with amber standing in for pink:
