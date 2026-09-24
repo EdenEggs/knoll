@@ -516,6 +516,10 @@ try { authApi = require('./api/auth.js'); } catch (e) { console.log('  ! api/aut
 const FRIENDS_API = '/api/friends';
 let friendsApi = null;
 try { friendsApi = require('./api/friends.js'); } catch (e) { console.log('  ! api/friends.js did not load: ' + e.message); }
+// /api/board: the town board and the chat (2026-09-24) — the same module again, the same store
+const BOARD_API = '/api/board';
+let boardApi = null;
+try { boardApi = require('./api/board.js'); } catch (e) { console.log('  ! api/board.js did not load: ' + e.message); }
 
 function handle(req, res) {
   const url = req.url.split('?')[0];
@@ -527,6 +531,11 @@ function handle(req, res) {
   if (url === FRIENDS_API) {
     if (!friendsApi) { answer(res, 500, { ok: false, error: 'api/friends.js did not load' }); return; }
     friendsApi(req, res).catch(e => answer(res, 500, { ok: false, error: String((e && e.message) || e) }));
+    return;
+  }
+  if (url === BOARD_API) {
+    if (!boardApi) { answer(res, 500, { ok: false, error: 'api/board.js did not load' }); return; }
+    boardApi(req, res).catch(e => answer(res, 500, { ok: false, error: String((e && e.message) || e) }));
     return;
   }
   if (url === WALL_API || WALL_AUTH.test(url)) {   // see THE WALL DOOR OF TOEM 2

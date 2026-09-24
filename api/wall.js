@@ -382,8 +382,10 @@ const dbm = cmds => storeFor().many(cmds);
      asks:<u>          set     the accounts asking to be its friend
      notes:<u>         list    its bell, newest first: {kind ask|friend|keeper|okd|rej|passed|failed|ballot, from, at, slug, title, why, ayes, nays}
      invited:<slug>    set     the accounts invited to a space — its keepers, while they are still the maker's friends
+   THE TOWN BOARD AND THE CHAT — api/board.js
+     board:<slug>:<ch> list    a page's news · updates · forum (threads and replies) · chat, newest first, trimmed
    THE MODERATORS' RECORD
-     audit             list    roles, bans, watches, pages made, settings, invites, reviews, closes, reverts, strikes, undos */
+     audit             list    roles, bans, watches, pages made, settings, invites, reviews, closes, reverts, strikes, undos, hides */
 const K = {
   user: u => P + 'user:' + u, users: P + 'users', names: u => P + 'names:' + u, tagN: name => P + 'tagn:' + name, tags: P + 'tags',
   sess: h => P + 'sess:' + h, oauth: s => P + 'oauth:' + s, days: u => P + 'days:' + u, rl: (who, hour) => P + 'rl:' + who + ':' + hour,
@@ -392,7 +394,7 @@ const K = {
   prop: id => P + 'prop:' + id, propDoc: id => P + 'propdoc:' + id, props: hill => P + 'props:' + hill,
   propsBy: u => P + 'propsby:' + u, propsIp: h => P + 'propsip:' + h, audit: P + 'audit',
   friends: u => P + 'friends:' + u, asks: u => P + 'asks:' + u, notes: u => P + 'notes:' + u, invited: s => P + 'invited:' + s,
-  lock: id => P + 'lock:' + id
+  lock: id => P + 'lock:' + id, board: (s, ch) => P + 'board:' + s + ':' + ch
 };
 function pageKeys(slug) {
   const p = slug === HOME ? P : P + 'p:' + slug + ':';

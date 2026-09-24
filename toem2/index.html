@@ -213,6 +213,8 @@ html.toem-embed .keymap, html.toem-embed .lab-panel, html.toem-embed .lab-warn {
     <dt><kbd>ctrl</kbd><kbd>s</kbd></dt><dd>save the paper into the site — every piece as it is now becomes what TOEM 2 opens on (hold shift to save this view as the opening one too); on the live wall, <b>submit</b>: what you changed goes to the wall, to the keepers, or to the ballot, as the stamp says</dd>
     <dt><kbd>history</kbd></dt><dd>every revision, the queue, and the rules of this wall</dd>
     <dt><kbd>ballot</kbd></dt><dd>the council's ballot — mark aye or nay and post it in the machine; a standing day on TOEM 2 lets you vote</dd>
+    <dt><kbd>board</kbd></dt><dd>the town board, bottom left — news and updates from the keepers, the rules, and a forum for everyone</dd>
+    <dt><kbd>chat</kbd></dt><dd>the chat beside it — whoever is signed in, under their own name and picture</dd>
     <dt><kbd>ctrl</kbd><kbd>z</kbd></dt><dd>undo — the last thing moved, or the last thing drawn</dd>
     <dt><kbd>ctrl</kbd><kbd>c</kbd><kbd>v</kbd></dt><dd>copy what is picked, and paste it a nudge down-right — a group stays a group</dd>
     <dt><kbd>right click</kbd></dt><dd>a feature — raise it, lower it, or delete it (undo puts it back)</dd>
@@ -297,6 +299,14 @@ html.toem-embed .keymap, html.toem-embed .lab-panel, html.toem-embed .lab-warn {
      the bench's. -->
 <link rel="stylesheet" href="ballot.css">
 <script src="ballot.js"></script>
+<!-- the town board and the chat (2026-09-24): two buttons in the bottom-left corner —
+     a megaphone for the board (news · updates · the rules · the forum) and a bubble
+     for the chat, where everyone signed in speaks under their own name and picture.
+     Both blank until people write on them; the books are api/board.js's, the same
+     store as the wall's. Not on the yard's picture of this page. Its own stylesheet,
+     so lab.css stays the bench's. -->
+<link rel="stylesheet" href="board.css">
+<script src="board.js"></script>
 <!-- the sign's own one trick: click a letter, a gnome puts it overhead -->
 <script src="sign.js"></script>
 <!-- hold ctrl and the hitbox is the drawing rather than the box round it —

@@ -1,0 +1,120 @@
+/* toem2/board.css — THE TOWN BOARD AND THE CHAT (board.js): two buttons in
+   the bottom-left corner and the two panels they stand up. Drawn the way the
+   sign's machines are — ink lines, hard shadows, a white card — in the
+   bench's handwriting (Kalam), with small caps for the names and plates.
+   Every line the pair needs is here and nothing else; lab.css stays the
+   bench's. */
+.town-fabs{position:fixed;left:16px;bottom:16px;z-index:6001;display:flex;gap:12px}
+.town-fab{position:relative;width:56px;height:56px;padding:0;box-sizing:border-box;background:#fff;color:#17120b;
+  border:4px solid #17120b;border-radius:16px 14px 18px 12px;box-shadow:6px 7px 0 #17120b;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:transform .08s,box-shadow .08s}
+.town-fab svg,.town-tile svg{width:30px;height:30px;fill:currentColor;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.town-fab:hover{background:#fff4f9}
+.town-fab:active,.town-fab[aria-expanded="true"]{transform:translate(3px,4px);box-shadow:2px 2px 0 #17120b}
+.town-fab:focus-visible,.town-close:focus-visible,.town-tab:focus-visible,.town-send:focus-visible,.town-btn:focus-visible,
+.town-back:focus-visible,.town-x:focus-visible,button.town-card:focus-visible{outline:3px solid #e8479c;outline-offset:3px}
+/* the little counts: what came since this tab was last looked at */
+.town-badge{position:absolute;top:-11px;right:-11px;min-width:24px;height:24px;padding:0 7px;box-sizing:border-box;border-radius:12px;
+  background:#17120b;color:#fff;font:700 13px/24px 'Kalam',cursive;font-style:normal;text-align:center;border:2px solid #fff}
+.town-tab .town-badge{position:static;display:inline-block;margin-left:7px;height:20px;min-width:20px;line-height:20px;font-size:12px;padding:0 6px;border:0;vertical-align:1px}
+.town-badge:empty,.town-tab .town-badge:empty{display:none}
+
+/* the panel: the card, its head, and the tabs that hang off it */
+.town-panel{position:fixed;left:16px;top:calc(var(--head-h,52px) + 14px);bottom:92px;z-index:6001;width:470px;max-width:calc(100vw - 32px);box-sizing:border-box;
+  display:flex;flex-direction:column;background:#fff;color:#17120b;border:4px solid #17120b;border-radius:22px 18px 24px 20px;
+  box-shadow:8px 9px 0 #17120b;font-family:'Kalam','Public Sans',sans-serif;font-size:15px;line-height:1.35}
+.town-panel[hidden]{display:none}
+.town-head{display:flex;align-items:center;gap:12px;padding:14px 14px 10px;flex:none}
+.town-tile{width:48px;height:48px;flex:none;box-sizing:border-box;background:#bdb8bf;color:#17120b;border:3px solid #17120b;
+  border-radius:12px 10px 13px 11px;display:flex;align-items:center;justify-content:center}
+.town-tile svg{width:28px;height:28px}
+.town-title{flex:1;min-width:0}
+.town-title b{display:block;font-size:22px;line-height:1.1;font-variant-caps:small-caps;letter-spacing:.04em}
+.town-title small{display:block;font-size:13.5px;opacity:.75;margin-top:2px}
+.town-close{width:40px;height:40px;flex:none;box-sizing:border-box;background:#fff;color:#17120b;border:3px solid #17120b;border-radius:11px 9px 12px 10px;
+  box-shadow:3px 3px 0 #17120b;font:700 17px/1 'Kalam',cursive;cursor:pointer;padding:0}
+.town-close:hover{background:#fff4f9}
+.town-close:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #17120b}
+.town-tabs{display:flex;gap:6px;padding:0 10px;position:relative;z-index:1;flex:none}
+.town-tab{flex:1;min-width:0;padding:9px 6px 11px;box-sizing:border-box;background:#e9e4e8;color:#17120b;border:4px solid #17120b;border-bottom:0;
+  border-radius:12px 12px 0 0;font:700 15px/1 'Kalam',cursive;font-variant-caps:small-caps;letter-spacing:.03em;cursor:pointer;white-space:nowrap}
+.town-tab:hover{background:#f3eef2}
+/* the open tab is cut into the body: it runs 4px over the body's top rule and paints it out */
+.town-tab.is-on{background:#fff;margin-bottom:-4px;padding-bottom:15px;position:relative;z-index:2}
+
+/* the body scrolls; the head and the tabs do not */
+.town-body{flex:1;min-height:0;overflow-y:auto;border-top:4px solid #17120b;padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px;
+  scrollbar-width:thin;scrollbar-color:#17120b transparent}
+.town-intro{margin:0}
+.town-card{background:#efecef;color:#17120b;border:3px solid #17120b;border-radius:14px 12px 15px 13px;box-shadow:4px 4px 0 #17120b;
+  padding:12px 14px;display:flex;gap:12px;align-items:flex-start;text-align:left;font:inherit;line-height:inherit;margin:0}
+.town-card:nth-child(even){border-radius:12px 15px 13px 14px}
+button.town-card{cursor:pointer;width:100%;box-sizing:border-box}
+button.town-card:hover{background:#f7f3f6}
+button.town-card:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #17120b}
+.town-n{width:36px;height:36px;flex:none;border-radius:50%;background:#17120b;color:#fff;font:700 16px/36px 'Kalam',cursive;text-align:center}
+.town-card-b{flex:1;min-width:0}
+.town-card-h{display:block;font-weight:700;font-variant-caps:small-caps;letter-spacing:.03em;font-size:16.5px;line-height:1.2;overflow-wrap:anywhere}
+.town-card-t{margin:2px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.town-meta{margin-top:6px;font-size:12.5px;opacity:.72;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.town-who{font-weight:700}
+.town-who small{font-weight:400;opacity:.7;font-size:.85em}
+.town-x{margin-left:auto;background:none;border:0;padding:0 4px;font:700 17px/1 'Kalam',cursive;color:#b8302f;cursor:pointer;opacity:.85}
+.town-x:hover{opacity:1}
+.town-empty{margin:0;padding:18px 14px;text-align:center;border:3px dashed #17120b;border-radius:14px 12px 15px 13px;opacity:.6}
+.town-back{align-self:flex-start;background:none;border:0;padding:0;font:700 15px 'Kalam',cursive;color:#c93b82;cursor:pointer}
+.town-note,.town-gate{margin:0;font-size:14px}
+.town-note{color:#b8302f}
+.town-note[hidden]{display:none}
+.town-gate a,.town-meta a{color:#c93b82;font-weight:700}
+/* writing: a title, the words, the button that sends them */
+.town-form{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.town-form input,.town-form textarea,.town-say input{width:100%;box-sizing:border-box;background:#fff;color:#17120b;border:3px solid #17120b;border-radius:12px;
+  padding:8px 12px;font:inherit;line-height:1.35}
+.town-form textarea{min-height:88px;resize:vertical}
+.town-form input:focus,.town-form textarea:focus,.town-say input:focus{outline:0;box-shadow:0 0 0 3px #ffb3c9}
+.town-form input::placeholder,.town-form textarea::placeholder,.town-say input::placeholder{color:#17120b;opacity:.45}
+.town-btn{align-self:flex-end;background:#17120b;color:#fff;border:3px solid #17120b;border-radius:12px 10px 13px 11px;padding:6px 18px;
+  font:700 15px/1.3 'Kalam',cursive;cursor:pointer;box-shadow:3px 3px 0 rgba(23,18,11,.35)}
+.town-btn:hover{background:#2e2636}
+.town-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(23,18,11,.35)}
+.town-btn:disabled{opacity:.5;cursor:default}
+
+/* the chat: a name, a face, a bubble — a run from one gnome keeps one name and one face */
+.town-chat-list{gap:12px;padding-bottom:12px}
+.town-msg{display:grid;grid-template-columns:40px minmax(0,max-content) auto;grid-template-rows:auto auto;column-gap:10px;align-items:center}
+.town-msg.is-more{margin-top:-6px}
+.town-msg.is-more .town-name{display:none}
+.town-msg.is-more .town-pic{visibility:hidden}
+.town-name{grid-column:2/4;grid-row:1;font-size:14px;margin:0 0 3px 6px;font-variant-caps:small-caps;letter-spacing:.04em}
+.town-name .town-who small{font-variant-caps:normal;letter-spacing:0}
+.town-pic{grid-column:1;grid-row:2;width:40px;height:40px;box-sizing:border-box;border-radius:50%;background:#bdb8bf;color:#17120b;border:3px solid #17120b;
+  overflow:hidden;display:flex;align-items:center;justify-content:center;font:700 17px/1 'Kalam',cursive}
+.town-pic img{width:100%;height:100%;object-fit:cover;display:block}
+.town-bubble{grid-column:2;grid-row:2;justify-self:start;max-width:100%;box-sizing:border-box;background:#efecef;border:3px solid #17120b;
+  border-radius:14px 12px 15px 13px;padding:9px 13px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15.5px}
+.town-msg.is-me .town-bubble{background:#fff4f9}
+.town-msg .town-x{grid-column:3;grid-row:2;margin:0;justify-self:start}
+.town-chat-note{padding:0 16px 8px;flex:none}
+.town-chat-gate,.town-say{flex:none;border-top:4px solid #17120b;padding:12px 14px 14px}
+.town-say{display:flex;gap:10px;align-items:center}
+.town-say[hidden],.town-chat-gate[hidden]{display:none}
+.town-say input{flex:1;border-radius:16px;padding:10px 14px;font-size:15.5px}
+.town-send{width:48px;height:48px;flex:none;box-sizing:border-box;border-radius:50%;background:#17120b;color:#fff;border:3px solid #17120b;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:3px 3px 0 rgba(23,18,11,.35)}
+.town-send svg{width:22px;height:22px;fill:currentColor;transform:translate(-1px,1px)}
+.town-send:hover{background:#2e2636}
+.town-send:active{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(23,18,11,.35)}
+.town-send:disabled{opacity:.5;cursor:default}
+
+/* a phone: the dock stands across the bottom, so the buttons go under the header and the panel between the two */
+@media (max-width:700px){
+  .town-fabs{left:10px;bottom:auto;top:calc(var(--head-h,52px) + 10px);gap:10px}
+  .town-fab{width:46px;height:46px;border-radius:13px 11px 14px 10px}
+  .town-fab svg{width:24px;height:24px}
+  .town-panel{left:10px;right:10px;width:auto;max-width:none;top:calc(var(--head-h,52px) + 66px);bottom:132px;font-size:14px}
+  .town-tab{font-size:14px;padding:8px 4px 10px}
+  .town-tab .town-badge{margin-left:4px}
+}
+/* a wide screen: the drawers on the left (.lab-panel) stop above the corner buttons instead of running under them */
+@media (min-width:1301px){.lab-panel{--lp-cap:calc(100dvh - var(--head-h,52px) - 96px)}}
