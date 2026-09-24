@@ -1,0 +1,151 @@
+/* toem2/ballot.css — THE BALLOT'S MACHINE, on the live wall (ballot.js).
+   lab 1's Ballot-O-Tron, lifted from lab/sticker.css (№ KN-0002) with its
+   token sheet scoped under .toem-ballot so the drawer's dark case around it
+   keeps its own colours. Every line the machine needs is here and nothing
+   else: the tokens, the keyframes, the plates and tabs and lamps, the
+   sticky note, the steam, and the .bo-* parts. The panel itself (.lab-panel,
+   .lp-*) is lab.css's. */
+.toem-ballot{
+  --lp-w:560px;
+  --st-paper:#f2e9cf; --st-card:#f4ecd5; --st-card-2:#fdf7e3; --st-ink:#17120b;
+  --st-drop:rgba(23,18,11,.82); --st-drop-soft:rgba(23,18,11,.4); --st-ink-55:rgba(23,18,11,.55);
+  --st-yellow:#ffd23f; --st-yellow-2:#f7c01f; --st-red:#e8484a; --st-red-2:#f05a5c; --st-red-3:#b8302f;
+  --st-green:#7bc264; --st-green-2:#5fae4e; --st-blue:#7fa8c9;
+  --st-metal:#b8ac97; --st-metal-2:#c5bba9; --st-metal-3:#d9d0c1; --st-metal-4:#8a7f6a;
+  --st-screen:#17120b; --st-phos:#7ce38b; --st-phos-dim:rgba(124,227,139,.55);
+  --st-face:'Kalam','Public Sans',sans-serif; --st-mono:'VT323',monospace;
+  --st-line:4px solid var(--st-ink); --st-line-3:3px solid var(--st-ink);
+  --st-shadow:10px 11px 0 var(--st-drop); --st-shadow-sm:6px 7px 0 var(--st-drop);
+}
+@keyframes st-blink  { 0%,60%{opacity:1} 61%,100%{opacity:.2} }
+@keyframes st-puff   { 0%{transform:translate(-50%,0) scale(.45);opacity:0} 18%{opacity:.95} 100%{transform:translate(-50%,-110px) scale(1.3);opacity:0} }
+@keyframes st-pop    { 0%{transform:scale(0)} 70%{transform:scale(1.14)} 100%{transform:scale(1)} }
+@keyframes st-shake  { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-2px,1px)} 50%{transform:translate(2px,-1px)} 75%{transform:translate(-1px,-2px)} }
+@keyframes st-land   { 0%{transform:translateY(-60px);opacity:0} 60%{transform:translateY(6px);opacity:1} 100%{transform:translateY(0)} }
+@keyframes st-stamp  { 0%{transform:rotate(-14deg) scale(2.4);opacity:0} 60%{transform:rotate(-8deg) scale(.92);opacity:1} 100%{transform:rotate(-8deg) scale(1)} }
+@keyframes st-suck   { 0%{transform:translate(-50%,-66px) scaleY(1);opacity:1} 75%{opacity:1} 100%{transform:translate(-50%,-6px) scaleY(.15);opacity:0} }
+
+/* the machine's own bits: plates, tabs, lamps, digits, the sticky note, the steam, the grille, the legs */
+.toem-ballot .st-plate{font-family:var(--st-mono);font-size:19px;letter-spacing:.16em;line-height:1.2;color:var(--st-ink);background:var(--st-card);border:var(--st-line-3);border-radius:6px 4px 7px 5px;padding:0 10px;white-space:nowrap;display:inline-block}
+.toem-ballot .st-tab{font-family:var(--st-mono);font-size:18px;letter-spacing:.18em;line-height:1.25;color:var(--st-card);background:var(--st-ink);border-radius:4px;padding:0 10px;white-space:nowrap;display:inline-block}
+.toem-ballot .st-tab-float{position:absolute;top:-13px;left:14px;z-index:3}
+.toem-ballot .st-lamp{width:18px;height:18px;border-radius:50%;border:var(--st-line-3);background:var(--st-metal-3);opacity:.32;display:inline-block;flex:none}
+.toem-ballot .st-lamp-y{background:var(--st-yellow)} .toem-ballot .st-lamp-r{background:var(--st-red)} .toem-ballot .st-lamp-g{background:var(--st-green)}
+.toem-ballot .st-digits{font-family:var(--st-mono);font-size:26px;letter-spacing:.16em;line-height:1.25;color:var(--st-phos);background:var(--st-ink);border-radius:5px;padding:0 10px}
+.toem-ballot .st-sticky{background:var(--st-yellow);border:var(--st-line);border-radius:4px 12px 6px 14px;box-shadow:8px 9px 0 var(--st-drop);padding:24px 15px 14px;position:relative;font-family:var(--st-face);font-weight:700;font-size:15px;line-height:1.4;color:var(--st-ink)}
+.toem-ballot .st-sticky::before{content:"";position:absolute;top:-13px;left:50%;transform:translateX(-50%) rotate(-4deg);width:84px;height:24px;background:rgba(244,236,205,.95);border:var(--st-line-3);border-radius:3px}
+.toem-ballot .st-sticky small{font-weight:400;font-size:13.5px;display:block;margin-top:5px}
+.toem-ballot .st-puff{position:absolute;left:50%;background:var(--st-card);border:var(--st-line-3);opacity:0;animation:st-puff 3s ease-out infinite}
+.toem-ballot .st-puff-1{top:-20px;width:32px;height:28px;border-radius:55% 62% 50% 65%}
+.toem-ballot .st-puff-2{top:-14px;width:22px;height:19px;border-radius:60% 50% 65% 55%;animation-delay:1.5s}
+.toem-ballot .st-puff-go{background:var(--st-card-2);animation-duration:1.1s}
+.toem-ballot .sp-stack{position:relative;width:40px;display:flex;flex-direction:column;align-items:center}
+.toem-ballot .sp-stack-cap{width:52px;height:13px;background:var(--st-metal);border:var(--st-line);border-radius:5px;position:relative;z-index:1}
+.toem-ballot .sp-stack-pipe{width:34px;background:var(--st-metal);border:var(--st-line);border-top-width:0;margin-top:-2px}
+.toem-ballot .sp-grille{height:22px;border:var(--st-line-3);border-radius:6px;background:repeating-linear-gradient(90deg,var(--st-metal) 0 8px,var(--st-ink) 8px 12px)}
+.toem-ballot .sp-legs{display:flex;gap:210px}
+.toem-ballot .sp-legs i{width:60px;height:26px;background:var(--st-metal);border:5px solid var(--st-ink);border-top-width:0;box-shadow:8px 8px 0 var(--st-drop)}
+
+/* the rig: the motion and the ballot above, the machine below (the case is narrow) */
+.toem-ballot .bo-rig{display:flex;flex-direction:column;align-items:center;gap:30px;padding:14px 6px 8px;background:var(--st-paper);border-radius:14px;margin:0 4px 14px 0}
+.toem-ballot .bo-left{display:flex;flex-direction:column;gap:26px;width:100%;max-width:440px;box-sizing:border-box;padding:12px 10px 0}
+.toem-ballot .bo-note{width:178px;transform:rotate(-5deg);align-self:flex-start;margin-bottom:-6px}
+.toem-ballot .bo-issue{background:var(--st-metal-3);border:5px solid var(--st-ink);border-radius:18px 22px 14px 20px;box-shadow:12px 14px 0 var(--st-drop);padding:20px 20px 16px;position:relative;transform:rotate(-.6deg)}
+.toem-ballot .bo-issue-n{position:absolute;top:-13px;right:18px;font-family:var(--st-mono);font-size:17px;letter-spacing:.14em;color:var(--st-ink);background:var(--st-yellow);border:var(--st-line-3);border-radius:6px 4px 7px 5px;padding:0 10px}
+.toem-ballot .bo-issue-q{font-family:var(--st-face);font-weight:700;font-size:21px;line-height:1.3;color:var(--st-ink);margin:0;overflow-wrap:anywhere}
+.toem-ballot .bo-issue-q small{display:block;font-weight:400;font-size:14px;opacity:.7;margin-top:6px}
+.toem-ballot .bo-issue-q a{color:var(--st-red-3)}
+.toem-ballot .bo-who[role="button"]{cursor:pointer;text-decoration:underline dotted}
+.toem-ballot .bo-stage{min-height:290px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+
+/* 02 the ballot itself */
+.toem-ballot .bo-ballot{width:330px;max-width:100%;box-sizing:border-box;background:var(--st-card);border:var(--st-line);border-radius:10px 6px 12px 8px;padding:24px 20px 14px;position:relative;transform:rotate(1.2deg);box-shadow:var(--st-shadow);animation:st-land .45s ease-out;touch-action:none;transition:transform .2s,box-shadow .2s}
+.toem-ballot .bo-ballot.armed{cursor:grab;transform:rotate(1.2deg) scale(1.03);box-shadow:14px 16px 0 var(--st-drop),0 0 0 5px var(--st-yellow)}
+.toem-ballot .bo-ballot.lifted{cursor:grabbing;transition:none;animation:none;z-index:20;box-shadow:20px 24px 0 var(--st-drop-soft)}
+.toem-ballot .bo-ballot.inert{opacity:.7}
+.toem-ballot .bo-ballot > .st-tab{position:absolute;top:-14px;left:50%;transform:translateX(-50%);z-index:2}
+.toem-ballot .bo-grip{display:flex;flex-direction:column;gap:4px;align-items:center;margin:2px 0 10px;opacity:.5}
+.toem-ballot .bo-ballot.armed .bo-grip{opacity:1}
+.toem-ballot .bo-grip i{width:120px;height:5px;background:var(--st-ink);border-radius:3px;opacity:.35}
+.toem-ballot .bo-boxes{display:flex;flex-direction:column;gap:11px}
+.toem-ballot .bo-box{display:flex;align-items:center;gap:14px;background:var(--st-card-2);border:var(--st-line-3);border-radius:9px 6px 8px 7px;padding:7px 13px;cursor:pointer;font-family:var(--st-face);text-align:left;width:100%}
+.toem-ballot .bo-box:nth-child(2){border-radius:7px 9px 6px 10px}
+.toem-ballot .bo-box:hover:not(:disabled){background:#fffcef}
+.toem-ballot .bo-box:disabled{cursor:default}
+.toem-ballot .bo-box i{width:40px;height:40px;flex:none;background:#fff;border:var(--st-line-3);border-radius:6px 4px 7px 5px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:32px;line-height:1;color:var(--st-red);font-style:normal}
+.toem-ballot .bo-box b{font-weight:700;font-size:22px;color:var(--st-ink)}
+.toem-ballot .bo-box u{margin-left:auto;width:20px;height:20px;border-radius:50%;border:var(--st-line-3);text-decoration:none}
+.toem-ballot .bo-box-yes u{background:var(--st-green)} .toem-ballot .bo-box-no u{background:var(--st-red)}
+.toem-ballot .bo-hint{border-top:3px dashed var(--st-ink-55);margin-top:13px;padding-top:8px;text-align:center;font-family:var(--st-face);font-size:15px;color:var(--st-ink);opacity:.75}
+.toem-ballot .bo-ballot.armed .bo-hint{font-weight:700;color:var(--st-red);opacity:1}
+.toem-ballot .bo-post{display:none;margin:10px auto 0;font-size:20px;padding:5px 16px 3px}
+.toem-ballot .bo-post:disabled{opacity:.4;cursor:default}
+.toem-ballot .bo-casting{font-family:var(--st-mono);font-size:21px;letter-spacing:.16em;opacity:.6;color:var(--st-ink)}
+.toem-ballot .bo-done{display:flex;flex-direction:column;align-items:center;gap:22px}
+.toem-ballot .bo-stamp{font-family:var(--st-mono);font-size:28px;letter-spacing:.18em;color:var(--st-red);border:4px solid var(--st-red);border-radius:8px 5px 9px 6px;padding:5px 18px 2px;transform:rotate(-8deg);animation:st-stamp .4s ease-out both}
+.toem-ballot .bo-stamp.is-bad{color:var(--st-red-3);border-color:var(--st-red-3);font-size:22px}
+.toem-ballot .bo-next{font-family:var(--st-mono);font-size:28px;letter-spacing:.18em;color:#fdf3d9;background:var(--st-red);border:var(--st-line);border-radius:12px 16px 10px 14px;padding:8px 24px 5px;cursor:pointer;box-shadow:var(--st-shadow-sm)}
+.toem-ballot .bo-next:hover{background:var(--st-red-2)}
+.toem-ballot .bo-next:active{transform:translate(5px,6px);box-shadow:1px 1px 0 var(--st-drop)}
+.toem-ballot .bo-empty{font-family:var(--st-mono);font-size:20px;letter-spacing:.14em;opacity:.55;text-align:center;line-height:1.4;max-width:300px;color:var(--st-ink)}
+
+/* the machine */
+.toem-ballot .bo-machine-col{display:flex;flex-direction:column;align-items:center;position:relative;flex:0 0 auto;width:100%;max-width:440px}
+.toem-ballot .bo-machine-col .sp-stack{align-self:flex-start;margin-left:70px}
+.toem-ballot .bo-machine-col .sp-stack .sp-stack-pipe{height:51px}
+.toem-ballot .bo-machine{width:100%;box-sizing:border-box;background:var(--st-metal-3);border:5px solid var(--st-ink);border-radius:22px 26px 14px 18px;box-shadow:14px 16px 0 var(--st-drop);padding:14px 16px;display:flex;flex-direction:column;gap:11px;position:relative;z-index:1;margin-top:-5px}
+.toem-ballot .bo-machine.counting{animation:st-shake .18s linear infinite}
+.toem-ballot .bo-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.toem-ballot .bo-top .st-plate{font-size:22px}
+.toem-ballot .bo-lamps{display:flex;gap:9px;align-items:center}
+.toem-ballot .bo-lamps .st-lamp:nth-child(3){opacity:1}
+.toem-ballot .bo-machine.counting .bo-lamps .st-lamp{opacity:1;animation:st-blink .55s steps(1) infinite}
+.toem-ballot .bo-machine.counting .bo-lamps .st-lamp:nth-child(2){animation-delay:.25s}
+.toem-ballot .bo-machine.counting .bo-lamps .st-lamp:nth-child(3){animation-delay:.5s}
+.toem-ballot .bo-machine-col .st-puff-go{display:none}
+.toem-ballot .bo-machine-col.counting .st-puff-go{display:block}
+/* 03 the tally screen */
+.toem-ballot .bo-screen{height:250px;background:var(--st-ink);border:var(--st-line);border-radius:14px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.toem-ballot .bo-screen::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,#262010 0%,#17120b 70%)}
+.toem-ballot .bo-screen::after{content:"03 TALLY SCREEN";position:absolute;top:8px;left:12px;z-index:2;font-family:var(--st-mono);font-size:16px;letter-spacing:.18em;color:var(--st-phos);opacity:.8}
+.toem-ballot .bo-screen-in{position:relative;z-index:1;width:100%;box-sizing:border-box}
+.toem-ballot .bo-say{display:flex;align-items:center;justify-content:center;gap:8px;padding:0 22px;text-align:center}
+.toem-ballot .bo-say p{font-family:var(--st-mono);font-size:26px;letter-spacing:.16em;line-height:1.3;color:var(--st-phos);margin:0;white-space:pre-line}
+.toem-ballot .bo-say.warn p{color:var(--st-red)}
+.toem-ballot .bo-say i{width:12px;height:24px;background:var(--st-phos);flex:none;animation:st-blink 1s steps(1) infinite}
+.toem-ballot .bo-say.warn i{background:var(--st-red)}
+.toem-ballot .bo-results{padding:34px 22px 14px;display:flex;flex-direction:column;gap:13px;animation:st-pop .35s ease-out}
+.toem-ballot .bo-results > b{font-family:var(--st-mono);font-size:18px;letter-spacing:.18em;color:var(--st-phos);opacity:.7;font-weight:400}
+.toem-ballot .bo-bar{display:flex;align-items:center;gap:12px}
+.toem-ballot .bo-bar > span{width:44px;font-family:var(--st-mono);font-size:22px;letter-spacing:.14em}
+.toem-ballot .bo-bar > i{flex:1;height:22px;background:#2a2416;border:2px solid #4a4130;border-radius:4px;overflow:hidden;display:block}
+.toem-ballot .bo-bar > i > b{display:block;height:100%;width:0;transition:width .8s ease-out}
+.toem-ballot .bo-bar > em{width:70px;text-align:right;font-family:var(--st-mono);font-size:22px;font-style:normal}
+.toem-ballot .bo-bar-yes span,.toem-ballot .bo-bar-yes em{color:var(--st-phos)} .toem-ballot .bo-bar-yes i b{background:var(--st-phos)}
+.toem-ballot .bo-bar-no span,.toem-ballot .bo-bar-no em{color:var(--st-red)} .toem-ballot .bo-bar-no i b{background:var(--st-red)}
+.toem-ballot .bo-verdict{text-align:center;font-family:var(--st-mono);font-size:22px;letter-spacing:.18em;color:var(--st-yellow);margin-top:2px}
+.toem-ballot .bo-yours{text-align:center;font-family:var(--st-mono);font-size:16px;letter-spacing:.14em;color:var(--st-phos);opacity:.55}
+/* 04 the slot */
+.toem-ballot .bo-slot-wrap{position:relative;padding-top:10px}
+.toem-ballot .bo-slot-wrap > .st-tab{position:absolute;top:-3px;left:12px;z-index:2}
+.toem-ballot .bo-slot{width:100%;height:54px;background:var(--st-metal);border:var(--st-line);border-radius:10px 8px 11px 9px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.toem-ballot .bo-slot.over{outline:4px dashed var(--st-green);outline-offset:5px;background:var(--st-metal-2)}
+.toem-ballot .bo-slot:focus-visible{outline:4px dashed var(--st-yellow);outline-offset:5px}
+.toem-ballot .bo-slot i{width:250px;max-width:70%;height:14px;background:var(--st-ink);border-radius:7px;position:relative;z-index:1}
+.toem-ballot .bo-slot em{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-style:normal;font-family:var(--st-mono);font-size:15px;letter-spacing:.14em;opacity:.55;color:var(--st-ink)}
+.toem-ballot .bo-suck{position:absolute;left:50%;top:22px;width:180px;height:54px;background:var(--st-card);border:var(--st-line-3);border-radius:6px 4px 7px 5px;transform-origin:bottom center;z-index:0;animation:st-suck .7s ease-in forwards}
+.toem-ballot .bo-cast-row{display:flex;gap:14px;align-items:center;justify-content:space-between}
+.toem-ballot .bo-cast{display:flex;align-items:center;gap:10px;background:var(--st-card);border:var(--st-line-3);border-radius:8px 11px 7px 10px;padding:5px 12px}
+.toem-ballot .bo-cast > span{font-family:var(--st-mono);font-size:16px;letter-spacing:.18em;color:var(--st-ink)}
+.toem-ballot .bo-cast-row > p{margin:0;font-family:var(--st-face);font-size:14px;opacity:.7;text-align:right;line-height:1.3;color:var(--st-ink)}
+
+/* the list of motions under the rig, in the case's own rows (lab.css .th-row) */
+.toem-ballot .bo-list{padding:4px 0}
+.toem-ballot .th-fine{font-size:13px;color:#bdb3c8;margin:8px 0 0}
+
+/* a phone: the machine is hidden, the ballot is posted with the button under it */
+@media (max-width:720px){
+  .toem-ballot .bo-machine-col{display:none}
+  .toem-ballot .bo-post{display:block}
+  .toem-ballot .bo-note{width:150px;font-size:13px}
+}

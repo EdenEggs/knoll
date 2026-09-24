@@ -157,8 +157,27 @@ html.lab-live .lab-tools{display:flex;position:relative}
 /* …and the note hangs BELOW the one-line header: the header clips (overflow:auto, for the
    long hint on a phone), so on the live site, where there is no hint, it does not */
 html.lab-live:not(.lab-local) .lab-head{overflow:visible;max-height:none}
-html.lab-live:not(.lab-local) .lab-tools>:not(#toem-save):not(#toem-save-note):not(#toem-history){display:none}
+html.lab-live:not(.lab-local) .lab-tools>:not(#toem-save):not(#toem-save-note):not(#toem-history):not(#toem-chaos):not(#toem-chaos-pop):not(#toem-ballot){display:none}
 .lab-save.is-wait{background:#b8860b}
+/* THE CHAOS STAMP (seed.js: THE RULES HERE, 2026-09-24): the wall's level beside the
+   submit button — tended, council, wild, read-only — a rubber stamp in the level's
+   colour, and the popover it opens with who keeps this wall, what everyone may do,
+   the ballot's clock and where you stand. "on the ballot" is the submit button's blue. */
+.toem-chaos{font-family:'VT323',monospace;font-size:13px;letter-spacing:2px;line-height:1.2;color:#2f8f5b;background:transparent;
+  border:2.5px solid currentColor;border-radius:4px;padding:1px 8px;transform:rotate(-3deg);cursor:pointer;white-space:nowrap;text-transform:uppercase}
+.toem-chaos:hover{transform:rotate(0deg)}
+.toem-chaos:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
+.toem-chaos.is-0{color:#6b6478} .toem-chaos.is-1{color:#2f8f5b} .toem-chaos.is-2{color:#b8860b} .toem-chaos.is-3{color:#b3261e}
+.toem-chaos[hidden]{display:none}
+.toem-chaos-pop{position:absolute;top:calc(100% + 8px);left:0;z-index:3;width:max-content;max-width:min(30em,92vw);padding:8px 12px;border-radius:8px;
+  background:var(--paper);box-shadow:0 2px 10px rgba(0,0,0,.14);font-family:var(--body);font-size:12px;line-height:1.5;color:var(--ink-3);text-align:left;text-wrap:pretty}
+.toem-chaos-pop[hidden]{display:none}
+.toem-chaos-pop .lab-link{margin-left:8px;white-space:nowrap}
+.lab-save.is-ballot{background:var(--blue)}
+.lab-why{box-sizing:border-box;width:min(22em,60vw);margin:4px 0 2px;padding:3px 8px;border:1.5px solid var(--line);border-radius:6px;background:#fff;
+  font-family:var(--body);font-size:12px;color:var(--ink)}
+.dock-btn.is-keepers{opacity:.32}
+.dock-btn.is-keepers:hover{opacity:.6}
 .lab-save:disabled{cursor:default;opacity:.7}
 .toem-save-note .lab-link{margin-left:10px;white-space:nowrap}
 /* THE HISTORY PANEL (history.js, 2026-09-17): the drawer's case (.lab-panel), a
@@ -187,6 +206,39 @@ html.lab-live:not(.lab-local) .lab-tools>:not(#toem-save):not(#toem-save-note):n
 .wall-diff .th-chg{fill:rgba(240,180,41,.10);stroke:#e0a020}
 .wall-diff .th-line{fill:none;stroke:#e0a020;stroke-dasharray:4 4}
 .wall-diff .th-was{fill:none;stroke:#e0a020}
+/* the pieces of yours that wait: a dashed box each — amber for the keepers' queue, blue for the ballot */
+.wall-diff .th-wait rect{fill:none;stroke:#b8860b;stroke-dasharray:3 5}
+.wall-diff .th-ballot rect{fill:none;stroke:#5871f5;stroke-dasharray:3 5}
+/* the panel's newer bits (history.js, 2026-09-24): a gnome's name you can press, their card, the rules, the flags on the moderators' rows, the scrubber */
+.th-who[role="button"]{cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px}
+.th-who[role="button"]:hover,.th-who[role="button"]:focus-visible{color:#ff9fd0;outline:none}
+.th-card{position:relative;margin:2px 0 8px;padding:10px 34px 10px 12px;border:3px solid #100c16;border-radius:8px;background:#332b3c;color:#f4f0f7;font-size:13px;line-height:1.5}
+.th-card b{color:#fff;font-size:15px}
+.th-card .lp-x{position:absolute;right:6px;top:6px}
+.th-card-head{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.th-card-head img{width:30px;height:30px;object-fit:cover;border-radius:6px;border:2px solid #100c16}
+.th-card .th-mod{color:#bdb3c8;font-size:12.5px}
+.th-stamp{font-family:'VT323',monospace;font-size:12px;letter-spacing:2px;color:#ff9fd0;border:2px solid currentColor;border-radius:4px;padding:0 6px;transform:rotate(-3deg);display:inline-block}
+.th-stamp.is-newcomer{color:#bdb3c8} .th-stamp.is-contributor{color:#9fb8ff} .th-stamp.is-trusted{color:#7ce38b} .th-stamp.is-mod,.th-stamp.is-admin{color:#ff8a80}
+.th-flag{display:inline-block;font-family:'VT323',monospace;font-size:12px;letter-spacing:2px;color:#f0b429;border:2px solid currentColor;border-radius:4px;padding:0 6px;margin:2px 6px 2px 0}
+.th-flag.is-bad{color:#ff8a80} .th-flag.is-flak{color:#ff8a80}
+.th-row.is-flak{box-shadow:inset 3px 0 0 #e0473f} .th-row.is-watched{box-shadow:inset 3px 0 0 #f0b429}
+.th-rules{margin:0 0 10px}
+.th-radio{display:block;border:0;background:none;color:#f4f0f7;font:inherit;cursor:pointer}
+.th-radio[aria-checked="true"]{background:#3d3447;box-shadow:inset 3px 0 0 #ff9fd0}
+.th-period{margin:6px 0} .th-period[hidden]{display:none}
+.th-period .th-link[aria-pressed="true"]{background:#e8479c;color:#fff}
+.th-period small,.th-switches small,.th-note{display:block;font-size:12px;color:#bdb3c8;margin-top:4px}
+.th-h2{font-family:'VT323',monospace;font-size:15px;letter-spacing:2px;color:#ff9fd0;margin:8px 0 2px}
+.th-switches label{display:inline-flex;align-items:center;gap:5px;margin:2px 12px 2px 0;font-size:13px;color:#f4f0f7}
+.th-switches label[hidden]{display:none}
+.th-seal:disabled{opacity:.5;cursor:default}
+.th-seal.is-dirty{background:#e8479c;color:#fff}
+.th-why{margin-top:4px}
+.th-scrub-wrap{display:flex;align-items:center;gap:8px}
+.th-scrub{flex:1;accent-color:#ff9fd0}
+.th-fine{font-size:12.5px;color:#bdb3c8}
+@media (max-width:560px){.toem-chaos{font-size:12px;letter-spacing:1.5px;padding:1px 6px}}
 
 /* a class sets display, so [hidden] has to be said again or it loses to it
    and the pill shows up on the deployed bench with nothing behind it */

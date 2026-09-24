@@ -27,6 +27,12 @@
      its own pill by knocking on the door, which is the same fact asked the
      slow way. -->
 <script>if(/^(localhost|127.0.0.1|[::1])$/.test(location.hostname)&&!/[?&]visitor\b/.test(location.search))document.documentElement.classList.add('lab-local');</script>
+<!-- ?page=<slug> (2026-09-24): this same bench hosts any space's wall. The slug goes
+     on <html data-page>, and seed.js, lab.js's stores, history.js, ballot.js and
+     cursors.js all read it there — the paper, the camera and the room are then that
+     page's, under knoll-<slug>: keys, and every ask of the door names it. A slug
+     that is not one, or TOEM 2's own, is nothing: the bench is TOEM 2's. -->
+<script>(function(){var m=/[?&]page=([a-z0-9][a-z0-9-]{0,31})(?:&|$)/i.exec(location.search);if(m&&m[1].toLowerCase()!=='toem2')document.documentElement.dataset.page=m[1].toLowerCase();})();</script>
 <!-- ?visitor (2026-09-21): localhost, but the landing page — how the site shows
      this bench, header, account corner and all, for a look at it before a push -->
 <!-- ?embed=1 — THE YARD'S PICTURE OF THIS PAGE (2026-09-21). /yard frames
@@ -204,7 +210,9 @@ html.toem-embed .keymap, html.toem-embed .lab-panel, html.toem-embed .lab-warn {
     <dt><kbd>drag</kbd></dt><dd>a picked sticker — the whole pick goes with it, and one undo brings it all back</dd>
     <dt><kbd>corner</kbd><kbd>ring</kbd></dt><dd>press one sticker on its own: the corner scales it, the ring above it turns it (<kbd>shift</kbd> for 15°) — double-click either to reset</dd>
     <dt><kbd>shift</kbd><kbd>h</kbd><kbd>v</kbd></dt><dd>mirror what is picked, left-to-right or top-to-bottom — a group flips about the group</dd>
-    <dt><kbd>ctrl</kbd><kbd>s</kbd></dt><dd>save the paper into the site — every piece as it is now becomes what TOEM 2 opens on (hold shift to save this view as the opening one too)</dd>
+    <dt><kbd>ctrl</kbd><kbd>s</kbd></dt><dd>save the paper into the site — every piece as it is now becomes what TOEM 2 opens on (hold shift to save this view as the opening one too); on the live wall, <b>submit</b>: what you changed goes to the wall, to the keepers, or to the ballot, as the stamp says</dd>
+    <dt><kbd>history</kbd></dt><dd>every revision, the queue, and the rules of this wall</dd>
+    <dt><kbd>ballot</kbd></dt><dd>the council's ballot — mark aye or nay and post it in the machine; a standing day on TOEM 2 lets you vote</dd>
     <dt><kbd>ctrl</kbd><kbd>z</kbd></dt><dd>undo — the last thing moved, or the last thing drawn</dd>
     <dt><kbd>ctrl</kbd><kbd>c</kbd><kbd>v</kbd></dt><dd>copy what is picked, and paste it a nudge down-right — a group stays a group</dd>
     <dt><kbd>right click</kbd></dt><dd>a feature — raise it, lower it, or delete it (undo puts it back)</dd>
@@ -283,6 +291,12 @@ html.toem-embed .keymap, html.toem-embed .lab-panel, html.toem-embed .lab-warn {
      undo one. After wall.js and seed.js, whose exports it reads; it does
      nothing on the dev server's file half. -->
 <script src="history.js"></script>
+<!-- the council's ballot, on the live wall only: lab 1's Ballot-O-Tron put on the
+     drawer's case — mark aye or nay, drag the ballot into the slot, the engine counts.
+     After history.js, whose cards it borrows. Its own stylesheet, so lab.css stays
+     the bench's. -->
+<link rel="stylesheet" href="ballot.css">
+<script src="ballot.js"></script>
 <!-- the sign's own one trick: click a letter, a gnome puts it overhead -->
 <script src="sign.js"></script>
 <!-- hold ctrl and the hitbox is the drawing rather than the box round it —

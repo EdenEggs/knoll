@@ -11,8 +11,10 @@
    AN INVITE is to a space, from the gnome who made it, to their friends
    (the form's "Invite friends along", and the space's own page), and it
    lands in the friend's bell with the space's address. Who was invited is
-   kept with the space (invited:<slug>) for the day "friends only" means
-   something, and nobody is told twice.
+   kept with the space (invited:<slug>): since 2026-09-24 they are its
+   KEEPERS (api/wall.js: THREE LEVELS OF CHAOS) while they are still
+   friends, so the bell says so, nobody is told twice, and uninvite takes
+   one back off.
    THE BELL is notes:<u>, newest first, the last NOTES_KEEP; whatever came
    after the bell was last opened (`noted` on the account) is unseen. An ask
    leaves it once answered.
@@ -22,7 +24,8 @@
      POST { op: 'ask', tag }            → { ok, friends }   (true when they had asked you first)
           { op: 'answer', id, yes }     → { ok }
           { op: 'drop', id }            → { ok }            (friends no longer, both ways)
-          { op: 'invite', slug, ids }   → { ok, sent }      (your space, your friends)
+          { op: 'invite', slug, ids }   → { ok, sent }      (your space, your friends: its keepers)
+          { op: 'uninvite', slug, ids } → { ok, gone }      (your space: keepers no more)
           { op: 'seen' }                → { ok }            (the bell was opened)
 
    ponytail: an hour's counter per account; a gnome who keeps asking one who
@@ -30,28 +33,20 @@
 'use strict';
 
 const W = require('./wall.js');
-const { db, dbm, K, answer, readBody, Bad, bad, sameSite, whoIs, USER_RE, SLUG_RE } = W;
+const { db, dbm, K, answer, readBody, Bad, bad, sameSite, whoIs, USER_RE, SLUG_RE, tell, tagsOf } = W;
 
-const NOTES_KEEP = 50, RATE = 60;             // bell entries kept · posts an hour, an account
+const RATE = 60;                              // posts an hour, an account (the bell itself — tell, tagsOf, NOTES_KEEP — is wall.js's now)
 const hour = () => Math.floor(Date.now() / 36e5);
 async function spend(u) {
   const k = K.rl('friends:' + u, hour()), n = await db('INCR', k);
   if (n === 1) await db('EXPIRE', k, 3600);
   return n <= RATE;
 }
-async function tagsOf(ids) {                   // account → Name#n, for the ones a page will draw
-  const uniq = [...new Set(ids)], out = {};
-  const got = await dbm(uniq.flatMap(u => [['HGET', K.user(u), 'name'], ['HGET', K.user(u), 'n']]));
-  uniq.forEach((u, i) => { out[u] = W.tagOf({ name: got[2 * i], n: got[2 * i + 1] }) || 'a gnome'; });
-  return out;
-}
 async function byTag(raw) {                    // 'Mossy#3' → the account that goes by it, if any
   const m = /^(.+)#(\d{1,7})$/.exec(String(raw == null ? '' : raw).trim()), name = m && W.cleanName(m[1]);
   const u = name ? await db('HGET', K.tags, W.foldName(name) + '#' + (+m[2])) : null;
   return u && USER_RE.test(u) && (await db('HGET', K.user(u), 'banned')) !== '1' ? u : null;
 }
-const tell = (to, kind, from, extra) => dbm([['LPUSH', K.notes(to), JSON.stringify(Object.assign({ kind, from, at: Date.now() }, extra || {}))],
-                                            ['LTRIM', K.notes(to), 0, NOTES_KEEP - 1]]);
 async function befriend(me, u) {
   await dbm([['SADD', K.friends(me), u], ['SADD', K.friends(u), me], ['SREM', K.asks(me), u], ['SREM', K.asks(u), me]]);
   await tell(u, 'friend', me);                 // the one who asked hears the yes
@@ -107,8 +102,18 @@ async function post(req, res) {
       const to = [...new Set(Array.isArray(body.ids) ? body.ids.map(String) : [])].filter(u => mine.has(u));
       const fresh = to.length ? await dbm(to.map(u => ['SADD', K.invited(slug), u])) : [];
       const sent = to.filter((u, i) => fresh[i]);
-      for (const u of sent) await tell(u, 'invite', me.id, { slug, title: p.title || slug });
+      for (const u of sent) await tell(u, 'keeper', me.id, { slug, title: p.title || slug });
+      if (sent.length) await W.audit(me.id, 'invite', { page: slug, ids: sent });
       return answer(res, 200, { ok: true, sent: sent.length });
+    }
+    case 'uninvite': {
+      const slug = String(body.slug == null ? '' : body.slug).toLowerCase(), p = SLUG_RE.test(slug) ? await db('HGETALL', K.page(slug)) : {};
+      if (!p.made) throw bad(404, 'page', 'no such space');
+      if (p.by !== me.id) throw bad(403, 'owner', 'only the gnome who made a space uninvites from it');
+      const ids = [...new Set(Array.isArray(body.ids) ? body.ids.map(String).filter(u => USER_RE.test(u)) : [])];
+      const gone = ids.length ? (await dbm(ids.map(u => ['SREM', K.invited(slug), u]))).filter(Boolean).length : 0;
+      if (gone) await W.audit(me.id, 'uninvite', { page: slug, ids });
+      return answer(res, 200, { ok: true, gone });
     }
     default: throw bad(400, 'op', 'no such op');
   }

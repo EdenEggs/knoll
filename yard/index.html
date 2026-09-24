@@ -493,7 +493,7 @@
             <div role="region" aria-label="notifications" style="position:absolute; left:0; top:calc(100% + 14px); z-index:14; width:min(280px, calc(100vw - 120px)); box-sizing:border-box; background:#fdf7e3; border:4px solid #17120b; box-shadow:7px 8px 0 rgba(60,50,80,0.25); padding:12px 16px 14px; transform:rotate(-0.6deg)">
               <div style="font-size:14px; letter-spacing:2px; color:#4a4054; opacity:0.75; margin-bottom:8px">NOTIFICATIONS</div>
               <sc-if value="{{ noNotes }}" hint-placeholder-val="{{ false }}">
-                <div style="font-size:15px; letter-spacing:1px; color:#4a4054; opacity:0.8">NOTHING YET — FRIENDS AND INVITES LAND HERE.</div>
+                <div style="font-size:15px; letter-spacing:1px; color:#4a4054; opacity:0.8">NOTHING YET — FRIENDS, INVITES AND WORD FROM THE WALLS LAND HERE.</div>
               </sc-if>
               <div style="display:flex; flex-direction:column; gap:10px; font-size:17px; line-height:1.25; color:#3a3342; max-height:340px; overflow-y:auto">
                 <sc-for list="{{ bellNotes }}" as="n" hint-placeholder-count="3">
@@ -742,8 +742,8 @@
           <div aria-hidden="true" style="position:absolute; top:-11px; left:-11px; width:15px; height:15px; background:#e0598c; border:3px solid #17120b; transform:rotate(45deg)"></div>
           <h2 style="margin:0 0 12px; font-family:'Rye',serif; font-size:20px; font-weight:400">Your standing</h2>
           <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px">
-            <div style="font-size:17px; letter-spacing:2px; color:#e8484a; border:3px solid #e8484a; padding:1px 10px; transform:rotate(-3deg); background:#fdf7e3; flex:none">REGULAR</div>
-            <div style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.75">GNOME IN GOOD STANDING</div>
+            <div style="font-size:17px; letter-spacing:2px; color:{{ tierCol }}; border:3px solid {{ tierCol }}; padding:1px 10px; transform:rotate(-3deg); background:#fdf7e3; flex:none">{{ tierWord }}</div>
+            <div style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.75">{{ standingLine }}</div>
           </div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px 10px">
             <sc-for list="{{ stats }}" as="st" hint-placeholder-count="4">
@@ -1150,6 +1150,8 @@ class Component extends DCLogic {
       if (a === null && !EMBED) { location.replace('/login/?next=' + encodeURIComponent(location.pathname + location.search)); return; }
       if (!a) return;
       if (a.avatar != null) this.setState({ pic: a.avatar });   // THE PICTURE, as the door has it
+      // YOUR STANDING (2026-09-24): the wall's own count — standing days, streak, what landed (api/wall.js ?who=); the pieces here stand in until it lands
+      if (a.id && !EMBED) fetch('/api/wall?who=' + a.id, { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json()).then(w => { if (w && w.ok) this.setState({ who: w.who, whoMade: +a.made || 0 }); }).catch(() => {});
       // a yard that has never been named goes by the account's name (setSettings is for edits, so this one is not sent back)
       if (a.name && !this.state.settings.displayName) { const settings = Object.assign({}, this.state.settings, { displayName: a.name }); this.setState({ settings }); this.save(this.K.settings, settings); }
       if (a.toured || EMBED || !(this.props.autoTour ?? true)) return;
@@ -1158,11 +1160,14 @@ class Component extends DCLogic {
     if (window.YardTools) { YardTools.mounted(this); if (!EMBED) this.loadFence(); }
     this.loadSpaces();
     if (!EMBED) this.loadFriends();
+    // the bell, read again when the tab comes back — at most once a minute, like the wall's pull
+    if (!EMBED) window.addEventListener('focus', this._focus = () => { if (Date.now() - (this._frAt || 0) > 60000) this.loadFriends(); });
   }
   /* FRIENDS AND THE BELL (2026-09-23): api/friends.js — who you know, and what you
      were told. Every post answers with the list read again, so the bell, the
      friends and the count never disagree with the door. */
   loadFriends() {
+    this._frAt = Date.now();
     return fetch('/api/friends', { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json())
       .then(v => { if (v && v.ok) this.setState({ fr: v }); }).catch(() => {});
   }
@@ -1182,6 +1187,7 @@ class Component extends DCLogic {
     window.removeEventListener('keydown', this._key);
     window.removeEventListener('resize', this._size);
     window.removeEventListener('mousemove', this._mouse);
+    if (this._focus) window.removeEventListener('focus', this._focus);
     /* Both loops, not one. `endTour` cancels _armRaf and this did not, so a
        component torn down mid-tour left the spring queued to setState on it.
        Nothing unmounts this page today — it is one document with one component
@@ -1362,28 +1368,40 @@ class Component extends DCLogic {
   }
   standing() {
     const P = this.pieces(), ts = P.map(function (p) { return +p.when || 0; }).filter(Boolean);
-    const pub = window.YardTools && YardTools.published;
-    const first = ts.length ? Math.min.apply(null, ts) : (pub && pub.t) || 0;
+    const pub = window.YardTools && YardTools.published, w = this.state.who;
+    const first = w && this.state.whoMade ? this.state.whoMade : ts.length ? Math.min.apply(null, ts) : (pub && pub.t) || 0;
     const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return [
-      { v: String(P.length), k: 'CONTRIBUTIONS' }, { v: '1', k: 'HILLS JOINED' },
-      { v: this.streak(ts) + 'd', k: 'CURRENT STREAK' },
+      { v: String(w ? (w.live || 0) + (w.okd || 0) : P.length), k: w ? 'EDITS ON THE WALLS' : 'CONTRIBUTIONS' }, { v: String(1 + (this.state.mine || []).length), k: 'HILLS OF YOURS' },
+      { v: (w ? w.streak || 0 : this.streak(ts)) + 'd', k: 'CURRENT STREAK' },
       { v: first ? MON[new Date(first).getMonth()] + ' ' + new Date(first).getFullYear() : '—', k: 'MEMBER SINCE' }
     ];
   }
+  // the stamp and the line beside it: the tier the wall gives you, and your standing days (api/wall.js: REP IS STANDING DAYS)
+  tierVals() {
+    const w = this.state.who;
+    if (!w) return { tierWord: 'GNOME', tierCol: '#e8484a', standingLine: 'THE HILL HAS NOT ANSWERED YET' };
+    const role = w.role === 'admin' || w.role === 'mod' ? 'MODERATOR' : String(w.tier || 'newcomer').toUpperCase();
+    const col = { NEWCOMER: '#6b6478', CONTRIBUTOR: '#5a8fd6', TRUSTED: '#2f8f5b', MODERATOR: '#e8484a' }[role] || '#e8484a';
+    return { tierWord: role, tierCol: col, standingLine: w.rep ? w.rep + ' STANDING DAY' + (w.rep === 1 ? '' : 'S') + (w.streak >= 2 ? ' · ' + w.streak + '-DAY STREAK' : '') : 'NO STANDING YET — A DAY OF LIVE EDITS ON TOEM 2 EARNS ONE' };
+  }
   badgeList(tile, locked) {
-    const P = this.pieces(), n = P.length, notes = P.filter(function (p) { return p.k === 't'; }).length;
+    const P = this.pieces(), notes = P.filter(function (p) { return p.k === 't'; }).length, w = this.state.who;
     const ts = P.map(function (p) { return +p.when || 0; }).filter(Boolean);
-    const first = ts.length ? Math.min.apply(null, ts) : 0, days = first ? Math.floor((Date.now() - first) / 86400000) : 0, streak = this.streak(ts);
+    const first = ts.length ? Math.min.apply(null, ts) : 0;
+    // with the wall's card (YOUR STANDING): what landed, the standing days, the streak; without it, this page's own pieces stand in
+    const landed = w ? (w.live || 0) + (w.okd || 0) : P.length, rep = w ? w.rep || 0 : 0, streak = w ? w.streak || 0 : this.streak(ts);
+    const since = w && this.state.whoMade ? this.state.whoMade : first;
     const MON = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
     const mon = function (t) { const d = new Date(t); return MON[d.getMonth()] + ' ' + d.getFullYear(); };
+    const founder = since && since < Date.UTC(2026, 9, 1);   // on the hill before October 2026
     return [
-      first ? tile({ name: 'FIRST PLANTING', sub: 'earned ' + mon(first), art: this.badgeIcon('star'), rot: '1.5deg' }) : locked({ name: 'FIRST PLANTING', sub: 'put one thing on the page' }),
-      days >= 30 ? tile({ name: 'HILL TENDER', sub: 'kept a page 30 days', art: this.badgeIcon('trophy'), rot: '-2deg' }) : locked({ name: 'HILL TENDER', sub: first ? (30 - days) + ' days to go' : 'keep a page 30 days' }),
+      landed >= 1 ? tile({ name: 'FIRST PLANTING', sub: 'earned ' + mon(since || Date.now()), art: this.badgeIcon('star'), rot: '1.5deg' }) : locked({ name: 'FIRST PLANTING', sub: 'put one thing on a wall for everybody' }),
+      rep >= 30 ? tile({ name: 'HILL TENDER', sub: 'thirty standing days', art: this.badgeIcon('trophy'), rot: '-2deg' }) : locked({ name: 'HILL TENDER', sub: w ? (30 - rep) + ' standing days to go' : 'thirty standing days' }),
       streak >= 3 ? tile({ name: streak + '-DAY STREAK', sub: 'still burning', art: this.badgeIcon('flame'), rot: '-1deg' }) : locked({ name: 'A STREAK', sub: 'three days running' }),
       notes >= 10 ? tile({ name: 'WALL SCRIBBLER', sub: 'left 10 notes', art: this.badgeIcon('pencil'), rot: '2deg' }) : locked({ name: 'WALL SCRIBBLER', sub: (10 - notes) + ' notes to go' }),
-      n >= 100 ? tile({ name: '100 EDITS', sub: 'a hundred pieces', art: this.badgeIcon('trophy'), rot: '1deg' }) : locked({ name: '100 EDITS', sub: (100 - n) + ' to go' }),
-      locked({ name: "FOUNDER'S PIN", sub: 'how? nobody knows' })
+      landed >= 100 ? tile({ name: '100 EDITS', sub: 'a hundred live edits', art: this.badgeIcon('trophy'), rot: '1deg' }) : locked({ name: '100 EDITS', sub: (100 - landed) + ' to go' }),
+      founder ? tile({ name: "FOUNDER'S PIN", sub: 'here before the crowd', art: this.badgeIcon('star'), rot: '-1.5deg' }) : locked({ name: "FOUNDER'S PIN", sub: 'how? nobody knows' })
     ];
   }
   editList(C) {
@@ -1807,8 +1825,10 @@ class Component extends DCLogic {
     /* …and first, the spaces you MADE (loadSpaces). These come from the door, not from
        this file — so the href is built from a slug that must look like one, the colour
        is the door's own table's, and a picture must be a JPEG's data: URL. */
+    const LEVEL = { 0: 'READ-ONLY', 1: 'TENDED', 2: 'COUNCIL', 3: 'WILD' };
     const MINE = this.state.mine.filter(s => /^[a-z0-9-]{1,32}$/.test(s.slug)).map(s => ({ name: s.title, href: '/' + s.slug, art: /^#[0-9a-f]{6}$/.test(s.paper) ? s.paper : C.CREAM,
-      pic: /^data:image\/jpeg;base64,/.test(s.pic) ? s.pic : '', about: 'YOURS · MADE ' + AGO(s.made), here: false, saved: false }));
+      pic: /^data:image\/jpeg;base64,/.test(s.pic) ? s.pic : '', here: false, saved: false,
+      about: 'YOURS · ' + (LEVEL[s.chaos] || 'TENDED') + (s.waiting ? ' · ' + s.waiting + (s.chaos === 2 ? ' ON THE BALLOT' : ' WAITING') : '') }));
     // the one flag, on a hill and beside a visit: raised is saved
     const flagVals = name => { const fav = favs.indexOf(name) >= 0; return {
       fav, favTitle: (fav ? 'take ' + name + ' off your hills' : 'save ' + name + ' to your hills'),
@@ -1827,9 +1847,14 @@ class Component extends DCLogic {
       bellLabel: fr.unseen ? 'notifications, ' + fr.unseen + ' new' : 'notifications',
       noNotes: !fr.notes.length,
       bellNotes: fr.notes.map(n => ({
-        text: n.kind === 'ask' ? n.from.tag + ' wants to be friends' : n.kind === 'friend' ? n.from.tag + ' said yes — you are friends now' : n.from.tag + ' invited you to',
-        isAsk: n.kind === 'ask', isInvite: n.kind === 'invite' && /^[a-z0-9-]{1,32}$/.test(n.slug || ''),
-        href: '/' + n.slug, title: n.title || n.slug, when: AGO(n.at),
+        text: n.kind === 'ask' ? n.from.tag + ' wants to be friends' : n.kind === 'friend' ? n.from.tag + ' said yes — you are friends now'
+            : n.kind === 'invite' ? n.from.tag + ' invited you to' : n.kind === 'keeper' ? n.from.tag + ' made you a keeper of'
+            : n.kind === 'okd' ? 'your edit went up at' : n.kind === 'rej' ? 'your edit was turned back' + (n.why ? ' — ' + n.why : '') + ' at'
+            : n.kind === 'passed' ? 'your motion carried, ' + (n.ayes || 0) + '–' + (n.nays || 0) + ', at' : n.kind === 'failed' ? 'your motion fell, ' + (n.ayes || 0) + '–' + (n.nays || 0) + ', at'
+            : n.kind === 'ballot' ? 'a motion is on the ballot at' : n.from.tag + ' sent word',
+        isAsk: n.kind === 'ask', isInvite: /^(invite|keeper|okd|rej|passed|failed|ballot)$/.test(n.kind) && /^[a-z0-9-]{1,32}$/.test(n.slug || ''),
+        href: /^(invite|keeper)$/.test(n.kind) ? '/' + n.slug : (n.slug === 'toem2' ? '/toem2/' : '/toem2/?page=' + n.slug) + (n.kind === 'ballot' ? (n.slug === 'toem2' ? '?' : '&') + 'ballot=1' : ''),
+        title: n.title || n.slug, when: AGO(n.at),
         yes: () => this.friendsDo({ op: 'answer', id: n.from.id, yes: true }),
         no: () => this.friendsDo({ op: 'answer', id: n.from.id, yes: false })
       })),

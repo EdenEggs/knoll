@@ -2,7 +2,7 @@
 <html><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Owner Dashboard · Knoll</title>
+<title>Dashboard · Knoll</title>
 <!-- The icon sits HERE and not in the helmet, which is where this page used to
      keep it. The helmet is hoisted into <head> by support.js, i.e. after the
      runtime boots — and Chrome, finding no icon before then, asks for
@@ -133,14 +133,44 @@
           <div style="position:absolute; bottom:-9px; right:-9px; width:12px; height:12px; background:#e8484a; border:3px solid #17120b; transform:rotate(45deg)"></div>
         </div>
         <div>
-          <h1 style="margin:0; font-family:'Rye',serif; font-size:36px; font-weight:400; line-height:1">Owner Dashboard</h1>
-          <div style="font-size:17px; letter-spacing:3px; color:#4a4054; opacity:0.7; margin-top:6px">· EVERY VISITOR COUNTED BY HAND · GNOME-CERTIFIED ·</div>
+          <h1 style="margin:0; font-family:'Rye',serif; font-size:36px; font-weight:400; line-height:1">{{ dashTitle }}</h1>
+          <div style="font-size:17px; letter-spacing:3px; color:#4a4054; opacity:0.7; margin-top:6px">{{ dashSub }}</div>
         </div>
       </div>
       <!-- THE CHIP IS THE DOOR TO THE PAGE THESE NUMBERS ARE ABOUT: the yard,
            which is the hill. -->
-      <a href="../yard/" title="open your page" style="font-size:17px; letter-spacing:1px; background:#fdf7e3; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:6px 14px; transform:rotate({{ rChip }}); color:#17120b; text-decoration:none" style-hover="transform:rotate({{ rChip }}) translate(1px,1px); box-shadow:4px 5px 0 rgba(60,50,80,0.2)">YOUR HILL · <b>/yard</b></a>
+      <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap">
+        <a href="{{ chipHref }}" title="{{ chipTitle }}" style="font-size:17px; letter-spacing:1px; background:#fdf7e3; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:6px 14px; transform:rotate({{ rChip }}); color:#17120b; text-decoration:none" style-hover="transform:rotate({{ rChip }}) translate(1px,1px); box-shadow:4px 5px 0 rgba(60,50,80,0.2)">{{ chipLabel }} · <b>{{ chipPath }}</b></a>
+        <sc-if value="{{ isSpace }}" hint-placeholder-val="{{ false }}">
+          <a href="{{ wallHref }}" title="the wall" style="font-size:17px; letter-spacing:1px; background:#fdf7e3; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:6px 14px; transform:rotate(-1deg); color:#17120b; text-decoration:none" style-hover="transform:rotate(-1deg) translate(1px,1px); box-shadow:4px 5px 0 rgba(60,50,80,0.2)">THE WALL</a>
+          <!-- THE GEAR (2026-09-24): the space's settings — its name, its look, how wild it is, its keepers (settings/) -->
+          <a href="{{ gearHref }}" title="settings" aria-label="settings" style="display:inline-flex; align-items:center; gap:8px; font-size:17px; letter-spacing:1px; background:#17120b; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:6px 14px; transform:rotate(1deg); color:#fdf7e3; text-decoration:none" style-hover="transform:rotate(1deg) translate(1px,1px); box-shadow:4px 5px 0 rgba(60,50,80,0.2)"><svg sc-camel-view-box="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="3.6" stroke-dasharray="3.53 3.53"></circle><circle cx="12" cy="12" r="6.6" fill="none" stroke="currentColor" stroke-width="2.6"></circle><circle cx="12" cy="12" r="2.3" fill="currentColor"></circle></svg><span>SETTINGS</span></a>
+        </sc-if>
+      </div>
     </div>
+
+    <!-- YOUR SPACES (2026-09-24): the pages you made (api/wall.js ?spaces=), each with its level and what waits there,
+         and the doors to it — its page, its wall, its numbers here, its settings -->
+    <sc-if value="{{ spacesOn }}" hint-placeholder-val="{{ false }}">
+      <section aria-label="your spaces" style="display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-bottom:28px">
+        <div style="font-size:15px; letter-spacing:2px; color:#4a4054; opacity:0.8">YOUR SPACES</div>
+        <sc-for list="{{ spaces }}" as="sp" hint-placeholder-count="2">
+          <div style="position:relative; display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:{{ sp.bg }}; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:8px 12px; transform:rotate({{ sp.rot }})">
+            <a href="{{ sp.dash }}" title="its numbers" style="font-family:'Rye',serif; font-size:19px; color:#17120b; text-decoration:none">{{ sp.title }}</a>
+            <span style="font-size:13px; letter-spacing:2px; color:{{ sp.col }}; border:2.5px solid {{ sp.col }}; padding:0 7px; transform:rotate(-3deg); background:#fdf7e3">{{ sp.level }}</span>
+            <span style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.85">{{ sp.about }}</span>
+            <span style="display:inline-flex; gap:8px; margin-left:4px">
+              <a href="{{ sp.face }}" title="its page" style="font-size:15px; letter-spacing:1px; color:#17120b; text-decoration:none; border:2.5px solid #17120b; padding:1px 8px; background:#fdf7e3">/{{ sp.slug }}</a>
+              <a href="{{ sp.wall }}" title="the wall" style="font-size:15px; letter-spacing:1px; color:#17120b; text-decoration:none; border:2.5px solid #17120b; padding:1px 8px; background:#fdf7e3">wall</a>
+              <a href="{{ sp.gear }}" title="settings" aria-label="{{ sp.gearLabel }}" style="display:inline-flex; align-items:center; color:#17120b; border:2.5px solid #17120b; padding:1px 6px; background:#fdf7e3"><svg sc-camel-view-box="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="3.6" stroke-dasharray="3.53 3.53"></circle><circle cx="12" cy="12" r="6.6" fill="none" stroke="currentColor" stroke-width="2.6"></circle><circle cx="12" cy="12" r="2.3" fill="currentColor"></circle></svg></a>
+            </span>
+          </div>
+        </sc-for>
+        <sc-if value="{{ canMake }}" hint-placeholder-val="{{ true }}">
+          <a href="/yard/new/" style="display:inline-flex; align-items:center; font-family:'VT323',monospace; font-size:17px; letter-spacing:1px; color:#17120b; text-decoration:none; border:4px dashed #17120b; padding:8px 14px; opacity:0.8">+ a new space</a>
+        </sc-if>
+      </section>
+    </sc-if>
 
     <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:28px">
       <div style="font-size:15px; letter-spacing:2px; color:#4a4054; opacity:0.8">SHOW ME</div>
@@ -399,9 +429,14 @@ class Component extends DCLogic {
     // (YOUR NUMBERS) the signed-in gnome's own hill; 'yard', the owner's, only where nobody is (the page sends them to the gate)
     const me = (/(?:^|;\s*)knoll_in=([0-9a-f]{16})(?:;|$)/.exec(document.cookie) || [])[1];
     this.HILL = me ? 'u-' + me : 'yard';
+    /* A SPACE'S NUMBERS (2026-09-24): ?space=<slug> makes this that space's dashboard — its wall as it stands (api/wall.js
+       ?page=), its revisions (?log=), what waits (?queue=), its rules (?rules=) — named after it, with the gear to its
+       settings. Visits are the yard's beacon's and are not counted on a space; edits are counted instead. */
+    const sp = String(new URLSearchParams(location.search).get('space') || '').toLowerCase();
+    this.SPACE = /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/.test(sp) && sp !== 'toem2' ? sp : '';
     this.DOOR = '/api/hill';
     this.SHIPPED = '../yard/hill.json';
-    this.FRAME = '../yard/?embed=1';
+    this.FRAME = this.SPACE ? '/toem2/?page=' + this.SPACE + '&embed=1' : '../yard/?embed=1';
     this.FRAME_W = 1260;                 // the yard at this width has its column exactly 1200 wide: world px are CSS px
     // the same deployment coming-soon.html and yard/tools.js talk to (apps-script/Code.gs)
     this.HITS = 'https://script.google.com/macros/s/AKfycbyzyF91GruictUGhnX3_N4NwVyNuxLLpGvEUs3Thb3ObeE9MkrFerkvMrBDrPPQfcFr/exec';
@@ -410,7 +445,8 @@ class Component extends DCLogic {
     this.KINDS = ['DRAW', 'STICKER', 'UPLOAD', 'TEXT', 'GIF'];
     this.KCOL = { DRAW: C.RED, STICKER: C.BLU, UPLOAD: C.GRN, TEXT: C.PNK, GIF: C.YEL };
     this.state = { range: null, trendTable: false, heatTable: false, tip: null, heatTip: null, look: null,
-                   doc: null, docFrom: '', hits: null, statsState: 'loading', looksDocs: {}, map: null };
+                   doc: null, docFrom: '', hits: null, statsState: 'loading', looksDocs: {}, map: null,
+                   space: null, rules: null, log: [], queue: [], spaces: [], spacesFull: false, meName: '' };
     this._looksDocs = {};
     this._heatPts = [];
     window.dash = this;                  // for the probes in lab2/perf, and the console
@@ -424,6 +460,7 @@ class Component extends DCLogic {
     let n = 0;
     this._tick = setInterval(() => { n++; if (n < 15 || n % 5 === 0) this.measure(); }, 1000);
     this.load();
+    this.loadSpaces();
   }
   componentWillUnmount() {
     window.removeEventListener('keydown', this._key);
@@ -434,6 +471,7 @@ class Component extends DCLogic {
 
   // ── the two sources ─────────────────────────────────────────────────────
   async load() {
+    if (this.SPACE) return this.loadSpace();
     let doc = null, from = 'none';
     try {
       const r = await fetch(this.DOOR + '?hill=' + this.HILL, { cache: 'no-store' });
@@ -452,6 +490,20 @@ class Component extends DCLogic {
       if (v && v.ok && Array.isArray(v.hits)) this.setState({ hits: v.hits, statsState: 'live' });
       else this.setState({ statsState: 'off' });
     } catch (e) { this.setState({ statsState: 'off' }); }
+  }
+  // a space: its wall, its log, its face, its rules and its queue, all from api/wall.js
+  async loadSpace() {
+    const S = this.SPACE, get = q => fetch('/api/wall' + q, { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json()).catch(() => null);
+    const [w, l, sp, rules, q] = await Promise.all([get('?page=' + S), get('?log=500&page=' + S), get('?space=' + S), get('?rules=1&page=' + S), get('?queue=1&page=' + S)]);
+    const doc = w && w.ok && w.wall ? { t: 0, rev: w.rev, wall: w.wall, flatfile: w.flatfile || { list: [] }, looks: [] } : { t: 0, wall: { items: [] }, flatfile: { list: [] }, looks: [] };
+    this.setState({ doc, docFrom: w && w.ok ? 'space' : 'none', space: sp && sp.ok ? sp.space : null, rules: rules && rules.ok ? rules : null,
+                    log: l && l.ok ? l.log : [], queue: q && q.ok ? q.queue : [], statsState: 'off', hits: null }, () => this.paintSoon());
+    if (sp && sp.ok) document.title = sp.space.title + ' dashboard · Knoll';
+  }
+  // the spaces you made, for the strip under the title; and your name, for the yard's own title
+  async loadSpaces() {
+    try { const v = await fetch('/api/wall?spaces=1', { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json()); if (v && v.ok) this.setState({ spaces: v.spaces, spacesFull: !!v.full }); } catch (e) {}
+    if (window.KnollAccount && KnollAccount.me) KnollAccount.me.then(a => { if (a && a.name) { this.setState({ meName: a.name }); if (!this.SPACE) document.title = a.name + ' dashboard · Knoll'; } }).catch(() => {});
   }
   // the older versions, one at a time, for their thumbnails — the newest IS the doc
   async fetchLooks(doc) {
@@ -480,6 +532,13 @@ class Component extends DCLogic {
     try { idoc = f.contentDocument; } catch (e) { return; }
     if (!idoc || !idoc.body || !idoc.documentElement) return;
     const world = idoc.getElementById('bench-world'), col = idoc.querySelector('#dc-root .yard-col');   // #dc-root: what React rendered, not the template still inside <x-dc>
+    if (this.SPACE) {                                                 // a wall in the frame: shown as it stands, no zones (it is one paper)
+      if (!world) return;
+      const avail = Math.max(240, Math.min(460, card.clientWidth - 44)), frameH = 760, s = Math.min(avail / this.FRAME_W, 720 / frameH);
+      const map = { frameH, s: +s.toFixed(5), W: Math.round(this.FRAME_W * s), H: Math.round(frameH * s), worldLeft: 0, worldTop: 0, zones: [], ready: true };
+      if (JSON.stringify(map) !== JSON.stringify(this.state.map)) this.setState({ map }, () => this.paintSoon());
+      return;
+    }
     if (!world || !col) return;                                       // not up yet: the last good map stands, and the timer asks again
     /* THE PAGE'S HEIGHT IS THE COLUMN'S FOOT, plus the root's 56px of bottom
        padding. Not the document's scrollHeight: the yard's root is min-height
@@ -639,6 +698,10 @@ class Component extends DCLogic {
 
     // ── the page's pieces, in and before the period ─────────────────────
     const P = ((S.doc && S.doc.wall && S.doc.wall.items) || []).filter(Boolean);
+    const SP = this.SPACE, spc = S.space, log = S.log || [], queue = S.queue || [], rules = S.rules;
+    const LEVEL = { 0: 'READ-ONLY', 1: 'TENDED', 2: 'COUNCIL', 3: 'WILD' }, LCOL = { 0: '#6b6478', 1: '#2f8f5b', 2: '#b8860b', 3: '#b3261e' };
+    const chaos = rules ? rules.chaos : spc && typeof spc.chaos === 'number' ? spc.chaos : 1;
+    const closesIn = t => { const ms = t - Date.now(); if (!(ms > 0)) return 'NOW'; const h = ms / 36e5; return h >= 48 ? 'IN ' + Math.floor(h / 24) + 'D ' + Math.floor(h % 24) + 'H' : h >= 1 ? 'IN ' + Math.floor(h) + 'H ' + Math.floor((ms % 36e5) / 6e4) + 'M' : 'IN ' + Math.max(1, Math.floor(ms / 6e4)) + ' MIN'; };
     const when = p => +p.when || 0;
     const inR = P.filter(p => !when(p) || when(p) >= from);          // undated pieces are the shipped page's: always on
     const inPrev = P.filter(p => when(p) && when(p) >= prevFrom && when(p) < from);
@@ -681,7 +744,7 @@ class Component extends DCLogic {
     };
     const off = { t: 'NOT COUNTING YET', c: '#4a4054' }, flat = spark([0, 0]);
     const cu = live ? cumUniq() : null;
-    const kpiDefs = [
+    let kpiDefs = [
       live ? { label: 'RESIDENTS (VISITORS SEEN)', value: this.fmt(residents), d: { t: '+' + this.fmt(newIds) + ' THIS PERIOD', c: '#3c7a2e' }, sp: spark(cu.out), pip: C.PNK }
            : { label: 'RESIDENTS (VISITORS SEEN)', value: '—', d: off, sp: flat, pip: C.PNK },
       live ? { label: 'ACTIVE RESIDENTS (AVG/DAY)', value: actNow < 10 ? String(Math.round(actNow * 10) / 10) : this.fmt(Math.round(actNow)), d: dl(actNow, actPrev), sp: spark(uniqPerDay()), pip: C.BLU }
@@ -690,6 +753,17 @@ class Component extends DCLogic {
            : { label: 'AVG. TIME ON THE HILL', value: '—', d: off, sp: flat, pip: C.GRN },
       { label: 'PIECES PUT ON THE PAGE', value: this.fmt(inR.length), d: dl(inR.length, inPrev.length), sp: spark(perDay(inR.filter(when), when)), pip: C.RED }
     ];
+    const eIn = log.filter(e => e.at >= from), ePrev = log.filter(e => e.at >= prevFrom && e.at < from);
+    if (SP) {                                                      // a wall's numbers: pieces, edits, what waits, how wild
+      const motions = queue.filter(q => q.status === 'motion').length, waiting = queue.length - motions;
+      kpiDefs = [
+        { label: 'PIECES ON THE WALL', value: this.fmt(P.length), d: { t: 'REVISION ' + this.fmt((S.doc && S.doc.rev) || 1), c: '#4a4054' }, sp: flat, pip: C.RED },
+        { label: 'EDITS ' + rangeWord, value: this.fmt(eIn.length), d: dl(eIn.length, ePrev.length), sp: spark(perDay(eIn, e => e.at)), pip: C.BLU },
+        chaos === 2 ? { label: 'ON THE BALLOT', value: this.fmt(motions), d: { t: 'CLOSES ' + closesIn(rules ? rules.closes : 0), c: '#4a4054' }, sp: flat, pip: C.YEL }
+                    : { label: 'WAITING FOR THE KEEPERS', value: this.fmt(waiting), d: { t: waiting ? 'OPEN THE WALL, PRESS HISTORY' : 'NOTHING WAITS', c: '#4a4054' }, sp: flat, pip: C.YEL },
+        { label: 'HOW WILD', value: LEVEL[chaos] || 'TENDED', d: { t: rules ? rules.keepers.length + (rules.keepers.length === 1 ? ' KEEPER' : ' KEEPERS') : '—', c: '#4a4054' }, sp: flat, pip: C.GRN }
+      ];
+    }
     const kpis = kpiDefs.map((k, i) => ({
       label: k.label, value: k.value, delta: k.d.t, deltaColor: k.d.c, pip: k.pip,
       spark: k.sp.pts, dotX: k.sp.dx, dotY: k.sp.dy,
@@ -698,7 +772,12 @@ class Component extends DCLogic {
 
     // ── the trend: residents when counted, pieces until then ────────────
     let data, gained, trendTitle, tipWord, tipGainWord;
-    if (live) {
+    if (SP) {                                                      // the wall's revisions, cumulative (the log keeps the last 500)
+      const before = log.filter(e => e.at < from).length;
+      gained = perDay(eIn, e => e.at);
+      data = []; let t = before; gained.forEach(g => { t += g; data.push(t); });
+      trendTitle = 'Edits over time'; tipWord = 'EDITS'; tipGainWord = 'THAT DAY';
+    } else if (live) {
       data = cu.out; gained = cu.gained; trendTitle = 'Residents over time'; tipWord = 'RESIDENTS'; tipGainWord = 'NEW THAT DAY';
     } else {
       const before = P.filter(p => !when(p) || when(p) < from).length;
@@ -741,7 +820,7 @@ class Component extends DCLogic {
     const m = S.map, deep = this.deep();
     const counts = {};
     const heatPts = [];
-    if (m) {
+    if (m && !SP) {
       inR.forEach(p => {
         const pts = this.pointsOf(p);
         if (!pts.length) return;
@@ -770,7 +849,7 @@ class Component extends DCLogic {
       this.setState({ heatTip: { zone: zn, x: Math.round(Math.max(60, Math.min(m.W - 60, cx))), y: Math.round(Math.max(24, Math.min(m.H - 24, cy))), v: cnt + (cnt === 1 ? ' PIECE ' : ' PIECES ') + rangeWord } });
     };
     const mapReady = !!m;
-    const mapNote = !mapReady ? 'DRAWING YOUR PAGE…' : !inR.length ? 'NOTHING PUT ON THE PAGE ' + rangeWord : '';
+    const mapNote = SP ? (mapReady ? '' : 'DRAWING THE WALL…') : !mapReady ? 'DRAWING YOUR PAGE…' : !inR.length ? 'NOTHING PUT ON THE PAGE ' + rangeWord : '';
 
     // ── tools, devices ──────────────────────────────────────────────────
     const mkRows = (tally, colorOf) => {
@@ -791,6 +870,14 @@ class Component extends DCLogic {
       { title: 'How they visit', sub: rangeWord, rows: devRows, rot: rot('0.5deg'), pip: C.GRN,
         emptyOn: !devRows.length, empty: live ? 'NO VISITS ' + rangeWord + '.' : 'NOT COUNTING VISITS YET — THE APPS SCRIPT WANTS ITS NEW VERSION DEPLOYED (yard/about.md).' }
     ];
+    if (SP) {                                                      // who edits here, from the log
+      const whoTally = {};
+      eIn.forEach(e => { const k = e.name || (e.by === 'seed' ? 'the shipped wall' : 'gnome ' + String(e.by || '').slice(0, 6)); whoTally[k] = (whoTally[k] || 0) + 1; });
+      const AVC = [C.PNK, C.RED, C.BLU, C.GRN, C.YEL];
+      const whoRows = mkRows(whoTally, (k, i) => AVC[Object.keys(whoTally).indexOf(k) % 5]);
+      rankedCards[0].empty = 'NOTHING ON THE WALL ' + rangeWord + ' — OPEN IT AND PICK UP A TOOL.';
+      rankedCards[1] = { title: 'Who edits here', sub: rangeWord, rows: whoRows, rot: rot('0.5deg'), pip: C.GRN, emptyOn: !whoRows.length, empty: 'NO EDITS ' + rangeWord + '.' };
+    }
 
     // ── past looks ──────────────────────────────────────────────────────
     const looksList = ((S.doc && S.doc.looks) || []).filter(l => l && l.t).slice(0, 12);
@@ -807,11 +894,13 @@ class Component extends DCLogic {
     });
     const lk = S.look != null ? looksList[S.look] : null;
 
-    const statusPage = S.doc == null ? 'PAGE: FETCHING…'
+    const statusPage = SP ? (S.doc == null ? 'WALL: FETCHING…' : S.docFrom === 'space' ? 'WALL: LIVE · ' + P.length + (P.length === 1 ? ' PIECE' : ' PIECES') + ' · REVISION ' + this.fmt(S.doc.rev || 1) + ' · ' + log.length + ' IN THE LOG' : 'WALL: NOTHING STANDS AT /' + SP)
+      : S.doc == null ? 'PAGE: FETCHING…'
       : S.docFrom === 'live' ? 'PAGE: LIVE · ' + P.length + (P.length === 1 ? ' PIECE' : ' PIECES') + (S.doc.t ? ' · LAST SAVED ' + this.fmtDate(new Date(S.doc.t), true) : ' · NEVER SAVED')
       : S.docFrom === 'shipped' ? 'PAGE: THE COPY THAT SHIPPED WITH THE SITE · ' + P.length + (P.length === 1 ? ' PIECE' : ' PIECES') + ' · NO STORE IS LINKED YET (yard/about.md)'
       : 'PAGE: NOTHING PUBLISHED YET';
-    const statusVisits = S.statsState === 'loading' ? 'VISITS: COUNTING…'
+    const statusVisits = SP ? 'VISITS: NOT COUNTED ON A SPACE YET — ITS EDITS ARE'
+      : S.statsState === 'loading' ? 'VISITS: COUNTING…'
       : live ? 'VISITS: ' + this.fmt(hits.length) + ' COUNTED IN 180 DAYS' + (hits.length ? ' · THE FIRST ON ' + this.fmtDate(new Date(hits[0][0]), true) : '')
       : 'VISITS: NOT COUNTING YET — THE APPS SCRIPT WANTS ITS NEW VERSION DEPLOYED (yard/about.md)';
 
@@ -838,7 +927,7 @@ class Component extends DCLogic {
       trendRows,
       contributors,
       refsEmpty: !contributors.length,
-      refsNote: live ? 'NO VISITS ' + rangeWord + '.' : 'NOT COUNTING VISITS YET — THE APPS SCRIPT WANTS ITS NEW VERSION DEPLOYED (yard/about.md).',
+      refsNote: SP ? 'VISITS ARE NOT COUNTED ON A SPACE YET — THE WALL COUNTS EDITS INSTEAD.' : live ? 'NO VISITS ' + rangeWord + '.' : 'NOT COUNTING VISITS YET — THE APPS SCRIPT WANTS ITS NEW VERSION DEPLOYED (yard/about.md).',
       heatSub: 'PIECES ON YOUR PAGE, BY WHERE THEY LAND · ' + rangeWord,
       heatChartOn: !S.heatTable, heatTableOn: S.heatTable,
       heatBtn: S.heatTable ? 'VIEW AS MAP' : 'VIEW AS TABLE',
@@ -857,13 +946,27 @@ class Component extends DCLogic {
       heatTipZone: S.heatTip ? S.heatTip.zone : '', heatTipV: S.heatTip ? S.heatTip.v : '',
       mapNoteOn: !!mapNote, mapNote,
       zoneRows, zonesEmpty: !zoneRows.length,
-      zonesNote: mapReady ? 'NOTHING PUT ON THE PAGE ' + rangeWord + ' — THE MAP LIGHTS UP AS PIECES GO ON.' : 'READING THE PAGE…',
+      zonesNote: SP ? 'A WALL IS ONE PAPER — THE PICTURE IS THE WALL AS IT STANDS.' : mapReady ? 'NOTHING PUT ON THE PAGE ' + rangeWord + ' — THE MAP LIGHTS UP AS PIECES GO ON.' : 'READING THE PAGE…',
       kindHeads: this.KINDS.concat(['ALL']), heatTableRows,
       rampLo: this.mix('#fffbea', deep, 0.03), rampHi: this.mix('#fffbea', deep, 0.98),
       rankedCards, looks,
       looksEmpty: !looks.length,
-      looksNote: S.docFrom === 'live' ? 'NO SAVES YET — PRESS SAVE YARD ON YOUR PAGE AND THE FIRST ONE APPEARS HERE.' : 'SAVES ARE KEPT BEHIND THE PUBLISH DOOR, WHICH THIS SITE DOES NOT HAVE YET (yard/about.md).',
+      looksNote: SP ? 'A WALL KEEPS REVISIONS, NOT SAVES — OPEN THE WALL AND PRESS HISTORY TO STEP THROUGH THEM.' : S.docFrom === 'live' ? 'NO SAVES YET — PRESS SAVE YARD ON YOUR PAGE AND THE FIRST ONE APPEARS HERE.' : 'SAVES ARE KEPT BEHIND THE PUBLISH DOOR, WHICH THIS SITE DOES NOT HAVE YET (yard/about.md).',
       statusPage, statusVisits,
+      // whose numbers these are (A SPACE'S NUMBERS)
+      isSpace: !!SP,
+      dashTitle: (SP ? (spc ? spc.title : SP) : ((S.doc && S.doc.settings && S.doc.settings.displayName) || S.meName || 'Your')) + ' Dashboard',
+      dashSub: SP ? '· ' + (LEVEL[chaos] || 'TENDED') + ' · ' + (chaos === 2 && rules ? 'THE BALLOT CLOSES ' + closesIn(rules.closes) : rules ? rules.keepers.length + (rules.keepers.length === 1 ? ' KEEPER' : ' KEEPERS') : 'A SPACE') + ' ·'
+                  : '· EVERY VISITOR COUNTED BY HAND · GNOME-CERTIFIED ·',
+      chipHref: SP ? '/' + SP : '../yard/', chipTitle: SP ? 'open the space' : 'open your page', chipLabel: SP ? 'THE SPACE' : 'YOUR HILL', chipPath: SP ? '/' + SP : '/yard',
+      wallHref: SP ? '/toem2/?page=' + SP : '', gearHref: SP ? '/settings/?space=' + SP : '',
+      spacesOn: S.spaces.length > 0 || !SP, canMake: !S.spacesFull,
+      spaces: S.spaces.filter(s => /^[a-z0-9-]{1,32}$/.test(s.slug)).map((s, i) => ({
+        slug: s.slug, title: s.title, level: LEVEL[s.chaos] || 'TENDED', col: LCOL[s.chaos] || LCOL[1],
+        about: s.waiting ? s.waiting + (s.chaos === 2 ? ' ON THE BALLOT' : ' WAITING') : 'NOTHING WAITS',
+        bg: s.slug === SP ? '#ffd23f' : '#fdf7e3', rot: rot(i % 2 ? '0.6deg' : '-0.6deg'),
+        face: '/' + s.slug, wall: '/toem2/?page=' + s.slug, dash: '/dashboard/?space=' + s.slug, gear: '/settings/?space=' + s.slug, gearLabel: 'settings for ' + s.title
+      })),
       lookOpen: S.look != null,
       lookBigArt: lk ? this.lookArt(docAt(lk, S.look), 470, 600, 'big') : null,
       lookDate: lk ? this.fmtDate(new Date(lk.t), true) : '',

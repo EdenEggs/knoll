@@ -7,9 +7,13 @@
      rewrites and serve.js send every one-word address with no file behind it here,
      so every url in this page is root-absolute, as in 404.html. It draws what
      api/wall.js keeps for the space (?space=): its name on a sign, its picture, its
-     paper and its inks — the form's "How it will open" (yard/new/), full size. Its
-     wall is not drawn yet. Its maker invites friends from here (api/friends.js), and
-     anybody else signed in can ask the maker to be friends. -->
+     paper and its inks — the form's "How it looks" (yard/new/), full size — and,
+     since 2026-09-24, its RULES: the level it runs at (THREE LEVELS OF CHAOS) as a
+     stamp under the sign, the ballot's clock on a council, and the way in: "go to
+     the wall" opens the bench on this page (toem2/index.html ?page=). Its maker
+     gets the gear (settings/) and the dashboard; anybody else signed in can ask
+     the maker to be friends. Nothing here is trusted by anybody but the reader:
+     every colour is the door's table's, every word is cut to its length. -->
 <link rel="icon" href="/logo/logo-icon.svg">
 <link rel="stylesheet" href="/lab2/fonts/fonts.css">
 <script src="/account.js" defer></script>
@@ -33,15 +37,19 @@
     background: #c89b62; border: 4px solid #17120b; box-shadow: 5px 5px 0 rgba(60,50,80,0.25); font-size: clamp(32px, 6vw, 54px); letter-spacing: 1px; color: #17120b; transform: rotate(-3deg); }
   .sp-post { width: 12px; height: 90px; box-sizing: border-box; background: #8a6a42; border: 3px solid #17120b; }
   .sp-by { margin-top: 24px; font-size: 18px; letter-spacing: 2px; color: var(--mute); }
+  /* the level, a rubber stamp in the space's own accent; and the ballot's clock under it on a council */
+  .sp-stamp { display: inline-block; margin-top: 16px; font-size: 18px; letter-spacing: 3px; color: var(--accent); border: 3px solid var(--accent); border-radius: 4px; padding: 1px 12px; transform: rotate(-3deg); background: var(--card); }
+  .sp-stamp[hidden] { display: none; }
+  .sp-line { margin-top: 12px; font-size: 16px; letter-spacing: 2px; color: var(--mute); min-height: 20px; }
   .sp-act { margin-top: 18px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .sp-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; align-items: center; }
   .sp-btn { height: 46px; padding: 0 18px; font: 20px/1 'VT323', monospace; letter-spacing: 1px; color: #fdf7e3; background: #17120b; border: 4px solid #17120b;
-    box-shadow: 5px 6px 0 rgba(60,50,80,0.2); cursor: pointer; transform: rotate(-1deg); }
+    box-shadow: 5px 6px 0 rgba(60,50,80,0.2); cursor: pointer; transform: rotate(-1deg); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
   .sp-btn:hover:not(:disabled) { transform: rotate(-1deg) translate(1px,1px); box-shadow: 4px 5px 0 rgba(60,50,80,0.2); }
   .sp-btn:disabled { background: #7bc264; color: #17120b; cursor: default; }
-  .sp-friends { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 560px; }
-  .sp-friends label { display: flex; align-items: center; gap: 9px; padding: 6px 12px; font-size: 19px; background: #fdf7e3; color: #17120b; border: 3px solid #17120b; box-shadow: 3px 3px 0 rgba(60,50,80,0.18); cursor: pointer; }
-  .sp-friends input { width: 17px; height: 17px; margin: 0; accent-color: #e8484a; }
-  .sp-note { min-height: 20px; font-size: 16px; letter-spacing: 1.5px; color: var(--mute); }
+  .sp-btn.is-light { background: #fdf7e3; color: #17120b; }
+  .sp-btn svg { display: block; }
+  .sp-note { min-height: 20px; font-size: 16px; letter-spacing: 1.5px; color: var(--mute); max-width: 560px; }
   [hidden] { display: none !important; }
   @media (prefers-reduced-motion: reduce) { .sp-btn:hover:not(:disabled) { transform: rotate(-1deg); } }
 </style>
@@ -58,14 +66,12 @@
   <h1 class="sp-sign" id="sign" style="margin:0">…</h1>
   <div class="sp-post" aria-hidden="true"></div>
   <div class="sp-by" id="by"></div>
+  <div class="sp-stamp" id="stamp" hidden></div>
+  <div class="sp-line" id="line"></div>
   <div class="sp-act">
+    <div class="sp-row" id="row"></div>
     <!-- a visitor who is signed in: ask the maker to be friends -->
-    <button class="sp-btn" id="ask" type="button" hidden></button>
-    <!-- the maker: invite friends here -->
-    <div id="invite" hidden>
-      <div class="sp-friends" id="friends"></div>
-      <div style="margin-top:14px"><button class="sp-btn" id="send" type="button">invite them</button></div>
-    </div>
+    <button class="sp-btn is-light" id="ask" type="button" hidden></button>
     <div class="sp-note" id="note" role="status"></div>
   </div>
 </main>
@@ -78,10 +84,16 @@
   const say = t => { $('note').textContent = t; };
   const post = body => fetch('/api/friends', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
     .then(r => r.json()).catch(() => ({ ok: false, error: 'the friends list did not answer — try again' }));
+  const read = q => fetch('/api/wall' + q, { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json()).catch(() => null);
+  const LEVEL = { 0: 'READ-ONLY · YOURS ALONE', 1: 'TENDED · KEEPERS DECIDE', 2: 'COUNCIL · AYE OR NAY', 3: 'WILD · NOTHING IS SAFE' };
+  const WORD = { 0: 'THE MAKER ALONE DRAWS HERE. EVERYBODY ELSE LOOKS.', 1: 'ANYONE MAY DRAW; THE KEEPERS DECIDE WHAT STAYS.',
+                 2: 'CHANGES GO TO THE BALLOT; A STANDING DAY ON TOEM 2 LETS YOU VOTE.', 3: 'NOTHING IS SAFE HERE. THE HISTORY KEEPS EVERYTHING.' };
+  const closesIn = t => { const ms = t - Date.now(); if (!(ms > 0)) return 'NOW'; const h = ms / 36e5; return h >= 48 ? 'IN ' + Math.floor(h / 24) + 'D ' + Math.floor(h % 24) + 'H' : h >= 1 ? 'IN ' + Math.floor(h) + 'H ' + Math.floor((ms % 36e5) / 6e4) + 'M' : 'IN ' + Math.max(1, Math.floor(ms / 6e4)) + ' MIN'; };
+  const btn = (text, href, light, svg) => { const a = document.createElement('a'); a.className = 'sp-btn' + (light ? ' is-light' : ''); a.href = href; if (svg) a.insertAdjacentHTML('afterbegin', svg); a.append(text); return a; };
+  const GEAR = '<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="3.6" stroke-dasharray="3.53 3.53"></circle><circle cx="12" cy="12" r="6.6" fill="none" stroke="currentColor" stroke-width="2.6"></circle><circle cx="12" cy="12" r="2.3" fill="currentColor"></circle></svg>';
   $('crumb').textContent = slug;
 
-  let out = null;
-  try { out = await fetch('/api/wall?space=' + encodeURIComponent(slug)).then(r => r.json()); } catch (e) {}
+  const out = await read('?space=' + encodeURIComponent(slug));
   const sp = out && out.ok && out.space;
   if (!sp) {
     const nothing = out && out.code === 'page';
@@ -99,39 +111,36 @@
   sp.inks.forEach(hex => { const s = document.createElement('span'); s.style.background = hex; $('inks').appendChild(s); });
   if (/^data:image\/jpeg;base64,/.test(sp.pic)) { $('pic').src = sp.pic; $('pic').hidden = false; }
   $('by').textContent = 'A SPACE BY ' + (sp.tag || 'A GNOME').toUpperCase() + ' · ' + new Date(sp.made).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase();
-  if (!me) return;
+  // the rules: the level as a stamp, the ballot's clock on a council
+  const chaos = [0, 1, 2, 3].includes(sp.chaos) ? sp.chaos : 1;
+  $('stamp').textContent = LEVEL[chaos]; $('stamp').hidden = false;
+  $('line').textContent = WORD[chaos];
+  if (chaos === 2) read('?ballot=1&page=' + encodeURIComponent(sp.slug)).then(b => {
+    if (!b || !b.ok) return;
+    const n = b.queue.length;
+    $('line').textContent = (n ? n + ' ON THE BALLOT' : 'THE BALLOT IS EMPTY') + ' · CLOSES ' + closesIn(b.closesAt || sp.closesAt) + ' · ' + WORD[2];
+  });
+  // the way in, and the maker's doors
+  $('row').append(btn('go to the wall', '/toem2/?page=' + encodeURIComponent(sp.slug)));
+  if (me && sp.by === me) {
+    $('row').append(btn('settings', '/settings/?space=' + encodeURIComponent(sp.slug), true, GEAR), btn('dashboard', '/dashboard/?space=' + encodeURIComponent(sp.slug), true));
+  }
+  if (!me) { say('LOG IN TO DRAW FOR EVERYBODY, OR TO ASK ' + (sp.tag || 'THE MAKER').toUpperCase() + ' TO BE FRIENDS.'); return; }
+  if (sp.by === me) return;
 
   const fr = await fetch('/api/friends', { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json()).catch(() => null);
   if (!fr || !fr.ok) return;
-  if (sp.by !== me) {
-    // a visitor: the maker, as a friend
-    const ask = $('ask'), known = fr.friends.some(f => f.id === sp.by);
-    ask.textContent = known ? 'friends ✓' : 'ask ' + sp.tag + ' to be friends';
-    ask.disabled = known; ask.hidden = !sp.tag;
-    ask.onclick = async () => {
-      ask.disabled = true;
-      const r = await post({ op: 'ask', tag: sp.tag });
-      if (r.ok) { ask.textContent = r.friends ? 'friends ✓' : 'asked ✓'; say(r.friends ? '' : 'IT IS IN THEIR BELL.'); }
-      else { ask.disabled = false; say(String(r.error || 'that did not work').toUpperCase() + '.'); }
-    };
-    return;
-  }
-  // the maker: their friends, to invite
-  $('invite').hidden = false;
-  if (!fr.friends.length) { $('send').hidden = true; say('NO FRIENDS TO INVITE YET — ADD ONE BY THEIR TAG IN YOUR YARD.'); return; }
-  fr.friends.forEach(f => {
-    const l = document.createElement('label'), c = document.createElement('input');
-    c.type = 'checkbox'; c.value = f.id;
-    l.append(c, document.createTextNode(f.tag));
-    $('friends').appendChild(l);
-  });
-  $('send').onclick = async () => {
-    const ids = [...$('friends').querySelectorAll('input:checked')].map(c => c.value);
-    if (!ids.length) { say('TICK A FRIEND FIRST.'); return; }
-    $('send').disabled = true;
-    const r = await post({ op: 'invite', slug: sp.slug, ids });
-    $('send').disabled = false;
-    say(r.ok ? (r.sent ? 'INVITED ' + r.sent + (r.sent === 1 ? ' FRIEND' : ' FRIENDS') + ' — IT IS IN THEIR BELLS.' : 'THEY WERE INVITED ALREADY.') : String(r.error || 'that did not work').toUpperCase() + '.');
+  const rules = await read('?rules=1&page=' + encodeURIComponent(sp.slug));
+  if (rules && rules.ok && rules.keeper) say('YOU KEEP THIS HILL WITH ' + (sp.tag || 'ITS MAKER').toUpperCase() + '.');
+  // a visitor: the maker, as a friend
+  const ask = $('ask'), known = fr.friends.some(f => f.id === sp.by);
+  ask.textContent = known ? 'friends ✓' : 'ask ' + sp.tag + ' to be friends';
+  ask.disabled = known; ask.hidden = !sp.tag;
+  ask.onclick = async () => {
+    ask.disabled = true;
+    const r = await post({ op: 'ask', tag: sp.tag });
+    if (r.ok) { ask.textContent = r.friends ? 'friends ✓' : 'asked ✓'; say(r.friends ? '' : 'IT IS IN THEIR BELL.'); }
+    else { ask.disabled = false; say(String(r.error || 'that did not work').toUpperCase() + '.'); }
   };
 })();
 </script>

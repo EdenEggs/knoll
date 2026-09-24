@@ -554,7 +554,7 @@ window.Tracer = (function () {
     const entry = { id, name: baseName, w: last.w, h: last.h, d: last.d, colors: last.colors, paths: last.paths, at: Date.now() };
     store.update(st => { st.list.push(entry); });
     let kept = false;
-    try { kept = (localStorage.getItem('knoll-toem2:flatfile') || '').indexOf('"' + id + '"') >= 0; } catch (e) {}
+    try { kept = (localStorage.getItem('knoll-' + (document.documentElement.dataset.page || 'toem2') + ':flatfile') || '').indexOf('"' + id + '"') >= 0; } catch (e) {}
     if (!kept) {
       store.update(st => { st.list = st.list.filter(f => f.id !== id); });
       index();

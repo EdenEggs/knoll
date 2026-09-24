@@ -97,7 +97,7 @@ window.Company = (function () {
      named after the host alone would put both sets of visitors in it —
      pointers gliding about at world coordinates that mean something else
      entirely on the other page. The directory is what tells them apart. */
-  const ROOM  = (location.host || 'nowhere') + '/toem2';
+  const ROOM  = (location.host || 'nowhere') + '/' + (document.documentElement.dataset.page || 'toem2');   // one room per page (toem2/index.html: ?page=)
   const RATE  = 50;      // ms between sends: twenty a second
   const TWEEN = 70;      // ms a remote cursor spends getting to its next point — a shade over RATE, so it is still moving when the next one lands
   const AWAY  = 60000;   // ms of silence before a cursor is taken off the paper

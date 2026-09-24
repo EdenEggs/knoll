@@ -96,9 +96,14 @@
    door is not there (no store yet, a deploy without the function) it falls
    back to wall-seed.json, read-only, and the button says "offline". */
 window.Seed = (function () {
-  const KEY = { wall: 'knoll-toem2:wall', flatfile: 'knoll-toem2:flatfile', cam: 'knoll-toem2:cam', mark: 'knoll-toem2:seeded',
-                token: 'knoll-toem2:token', resume: 'knoll-toem2:resume', before: 'knoll-toem2:wall-before-live' };
-  const FILE = 'wall-seed.json', DOOR = '/_toem2/wall', API = '/api/wall';
+  /* THE PAGE (2026-09-24): this bench is TOEM 2's unless index.html's head read a
+     ?page=<slug> into data-page — then it is that space's wall, under keys of its own
+     (lab.js: NS), and every ask of the door names the page. The session token is the
+     site's, not a page's. */
+  const PAGE = document.documentElement.dataset.page || 'toem2', NS = 'knoll-' + PAGE + ':', HOME = PAGE === 'toem2';
+  const KEY = { wall: NS + 'wall', flatfile: NS + 'flatfile', cam: NS + 'cam', mark: NS + 'seeded',
+                token: 'knoll-toem2:token', resume: NS + 'resume', before: NS + 'wall-before-live', hinted: NS + 'hinted' };
+  const FILE = 'wall-seed.json', DOOR = '/_toem2/wall', API = '/api/wall', PQ = 'page=' + encodeURIComponent(PAGE);
   const NARROW = 700;                       // under this the bench is a phone's — the same line as lab.css's zoom dock
   const LOCAL = document.documentElement.classList.contains('lab-local');
   const LIVE = !LOCAL || /[?&]live=1\b/.test(location.search);
@@ -274,6 +279,134 @@ window.Seed = (function () {
   /* ── THE LIVE WALL: the paper against the revision, and SUBMIT ───────────── */
   let me = null, pulling = false, reviewing = null, lastPull = 0, hands = 0;
   const isMod = () => !!me && (me.role === 'mod' || me.role === 'admin');
+  /* THE RULES HERE (api/wall.js: THREE LEVELS OF CHAOS): the page's chaos level, its
+     keepers, the six kind switches, the ballot's clock — read once the door has said
+     who you are, again on every forced pull and at most every five minutes, and worn
+     as a STAMP beside the submit button: TENDED · COUNCIL · WILD (· READ-ONLY), with
+     a popover that says who keeps this wall, what everyone may do, and where you
+     stand. The door is the judge of all of it; this only says so first. */
+  let rules = null, rulesAt = 0, stamp = null, pop = null, reviewShow = null;
+  const keeper = () => !!(rules && rules.keeper);
+  const owner = () => !!(rules && rules.owner);
+  const canVote = () => !!me && (isMod() || me.tier === 'trusted' || (me.rep || 0) >= 1);
+  const canDecide = ed => !!me && (isMod() || owner() || (keeper() && ed.status === 'queued' && ed.cls !== 'drastic' && ed.by !== me.id));
+  const closesIn = t => {
+    if (!t) return 'soon';
+    const ms = t - Date.now();
+    if (ms <= 0) return 'now — it is being counted';
+    const h = ms / 36e5;
+    return h >= 48 ? 'in ' + Math.floor(h / 24) + 'd ' + Math.floor(h % 24) + 'h' : h >= 1 ? 'in ' + Math.floor(h) + 'h ' + Math.floor((ms % 36e5) / 6e4) + 'm' : 'in ' + Math.max(1, Math.floor(ms / 6e4)) + ' min';
+  };
+  const KIND_NAMES = ['ink', 'stickers', 'notes', 'tracings', 'embeds', "others' pieces"], TOOL_SLOT = { draw: 0, sticker: 1, text: 2, upload: 3, gif: 4 };
+  const QUEUED_NOTE = why => (
+    why === 'others' ? 'It touches somebody else\'s piece, so the keepers look first.'
+    : why === 'keeper' ? 'That kind is the keepers\' here, so they look first.'
+    : why === 'look' ? 'The sign is the maker\'s, so they look first.'
+    : why === 'footprint' ? 'You have changed a lot of the wall today, so this one waits for a keeper\'s look.'
+    : why === 'contested' ? 'That piece was put back today, so a keeper looks before it moves again.'
+    : 'Waiting for a keeper\'s look; it shows for everybody once it is approved.') + ' It stays on your paper meanwhile.';
+  const BALLOT_NOTE = out => (rules && rules.chaos === 2 && out.why === 'council'
+    ? 'This wall is a council: your change is a motion on the ballot, which closes ' + closesIn(out.closes) + '.'
+    : 'This one is drastic, so it goes to the council: the standing gnomes mark aye or nay, and the ballot closes ' + closesIn(out.closes) + '.') + ' It stays on your paper meanwhile.';
+  async function readRules(force) {
+    if (!LIVE || (!force && Date.now() - rulesAt < 300000)) return rules;
+    rulesAt = Date.now();
+    try {
+      const r = await fetch(API + '?rules=1&' + PQ, { headers: bearer(), cache: 'no-store' });
+      const out = r.ok ? await r.json() : null;
+      if (out && out.ok) rules = out;
+      if (rules && rules.chaos === 2) {
+        const b = await fetch(API + '?ballot=1&' + PQ, { headers: bearer(), cache: 'no-store' }).then(x => (x.ok ? x.json() : null)).catch(() => null);
+        rules.motions = b && b.ok ? b.queue.length : 0;
+        if (b && b.ok && b.closesAt) rules.closesAt = b.closesAt;
+      }
+      if (rules && rules.chaos === 3) {
+        const l = await fetch(API + '?log=30&' + PQ, { cache: 'no-store' }).then(x => (x.ok ? x.json() : null)).catch(() => null);
+        rules.hour = l && l.ok ? l.log.filter(e => e.at > Date.now() - 36e5).length : null;
+      }
+    } catch (e) {}
+    paintStamp(); hintDock();
+    return rules;
+  }
+  const LEVEL = { 0: ['READ-ONLY', 'the maker alone'], 1: ['TENDED', 'the keepers decide'], 2: ['COUNCIL', ''], 3: ['WILD', 'nothing is safe'] };
+  function stampText(short) {
+    if (!rules) return '';
+    const c = rules.chaos, L = LEVEL[c] || LEVEL[1];
+    if (c === 2) return short ? 'COUNCIL · ' + closesIn(rules.closesAt).replace(/^in /, '') : 'COUNCIL · ' + (rules.motions ? rules.motions + ' on the ballot · ' : 'ballot ') + 'closes ' + closesIn(rules.closesAt);
+    let t = L[0] + (short ? '' : ' · ' + L[1]);
+    if (c === 3 && !short && rules.hour != null) t += ' · ' + (rules.hour ? rules.hour + ' edits this hour' : 'quiet this hour');
+    return t;
+  }
+  function popLines() {
+    const r = rules, out = [];
+    if (!r) return out;
+    const per = { 1: 'daily', 3: 'every third day', 7: 'weekly' }[r.period] || 'every few days';
+    out.push({ text: r.chaos === 0 ? 'Read-only — its maker alone draws on it.' : r.chaos === 1 ? 'Tended — the keepers decide what stays.'
+                   : r.chaos === 2 ? 'Council — every change from a non-keeper is a motion; the ballot closes ' + per + '.' : 'Wild — anyone edits anything, live. The history keeps everything.' });
+    const ks = (r.keepers || []).map(k => k.tag).filter(Boolean);
+    out.push({ text: HOME ? 'keepers: the moderators and the trusted' : (ks.length > 1 ? 'keepers: ' : 'keeper: ') + (ks.join(', ') || 'the maker') });
+    const on = KIND_NAMES.filter((n, i) => r.feats && r.feats[i]), off = KIND_NAMES.filter((n, i) => !(r.feats && r.feats[i]));
+    out.push({ text: r.chaos === 3 ? 'everyone may do everything here' : r.chaos === 0 ? 'only the maker edits here'
+                   : !off.length ? 'everyone may do everything here' : !on.length ? 'only the keepers edit here' : 'everyone may: ' + on.join(', ') + ' · keepers only: ' + off.join(', ') });
+    if (r.chaos === 2) out.push({ text: 'ballot closes ' + closesIn(r.closesAt) + (r.motions ? ' · ' + r.motions + (r.motions === 1 ? ' motion' : ' motions') : ''), links: [['see the ballot', () => { closePop(); if (window.Ballot) Ballot.open(); }]] });
+    if (!hasSession()) out.push({ text: 'log in to edit for everybody', links: GATE });
+    else if (!me) out.push({ text: 'you: signed in' });
+    else out.push({ text: 'you: ' + (owner() ? 'the maker' : keeper() ? 'a keeper' : canVote() ? 'a voter — ' + (me.rep || 0) + ' standing day' + (me.rep === 1 ? '' : 's') : 'no standing yet — a day of live edits on TOEM 2 earns a vote') });
+    if (owner() || (HOME && isMod())) out.push({ text: '', links: [['the rules', () => { closePop(); if (window.History) History.open('rules'); }]] });
+    return out;
+  }
+  function buildStamp() {
+    if (stamp || !btn || document.documentElement.classList.contains('toem-embed')) return;
+    stamp = document.createElement('button'); stamp.type = 'button'; stamp.id = 'toem-chaos'; stamp.className = 'toem-chaos'; stamp.hidden = true;
+    stamp.setAttribute('aria-expanded', 'false'); stamp.setAttribute('aria-haspopup', 'dialog');
+    stamp.addEventListener('click', () => (pop && !pop.hidden ? closePop() : openPop()));
+    btn.parentNode.insertBefore(stamp, btn);
+    pop = document.createElement('div'); pop.id = 'toem-chaos-pop'; pop.className = 'toem-chaos-pop'; pop.hidden = true;
+    pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'the rules here'); pop.tabIndex = -1;
+    btn.parentNode.appendChild(pop);
+    document.addEventListener('pointerdown', e => { if (pop && !pop.hidden && !pop.contains(e.target) && e.target !== stamp) closePop(); }, true);
+    window.addEventListener('keydown', e => { if (e.key === 'Escape' && pop && !pop.hidden) { closePop(); stamp.focus(); } });
+    window.addEventListener('resize', paintStamp);
+    setInterval(paintStamp, 60000);
+  }
+  function paintStamp() {
+    if (!stamp) return;
+    if (!rules) { stamp.hidden = true; return; }
+    stamp.textContent = stampText(window.innerWidth < 560);
+    stamp.className = 'toem-chaos is-' + rules.chaos;
+    stamp.title = popLines().slice(0, 3).map(l => l.text).filter(Boolean).join(' · ');
+    stamp.setAttribute('aria-label', stamp.textContent);
+    stamp.hidden = false;
+    if (pop && !pop.hidden) paintPop();
+  }
+  function paintPop() {
+    pop.textContent = '';
+    popLines().forEach(l => {
+      const d = document.createElement('div');
+      if (l.text) d.append(l.text);
+      (l.links || []).forEach(([label, fn]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'lab-link'; b.textContent = label; b.addEventListener('click', fn); d.appendChild(b); });
+      pop.appendChild(d);
+    });
+  }
+  function openPop() { if (!pop) return; paintPop(); pop.hidden = false; stamp.setAttribute('aria-expanded', 'true'); const f = pop.querySelector('button'); (f || pop).focus(); }
+  function closePop() { if (!pop || pop.hidden) return; pop.hidden = true; stamp.setAttribute('aria-expanded', 'false'); }
+  // the dock: a kind the keepers keep to themselves is greyed, never disabled — the door is the judge
+  function hintDock() {
+    document.querySelectorAll('.dock-btn[data-tool]').forEach(b => {
+      const slot = TOOL_SLOT[b.dataset.tool];
+      if (!b.getAttribute('data-title')) b.setAttribute('data-title', b.title);
+      const free = keeper() || owner() || isMod();
+      const off = !!rules && rules.chaos !== 3 && slot != null && !(rules.feats && rules.feats[slot]) && !free;
+      b.classList.toggle('is-keepers', off);
+      b.title = b.getAttribute('data-title') + (off ? ' — keepers only here' : rules && rules.chaos === 2 && !free ? ' — this goes to the ballot' : '');
+    });
+  }
+  // the pieces of yours that wait — for the keepers, or on the ballot — wear a dashed box (history.js draws it)
+  function markPending() {
+    if (!window.History || !History.markPending || !base) return;
+    const p = base.get().pending;
+    History.markPending(p && p.names ? p.names : [], p ? p.kind : null);
+  }
   const artIds = doc => ((doc && doc.flatfile && doc.flatfile.list) || []).map(t => t.id);
   const canon = rec => JSON.stringify(rec, Object.keys(rec).sort());   // key order is not a change
   const title = () => {
@@ -369,8 +502,11 @@ window.Seed = (function () {
     const b = base.get();
     if (!b.rev) { show('clean', 'offline'); return; }
     const p = patch();
-    if (!dirty(p)) { if (b.pending) base.update(st => { delete st.pending; }); show('clean', 'live'); return; }
-    if (b.pending && print(p) === b.pending.print) { show('wait', 'queued'); return; }
+    if (!dirty(p)) { if (b.pending) { base.update(st => { delete st.pending; }); markPending(); } show('clean', 'live'); return; }
+    if (b.pending && print(p) === b.pending.print) { const m = b.pending.kind === 'motion'; show(m ? 'ballot' : 'wait', m ? 'on the ballot' : 'queued'); markPending(); return; }
+    if (rules && rules.chaos === 2 && !keeper() && !owner() && !isMod() && !get(KEY.hinted) && window.Lab && Lab.warn) {   // once per browser: where this is going
+      set(KEY.hinted, '1'); Lab.warn('this is a council wall: your change goes to the ballot, where the standing gnomes mark aye or nay'); setTimeout(() => Lab.warn(''), 6000);
+    }
     show('', 'submit');
   }
   async function submit(withView) {
@@ -388,7 +524,7 @@ window.Seed = (function () {
     try {
       for (let go = 0; go < 3; go++) {
         if (withView && isMod()) { p.cam = view(); p.which = isNarrow() ? 'narrow' : 'wide'; }
-        out = await post(Object.assign({ op: 'edit' }, p));
+        out = await post(Object.assign({ op: 'edit', page: PAGE }, p));
         if (out.http === 409 && out.doc) {           // the wall moved: lay it under what is here, measure again, send again
           rebase(out.doc);
           p = patch();
@@ -405,18 +541,21 @@ window.Seed = (function () {
       base.set({ rev: out.rev, items: copy(pieces()), art });
       show('done', 'live ✓', out.nothing ? 'Somebody had already made that change.'
         : withView ? 'On the wall — and this view is the one ' + (p.which === 'narrow' ? 'a phone' : 'TOEM 2') + ' opens on.' : '');
-    } else if (out.ok && out.status === 'queued') {
-      base.update(st => { st.pending = { id: out.edit, print: print(p), at: Date.now() }; });
-      show('wait', 'queued', out.why === 'footprint'
-        ? 'You have changed a lot of the wall today, so this one waits for a moderator’s look. It stays on your paper meanwhile.'
-        : 'Waiting for a moderator’s look; it shows for everybody once it is approved. It stays on your paper meanwhile.');
+    } else if (out.ok && (out.status === 'queued' || out.status === 'motion')) {
+      const motion = out.status === 'motion';
+      base.update(st => { st.pending = { id: out.edit, print: print(p), at: Date.now(), kind: out.status, names: Object.keys(p.put).concat(p.del), closes: out.closes || 0 }; });
+      markPending();
+      show(motion ? 'ballot' : 'wait', motion ? 'on the ballot' : 'queued', motion ? BALLOT_NOTE(out) : QUEUED_NOTE(out.why), false,
+           motion ? [['see the ballot', () => { if (window.Ballot) Ballot.open(out.edit); }]] : [['see the queue', () => { if (window.History) History.open(); }]]);
     } else if (out.http === 401) {
       del(KEY.token); me = null;
       show('bad', 'not sent', 'Your sign-in has lapsed — log in again to submit; the edit stays on this paper.', true, GATE);
+    } else if (out.http === 403 && out.code === 'read') {
+      show('bad', 'not sent', 'This page is read-only: its maker alone draws on it. Your edit stays on this paper.', true);
     } else {
       show('bad', 'not sent', 'Not sent: ' + (out.error || 'the door answered ' + out.http) + '.', true);
     }
-    settle = setTimeout(() => { settle = 0; refresh(); }, !out.ok ? 8000 : out.status === 'queued' ? 6000 : withView ? 3000 : 1800);
+    settle = setTimeout(() => { settle = 0; refresh(); }, !out.ok ? 8000 : out.status !== 'live' ? 6000 : withView ? 3000 : 1800);
   }
   /* THE PULL: has the revision moved? Asked on focus, on the tab showing
      again, and once a minute while it shows — never while a hand is on the
@@ -435,16 +574,23 @@ window.Seed = (function () {
     try {
       const pending = base.get().pending;
       if (pending) {
-        const r = await fetch(API + '?edit=' + encodeURIComponent(pending.id), { cache: 'no-store' });
-        const out = r.ok ? await r.json() : null, ed = out && out.edit;
-        if (r.status === 404 || (ed && ed.status !== 'queued')) {
+        const r = await fetch(API + '?edit=' + encodeURIComponent(pending.id) + '&' + PQ, { cache: 'no-store' });
+        const out = r.ok ? await r.json() : null, ed = out && out.edit, motion = pending.kind === 'motion';
+        if (ed && motion && ed.status === 'queued') {          // too few voted: it fell to the keepers, and waits on
+          base.update(st => { st.pending.kind = 'queued'; });
+          said = ['wait', 'queued', 'Too few voted, so it fell to the keepers. It stays on your paper meanwhile.'];
+        } else if (r.status === 404 || (ed && ed.status !== 'queued' && ed.status !== 'motion')) {
           base.update(st => { delete st.pending; });
-          said = ed && ed.status === 'live' ? ['done', 'live ✓', 'Your edit was approved — it is on the wall for everybody.']
-               : ['bad', 'not sent', 'Your edit was ' + (ed ? ed.status : 'not kept') + (ed && ed.why ? ': ' + ed.why : '') +
-                  '. It is still on your paper — change it and submit again.', true];
+          const t = ed && ed.ayes != null ? ed.ayes + ' for, ' + ed.nays + ' against' : '';
+          said = !ed ? ['bad', 'not sent', 'Your edit was not kept. It is still on your paper — submit it again.', true]
+               : ed.status === 'live' ? ['done', 'live ✓', motion ? 'The council carried it, ' + t + ' — it is on the wall for everybody.' : 'The keepers put it up — it is on the wall for everybody.']
+               : ed.status === 'expired' ? ['bad', 'not sent', 'Nobody looked in seven days, so it lapsed. It is still on your paper — submit it again.', true]
+               : ['bad', 'not sent', (motion ? 'The council turned it back, ' + t : 'Your edit was turned back' + (ed.why ? ': ' + ed.why : '')) + '. It is still on your paper — change it and submit again.', true];
+          markPending();
         }
       }
-      const r = await fetch(API + '?rev=' + base.get().rev, { cache: 'no-store' });
+      readRules();
+      const r = await fetch(API + '?rev=' + base.get().rev + '&' + PQ, { cache: 'no-store' });
       const out = r.ok ? await r.json() : null;
       if (out && out.ok && !out.same && out.wall && out.rev !== base.get().rev) rebase(out);
     } catch (e) {}
@@ -464,6 +610,7 @@ window.Seed = (function () {
       me = out && out.ok ? out : null;
     } catch (e) { me = null; }
     if (btn) btn.title = title();
+    paintStamp();
   }
 
   /* ── REVIEW: a queued edit, laid over the paper ────────────────────────── */
@@ -474,13 +621,13 @@ window.Seed = (function () {
     let ed = null;
     try {
       if (id === 'next') {
-        const q = await fetch(API + '?queue=1', { cache: 'no-store' }).then(r => r.json());
+        const q = await fetch(API + '?queue=1&' + PQ, { cache: 'no-store' }).then(r => r.json());
         id = q && q.queue && q.queue[0] ? q.queue[0].id : null;
       }
-      if (id) { const out = await fetch(API + '?edit=' + encodeURIComponent(id), { cache: 'no-store' }).then(r => r.json()); ed = out && out.edit; }
+      if (id) { const out = await fetch(API + '?edit=' + encodeURIComponent(id) + '&' + PQ, { headers: bearer(), cache: 'no-store' }).then(r => r.json()); ed = out && out.edit; }
     } catch (e) {}
     if (!ed) { show('clean', 'live', id ? 'No such edit.' : 'The queue is empty — nothing is waiting for a look.'); settleIn(4000); return; }
-    if (ed.status !== 'queued') { show('clean', 'live', 'That edit is already ' + ed.status + '.'); settleIn(4000); return; }
+    if (ed.status !== 'queued' && ed.status !== 'motion') { show('clean', 'live', 'That edit is already ' + ed.status + '.'); settleIn(4000); return; }
     const touched = new Set(), added = [];
     if (ed.art && ed.art.length && window.Tracer && Tracer.store) {       // the tracings it brings, filed for the look and taken out after
       const have = new Set((Tracer.store.get().list || []).map(t => t.id));
@@ -498,9 +645,44 @@ window.Seed = (function () {
     Wall.pickN(touched);
     Wall.fitPick();
     const who = (ed.name || 'gnome ' + String(ed.by).slice(0, 6)) + ' (' + String(ed.by).slice(0, 6) + ')';
-    const what = Object.keys(ed.put).length + ' changed · ' + (ed.del || []).length + ' deleted (shown faded)' + ((ed.art || []).length ? ' · ' + ed.art.length + ' tracings' : '');
-    show('', 'reviewing', who + ' — ' + ed.cls + ': ' + what + (isMod() ? '' : ' · a moderator decides'), false,
-         isMod() ? [['approve', () => decide('approve')], ['reject', () => decide('reject')], ['close', leave]] : [['close', leave]]);
+    const what = Object.keys(ed.put).length + ' changed · ' + (ed.del || []).length + ' deleted (shown faded)' + ((ed.art || []).length ? ' · ' + ed.art.length + ' tracings' : '')
+               + (ed.why && !/^(small|large|drastic|council)$/.test(ed.why) ? ' · why: ' + ed.why : '')
+               + (ed.look ? ' · the look: ' + [ed.look.title, ed.look.palette].filter(Boolean).join(', ') : '');
+    const motion = ed.status === 'motion', mine = !!me && ed.by === me.id;
+    const tally = motion ? ' · on the ballot: ' + (ed.ayes || 0) + ' for, ' + (ed.nays || 0) + ' against' + (ed.closes ? ' · closes ' + closesIn(ed.closes) : '') : '';
+    const suffix = canDecide(ed) ? '' : motion ? (mine ? ' · your own motion — the others decide' : !hasSession() ? ' · log in to vote' : canVote() ? '' : ' · voting takes a standing day on the hill') : ' · the keepers decide';
+    const acts = canDecide(ed) ? [['approve', () => decide('approve')], ['reject', () => decide('reject')], ['close', leave]]
+               : motion && canVote() && !mine ? [['aye', () => vote(ed.id, true)], ['nay', () => vote(ed.id, false)], ['vote at the machine', () => { const id = ed.id; leave(); if (window.Ballot) Ballot.open(id); }], ['close', leave]]
+               : [['close', leave]];
+    reviewShow = () => show('', 'reviewing', who + ' — ' + ed.cls + ': ' + what + tally + suffix, false, acts);
+    reviewShow();
+  }
+  // a reason for a rejection, asked in the note itself (the one who made the edit reads it)
+  function askWhy() {
+    const n = document.getElementById('toem-save-note'), why = document.createElement('input');
+    show('', 'reviewing', 'Why? They will read it.', false, [['send', () => decide('reject', (why.value || '').trim())], ['cancel', () => { if (reviewShow) reviewShow(); }]]);
+    if (!n) return;
+    why.className = 'lab-why'; why.maxLength = 140; why.placeholder = 'why? optional'; why.setAttribute('aria-label', 'why');
+    why.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); decide('reject', why.value.trim()); } if (e.key === 'Escape') { e.stopPropagation(); if (reviewShow) reviewShow(); } });
+    n.insertBefore(why, n.querySelector('button'));
+    why.focus();
+  }
+  async function vote(id, aye) {
+    if (busy) return null;
+    busy = true;
+    show('', 'sending…');
+    let out;
+    try { out = await post({ op: 'vote', page: PAGE, edit: id, aye }); } catch (e) { out = { ok: false, error: (e && e.message) || String(e) }; }
+    busy = false;
+    if (reviewing) leave();
+    if (out.ok) {
+      if (out.status === 'live') await pull(true);
+      clearTimeout(settle);
+      show('done', 'sealed', (aye ? 'Aye' : 'Nay') + ', sealed. ' + (out.ayes || 0) + ' for, ' + (out.nays || 0) + ' against.', false, [['next', () => review('next')]]);
+    } else show('bad', 'not sent', 'Not counted: ' + (out.error || 'the door answered ' + out.http) + '.', true);
+    settleIn(6000);
+    readRules(true);
+    return out;
   }
   function leave() {
     if (!reviewing) return;
@@ -513,21 +695,21 @@ window.Seed = (function () {
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
     refresh();
   }
-  async function decide(what) {
+  async function decide(what, why) {
     if (!reviewing || busy) return;
+    if (what === 'reject' && why == null) { askWhy(); return; }   // the reason is asked in the note, driven or not — it is no dialog
     const id = reviewing.id;
-    const why = what === 'reject' && !driven ? (prompt('Why? (shown to whoever made it — optional)') || '') : '';
     busy = true;
     show('', 'sending…');
     let out;
-    try { out = await post({ op: 'review', edit: id, do: what, why }); } catch (e) { out = { ok: false, error: (e && e.message) || String(e) }; }
+    try { out = await post({ op: 'review', page: PAGE, edit: id, do: what, why: why || '' }); } catch (e) { out = { ok: false, error: (e && e.message) || String(e) }; }
     busy = false;
     leave();
     if (out.ok) {
       await pull(true);
       clearTimeout(settle);
       show(what === 'approve' ? 'done' : 'clean', what === 'approve' ? 'live ✓' : 'rejected',
-           what === 'approve' ? 'Approved — it is on the wall for everybody.' : 'Rejected.', false, [['next', () => review('next')]]);
+           what === 'approve' ? 'Approved — it is on the wall for everybody.' + (out.skipped ? ' ' + out.skipped + ' of its pieces had changed since, and were left alone.' : '') : 'Rejected.', false, [['next', () => review('next')]]);
     } else show('bad', 'not sent', 'Not decided: ' + (out.error || 'the door answered ' + out.http) + '.', true);
     settleIn(6000);
   }
@@ -538,9 +720,9 @@ window.Seed = (function () {
      Local: the file — a first visit opens on it, and the save button
      measures against it. */
   const fromFile = () => fetch(FILE, { cache: 'no-cache' }).then(r => (r.ok ? r.json() : null)).catch(() => null);
-  const fromDoor = () => fetch(API, { cache: 'no-store' }).then(r => (r.ok ? r.json() : null)).catch(() => null)
+  const fromDoor = () => fetch(API + '?' + PQ, { cache: 'no-store' }).then(r => (r.ok ? r.json() : null)).catch(() => null)
     .then(d => (d && d.ok !== false && Number.isFinite(d.rev) && d.wall && Array.isArray(d.wall.items) ? d : null));
-  const seedP = LIVE ? fromDoor().then(d => d || fromFile().then(s => (s ? Object.assign(s, { rev: 0, readonly: true }) : null))) : fromFile();
+  const seedP = LIVE ? fromDoor().then(d => d || (HOME ? fromFile().then(s => (s ? Object.assign(s, { rev: 0, readonly: true }) : null)) : null)) : fromFile();
   seedP.then(seed => ready(() => {
     btn = document.getElementById('toem-save');
     if (!LIVE) {
@@ -558,6 +740,12 @@ window.Seed = (function () {
       return;
     }
     // THE LIVE WALL
+    if (!seed && !HOME && btn) {                           // an address nothing stands at
+      document.documentElement.classList.add('lab-live');
+      btn.hidden = false; btn.disabled = true;
+      show('clean', 'offline', 'Nothing stands at ' + location.host.replace(/^www\./, '') + '/' + PAGE + '.' + (hasSession() ? '' : ''), false, [['make a space of your own', () => location.assign('/yard/new/')]]);
+      return;
+    }
     if (!seed || !window.Wall || !Wall.store) return;
     document.documentElement.classList.add('lab-live');
     if (!seed.rev) {                                       // no door: the shipped wall, read-only
@@ -576,16 +764,18 @@ window.Seed = (function () {
       base.update(st => { delete st.review; });
     }
     applyLive(seed);
-    if (btn) { btn.hidden = false; btn.addEventListener('click', e => submit(e.shiftKey)); }
+    if (btn) { btn.hidden = false; btn.addEventListener('click', e => submit(e.shiftKey)); buildStamp(); }
     window.addEventListener('pagehide', () => { if (reviewing) leave(); });
     Wall.store.on(refresh);
     if (window.Tracer && Tracer.store && Tracer.store.on) Tracer.store.on(refresh);
     refresh();
-    whoami().then(() => {
+    whoami().then(() => readRules(true)).then(() => {
       const m = /[?&]review=([^&]+)/.exec(location.search);
       if (m) review(decodeURIComponent(m[1]));
       else if (get(KEY.resume)) { del(KEY.resume); if (me) submit(false); }
       else refresh();
+      markPending();
+      if (/[?&]ballot=1\b/.test(location.search) && window.Ballot) Ballot.open();
     });
     window.addEventListener('focus', () => { pull(); });
     document.addEventListener('visibilitychange', () => { if (!document.hidden) pull(); });
@@ -602,7 +792,8 @@ window.Seed = (function () {
   return { get had() { return Object.assign({}, had); }, collect, frame, save,
            get saved() { return savedPrint !== null && !!window.Wall && printFile(pieces(), tracings()) === savedPrint; },
            // the live half, for the probes and the console
-           LIVE, patch, submit, pull, review, leave, rebase,
+           LIVE, patch, submit, pull, review, leave, rebase, vote, readRules, closesIn, canVote, canDecide, PAGE, HOME,
+           get rules() { return rules; }, get keeper() { return keeper(); }, get owner() { return owner(); },
            get base() { return base ? base.get() : null; },
            get me() { return me; },
            get reviewing() { return !!reviewing; } };

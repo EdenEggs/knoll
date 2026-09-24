@@ -657,7 +657,7 @@ window.Lab = (function () {
   // The sheet is never scrolled — it is translated and scaled under a fixed
   // viewport. PX/PY are the sheet's offset from the top-left of the bench, in
   // screen pixels; Z is the scale.
-  const CAM_KEY = 'knoll-toem2:cam', OLD_ZKEY = 'knoll-toem2:zoom';
+  const CAM_KEY = 'knoll-' + (document.documentElement.dataset.page || 'toem2') + ':cam', OLD_ZKEY = 'knoll-toem2:zoom';
   const ZMIN = 0.02, ZMAX = 4, EDGE = 120;     // EDGE — how much sheet stays on screen
   let Z = 1, PX = 0, PY = 0, lastZ = 1, restored = false;
 
@@ -1246,8 +1246,10 @@ window.Lab = (function () {
     warnEl.textContent = text || '';
     warnEl.hidden = !text;
   }
+  // every store is the page's (toem2/index.html: ?page=): TOEM 2's under knoll-toem2:, a space's under knoll-<slug>:
+  const NS = 'knoll-' + (document.documentElement.dataset.page || 'toem2') + ':';
   function store(key, defaults) {
-    const K = 'knoll-toem2:' + key;
+    const K = NS + key;
     const fresh = () => typeof defaults === 'function' ? defaults() : JSON.parse(JSON.stringify(defaults));
     let state = null, seeded = false;
     try { const v = JSON.parse(localStorage.getItem(K)); if (v && typeof v === 'object') state = v; } catch (e) {}

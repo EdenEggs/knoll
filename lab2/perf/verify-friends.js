@@ -81,7 +81,7 @@ const tags = list => list.map(f => f.tag).sort();
   r = await act('Mossy', { op: 'invite', slug: 'hollow', ids: [G.Juno.id, G.Bram.id, G.Pip.id, G.Juno.id, 'x'] });
   A.deepStrictEqual([r.json.ok, r.json.sent], [true, 2], 'and invites his two friends to it — not Pip, who is not one');
   r = await see('Juno');
-  A.deepStrictEqual([r.json.notes[0].kind, r.json.notes[0].slug, r.json.notes[0].title, r.json.notes[0].from.tag, r.json.unseen], ['invite', 'hollow', 'Mossy Hollow', 'Mossy#1', 1], "the invite is in Juno's bell, with the space's address");
+  A.deepStrictEqual([r.json.notes[0].kind, r.json.notes[0].slug, r.json.notes[0].title, r.json.notes[0].from.tag, r.json.unseen], ['keeper', 'hollow', 'Mossy Hollow', 'Mossy#1', 1], "the invite is in Juno's bell, with the space's address — and it makes her a keeper (2026-09-24)");
   r = await see('Pip'); A.strictEqual(r.json.notes.length, 0, "…and not in Pip's");
   r = await act('Mossy', { op: 'invite', slug: 'hollow', ids: [G.Juno.id] }); A.strictEqual(r.json.sent, 0, 'nobody is invited twice');
   r = await act('Juno', { op: 'invite', slug: 'hollow', ids: [G.Mossy.id] }); A.deepStrictEqual([r.status, r.json.code], [403, 'owner'], 'only its maker invites to a space');

@@ -50,7 +50,7 @@ const LIST = 100;                             // accounts in one ?users answer (
 // an hour's worth: new accounts per address, knocks per address, wrong words per account, anything else per account
 const RATE = { signup: 20, login: 60, fails: 20, acct: 120 };
 const SCRYPT = { N: 1 << 15, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };   // 32 MB and ~100 ms a word
-const WRONG = 'that is not the secret word the gate remembers';
+const WRONG = 'incorrect email or password';
 
 // ── the secret word ───────────────────────────────────────────────────────
 const scrypt = (word, salt, o) => new Promise((ok, no) => crypto.scrypt(word, salt, 32, o, (e, k) => (e ? no(e) : ok(k))));
@@ -106,24 +106,24 @@ async function users(res, who) {
   if (!who || who.rec.banned === '1' || !(who.rec.role === 'mod' || who.rec.role === 'admin')) throw bad(403, 'role', 'the list of gnomes is the moderators\'');
   const [count, ids] = await dbm([['ZCARD', K.users], ['ZREVRANGE', K.users, 0, LIST - 1]]);
   const recs = await dbm(ids.map(u => ['HGETALL', K.user(u)]));
-  answer(res, 200, { ok: true, count, users: ids.map((u, i) => ({ id: u, name: recs[i].name || '', tag: W.tagOf(recs[i]), made: +recs[i].made || 0,
-                                                                  seen: +recs[i].seen || 0, role: recs[i].role || 'user', banned: recs[i].banned === '1' })) });
+  answer(res, 200, { ok: true, count, users: ids.map((u, i) => Object.assign({ id: u, name: recs[i].name || '', tag: W.tagOf(recs[i]), made: +recs[i].made || 0,
+                                                                  seen: +recs[i].seen || 0, role: recs[i].role || 'user', banned: recs[i].banned === '1' }, W.habits(recs[i]))) });
 }
 
 // ── POST ──────────────────────────────────────────────────────────────────
 async function signup(req, res, body) {
   const name = W.cleanName(body.name), email = cleanEmail(body.email), pw = word(body.password);
-  if (!name) throw bad(400, 'name', 'every gnome has a name; even Nameless is one');
-  if (!email) throw bad(400, 'email', 'the postmaster wants a proper address after the @');
-  if (pw.length < WORD_MIN) throw bad(400, 'password', 'a secret word wants eight letters at least');
-  if (pw.length > WORD_MAX) throw bad(400, 'password', 'a secret word that long will not fit the lock — ' + WORD_MAX + ' letters at most');
-  if (!(await spend('signup:' + ipHash(req), RATE.signup))) throw bad(429, 'rate', 'a lot of new gnomes from one doorstep this hour — try again later');
+  if (!name) throw bad(400, 'name', 'please enter a username');
+  if (!email) throw bad(400, 'email', 'please enter a valid email address');
+  if (pw.length < WORD_MIN) throw bad(400, 'password', 'your password must be at least 8 characters');
+  if (pw.length > WORD_MAX) throw bad(400, 'password', 'your password must be ' + WORD_MAX + ' characters or fewer');
+  if (!(await spend('signup:' + ipHash(req), RATE.signup))) throw bad(429, 'rate', 'too many sign-ups from your network this hour — please try again later');
   const u = userKey(email), kept = await hashWord(pw), now = String(Date.now());
   /* THE ADDRESS IS CLAIMED IN ONE STEP: `made` goes on only if it was not
      there, so two petitions for one address cannot both win, and an address
      Google already vouched for (api/wall.js: ONE ADDRESS, ONE WAY IN) or
      somebody already signed up with is taken, whatever else is on it. */
-  if (!(await db('HSETNX', K.user(u), 'made', now))) throw bad(409, 'taken', 'someone on the hill already gets post there — log in instead?');
+  if (!(await db('HSETNX', K.user(u), 'made', now))) throw bad(409, 'taken', 'an account with that email already exists — log in instead?');
   // an account half made — the claim, with no secret word or no name — would hold the address for nobody: undone if the rest does not land
   let named;
   try { await db('HSET', K.user(u), 'pw', kept, 'role', 'user'); named = await W.rename(u, name, u); }
@@ -136,15 +136,15 @@ async function signup(req, res, body) {
 
 async function login(req, res, body) {
   const email = cleanEmail(body.email), pw = word(body.password);
-  if (!email) throw bad(400, 'email', 'the postmaster wants a proper address after the @');
-  if (!pw) throw bad(400, 'password', 'the gate wants a secret word before it opens');
-  if (!(await spend('login:' + ipHash(req), RATE.login))) throw bad(429, 'rate', 'that is a lot of knocking from one doorstep — wait a while and try again');
+  if (!email) throw bad(400, 'email', 'please enter a valid email address');
+  if (!pw) throw bad(400, 'password', 'please enter your password');
+  if (!(await spend('login:' + ipHash(req), RATE.login))) throw bad(429, 'rate', 'too many log-in attempts from your network — please wait a while and try again');
   const u = userKey(email);
-  if ((await spent('fail:' + u)) >= RATE.fails) throw bad(429, 'rate', 'the gate has heard the wrong word for this address too often — try again in an hour');
+  if ((await spent('fail:' + u)) >= RATE.fails) throw bad(429, 'rate', 'too many wrong passwords for this email — please try again in an hour');
   const rec = await db('HGETALL', K.user(u));
   if (pw.length > WORD_MAX || !(await wordFits(pw, rec.pw))) {
     await spend('fail:' + u, Infinity);
-    if (rec.made && !rec.pw) throw bad(401, 'google', 'this address comes in with Google — use the Google button');
+    if (rec.made && !rec.pw) throw bad(401, 'google', 'this email signed up with Google — please use the Google button');
     throw bad(401, 'wrong', WRONG);
   }
   await db('DEL', K.rl('fail:' + u, hour()));
@@ -194,7 +194,7 @@ module.exports = async function handler(req, res) {
     if (e instanceof Bad) return answer(res, e.status, { ok: false, code: e.code, error: e.message });
     if (e instanceof SyntaxError) return answer(res, 400, { ok: false, code: 'body', error: 'the post is not JSON' });
     console.error('api/auth.js: ' + String((e && e.stack) || e));
-    answer(res, 500, { ok: false, code: 'server', error: 'the gate is having trouble — try again in a moment' });
+    answer(res, 500, { ok: false, code: 'server', error: 'something went wrong on our end — please try again in a moment' });
   }
 };
 module.exports.RATE = RATE;
