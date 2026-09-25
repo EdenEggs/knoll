@@ -1290,7 +1290,7 @@ async function opRole(req, res, me, body) {
    ponytail: RESERVED is a list — a new top-level folder is a word here; and
    a space is not renamed or taken down yet; 'read' (yours alone) is one
    branch at the top of decide() when it is wanted. */
-const SPACES_MAX = 2;
+const SPACES_MAX = 3;                         // three since 2026-09-25 (the yard's YOUR SPACES row holds three); two before
 const RESERVED = new Set(['404', 'api', 'apps-script', 'auth', 'coming-soon', 'dashboard', 'features', 'fonts', 'ironhive', 'lab', 'lab2',
                           'login', 'logo', 'posters', 'privacy', 'settings', 'signup', 'uploads', 'vendor', 'yard', 'yardview']);
 // the form's four papers (yard/new/: PALETTES, keep in step), which space.html and the yard's hills draw with

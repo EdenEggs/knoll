@@ -3,7 +3,9 @@
    only what a leaderboard has that the others have not — the podium, the rows after it, your own line at the foot. */
 .lb-fab svg,.lb-tile svg{fill:currentColor;stroke:currentColor;stroke-width:3.2;stroke-linejoin:round;stroke-linecap:round}
 .lb-fab svg [fill="#fff"],.lb-tile svg [fill="#fff"]{fill:#fff}
-.lb-panel{width:440px}
+/* the trophy stands alone at the top right, under the header; its panel hangs below it, against the right edge */
+.lb-dock{position:fixed;right:16px;top:calc(var(--head-h,52px) + 14px);z-index:6001}
+.lb-panel{left:auto;right:16px;top:calc(var(--head-h,52px) + 86px);width:440px}
 .lb-body{gap:14px}
 .lb-blurb{text-align:center;opacity:.8}
 .lb-empty{margin:auto}
@@ -37,4 +39,9 @@
 .lb-foot a{color:#ffb3c9;font-weight:700}
 .lb-foot .town-pic{border-color:#fff}
 .lb-foot .lb-who small{opacity:.8}
-@media (max-width:700px){.lb-panel{width:auto}}
+@media (max-width:700px){
+  .lb-dock{right:10px;top:calc(var(--head-h,52px) + 10px)}
+  .lb-dock .town-fab{width:46px;height:46px;border-radius:13px 11px 14px 10px}
+  .lb-dock .town-fab svg{width:24px;height:24px}
+  .lb-panel{left:10px;right:10px;width:auto;top:calc(var(--head-h,52px) + 66px);bottom:132px}
+}

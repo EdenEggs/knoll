@@ -352,9 +352,10 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
           r.json.page.mod === 'read' && j(r.json.page.feats) === j([true, false, true, false, false, false]) && r.json.page.pic === JPEG, brief(r));
     r = await POST({ op: 'page', slug: 'glen', title: 'The Glen', palette: 'plaid', mod: 'anyone', pic: 'data:image/png;base64,iVBORw0KGgo=' }, 'sp');
     check('…a second, where a paper, a rule or a picture the form does not offer falls back', r.json.ok && r.json.page.palette === 'yard' && r.json.page.mod === 'open' && r.json.page.pic === '', brief(r));
-    r = await POST({ op: 'page', slug: 'dell', title: 'The Dell' }, 'sp'); check('…and not a third: two an account', r.status === 409 && r.json.code === 'full' && /only have 2 spaces per account/.test(r.json.error), brief(r));
-    r = await GET('?space=dell'); check('…and the refused one was never claimed', r.status === 404);
-    r = await GET('?spaces=1', 'sp'); check('?spaces lists its own, oldest first, and says it is full', r.json.ok && j(r.json.spaces.map(s => s.slug)) === j(['hollow', 'glen']) && r.json.full === true && r.json.max === 2, j({ full: r.json.full, n: (r.json.spaces || []).length }));
+    r = await POST({ op: 'page', slug: 'dell', title: 'The Dell' }, 'sp'); check('…a third (three an account since 2026-09-25)', r.json.ok && r.json.page.slug === 'dell', brief(r));
+    r = await POST({ op: 'page', slug: 'dale', title: 'The Dale' }, 'sp'); check('…and not a fourth', r.status === 409 && r.json.code === 'full' && /only have 3 spaces per account/.test(r.json.error), brief(r));
+    r = await GET('?space=dale'); check('…and the refused one was never claimed', r.status === 404);
+    r = await GET('?spaces=1', 'sp'); check('?spaces lists its own, oldest first, and says it is full', r.json.ok && j(r.json.spaces.map(s => s.slug)) === j(['hollow', 'glen', 'dell']) && r.json.full === true && r.json.max === 3, j({ full: r.json.full, n: (r.json.spaces || []).length }));
     r = await GET('?spaces=1'); check('…to the account signed in, and nobody else', r.status === 401);
     r = await GET('?space=hollow'); check('?space answers anybody: the name, the look, and whose it is', r.json.ok && r.json.space.title === 'Mossy Hollow' && r.json.space.accent === '#c93b82' && /^sp#\d+$/.test(r.json.space.tag) && r.json.space.by === U.sp, j(r.json.space && r.json.space.tag));
     check('…kept at the edge ten seconds, like the log', /s-maxage=10/.test(r.headers['cache-control']));

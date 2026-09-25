@@ -1219,6 +1219,7 @@ window.Lab = (function () {
     if (!state) { state = fresh(); seeded = true; }
     const subs = [];
     const save = () => {
+      if (window.LAB_LOOK) return true;   // a look at a past version of the yard (yard/tools.js: LOOK): in memory only, nothing kept
       try { localStorage.setItem(K, JSON.stringify(state)); }
       catch (e) {
         full = K;

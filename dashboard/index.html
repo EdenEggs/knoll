@@ -372,10 +372,15 @@
         <div aria-hidden="true" style="position:absolute; top:-11px; right:-11px; width:15px; height:15px; background:#e0598c; border:3px solid #17120b; border-radius:50%"></div>
         <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">Past looks of your page</h2>
         <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin:3px 0 16px">EVERY TIME YOU PRESSED SAVE YARD, NEWEST FIRST · CLICK ONE TO PEEK</div>
-        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:20px">
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(208px,1fr)); gap:20px">
           <sc-for list="{{ looks }}" as="lk" hint-placeholder-count="6">
             <div sc-camel-on-click="{{ lk.open }}" role="button" tabindex="0" style="background:#fdf7e3; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.18); padding:9px 9px 11px; transform:rotate({{ lk.rot }}); cursor:pointer; transition:transform 0.15s" style-hover="transform:rotate(0deg) scale(1.05)">
-              {{ lk.art }}
+              <!-- THE LOOK ITSELF (2026-09-25): the yard as it was at that save, framed at 1260 wide and scaled
+                   to the print (yard/tools.js: LOOK — ?embed=1&at=<t>, that version applied, nothing kept).
+                   Lazy, so a look loads when it scrolls into sight; inert, so nothing in it takes a click. -->
+              <div style="position:relative; width:190px; height:250px; margin:0 auto; overflow:hidden; background:#ece7f1; border:3px solid #17120b; box-sizing:border-box">
+                <iframe sc-camel-src="{{ lk.src }}" title="{{ lk.title }}" inert="" loading="lazy" tabindex="-1" style="position:absolute; left:0; top:0; width:1260px; height:{{ lk.frameH }}px; border:0; transform:scale({{ lk.scale }}); transform-origin:0 0; pointer-events:none; background:#ece7f1"></iframe>
+              </div>
               <div style="font-size:16px; margin-top:8px; letter-spacing:0.5px"><b>{{ lk.date }}</b></div>
               <div style="font-size:14px; color:#4a4054; opacity:0.8; margin-top:1px; line-height:1.25">{{ lk.note }}</div>
             </div>
@@ -397,7 +402,10 @@
         <h2 style="margin:0; font-family:'Rye',serif; font-size:22px; font-weight:400">{{ lookDate }}</h2>
         <button sc-camel-on-click="{{ closeLook }}" aria-label="close" style="border:3px solid #17120b; background:#fdf7e3; width:32px; height:32px; font-family:'VT323',monospace; font-size:20px; line-height:1; cursor:pointer; padding:0" style-hover="background:#ffd23f">×</button>
       </div>
-      {{ lookBigArt }}
+      <!-- the peek: the same save, framed at 1260 and scaled to the card's 504, the whole page (the card scrolls) -->
+      <div style="position:relative; width:504px; max-width:100%; height:{{ lookBigH }}px; overflow:hidden; background:#ece7f1; border:3px solid #17120b; box-sizing:border-box">
+        <iframe sc-camel-src="{{ lookBigSrc }}" title="{{ lookBigTitle }}" inert="" tabindex="-1" style="position:absolute; left:0; top:0; width:1260px; height:{{ lookBigFrameH }}px; border:0; transform:scale(0.4); transform-origin:0 0; pointer-events:none; background:#ece7f1"></iframe>
+      </div>
       <div style="font-size:17px; margin-top:12px; line-height:1.3">{{ lookNote }}</div>
       <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.7; margin-top:6px">A VERSION KEPT WHEN YOU PRESSED SAVE YARD</div>
     </div>
@@ -447,9 +455,8 @@ class Component extends DCLogic {
     this.KINDS = ['DRAW', 'STICKER', 'UPLOAD', 'TEXT', 'GIF'];
     this.KCOL = { DRAW: C.RED, STICKER: C.BLU, UPLOAD: C.GRN, TEXT: C.PNK, GIF: C.YEL };
     this.state = { range: null, trendTable: false, tip: null, heatTip: null, look: null,
-                   doc: null, docFrom: '', hits: null, statsState: 'loading', looksDocs: {}, map: null,
+                   doc: null, docFrom: '', hits: null, statsState: 'loading', map: null,
                    space: null, rules: null, log: [], queue: [], spaces: [], spacesFull: false, meName: '' };
-    this._looksDocs = {};
     this._heatPts = [];
     window.dash = this;                  // for the probes in lab2/perf, and the console
   }
@@ -485,7 +492,6 @@ class Component extends DCLogic {
     }
     if (!doc || !doc.wall) doc = { t: 0, wall: { items: [] }, flatfile: { list: [] }, looks: [] };
     this.setState({ doc, docFrom: from }, () => this.paintSoon());
-    if (from === 'live') this.fetchLooks(doc);
     try {
       const r = await fetch(this.HITS + '?stats=1&hill=' + this.HILL + '&days=180');
       const v = await r.json();
@@ -512,18 +518,6 @@ class Component extends DCLogic {
       KnollAccount.me.then(a => { if (a && a.name) { this.setState({ meName: a.name, mePic: a.avatar || (KnollAccount.pic ? KnollAccount.pic() : '') || '' }); if (!this.SPACE) document.title = a.name + ' Profile Dashboard · Knoll'; } }).catch(() => {});
     }
   }
-  // the older versions, one at a time, for their thumbnails — the newest IS the doc
-  async fetchLooks(doc) {
-    for (const l of (doc.looks || []).slice(1, 7)) {
-      if (!l || this._looksDocs[l.t]) continue;
-      try {
-        const r = await fetch(this.DOOR + '?hill=' + this.HILL + '&at=' + l.t);
-        const v = await r.json();
-        if (v && v.ok && v.doc) { this._looksDocs[l.t] = v.doc; this.setState({ looksDocs: Object.assign({}, this._looksDocs) }); }
-      } catch (e) {}
-    }
-  }
-
   // ── the picture of the page ─────────────────────────────────────────────
   /* The frame shows the yard at 1260 CSS px wide, where its content column is
      exactly 1200 — the wall's world width — so a piece's world x,y is the
@@ -659,29 +653,6 @@ class Component extends DCLogic {
     return 'rgb(' + pa.map((v, i) => Math.round(v + (pb[i] - v) * t)).join(',') + ')';
   }
   deep() { const D = { 'pond blue': '#2f4f8f', 'gnome red': '#9c2a2a', 'grass green': '#3c6b2f' }; return D[this.props.heatRamp] || D['pond blue']; }
-
-  /* a version of the page, drawn small: the page's paper, the column, and
-     every piece where it landed — a stroke as a thin line in its tool's
-     colour, a stamp or a note as a chip */
-  lookArt(doc, w, h, key) {
-    const el = React.createElement, m = this.state.map;
-    const FW = this.FRAME_W, FH = (m && m.frameH) || 2400, wl = m ? m.worldLeft : 30, wt = m ? m.worldTop : 140;
-    const s = Math.min(w / FW, h / FH), ox = (w - FW * s) / 2, oy = (h - FH * s) / 2;
-    const sx = x => +(ox + (wl + x) * s).toFixed(1), sy = y => +(oy + (wt + y) * s).toFixed(1);
-    const kids = [
-      el('rect', { key: 'pg', x: ox.toFixed(1), y: oy.toFixed(1), width: (FW * s).toFixed(1), height: (FH * s).toFixed(1), fill: '#ece7f1', stroke: '#17120b', strokeWidth: 1.2 }),
-      el('rect', { key: 'col', x: (ox + wl * s).toFixed(1), y: (oy + wt * s).toFixed(1), width: (1200 * s).toFixed(1), height: Math.max(0, (FH - wt) * s - 1).toFixed(1), fill: '#fdf7e3', opacity: 0.9 })
-    ];
-    if (!doc) kids.push(el('text', { key: 'wait', x: w / 2, y: h / 2, textAnchor: 'middle', fontFamily: 'VT323, monospace', fontSize: 14, fill: '#4a4054' }, 'FETCHING…'));
-    else ((doc.wall && doc.wall.items) || []).filter(Boolean).slice(0, 400).forEach((p, i) => {
-      const kd = this.KIND[p.k] || 'DRAW', col = this.KCOL[kd], pts = this.pointsOf(p);
-      if (!pts.length) return;
-      if (kd === 'DRAW' && pts.length > 1) kids.push(el('polyline', { key: i, points: pts.map(q => sx(q[0]) + ',' + sy(q[1])).join(' '), fill: 'none', stroke: col, strokeWidth: 1.6, strokeLinejoin: 'round', strokeLinecap: 'round' }));
-      else if (kd === 'DRAW') kids.push(el('circle', { key: i, cx: sx(pts[0][0]), cy: sy(pts[0][1]), r: 1.5, fill: col }));
-      else { const sz = kd === 'TEXT' ? [9, 3] : [6, 6]; kids.push(el('rect', { key: i, x: (sx(pts[0][0]) - sz[0] / 2).toFixed(1), y: (sy(pts[0][1]) - sz[1] / 2).toFixed(1), width: sz[0], height: sz[1], fill: col, stroke: '#17120b', strokeWidth: 0.8 })); }
-    });
-    return el('svg', { key, viewBox: '0 0 ' + w + ' ' + h, 'aria-hidden': true, style: { display: 'block', width: '100%', height: 'auto', background: '#fffcf0', border: '3px solid #17120b', boxSizing: 'border-box' } }, kids);
-  }
 
   renderVals() {
     const C = this.C, S = this.state, self = this;
@@ -887,11 +858,15 @@ class Component extends DCLogic {
 
     // ── past looks ──────────────────────────────────────────────────────
     const looksList = ((S.doc && S.doc.looks) || []).filter(l => l && l.t).slice(0, 12);
-    const docAt = (l, i) => i === 0 ? S.doc : (S.looksDocs[l.t] || null);
+    /* THE LOOKS ARE THE PAGE ITSELF (2026-09-25): each print frames the yard at that save — ../yard/?embed=1&at=<t>
+       (api/hill.js keeps every save as a version; yard/tools.js: LOOK applies it and keeps nothing) — 1260 wide,
+       scaled to the print's 190: the top of the page. The peek scales it to 504 and shows the whole. Until
+       2026-09-25 the prints were drawn here from the saved pieces: lines for strokes, chips for the rest. */
+    const lookSrc = l => '../yard/?embed=1&at=' + l.t, lookFrameH = m ? m.frameH : 2400, lookScale = +(190 / this.FRAME_W).toFixed(4);
     const looks = looksList.map((l, i) => {
       const next = looksList[i + 1], d = l.n - (next ? next.n : 0);
       return {
-        art: this.lookArt(docAt(l, i), 190, 250, 'a' + l.t),
+        src: lookSrc(l), title: 'your page as saved ' + this.fmtDate(new Date(l.t), true), scale: lookScale, frameH: lookFrameH,
         date: this.fmtDate(new Date(l.t), true),
         note: l.n + (l.n === 1 ? ' PIECE' : ' PIECES') + (next ? ' · ' + (d >= 0 ? '+' : '') + d + ' SINCE THE SAVE BEFORE' : ' · THE FIRST SAVE'),
         rot: rot(['-1.2deg', '0.9deg', '-0.7deg', '1.1deg', '-1deg', '0.8deg'][i % 6]),
@@ -973,7 +948,7 @@ class Component extends DCLogic {
         face: '/' + s.slug, dash: '/dashboard/?space=' + s.slug, gear: '/settings/?space=' + s.slug, gearLabel: 'settings for ' + s.title
       })),
       lookOpen: S.look != null,
-      lookBigArt: lk ? this.lookArt(docAt(lk, S.look), 470, 600, 'big') : null,
+      lookBigSrc: lk ? lookSrc(lk) : '', lookBigTitle: lk ? 'your page as saved ' + this.fmtDate(new Date(lk.t), true) : '', lookBigH: Math.round(lookFrameH * 0.4), lookBigFrameH: lookFrameH,
       lookDate: lk ? this.fmtDate(new Date(lk.t), true) : '',
       lookNote: lk ? lk.n + (lk.n === 1 ? ' PIECE ON THE PAGE' : ' PIECES ON THE PAGE') + ' WHEN THIS WAS SAVED' : '',
       closeLook: () => this.setState({ look: null })

@@ -42,9 +42,23 @@
     m.append(up, dn);
     return m;
   };
-  function card(title, sub, pip, rot) {
-    const c = el('div', 'cm-card'); c.style.setProperty('--rot', rot); c.style.setProperty('--pip', pip);
-    c.append(el('i', 'cm-pip'), el('h2', null, title), el('div', 'cm-sub', sub));
+  // MINIMIZED OR NOT is this browser's to remember, a page at a time (knoll-corner:<slug>:shut) — so the numbers below stay in reach
+  const FOLD = 'knoll-corner:' + SLUG + ':shut';
+  const shutOnes = () => { try { return JSON.parse(localStorage.getItem(FOLD)) || {}; } catch (e) { return {}; } };
+  function card(title, sub, pip, rot, key) {
+    const c = el('div', 'cm-card'); c.style.setProperty('--rot', rot); c.style.setProperty('--pip', pip); c.dataset.card = key;
+    const fold = el('button', 'cm-fold'); fold.type = 'button';
+    const set = shut => {
+      c.classList.toggle('is-shut', shut);
+      fold.textContent = shut ? '+' : '–'; fold.title = (shut ? 'open ' : 'minimize ') + title; fold.setAttribute('aria-label', fold.title); fold.setAttribute('aria-expanded', shut ? 'false' : 'true');
+    };
+    fold.addEventListener('click', () => {
+      const shut = !c.classList.contains('is-shut'); set(shut);
+      const o = shutOnes(); if (shut) o[key] = 1; else delete o[key];
+      try { localStorage.setItem(FOLD, JSON.stringify(o)); } catch (e) {}
+    });
+    set(!!shutOnes()[key]);
+    c.append(el('i', 'cm-pip'), fold, el('h2', null, title), el('div', 'cm-sub', sub));
     return c;
   }
 
@@ -52,7 +66,7 @@
 
   // ── THE TOWN BOARD: its tabs ────────────────────────────────────────────
   function boardCard() {
-    const c = card('Town Board', 'THE TABS · WHAT EACH IS · WHO WRITES THERE', '#e8484a', '-0.4deg');
+    const c = card('Town Board', 'THE TABS · WHAT EACH IS · WHO WRITES THERE', '#e8484a', '-0.4deg', 'board');
     let draft = tabs.map(t => Object.assign({}, t, { _old: true }));
     const rows = el('div', 'cm-rows'), note = noteEl();
     const draw = () => { rows.replaceChildren(); draft.forEach((t, i) => rows.append(tabRow(t, i))); add.disabled = draft.length >= CAP.tabs; };
@@ -99,7 +113,7 @@
 
   // ── THE CHAT: its rules ─────────────────────────────────────────────────
   function chatCard() {
-    const c = card('Chat', 'WHO MAY SAY SOMETHING · THE WAIT BETWEEN TWO LINES', '#5a8fd6', '0.5deg');
+    const c = card('Chat', 'WHO MAY SAY SOMETHING · THE WAIT BETWEEN TWO LINES', '#5a8fd6', '0.5deg', 'chat');
     let who = chat.who, wait = chat.wait, named = (chat.named || []).slice();
     const note = noteEl(), radios = el('div', 'cm-radios'), namedBox = el('div', 'cm-named'), chips = el('div', 'cm-chips'), hits = el('div', 'cm-hits');
     const drawChips = () => {
@@ -171,7 +185,7 @@
     });
   }
   function albumCard() {
-    const c = card('Photo Album', 'ITS SECTIONS · PHOTOS PUT UP HERE · THE ONES HANGING', '#7bc264', '-0.3deg'); c.classList.add('is-wide');
+    const c = card('Photo Album', 'ITS SECTIONS · PHOTOS PUT UP HERE · THE ONES HANGING', '#7bc264', '-0.3deg', 'album'); c.classList.add('is-wide');
     const secOptions = () => [['', 'no section']].concat(sections.map(s => [s.id, s.title]));
     // the sections
     let draft = sections.map(s => Object.assign({}, s, { _old: true }));
@@ -282,7 +296,7 @@
 
   // ── THE LEADERBOARD: what it ranks, in what order, its title, how many rows ──
   function ranksCard() {
-    const c = card('Leaderboard', 'WHAT IT RANKS · IN WHAT ORDER · ITS TITLE · HOW MANY ROWS', '#ffd23f', '0.4deg');
+    const c = card('Leaderboard', 'WHAT IT RANKS · IN WHAT ORDER · ITS TITLE · HOW MANY ROWS', '#ffd23f', '0.4deg', 'ranks');
     const all = Object.keys(lb.metrics), chosen = lb.settings.tabs.filter(m => lb.metrics[m]);
     const order = chosen.concat(all.filter(m => !chosen.includes(m))), on = new Set(chosen);
     const rows = el('div', 'cm-rows'), note = noteEl();

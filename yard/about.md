@@ -687,6 +687,16 @@ one you chose. Name, link and frame come from the page's own `SPACES` table,
 never from storage. Beside the hills, one dashed "unclaimed" mound says `create
 page`, and opens Create a Space (§5a).
 
+**Two rows since 2026-09-25** (`hillRows` in `renderVals()`, one `sc-for` over
+the rows and one over each row's hills): a small title **FAVORITES** over the
+saved spaces — an empty row says "NONE YET — RAISE THE FLAG BESIDE A SPACE YOU
+HAVE VISITED" — and **YOUR SPACES** under it: the spaces the account made
+(`/api/wall?spaces=1`, oldest first, **three at most** now — `SPACES_MAX` in
+`api/wall.js`, two before that day) with the `create page` mound while another
+may be made. Made your three, and the mound is simply not there; the old "you
+can only have 2" note went with it. `lab2/perf/probe-yard-hills.js` walks both
+rows in headless Chrome.
+
 **The fence** is "At the fence" (its subtitle and its not-wired notice came off
 2026-09-22, as Yard View's already had): a like count
 you can toggle, a view count, and three notes on tilted paper with initial

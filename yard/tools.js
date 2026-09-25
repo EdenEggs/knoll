@@ -46,6 +46,10 @@
   'use strict';
 
   const EMBED = /[?&]embed\b/.test(location.search);
+  /* A LOOK (2026-09-25): ?embed=1&at=<t> is the dashboard's picture of one past save
+     (api/hill.js ?at=) — that version applied to the page, and nothing of it kept:
+     the head script sets window.LAB_LOOK first, so lab.js's stores stay in memory. */
+  const LOOK = EMBED ? (/[?&]at=(\d{10,16})\b/.exec(location.search) || [])[1] || '' : '';
   const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   /* /YardView is a visitor's view (window.YARD_VIEW): its own storage, so their
      edits never land in their own yard, and the owner's latest page always
@@ -270,6 +274,7 @@
       if (comp && comp.applyDoc) comp.applyDoc(doc); else pending = doc;
     } finally { applying = false; }
     if (Wall.paint) Wall.paint();
+    if (LOOK) return true;               // a look keeps nothing
     set(PREFIX + 'applied', doc.t || 1);
     del(PREFIX + 'touched');
     return true;
@@ -278,16 +283,17 @@
   async function seed() {
     let doc = null;
     try {
-      const r = await fetch(DOOR + '?hill=' + HILL, { cache: 'no-store' });
+      const r = await fetch(DOOR + '?hill=' + HILL + (LOOK ? '&at=' + LOOK : ''), { cache: LOOK ? 'default' : 'no-store' });   // a version never changes, so a look may be cached
       const v = await r.json();
       if (v && v.ok && v.doc) doc = v.doc;
     } catch (e) {}
-    if (!doc && !MINE) {                 // no door, or nothing behind it: the copy that shipped with the page (the owner's — see WHOSE HILL)
+    if (!doc && !MINE && !LOOK) {        // no door, or nothing behind it: the copy that shipped with the page (the owner's — see WHOSE HILL)
       try { const r = await fetch(SHIPPED, { cache: 'no-cache' }); if (r.ok) doc = await r.json(); } catch (e) {}
     }
     if (!doc || !doc.wall) return;
     published = doc;
     if (comp) comp.setState({ wallTick: Date.now() });   // the standing reads it (and on /YardView, counts off it)
+    if (LOOK) { apply(doc); return; }    // that version, whatever this browser keeps
     const applied = num(PREFIX + 'applied'), touched = num(PREFIX + 'touched');
     if ((doc.t || 1) === applied) return;        // already on this version (apply() writes a t of 0 as 1)
     if (touched > applied && !VIEW) return;       // this browser has work of its own since: keep it — a visitor's never outranks the owner's

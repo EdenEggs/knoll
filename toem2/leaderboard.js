@@ -1,5 +1,6 @@
-/* toem2/leaderboard.js — THE LEADERBOARD (2026-09-24): the fourth corner button, a trophy, and the panel it
-   stands up — the sticker kit's "TOEM 2 Leaderboard", on the bench. Tabs for the rankings this page's keepers
+/* toem2/leaderboard.js — THE LEADERBOARD (2026-09-24): a trophy at the top right of the bench, under the header
+   (the owner's call, 2026-09-25 — the other three buttons keep the bottom-left corner), and the panel it stands up
+   — the sticker kit's "TOEM 2 Leaderboard", on the bench. Tabs for the rankings this page's keepers
    chose (dashboard/manage.js; api/leaderboard.js counts them from the page's wall, board and album), a blurb, a
    podium for the first three, the rows after them, and — signed in — your own line at the foot. Empty until
    people use the page: nothing is seeded or made up. It reads when it opens and once a minute while it is up.
@@ -131,8 +132,7 @@ window.Ranks = (function () {
     fab.setAttribute('aria-expanded', 'false'); fab.setAttribute('aria-controls', 'ranks-panel');
     fab.innerHTML = SVG.trophy;
     fab.addEventListener('click', show);
-    const fabs = document.querySelector('.town-fabs') || (() => { const d = el('div', 'town-fabs'); document.body.append(d); return d; })();
-    fabs.append(fab);
+    const dock = el('div', 'lb-dock'); dock.append(fab); document.body.append(dock);   // the trophy stands at the top right, under the header — the other three keep the bottom-left
 
     panel = el('section', 'town-panel lb-panel'); panel.id = 'ranks-panel'; panel.hidden = true; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'the leaderboard');
     const head = el('div', 'town-head'), tile = el('span', 'town-tile lb-tile'), tt = el('div', 'town-title');

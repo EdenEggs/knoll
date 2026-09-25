@@ -136,6 +136,16 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR
     fs.writeFileSync(dbf, JSON.stringify(d1));
     lb = await api(ctx, '/api/leaderboard?page=probe-corner&fresh=1');
     ok(lb.ranks.edits.length === 1 && lb.ranks.edits[0].id === me.id && lb.ranks.edits[0].value === 1 && lb.ranks.days[0].value === 1 && lb.you.edits.rank === 1, 'one edit of the wall, and its maker leads the edits and the days', j(lb.ranks.edits));
+    // ── minimized, and remembered ────────────────────────────────────────
+    await board.locator('.cm-fold').click();
+    ok(await board.locator('.cm-row').first().isHidden() && await board.locator('text=Save the tabs').isHidden() && (await board.locator('.cm-fold').getAttribute('aria-expanded')) === 'false' && !(await board.locator('h2').isHidden()), 'the Town Board minimizes to its name and its line');
+    await album.locator('.cm-fold').click();
+    await p.reload(); await p.waitForSelector('#dc-root #corner-manage .cm-card', { timeout: 20000 }); await p.waitForTimeout(500);
+    const again = p.locator('#dc-root #corner-manage .cm-card');
+    ok((await again.evaluateAll(es => es.map(e => (e.classList.contains('is-shut') ? '-' : '+')))).join('') === '-+-+', 'on the next visit the board and the album are still minimized; the chat and the leaderboard open', await again.evaluateAll(es => es.map(e => e.className)));
+    ok(await p.evaluate(() => localStorage.getItem('knoll-corner:probe-corner:shut')) === '{"board":1,"album":1}', '…remembered in this browser, a page at a time');
+    await again.nth(0).locator('.cm-fold').click();
+    ok(!(await again.nth(0).locator('.cm-row').first().isHidden()) && await p.evaluate(() => localStorage.getItem('knoll-corner:probe-corner:shut')) === '{"album":1}', 'opened again, and that is remembered too');
     ok(errs.length === 0, 'no page errors on the dashboard', errs.join(' | '));
 
     // ── the bench, as the stranger: the board's tabs, the notice, the chat shut, the album's section ──

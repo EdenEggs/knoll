@@ -19,7 +19,7 @@ const waitPort = (port, tries = 80) => new Promise((res, rej) => { const t = () 
   try {
     await waitPort(PORT);
     b = await chromium.launch({ channel: 'chrome', headless: true });
-    const ctx = await b.newContext({ viewport: { width: 1400, height: 1000 } });
+    const ctx = await b.newContext({ viewport: { width: 1400, height: 1700 } });   // tall: the standing card and the plot both in view (the hills are two rows since 2026-09-25), since the points below are taken in the viewport
     const p = await ctx.newPage();
     const pageErrors = []; p.on('pageerror', e => pageErrors.push(String(e)));
     await p.goto(BASE + '/login/');
@@ -28,6 +28,7 @@ const waitPort = (port, tries = 80) => new Promise((res, rej) => { const t = () 
     await post(inky);   // the code goes out (api/auth.js: THE CODE; the preload hands it over — gnome.js)…
     const su = await post(Object.assign({ code: await require('./gnome.js').code(ctx, BASE, inky.email) }, inky));   // …and comes back
     ok(su.ok, 'a test account signs up', JSON.stringify(su));
+    await post({ op: 'toured' });   // no tour: it scrolls the page about, and the points below are taken in the viewport (the hills are two rows tall since 2026-09-25)
     await p.goto(BASE + '/yard/'); await p.waitForTimeout(4000);
     const tools = await p.evaluate(() => [...document.querySelectorAll('#tool-dock [data-tool]')].map(b => b.dataset.tool));
     ok(tools.includes('draw') && tools.includes('move'), 'the dock offers draw and move', tools.join(','));

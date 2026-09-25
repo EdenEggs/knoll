@@ -30,7 +30,7 @@ What each card shows, and what it shows when a source is missing:
 | Where the work happens | see §4 | the map still draws; the list says nothing landed |
 | Tools people reach for | pieces by the tool that made them (DRAW = strokes, pixels and smears; STICKER; UPLOAD = tracings; TEXT; GIF) | a line saying so |
 | How they visit | desktop / tablet / mobile off the beacon | a line saying so |
-| Past looks | every press of SAVE YARD, newest first, each drawn small; click for a bigger one | a line saying so |
+| Past looks | every press of SAVE YARD, newest first, each the page itself at that save (a frame of the yard at that version, since 2026-09-25); click for a bigger one | a line saying so |
 
 The footer says where each source stands: `PAGE: LIVE · 3 PIECES · LAST
 SAVED …` or `THE COPY THAT SHIPPED WITH THE SITE`, and `VISITS: 41 COUNTED IN
@@ -176,10 +176,19 @@ in `hill.json` before pieces carried a time) counts in every range.
 and a gif's `at` is where it starts. `yard/wall.js` stamps `when` in `add()`;
 the bench's own wall.js does not.
 
-**Past looks fetch lazily.** The newest look is the doc itself; the six after
-it are fetched one at a time (`/api/hill?hill=yard&at=<t>`) once the doc has
-arrived from the live door, and only then — a page running on the shipped
-copy has no door to ask. Until a version lands its card reads FETCHING….
+**Past looks are the page itself (2026-09-25).** Each print is an `<iframe>` of
+`../yard/?embed=1&at=<t>` — the yard, at that save — 1260 wide and scaled to
+the print's 190 × 250 (the top of the page), `loading="lazy"` so a print loads
+when it scrolls into sight, `inert` so nothing in it takes a click; the peek
+frames the same save at 504 wide and shows the whole page. `api/hill.js` keeps
+every save as a version behind `?at=`, and `yard/tools.js` (LOOK) applies that
+version to the page **without keeping anything**: the head of `yard/index.html`
+sets `window.LAB_LOOK`, lab.js's stores then stay in memory, and nothing is
+marked applied — the dozen frames here share localStorage with the live yard
+and must never overwrite it. Until that day the prints were drawn here from the
+saved pieces (lines for strokes, chips for the rest) and fetched one version at
+a time; that code is gone. `lab2/perf/probe-looks.js` proves both the frames
+and the keep-nothing rule.
 
 **This page has no `@media` at all, and on a phone it is still cramped**: the
 trend row's `minmax(280px, 1fr)` floor squeezes the chart, and the heading is a
@@ -207,5 +216,7 @@ to `api/board.js`, `api/gallery.js` and `api/leaderboard.js`, and the bench's
 next poll. The rendered slot is `#dc-root #corner-manage`: the raw template
 inside `<x-dc>` keeps a hidden copy with the same id. A space's dashboard is
 titled `<its title> dashboard`, and the YOUR SPACES strip starts with a Profile
-card back to this page's own numbers. `node toem2/probe-manage.js` walks it all
-in headless Chrome.
+card back to this page's own numbers. Each card minimizes to its name with the
+– / + at its corner, and which ones are shut is this browser's to remember, a
+page at a time (`knoll-corner:<slug>:shut`). `node toem2/probe-manage.js`
+walks it all in headless Chrome.

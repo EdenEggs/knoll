@@ -43,6 +43,8 @@
      runtime, because the component and tools.js read those keys as they run;
      knoll_in is the cookie that says which account is in (api/wall.js). -->
 <script>(function () {
+  // A LOOK at a past save (?embed=1&at=<t> — the dashboard's past looks): before any script, so lab.js's stores keep nothing (tools.js: LOOK)
+  if (/[?&]embed\b/.test(location.search) && /[?&]at=\d{10,16}\b/.test(location.search)) window.LAB_LOOK = true;
   var id = (/(?:^|;\s*)knoll_in=([0-9a-f]{16})(?:;|$)/.exec(document.cookie) || [])[1];
   if (!id) { if (!/[?&]embed\b/.test(location.search) && !window.YARD_WHO) location.replace('/login/?next=' + encodeURIComponent(location.pathname + location.search)); return; }   // a visitor at /yard/<name> is sent on above
   try {
@@ -571,11 +573,16 @@
     <div class="yard-grid" style="display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:28px; align-items:start">
 
       <div style="display:flex; flex-direction:column; gap:28px; min-width:0">
-    <!-- THE HILLS: one horizon, each mound a canvas. The spaces you saved, in the order you saved them
-         (the flags in Spaces you've visited, below). -->
-    <nav aria-label="hills" style="margin:0 -8px 8px; position:relative">
-      <div class="yard-ui" style="position:relative; z-index:13; display:flex; align-items:flex-end; gap:0; overflow-x:auto; overflow-y:hidden; padding:70px 8px 0; scrollbar-width:thin">
-        <sc-for list="{{ hills }}" as="h" hint-placeholder-count="6">
+    <!-- THE HILLS (2026-09-25): two horizons, each mound a canvas. FAVORITES first — the spaces you
+         saved with the flag in Spaces you've visited, below, in the order you saved them — then
+         YOUR SPACES, the ones you made (api/wall.js: SPACES, three at most), with the mound to make
+         another while you may. -->
+    <nav aria-label="hills" style="margin:0 -8px 8px; padding-top:26px; position:relative; display:flex; flex-direction:column; gap:4px"><!-- the padding: the first row's title clears the gnome's feet -->
+      <sc-for list="{{ hillRows }}" as="row" hint-placeholder-count="2">
+      <div class="yard-ui" style="position:relative; z-index:13">
+        <div style="font-size:13px; letter-spacing:2px; color:#4a4054; opacity:0.8; padding:0 12px">{{ row.title }}</div>
+        <div style="display:flex; align-items:flex-end; gap:0; overflow-x:auto; overflow-y:hidden; padding:66px 8px 0; scrollbar-width:thin">
+        <sc-for list="{{ row.hills }}" as="h" hint-placeholder-count="3">
           <a href="{{ h.href }}" title="{{ h.name }}" sc-camel-on-mouse-enter="{{ h.enter }}" sc-camel-on-mouse-leave="{{ h.leave }}" style="flex:none; width:168px; display:block; position:relative; text-decoration:none; color:#17120b; transform:translateY({{ h.lift }}); transition:transform .25s cubic-bezier(.3,1.4,.5,1)">
             <!-- signpost -->
             <div aria-hidden="true" style="position:absolute; left:50%; bottom:calc(100% - 4px); width:6px; height:34px; background:#8a6a42; border:2.5px solid #17120b; margin-left:-3px; box-sizing:border-box"></div>
@@ -620,13 +627,18 @@
             <div style="font-size:13px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin-top:0; padding:13px 6px 0 10px; border-top:4px solid #17120b; line-height:1.35; text-wrap:pretty; height:36px; box-sizing:content-box">{{ h.about }}</div>
           </a>
         </sc-for>
-        <!-- the unclaimed mound: Create a space (yard/new/) — unless you have made your two
-             (api/wall.js: SPACES), and then it says so here instead of going -->
-        <div style="flex:none; position:relative">
-        <sc-if value="{{ fullNote }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" style="position:absolute; left:50%; bottom:64px; z-index:2; width:150px; box-sizing:border-box; transform:translateX(-50%) rotate(-3deg); padding:4px 8px; background:#fdf7e3; color:#e8484a; border:3px solid #e8484a; box-shadow:3px 4px 0 rgba(60,50,80,0.25); font-size:15px; letter-spacing:1.5px; line-height:1.15; text-align:center">YOU CAN ONLY HAVE 2 SPACES PER ACCOUNT</div>
+        <!-- a favourites row with nothing saved yet says where the flags are -->
+        <sc-if value="{{ row.empty }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:none; width:168px; position:relative">
+            <div style="height:104px; border:4px dashed #17120b; border-bottom:none; border-radius:84px 84px 0 0 / 104px 104px 0 0; background:rgba(253,247,227,0.35); display:flex; align-items:flex-end; justify-content:center; padding:0 14px 12px; font-size:12px; letter-spacing:1.5px; text-align:center; line-height:1.3; color:#4a4054; box-sizing:border-box">{{ row.emptyWords }}</div>
+            <div style="padding:13px 6px 0 10px; border-top:4px solid #17120b; height:36px"></div>
+          </div>
         </sc-if>
-        <a href="/yard/new/" title="create page" sc-camel-on-click="{{ newHill }}" style="flex:none; width:168px; display:block; position:relative; text-decoration:none; color:#17120b" style-hover="transform:translateY(-4px)">
+        <!-- the unclaimed mound: Create a space (yard/new/) — in YOUR SPACES, while you may make another
+             (api/wall.js: SPACES); made your three, and it is not there -->
+        <sc-if value="{{ row.create }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:none; position:relative">
+        <a href="/yard/new/" title="create page" style="flex:none; width:168px; display:block; position:relative; text-decoration:none; color:#17120b" style-hover="transform:translateY(-4px)">
           <svg aria-hidden="true" sc-camel-view-box="0 0 40 60" width="30" height="45" style="position:absolute; left:50%; margin-left:-15px; bottom:calc(100% - 30px); overflow:visible; transform:rotate(14deg)">
             <line x1="20" y1="4" x2="20" y2="34" stroke="#17120b" stroke-width="6" stroke-linecap="round"></line>
             <line x1="20" y1="4" x2="20" y2="34" stroke="#8a6a42" stroke-width="3" stroke-linecap="round"></line>
@@ -637,7 +649,10 @@
           <div style="padding:13px 6px 0 10px; border-top:4px solid #17120b; height:36px"></div>
         </a>
         </div>
+        </sc-if>
+        </div>
       </div>
+      </sc-for>
     </nav>
 
         <section style="min-width:0; position:relative; padding-top:48px">
@@ -992,6 +1007,7 @@
    then the drawing. */
 /* the dashboard's picture of this page: no tour, no beacon (tools.js reads the same flag) */
 const EMBED = /[?&]embed\b/.test(location.search);
+const LOOK = EMBED && !!window.LAB_LOOK;   // a past save, pictured: nothing this component keeps is written (tools.js: LOOK)
 /* how long ago, in the page's own capitals */
 function AGO(t) {
   t = +t || 0; if (!t) return '';
@@ -1100,11 +1116,12 @@ class Component extends DCLogic {
     if (window.YardTools) YardTools.forest(FOREST);
   }
   save(k, v) {
+    if (LOOK) return;                     // a look keeps nothing
     try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
     // where the trees stand is part of the published page: a move marks it unsaved (tools.js)
     if (window.YardTools && (k === this.K.plot || k === this.K.mine)) YardTools.touch();
   }
-  forget(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  forget(k) { if (LOOK) return; try { localStorage.removeItem(k); } catch (e) {} }
   /* ── YARD FIX 6 of 10 (see about.md § changes to the export) ──────────────
      THE ONE QUESTION "IS THIS PAGE MEANT TO BE STILL?", asked in the three
      places the gnome and the tour move. The drawer has promised "Reduce motion
@@ -1211,8 +1228,8 @@ class Component extends DCLogic {
       .then(r => r.json()).catch(() => ({ ok: false, error: 'the friends list did not answer — try again' }))
       .then(out => this.loadFriends().then(() => out));
   }
-  /* YOUR SPACES (api/wall.js: SPACES): the ones you made stand first on the hills,
-     and two is all an account makes — the mound says so rather than open the form */
+  /* YOUR SPACES (api/wall.js: SPACES): the ones you made stand on the second row of the hills,
+     and three is all an account makes — the mound to make one goes when they are made */
   loadSpaces() {
     fetch('/api/wall?spaces=1', { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json())
       .then(v => { if (v && v.ok) this.setState({ spaces: Array.isArray(v.spaces) ? v.spaces : [], full: !!v.full }); }).catch(() => {});
@@ -1945,21 +1962,25 @@ class Component extends DCLogic {
                                                                              : { askNote: String(out.error || 'that did not work').toUpperCase() + '.' }));
       },
       askNote: this.state.askNote || (fr.me && fr.me.tag ? 'YOUR TAG IS ' + fr.me.tag.toUpperCase() + ' — GIVE IT TO A FRIEND.' : ''),
-      newHill: (e) => { if (!this.state.full) return; e.preventDefault(); clearTimeout(this._fullT); this.setState({ fullNote: true }); this._fullT = setTimeout(() => this.setState({ fullNote: false }), 4000); },
-      fullNote: !!this.state.fullNote,
-      hills: MINE.concat(HILLS).map((h, i) => { const fl = flagVals(h.name), fav = fl.fav; return Object.assign({}, h, fl, {
-        href: h.href || '#hill-' + h.name.toLowerCase().replace(/[^a-z]+/g, '-'),
-        flagOp: fav ? 1 : (hover === i ? 0.4 : 0),
-        flagY: fav ? '0px' : '26px',
-        clothOp: fav ? 1 : 0,
-        poleDash: fav ? 'none' : '4 3',
-        hasFrame: !!h.frame && !EMBED, frameTitle: h.name + ', as it is now',   // not in the dashboard's picture: a whole second bench for a 60px dome
-        hasPic: !!h.pic,
-        lift: hover === i ? '-5px' : '0px',
-        signRot: hover === i ? (i % 2 ? '6deg' : '-6deg') : (i % 2 ? '-2deg' : '2deg'),
-        enter: () => this.setState({ hoverHill: i }),
-        leave: () => this.setState({ hoverHill: -1 })
-      }); }),
+      // THE HILLS, two rows (2026-09-25): the favourites, then the spaces you made — one index runs across both, for the hover
+      hillRows: (() => {
+        const vals = (h, i) => { const fl = flagVals(h.name), fav = fl.fav; return Object.assign({}, h, fl, {
+          href: h.href || '#hill-' + h.name.toLowerCase().replace(/[^a-z]+/g, '-'),
+          flagOp: fav ? 1 : (hover === i ? 0.4 : 0),
+          flagY: fav ? '0px' : '26px',
+          clothOp: fav ? 1 : 0,
+          poleDash: fav ? 'none' : '4 3',
+          hasFrame: !!h.frame && !EMBED, frameTitle: h.name + ', as it is now',   // not in the dashboard's picture: a whole second bench for a 60px dome
+          hasPic: !!h.pic,
+          lift: hover === i ? '-5px' : '0px',
+          signRot: hover === i ? (i % 2 ? '6deg' : '-6deg') : (i % 2 ? '-2deg' : '2deg'),
+          enter: () => this.setState({ hoverHill: i }),
+          leave: () => this.setState({ hoverHill: -1 })
+        }); };
+        const favRow = HILLS.map((h, i) => vals(h, i)), mineRow = MINE.map((h, i) => vals(h, HILLS.length + i));
+        return [{ title: 'FAVORITES', hills: favRow, empty: !favRow.length, emptyWords: 'NONE YET — RAISE THE FLAG BESIDE A SPACE YOU HAVE VISITED', create: false },
+                { title: 'YOUR SPACES', hills: mineRow, empty: false, emptyWords: '', create: !this.state.full }];
+      })(),
       rStand: rot('-0.8deg'), rFriends: rot('0.5deg'), rBadge: rot('0.7deg'), rVisit: rot('-0.5deg'), rEdit: rot('0.6deg'), rFence: rot('-0.4deg'),
       liked: this.state.liked, likeCount: this.state.likes, likeBg: this.state.liked ? '#e8484a' : '#fdf7e3', likeFg: this.state.liked ? '#fdf7e3' : '#17120b', heartFill: this.state.liked ? '#fdf7e3' : '#e8484a',
       toggleLike: () => this.toggleLike(),

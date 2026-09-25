@@ -7,7 +7,14 @@
 .cm-card{position:relative;background:#fdf7e3;border:5px solid #17120b;box-shadow:9px 10px 0 rgba(60,50,80,.2);padding:18px 20px 20px;transform:rotate(var(--rot,0deg));min-width:0;box-sizing:border-box}
 .cm-card.is-wide{grid-column:1/-1}
 .cm-pip{position:absolute;top:-11px;left:-11px;width:15px;height:15px;background:var(--pip,#e8484a);border:3px solid #17120b;transform:rotate(45deg)}
-.cm-card h2{margin:0;font-family:'Rye',serif;font-size:22px;font-weight:400}
+.cm-card h2{margin:0;padding-right:44px;font-family:'Rye',serif;font-size:22px;font-weight:400}
+/* minimized: the card keeps its name and its line; the – / + at its corner, remembered by manage.js */
+.cm-fold{position:absolute;top:12px;right:12px;width:32px;height:32px;padding:0;font-family:'VT323',monospace;font-size:24px;line-height:1;border:3px solid #17120b;background:#fdf7e3;color:#17120b;cursor:pointer;box-shadow:3px 4px 0 rgba(60,50,80,.2)}
+.cm-fold:hover{background:#ffd23f}
+.cm-fold:focus-visible{outline:3px solid #e8479c;outline-offset:2px}
+.cm-card.is-shut{padding-bottom:16px}
+.cm-card.is-shut .cm-sub{margin-bottom:0}
+.cm-card.is-shut > :not(h2):not(.cm-sub):not(.cm-pip):not(.cm-fold){display:none}
 .cm-sub{font-size:14px;letter-spacing:1.5px;color:#4a4054;opacity:.8;margin:3px 0 14px}
 .cm-label-t{display:block;font-size:14px;letter-spacing:2px;color:#4a4054;opacity:.85;margin:16px 0 8px}
 .cm-card > .cm-label-t:first-of-type,.cm-field .cm-label-t{margin-top:0}
