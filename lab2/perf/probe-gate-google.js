@@ -3,7 +3,10 @@
    wording, each input's one <label>, the margin notes, and "Continue with
    Google" end to end — a new person named at /signup and sent on, a named
    account from /login sent straight to ?next=, a cancelled sign-in, a
-   callback this browser never started, and an address that has a password.
+   callback this browser never started, and an address that has a password —
+   and THE CODE (2026-09-24): the seal sends a code, the page turns to the
+   code step, a wrong code, a new code, "go back", and the right code making
+   the account and sending it on to ?next=.
 
    Google is played by this file: it starts serve.js on its own port with
    itself as a preload (node -r), which points the store at a temp folder
@@ -11,7 +14,11 @@
    GOOGLE_CLIENT_ID/SECRET, answers Google's two token endpoints in-process,
    and rewrites /auth/google's redirect to accounts.google.com into a local
    /fake-google that bounces straight back to the site's callback. The lab
-   benches' "/_name/" doors are 404'd so nothing autosaves into lab2/index.html.
+   benches' "/_name/" doors are 404'd so nothing autosaves into lab2/index.html,
+   and GET /_outbox?to=<address> hands out the newest sign-up code the door
+   wrote to the outbox beside its store (gnome.js reads it there). Other
+   probes (the yard's, the accounts') start their server with this preload
+   for the same reasons.
 
      node lab2/perf/probe-gate-google.js          (needs Chrome + Playwright)
 */
@@ -44,6 +51,12 @@ if (require.main !== module) {
   http.createServer = function (...args) {
     const i = args.length - 1, h = args[i];
     args[i] = (req, res) => {
+      if (req.url.startsWith('/_outbox?')) {   // THE CODE (gnome.js): the newest code the door posted to an address, out of the outbox beside the store
+        res.setHeader('content-type', 'text/plain');
+        try { res.end(require('./gnome.js').codeIn(path.join(store, 'outbox.jsonl'), new URL(req.url, 'http://x').searchParams.get('to'))); }
+        catch (e) { res.statusCode = 404; res.end(String(e.message)); }
+        return;
+      }
       if (/^\/_[^/]*\//.test(req.url)) { res.statusCode = 404; res.end(); return; }
       if (req.url.startsWith('/fake-google?')) {   // Google's sign-in page: straight back with a code, or the error in google-mode.txt
         const q = new URL(req.url, 'http://x').searchParams, mode = readOr('google-mode.txt', 'code');
@@ -66,6 +79,7 @@ const net = require('net');
 const { chromium } = require(process.env.PLAYWRIGHT || 'C:/Users/bobb9/Desktop/node_modules/playwright');
 const SITE = path.join(__dirname, '..', '..'), PORT = Number(process.env.PORT || 4323), BASE = 'http://localhost:' + PORT;
 const store = fs.mkdtempSync(path.join(os.tmpdir(), 'knoll-gate-'));
+const gnome = require('./gnome.js');
 
 const fails = []; let n = 0;
 const ok = (cond, what, extra) => { n++; if (!cond) fails.push(what + (extra ? ' :: ' + String(extra).slice(0, 400) : '')); console.log((cond ? '  ok   ' : '  FAIL ') + what); };
@@ -143,8 +157,11 @@ const whoami = p => p.evaluate(() => fetch('/api/auth', { cache: 'no-store' }).t
     me = await whoami(p); ok(!me.me, '…and signs nobody in', JSON.stringify(me));
     const r1 = await p.evaluate(() => fetch('/auth/google/callback?state=abcdefghijklmnop&code=abcd').then(r => r.text()));
     ok(/another browser/.test(r1) && !/gate/.test(r1), 'a callback this browser never started is refused, plainly', r1.slice(0, 300));
-    let r2 = await post(p, { op: 'signup', name: 'Pw Person', email: 'pw@example.com', password: 'toadstool1' });
-    ok(r2.ok, 'a password account can still be made', JSON.stringify(r2));
+    const pwp = { op: 'signup', name: 'Pw Person', email: 'pw@example.com', password: 'toadstool1' };
+    let r2 = await post(p, pwp);
+    ok(r2.ok && r2.sent && !r2.me, 'a password sign-up sends a code first, and makes nothing yet', JSON.stringify(r2));
+    r2 = await post(p, Object.assign({ code: await gnome.code(ctx, BASE, pwp.email) }, pwp));
+    ok(r2.ok && r2.me && r2.me.name === 'Pw Person', 'a password account can still be made — with the code', JSON.stringify(r2));
     await post(p, { op: 'logout' });
     r2 = await post(p, { op: 'login', email: 'pw@example.com', password: 'wrong-one' });
     ok(r2.code === 'wrong' && r2.error === 'incorrect email or password', 'a wrong password is answered in plain words', JSON.stringify(r2));
@@ -152,6 +169,44 @@ const whoami = p => p.evaluate(() => fetch('/api/auth', { cache: 'no-store' }).t
     await p.goto(BASE + '/auth/google?next=%2Fyard%2F'); await p.waitForTimeout(500);
     t = await text(); ok(t.includes('already has a password'), 'Google cannot open a password account, and says so plainly', t.slice(0, 300));
     me = await whoami(p); ok(!me.me, '…and nobody is signed in afterwards', JSON.stringify(me));
+
+    // ── 5 · THE CODE: the seal sends a code, and the code makes the account ──
+    const says = (s, ms) => p.waitForFunction(s => document.body.innerText.includes(s), s, { timeout: ms || 8000 }).then(() => true, () => false);
+    await post(p, { op: 'logout' });
+    await p.goto(BASE + '/signup/?next=%2Ftoem2%2F'); await p.waitForTimeout(2500);
+    await p.fill('#f-name', 'Coder'); await p.fill('#f-email', 'Coder@Example.com'); await p.fill('#f-pw', 'toadstool1'); await p.fill('#f-pw2', 'toadstool1');
+    await p.click('button[aria-label="Sign up"]');
+    ok(await says('SENT'), 'the seal says SENT once the code has gone');
+    ok(await p.waitForSelector('#f-code', { timeout: 8000 }).then(() => true, () => false), 'the paper turns to the code step');
+    await p.waitForTimeout(400); t = await text();
+    for (const s of ['Check your email', 'Enter the code we sent you', 'Code', 'we emailed a 6-digit code to Coder@Example.com', 'VERIFY', 'press the seal to confirm your email', 'send a new code', 'Wrong email?']) ok(t.includes(s), 'the code step shows "' + s + '"', t.slice(0, 500));
+    ok(!t.includes('Confirm password') && !t.includes('Continue with Google') && !t.includes('Username'), 'the code step has put the form away');
+    ok(await p.evaluate(() => document.activeElement && document.activeElement.id === 'f-code'), 'the code field has the focus');
+    me = await whoami(p); ok(!me.me, 'no account yet — the code has not come back', JSON.stringify(me));
+    labels = await labelsOf(['f-code']); ok(labels[0] === 'Code', 'the code input has its one label', JSON.stringify(labels));
+    const c1 = await gnome.code(ctx, BASE, 'coder@example.com');
+    ok(/^\d{6}$/.test(c1), 'the door posted a six-figure code to the address, lower-cased', c1);
+    await p.click('button[aria-label="Sign up"]'); await p.waitForTimeout(400);
+    t = await text(); ok(t.includes('please enter the 6-digit code from the email'), 'the seal with no code asks for it, plainly');
+    await p.fill('#f-code', c1 === '000000' ? '111111' : '000000'); await p.click('button[aria-label="Sign up"]');
+    ok(await says('that code is not right'), 'a wrong code cracks the wax and says so');
+    me = await whoami(p); ok(!me.me, '…and makes no account');
+    await p.click('text=send a new code');
+    ok(await says('a new code is on its way'), '"send a new code" says a new one is coming');
+    const c2 = await gnome.code(ctx, BASE, 'coder@example.com');
+    ok(/^\d{6}$/.test(c2), 'a fresh code went out', c2);
+    if (c1 !== c2) { await p.fill('#f-code', c1); await p.click('button[aria-label="Sign up"]'); ok(await says('that code is not right'), 'the first code is no good once a new one has gone'); }
+    await p.click('text=go back'); await p.waitForTimeout(500);
+    t = await text(); ok(t.includes('Create your account') && t.includes('Confirm password') && !t.includes('Wrong email?'), '"go back" returns to the form');
+    ok(await p.evaluate(() => document.getElementById('f-email').value === 'Coder@Example.com' && document.getElementById('f-pw').value === 'toadstool1'), '…filled in as it was');
+    await p.click('button[aria-label="Sign up"]');
+    ok(await p.waitForSelector('#f-code', { timeout: 8000 }).then(() => true, () => false), 'the seal sends another code and the code step is back');
+    const c3 = await gnome.code(ctx, BASE, 'coder@example.com');
+    await p.fill('#f-code', c3.slice(0, 3) + ' ' + c3.slice(3)); await p.click('button[aria-label="Sign up"]');   // with a space, the way people type them
+    ok(await says('Welcome to Knoll'), 'the right code sets the wax: Welcome to Knoll');
+    await p.waitForURL(/\/toem2\//, { timeout: 20000 });
+    me = await whoami(p);
+    ok(me.me && me.me.name === 'Coder', '…and the account is made and sent on to ?next=, signed in', JSON.stringify(me));
 
     ok(pageErrors.length === 0, 'no uncaught page errors along the way', pageErrors.join(' | '));
   } catch (e) { fails.push('CRASH ' + (e && e.stack || e)); }

@@ -53,6 +53,11 @@ async function signUp(p, who) {
   await p.waitForTimeout(1200);                       // the scroll unrolls
   await p.fill('#f-name', who.name); await p.fill('#f-email', who.email); await p.fill('#f-pw', who.pw); await p.fill('#f-pw2', who.pw);
   await p.click('button[type="submit"]');
+  // THE CODE (api/auth.js): the seal sends a code; the probe reads it (gnome.js — a server started with probe-gate-google.js
+  // as its preload hands it over at /_outbox) and presses the seal again with it
+  await p.waitForSelector('#f-code', { timeout: 15000 });
+  await p.fill('#f-code', await require('./gnome.js').code(p.context(), BASE, who.email));
+  await p.click('button[type="submit"]');
 }
 async function logIn(p, who, pw, remember) {
   await p.waitForSelector('#f-email');
@@ -198,7 +203,7 @@ async function logIn(p, who, pw, remember) {
     await logIn(p, A, 'not-the-word');
     await p.waitForSelector('#e-pw', { timeout: 8000 }).catch(() => {});
     const note = await p.evaluate(() => { const e = document.getElementById('e-pw'); return e && e.textContent.trim(); });
-    check('the wrong secret word jams the key, and the margin says so', /not the secret word/.test(note || '') && /\/login\/$/.test(p.url()), note);
+    check('the wrong secret word jams the key, and the margin says so', /incorrect email or password/.test(note || '') && /\/login\/$/.test(p.url()), note);   // plain words since 2026-09-23
     await p.fill('#f-pw', A.pw);
     await p.uncheck('input[type="checkbox"]');
     await p.click('button[type="submit"]');

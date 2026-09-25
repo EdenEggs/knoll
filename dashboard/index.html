@@ -19,6 +19,10 @@
 <script src="./support.js"></script>
 <!-- THE ACCOUNT CORNER (account.js, 2026-09-21): the search and your gnome at the right of the house bar -->
 <script src="/account.js" defer></script>
+<!-- THE CORNER'S SETTINGS (manage.js, 2026-09-24): on a page's dashboard, for its keepers — the town board's tabs, the
+     chat's rules and the photo album, built into the #corner-manage slot below -->
+<link rel="stylesheet" href="./manage.css">
+<script src="./manage.js" defer></script>
 </head>
 <body>
 <x-dc>
@@ -144,7 +148,7 @@
            which is the hill. -->
       <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap">
         <a href="{{ chipHref }}" title="{{ chipTitle }}" style="font-size:17px; letter-spacing:1px; background:#fdf7e3; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:6px 14px; transform:rotate({{ rChip }}); color:#17120b; text-decoration:none" style-hover="transform:rotate({{ rChip }}) translate(1px,1px); box-shadow:4px 5px 0 rgba(60,50,80,0.2)">{{ chipLabel }} · <b>{{ chipPath }}</b></a>
-        <sc-if value="{{ isSpace }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ gearOn }}" hint-placeholder-val="{{ false }}">
           <!-- THE GEAR (2026-09-24): the space's settings — its name, its look, who can edit, its keepers (settings/). The space's
                own chip beside it IS the wall now, so there is no second door to it. -->
           <a href="{{ gearHref }}" title="settings" aria-label="settings" style="display:inline-flex; align-items:center; gap:8px; font-size:17px; letter-spacing:1px; background:#17120b; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:6px 14px; transform:rotate(1deg); color:#fdf7e3; text-decoration:none" style-hover="transform:rotate(1deg) translate(1px,1px); box-shadow:4px 5px 0 rgba(60,50,80,0.2)"><svg sc-camel-view-box="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="3.6" stroke-dasharray="3.53 3.53"></circle><circle cx="12" cy="12" r="6.6" fill="none" stroke="currentColor" stroke-width="2.6"></circle><circle cx="12" cy="12" r="2.3" fill="currentColor"></circle></svg><span>SETTINGS</span></a>
@@ -153,10 +157,17 @@
     </div>
 
     <!-- YOUR SPACES (2026-09-24): the pages you made (api/wall.js ?spaces=), each with its level and what waits there,
-         and the doors to it — its page (which is its wall), its numbers here, its settings -->
-    <sc-if value="{{ spacesOn }}" hint-placeholder-val="{{ false }}">
+         and the doors to it — its page (which is its wall), its numbers here, its settings. First in the row, the
+         profile's own card (later the same day): the door back to the profile dashboard, so a space's dashboard is
+         never a dead end — lit, like a space's card, when its numbers are the ones on show. -->
       <section aria-label="your spaces" style="display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-bottom:28px">
         <div style="font-size:15px; letter-spacing:2px; color:#4a4054; opacity:0.8">YOUR SPACES</div>
+        <div style="position:relative; display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:{{ meBg }}; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:8px 12px; transform:rotate(0.5deg)">
+          <a href="/dashboard/" title="your profile's numbers" style="font-family:'Rye',serif; font-size:19px; color:#17120b; text-decoration:none">Profile</a>
+          <span style="display:inline-flex; gap:8px; margin-left:4px">
+            <a href="../yard/" title="your page — the yard" style="font-size:15px; letter-spacing:1px; color:#17120b; text-decoration:none; border:2.5px solid #17120b; padding:1px 8px; background:#fdf7e3">/yard</a>
+          </span>
+        </div>
         <sc-for list="{{ spaces }}" as="sp" hint-placeholder-count="2">
           <div style="position:relative; display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:{{ sp.bg }}; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); padding:8px 12px; transform:rotate({{ sp.rot }})">
             <a href="{{ sp.dash }}" title="its numbers" style="font-family:'Rye',serif; font-size:19px; color:#17120b; text-decoration:none">{{ sp.title }}</a>
@@ -172,7 +183,6 @@
           <a href="/yard/new/" style="display:inline-flex; align-items:center; font-family:'VT323',monospace; font-size:17px; letter-spacing:1px; color:#17120b; text-decoration:none; border:4px dashed #17120b; padding:8px 14px; opacity:0.8">+ a new space</a>
         </sc-if>
       </section>
-    </sc-if>
 
     <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:28px">
       <div style="font-size:15px; letter-spacing:2px; color:#4a4054; opacity:0.8">SHOW ME</div>
@@ -197,6 +207,11 @@
         </div>
       </sc-for>
     </section>
+
+    <!-- THE CORNER'S SETTINGS (2026-09-24): the town board's tabs, the chat's rules and the photo album's sections and
+         photos, for a page's keepers — manage.js builds them into this slot, plain DOM outside React's care, on a page's
+         dashboard only; empty (and so unseen) everywhere else. Nothing of React's ever goes inside. -->
+    <section id="corner-manage" aria-label="the town board, the chat and the photo album"></section>
 
     <section style="display:grid; grid-template-columns:minmax(0,2fr) minmax(280px,1fr); gap:26px; margin-bottom:30px; align-items:start">
 
@@ -420,7 +435,7 @@ class Component extends DCLogic {
        ?page=), its revisions (?log=), what waits (?queue=), its rules (?rules=) — named after it, with the gear to its
        settings. Visits are the yard's beacon's and are not counted on a space; edits are counted instead. */
     const sp = String(new URLSearchParams(location.search).get('space') || '').toLowerCase();
-    this.SPACE = /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/.test(sp) && sp !== 'toem2' ? sp : '';
+    this.SPACE = /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/.test(sp) ? sp : '';   // 'toem2' too, since 2026-09-24: the first page's own numbers, and its corner's settings, for its moderators
     this.DOOR = '/api/hill';
     this.SHIPPED = '../yard/hill.json';
     this.FRAME = this.SPACE ? '/toem2/?page=' + this.SPACE + '&embed=1' : '../yard/?embed=1';
@@ -483,16 +498,18 @@ class Component extends DCLogic {
     const S = this.SPACE, get = q => fetch('/api/wall' + q, { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json()).catch(() => null);
     const [w, l, sp, rules, q] = await Promise.all([get('?page=' + S), get('?log=500&page=' + S), get('?space=' + S), get('?rules=1&page=' + S), get('?queue=1&page=' + S)]);
     const doc = w && w.ok && w.wall ? { t: 0, rev: w.rev, wall: w.wall, flatfile: w.flatfile || { list: [] }, looks: [] } : { t: 0, wall: { items: [] }, flatfile: { list: [] }, looks: [] };
-    this.setState({ doc, docFrom: w && w.ok ? 'space' : 'none', space: sp && sp.ok ? sp.space : null, rules: rules && rules.ok ? rules : null,
+    const space = sp && sp.ok ? sp.space : S === 'toem2' ? { slug: 'toem2', title: 'TOEM 2', by: '' } : null;   // TOEM 2 has no ?space= record: it is the first page, and its own name
+    this.setState({ doc, docFrom: w && w.ok ? 'space' : 'none', space, rules: rules && rules.ok ? rules : null,
                     log: l && l.ok ? l.log : [], queue: q && q.ok ? q.queue : [], statsState: 'off', hits: null }, () => this.paintSoon());
-    if (sp && sp.ok) document.title = sp.space.title + ' dashboard · Knoll';
+    if (space) document.title = space.title + ' dashboard · Knoll';
   }
   // the spaces you made, for the strip under the title; and your name, for the yard's own title
   async loadSpaces() {
     try { const v = await fetch('/api/wall?spaces=1', { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json()); if (v && v.ok) this.setState({ spaces: v.spaces, spacesFull: !!v.full }); } catch (e) {}
     if (window.KnollAccount && KnollAccount.me) {
       if (KnollAccount.pic && KnollAccount.pic()) this.setState({ mePic: KnollAccount.pic() });   // this device's copy first, the door's word when it comes
-      KnollAccount.me.then(a => { if (a && a.name) { this.setState({ meName: a.name, mePic: a.avatar || (KnollAccount.pic ? KnollAccount.pic() : '') || '' }); document.title = a.name + ' Profile Dashboard · Knoll'; } }).catch(() => {});
+      // (the tab is the space's when these are a space's numbers — loadSpace names it — whichever answer lands last)
+      KnollAccount.me.then(a => { if (a && a.name) { this.setState({ meName: a.name, mePic: a.avatar || (KnollAccount.pic ? KnollAccount.pic() : '') || '' }); if (!this.SPACE) document.title = a.name + ' Profile Dashboard · Knoll'; } }).catch(() => {});
     }
   }
   // the older versions, one at a time, for their thumbnails — the newest IS the doc
@@ -940,14 +957,15 @@ class Component extends DCLogic {
       statusPage, statusVisits,
       // whose numbers these are (A SPACE'S NUMBERS)
       isSpace: !!SP,
-      // whose it is (2026-09-24): "<name> Profile Dashboard", the space's numbers or the yard's alike — and the yard's picture in the corner
-      dashTitle: (S.meName || (S.doc && S.doc.settings && S.doc.settings.displayName) || 'Your') + ' Profile Dashboard',
+      // whose it is (2026-09-24): "<name> Profile Dashboard", or a space's "<title> dashboard" — and the yard's picture in the corner either way
+      dashTitle: SP ? ((S.space && S.space.title) || SP) + ' dashboard' : (S.meName || (S.doc && S.doc.settings && S.doc.settings.displayName) || 'Your') + ' Profile Dashboard',
+      meBg: SP ? '#fdf7e3' : '#ffd23f',
       hasPic: !!S.mePic, noPic: !S.mePic, picSrc: S.mePic || '',
       dashSub: SP ? '· ' + (LEVEL[chaos] || 'TENDED') + ' · ' + (chaos === 2 && rules ? 'THE BALLOT CLOSES ' + closesIn(rules.closes) : rules ? rules.keepers.length + (rules.keepers.length === 1 ? ' KEEPER' : ' KEEPERS') : 'A SPACE') + ' ·'
                   : '· EVERY VISITOR COUNTED BY HAND · GNOME-CERTIFIED ·',
       chipHref: SP ? '/' + SP : '../yard/', chipTitle: SP ? 'open the space' : 'open your page', chipLabel: SP ? 'THE SPACE' : 'YOUR HILL', chipPath: SP ? '/' + SP : '/yard',
-      gearHref: SP ? '/settings/?space=' + SP : '',
-      spacesOn: S.spaces.length > 0 || !SP, canMake: !S.spacesFull,
+      gearHref: SP ? '/settings/?space=' + SP : '', gearOn: !!SP && SP !== 'toem2',   // TOEM 2 has no settings page: its rules are the moderators', on the wall
+      canMake: !S.spacesFull,
       spaces: S.spaces.filter(s => /^[a-z0-9-]{1,32}$/.test(s.slug)).map((s, i) => ({
         slug: s.slug, title: s.title, level: LEVEL[s.chaos] || 'TENDED', col: LCOL[s.chaos] || LCOL[1],
         about: s.waiting ? s.waiting + (s.chaos === 2 ? ' ON THE BALLOT' : ' WAITING') : 'NOTHING WAITS',

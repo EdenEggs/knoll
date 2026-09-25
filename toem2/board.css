@@ -35,9 +35,9 @@
   box-shadow:3px 3px 0 #17120b;font:700 17px/1 'Kalam',cursive;cursor:pointer;padding:0}
 .town-close:hover{background:#fff4f9}
 .town-close:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #17120b}
-.town-tabs{display:flex;gap:6px;padding:0 10px;position:relative;z-index:1;flex:none}
+.town-tabs{display:flex;flex-wrap:wrap;gap:6px;row-gap:4px;padding:0 10px;position:relative;z-index:1;flex:none}   /* the keepers may hang up to eight: a second row when they do not fit */
 .town-tab{flex:1;min-width:0;padding:9px 6px 11px;box-sizing:border-box;background:#e9e4e8;color:#17120b;border:4px solid #17120b;border-bottom:0;
-  border-radius:12px 12px 0 0;font:700 15px/1 'Kalam',cursive;font-variant-caps:small-caps;letter-spacing:.03em;cursor:pointer;white-space:nowrap}
+  border-radius:12px 12px 0 0;font:700 15px/1 'Kalam',cursive;font-variant-caps:small-caps;letter-spacing:.03em;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .town-tab:hover{background:#f3eef2}
 /* the open tab is cut into the body: it runs 4px over the body's top rule and paints it out */
 .town-tab.is-on{background:#fff;margin-bottom:-4px;padding-bottom:15px;position:relative;z-index:2}
@@ -46,6 +46,7 @@
 .town-body{flex:1;min-height:0;overflow-y:auto;border-top:4px solid #17120b;padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px;
   scrollbar-width:thin;scrollbar-color:#17120b transparent}
 .town-intro{margin:0}
+.town-notice{white-space:pre-wrap;overflow-wrap:anywhere}   /* a notice tab: the keepers' text, its line breaks kept */
 .town-card{background:#efecef;color:#17120b;border:3px solid #17120b;border-radius:14px 12px 15px 13px;box-shadow:4px 4px 0 #17120b;
   padding:12px 14px;display:flex;gap:12px;align-items:flex-start;text-align:left;font:inherit;line-height:inherit;margin:0}
 .town-card:nth-child(even){border-radius:12px 15px 13px 14px}

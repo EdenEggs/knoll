@@ -532,6 +532,10 @@ try { boardApi = require('./api/board.js'); } catch (e) { console.log('  ! api/b
 const GALLERY_API = '/api/gallery';
 let galleryApi = null;
 try { galleryApi = require('./api/gallery.js'); } catch (e) { console.log('  ! api/gallery.js did not load: ' + e.message); }
+// /api/leaderboard: who stands where on a page (2026-09-24) — the same module again, counting from the same store
+const RANKS_API = '/api/leaderboard';
+let ranksApi = null;
+try { ranksApi = require('./api/leaderboard.js'); } catch (e) { console.log('  ! api/leaderboard.js did not load: ' + e.message); }
 
 function handle(req, res) {
   const url = req.url.split('?')[0];
@@ -553,6 +557,11 @@ function handle(req, res) {
   if (url === GALLERY_API) {
     if (!galleryApi) { answer(res, 500, { ok: false, error: 'api/gallery.js did not load' }); return; }
     galleryApi(req, res).catch(e => answer(res, 500, { ok: false, error: String((e && e.message) || e) }));
+    return;
+  }
+  if (url === RANKS_API) {
+    if (!ranksApi) { answer(res, 500, { ok: false, error: 'api/leaderboard.js did not load' }); return; }
+    ranksApi(req, res).catch(e => answer(res, 500, { ok: false, error: String((e && e.message) || e) }));
     return;
   }
   if (url === WALL_API || WALL_AUTH.test(url)) {   // see THE WALL DOOR OF TOEM 2

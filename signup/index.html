@@ -143,6 +143,7 @@
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 14px; font-size: 18px; line-height: 1.5">
+              <sc-if value="{{ formStep }}" hint-placeholder-val="{{ true }}">
               <!-- name -->
               <div style="position: relative">
                 <label for="f-name" style="display: block">Username</label>
@@ -158,6 +159,7 @@
                   </div>
                 </sc-if>
               </div>
+              </sc-if>
               <sc-if value="{{ viaGoogle }}" hint-placeholder-val="{{ false }}">
                 <div style="display: flex; align-items: center; gap: 10px; font-size: 16px; opacity: 0.85">
                   <svg width="18" height="18" sc-camel-view-box="0 0 48 48" aria-hidden="true" style="flex: none"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-2.8-.4-4H24v8.1h12.8c-.3 2.2-1.7 5.4-4.8 7.6l7.4 5.7c4.4-4.1 7.1-10.1 7.1-17.4z"></path><path fill="#FBBC05" d="M10.5 28.7c-.5-1.5-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C1 16.5 0 20.1 0 24s1 7.5 2.6 10.8l7.9-6.1z"></path><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2 1.4-4.8 2.4-8.5 2.4-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"></path></svg>
@@ -212,7 +214,28 @@
                 </sc-if>
               </div>
               </sc-if>
+              <!-- THE CODE (2026-09-24): the six figures the door posted to the address. The form above stays in
+                   the page's state and goes back with the code, so this is the same sign-up, proved — the seal
+                   is pressed a second time for it. -->
+              <sc-if value="{{ codeStep }}" hint-placeholder-val="{{ false }}">
+              <div style="position: relative">
+                <label for="f-code" style="display: block">Code</label>
+                <div style="position: relative; border-bottom: 2px dotted rgba(23,18,11,0.5)">
+                  <input ref="{{ codeRef }}" id="f-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" value="{{ code }}" sc-camel-on-change="{{ onCode }}" sc-camel-on-focus="{{ onFocusCode }}" sc-camel-on-blur="{{ onBlurCode }}" aria-describedby="e-code" style="display: block; width: 100%; box-sizing: border-box; background: transparent; border: 0; outline: none; padding: 4px 0 3px; font-family: 'Public Sans', sans-serif; font-size: 17px; letter-spacing: 4px; color: #3b2a1a; caret-color: #3b2a1a">
+                  <div style="position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: #17120b; transform-origin: left; transform: scaleX({{ codeLine }}); transition: transform 0.35s ease-out"></div>
+                </div>
+                <div style="font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">{{ codeHint }}</div>
+                <sc-if value="{{ codeErr }}" hint-placeholder-val="{{ false }}">
+                  <div id="e-code" style="position: {{ notePos }}; left: 100%; top: 0; margin-left: {{ noteMl }}; width: {{ noteW }}; color: #b83739; font-size: 15px; line-height: 1.3; transform: rotate(1.5deg); display: flex; gap: 6px; align-items: flex-start; margin-top: {{ noteMt }}">
+                    <svg width="34" height="20" sc-camel-view-box="0 0 34 20" style="flex: none; margin-top: 3px"><path d="M32,4 Q20,2 4,14 M12,15 L3,14 L8,7" fill="none" stroke="#b83739" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <span>{{ codeErr }}</span>
+                  </div>
+                </sc-if>
+              </div>
+              </sc-if>
+              <sc-if value="{{ formStep }}" hint-placeholder-val="{{ true }}">
               <div>By signing up, you agree to our <a href="#" style="color: #b83739">Rules</a> and <a href="#" style="color: #b83739">Terms of Service</a>.</div>
+              </sc-if>
             </div>
 
             <!-- the seal -->
@@ -257,6 +280,12 @@
               <div style="font-style: italic; font-size: 13px; opacity: 0.6; text-align: center; margin-top: -4px">no password needed</div>
             </div>
             <div style="font-style: italic; font-size: 14.5px; opacity: 0.7; text-align: center">Already have an account? <a href="{{ loginHref }}" style="color: #b83739">Log in</a></div>
+            </sc-if>
+            <sc-if value="{{ codeStep }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; font-style: italic; font-size: 14.5px; opacity: 0.75; text-align: center">
+              <div>Didn't get it? Check your spam folder, or <button type="button" sc-camel-on-click="{{ onResend }}" disabled="{{ sealBusy }}" style="background: transparent; border: 0; padding: 0; cursor: pointer; font: inherit; color: #b83739; text-decoration: underline">send a new code</button></div>
+              <div>Wrong email? <button type="button" sc-camel-on-click="{{ onBack }}" disabled="{{ sealBusy }}" style="background: transparent; border: 0; padding: 0; cursor: pointer; font: inherit; color: #b83739; text-decoration: underline">go back</button></div>
+            </div>
             </sc-if>
           </form>
           <div style="height: 16px; background: #e4d9bb; border-top: 2px solid rgba(23,18,11,0.25)"></div>
@@ -404,8 +433,16 @@
    the gnome shows you round. "Let Google vouch for me" goes to Google when
    this site has Google set up (and says so in the margin when it has not);
    a new account Google vouched for comes back here as ?google=1, straight to
-   the one-field form, to be named. */
-const NEXT = (function () { const v = new URLSearchParams(location.search).get('next') || ''; return v.length <= 512 && /^\/(?![\/\\])[^\s\\]*$/.test(v) ? v : '/yard/'; })();
+   the one-field form, to be named.
+
+   THE CODE (2026-09-24). The seal no longer makes the account on its own:
+   the door checks the form, emails a six-figure code to the address, and
+   answers `sent`; the wax sets, and the paper turns to a one-field form for
+   the code (stage 'code'), with "send a new code" and "go back" under the
+   seal. The seal pressed again sends the same form back WITH the code, and
+   the account is made — the welcome and the walk on are as before. A wrong
+   or stale code cracks the wax with the door's own words by the field. */
+const NEXT =(function () { const v = new URLSearchParams(location.search).get('next') || ''; return v.length <= 512 && /^\/(?![\/\\])[^\s\\]*$/.test(v) ? v : '/yard/'; })();
 const NEXT_WORD = /^\/yard\//.test(NEXT) ? 'go to your yard →' : /^\/toem2\//.test(NEXT) ? 'back to TOEM 2 →' : NEXT === '/' ? 'back to the home page →' : 'back where you were →';
 const VIA_GOOGLE = /[?&]google=1\b/.test(location.search);
 const GATE = body => fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
@@ -416,11 +453,12 @@ let GATE_INFO = null;                          // what the door says about itsel
 const gateInfo = () => GATE_INFO || (GATE_INFO = fetch('/api/auth', { cache: 'no-store' }).then(r => r.json()).catch(() => ({})));
 class Component extends DCLogic {
   state = { pose: 'point', paperH: '0px', paperT: 'none', swung: false, focused: null, name: '', email: '', pw: '', pw2: '', showPw: false,
-    errs: {}, seal: 'idle', asleep: false, narrow: false, jostle: false, hatSlip: false, done: false, live: '', rolledUp: false, viaGoogle: VIA_GOOGLE };
+    errs: {}, seal: 'idle', asleep: false, narrow: false, jostle: false, hatSlip: false, done: false, live: '', rolledUp: false, viaGoogle: VIA_GOOGLE,
+    stage: 'form', code: '', sentTo: '', codeNote: '' };   // THE CODE: 'form' until a code has gone out, then 'code'
   refs = {};
   r = (k) => (el) => { this.refs[k] = el; };
   armInkRef = this.r('armInk'); armCoatRef = this.r('armCoat'); cuffRef = this.r('cuff'); cuffRef2 = this.r('cuff2');
-  scrollRef = this.r('scroll'); paperInnerRef = this.r('paperInner'); nameRef = this.r('name'); emailRef = this.r('email'); pwRef = this.r('pw'); pw2Ref = this.r('pw2');
+  scrollRef = this.r('scroll'); paperInnerRef = this.r('paperInner'); nameRef = this.r('name'); emailRef = this.r('email'); pwRef = this.r('pw'); pw2Ref = this.r('pw2'); codeRef = this.r('code');
   sealRef = this.r('seal'); gnomeRef = this.r('gnome'); shoulderRef = this.r('shoulder'); headRef = this.r('head'); pupilsRef = this.r('pupils');
   handRef = this.r('hand'); handInnerRef = this.r('handInner'); mirrorRef = this.r('mirror');
 
@@ -504,6 +542,8 @@ class Component extends DCLogic {
   onPw = (e) => this.setState({ pw: e.target.value }, this.typed);
   onPw2 = (e) => this.setState({ pw2: e.target.value }, this.typed);
   onFocusPw2 = () => this.focusField('pw2'); onBlurPw2 = () => this.blurField('pw2');
+  onCode = (e) => this.setState({ code: e.target.value }, this.typed);
+  onFocusCode = () => this.focusField('code'); onBlurCode = () => this.blurField('code');
   typed = () => { this.m.scribbleT = performance.now(); this.m.mode = 'caret'; if (this.state.focused) { this.m.touched = this.m.touched || {}; this.m.touched[this.state.focused] = true; } };
   focusField(f) { this.setState({ focused: f }); this.m.mode = 'caret'; this.m.focusMouse = { x: this.m.mx, y: this.m.my }; }
   onFocusName = () => this.focusField('name'); onFocusEmail = () => this.focusField('email'); onFocusPw = () => this.focusField('pw');
@@ -514,6 +554,7 @@ class Component extends DCLogic {
     if (f === 'email') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email) ? '' : 'please enter a valid email address';
     if (f === 'pw') return s.pw.length >= 8 ? '' : 'your password must be at least 8 characters';
     if (f === 'pw2') return s.pw2 === s.pw ? '' : 'the passwords do not match';
+    if (f === 'code') return /^\d{6}$/.test(s.code.replace(/\s/g, '')) ? '' : 'please enter the 6-digit code from the email';
     return '';
   }
   blurField(f) {
@@ -541,28 +582,37 @@ class Component extends DCLogic {
   // ─── the seal ───
   onSealEnter = () => { this.m.sealHover = true; };
   onSealLeave = () => { this.m.sealHover = false; };
+  // THE CODE: the same form, as the door wants it — first with no code (one goes out), then with it
+  petition = () => ({ op: 'signup', name: this.state.name.trim(), email: this.state.email.trim(), password: this.state.pw });
   onSubmit = (e) => {
     e.preventDefault();
     if (this.state.seal !== 'idle' && this.state.seal !== 'cracked') return;
-    const errs = {}; (this.state.viaGoogle ? ['name'] : ['name', 'email', 'pw', 'pw2']).forEach((f) => { const er = this.validate(f); if (er) errs[f] = er; });
+    const google = this.state.viaGoogle, coding = this.state.stage === 'code';
+    const errs = {}; (google ? ['name'] : coding ? ['code'] : ['name', 'email', 'pw', 'pw2']).forEach((f) => { const er = this.validate(f); if (er) errs[f] = er; });
     if (Object.keys(errs).length) { this.setState({ errs, live: Object.values(errs)[0] }); this.m.noteAt = Object.keys(errs)[0]; this.m.noteT = performance.now(); return; }
     // the door is asked now, and has answered by the time the wax is cool (THE PETITION IS REAL)
-    const asked = this.state.viaGoogle ? GATE({ op: 'name', name: this.state.name.trim() })
-      : GATE({ op: 'signup', name: this.state.name.trim(), email: this.state.email.trim(), password: this.state.pw });
+    const asked = google ? GATE({ op: 'name', name: this.state.name.trim() })
+      : GATE(Object.assign(this.petition(), coding ? { code: this.state.code.replace(/\s/g, '') } : {}));
     // the hand reaches for the stamp first (~350ms), then grips, lifts, thumps
-    this.setState({ seal: 'reach', errs: {} });
+    this.setState({ seal: 'reach', errs: {}, codeNote: '' });
     setTimeout(() => this.setState({ seal: 'grip' }), 380);
     setTimeout(() => this.setState({ seal: 'lift' }), 520);
     setTimeout(() => this.setState({ seal: 'press', jostle: true, hatSlip: true }), 640);
     setTimeout(() => this.setState({ seal: 'wax' }), 760);
-    setTimeout(() => this.setState({ seal: 'cooling', jostle: false, live: 'Creating your account' }), 1080);
+    setTimeout(() => this.setState({ seal: 'cooling', jostle: false, live: google || coding ? 'Creating your account' : 'Sending you a code' }), 1080);
     Promise.all([asked, new Promise(r => setTimeout(r, 2060))]).then(([out]) => {
       if (!out.ok) {
-        const google = this.state.viaGoogle;
-        const f = google ? 'name' : ({ name: 'name', password: 'pw' }[out.code] || 'email');
+        const f = google ? 'name' : coding ? 'code' : ({ name: 'name', password: 'pw' }[out.code] || 'email');
         const msg = GATE_SAYS[out.code] || (google && out.code === 'who' ? 'your Google sign-in has expired — please continue with Google again' : out.error) || 'something went wrong — please try again';
         this.setState({ seal: 'cracked', errs: { [f]: msg }, live: msg });
         this.m.noteAt = f; this.m.noteT = performance.now();
+      } else if (out.sent) {
+        // THE CODE: the wax sets on "sent"; then the paper turns to the one field the code goes in, and the seal is ready for it
+        this.setState({ seal: 'set', live: 'We emailed you a code' });
+        setTimeout(() => {
+          this.setState({ seal: 'idle', stage: 'code', code: '', errs: {}, sentTo: this.state.email.trim() });
+          setTimeout(() => { if (this.refs.code) this.refs.code.focus(); }, 80);
+        }, 900);
       } else {
         this.setState({ seal: 'set', live: 'Welcome to Knoll' });
         setTimeout(() => this.setState({ paperT: 'height 380ms cubic-bezier(.6,0,.8,1)', paperH: '0px', rolledUp: true, open: false }), 500);
@@ -571,12 +621,23 @@ class Component extends DCLogic {
       }
     });
   };
+  // THE CODE: another one, without the seal — the same form goes again with no code and the door posts a fresh one; or back to the form
+  onResend = () => {
+    if (this.state.seal !== 'idle' && this.state.seal !== 'cracked') return;
+    this.setState({ seal: 'idle', errs: {}, codeNote: 'sending a new code…' });
+    GATE(this.petition()).then(out => {
+      if (out.ok && out.sent) { this.setState({ code: '', codeNote: 'a new code is on its way — check your email', live: 'A new code is on its way' }); return; }
+      const msg = GATE_SAYS[out.code] || out.error || 'something went wrong — please try again';
+      this.setState({ codeNote: '', errs: { code: msg }, live: msg }); this.m.noteAt = 'code'; this.m.noteT = performance.now();
+    });
+  };
+  onBack = () => { if (this.state.seal === 'idle' || this.state.seal === 'cracked') this.setState({ stage: 'form', seal: 'idle', code: '', errs: {}, codeNote: '' }); };
 
   // ─── the loop ───
   caretPoint() {
     const f = this.state.focused; const el = this.refs[f]; const mir = this.refs.mirror; if (!el || !mir) return null;
     const v = el.value; const hid = (f === 'pw' || f === 'pw2') && !this.state.showPw;
-    mir.textContent = hid ? '\u2022'.repeat(v.length) : v; mir.style.letterSpacing = hid ? '3px' : '0';
+    mir.textContent = hid ? '\u2022'.repeat(v.length) : v; mir.style.letterSpacing = hid ? '3px' : f === 'code' ? '4px' : '0';
     const r = el.getBoundingClientRect(); const w = Math.min(mir.getBoundingClientRect().width, r.width - 4);
     return { x: r.left + w, y: r.bottom - 6 };
   }
@@ -696,6 +757,7 @@ class Component extends DCLogic {
     const down = s.seal === 'press' || s.seal === 'wax';
     const held = s.seal === 'lift';
     const pwFocused = s.focused === 'pw' || s.focused === 'pw2';
+    const coding = s.stage === 'code';        // THE CODE: the one-field step, in place of the form
     return {
       armInkRef: this.armInkRef, armCoatRef: this.armCoatRef, cuffRef: this.cuffRef, cuffRef2: this.cuffRef2, scrollRef: this.scrollRef, paperInnerRef: this.paperInnerRef,
       nameRef: this.nameRef, emailRef: this.emailRef, pwRef: this.pwRef, sealRef: this.sealRef, gnomeRef: this.gnomeRef, shoulderRef: this.shoulderRef,
@@ -718,13 +780,19 @@ class Component extends DCLogic {
       waxOn: wax, waxSet: s.seal === 'set', waxCracked: s.seal === 'cracked',
       waxColor: s.seal === 'wax' ? '#f05a5c' : (s.seal === 'cracked' ? '#8e2a2c' : '#b83739'),
       stampY: held ? '-22px' : (down ? '10px' : '0px'), stampSx: down ? 1.12 : 1, stampSy: down ? 0.86 : 1,
-      sealLabel: s.seal === 'set' ? 'DONE' : (busy ? 'SIGNING UP…' : 'SIGN UP'),
-      sealHint: s.seal === 'cracked' ? 'something went wrong — see the note by the field' : (busy ? 'creating your account…' : 'press the seal to create your account'),
+      sealLabel: s.seal === 'set' ? (coding || s.viaGoogle ? 'DONE' : 'SENT') : busy ? (coding ? 'CHECKING…' : s.viaGoogle ? 'SIGNING UP…' : 'SENDING…') : coding ? 'VERIFY' : 'SIGN UP',
+      sealHint: s.seal === 'cracked' ? 'something went wrong — see the note by the field'
+              : s.seal === 'set' ? (coding || s.viaGoogle ? 'your account is ready' : 'a code is on its way to your email')
+              : busy ? (coding ? 'checking your code…' : s.viaGoogle ? 'creating your account…' : 'sending you a code…')
+              : coding ? 'press the seal to confirm your email' : 'press the seal to create your account',
       done: s.done, liveMsg: s.live, interlude: !!s.interlude,
-      viaGoogle: !!s.viaGoogle, fullForm: !s.viaGoogle, googleEmail: 'your Google email',   // the address is not kept, so not known here either
+      viaGoogle: !!s.viaGoogle, fullForm: !s.viaGoogle && !coding, googleEmail: 'your Google email',   // the address is not kept, so not known here either
+      codeStep: coding, formStep: !coding, code: s.code, codeRef: this.codeRef, onCode: this.onCode, onFocusCode: this.onFocusCode, onBlurCode: this.onBlurCode,
+      codeLine: s.focused === 'code' ? 1 : 0, codeErr: s.errs.code || false, codeHint: s.codeNote || '(we emailed a 6-digit code to ' + s.sentTo + ')',
+      onResend: this.onResend, onBack: this.onBack,
       nextHref: NEXT, nextWord: NEXT_WORD, loginHref: '../login/?next=' + encodeURIComponent(NEXT),
-      heading: s.viaGoogle ? 'One more thing — pick a username' : 'Create your account',
-      subhead: s.viaGoogle ? 'Signed in with Google' : 'Sign up for Knoll',
+      heading: s.viaGoogle ? 'One more thing — pick a username' : coding ? 'Check your email' : 'Create your account',
+      subhead: s.viaGoogle ? 'Signed in with Google' : coding ? 'Enter the code we sent you' : 'Sign up for Knoll',
       handOpacity: this.m.rest ? 0.92 : 1,
       armZ: busy ? 4 : 2,
       posePoint: p === 'point', poseQuill: p === 'quill', poseGrab: p === 'grab', poseThumb: p === 'thumb', posePalm: p === 'palm',

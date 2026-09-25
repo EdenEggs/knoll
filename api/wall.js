@@ -297,6 +297,7 @@ function fileStore(file) {
       case 'HINCRBY': { const h = d.h[k] = d.h[k] || {}; const v = num(h[str(cmd[2])] || 0) + num(cmd[3]); h[str(cmd[2])] = String(v); return v; }
       case 'LPUSH': case 'RPUSH': { const l = d.l[k] = d.l[k] || []; cmd.slice(2).forEach(v => (op === 'LPUSH' ? l.unshift(str(v)) : l.push(str(v)))); return l.length; }
       case 'LRANGE': return range(d.l[k] || [], cmd[2], cmd[3]);
+      case 'LSET': { const l = d.l[k] || []; let i = num(cmd[2]); if (i < 0) i += l.length; if (!(i >= 0 && i < l.length)) throw new Error('the store said: index out of range'); l[i] = str(cmd[3]); return 'OK'; }
       case 'LREM': { const l = d.l[k] || []; const c = num(cmd[2]), v = str(cmd[3]); let n = 0; for (let i = 0; i < l.length;) { if (l[i] === v && (c === 0 || n < Math.abs(c))) { l.splice(i, 1); n++; } else i++; } return n; }
       case 'LTRIM': d.l[k] = range(d.l[k] || [], cmd[2], cmd[3]); return 'OK';
       case 'LLEN': return (d.l[k] || []).length;
@@ -324,7 +325,7 @@ function fileStore(file) {
       default: throw new Error('the file store does not know ' + op);
     }
   }
-  const WRITES = /^(SET|GETDEL|DEL|INCR|INCRBY|EXPIRE|HSET|HSETNX|HINCRBY|LPUSH|RPUSH|LREM|LTRIM|SADD|SREM|ZADD|ZREMRANGEBYSCORE|EVAL)$/;
+  const WRITES = /^(SET|GETDEL|DEL|INCR|INCRBY|EXPIRE|HSET|HSETNX|HINCRBY|LPUSH|RPUSH|LSET|LREM|LTRIM|SADD|SREM|ZADD|ZREMRANGEBYSCORE|EVAL)$/;
   const writes = cmd => WRITES.test(String(cmd[0]).toUpperCase());
   return {
     kind: 'file', file,
@@ -358,13 +359,16 @@ const dbm = cmds => storeFor().many(cmds);
      tags              hash    '<name>#<n>' → the account; a tag is never given twice
      sess:<sha>        string  a session → its account (expires)
      oauth:<state>     string  a Google sign-in on its way (ten minutes)
+     code:<u>          hash    h tries — a sign-up code posted to an address, hashed, and the wrong guesses (api/auth.js: THE CODE; ten minutes)
      days:<u>          set     standing days — rep, earned on any page
-     rl:<who>:<hour>   string  the hour's counters
+     rl:<who>:<hour>   string  the hour's counters · rl:chat:<slug>:<u>:wait — the chat's wait between two lines (api/board.js)
      fp:<u>:<day>      set     the pieces touched today, any page (the footprint)
      pending:<u>       list    edits of theirs waiting, any page · pendingip:<h> the same by address
    PAGES
      page:<slug>       hash    made title kind by, its look: palette inks pic, its rules: chaos period closes last told feats
                                (mod: the form's old word, kept, unread) — every page; the first keeps a settings-only hash (no made)
+                               · tabs chat (the board's tabs and the chat's rules — api/board.js) · sections (the album's — api/gallery.js)
+                               · ranks (what the leaderboard shows — api/leaderboard.js), JSON
      pages             zset    those pages, scored by when they were made
      spaces:<u>        set     the pages an account made (SPACES: two, unless a moderator)
      doc rev log rev:<n> queue contested
@@ -387,18 +391,21 @@ const dbm = cmds => storeFor().many(cmds);
    THE PHOTO ALBUM — api/gallery.js
      album:<slug>      list    a page's photos, newest first, trimmed: {id, by, at, cap, where, src, key} — the picture is a file (Blob, or toem2/album/)
      album:<slug>:like:<id> set  who gave the photo a heart
+   THE LEADERBOARD — api/leaderboard.js
+     lb:<slug>         string  the page's count, as last made from its log, board and album (ten minutes)
    THE MODERATORS' RECORD
      audit             list    roles, bans, watches, pages made, settings, invites, reviews, closes, reverts, strikes, undos, hides */
 const K = {
   user: u => P + 'user:' + u, users: P + 'users', names: u => P + 'names:' + u, tagN: name => P + 'tagn:' + name, tags: P + 'tags',
-  sess: h => P + 'sess:' + h, oauth: s => P + 'oauth:' + s, days: u => P + 'days:' + u, rl: (who, hour) => P + 'rl:' + who + ':' + hour,
+  sess: h => P + 'sess:' + h, oauth: s => P + 'oauth:' + s, code: u => P + 'code:' + u, days: u => P + 'days:' + u, rl: (who, hour) => P + 'rl:' + who + ':' + hour,
   fp: (u, day) => P + 'fp:' + u + ':' + day, pending: u => P + 'pending:' + u, pendingIp: h => P + 'pendingip:' + h,
   page: s => P + 'page:' + s, pages: P + 'pages', spaces: u => P + 'spaces:' + u, edit: id => P + 'edit:' + id,
   prop: id => P + 'prop:' + id, propDoc: id => P + 'propdoc:' + id, props: hill => P + 'props:' + hill,
   propsBy: u => P + 'propsby:' + u, propsIp: h => P + 'propsip:' + h, audit: P + 'audit',
   friends: u => P + 'friends:' + u, asks: u => P + 'asks:' + u, notes: u => P + 'notes:' + u, invited: s => P + 'invited:' + s,
   lock: id => P + 'lock:' + id, board: (s, ch) => P + 'board:' + s + ':' + ch,
-  album: s => P + 'album:' + s, albumLike: (s, id) => P + 'album:' + s + ':like:' + id
+  album: s => P + 'album:' + s, albumLike: (s, id) => P + 'album:' + s + ':like:' + id,
+  lb: s => P + 'lb:' + s
 };
 function pageKeys(slug) {
   const p = slug === HOME ? P : P + 'p:' + slug + ':';

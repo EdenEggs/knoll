@@ -44,7 +44,8 @@ const brief = r => ({ status: r.status, code: r.json.code });
   check('the chat, signed in: me is named, not a keeper', r.json.me && r.json.me.tag === 'nu#1' && r.json.me.keeper === false && r.json.posts.chat.length === 0, r.json.me);
   r = await GET('', 'mod');
   check('a moderator is a keeper', r.json.me && r.json.me.keeper === true && r.json.me.mod === true, r.json.me);
-  check('a channel that is not one', (await GET('?ch=rules')).json.code === 'ch');
+  check('a channel that is not one', (await GET('?ch=nothing')).json.code === 'ch');
+  check('a notice tab asked for by name is an empty list', Array.isArray((await GET('?ch=rules')).json.posts.rules) && !(await GET('?ch=rules')).json.posts.rules.length);
   check('a page that is not one', (await GET('?page=nowhere')).json.code === 'page');
 
   console.log('writing');
@@ -80,6 +81,57 @@ const brief = r => ({ status: r.status, code: r.json.code });
   const audit = (await W.db('LRANGE', W.K.audit, 0, -1)).map(s => JSON.parse(s));
   check('a keeper hides another\'s line, and the record says so', r.json.ok && r.json.gone === 1 && audit.some(e => e.what === 'hide' && e.by === U.mod && e.of === U.nu && e.ch === 'chat'), audit[0]);
   check('and it is gone for everyone', (await GET('?ch=chat')).json.posts.chat.length === 1);
+
+  console.log('the tabs');
+  r = await GET('', 'nu');
+  check('a page starts with the four tabs, and a chat open to anyone', r.json.tabs.length === 4 && r.json.tabs.map(t => t.ch).join() === 'news,updates,rules,forum' && r.json.tabs[2].kind === 'notice' && r.json.chat.who === 'anyone' && r.json.chat.wait === 0 && r.json.chat.can === true && r.json.chat.named === undefined, r.json.tabs);
+  check('…and ?ch=board is every tab that keeps posts', Object.keys(r.json.posts).join() === 'news,updates,forum', Object.keys(r.json.posts));
+  check('the tabs are the keepers\' to arrange', brief(await POST({ op: 'tabs', tabs: API.TABS }, 'nu')).code === 'role');
+  for (const [what, tabs] of [['none', []], ['nine', Array.from({ length: 9 }, (_, i) => ({ ch: 't' + i, title: 't' + i, kind: 'posts' }))], ['a bad name', [{ ch: 'Bad Name', title: 'x', kind: 'posts' }]],
+                              ['"chat"', [{ ch: 'chat', title: 'x', kind: 'posts' }]], ['two alike', [{ ch: 'a', title: 'x', kind: 'posts' }, { ch: 'a', title: 'y', kind: 'posts' }]],
+                              ['no title', [{ ch: 'a', title: ' ', kind: 'posts' }]], ['a kind that is not one', [{ ch: 'a', title: 'x', kind: 'video' }]]])
+    check('tabs refused: ' + what, brief(await POST({ op: 'tabs', tabs }, 'mod')).code === 'tabs');
+  await POST({ op: 'post', ch: 'updates', title: 'An update', text: 'x' }, 'mod');   // so a tab made another kind has something to clear
+  const arranged = [{ ch: 'news', title: '  Announcements ', kind: 'posts', who: 'keepers' }, { ch: 'events', title: 'Events', kind: 'posts', who: 'anyone' },
+                    { ch: 'rules', title: 'House rules', kind: 'notice', who: 'anyone', text: 'Be kind.\r\n\r\n\r\nNo spoilers.' }, { ch: 'updates', title: 'Updates', kind: 'threads', who: 'anyone' }];
+  r = await POST({ op: 'tabs', tabs: arranged }, 'mod');
+  check('a keeper arranges the board: a tab renamed, a new one for anyone, a notice with its text (the keepers\', whatever was said), one made another kind, one taken down',
+        r.json.ok && r.json.tabs.length === 4 && r.json.tabs[0].title === 'Announcements' && r.json.tabs[1].who === 'anyone' && r.json.tabs[2].who === 'keepers' && r.json.tabs[2].text === 'Be kind.\n\nNo spoilers.' && r.json.tabs[3].kind === 'threads', r.json);
+  r = await GET('', 'nu');
+  check('…and the board reads back so: the news kept, the forum gone, the updates cleared', r.json.tabs.map(t => t.ch).join() === 'news,events,rules,updates' && r.json.posts.news.length === 1 && !('forum' in r.json.posts) && r.json.posts.updates.length === 0, r.json.posts);
+  check('the lists that went are gone from the store', (await W.db('LLEN', W.K.board('toem2', 'forum'))) === 0 && (await W.db('LLEN', W.K.board('toem2', 'updates'))) === 0);
+  r = await POST({ op: 'post', ch: 'events', title: 'A fair', text: 'Saturday' }, 'nu');
+  check('anyone signed in posts on a tab for anyone', r.json.ok && r.json.post.title === 'A fair', r.json);
+  check('a notice takes no posts', brief(await POST({ op: 'post', ch: 'rules', title: 'x', text: 'y' }, 'mod')).code === 'ch');
+  check('a tab that is gone is no channel', brief(await POST({ op: 'post', ch: 'forum', title: 'x', text: 'y' }, 'nu')).code === 'ch');
+  r = await POST({ op: 'post', ch: 'updates', title: 'A thread now', text: 'x' }, 'nu');
+  check('the tab made threads takes a thread from anyone', r.json.ok && !r.json.post.re && r.json.post.title === 'A thread now', r.json);
+  check('the record says who arranged it, and what went', (await W.db('LRANGE', W.K.audit, 0, -1)).map(s => JSON.parse(s)).some(e => e.what === 'tabs' && e.by === U.mod && e.gone === 'updates,forum'));
+
+  console.log('the chat\'s rules');
+  check('the rules are the keepers\' to set', brief(await POST({ op: 'chat', who: 'keepers', wait: 0 }, 'nu')).code === 'role');
+  for (const [what, b] of [['a wait past an hour', { who: 'anyone', wait: 4000 }], ['a who that is not one', { who: 'friends', wait: 0 }], ['too many named', { who: 'named', wait: 0, named: Array.from({ length: 51 }, (_, i) => String(i).padStart(16, '0')) }]])
+    check('chat rules refused: ' + what, brief(await POST(Object.assign({ op: 'chat' }, b), 'mod')).code === 'chat');
+  r = await POST({ op: 'chat', who: 'keepers', wait: 0 }, 'mod');
+  check('the keepers only: set, and said back', r.json.ok && r.json.chat.who === 'keepers' && r.json.chat.can === true && Array.isArray(r.json.chat.named), r.json);
+  r = await GET('?ch=chat', 'nu');
+  check('a gnome who is not a keeper reads that they may not', r.json.chat.who === 'keepers' && r.json.chat.can === false, r.json.chat);
+  check('…and may not', brief(await POST({ op: 'post', ch: 'chat', text: 'hi' }, 'nu')).code === 'role');
+  check('a keeper still may', (await POST({ op: 'post', ch: 'chat', text: 'hi' }, 'mod')).json.ok);
+  r = await POST({ op: 'chat', who: 'named', wait: 0, named: [U.nu, U.nu, 'not-an-id'] }, 'mod');
+  check('named people: kept once each, by id, and named back to a keeper with their tags', r.json.ok && r.json.chat.named.length === 1 && r.json.chat.named[0].tag === 'nu#1', r.json.chat);
+  check('a named gnome may chat', (await POST({ op: 'post', ch: 'chat', text: 'hi' }, 'nu')).json.ok);
+  check('one not named may not', brief(await POST({ op: 'post', ch: 'chat', text: 'hi' }, 'nu2')).code === 'role');
+  check('…and the list of the named is not theirs to read', (await GET('?ch=chat', 'nu2')).json.chat.named === undefined);
+  r = await POST({ op: 'chat', who: 'anyone', wait: 5 }, 'mod');
+  check('a wait of five seconds', r.json.ok && r.json.chat.wait === 5);
+  check('the first line goes', (await POST({ op: 'post', ch: 'chat', text: 'one' }, 'nu2')).json.ok);
+  r = await POST({ op: 'post', ch: 'chat', text: 'two' }, 'nu2');
+  check('the second, at once, waits — and is told how long', r.status === 429 && r.json.code === 'wait' && r.json.wait >= 1 && r.json.wait <= 5, r.json);
+  check('somebody else\'s line is not held by it', (await POST({ op: 'post', ch: 'chat', text: 'three' }, 'nu')).json.ok);
+  await W.db('DEL', W.K.rl('chat:toem2:' + U.nu2, 'wait'));
+  check('once the wait is over, the line goes', (await POST({ op: 'post', ch: 'chat', text: 'two' }, 'nu2')).json.ok);
+  await POST({ op: 'chat', who: 'anyone', wait: 0 }, 'mod');
 
   console.log('the rate');
   let last = null;

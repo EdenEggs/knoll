@@ -34,9 +34,12 @@ function call(fn, method, url, body, headers) {
     fn(req, res).catch(e => resolve({ status: 599, json: { error: String(e && e.stack || e) }, cookies: [] }));
   });
 }
+const { codeIn } = require('./gnome.js');      // the sign-up code, out of the outbox beside the temp store (api/auth.js: THE CODE)
 const G = {};                                   // each gnome: { id, tag, h } — h is the cookie header they send
 async function join(name) {
-  const r = await call(auth, 'POST', '/api/auth', { op: 'signup', name, email: name.toLowerCase() + '@example.com', password: 'toadstool1' });
+  const who = { op: 'signup', name, email: name.toLowerCase() + '@example.com', password: 'toadstool1' };
+  await call(auth, 'POST', '/api/auth', who);   // the code goes out…
+  const r = await call(auth, 'POST', '/api/auth', Object.assign({ code: codeIn(auth.OUTBOX, who.email) }, who));   // …and comes back
   const c = {}; r.cookies.forEach(s => { const m = /^([^=]+)=([^;]*)/.exec(s); if (m) c[m[1]] = m[2]; });
   G[name] = { id: r.json.me.id, tag: r.json.me.tag, h: { cookie: 'knoll_s=' + c.knoll_s + '; knoll_in=' + c.knoll_in } };
 }

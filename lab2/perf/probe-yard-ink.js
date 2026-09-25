@@ -23,7 +23,10 @@ const waitPort = (port, tries = 80) => new Promise((res, rej) => { const t = () 
     const p = await ctx.newPage();
     const pageErrors = []; p.on('pageerror', e => pageErrors.push(String(e)));
     await p.goto(BASE + '/login/');
-    const su = await p.evaluate(() => fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ op: 'signup', name: 'Inky', email: 'inky@example.com', password: 'toadstool1' }) }).then(r => r.json()));
+    const inky = { op: 'signup', name: 'Inky', email: 'inky@example.com', password: 'toadstool1' };
+    const post = b => p.evaluate(b => fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) }).then(r => r.json()), b);
+    await post(inky);   // the code goes out (api/auth.js: THE CODE; the preload hands it over — gnome.js)…
+    const su = await post(Object.assign({ code: await require('./gnome.js').code(ctx, BASE, inky.email) }, inky));   // …and comes back
     ok(su.ok, 'a test account signs up', JSON.stringify(su));
     await p.goto(BASE + '/yard/'); await p.waitForTimeout(4000);
     const tools = await p.evaluate(() => [...document.querySelectorAll('#tool-dock [data-tool]')].map(b => b.dataset.tool));

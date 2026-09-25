@@ -64,7 +64,10 @@ async function waitPort() {
     const G = {}; let ipN = 0;                                          // each gnome from an address of their own: the door counts by address
     async function join(name) {
       const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, extraHTTPHeaders: { 'x-real-ip': '10.5.0.' + (++ipN) } });
-      const r = await ctx.request.post(BASE + '/api/auth', { data: { op: 'signup', name, email: name.toLowerCase() + '@probe.example', password: 'toadstool1' }, headers: { origin: BASE } });
+      const who = { op: 'signup', name, email: name.toLowerCase() + '@probe.example', password: 'toadstool1' };
+      const post = data => ctx.request.post(BASE + '/api/auth', { data, headers: { origin: BASE } });
+      await post(who);   // the code goes out (api/auth.js: THE CODE) — into the outbox beside the temp store, off Vercel with no key…
+      const r = await post(Object.assign({ code: require('../lab2/perf/gnome.js').codeIn(path.join(tmp, 'outbox.jsonl'), who.email) }, who));   // …and comes back
       const out = await r.json();
       G[name] = { ctx, id: out.me && out.me.id, tag: out.me && out.me.tag };
       return G[name];
@@ -208,8 +211,9 @@ async function waitPort() {
     // ── 6 · the dashboard and the yard ────────────────────────────────────
     page = await maker.ctx.newPage();
     await page.goto(BASE + '/dashboard/?space=probe-hollow');
-    await page.waitForFunction(() => /Maker Profile Dashboard/.test(document.body.textContent), null, { timeout: 30000 });
-    check('the dashboard is "<name> Profile Dashboard", with the gear to the settings and the space\'s chip — and no second door to the wall', /Maker Profile Dashboard/.test(await page.locator('h1').textContent()) && await page.locator('a[href="/settings/?space=probe-hollow"]').count() >= 1 && await page.locator('a[href="/probe-hollow"]').count() >= 1 && await page.locator('a[href="/toem2/?page=probe-hollow"]').count() === 0, await page.locator('h1').textContent());
+    await page.waitForFunction(() => /Probe Hollow Two dashboard/.test(document.body.textContent), null, { timeout: 30000 });
+    check('the dashboard is "<the space\'s title> dashboard", with the gear to the settings and the space\'s chip — and no second door to the wall', /^Probe Hollow Two dashboard$/.test((await page.locator('h1').textContent()).trim()) && await page.locator('a[href="/settings/?space=probe-hollow"]').count() >= 1 && await page.locator('a[href="/probe-hollow"]').count() >= 1 && await page.locator('a[href="/toem2/?page=probe-hollow"]').count() === 0, await page.locator('h1').textContent());
+    check('…and the strip has the door back to the profile dashboard', await page.locator('section[aria-label="your spaces"] a[href="/dashboard/"]').count() === 1 && /Profile Dashboard · Knoll$/.test(await page.title()) === false);
     check('…its numbers are the wall\'s: pieces, edits, the ballot, how wild', /PIECES ON THE WALL/.test(await page.textContent('body')) && /ON THE BALLOT/.test(await page.textContent('body')) && /HOW WILD/.test(await page.textContent('body')));
     check('…and the strip of your spaces names this one with its level', /YOUR SPACES/.test(await page.textContent('body')) && await page.locator('text=COUNCIL').count() >= 1);
     await page.close();

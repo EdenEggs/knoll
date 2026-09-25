@@ -216,6 +216,7 @@ html.toem-embed .keymap, html.toem-embed .lab-panel, html.toem-embed .lab-warn {
     <dt><kbd>board</kbd></dt><dd>the town board, bottom left — news and updates from the keepers, the rules, and a forum for everyone</dd>
     <dt><kbd>chat</kbd></dt><dd>the chat beside it — whoever is signed in, under their own name and picture</dd>
     <dt><kbd>album</kbd></dt><dd>the photo album, the third button — the photos taken around this page, and a heart to keep one; empty until something takes a photo</dd>
+    <dt><kbd>ranks</kbd></dt><dd>the leaderboard, the fourth button — who has edited this wall the most, on the most days, or first, or posted or photographed the most, as its keepers chose; a podium, and your own line at the foot</dd>
     <dt><kbd>ctrl</kbd><kbd>z</kbd></dt><dd>undo — the last thing moved, or the last thing drawn</dd>
     <dt><kbd>ctrl</kbd><kbd>c</kbd><kbd>v</kbd></dt><dd>copy what is picked, and paste it a nudge down-right — a group stays a group</dd>
     <dt><kbd>right click</kbd></dt><dd>a feature — raise it, lower it, or delete it (undo puts it back)</dd>
@@ -315,6 +316,13 @@ html.toem-embed .keymap, html.toem-embed .lab-panel, html.toem-embed .lab-warn {
      through. After board.js, whose corner and whose case (.town-*) it shares. -->
 <link rel="stylesheet" href="gallery.css">
 <script src="gallery.js"></script>
+<!-- the leaderboard (2026-09-24): the fourth corner button, a trophy — the sticker kit's
+     leaderboard on the bench. Who stands where, counted from this page's wall, board
+     and album (api/leaderboard.js), under the rankings its keepers chose on the
+     dashboard; a podium, the rows after it, your own line at the foot. Empty until
+     people use the page. After gallery.js, sharing board.js's corner and case. -->
+<link rel="stylesheet" href="leaderboard.css">
+<script src="leaderboard.js"></script>
 <!-- the sign's own one trick: click a letter, a gnome puts it overhead -->
 <script src="sign.js"></script>
 <!-- hold ctrl and the hitbox is the drawing rather than the box round it —

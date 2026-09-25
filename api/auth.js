@@ -9,8 +9,14 @@
    the same session, the same store. So an account made at /signup edits the
    TOEM 2 wall with no second sign-in, and one Google vouched for there is an
    account here. The address itself is still not kept: the key is found from
-   it at every log-in, which is also when a reset-by-post would learn it, the
-   day there is a postman.
+   it at every log-in, which is also when a reset-by-post would learn it.
+
+   THE CODE (2026-09-24). A sign-up is two posts. The first checks the form,
+   posts a six-figure code to the address (THE POSTMAN, below) and keeps only
+   the code's hash, for ten minutes and five wrong guesses; the second brings
+   the code back with the same form, and only then is the account made. So an
+   address on the hill is one its owner reads mail at — the thing the admin
+   list and a reset-by-post will want. Google's accounts Google proves.
 
    THE SECRET WORD is kept as scrypt (Node's own — no package), sixteen bytes
    of salt, the cost written into the record beside it so it can be raised
@@ -21,9 +27,10 @@
    COOKIE). Every post must come from this site (its Origin) and say JSON,
    which no other site's form can.
 
-     GET  → { ok, open, google, me: { id, name, n, tag, toured, made, avatar } | null }
+     GET  → { ok, open, google, mail, me: { id, name, n, tag, toured, made, avatar } | null }
           ?users=1 → { ok, count, users }   (a moderator: the accounts, newest first)
-     POST { op: 'signup', name, email, password }     → { ok, me } and the cookies · 409 taken
+     POST { op: 'signup', name, email, password }     → { ok, sent: true }: a code is on its way · 409 taken · 503 no-mail
+          { op: 'signup', name, email, password, code } → { ok, me } and the cookies · 400 code (wrong) · 400 expired (gone, or five wrong) · 409 taken
           { op: 'login', email, password, remember }   → { ok, me } and the cookies · 401 wrong
           { op: 'logout' }                             → { ok }, the cookies cleared
           { op: 'name', name }                         → { ok, name, n, tag }   (signed in)
@@ -38,17 +45,21 @@
    there, and never again (yard/index.html).
 
    ponytail: counters by the hour, in the store (api/wall.js's rl: keys) —
-   a patient guesser gets twenty wrong words an hour per address. */
+   a patient guesser gets twenty wrong words an hour per address, and five
+   codes an hour per address with five guesses each: 25 in a million. */
 'use strict';
 
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 const W = require('./wall.js');
 const { db, dbm, K, answer, readBody, Bad, bad, sha, ipHash, sessionOf, setSession, clearSession, sameSite, finishLogin, userKey, USER_RE, SESSION_DAYS } = W;
 
 const WORD_MIN = 8, WORD_MAX = 256;
 const LIST = 100;                             // accounts in one ?users answer (ponytail: the newest; paging when a moderator needs past them)
-// an hour's worth: new accounts per address, knocks per address, wrong words per account, anything else per account
-const RATE = { signup: 20, login: 60, fails: 20, acct: 120 };
+// an hour's worth: sign-up codes per network, knocks per address, wrong words per account, anything else per account, codes per address
+const RATE = { signup: 20, login: 60, fails: 20, acct: 120, code: 5 };
+const CODE = { ttl: 600, tries: 5 };          // a sign-up code: ten minutes, five wrong guesses
 const SCRYPT = { N: 1 << 15, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };   // 32 MB and ~100 ms a word
 const WRONG = 'incorrect email or password';
 
@@ -91,6 +102,29 @@ async function current(req) {                 // the account behind this request
 const drop = async req => { const s = sessionOf(req); if (s) await db('DEL', K.sess(sha(s))); };   // the session this browser came in with is over
 const hinted = req => /(?:^|;\s*)knoll_in=/.test(String(req.headers.cookie || ''));
 
+// ── THE POSTMAN (2026-09-24) ──────────────────────────────────────────────
+/* One HTTPS post to Resend, no package: RESEND_API_KEY, and MAIL_FROM for the
+   envelope — an address on a domain verified there (knoll.space's SPF and
+   DKIM records, from Resend's dashboard, in the domain's DNS), or nothing
+   arrives. With no key off Vercel (the dev server, the probes) each letter is
+   printed and appended to outbox.jsonl beside the store, one JSON line, which
+   is where a probe reads its code (lab2/perf/gnome.js). On Vercel with no key
+   the gate says so (503 no-mail) rather than make an account nobody proved. */
+const OUTBOX = path.join(path.dirname(process.env.WALL_DB || path.join(__dirname, '..', 'toem2', 'wall-db.json')), 'outbox.jsonl');
+const postman = () => !!process.env.RESEND_API_KEY || !process.env.VERCEL;
+async function send(to, subject, text) {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    if (process.env.VERCEL) throw bad(503, 'no-mail', 'email is not set up on this site yet, so we cannot send you a code — please continue with Google, or try again later');
+    fs.appendFileSync(OUTBOX, JSON.stringify({ to, subject, text, at: Date.now() }) + '\n');
+    console.log('  ✉ no RESEND_API_KEY, so into ' + OUTBOX + ':  to ' + to + ' — ' + subject);
+    return;
+  }
+  const r = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { authorization: 'Bearer ' + key, 'content-type': 'application/json' },
+                                                           body: JSON.stringify({ from: process.env.MAIL_FROM || 'Knoll <no-reply@knoll.space>', to: [to], subject, text }) });
+  if (!r.ok) throw new Error('the postman answered ' + r.status + ' ' + String(await r.text().catch(() => '')).slice(0, 200));
+}
+
 // ── GET: who is here ──────────────────────────────────────────────────────
 async function get(req, res) {
   if (!W.storeFor()) return answer(res, 200, { ok: true, open: false, google: false, me: null });
@@ -98,7 +132,7 @@ async function get(req, res) {
   // a session that has lapsed: the cookies go, so the pages stop drawing a gnome for nobody
   if (!who && (sessionOf(req) || hinted(req))) clearSession(res, req);
   if (new URL(req.url, 'http://x').searchParams.get('users')) return users(res, who);
-  answer(res, 200, { ok: true, open: true, google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
+  answer(res, 200, { ok: true, open: true, google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET), mail: postman(),
                      me: who ? meOf(who.u, who.rec) : null });
 }
 // the accounts, newest first: how a moderator finds a gnome, since the store keeps no addresses to find one by
@@ -112,22 +146,43 @@ async function users(res, who) {
 
 // ── POST ──────────────────────────────────────────────────────────────────
 async function signup(req, res, body) {
-  const name = W.cleanName(body.name), email = cleanEmail(body.email), pw = word(body.password);
+  const name = W.cleanName(body.name), email = cleanEmail(body.email), pw = word(body.password), code = String(body.code == null ? '' : body.code).replace(/\s/g, '');
   if (!name) throw bad(400, 'name', 'please enter a username');
   if (!email) throw bad(400, 'email', 'please enter a valid email address');
   if (pw.length < WORD_MIN) throw bad(400, 'password', 'your password must be at least 8 characters');
   if (pw.length > WORD_MAX) throw bad(400, 'password', 'your password must be ' + WORD_MAX + ' characters or fewer');
-  if (!(await spend('signup:' + ipHash(req), RATE.signup))) throw bad(429, 'rate', 'too many sign-ups from your network this hour — please try again later');
-  const u = userKey(email), kept = await hashWord(pw), now = String(Date.now());
+  const u = userKey(email), taken = bad(409, 'taken', 'an account with that email already exists — log in instead?');
+  if (await db('HGET', K.user(u), 'made')) throw taken;   // said before a code goes anywhere; the claim below is what makes it certain
+  if (!code) {
+    /* THE CODE, step one: the form is right, so a code goes to the address
+       and only its hash stays. The network's hourly cap is spent on codes
+       sent, and one address gets a few an hour, whoever asks. */
+    if (!(await spend('signup:' + ipHash(req), RATE.signup))) throw bad(429, 'rate', 'too many sign-ups from your network this hour — please try again later');
+    if (!(await spend('code:' + u, RATE.code))) throw bad(429, 'rate', 'too many codes have been sent to that email this hour — please try again later');
+    const fresh = String(crypto.randomInt(0, 1e6)).padStart(6, '0');
+    await send(email, 'Your Knoll sign-up code: ' + fresh, 'Your sign-up code is ' + fresh + '.\n\nEnter it on the sign-up page to finish creating your Knoll account. It expires in 10 minutes.\n\nIf you did not sign up for Knoll, you can ignore this email.');
+    await dbm([['DEL', K.code(u)], ['HSET', K.code(u), 'h', sha(u + ':' + fresh), 'tries', '0'], ['EXPIRE', K.code(u), CODE.ttl]]);   // ponytail: a plain hash — the store is the secret; an HMAC key in the env if the store is ever shared
+    return answer(res, 200, { ok: true, sent: true });
+  }
+  // step two: the code back, with the same form
+  const pend = await db('HGETALL', K.code(u));
+  if (!pend.h) throw bad(400, 'expired', 'that code has expired — please send a new one');
+  if (+pend.tries >= CODE.tries) throw bad(400, 'expired', 'too many wrong codes — please send a new one');
+  if (!/^\d{6}$/.test(code) || !crypto.timingSafeEqual(Buffer.from(pend.h, 'hex'), Buffer.from(sha(u + ':' + code), 'hex'))) {
+    await db('HINCRBY', K.code(u), 'tries', 1);
+    throw bad(400, 'code', 'that code is not right — please check the email and try again');
+  }
+  const kept = await hashWord(pw), now = String(Date.now());
   /* THE ADDRESS IS CLAIMED IN ONE STEP: `made` goes on only if it was not
      there, so two petitions for one address cannot both win, and an address
      Google already vouched for (api/wall.js: ONE ADDRESS, ONE WAY IN) or
      somebody already signed up with is taken, whatever else is on it. */
-  if (!(await db('HSETNX', K.user(u), 'made', now))) throw bad(409, 'taken', 'an account with that email already exists — log in instead?');
+  if (!(await db('HSETNX', K.user(u), 'made', now))) throw taken;
   // an account half made — the claim, with no secret word or no name — would hold the address for nobody: undone if the rest does not land
   let named;
   try { await db('HSET', K.user(u), 'pw', kept, 'role', 'user'); named = await W.rename(u, name, u); }
   catch (e) { await db('DEL', K.user(u)).catch(() => {}); throw e; }
+  await db('DEL', K.code(u));                  // spent
   await drop(req);
   const { session } = await finishLogin(email, SESSION_DAYS, false);   // 'seen', the list of accounts, and the session; the admin list wants a PROVED address (api/wall.js)
   setSession(res, req, session, u, SESSION_DAYS);
@@ -197,4 +252,4 @@ module.exports = async function handler(req, res) {
     answer(res, 500, { ok: false, code: 'server', error: 'something went wrong on our end — please try again in a moment' });
   }
 };
-module.exports.RATE = RATE;
+Object.assign(module.exports, { RATE, CODE, OUTBOX });   // for the probes

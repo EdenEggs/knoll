@@ -359,7 +359,8 @@ window.Seed = (function () {
     else if (!me) out.push({ text: 'you: signed in' });
     else out.push({ text: 'you: ' + (owner() ? 'the maker' : keeper() ? 'a keeper' : canVote() ? 'a voter — ' + (me.rep || 0) + ' standing day' + (me.rep === 1 ? '' : 's') : 'no standing yet — a day of live edits on TOEM 2 earns a vote') });
     if (owner() || (HOME && isMod())) out.push({ text: '', links: [['the rules', () => { closePop(); if (window.History) History.open('rules'); }]].concat(
-      owner() && !HOME ? [['settings', () => location.assign('/settings/?space=' + encodeURIComponent(PAGE))], ['dashboard', () => location.assign('/dashboard/?space=' + encodeURIComponent(PAGE))]] : []) });   // the maker's doors, now the space opens on this bench (2026-09-24)
+      owner() && !HOME ? [['settings', () => location.assign('/settings/?space=' + encodeURIComponent(PAGE))], ['dashboard', () => location.assign('/dashboard/?space=' + encodeURIComponent(PAGE))]]
+      : HOME && isMod() ? [['dashboard', () => location.assign('/dashboard/?space=toem2')]] : []) });   // the maker's doors, now the space opens on this bench (2026-09-24); TOEM 2's own dashboard is the moderators' (its board, chat and album are arranged there)
     return out;
   }
   function buildStamp() {

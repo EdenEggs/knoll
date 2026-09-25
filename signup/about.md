@@ -326,6 +326,23 @@ future hand-edit might reach for it: `walk()` in `support.js` dispatches only
 read only to pick the unroll speed (700ms first time, 400ms after). Nothing
 else is stored. There is nothing to reset.
 
+**The code (2026-09-24).** Pressing the seal no longer makes the account by
+itself. The door checks the form, emails a six-digit code to the address
+(`api/auth.js`: THE CODE and THE POSTMAN — one post to Resend, with
+`RESEND_API_KEY` and `MAIL_FROM` set in Vercel; off Vercel with no key the
+letter is printed by the server and appended to `toem2/outbox.jsonl` beside the
+store), the wax sets on SENT, and the paper turns to a one-field form: "Check
+your email", a Code field, "send a new code" and "Wrong email? go back" under
+the seal. The seal pressed again sends the same form back with the code, and
+only then is the account made and the scroll rolls up as before. A wrong code
+cracks the wax with the door's note; after five wrong ones, or ten minutes, a
+new code is needed (five an hour to one address). The Google path is
+unchanged — Google proves its own addresses. On Vercel with no key the door
+answers 503 `no-mail` and the note says email is not set up yet. Checks:
+`node lab2/perf/verify-auth.js` (the door, in-process) and
+`node lab2/perf/probe-gate-google.js` (§5: the page, in headless Chrome; its
+preload hands probes the code at `/_outbox` — see `lab2/perf/gnome.js`).
+
 **Testing.** `lab2/perf/probe-signup.js` walks the happy path, the validation
 notes and the seal's state machine; `probe-signup-paths.js` covers the Google
 path, the `taken` outcome, the narrow layout and the second visit;

@@ -19,7 +19,9 @@ const fails = []; let n = 0;
 const ok = (c, what, extra) => { n++; if (!c) fails.push(what + (extra ? ' :: ' + String(extra).slice(0, 400) : '')); console.log((c ? '  ok   ' : '  FAIL ') + what); };
 const waitPort = (port, tries = 80) => new Promise((res, rej) => { const t = () => { const s = net.connect(port, '127.0.0.1'); s.once('connect', () => { s.end(); res(); }); s.once('error', () => tries-- > 0 ? setTimeout(t, 250) : rej(new Error('port never opened'))); }; t(); });
 const post = (p, body) => p.evaluate(b => fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) }).then(r => r.json()), body);
-const settle = async (p, ms = 3000) => { await p.waitForTimeout(ms); return { path: new URL(p.url()).pathname + new URL(p.url()).search, view: await p.evaluate(() => !!window.YARD_VIEW), own: await p.evaluate(() => !!document.querySelector('.yard-tools')) }; };
+// both steps of a sign-up (api/auth.js: THE CODE): the code goes out, the preload hands it over (gnome.js), and it comes back with the same form
+const signup = async (ctx, p, who) => { await post(p, who); return post(p, Object.assign({ code: await require('./gnome.js').code(ctx, BASE, who.email) }, who)); };
+const settle =async (p, ms = 3000) => { await p.waitForTimeout(ms); return { path: new URL(p.url()).pathname + new URL(p.url()).search, view: await p.evaluate(() => !!window.YARD_VIEW), own: await p.evaluate(() => !!document.querySelector('.yard-tools')) }; };
 (async () => {
   const srv = spawn(process.execPath, ['-r', path.join(SITE, 'lab2/perf/probe-gate-google.js'), 'serve.js', String(PORT)], { cwd: SITE, stdio: ['ignore', 'pipe', 'pipe'] });
   let log = ''; srv.stdout.on('data', d => log += d); srv.stderr.on('data', d => log += d);
@@ -31,7 +33,7 @@ const settle = async (p, ms = 3000) => { await p.waitForTimeout(ms); return { pa
     const p = await ctx.newPage();
     const pageErrors = []; p.on('pageerror', e => pageErrors.push(String(e)));
     await p.goto(BASE + '/login/');
-    const one = await post(p, { op: 'signup', name: 'Inky', email: 'inky1@example.com', password: 'toadstool1' });
+    const one = await signup(ctx, p, { op: 'signup', name: 'Inky', email: 'inky1@example.com', password: 'toadstool1' });
     ok(one.ok && one.me && one.me.tag === 'Inky#1', 'the first Inky is Inky#1', JSON.stringify(one).slice(0, 200));
     const id1 = one.me && one.me.id;
 
@@ -52,7 +54,7 @@ const settle = async (p, ms = 3000) => { await p.waitForTimeout(ms); return { pa
 
     // the second Inky
     await post(p, { op: 'logout' });
-    const two = await post(p, { op: 'signup', name: 'Inky', email: 'inky2@example.com', password: 'toadstool1' });
+    const two = await signup(ctx, p, { op: 'signup', name: 'Inky', email: 'inky2@example.com', password: 'toadstool1' });
     ok(two.ok && two.me && two.me.tag === 'Inky#2', 'the second Inky is Inky#2', JSON.stringify(two).slice(0, 200));
     s = await (await p.goto(BASE + '/yard/'), settle(p));
     ok(s.path === '/yard/Inky~2' && s.own, 'their address is /yard/Inky~2', JSON.stringify(s));

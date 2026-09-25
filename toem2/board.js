@@ -11,6 +11,15 @@
    last looked at (knoll-<page>:town:seen), which is what the little counts
    are. Not on the yard's picture of this page (?embed=1).
 
+   THE TABS ARE THE KEEPERS' (2026-09-24, later that day): the door says
+   which tabs this page's board has — each a title, a kind (posts, threads
+   or a notice the keepers wrote) and who writes there (the keepers, or
+   anyone signed in) — arranged on the page's dashboard (dashboard/manage.js);
+   the four above are what a page starts with. THE CHAT'S RULES come the same
+   way: who may say something (anyone, the keepers, or the people the keepers
+   named) and the wait one account keeps between two lines, which the box
+   counts down after each.
+
    ponytail: the chat polls — every 4 s open, every minute closed — rather
    than riding cursors.js's room; a 'chat' action on that room is the
    upgrade if the wait shows. Pictures are one card fetch per author per
@@ -27,7 +36,14 @@ window.Town = (function () {
     ['One thread per topic', 'Search before posting a new one.'],
     ['No selling or ads', 'Stamp trades are fine, money is not.']
   ];
-  const TABS = [['news', 'News'], ['updates', 'Updates'], ['rules', 'Rules'], ['forum', 'Forum']];
+  // THE TABS (api/board.js): the four a page starts with, until the door says what the keepers arranged
+  let tabs = [{ ch: 'news', title: 'News', kind: 'posts', who: 'keepers' }, { ch: 'updates', title: 'Updates', kind: 'posts', who: 'keepers' },
+              { ch: 'rules', title: 'Rules', kind: 'notice', who: 'keepers', text: '' }, { ch: 'forum', title: 'Forum', kind: 'threads', who: 'anyone' }];
+  let chatRules = { who: 'anyone', wait: 0, can: false };   // THE CHAT'S RULES, the door's word
+  const tabOf = ch => tabs.find(t => t.ch === ch) || null;
+  const isNotice = ch => { const t = tabOf(ch); return !!t && t.kind === 'notice'; };
+  const mayWrite = ch => { const t = tabOf(ch); return !!me && !!t && t.kind !== 'notice' && (t.who === 'anyone' || me.keeper); };
+  const waitWord = s => (s % 3600 === 0 ? (s / 3600) + (s === 3600 ? ' hour' : ' hours') : s % 60 === 0 ? (s / 60) + ' min' : s + ' s');
   const SVG = {
     horn: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9.5v5h3.2l7.3 4.5V5L6.7 9.5z"/><path d="M17.3 9.2a3.6 3.6 0 0 1 0 5.6M19.6 6.8a7 7 0 0 1 0 10.4" fill="none"/><path d="M6.2 14.5v4.3h3.2" fill="none"/></svg>',
     bubble: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v10.5h-8.2L7.5 19.6v-3.6H4z"/></svg>',
@@ -44,10 +60,10 @@ window.Town = (function () {
   const initial = tag => (String(tag || '?').replace(/#\d+$/, '').trim()[0] || '?').toUpperCase();
   const initialFor = tag => { const m = /^(.*?)(#\d+)?$/.exec(String(tag || '')); return [m[1] || 'a gnome', m[2] || '']; };
 
-  let me = null, seen = {}, tab = 'news', thread = null, loading = false, busy = false, timer = 0, openPanel = null, drawn = '';
-  const posts = { news: [], updates: [], forum: [], chat: [] };
+  let me = null, seen = {}, tab = 'news', thread = null, loading = false, busy = false, timer = 0, openPanel = null, drawn = '', coolT = 0, tabsKey = '';
+  const posts = { chat: [] };
   try { seen = JSON.parse(get(SEEN)) || {}; } catch (e) { seen = {}; }
-  let fabs, boardBtn, chatBtn, board, chat, tabsEl, boardBody, chatList, chatForm, chatIn, chatSend, chatGate, chatNote;
+  let fabs, boardBtn, chatBtn, board, chat, tabsEl, boardBody, boardSub, chatList, chatForm, chatIn, chatSend, chatGate, chatNote, chatWhy, chatSub;
 
   // ── the door ────────────────────────────────────────────────────────────
   async function load(chs) {
@@ -56,7 +72,27 @@ window.Town = (function () {
     if (!out || !out.ok) return false;
     me = out.me || null;
     Object.assign(posts, out.posts);
+    if (Array.isArray(out.tabs) && out.tabs.length) setTabs(out.tabs);
+    if (out.chat) chatRules = out.chat;
     return true;
+  }
+  // THE TABS, as the door has them: the buttons are rebuilt when the list changes, and the subtitle names them
+  function setTabs(list) {
+    const key = JSON.stringify(list);
+    if (key === tabsKey) return;
+    tabsKey = key; tabs = list;
+    if (tabsEl) buildTabs();
+    if (boardSub) boardSub.textContent = tabs.map(t => t.title).join(' · ');
+    if (openPanel === board) renderBoard();
+  }
+  function buildTabs() {
+    tabsEl.replaceChildren();
+    tabs.forEach(t => {
+      const b = el('button', 'town-tab'); b.type = 'button'; b.dataset.tab = t.ch; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', 'false');
+      b.append(t.title, el('i', 'town-badge'));
+      b.addEventListener('click', () => pick(t.ch));
+      tabsEl.append(b);
+    });
   }
   const send = body => fetch(API + '?' + PQ, { method: 'POST', headers: headers({ 'content-type': 'application/json' }), body: JSON.stringify(body) })
     .then(r => r.json()).catch(() => ({ ok: false, error: 'the door did not answer' }));
@@ -73,12 +109,12 @@ window.Town = (function () {
 
   // ── the little counts ───────────────────────────────────────────────────
   const unread = ch => (posts[ch] || []).filter(p => p.at > (seen[ch] || 0)).length;
-  const look = ch => { if (!ch || ch === 'rules') return; seen[ch] = Date.now(); set(SEEN, JSON.stringify(seen)); badges(); };
+  const look = ch => { if (!ch || isNotice(ch)) return; seen[ch] = Date.now(); set(SEEN, JSON.stringify(seen)); badges(); };
   const fill = (b, n) => { b.textContent = n > 9 ? '9+' : n ? String(n) : ''; };
   function badges() {
-    fill(boardBtn.querySelector('.town-badge'), unread('news') + unread('updates') + unread('forum'));
+    fill(boardBtn.querySelector('.town-badge'), tabs.reduce((n, t) => n + (t.kind === 'notice' ? 0 : unread(t.ch)), 0));
     fill(chatBtn.querySelector('.town-badge'), openPanel === chat ? 0 : unread('chat'));
-    TABS.forEach(([ch]) => { const b = tabsEl.querySelector('[data-tab="' + ch + '"] .town-badge'); if (b) fill(b, ch === 'rules' || ch === tab && openPanel === board ? 0 : unread(ch)); });
+    tabs.forEach(t => { const b = tabsEl.querySelector('[data-tab="' + t.ch + '"] .town-badge'); if (b) fill(b, t.kind === 'notice' || t.ch === tab && openPanel === board ? 0 : unread(t.ch)); });
   }
 
   // ── pictures: the card's, once per author ───────────────────────────────
@@ -134,22 +170,25 @@ window.Town = (function () {
     return f;
   }
   function renderFeed(ch) {
-    const list = posts[ch];
+    const list = posts[ch] || [];
     if (!list.length) boardBody.append(empty('Nothing here yet.'));
     list.forEach(p => boardBody.append(card(ch, p, renderBoard)));
-    if (me && me.keeper) boardBody.append(form(ch, { titleHint: 'A title', hint: 'What is new?', verb: 'post', after: () => { renderBoard(); look(ch); } }));
+    if (mayWrite(ch)) boardBody.append(form(ch, { titleHint: 'A title', hint: 'What is new?', verb: 'post', after: () => { renderBoard(); look(ch); } }));
+    else if (!me && tabOf(ch).who === 'anyone') boardBody.append(gateLine('to post.'));
   }
-  function renderRules() {
+  function renderNotice(t) {                    // what the keepers wrote from the dashboard — or, on an unwritten Rules tab, the five the town started with
+    if (t.text) { boardBody.append(el('p', 'town-intro town-notice', t.text)); return; }
+    if (t.ch !== 'rules') { boardBody.append(empty('Nothing written here yet.')); return; }
     boardBody.append(el('p', 'town-intro', 'Keep the town friendly. Moderators can hide posts that break these.'));
-    RULES.forEach(([h, t], i) => {
+    RULES.forEach(([h, t2], i) => {
       const c = el('article', 'town-card'), b = el('div', 'town-card-b');
-      b.append(el('span', 'town-card-h', h), el('p', 'town-card-t', t));
+      b.append(el('span', 'town-card-h', h), el('p', 'town-card-t', t2));
       c.append(el('span', 'town-n', String(i + 1)), b);
       boardBody.append(c);
     });
   }
-  function renderForum() {
-    const threads = posts.forum.filter(p => !p.re), replies = id => posts.forum.filter(p => p.re === id).length;
+  function renderForum(ch) {
+    const all = posts[ch] || [], threads = all.filter(p => !p.re), replies = id => all.filter(p => p.re === id).length;
     if (!threads.length) boardBody.append(empty('No threads yet.'));
     threads.forEach(t => {
       const c = el('button', 'town-card is-thread'); c.type = 'button';
@@ -160,26 +199,29 @@ window.Town = (function () {
       c.addEventListener('click', () => { thread = t.id; renderBoard(); });
       boardBody.append(c);
     });
-    if (me) boardBody.append(form('forum', { titleHint: 'A title for the thread', hint: 'Start it off…', verb: 'start a thread', after: p => { thread = p.id; renderBoard(); look('forum'); } }));
-    else boardBody.append(gateLine('to start a thread.'));
+    if (mayWrite(ch)) boardBody.append(form(ch, { titleHint: 'A title for the thread', hint: 'Start it off…', verb: 'start a thread', after: p => { thread = p.id; renderBoard(); look(ch); } }));
+    else if (!me && tabOf(ch).who === 'anyone') boardBody.append(gateLine('to start a thread.'));
+    else if (me) boardBody.append(el('p', 'town-gate', 'The keepers start the threads here.'));
   }
-  function renderThread() {
-    const t = posts.forum.find(p => p.id === thread && !p.re);
+  function renderThread(ch) {
+    const all = posts[ch] || [], t = all.find(p => p.id === thread && !p.re);
     const back = el('button', 'town-back', '← all threads'); back.type = 'button'; back.addEventListener('click', () => { thread = null; renderBoard(); });
     boardBody.append(back);
     if (!t) { boardBody.append(empty('That thread is gone.')); return; }
     const leave = () => { thread = null; renderBoard(); };
-    boardBody.append(card('forum', t, leave));
-    posts.forum.filter(p => p.re === t.id).reverse().forEach(p => boardBody.append(card('forum', p, renderBoard)));
-    if (me) boardBody.append(form('forum', { re: t.id, hint: 'Reply…', verb: 'reply', after: () => { renderBoard(); look('forum'); } }));
-    else boardBody.append(gateLine('to reply.'));
+    boardBody.append(card(ch, t, leave));
+    all.filter(p => p.re === t.id).reverse().forEach(p => boardBody.append(card(ch, p, renderBoard)));
+    if (mayWrite(ch)) boardBody.append(form(ch, { re: t.id, hint: 'Reply…', verb: 'reply', after: () => { renderBoard(); look(ch); } }));
+    else if (!me && tabOf(ch).who === 'anyone') boardBody.append(gateLine('to reply.'));
   }
   function renderBoard() {
+    if (!tabOf(tab)) { tab = tabs[0].ch; thread = null; }   // the tab this browser was on is gone: the first one, then
     tabsEl.querySelectorAll('.town-tab').forEach(b => { const on = b.dataset.tab === tab; b.classList.toggle('is-on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; });
     boardBody.replaceChildren();
     boardBody.scrollTop = 0;
-    if (tab === 'rules') renderRules();
-    else if (tab === 'forum') (thread ? renderThread : renderForum)();
+    const t = tabOf(tab);
+    if (t.kind === 'notice') renderNotice(t);
+    else if (t.kind === 'threads') (thread ? renderThread : renderForum)(tab);
     else renderFeed(tab);
     badges();
   }
@@ -187,8 +229,12 @@ window.Town = (function () {
 
   // ── the chat ────────────────────────────────────────────────────────────
   function renderChat() {
-    const list = posts.chat.slice().reverse(), print = (me ? me.id + (me.keeper ? '+' : '') : '') + '|' + list.map(m => m.id).join(',');
-    chatForm.hidden = !me; chatGate.hidden = !!me;
+    const list = posts.chat.slice().reverse(), print = (me ? me.id + (me.keeper ? '+' : '') : '') + '|' + (chatRules.can ? 'c' : '') + '|' + list.map(m => m.id).join(',');
+    // THE CHAT'S RULES: the box for those who may; a word for the signed-in who may not; the gate for the signed-out
+    chatForm.hidden = !me || !chatRules.can; chatGate.hidden = !!me;
+    chatWhy.hidden = !me || chatRules.can;
+    chatWhy.textContent = chatRules.who === 'keepers' ? 'Only the keepers can chat here — everyone can read along.' : 'This chat is for the people the keepers named — everyone can read along.';
+    chatSub.textContent = (chatRules.who === 'keepers' ? 'The keepers' : chatRules.who === 'named' ? 'The people the keepers named' : 'Everyone on this wall') + (chatRules.wait ? ' · one message every ' + waitWord(chatRules.wait) : '');
     if (print === drawn) return;                // nothing new: the list stands (and so does a selection in it)
     drawn = print;
     const stick = chatList.scrollHeight - chatList.scrollTop - chatList.clientHeight < 48;
@@ -216,13 +262,21 @@ window.Town = (function () {
     busy = true; chatSend.disabled = true;
     const out = await send({ op: 'post', ch: 'chat', text });
     busy = false; chatSend.disabled = false;
-    if (!out.ok) { note(chatNote, 'Not sent: ' + (out.error || 'the door said no') + '.'); chatIn.focus(); return; }
+    if (!out.ok) { note(chatNote, 'Not sent: ' + (out.error || 'the door said no') + '.'); if (out.code === 'wait' && out.wait) cooldown(out.wait); chatIn.focus(); return; }
     note(chatNote, '');
     chatIn.value = '';
     posts.chat.unshift(out.post);
     renderChat(); look('chat');
     chatList.scrollTop = chatList.scrollHeight;
+    if (chatRules.wait) cooldown(chatRules.wait);
     chatIn.focus();
+  }
+  // THE WAIT: after a line, the box counts the seconds down before the next (the door counts too)
+  function cooldown(s) {
+    clearInterval(coolT);
+    let left = Math.ceil(s);
+    const step = () => { chatSend.disabled = left > 0; chatIn.placeholder = left > 0 ? 'next message in ' + left + ' s…' : 'Say something nice…'; if (left <= 0) clearInterval(coolT); left--; };
+    step(); coolT = setInterval(step, 1000);
   }
 
   // ── polling: the chat every 4 s while it is up, everything every minute otherwise ──
@@ -230,7 +284,7 @@ window.Town = (function () {
   async function tick() {
     if (!loading && !document.hidden) {
       loading = true;
-      await load(openPanel === chat ? 'chat' : 'chat,news,updates,forum');
+      await load(openPanel === chat ? 'chat' : 'board,chat');
       loading = false;
       if (openPanel === chat) { renderChat(); look('chat'); }
       badges();
@@ -244,7 +298,7 @@ window.Town = (function () {
     hide();
     openPanel = p; p.hidden = false;
     (p === board ? boardBtn : chatBtn).setAttribute('aria-expanded', 'true');
-    if (p === board) { renderBoard(); look(tab); load('news,updates,forum').then(ok => { if (ok && openPanel === board) { renderBoard(); look(tab); } }); }
+    if (p === board) { renderBoard(); look(tab); load('board').then(ok => { if (ok && openPanel === board) { renderBoard(); look(tab); } }); }
     else { drawn = ''; renderChat(); look('chat'); load('chat').then(ok => { if (ok && openPanel === chat) { renderChat(); look('chat'); chatList.scrollTop = chatList.scrollHeight; } }); if (me) chatIn.focus(); }
     schedule();
   }
@@ -281,32 +335,30 @@ window.Town = (function () {
     chatBtn.addEventListener('click', () => show(chat));
     fabs.append(boardBtn, chatBtn);
 
-    board = panel('town-board', SVG.horn, 'Town Board', 'News, updates, rules & forum');
+    board = panel('town-board', SVG.horn, 'Town Board', tabs.map(t => t.title).join(' · '));
+    boardSub = board.querySelector('.town-title small');
     tabsEl = el('div', 'town-tabs'); tabsEl.setAttribute('role', 'tablist');
-    TABS.forEach(([ch, label]) => {
-      const b = el('button', 'town-tab'); b.type = 'button'; b.dataset.tab = ch; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', 'false');
-      b.append(label, el('i', 'town-badge'));
-      b.addEventListener('click', () => pick(ch));
-      tabsEl.append(b);
-    });
+    buildTabs();
     tabsEl.addEventListener('keydown', e => {   // the arrow keys walk the tabs, as a tablist's do
-      const i = TABS.findIndex(([ch]) => ch === tab), d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      const i = tabs.findIndex(t => t.ch === tab), d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
       if (!d) return;
-      e.preventDefault(); pick(TABS[(i + d + TABS.length) % TABS.length][0]); tabsEl.querySelector('.is-on').focus();
+      e.preventDefault(); pick(tabs[(i + d + tabs.length) % tabs.length].ch); tabsEl.querySelector('.is-on').focus();
     });
     boardBody = el('div', 'town-body');
     board.append(tabsEl, boardBody);
 
     chat = panel('town-chat', SVG.bubble, 'Chat', 'Everyone on this wall');
+    chatSub = chat.querySelector('.town-title small');
     chatList = el('div', 'town-body town-chat-list'); chatList.setAttribute('aria-live', 'polite');
     chatNote = el('p', 'town-note town-chat-note'); chatNote.hidden = true;
+    chatWhy = el('p', 'town-gate town-chat-gate'); chatWhy.hidden = true;
     chatGate = gateLine('to chat.'); chatGate.className = 'town-gate town-chat-gate'; chatGate.hidden = true;
     chatForm = el('form', 'town-say'); chatForm.hidden = true;
     chatIn = el('input'); chatIn.type = 'text'; chatIn.maxLength = CAP.line; chatIn.placeholder = 'Say something nice…'; chatIn.autocomplete = 'off'; chatIn.setAttribute('aria-label', 'your message');
     chatSend = el('button', 'town-send'); chatSend.type = 'submit'; chatSend.title = 'send'; chatSend.setAttribute('aria-label', 'send'); chatSend.innerHTML = SVG.plane;
     chatForm.append(chatIn, chatSend);
     chatForm.addEventListener('submit', say);
-    chat.append(chatList, chatNote, chatGate, chatForm);
+    chat.append(chatList, chatNote, chatWhy, chatGate, chatForm);
 
     document.body.append(fabs, board, chat);
   }
@@ -320,5 +372,6 @@ window.Town = (function () {
   });
 
   return { open: which => show(which === 'chat' ? chat : board), close: hide, pick, load, get me() { return me; }, get posts() { return posts; },
+           get tabs() { return tabs; }, get chat() { return chatRules; }, get tab() { return tab; },
            get isOpen() { return openPanel === board ? 'board' : openPanel === chat ? 'chat' : null; } };
 })();

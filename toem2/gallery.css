@@ -58,6 +58,7 @@
 .gal-like.is-on svg{fill:#fff;stroke:#fff}
 .gal-like:active{transform:scale(.94)}
 .gal-like:disabled{opacity:.6;cursor:default}
+.gal-desc{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;line-height:1.4}   /* the description a photo carries */
 .gal-foot{display:flex;align-items:center;gap:10px}
 .gal-pos{font-size:14px;opacity:.7;margin-right:auto}
 .gal-foot .town-x{margin:0;font-size:14px}

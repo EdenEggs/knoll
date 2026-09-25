@@ -4,24 +4,33 @@
    toem2/gallery.js reads and posts here: the photos taken around a page,
    newest first, and the hearts on them.
 
-   A PHOTO IS A RECORD in the list album:<slug> — {id, by, at, cap, where,
-   src, key} — its picture a file of its own (in the Vercel Blob store on the
-   site, album/<slug>/<id>.jpg, public and cached a year — the store the
-   yards publish to; beside the file store off it, under toem2/album/) and
-   its hearts a set, album:<slug>:like:<id>, of who gave one. Names are
-   looked up when read (tagsOf), so a rename shows; the takers' pictures are
-   the gnome's card's (/api/wall?who=), which the page fetches once each.
+   A PHOTO IS A RECORD in the list album:<slug> — {id, by, at, cap, desc,
+   sec, where, src, key} — its picture a file of its own (in the Vercel Blob
+   store on the site, album/<slug>/<id>.jpg, public and cached a year — the
+   store the yards publish to; beside the file store off it, under
+   toem2/album/) and its hearts a set, album:<slug>:like:<id>, of who gave
+   one. Names are looked up when read (tagsOf), so a rename shows; the
+   takers' pictures are the gnome's card's (/api/wall?who=), which the page
+   fetches once each.
+
+   THE SECTIONS (2026-09-24, later that day): the keepers arrange the album
+   into sections from the dashboard — {id, title, desc}, up to twelve, kept
+   on the page's hash (api/wall.js: page:<slug> `sections`) — and a photo
+   names the one it hangs in (`sec`, or none). A section taken down leaves
+   its photos in the album, unsectioned. A photo has a title (`cap`) and a
+   description (`desc`); its taker, or a keeper, may change them, and the
+   section, after the fact (`edit`). The dashboard is where the keepers
+   upload; nothing on the bench takes a photo yet.
 
      GET  ?page=<slug>
-          → { ok, me: {id, tag, keeper, mod} | null,
-              photos: [{id, by, tag, at, cap, where, src, likes, liked}] }
-     POST { op: 'post', cap, where?, src: 'data:image/(jpeg|png|webp);base64,…' }
+          → { ok, me: {id, tag, keeper, mod} | null, sections: [{id, title, desc}],
+              photos: [{id, by, tag, at, cap, desc, sec, where, src, likes, liked}] }
+     POST { op: 'post', cap, desc?, sec?, where?, src: 'data:image/(jpeg|png|webp);base64,…' }
                                         → { ok, photo }        (anyone signed in; twenty an hour; a picture ≤ 300 KB)
+          { op: 'edit', id, cap?, desc?, sec? } → { ok, photo } (your own, or a keeper's)
           { op: 'like', id, on? }       → { ok, likes, liked } (on: false takes the heart back)
           { op: 'drop', id }            → { ok }               (your own, or a keeper's to hide — audited)
-
-   NOTHING TAKES A PHOTO YET (2026-09-24): the album opens empty, and 'post'
-   is the door a camera posts through when there is one.
+          { op: 'sections', sections: [{id, title, desc}] } → { ok, sections }   (the keepers)
 
    ponytail: the hearts are one set a photo, read with a pipeline of SCARDs —
    fine to the 200 the list keeps; a count on the record if it ever grows. */
@@ -33,7 +42,8 @@ const H = require('./hill.js');
 const { db, dbm, K, answer, readBody, Bad, bad, sameSite, whoIs, isMod, rulesOf, tagsOf, text, HOME, SLUG_RE } = W;
 
 const KEEP = 200;                             // photos a page keeps; the oldest fall off the end
-const CAP = { cap: 60, where: 40, src: 400000 };
+const CAP = { cap: 60, desc: 300, where: 40, src: 400000, sec: 40, secDesc: 200 };
+const SECTIONS_MAX = 12, SEC_RE = /^[a-z0-9][a-z0-9-]{0,19}$/;
 const BYTES = 300 * 1024;                     // the picture, decoded
 const RATE = { post: 20, other: 200 };        // an hour, an account
 const EXT = { jpeg: 'jpg', png: 'png', webp: 'webp' };
@@ -59,6 +69,24 @@ async function meOf(req, slug) {              // who is asking, and what they ar
   return { id: me.id, tag: me.tag, banned: me.banned, mod, keeper: mod || !!rules.keeper };
 }
 const said = me => me && { id: me.id, tag: me.tag, keeper: me.keeper, mod: me.mod };
+
+// ── THE SECTIONS, off the page's hash ──────────────────────────────────────
+const sectionsOf = p => { try { const s = p.sections ? JSON.parse(p.sections) : []; return Array.isArray(s) ? s : []; } catch (e) { return []; } };
+function cleanSections(v) {
+  if (!Array.isArray(v) || v.length > SECTIONS_MAX) throw bad(400, 'sections', 'an album has up to ' + SECTIONS_MAX + ' sections');
+  const seen = new Set();
+  return v.map(s => {
+    if (!s || typeof s !== 'object') throw bad(400, 'sections', 'a section is a title and a description');
+    const id = String(s.id == null ? '' : s.id).toLowerCase(), title = text(s.title, CAP.sec);
+    if (!SEC_RE.test(id)) throw bad(400, 'sections', 'a section\'s name is lower-case letters, numbers and dashes, 20 at most');
+    if (seen.has(id)) throw bad(400, 'sections', 'two sections are called ' + id);
+    seen.add(id);
+    if (!title) throw bad(400, 'sections', 'every section needs a title');
+    return { id, title, desc: text(s.desc, CAP.secDesc) };
+  });
+}
+const secOf = (v, sections) => { const id = String(v == null ? '' : v).toLowerCase(); return sections.some(s => s.id === id) ? id : ''; };
+const descOf = v => text(String(v == null ? '' : v).replace(/[\r\n\t]+/g, ' '), CAP.desc);   // a description is one line here: a line break typed in becomes a space, not nothing
 
 // ── the picture: a data: url the browser made, checked twice — the header says jpeg, png or webp, and so must the bytes ──
 function decode(v) {
@@ -93,38 +121,59 @@ const pictures = H.blob.token() ? {
   async del(keys) { keys.forEach(k => { try { fs.unlinkSync(fileOf(k)); } catch (e) {} }); }
 };
 
-const shown = (p, tag, likes, liked) => ({ id: p.id, by: p.by, tag, at: p.at, cap: p.cap, where: p.where || '', src: p.src, likes: +likes || 0, liked: !!liked });
+const shown = (p, tag, likes, liked, sections) => ({ id: p.id, by: p.by, tag, at: p.at, cap: p.cap, desc: p.desc || '', sec: secOf(p.sec, sections), where: p.where || '', src: p.src, likes: +likes || 0, liked: !!liked });
 
 async function get(req, res) {
-  const q = new URL(req.url, 'http://x').searchParams, slug = await pageOf(q);
+  const q = new URL(req.url, 'http://x').searchParams, slug = await pageOf(q), sections = sectionsOf(await db('HGETALL', K.page(slug)));
   const me = await meOf(req, slug);
   const photos = (await db('LRANGE', K.album(slug), 0, KEEP - 1)).map(one).filter(Boolean);
   const cmds = photos.map(p => ['SCARD', K.albumLike(slug, p.id)]).concat(me ? photos.map(p => ['SISMEMBER', K.albumLike(slug, p.id), me.id]) : []);
   const n = cmds.length ? await dbm(cmds) : [];
   const tag = await tagsOf(photos.map(p => p.by));
-  answer(res, 200, { ok: true, me: said(me), photos: photos.map((p, i) => shown(p, tag[p.by], n[i], me && n[photos.length + i])) });
+  answer(res, 200, { ok: true, me: said(me), sections, photos: photos.map((p, i) => shown(p, tag[p.by], n[i], me && n[photos.length + i], sections)) });
 }
 
 async function post(req, res) {
   if (!sameSite(req)) throw bad(403, 'origin', 'that post came from another site');
   const body = await readBody(req);
   if (!body || typeof body !== 'object' || Array.isArray(body)) throw bad(400, 'body', 'the post is not an op');
-  const slug = await pageOf(new URL(req.url, 'http://x').searchParams, body);
+  const slug = await pageOf(new URL(req.url, 'http://x').searchParams, body), sections = sectionsOf(await db('HGETALL', K.page(slug)));
   const me = await meOf(req, slug);
   if (!me) throw bad(401, 'who', 'sign in to do that');
   if (me.banned) throw bad(403, 'banned', 'this account may not post');
   const key = K.album(slug), id = String(body.id == null ? '' : body.id);
-  const find = async () => { const raw = await db('LRANGE', key, 0, -1); const hit = raw.map(s => [s, one(s)]).find(([, p]) => p && p.id === id); return hit || [null, null]; };
+  const find = async () => { const raw = await db('LRANGE', key, 0, -1); const i = raw.findIndex(s => { const p = one(s); return p && p.id === id; }); return i < 0 ? [null, null, -1] : [raw[i], one(raw[i]), i]; };
   switch (body.op) {
+    case 'sections': {                        // THE SECTIONS: the keepers arrange the album
+      if (!me.keeper) throw bad(403, 'role', 'the album\'s sections are the keepers\' to arrange');
+      if (!(await spend(me.id, 'other'))) throw bad(429, 'rate', 'that is a lot in one hour — take a breath');
+      const next = cleanSections(body.sections);
+      await db('HSET', K.page(slug), 'sections', JSON.stringify(next));
+      await W.audit(me.id, 'sections', { page: slug, sections: next.map(s => s.id).join(',') });
+      return answer(res, 200, { ok: true, sections: next });
+    }
+    case 'edit': {                            // the title, the description, the section — the taker's, or a keeper's, to change
+      if (!(await spend(me.id, 'other'))) throw bad(429, 'rate', 'that is a lot in one hour — take a breath');
+      const [, p, i] = await find();
+      if (!p) throw bad(404, 'photo', 'no such photo');
+      if (p.by !== me.id && !me.keeper) throw bad(403, 'role', 'that is somebody else\'s photo');
+      if (body.cap != null) { p.cap = text(body.cap, CAP.cap); if (!p.cap) throw bad(400, 'cap', 'give it a title'); }
+      if (body.desc != null) p.desc = descOf(body.desc);
+      if (body.sec != null) p.sec = secOf(body.sec, sections);
+      await db('LSET', key, i, JSON.stringify(p));   // ponytail: the index read a moment ago; a photo dropped in between moves it by one
+      if (p.by !== me.id) await W.audit(me.id, 'edit', { page: slug, ch: 'album', id, of: p.by, text: String(p.cap || '').slice(0, 140) });
+      const [likes, liked] = await dbm([['SCARD', K.albumLike(slug, id)], ['SISMEMBER', K.albumLike(slug, id), me.id]]);
+      return answer(res, 200, { ok: true, photo: shown(p, (await tagsOf([p.by]))[p.by], likes, liked, sections) });
+    }
     case 'post': {
       if (!(await spend(me.id, 'post'))) throw bad(429, 'rate', 'that is a lot of photos in one hour — take a breath');
       const cap = text(body.cap, CAP.cap);
-      if (!cap) throw bad(400, 'cap', 'give it a caption');
+      if (!cap) throw bad(400, 'cap', 'give it a title');
       const pic = decode(body.src);
       if (!pictures) throw bad(503, 'no-store', 'this site has no store for pictures yet');
       const pid = newId(), name = 'album/' + slug + '/' + pid + '.' + pic.ext;
       const src = await pictures.put(name, pic);
-      const p = { id: pid, by: me.id, at: Date.now(), cap, where: text(body.where, CAP.where), src, key: name };
+      const p = { id: pid, by: me.id, at: Date.now(), cap, desc: descOf(body.desc), sec: secOf(body.sec, sections), where: text(body.where, CAP.where), src, key: name };
       // the list keeps KEEP: what this one pushes off the end takes its picture and its hearts with it
       const over = (await db('LRANGE', key, KEEP - 1, -1)), gone = over.map(one).filter(Boolean);
       if (over.length) {
@@ -132,7 +181,7 @@ async function post(req, res) {
         await pictures.del(gone.map(g => g.key).filter(Boolean));
       }
       await db('LPUSH', key, JSON.stringify(p));
-      return answer(res, 200, { ok: true, photo: shown(p, me.tag, 0, false) });
+      return answer(res, 200, { ok: true, photo: shown(p, me.tag, 0, false, sections) });
     }
     case 'like': {
       if (!(await spend(me.id, 'other'))) throw bad(429, 'rate', 'that is a lot in one hour — take a breath');

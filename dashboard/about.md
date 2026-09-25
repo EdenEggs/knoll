@@ -194,3 +194,18 @@ thing to change** when it happens (§1a).
 **Visual system matches the Yard, not the coming-soon page.** Rye + VT323 on
 the same ink/cream/red/yellow/green/blue/pink token set and pale-lavender
 paper as `/yard`.
+
+**The corner's settings (2026-09-24).** On a page's dashboard (`?space=<slug>`,
+and `?space=toem2` for TOEM 2's own, which its moderators reach from the
+stamp's popover), the keepers get four more cards under the numbers — the
+Town Board's tabs, the Chat's rules, the Photo Album's sections, uploads and
+hanging photos, and the Leaderboard's rankings — built by `manage.js`
+(`manage.css`) into the `#corner-manage` slot the template leaves, plain DOM
+outside React's care; the slot stays empty for everyone else. Those cards post
+to `api/board.js`, `api/gallery.js` and `api/leaderboard.js`, and the bench's
+`toem2/board.js`, `gallery.js` and `leaderboard.js` read the result on their
+next poll. The rendered slot is `#dc-root #corner-manage`: the raw template
+inside `<x-dc>` keeps a hidden copy with the same id. A space's dashboard is
+titled `<its title> dashboard`, and the YOUR SPACES strip starts with a Profile
+card back to this page's own numbers. `node toem2/probe-manage.js` walks it all
+in headless Chrome.

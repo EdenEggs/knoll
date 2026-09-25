@@ -13,6 +13,12 @@
    (knoll-<page>:album:seen), which is what the little "new" count is. Not on
    the yard's picture of this page (?embed=1).
 
+   THE SECTIONS (2026-09-24, later that day): the keepers arrange the album
+   into sections and put photos up from the page's dashboard
+   (dashboard/manage.js) — each section is one more tab after the three, and
+   a photo carries its title, a description (under the print, full size) and
+   the section it hangs in.
+
    ponytail: the album asks the door once a minute for the count and when it
    opens — no live push; the board's poll is the pattern if one is wanted. */
 window.Gallery = (function () {
@@ -20,10 +26,14 @@ window.Gallery = (function () {
   const PAGE = document.documentElement.dataset.page || 'toem2', PQ = 'page=' + encodeURIComponent(PAGE);
   const API = '/api/gallery', CARD = '/api/wall?who=', TOKEN = 'knoll-toem2:token', SEEN = 'knoll-' + PAGE + ':album:seen';
   const POLL = 60000;
-  const TABS = [['all', 'All'], ['mine', 'Mine'], ['fav', 'Favourites']];
+  const BASE = [['all', 'All'], ['mine', 'Mine'], ['fav', 'Favourites']];
   const EMPTY = { all: ['No photos yet', 'Photos taken around town will hang here.'],
                   mine: ['None of yours yet', 'The photos you take will be kept here.'],
                   fav: ['No favourites yet', 'Tap the heart on a photo to keep it here.'] };
+  let sections = [], secKey = '';               // THE SECTIONS the keepers made (api/gallery.js): a tab each, after the three
+  const tabsNow = () => BASE.concat(sections.map(s => ['sec:' + s.id, s.title]));
+  const secOf = id => sections.find(s => s.id === id) || null;
+  const emptyOf = t => EMPTY[t] || ['Nothing in ' + ((secOf(t.slice(4)) || {}).title || 'this section') + ' yet', 'Photos put in this section will hang here.'];
   const TILT = [-2, 1.5, -1, 2, -1.5, 1];
   const SVG = {
     album: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="13" height="14" rx="1.5" fill="none" transform="rotate(-8 9.5 14)"/><rect x="9" y="4" width="12" height="13" rx="1.5" fill="#fff"/><rect x="11" y="6" width="8" height="6.5" stroke="none"/></svg>',
@@ -53,6 +63,12 @@ window.Gallery = (function () {
     if (!out || !out.ok) return false;
     me = out.me || null;
     photos = Array.isArray(out.photos) ? out.photos : [];
+    const secs = Array.isArray(out.sections) ? out.sections : [];
+    if (JSON.stringify(secs) !== secKey) {     // the sections changed: the tabs are rebuilt, and a tab that went closes to ALL
+      secKey = JSON.stringify(secs); sections = secs;
+      if (tabsEl) buildTabs();
+      if (!tabsNow().some(([t]) => t === tab)) { tab = 'all'; viewing = null; }
+    }
     return true;
   }
   const send = body => fetch(API + '?' + PQ, { method: 'POST', headers: headers({ 'content-type': 'application/json' }), body: JSON.stringify(body) })
@@ -60,14 +76,14 @@ window.Gallery = (function () {
   const canDrop = p => !!me && (p.by === me.id || me.keeper);
 
   // ── the tabs' lists, the counts ─────────────────────────────────────────
-  const listOf = t => photos.filter(p => t === 'all' || (t === 'mine' ? !!me && p.by === me.id : p.liked));
+  const listOf = t => photos.filter(p => t === 'all' || (t === 'mine' ? !!me && p.by === me.id : t === 'fav' ? p.liked : p.sec === t.slice(4)));
   const unread = () => photos.filter(p => p.at > seen).length;
   const look = () => { seen = Date.now(); set(SEEN, String(seen)); badge(); };
   function badge() {
     const b = fab.querySelector('.town-badge'), n = open ? 0 : unread();
     b.textContent = n > 9 ? '9+' : n ? String(n) : '';
     sub.textContent = photos.length === 1 ? '1 photo from around town' : photos.length + ' photos from around town';
-    TABS.forEach(([t]) => { const c = tabsEl.querySelector('[data-tab="' + t + '"] .gal-n'); if (c) c.textContent = String(listOf(t).length); });
+    tabsNow().forEach(([t]) => { const c = tabsEl.querySelector('[data-tab="' + t + '"] .gal-n'); if (c) c.textContent = String(listOf(t).length); });
   }
 
   // ── pictures of the takers: the card's, once per author ─────────────────
@@ -97,7 +113,7 @@ window.Gallery = (function () {
     body.replaceChildren();
     const list = listOf(tab);
     if (!list.length) {
-      const e = el('div', 'gal-empty'), [h, t] = EMPTY[tab];
+      const e = el('div', 'gal-empty'), [h, t] = emptyOf(tab);
       e.append(el('b', null, h), el('span', null, t));
       body.append(e);
       return;
@@ -117,8 +133,8 @@ window.Gallery = (function () {
     const arrow = (cls, icon, label, d) => { const b = el('button', 'gal-arrow ' + cls); b.type = 'button'; b.innerHTML = icon; b.setAttribute('aria-label', label); b.disabled = list.length < 2; b.addEventListener('click', () => step(d)); return b; };
     frame.append(img, arrow('is-prev', SVG.prev, 'previous', -1), arrow('is-next', SVG.next, 'next', 1));
     const row = el('div', 'gal-row'), face = el('span', 'town-pic', initial(p.tag)); face.dataset.pic = p.by; picIn(face, p.by);
-    const who = el('div', 'gal-who');
-    who.append(el('b', null, p.cap), el('small', null, nameOf(p.tag) + (p.where ? ' · ' + p.where : '') + ' · ' + when(p.at)));
+    const who = el('div', 'gal-who'), sec = secOf(p.sec);
+    who.append(el('b', null, p.cap), el('small', null, nameOf(p.tag) + (p.where ? ' · ' + p.where : '') + (sec ? ' · ' + sec.title : '') + ' · ' + when(p.at)));
     const like = el('button', 'gal-like' + (p.liked ? ' is-on' : '')); like.type = 'button'; like.innerHTML = SVG.heart; like.append(String(p.likes));
     like.setAttribute('aria-pressed', String(!!p.liked)); like.setAttribute('aria-label', p.liked ? 'take your heart back' : 'keep it — a heart');
     like.addEventListener('click', () => heart(p, like));
@@ -129,7 +145,9 @@ window.Gallery = (function () {
     const back = el('button', 'town-btn', 'Back to album'); back.type = 'button'; back.addEventListener('click', () => { viewing = null; render(); });
     foot.append(back);
     note = el('p', 'town-note'); note.hidden = true;
-    sheet.append(frame, row, note, foot);
+    sheet.append(frame, row);
+    if (p.desc) sheet.append(el('p', 'gal-desc', p.desc));   // the description, when its taker or a keeper wrote one
+    sheet.append(note, foot);
     if (!me) { const g = el('p', 'town-gate'), a = el('a', null, 'Log in'); a.href = gate(); g.append(a, ' to keep favourites.'); sheet.append(g); }
     view.append(sheet);
     back.focus({ preventScroll: true });
@@ -190,6 +208,15 @@ window.Gallery = (function () {
   }
 
   // ── the furniture ───────────────────────────────────────────────────────
+  function buildTabs() {                        // ALL, MINE, FAVOURITES — and one tab a section the keepers made
+    tabsEl.replaceChildren();
+    tabsNow().forEach(([t, label]) => {
+      const b = el('button', 'town-tab'); b.type = 'button'; b.dataset.tab = t; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', 'false');
+      b.append(label, el('small', 'gal-n', '0'));
+      b.addEventListener('click', () => pick(t));
+      tabsEl.append(b);
+    });
+  }
   function build() {
     fab = el('button', 'town-fab gal-fab'); fab.type = 'button'; fab.id = 'gallery-btn'; fab.title = 'the photo album'; fab.setAttribute('aria-label', 'the photo album');
     fab.setAttribute('aria-expanded', 'false'); fab.setAttribute('aria-controls', 'gallery-panel');
@@ -206,16 +233,11 @@ window.Gallery = (function () {
     const x = el('button', 'town-close', '✕'); x.type = 'button'; x.setAttribute('aria-label', 'close'); x.addEventListener('click', hide);
     head.append(tile, tt, x);
     tabsEl = el('div', 'town-tabs'); tabsEl.setAttribute('role', 'tablist');
-    TABS.forEach(([t, label]) => {
-      const b = el('button', 'town-tab'); b.type = 'button'; b.dataset.tab = t; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', 'false');
-      b.append(label, el('small', 'gal-n', '0'));
-      b.addEventListener('click', () => pick(t));
-      tabsEl.append(b);
-    });
+    buildTabs();
     tabsEl.addEventListener('keydown', e => {
-      const i = TABS.findIndex(([t]) => t === tab), d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      const T = tabsNow(), i = T.findIndex(([t]) => t === tab), d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
       if (!d) return;
-      e.preventDefault(); pick(TABS[(i + d + TABS.length) % TABS.length][0]); tabsEl.querySelector('.is-on').focus();
+      e.preventDefault(); pick(T[(i + d + T.length) % T.length][0]); tabsEl.querySelector('.is-on').focus();
     });
     body = el('div', 'town-body gal-body');
     view = el('div', 'gal-view'); view.hidden = true;
@@ -241,5 +263,5 @@ window.Gallery = (function () {
   });
 
   return { open: show, close: hide, pick, load, view: id => { viewing = id; if (open) render(); },
-           get me() { return me; }, get photos() { return photos; }, get isOpen() { return open; }, get viewing() { return viewing; }, get tab() { return tab; } };
+           get me() { return me; }, get photos() { return photos; }, get sections() { return sections; }, get isOpen() { return open; }, get viewing() { return viewing; }, get tab() { return tab; } };
 })();

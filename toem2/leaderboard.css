@@ -1,0 +1,40 @@
+/* toem2/leaderboard.css — THE LEADERBOARD (leaderboard.js): the fourth corner button and its panel. The button,
+   the panel's case, its head, tabs and body are board.css's (.town-*), so the four panels match; what is here is
+   only what a leaderboard has that the others have not — the podium, the rows after it, your own line at the foot. */
+.lb-fab svg,.lb-tile svg{fill:currentColor;stroke:currentColor;stroke-width:3.2;stroke-linejoin:round;stroke-linecap:round}
+.lb-fab svg [fill="#fff"],.lb-tile svg [fill="#fff"]{fill:#fff}
+.lb-panel{width:440px}
+.lb-body{gap:14px}
+.lb-blurb{text-align:center;opacity:.8}
+.lb-empty{margin:auto}
+/* the podium: second, first, third — the first a head taller, with the crown */
+.lb-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;gap:8px;padding:22px 4px 0}
+.lb-stand{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.lb-face{position:relative;width:48px;height:48px;font-size:20px}
+.lb-stand.is-first .lb-face{width:60px;height:60px;font-size:24px}
+.lb-face.is-empty{display:block;width:48px;height:48px;box-sizing:border-box;border:3px dashed #17120b;border-radius:50%;opacity:.35}
+.lb-crown{position:absolute;top:-19px;left:50%;width:30px;height:20px;margin-left:-15px}
+.lb-crown svg{width:30px;height:20px;display:block}
+.lb-name{max-width:100%;font-weight:700;font-variant-caps:small-caps;letter-spacing:.03em;font-size:16px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-block{width:100%;height:56px;box-sizing:border-box;border:3px solid #17120b;border-radius:10px 10px 0 0;background:#efecef;display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:6px;box-shadow:inset -6px 0 0 #d9d3d8}
+.lb-stand:nth-child(1) .lb-block{height:72px}
+.lb-stand.is-first .lb-block{height:96px;background:#17120b;color:#fff;box-shadow:inset -6px 0 0 #3a3140}
+.lb-stand.is-empty .lb-block{background:#fff;border-style:dashed;box-shadow:none;opacity:.5}
+.lb-rank{font-weight:700;font-size:26px;line-height:1}
+.lb-value{font-size:14px;line-height:1}
+/* the rows after the podium, and your own line */
+.lb-rows{display:flex;flex-direction:column;gap:8px}
+.lb-row,.lb-foot{display:flex;align-items:center;gap:10px;padding:7px 12px 7px 8px;border:3px solid #17120b;border-radius:14px;background:#efecef}
+.lb-row:nth-child(even){background:#fff}
+.lb-row.is-me{background:#fff4f9}
+.lb-n{width:30px;flex:none;text-align:center;font-weight:700;font-size:19px;line-height:1;opacity:.75}
+.lb-row .town-pic,.lb-foot .town-pic{width:32px;height:32px;font-size:15px;flex:none}
+.lb-who{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.lb-who b{font-size:17px;line-height:1.05;font-variant-caps:small-caps;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-who small{font-size:13px;line-height:1.05;opacity:.7}
+.lb-val{flex:none;font-weight:700;font-size:18px;line-height:1}
+.lb-foot{flex:none;margin:0;border:0;border-top:4px solid #17120b;border-radius:0 0 18px 16px;background:#17120b;color:#fff;padding:10px 14px 12px 10px;font-size:14.5px}
+.lb-foot a{color:#ffb3c9;font-weight:700}
+.lb-foot .town-pic{border-color:#fff}
+.lb-foot .lb-who small{opacity:.8}
+@media (max-width:700px){.lb-panel{width:auto}}

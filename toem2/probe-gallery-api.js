@@ -84,6 +84,36 @@ const file = src => path.join(tmp, src.replace(/^\/toem2\//, ''));
   check('taken back', r.json.ok && r.json.likes === 1 && r.json.liked === false);
   check('signed out sees the hearts and no liked', (await GET()).json.photos[1].likes === 1 && (await GET()).json.photos[1].liked === false);
 
+  console.log('sections, titles and descriptions');
+  check('a page starts with no sections', Array.isArray((await GET()).json.sections) && !(await GET()).json.sections.length);
+  check('the sections are the keepers\' to arrange', brief(await POST({ op: 'sections', sections: [] }, 'nu')).code === 'role');
+  for (const [what, sections] of [['thirteen', Array.from({ length: 13 }, (_, i) => ({ id: 's' + i, title: 's' + i }))], ['a bad name', [{ id: 'Bad!', title: 'x' }]], ['two alike', [{ id: 'a', title: 'x' }, { id: 'a', title: 'y' }]], ['no title', [{ id: 'a', title: '  ' }]]])
+    check('sections refused: ' + what, brief(await POST({ op: 'sections', sections }, 'mod')).code === 'sections');
+  r = await POST({ op: 'sections', sections: [{ id: 'harbour', title: '  The  harbour ', desc: 'Boats and gulls' }, { id: 'hills', title: 'The hills' }] }, 'mod');
+  check('a keeper arranges the album into sections', r.json.ok && r.json.sections.length === 2 && r.json.sections[0].title === 'The harbour' && r.json.sections[0].desc === 'Boats and gulls' && r.json.sections[1].desc === '', r.json);
+  check('…which everyone reads', (await GET()).json.sections.map(s => s.id).join() === 'harbour,hills');
+  r = await POST({ op: 'post', cap: 'Nets', desc: '  Drying on the quay,\nafter the catch. ', sec: 'harbour', src: PNG }, 'nu');
+  const p3 = r.json.photo;
+  check('a photo posts with a description and into a section', r.json.ok && p3.desc === 'Drying on the quay, after the catch.' && p3.sec === 'harbour', r.json.photo);
+  r = await POST({ op: 'post', cap: 'Lost', sec: 'nowhere', src: PNG }, 'nu');
+  const p4 = r.json.photo;
+  check('a section that is not one is none, and no description is an empty one', r.json.ok && p4.sec === '' && p4.desc === '', r.json.photo);
+  check('somebody else\'s title: no', brief(await POST({ op: 'edit', id: p3.id, cap: 'Mine now' }, 'nu2')).code === 'role');
+  check('a photo that is not there', (await POST({ op: 'edit', id: 'nope', cap: 'x' }, 'nu')).status === 404);
+  check('a title cannot be taken away', brief(await POST({ op: 'edit', id: p3.id, cap: '  ' }, 'nu')).code === 'cap');
+  r = await POST({ op: 'edit', id: p3.id, cap: 'Nets drying', desc: '', sec: 'hills' }, 'nu');
+  check('the taker changes the title, clears the description, moves it to another section', r.json.ok && r.json.photo.cap === 'Nets drying' && r.json.photo.desc === '' && r.json.photo.sec === 'hills' && r.json.photo.tag === 'nu#1', r.json);
+  r = await POST({ op: 'edit', id: p3.id, desc: 'A keeper wrote this' }, 'mod');
+  check('a keeper changes another\'s, and only what was sent', r.json.ok && r.json.photo.cap === 'Nets drying' && r.json.photo.desc === 'A keeper wrote this' && r.json.photo.sec === 'hills', r.json);
+  r = await GET('', 'nu');
+  const back = r.json.photos.find(p => p.id === p3.id);
+  check('…and it reads back so, in its place among the others', back && back.cap === 'Nets drying' && back.desc === 'A keeper wrote this' && back.sec === 'hills' && r.json.photos.map(p => p.id).join() === [p4.id, p3.id, p2.id, p1.id].join(), r.json.photos.map(p => p.id));
+  check('…with its hearts', back && back.likes === 0 && (await GET('', 'mod')).json.photos.find(p => p.id === p1.id).liked === true);
+  check('the record says a keeper changed it', (await W.db('LRANGE', W.K.audit, 0, -1)).map(s => JSON.parse(s)).some(e => e.what === 'edit' && e.by === U.mod && e.of === U.nu && e.ch === 'album'));
+  r = await POST({ op: 'sections', sections: [{ id: 'harbour', title: 'The harbour' }] }, 'mod');
+  check('a section taken down leaves its photos, unsectioned', r.json.ok && (await GET()).json.photos.find(p => p.id === p3.id).sec === '');
+  await POST({ op: 'drop', id: p3.id }, 'nu'); await POST({ op: 'drop', id: p4.id }, 'nu');   // the two of this section go, so the counts below are the album's first two again
+
   console.log('dropping');
   check('somebody else\'s: no', brief(await POST({ op: 'drop', id: p1.id }, 'nu2')).code === 'role');
   check('one that is not there', (await POST({ op: 'drop', id: 'nope' }, 'nu')).status === 404);
