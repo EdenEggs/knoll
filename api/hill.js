@@ -397,7 +397,9 @@ module.exports = async function handler(req, res) {
     answer(res, 405, { ok: false, error: 'GET or POST' });
   } catch (e) {
     if (e instanceof W.Bad) return answer(res, e.status, { ok: false, code: e.code, error: e.message });   // a name that cannot be had, from api/wall.js
-    answer(res, 500, { ok: false, error: String((e && e.message) || e) });
+    // what went wrong is the log's (a store's answer names the store); the visitor gets the same line the other doors give
+    console.error('api/hill.js: ' + String((e && e.stack) || e));
+    answer(res, 500, { ok: false, code: 'server', error: 'the yard is having trouble — try again in a moment' });
   }
 };
 module.exports.clean = clean;

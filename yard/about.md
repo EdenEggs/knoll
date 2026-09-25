@@ -603,10 +603,10 @@ round it and the gnome's arm reaching across the page to touch it:
 | 3 | the badges card | Badges & trophies |
 | 4 | the spaces-visited card | Spaces you've visited |
 
-**The copy is dummy and knowingly so** — the source says `Copy is dummy for now`
-above the `TOUR` table, and all four bodies open `Lorem ipsum dolor sit amet`.
-It ships that way on purpose; the four `body` strings in `TOUR` are the only
-thing to edit.
+**The copy is real since 2026-09-24** — one or two sentences a stop, saying what
+the thing does (the dock and SAVE YARD, the picture, how badges are earned, the
+flag that pins a space to the hills). The four `body` strings in `TOUR` are the
+only thing to edit. `/YardView` still carries the old Lorem ipsum copy.
 
 ### How a stop is placed
 
@@ -871,8 +871,8 @@ attribute it does not recognise instead of complaining about one it does. Same
 attribute, same value, no error. It applies to any raw `{{ }}` in a geometry
 attribute (`d`, `cx`, `cy`, `x2`, `transform`, …).
 
-Not fixed, and not accidentally: the **Lorem ipsum tour copy** and the **empty
-plot** are both shipped as exported at the author's choice. See §3 and §4.
+Not fixed, and not accidentally: the **empty plot** is shipped as exported at
+the author's choice (§3). The tour copy was written on 2026-09-24 (§4).
 
 ---
 
@@ -1009,7 +1009,7 @@ Things this re-cut deliberately did not decide. None of them is broken.
    publish (§0), so the question is only which word to keep.
 2. ~~The empty plot.~~ Settled 2026-09-21: `plotEmpty` defaults true and the
    plot ships blank (it was false from 2026-09-17 to 2026-09-21).
-3. **The tour copy** is Lorem ipsum (§4).
+3. ~~The tour copy.~~ Written 2026-09-24 (§4).
 4. **`HILLS` has one entry** and the default favourites name three hills that
    do not exist (§5).
 5. **Corner accents repeat**, and there are two pinks (§10).

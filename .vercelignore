@@ -1,3 +1,5 @@
+.env
+.env.*
 lab2/index.html.keep-bak
 lab2/*.tmp
 lab2/*.bat
@@ -36,3 +38,4 @@ yard/*.lnk
 yard/*.ico
 YardView/*.lnk
 YardView/*.ico
+toem2/outbox.jsonl

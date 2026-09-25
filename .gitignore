@@ -1,6 +1,12 @@
 # Local tooling, not the site.
 .claude/
 
+# Secrets live in Vercel's environment (KV_REST_API_TOKEN, BLOB_READ_WRITE_TOKEN,
+# GOOGLE_CLIENT_SECRET, KNOLL_OWNER_KEY…), never in a file here — and a .env
+# made for a local run must never reach git or the deploy (.vercelignore too).
+.env
+.env.*
+
 # lab 2's performance workbench keeps its evidence here: ~53MB of screen
 # captures, traces and run logs across 148 PNGs and 20 logs. The harnesses
 # that produce them are worth keeping and are tracked; the output of a run
@@ -48,6 +54,8 @@ toem2/results/
 # Redis; wall-seed.json beside it is the copy that ships.
 toem2/wall-db.json
 toem2/wall-db.json.tmp
+# …and the sign-up codes the dev server's stand-in postman writes beside it (api/auth.js: THE POSTMAN)
+toem2/outbox.jsonl
 # …and the photo album's pictures (api/gallery.js) land beside it, off Vercel
 toem2/album/
 
