@@ -225,6 +225,112 @@ const tracing = extra => Object.assign({ id: 'tr1abcdefg', name: 'a leaf', w: 10
   r = await G('proposals=1&hill=u-' + ow, md);
   A.strictEqual(r.status, 403, '…and a banned one, none but their own');
 
+  // ── the bell hears of it, and the yard's history keeps it (2026-09-27) ───
+  const bell = async id => (await W.db('LRANGE', W.K.notes(id), 0, -1)).map(s => JSON.parse(s));
+  let notes = await bell(ow);
+  A.ok(notes.filter(x => x.kind === 'proposal').length === 8 && notes.some(x => x.kind === 'proposal' && x.prop === p1 && x.from === pr) && notes.some(x => x.prop === p3 && x.what === 'Bramble'),
+    'every proposal rang its owner\'s bell: who, which, and the name if it proposed one: ' + JSON.stringify(notes.map(x => x.kind)));
+  notes = await bell(pr);
+  A.ok(notes.some(x => x.kind === 'taken' && x.prop === p1 && x.from === ow) && notes.some(x => x.kind === 'left' && x.prop === p2 && x.why === 'no thanks') && notes.some(x => x.kind === 'left' && x.from === md)
+       && !notes.some(x => x.prop === p4), 'the proposer hears of each decision — taken, left (with the owner\'s words), left by a moderator — and nothing of the one they withdrew: ' + JSON.stringify(notes));
+  await W.db('HSET', W.K.user(md), 'banned', '0');
+  r = await G('proposals=1&hill=u-' + ow, ow);
+  A.ok(r.body.done.length === 5 && r.body.done[0].id === p4 && r.body.done[0].status === 'withdrawn' && r.body.done.some(x => x.id === p1 && x.status === 'accepted' && x.took > 0 && x.doc === undefined)
+       && r.body.done.every(x => x.name === 'Pal#1') && r.body.looks.length === 3 && r.body.t === r.body.looks[0].t,
+    'the inbox carries the yard\'s history too: what was decided, newest first, and its saves: ' + JSON.stringify(r.body.done.map(x => x.status)));
+
+  // ── taking what a proposal CHANGES: one, or several together (api/hill.js: WHAT A PROPOSAL CHANGES) ──
+  const o2 = '1a'.repeat(8), q1 = '1b'.repeat(8), q2 = '1c'.repeat(8), q3 = '1d'.repeat(8);
+  for (const [id, name] of [[o2, 'Holly'], [q1, 'Ash'], [q2, 'Birch'], [q3, 'Cedar']]) { await W.db('HSET', W.K.user(id), 'made', '1', 'name', name, 'role', 'user'); S[id] = await W.mintSession(id); }
+  const rock = { k: 's', d: 'M0 0L1 1' }, pond = { k: 's', d: 'M5 5L6 6' }, sign = { k: 't', t: 'welcome', x: 10, y: 10 };
+  const yard0 = { wall: { items: [rock, pond, pond] }, flatfile: { list: [] }, plot: { 'the-elder': { x: 10, y: 10 }, 'the-pine': { x: 50, y: 50 } }, plotName: 'Holly\'s' };
+  r = await P({ hill: 'u-' + o2, doc: yard0 }, o2);
+  const base0 = r.body.t;
+  // Ash adds a sign and takes one of the two ponds away; Birch adds a bench, moves a tree, files a tracing and renames the plot; Cedar proposes a name
+  r = await P({ op: 'propose', hill: 'u-' + o2, doc: yard0 }, q1);
+  A.deepStrictEqual([r.status, r.body.code], [400, 'same'], 'a yard proposed exactly as it stands proposes nothing');
+  r = await P({ op: 'propose', hill: 'u-' + o2, why: 'a sign, and one pond fewer', doc: Object.assign({}, yard0, { wall: { items: [rock, pond, sign] } }) }, q1);
+  const a1 = r.body.id;
+  const bench = { k: 's', d: 'M7 7L8 8' };
+  r = await P({ op: 'propose', hill: 'u-' + o2, doc: { wall: { items: [rock, pond, pond, bench] }, flatfile: { list: [tracing()] }, plot: { 'the-elder': { x: 99, y: 10 }, 'the-pine': { x: 50, y: 50 } }, plotName: 'Holly\'s Hollow' } }, q2);
+  const b1 = r.body.id;
+  r = await P({ op: 'propose', hill: 'u-' + o2, name: 'Hollyhock' }, q3);
+  const c1 = r.body.id;
+  r = await G('proposals=1&hill=u-' + o2, o2);
+  const open = {}; r.body.proposals.forEach(x => { open[x.id] = x; });
+  A.deepStrictEqual([open[a1].to.changes, open[b1].to.changes, open[c1].to.changes],
+    [{ add: 1, del: 1, moved: 0, filed: 0 }, { add: 1, del: 0, moved: 1, filed: 1, plotName: 'Holly\'s Hollow' }, undefined],
+    'the inbox says what each would change: pieces put up and taken down (two alike are counted), trees moved, tracings filed, the plot\'s name');
+  // the owner goes on working: a save of their own, after both were proposed
+  const gate = { k: 's', d: 'M2 2L3 3' };
+  r = await P({ hill: 'u-' + o2, doc: Object.assign({}, yard0, { wall: { items: [rock, pond, pond, gate] } }) }, o2);
+  r = await G('hill=u-' + o2 + '&with=' + a1 + ',' + b1, q1);
+  A.deepStrictEqual([r.status, r.body.code], [403, 'theirs'], 'a look at a yard with proposals taken is its owner\'s');
+  r = await call('GET', '/api/hill?hill=u-' + o2 + '&with=' + a1);
+  A.deepStrictEqual([r.status, r.body.code], [401, 'who'], '…and wants them signed in');
+  r = await G('hill=u-' + o2 + '&with=' + a1 + ',' + b1, o2);
+  const kinds = d => d.wall.items.map(it => it.d || it.t).join('|');
+  A.ok(r.status === 200 && kinds(r.body.doc) === 'M0 0L1 1|M5 5L6 6|M2 2L3 3|welcome|M7 7L8 8' && r.body.doc.plot['the-elder'].x === 99 && r.body.doc.plot['the-pine'].x === 50
+       && r.body.doc.plotName === 'Holly\'s Hollow' && r.body.doc.flatfile.list.length === 1,
+    'taken together: the owner\'s gate kept, Ash\'s sign up and one pond down, Birch\'s bench up, the tree moved, the tracing filed, the plot renamed: ' + kinds(r.body.doc));
+  r = await call('GET', '/api/hill?hill=u-' + o2);
+  A.ok(kinds(r.body.doc) === 'M0 0L1 1|M5 5L6 6|M5 5L6 6|M2 2L3 3' && r.body.doc.looks.length === 2, '…and looking kept nothing: the yard is as the owner saved it');
+  r = await P({ op: 'take', ids: [a1, b1] }, q1);
+  A.deepStrictEqual([r.status, r.body.code], [403, 'theirs'], 'only the owner takes: to anybody else they are proposals to somebody else\'s yard');
+  r = await P({ op: 'take', ids: [] }, o2);
+  A.deepStrictEqual([r.status, r.body.code], [400, 'take'], 'taking wants proposals named');
+  r = await P({ op: 'take', ids: [a1, 'p' + 'z'.repeat(14)] }, o2);
+  A.deepStrictEqual([r.status, r.body.code], [404, 'proposal'], '…ones that are there');
+  r = await P({ op: 'take', ids: [a1, p1] }, o2);
+  A.deepStrictEqual([r.status, r.body.code], [403, 'theirs'], '…to this yard');
+  // two takes at once — a button pressed twice, two tabs: the second finds them held, and puts nothing up twice
+  await W.db('SET', W.K.lock(b1), o2, 'NX', 'EX', 20);
+  r = await P({ op: 'take', ids: [a1, b1, c1] }, o2);
+  A.deepStrictEqual([r.status, r.body.code, r.body.id, await W.db('GET', W.K.lock(a1))], [409, 'busy', b1, null], 'a proposal being taken already holds the take off, and the ones it had hold of are let go');
+  A.ok(JSON.parse(await W.db('GET', W.K.prop(a1))).status === 'open' && (await call('GET', '/api/hill?hill=u-' + o2)).body.doc.looks.length === 2, '…with nothing taken and nothing saved');
+  await W.db('DEL', W.K.lock(b1));
+  r = await P({ op: 'take', ids: [a1, b1, c1] }, o2);
+  A.ok(r.status === 200 && r.body.t > 0 && r.body.took.length === 3, 'the owner takes all three together: ' + JSON.stringify(r.body));
+  A.deepStrictEqual(await W.dbm([a1, b1, c1].map(id => ['GET', W.K.lock(id)])), [null, null, null], '…and none of them is held afterwards');
+  const tookAt = r.body.t;
+  r = await call('GET', '/api/hill?hill=u-' + o2);
+  A.ok(kinds(r.body.doc) === 'M0 0L1 1|M5 5L6 6|M2 2L3 3|welcome|M7 7L8 8' && r.body.doc.plotName === 'Holly\'s Hollow' && r.body.doc.t === tookAt && r.body.doc.looks.length === 3,
+    'one save, with all of it: ' + kinds(r.body.doc));
+  A.strictEqual(await W.db('HGET', W.K.user(o2), 'name'), 'Hollyhock', '…and the name Cedar proposed');
+  r = await G('proposals=1&hill=u-' + o2, o2);
+  A.ok(r.body.proposals.length === 0 && r.body.done.length === 3 && r.body.done.every(x => x.status === 'accepted' && x.among === 3) && r.body.done.filter(x => x.took === tookAt).length === 2,
+    'all three are decided: accepted, three together, and the two that carried a yard say which save took them');
+  A.ok((await bell(q1)).some(x => x.kind === 'taken' && x.prop === a1) && (await bell(q2)).some(x => x.kind === 'taken' && x.prop === b1) && (await bell(q3)).some(x => x.kind === 'taken' && x.prop === c1), 'each proposer\'s bell says theirs was taken');
+  r = await P({ op: 'take', ids: [a1] }, o2);
+  A.deepStrictEqual([r.status, r.body.code], [409, 'decided'], 'taken is taken');
+  r = await P({ op: 'propose', hill: 'u-' + o2, name: 'One' }, q1);
+  const n1 = r.body.id;
+  r = await P({ op: 'propose', hill: 'u-' + o2, name: 'Other' }, q2);
+  r = await P({ op: 'take', ids: [n1, r.body.id] }, o2);
+  A.deepStrictEqual([r.status, r.body.code, await W.db('HGET', W.K.user(o2), 'name')], [409, 'names', 'Hollyhock'], 'two names proposed are two decisions: nothing is taken');
+  // a proposal whose base has fallen off the end of the versions cannot be told apart from it
+  r = await P({ op: 'propose', hill: 'u-' + o2, doc: { wall: { items: [rock] } } }, q3);
+  const old1 = r.body.id, rec = JSON.parse(await W.db('GET', W.K.prop(old1)));
+  fs.unlinkSync(path.join(TMP, 'yard', 'looks', 'u-' + o2, rec.base + '.json'));
+  r = await P({ op: 'take', ids: [old1] }, o2);
+  A.deepStrictEqual([r.status, r.body.code, r.body.id], [409, 'old', old1], 'a base that is gone says so, and which');
+  r = await P({ op: 'decide', id: old1, do: 'accept', force: true }, o2);
+  A.strictEqual(r.status, 200, '…and that one can still be taken whole');
+  // looking ahead reads a yard per proposal: an owner gets so many an hour
+  await W.db('SET', W.K.rl('look:' + o2, Math.floor(Date.now() / 36e5)), '240');
+  r = await G('hill=u-' + o2 + '&with=' + n1, o2);
+  A.deepStrictEqual([r.status, r.body.code], [429, 'rate'], 'two hundred and forty looks ahead in an hour, then it waits');
+  // a past save, put up again
+  r = await P({ op: 'restore', t: base0 }, q1);
+  A.deepStrictEqual([r.status, r.body.code], [404, 'version'], 'restore reads the asker\'s OWN yard: somebody else\'s save is no save of theirs');
+  r = await P({ op: 'restore', t: 'latest' }, o2);
+  A.deepStrictEqual([r.status, r.body.code], [400, 'version'], 'a version is a number');
+  r = await P({ op: 'restore', t: base0 }, o2);
+  A.ok(r.status === 200 && r.body.from === base0 && r.body.t > tookAt, 'the owner puts a past save up again: ' + JSON.stringify({ t: r.body.t, n: r.body.n }));
+  r = await call('GET', '/api/hill?hill=u-' + o2);
+  A.ok(kinds(r.body.doc) === 'M0 0L1 1|M5 5L6 6|M5 5L6 6' && r.body.doc.plotName === 'Holly\'s' && r.body.doc.looks.length === 5 && r.body.doc.looks.some(l => l.t === tookAt),
+    '…as a new save, with the ones between still in the history: ' + kinds(r.body.doc));
+
   // deployed with no store: shut, and says so
   process.env.VERCEL = '1';
   r = await call('POST', '/api/hill', { hill: HILL, doc });

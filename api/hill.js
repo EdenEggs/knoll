@@ -54,8 +54,26 @@
 
      POST { op: 'propose', hill: 'u-<id>', name?, doc?, why? } → { ok, id }
           { op: 'decide', id, do: 'accept' | 'decline' | 'withdraw', why?, force? }
-     GET  ?proposals=1&hill=u-<id>   the open ones (the owner, a moderator)
+          { op: 'take', ids: [id, …] }   → { ok, t, took }   (the owner: what each CHANGES, made to the yard as it stands — see below)
+          { op: 'restore', t }           → { ok, t }         (the owner: a past save put up again, as a new one)
+     GET  ?proposals=1&hill=u-<id>   the open ones, the decided ones (`done`) and the yard's saves (`looks`) (the owner, a moderator)
           ?proposal=<id>             one, with its yard (the owner, the proposer, a moderator)
+          ?hill=u-<id>&with=<id>,…   the yard as it would be with those taken, and nothing kept (the owner)
+
+   WHAT A PROPOSAL CHANGES (2026-09-27). A proposal is still the whole yard as
+   its proposer would have it, but what it changes can be told by holding it
+   against the yard it was made on (`base`, that save's version): the pieces
+   it has that the base has not are put up, the ones the base has that it has
+   not are taken down, a tree stood somewhere else has moved, a tracing the
+   base's library lacks is filed, the plot's name may be new. Pieces have no
+   names, so they are told apart by what they are — every field — and two
+   alike are counted. `take` makes those changes to the yard AS IT STANDS
+   NOW, for one proposal or for several together (oldest first), as one save:
+   so the owner's own saves since are kept, which `accept` — the whole yard,
+   in place of the owner's — cannot do, and two people's ideas can both be
+   had. A base that has fallen off the end of the versions (KEEP) cannot be
+   told apart from its proposal any more: that one is `accept`'s, or nobody's.
+   Every decision rings the proposer's bell, and a proposal the owner's.
 
    Taking a yard puts it up as the owner's own save would, a version like
    any other. It was proposed against the yard as it stood (`base`, that
@@ -72,8 +90,9 @@
    is a thousand saves across every yard on the site. And a proposal is the
    whole yard, not a patch: the yard's pieces carry no names to patch by
    (TOEM 2's do — api/wall.js); when they do, a proposal can be only the
-   pieces it changes, and merge with the owner's saves instead of waiting on
-   them. A yard over PROP_MAX cannot be proposed whole. The stale check
+   pieces it changes. Until then a piece MOVED is one taken down and one put
+   up, and two proposals that move the same piece leave it in both places.
+   A yard over PROP_MAX cannot be proposed whole. The stale check
    reads latest.json through the Blob store's 60 s edge cache, so a save
    made in the minute before can slip past it — as it can past the looks
    list of a save made that soon after another; a cache-busting read (a MISS,
@@ -94,6 +113,9 @@ const HILL = /^(yard|u-[0-9a-f]{16})$/, MINE = /^u-[0-9a-f]{16}$/;
 const SAVES = 30;                            // an hour, per yard of one's own
 const PROP_RE = /^p[a-z0-9]{12,40}$/, PROP_MAX = 1024 * 1024;   // a proposed yard: the wall's own cap on a post (api/wall.js)
 const PROP_BY = 3, PROP_IP = 6, PROP_ON = 20, PROPS_HOUR = 10, PROP_DAYS = 7, PROP_KEEP = 30;
+const DONE_KEEP = 50;                        // decided proposals a yard's history lists
+const LOOKS = 240;                           // looks ahead (?with=) an hour, an owner
+const TAKING_S = 20;                         // how long a proposal being taken is held, so two takes at once cannot both have it
 
 // ── replies ───────────────────────────────────────────────────────────────
 function answer(res, status, out) {
@@ -224,12 +246,79 @@ function clean(d) {
   return { wall: { items }, flatfile: { list }, plot, name: str(d.name, 24), plotName: str(d.plotName, 28) };
 }
 
+// ── what a proposal changes (see WHAT A PROPOSAL CHANGES) ──────────────────
+const blank = () => ({ wall: { items: [] }, flatfile: { list: [] }, plot: {}, name: '', plotName: '' });
+const sameAs = it => JSON.stringify(Object.keys(it).sort().map(k => [k, it[k]]));   // a piece, as what it is
+function changesOf(base, doc) {
+  const had = new Map(), add = [], del = [], plot = {};
+  base.wall.items.forEach(it => { const k = sameAs(it); had.set(k, (had.get(k) || 0) + 1); });
+  doc.wall.items.forEach(it => { const k = sameAs(it), n = had.get(k) || 0; if (n) had.set(k, n - 1); else add.push(it); });
+  had.forEach((n, k) => { for (let i = 0; i < n; i++) del.push(k); });
+  /* a tree the base gives no place to stands where the page puts it by default, which this door does not
+     know: its place in the proposal is kept (it is that default, or a move) but only a tree the base DID
+     place, somewhere else, is counted as moved */
+  let moved = 0;
+  Object.keys(doc.plot).forEach(k => { const a = base.plot[k], b = doc.plot[k]; if (!a || a.x !== b.x || a.y !== b.y) { plot[k] = b; if (a) moved++; } });
+  const filed = doc.flatfile.list.filter(t => !base.flatfile.list.some(b => b.id === t.id));
+  return Object.assign({ add, del, plot, moved, filed }, doc.plotName !== base.plotName ? { plotName: doc.plotName } : {});
+}
+function change(doc, c) {                    // …made to a yard
+  c.del.forEach(k => { const i = doc.wall.items.findIndex(it => sameAs(it) === k); if (i >= 0) doc.wall.items.splice(i, 1); });   // already gone is gone
+  doc.wall.items.push(...c.add);
+  Object.assign(doc.plot, c.plot);
+  c.filed.forEach(t => { if (!doc.flatfile.list.some(b => b.id === t.id)) doc.flatfile.list.push(t); });
+  if (c.plotName != null) doc.plotName = c.plotName;
+  return doc;
+}
+const counts = c => ({ add: c.add.length, del: c.del.length, moved: c.moved, filed: c.filed.length, plotName: c.plotName });
+// the yard a proposal was made on: that version, nothing at all if there was no yard yet, null if the version is gone
+const baseOf = async (st, p) => (p.base ? st.get('hills/' + p.hill + '/v/' + p.base + '.json').then(d => (d ? clean(d) : null)) : blank());
+const gone = (code, error, extra) => Object.assign(new Error(error), { status: 409, code, extra });
+/* The yard as it stands with these proposals' changes made to it, oldest first. Throws what
+   `take` and the preview both answer with: `old` for a base that is gone, `doc` for a yard that
+   no longer passes the checks a save does — one proposal's, or all of them together. */
+async function together(st, hill, ps) {
+  const latest = await st.get('hills/' + hill + '/latest.json');
+  let doc = latest ? clean(latest) : blank();
+  for (const p of ps.filter(p => p.to.doc).sort((a, b) => a.at - b.at)) {
+    const base = await baseOf(st, p);
+    if (!base) throw gone('old', 'the yard ' + (p.name || 'that one') + ' proposed against is too many saves ago to tell what they changed — take theirs whole, or leave it', { id: p.id });
+    let theirs;
+    try { theirs = clean(JSON.parse((await W.db('GET', W.K.propDoc(p.id))) || 'null')); }
+    catch (e) { throw gone('doc', 'that yard no longer passes the checks a save does: ' + e.message, { id: p.id }); }
+    change(doc, changesOf(base, theirs));
+  }
+  try { doc = clean(doc); } catch (e) { throw gone('doc', 'taken together they are more than a yard holds: ' + e.message); }
+  return doc;
+}
+// the proposals named, each open and each to this yard — or what is wrong with the asking
+async function theirsToTake(ids, hill) {
+  if (!ids.length || ids.length > PROP_ON || !ids.every(id => PROP_RE.test(id))) throw Object.assign(new Error('name the proposals to take — one to ' + PROP_ON + ' of them'), { status: 400, code: 'take' });
+  const ps = (await W.dbm(ids.map(id => ['GET', W.K.prop(id)]))).map(r => r && JSON.parse(r));
+  ps.forEach((p, i) => {
+    if (!p) throw Object.assign(new Error('no such proposal (an open one lapses after ' + PROP_DAYS + ' days)'), { status: 404, code: 'proposal', extra: { id: ids[i] } });
+    if (p.hill !== hill) throw Object.assign(new Error('that proposal is to somebody else\'s yard'), { status: 403, code: 'theirs', extra: { id: p.id } });
+    if (p.status !== 'open') throw gone('decided', 'that proposal is ' + p.status + ' already', { id: p.id });
+  });
+  return ps;
+}
+const idsOf = v => [...new Set((Array.isArray(v) ? v : String(v || '').split(',')).map(String).filter(Boolean))];
+const says = (res, e) => answer(res, e.status, Object.assign({ ok: false, code: e.code, error: e.message }, e.extra || {}));
+
 // ── GET ───────────────────────────────────────────────────────────────────
 async function get(req, res, q) {
   if (q.get('proposal') || q.get('proposals')) return readProposals(req, res, q);
   const hill = q.get('hill') || 'yard';
   if (!HILL.test(hill)) return answer(res, 400, { ok: false, error: 'not a hill' });
   const st = storeFor();
+  if (q.get('with')) {                       // the owner's look at their yard with some proposals taken: nothing is kept
+    const me = W.storeFor() ? await W.whoIs(req) : null;
+    if (!me) return answer(res, 401, { ok: false, code: 'who', error: 'sign in to see that' });
+    if ('u-' + me.id !== hill) return answer(res, 403, { ok: false, code: 'theirs', error: 'that is for the yard\'s owner' });
+    if (!(await withinHour('look:' + me.id, LOOKS))) return answer(res, 429, { ok: false, code: 'rate', error: 'that is a lot of looking in one hour — take a breath' });   // each reads a yard per proposal
+    try { return answer(res, 200, { ok: true, doc: await together(st, hill, await theirsToTake(idsOf(q.get('with')), hill)) }); }
+    catch (e) { if (e.status) return says(res, e); throw e; }
+  }
   if (q.get('ping')) return answer(res, 200, { ok: true, door: true, store: st.kind, save: canSave(st, hill) });
   const at = q.get('at');
   if (at) {
@@ -307,7 +396,55 @@ async function proposalOp(req, res, body) {
   if (me.banned) return answer(res, 403, { ok: false, code: 'banned', error: 'this account may not change anybody\'s yard' });
   if (body.op === 'propose') return propose(req, res, me, body);
   if (body.op === 'decide') return decide(res, me, body);
+  if (body.op === 'take') return take(res, me, body);
+  if (body.op === 'restore') return restore(res, me, body);
   answer(res, 400, { ok: false, code: 'op', error: 'no such op' });
+}
+// a decision, written down: the record kept PROP_KEEP days and its yard let go, off the lists of the open, onto the yard's history — and the proposer told
+async function decided(p, status, me, extra) {
+  Object.assign(p, { status, decided: { by: me.id, at: Date.now() } }, extra || {});
+  await W.dbm([['SET', W.K.prop(p.id), JSON.stringify(p), 'EX', PROP_KEEP * 86400], ['DEL', W.K.propDoc(p.id)],
+               ['LREM', W.K.props(p.hill), 0, p.id], ['LREM', W.K.propsBy(p.by), 0, p.id],
+               ['LPUSH', W.K.propsDone(p.hill), p.id], ['LTRIM', W.K.propsDone(p.hill), 0, DONE_KEEP - 1], ['EXPIRE', W.K.propsDone(p.hill), PROP_KEEP * 86400]]);
+  if (status !== 'withdrawn' && me.id !== p.by) await W.tell(p.by, status === 'accepted' ? 'taken' : 'left', me.id, Object.assign({ prop: p.id }, p.answer ? { why: p.answer } : {}));
+}
+/* THE OWNER TAKES ONE, OR SEVERAL TOGETHER: what each changes, made to the yard as it stands,
+   as one save (see WHAT A PROPOSAL CHANGES). One name at most among them — two proposed names
+   are two decisions. */
+async function take(res, me, body) {
+  const hill = 'u-' + me.id, st = storeFor();
+  try {
+    const ps = await theirsToTake(idsOf(body.ids), hill);
+    const named = ps.filter(p => p.to.name), names = [...new Set(named.map(p => p.to.name))];
+    if (names.length > 1) throw gone('names', 'two of these propose different names for you — take them one at a time');
+    const yards = ps.some(p => p.to.doc);
+    if (yards && st.kind === 'none') return answer(res, 503, { ok: false, error: 'this site has no store for yards yet' });
+    if (yards && !(await withinHour('hill:' + me.id, SAVES))) return answer(res, 429, { ok: false, code: 'rate', error: SAVES + ' saves in an hour is the most a yard takes — try again in a while' });
+    /* EACH IS HELD WHILE IT IS TAKEN: two takes at once — a button pressed twice, two tabs — would
+       both find them open, and the second would put every piece up again on top of the first.
+       The hold is let go of whatever happens; a take that died holding it frees in TAKING_S. */
+    const held = [];
+    try {
+      for (const p of ps) { if (!(await W.db('SET', W.K.lock(p.id), me.id, 'NX', 'EX', TAKING_S))) throw gone('busy', 'that one is being taken already — give it a moment', { id: p.id }); held.push(p.id); }
+      const doc = yards ? await together(st, hill, ps) : null;
+      if (names.length) await W.rename(me.id, names[0], named[0].by);   // first: a name that cannot be had leaves the yard as it was, and the proposals open
+      const t = doc ? (await save(st, hill, doc)).t : undefined;
+      for (const p of ps) await decided(p, 'accepted', me, Object.assign(p.to.doc ? { took: t } : {}, ps.length > 1 ? { among: ps.length } : {}));
+      answer(res, 200, { ok: true, t, took: ps.map(p => p.id) });
+    } finally { if (held.length) await W.dbm(held.map(id => ['DEL', W.K.lock(id)])).catch(() => {}); }
+  } catch (e) { if (e.status) return says(res, e); throw e; }
+}
+// a past save, put up again as a new one: what undoes a change taken and regretted
+async function restore(res, me, body) {
+  const hill = 'u-' + me.id, st = storeFor(), t = String(body.t == null ? '' : body.t);
+  if (!/^\d{10,16}$/.test(t)) return answer(res, 400, { ok: false, code: 'version', error: 'not a version' });
+  if (st.kind === 'none') return answer(res, 503, { ok: false, error: 'this site has no store for yards yet' });
+  const was = await st.get('hills/' + hill + '/v/' + t + '.json');
+  if (!was) return answer(res, 404, { ok: false, code: 'version', error: 'no such save (a yard keeps its last ' + KEEP + ')' });
+  if (!(await withinHour('hill:' + me.id, SAVES))) return answer(res, 429, { ok: false, code: 'rate', error: SAVES + ' saves in an hour is the most a yard takes — try again in a while' });
+  let doc;
+  try { doc = clean(was); } catch (e) { return answer(res, 409, { ok: false, code: 'doc', error: 'that save no longer passes the checks a save does: ' + e.message }); }
+  answer(res, 200, Object.assign({ ok: true, from: +t }, await save(st, hill, doc)));
 }
 async function propose(req, res, me, body) {
   const hill = str(body.hill, 32), owner = hill.slice(2);
@@ -322,6 +459,7 @@ async function propose(req, res, me, body) {
     if (doc.length > PROP_MAX) return answer(res, 413, { ok: false, code: 'size', error: 'a proposed yard can be ' + (PROP_MAX >> 10) + ' KB at most' });
     Object.assign(to, { doc: true, pieces: JSON.parse(doc).wall.items.length });
   }
+  if (body.why != null && typeof body.why !== 'string') return answer(res, 400, { ok: false, code: 'why', error: 'why is a line of words' });
   if (!to.name && !doc) return answer(res, 400, { ok: false, code: 'empty', error: 'propose a name, or a yard, or both' });
   const st = storeFor();
   if (doc && st.kind === 'none') return answer(res, 503, { ok: false, error: 'this site has no store for yards yet' });
@@ -332,12 +470,17 @@ async function propose(req, res, me, body) {
   if (here.length >= PROP_IP) return answer(res, 429, { ok: false, code: 'full', error: 'this address has ' + PROP_IP + ' proposals waiting already' });
   if (there.length >= PROP_ON) return answer(res, 429, { ok: false, code: 'full', error: 'that yard has ' + PROP_ON + ' proposals waiting already' });
   const latest = doc ? await st.get('hills/' + hill + '/latest.json') : null;
+  // what it changes, counted while the yard it was made on is to hand (WHAT A PROPOSAL CHANGES): the owner's list says so without opening each
+  if (doc) { try { to.changes = counts(changesOf(latest ? clean(latest) : blank(), JSON.parse(doc))); } catch (e) {} }
+  if (doc && to.changes && !to.name && !(to.changes.add || to.changes.del || to.changes.moved || to.changes.filed || to.changes.plotName != null))
+    return answer(res, 400, { ok: false, code: 'same', error: 'that is their yard as it already is — change something first' });
   const id = 'p' + Date.now().toString(36) + crypto.randomBytes(6).toString('hex'), ex = PROP_DAYS * 86400;
   const p = { id, hill, by: me.id, name: me.tag || me.name, at: Date.now(), base: latest ? latest.t : 0, why: W.text(body.why, 140), to, status: 'open' };
   const cmds = [['SET', W.K.prop(id), JSON.stringify(p), 'EX', ex], ['RPUSH', W.K.props(hill), id], ['RPUSH', W.K.propsBy(me.id), id],
                 ['RPUSH', W.K.propsIp(ip), id], ['EXPIRE', W.K.propsIp(ip), ex]];
   if (doc) cmds.push(['SET', W.K.propDoc(id), doc, 'EX', ex]);
   await W.dbm(cmds);
+  await W.tell(owner, 'proposal', me.id, Object.assign({ prop: id }, to.name ? { what: to.name } : {}));   // THE BELL: the owner hears of it
   answer(res, 200, { ok: true, id, status: 'open' });
 }
 async function decide(res, me, body) {
@@ -362,10 +505,8 @@ async function decide(res, me, body) {
     if (p.to.name) await W.rename(owner, p.to.name, p.by);   // first: a name that cannot be had leaves the yard as it was, and the proposal open
     if (doc) p.took = (await save(st, p.hill, doc)).t;
   }
-  Object.assign(p, { status: { accept: 'accepted', decline: 'declined', withdraw: 'withdrawn' }[what], decided: { by: me.id, at: Date.now() } });
   if (body.why) p.answer = W.text(body.why, 140);
-  await W.dbm([['SET', W.K.prop(id), JSON.stringify(p), 'EX', PROP_KEEP * 86400], ['DEL', W.K.propDoc(id)],
-               ['LREM', W.K.props(p.hill), 0, id], ['LREM', W.K.propsBy(p.by), 0, id]]);
+  await decided(p, { accept: 'accepted', decline: 'declined', withdraw: 'withdrawn' }[what], me);
   if (me.id !== owner && me.id !== p.by) await W.audit(me.id, 'proposal', { id, hill: p.hill, status: p.status });   // a moderator, declining on the owner's behalf
   answer(res, 200, { ok: true, id, status: p.status, t: p.took });
 }
@@ -386,7 +527,13 @@ async function readProposals(req, res, q) {
   const hill = q.get('hill') || '';
   if (!MINE.test(hill)) return answer(res, 400, { ok: false, error: 'not a gnome\'s yard' });
   if (hill !== 'u-' + me.id && !W.isMod(me)) return answer(res, 403, { ok: false, code: 'theirs', error: 'those are for the yard\'s owner' });
-  answer(res, 200, { ok: true, proposals: await openOnes(W.K.props(hill)) });
+  // …and the yard's history beside them: what was decided (while its record lasts), and the saves a look can open
+  const ids = await W.db('LRANGE', W.K.propsDone(hill), 0, DONE_KEEP - 1);
+  const done = (ids.length ? await W.dbm(ids.map(id => ['GET', W.K.prop(id)])) : []).map(r => r && JSON.parse(r)).filter(Boolean);
+  const latest = await storeFor().get('hills/' + hill + '/latest.json').catch(() => null);
+  const tags = await W.tagsOf(done.map(p => p.by));
+  answer(res, 200, { ok: true, proposals: await openOnes(W.K.props(hill)), done: done.map(p => Object.assign(p, { name: tags[p.by] || p.name })),
+                     looks: latest && Array.isArray(latest.looks) ? latest.looks : [], t: latest ? latest.t : 0 });
 }
 
 module.exports = async function handler(req, res) {

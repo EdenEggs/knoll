@@ -528,7 +528,7 @@ class Component extends DCLogic {
     if (out.ok && add.length) out = await json('/api/friends', { op: 'invite', slug: SLUG, ids: add });
     if (out.ok && drop.length) out = await json('/api/friends', { op: 'uninvite', slug: SLUG, ids: drop });
     if (!out.ok) { this.setState({ busy: false, note: 'NOT SAVED: ' + String(out.error || 'the door said no').toUpperCase() + '.' }); return; }
-    try { localStorage.removeItem(KEY); } catch (e) {}
+    try { localStorage.removeItem(KEY); localStorage.setItem('knoll-' + SLUG + ':paper', s.palette); } catch (e) {}   // the paper, told ahead to the wall (toem2/lab.css: A SPACE'S OWN PAPER)
     await this.load();
     this.setState({ busy: false, justSaved: true });
     clearTimeout(this._t); this._t = setTimeout(() => this.setState({ justSaved: false }), 2400);

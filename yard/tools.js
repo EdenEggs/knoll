@@ -50,6 +50,11 @@
      (api/hill.js ?at=) — that version applied to the page, and nothing of it kept:
      the head script sets window.LAB_LOOK first, so lab.js's stores stay in memory. */
   const LOOK = EMBED ? (/[?&]at=(\d{10,16})\b/.exec(location.search) || [])[1] || '' : '';
+  /* …AND A LOOK AHEAD (2026-09-27): ?embed=1&with=<proposal>,<proposal> is the review screen's
+     picture (dashboard/edits/) of the yard as it would be with those changes taken — the door
+     makes it (api/hill.js ?with=, the owner's alone) and, like a look back, none of it is kept. */
+  const WITH = EMBED && !LOOK ? (/[?&]with=(p[a-z0-9]{12,40}(?:,p[a-z0-9]{12,40})*)(?:&|$)/.exec(location.search) || [])[1] || '' : '';
+  const PEEK = !!(LOOK || WITH);           // either way: that yard on the paper, and nothing written down
   const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   /* /YardView is a visitor's view (window.YARD_VIEW): its own storage, so their
      edits never land in their own yard, and the owner's latest page always
@@ -133,14 +138,21 @@
      which sweeps knoll-yard:, takes the wall with it. A write to the wall or
      the library by a hand marks the paper as this browser's own (touched); a
      seed's first save and the gif tool's key do not. */
+  /* A LOOK'S STORES ARE IN MEMORY (2026-09-27). A look is a frame on the dashboard, and a
+     frame shares this browser's storage with the yard itself: until today a look at an old
+     save WROTE that save over knoll-yard:wall — it was only never marked applied — so the
+     yard opened next on whichever look had loaded last, and SAVE YARD would have published
+     it. (The probe that guarded this read knoll-lab2:wall, a key no yard writes.) A look
+     reads nothing of this browser's and writes nothing to it. */
   function store(key, defaults) {
     const K = PREFIX + key, marks = key === 'wall' || key === 'flatfile';
     const fresh = () => typeof defaults === 'function' ? defaults() : copy(defaults);
     let state = null, seeded = false, full = false;
-    try { const v = JSON.parse(get(K)); if (v && typeof v === 'object') state = v; } catch (e) {}
+    if (!PEEK) try { const v = JSON.parse(get(K)); if (v && typeof v === 'object') state = v; } catch (e) {}
     if (!state) { state = fresh(); seeded = true; }
     const subs = [];
     const save = () => {
+      if (PEEK) return true;
       try { localStorage.setItem(K, JSON.stringify(state)); }
       catch (e) {
         full = true;
@@ -152,7 +164,7 @@
     };
     if (seeded) save();
     const emit = () => subs.forEach(f => f(state));
-    const touch = () => { if (marks && !applying) set(PREFIX + 'touched', Date.now()); };
+    const touch = () => { if (marks && !applying && !PEEK) set(PREFIX + 'touched', Date.now()); };
     const api = {
       get: () => state,
       set: v => { state = v; touch(); save(); emit(); },
@@ -223,7 +235,7 @@
   bandEl.className = 'lab-band'; bandEl.hidden = true;
   document.body.appendChild(bandEl);
   let sweep = null;
-  const BUSY = '.yard-ui,.tool-dock,.tool-opts,.lab-panel,.lab-warn,.knoll-head,.wall-item,.wall-note,.wall-video,.plot-piece,' +
+  const BUSY = '.yard-ui,.tool-dock,.tool-opts,.lab-panel,.lab-warn,.knoll-head,.wall-item,.wall-note,.wall-video,.plot-piece,.kb-veil,' +   // .kb-veil: the bell's sheet (bell.js) is over the paper, not of it
                'a,button,input,textarea,select,label,summary,[contenteditable],[role=button],[role=dialog],[data-handle]';
   const bare = t => !!(t && t.closest) && !t.closest(BUSY);
   const moveTool = () => !!window.Wall && Wall.tool === 'move';
@@ -274,7 +286,7 @@
       if (comp && comp.applyDoc) comp.applyDoc(doc); else pending = doc;
     } finally { applying = false; }
     if (Wall.paint) Wall.paint();
-    if (LOOK) return true;               // a look keeps nothing
+    if (PEEK) return true;               // a look keeps nothing
     set(PREFIX + 'applied', doc.t || 1);
     del(PREFIX + 'touched');
     return true;
@@ -283,17 +295,17 @@
   async function seed() {
     let doc = null;
     try {
-      const r = await fetch(DOOR + '?hill=' + HILL + (LOOK ? '&at=' + LOOK : ''), { cache: LOOK ? 'default' : 'no-store' });   // a version never changes, so a look may be cached
+      const r = await fetch(DOOR + '?hill=' + HILL + (LOOK ? '&at=' + LOOK : WITH ? '&with=' + WITH : ''), { cache: LOOK ? 'default' : 'no-store', credentials: 'same-origin' });   // a version never changes, so a look may be cached
       const v = await r.json();
       if (v && v.ok && v.doc) doc = v.doc;
     } catch (e) {}
-    if (!doc && !MINE && !LOOK) {        // no door, or nothing behind it: the copy that shipped with the page (the owner's — see WHOSE HILL)
+    if (!doc && !MINE && !PEEK) {        // no door, or nothing behind it: the copy that shipped with the page (the owner's — see WHOSE HILL)
       try { const r = await fetch(SHIPPED, { cache: 'no-cache' }); if (r.ok) doc = await r.json(); } catch (e) {}
     }
     if (!doc || !doc.wall) return;
     published = doc;
     if (comp) comp.setState({ wallTick: Date.now() });   // the standing reads it (and on /YardView, counts off it)
-    if (LOOK) { apply(doc); return; }    // that version, whatever this browser keeps
+    if (PEEK) { apply(doc); return; }    // that version, whatever this browser keeps
     const applied = num(PREFIX + 'applied'), touched = num(PREFIX + 'touched');
     if ((doc.t || 1) === applied) return;        // already on this version (apply() writes a t of 0 as 1)
     if (touched > applied && !VIEW) return;       // this browser has work of its own since: keep it — a visitor's never outranks the owner's
@@ -415,7 +427,7 @@
 
   window.YardTools = {
     forest, mounted, publish, collect, fence, me,
-    touch() { if (!applying) set(PREFIX + 'touched', Date.now()); },
+    touch() { if (!applying && !PEEK) set(PREFIX + 'touched', Date.now()); },
     dirty() { return num(PREFIX + 'touched') > num(PREFIX + 'applied'); },
     get published() { return published; },
     get embed() { return EMBED; }

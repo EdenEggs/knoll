@@ -170,8 +170,13 @@
               </sc-if>
               <sc-if value="{{ viaGoogle }}" hint-placeholder-val="{{ false }}">
                 <div style="display: flex; align-items: center; gap: 10px; font-size: 16px; opacity: 0.85">
+                  <sc-if value="{{ viaGoogleMark }}" hint-placeholder-val="{{ false }}">
                   <svg width="18" height="18" sc-camel-view-box="0 0 48 48" aria-hidden="true" style="flex: none"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-2.8-.4-4H24v8.1h12.8c-.3 2.2-1.7 5.4-4.8 7.6l7.4 5.7c4.4-4.1 7.1-10.1 7.1-17.4z"></path><path fill="#FBBC05" d="M10.5 28.7c-.5-1.5-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C1 16.5 0 20.1 0 24s1 7.5 2.6 10.8l7.9-6.1z"></path><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2 1.4-4.8 2.4-8.5 2.4-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"></path></svg>
-                  <span>Signed in with Google, using <strong style="font-family: 'Public Sans', sans-serif; font-weight: 500; color: #3b2a1a">{{ googleEmail }}</strong></span>
+                  </sc-if>
+                  <sc-if value="{{ viaDiscordMark }}" hint-placeholder-val="{{ false }}">
+                  <svg width="18" height="18" sc-camel-view-box="0 0 24 24" aria-hidden="true" style="flex: none"><path fill="#5865F2" d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"></path></svg>
+                  </sc-if>
+                  <span>Signed in with {{ viaName }}, using <strong style="font-family: 'Public Sans', sans-serif; font-weight: 500; color: #3b2a1a">{{ googleEmail }}</strong></span>
                 </div>
               </sc-if>
               <sc-if value="{{ fullForm }}" hint-placeholder-val="{{ true }}">
@@ -285,6 +290,12 @@
                 <span style="flex: 1">Continue with Google</span>
                 <span style="font-family: VT323, monospace; font-size: 14px; letter-spacing: 1px; opacity: 0.6">→</span>
               </button>
+              <!-- DISCORD (2026-09-27): the same button, to /auth/discord — the mark is Discord's, in Discord's blurple -->
+              <button type="button" sc-camel-on-click="{{ onDiscord }}" disabled="{{ sealBusy }}" style="display: flex; align-items: center; gap: 12px; width: 100%; max-width: 300px; box-sizing: border-box; padding: 9px 16px 8px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 10px 7px 11px 8px; box-shadow: 4px 4px 0 rgba(23,18,11,0.55); cursor: pointer; font-family: 'Kalam', cursive; font-size: 16px; color: #17120b; text-align: left; transition: transform 0.08s" style-hover="background: #fffaf0; transform: translate(-1px,-1px)" style-active="transform: translate(2px,2px); box-shadow: 2px 2px 0 rgba(23,18,11,0.55)">
+                <svg width="22" height="22" sc-camel-view-box="0 0 24 24" aria-hidden="true" style="flex: none"><path fill="#5865F2" d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"></path></svg>
+                <span style="flex: 1">Continue with Discord</span>
+                <span style="font-family: VT323, monospace; font-size: 14px; letter-spacing: 1px; opacity: 0.6">→</span>
+              </button>
               <div style="font-style: italic; font-size: 13px; opacity: 0.6; text-align: center; margin-top: -4px">no password needed</div>
             </div>
             <div style="font-style: italic; font-size: 14.5px; opacity: 0.7; text-align: center">Already have an account? <a href="{{ loginHref }}" style="color: #b83739">Log in</a></div>
@@ -292,7 +303,7 @@
             <sc-if value="{{ codeStep }}" hint-placeholder-val="{{ false }}">
             <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; font-style: italic; font-size: 14.5px; opacity: 0.75; text-align: center">
               <div>Didn't get it? Check your spam folder, or <button type="button" sc-camel-on-click="{{ onResend }}" disabled="{{ sealBusy }}" style="background: transparent; border: 0; padding: 0; cursor: pointer; font: inherit; color: #b83739; text-decoration: underline">send a new code</button></div>
-              <div>Wrong email? <button type="button" sc-camel-on-click="{{ onBack }}" disabled="{{ sealBusy }}" style="background: transparent; border: 0; padding: 0; cursor: pointer; font: inherit; color: #b83739; text-decoration: underline">go back</button></div>
+              <div>Wrong email? <button type="button" sc-camel-on-click="{{ onWrongEmail }}" disabled="{{ sealBusy }}" style="background: transparent; border: 0; padding: 0; cursor: pointer; font: inherit; color: #b83739; text-decoration: underline">go back</button></div>
             </div>
             </sc-if>
           </form>
@@ -452,11 +463,14 @@
    or stale code cracks the wax with the door's own words by the field. */
 const NEXT =(function () { const v = new URLSearchParams(location.search).get('next') || ''; return v.length <= 512 && /^\/(?![\/\\])[^\s\\]*$/.test(v) ? v : '/yard/'; })();
 const NEXT_WORD = /^\/yard\//.test(NEXT) ? 'go to your yard →' : /^\/toem2\//.test(NEXT) ? 'back to TOEM 2 →' : NEXT === '/' ? 'back to the home page →' : 'back where you were →';
-const VIA_GOOGLE = /[?&]google=1\b/.test(location.search);
+// DISCORD (2026-09-27): vouched for by either — ?google=1 or ?discord=1 — is the one-field form; VIA is which, for the words and the mark
+const VIA = (/[?&](google|discord)=1\b/.exec(location.search) || [])[1] || '', VIA_GOOGLE = !!VIA, VIA_NAME = VIA === 'discord' ? 'Discord' : 'Google';
 const GATE = body => fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
   .then(r => r.json().catch(() => ({})).then(o => Object.assign({ http: r.status }, o)))
   .catch(() => ({ ok: false, http: 0, error: 'could not reach the server — are you online?' }));
-const GATE_SAYS = { 'no-store': 'accounts are not available on this site yet — please try again later' };
+const GATE_SAYS = { 'no-store': 'accounts are not available on this site yet — please try again later',
+                    'no-mail': 'email is not set up on this site yet, so we cannot send you a code — please continue with Google or Discord, or try again later',
+                    'busy': 'we have sent all the emails we can for today — please continue with Google or Discord, or try again tomorrow' };
 let GATE_INFO = null;                          // what the door says about itself (is Google set up?), asked once
 const gateInfo = () => GATE_INFO || (GATE_INFO = fetch('/api/auth', { cache: 'no-store' }).then(r => r.json()).catch(() => ({})));
 class Component extends DCLogic {
@@ -578,14 +592,16 @@ class Component extends DCLogic {
   togglePw = () => this.setState((s) => ({ showPw: !s.showPw }));
 
   // (THE PETITION IS REAL) away to Google and back through api/wall.js's sign-in — or, with no Google here, a note
-  onGoogle = () => {
+  vouch(which, Name) {
     if (this.state.seal !== 'idle' && this.state.seal !== 'cracked') return;
     gateInfo().then(g => {
-      if (g && g.google) { this.setState({ seal: 'cooling', errs: {}, live: 'Redirecting to Google' }); location.assign('/auth/google?next=' + encodeURIComponent(NEXT)); return; }
-      const msg = 'Google sign-in is not available yet — please sign up with an email and password';
+      if (g && g[which]) { this.setState({ seal: 'cooling', errs: {}, live: 'Redirecting to ' + Name }); location.assign('/auth/' + which + '?next=' + encodeURIComponent(NEXT)); return; }
+      const msg = Name + ' sign-in is not available yet — please sign up with an email and password';
       this.setState({ errs: Object.assign({}, this.state.errs, { email: msg }), live: msg }); this.m.noteAt = 'email'; this.m.noteT = performance.now();
     });
-  };
+  }
+  onGoogle = () => this.vouch('google', 'Google');
+  onDiscord = () => this.vouch('discord', 'Discord');   // DISCORD (2026-09-27): Google's button over again, to /auth/discord
 
   // ─── the seal ───
   onSealEnter = () => { this.m.sealHover = true; };
@@ -611,7 +627,7 @@ class Component extends DCLogic {
     Promise.all([asked, new Promise(r => setTimeout(r, 2060))]).then(([out]) => {
       if (!out.ok) {
         const f = google ? 'name' : coding ? 'code' : ({ name: 'name', password: 'pw' }[out.code] || 'email');
-        const msg = GATE_SAYS[out.code] || (google && out.code === 'who' ? 'your Google sign-in has expired — please continue with Google again' : out.error) || 'something went wrong — please try again';
+        const msg = GATE_SAYS[out.code] || (google && out.code === 'who' ? 'your ' + VIA_NAME + ' sign-in has expired — please continue with ' + VIA_NAME + ' again' : out.error) || 'something went wrong — please try again';
         this.setState({ seal: 'cracked', errs: { [f]: msg }, live: msg });
         this.m.noteAt = f; this.m.noteT = performance.now();
       } else if (out.sent) {
@@ -639,7 +655,11 @@ class Component extends DCLogic {
       this.setState({ codeNote: '', errs: { code: msg }, live: msg }); this.m.noteAt = 'code'; this.m.noteT = performance.now();
     });
   };
-  onBack = () => { if (this.state.seal === 'idle' || this.state.seal === 'cracked') this.setState({ stage: 'form', seal: 'idle', code: '', errs: {}, codeNote: '' }); };
+  /* KNOLL-SIGNUP FIX (2026-09-27): this was `onBack`, which is ALSO the window coming back into focus
+     (above) — a class field written twice keeps the second, so the focus and mouseenter listeners ran
+     THIS: going to read the code in the mail and coming back to the tab threw the code step away,
+     and the code with it. Its own name, and the window's handler is the window's again. */
+  onWrongEmail = () => { if (this.state.seal === 'idle' || this.state.seal === 'cracked') this.setState({ stage: 'form', seal: 'idle', code: '', errs: {}, codeNote: '' }); };
 
   // ─── the loop ───
   caretPoint() {
@@ -794,13 +814,14 @@ class Component extends DCLogic {
               : busy ? (coding ? 'checking your code…' : s.viaGoogle ? 'creating your account…' : 'sending you a code…')
               : coding ? 'press the seal to confirm your email' : 'press the seal to create your account',
       done: s.done, liveMsg: s.live, interlude: !!s.interlude,
-      viaGoogle: !!s.viaGoogle, fullForm: !s.viaGoogle && !coding, googleEmail: 'your Google email',   // the address is not kept, so not known here either
+      viaGoogle: !!s.viaGoogle, fullForm: !s.viaGoogle && !coding, googleEmail: 'your ' + VIA_NAME + ' email',   // the address is not kept, so not known here either
+      viaName: VIA_NAME, viaGoogleMark: VIA !== 'discord', viaDiscordMark: VIA === 'discord', onDiscord: this.onDiscord,
       codeStep: coding, formStep: !coding, code: s.code, codeRef: this.codeRef, onCode: this.onCode, onFocusCode: this.onFocusCode, onBlurCode: this.onBlurCode,
       codeLine: s.focused === 'code' ? 1 : 0, codeErr: s.errs.code || false, codeHint: s.codeNote || '(we emailed a 6-digit code to ' + s.sentTo + ')',
-      onResend: this.onResend, onBack: this.onBack,
+      onResend: this.onResend, onWrongEmail: this.onWrongEmail,
       nextHref: NEXT, nextWord: NEXT_WORD, loginHref: '../login/?next=' + encodeURIComponent(NEXT),
       heading: s.viaGoogle ? 'One more thing — pick a username' : coding ? 'Check your email' : 'Create your account',
-      subhead: s.viaGoogle ? 'Signed in with Google' : coding ? 'Enter the code we sent you' : 'Sign up for Knoll',
+      subhead: s.viaGoogle ? 'Signed in with ' + VIA_NAME : coding ? 'Enter the code we sent you' : 'Sign up for Knoll',
       handOpacity: this.m.rest ? 0.92 : 1,
       armZ: busy ? 4 : 2,
       posePoint: p === 'point', poseQuill: p === 'quill', poseGrab: p === 'grab', poseThumb: p === 'thumb', posePalm: p === 'palm',

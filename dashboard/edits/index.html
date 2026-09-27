@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edits to your page · Knoll</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/logo/logo-icon.svg">
+<!-- EDITS TO YOUR PAGE (2026-09-27): the screen the bell leads to when somebody proposes a
+     change to your yard or your name. What waits is listed with what it would CHANGE — pieces
+     put up and taken down, trees moved, tracings filed, a new name — and can be looked at
+     before it is decided: the page as it stands beside the page with the chosen edits taken
+     (yard/tools.js: A LOOK AHEAD — the yard itself, in a frame, nothing kept). One is taken or
+     left; several are taken TOGETHER, as one save (api/hill.js: WHAT A PROPOSAL CHANGES). Below
+     them, the history: what was decided, and every save of the yard — each can be looked at,
+     and put up again, which is what undoes a change taken and regretted.
+
+     Yours alone: signed out you go to the gate first, as /dashboard does. A plain page — no
+     runtime — in the house's paper. Nothing somebody else wrote is ever markup here: a name,
+     a line of why, a proposed name are all set as text. -->
+<script>if (!/(?:^|;\s*)knoll_in=[0-9a-f]{16}(?:;|$)/.test(document.cookie)) location.replace('/login/?next=' + encodeURIComponent(location.pathname + location.search + location.hash));</script>
+<link rel="stylesheet" href="/lab2/fonts/fonts.css">
+<script src="/account.js" defer></script>
+<style>
+  body { margin: 0; min-height: 100vh; background: #ece7f1; background-image: radial-gradient(circle, rgba(90,70,110,0.13) 1.3px, transparent 1.3px); background-size: 24px 24px;
+    color: #17120b; font-family: 'VT323', ui-monospace, Menlo, Consolas, monospace; }
+  a { color: #b8302f; }
+  a:hover { color: #17120b; }
+  ::selection { background: #ffd23f; }
+  .knoll-head { display: flex; align-items: center; gap: 22px; padding: 12px 22px; background: #fdfbfd; border-bottom: 1.5px dashed #e2d4df; box-sizing: border-box; }
+  .knoll-brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #26212a; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: -0.01em; }
+  .knoll-brand img { display: block; }
+  .knoll-brand:hover { color: #a52c68; }
+  .knoll-switch { display: inline-flex; align-items: center; gap: 6px; }
+  .knoll-switch a { display: inline-flex; align-items: center; border: 1.5px solid #e2d4df; border-radius: 999px; padding: 3px 10px; background: #faf7f9; color: #3d3346;
+    text-decoration: none; font-family: 'Public Sans', sans-serif; font-size: 11.5px; font-weight: 600; letter-spacing: 0.01em; white-space: nowrap; }
+  .knoll-switch a:hover { color: #a52c68; border-color: #f9d3e6; background: #fff6fb; }
+
+  .wrap { max-width: 1120px; margin: 34px auto 80px; padding: 0 20px; box-sizing: border-box; }
+  .eyebrow { font-size: 15px; letter-spacing: 2px; color: #4a4054; }
+  h1 { margin: 4px 0 6px; font-family: 'Rye', Georgia, serif; font-size: clamp(28px, 5vw, 42px); font-weight: 400; line-height: 1.05; }
+  h2 { margin: 0; font-family: 'Rye', Georgia, serif; font-size: 23px; font-weight: 400; }
+  .lede { font-size: 19px; line-height: 1.3; color: #3a3342; max-width: 46em; margin: 0 0 22px; }
+  .card { position: relative; background: #fdf7e3; border: 5px solid #17120b; box-shadow: 9px 10px 0 rgba(60,50,80,0.2); padding: 18px 20px 20px; margin-bottom: 30px; box-sizing: border-box; }
+  .card > .sub { font-size: 14px; letter-spacing: 1.5px; color: #4a4054; margin: 3px 0 14px; text-transform: uppercase; }
+  .pin { position: absolute; top: -11px; right: -11px; width: 15px; height: 15px; border: 3px solid #17120b; border-radius: 50%; }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 3px 14px 2px; background: #fdf7e3; color: #17120b; border: 3px solid #17120b; box-shadow: 3px 4px 0 rgba(60,50,80,0.22);
+    font: 400 18px/1 'VT323', monospace; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; cursor: pointer; box-sizing: border-box; }
+  .btn:hover { transform: translate(1px,1px); box-shadow: 2px 3px 0 rgba(60,50,80,0.22); color: #17120b; }
+  .btn.ink { background: #17120b; color: #fdf7e3; }
+  .btn.ink:hover { color: #fdf7e3; }
+  .btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; box-shadow: 3px 4px 0 rgba(60,50,80,0.22); }
+  .btn:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid #5a8fd6; outline-offset: 2px; }
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 10px 0 12px; border-bottom: 4px solid #17120b; margin-bottom: 4px; font-size: 17px; letter-spacing: 1px; }
+  .bar[hidden] { display: none; }   /* display:flex above would otherwise outrank the attribute */
+  .bar .grow { flex: 1 1 auto; }
+  .say { min-height: 22px; margin: 10px 0 0; font-size: 17px; letter-spacing: 1px; color: #3a3342; }
+  .say.bad { color: #b8302f; }
+  .warn { display: none; margin: 0 0 22px; padding: 12px 16px; background: #ffd23f; border: 4px solid #17120b; box-shadow: 5px 6px 0 rgba(60,50,80,0.2); font-size: 19px; line-height: 1.3; }
+  .warn.on { display: block; }
+
+  .props { list-style: none; margin: 0; padding: 0; }
+  .prop { display: grid; grid-template-columns: 34px 1fr; gap: 0 10px; padding: 14px 0; border-top: 2px dashed rgba(23,18,11,.28); }
+  .prop:first-child { border-top: 0; }
+  .prop.hit { background: rgba(255,210,63,.28); outline: 3px solid #ffd23f; outline-offset: 4px; }
+  .prop input[type=checkbox] { width: 22px; height: 22px; margin: 3px 0 0; accent-color: #17120b; cursor: pointer; }
+  .who { font-size: 21px; line-height: 1.2; overflow-wrap: anywhere; }
+  .who a { color: #17120b; }
+  .when { font-size: 14px; letter-spacing: 1px; color: #4a4054; margin-top: 2px; text-transform: uppercase; }
+  .why { margin: 8px 0 0; padding: 2px 0 2px 10px; border-left: 3px solid #17120b; font-family: 'Public Sans', system-ui, sans-serif; font-weight: 600; font-size: 15px; line-height: 1.4; color: #3a3342; overflow-wrap: anywhere; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
+  .chip { padding: 1px 8px; border: 2px solid #17120b; font-size: 16px; letter-spacing: .5px; background: #fff; overflow-wrap: anywhere; }
+  .chip.add { background: #cfe9c4; } .chip.del { background: #f6c7c7; } .chip.mov { background: #cfe0f6; } .chip.nam { background: #ffe9a3; }
+  .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .none { font-size: 18px; letter-spacing: 1px; color: #4a4054; text-transform: uppercase; line-height: 1.35; padding: 8px 0 2px; }
+
+  .looks { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .look h3 { margin: 0 0 8px; font: 400 17px/1.1 'VT323', monospace; letter-spacing: 2px; color: #4a4054; text-transform: uppercase; }
+  .frame { position: relative; width: 100%; overflow: hidden; background: #ece7f1; border: 4px solid #17120b; box-sizing: border-box; }
+  .frame iframe { position: absolute; left: 0; top: 0; width: 1260px; border: 0; transform-origin: 0 0; pointer-events: none; background: #ece7f1; }
+  .frame .blank { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px; font-size: 17px; letter-spacing: 1px; color: #4a4054; text-transform: uppercase; line-height: 1.4; }
+
+  .hist { list-style: none; margin: 0; padding: 0; }
+  .hist li { display: grid; grid-template-columns: 128px 1fr; gap: 4px 14px; padding: 11px 0; border-top: 2px dashed rgba(23,18,11,.28); font-size: 19px; line-height: 1.25; }
+  .hist li:first-child { border-top: 0; }
+  .hist .d { font-size: 15px; letter-spacing: 1px; color: #4a4054; text-transform: uppercase; padding-top: 2px; }
+  .hist .t { overflow-wrap: anywhere; }
+  .hist .now { padding: 0 6px; border: 2px solid #17120b; background: #cfe9c4; font-size: 14px; letter-spacing: 1px; margin-left: 6px; }
+  @media (max-width: 820px) { .looks { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { .wrap { margin: 20px auto 50px; padding: 0 12px; } .card { padding: 14px 14px 16px; box-shadow: 6px 7px 0 rgba(60,50,80,0.2); } .hist li { grid-template-columns: 1fr; } .who { font-size: 19px; } }
+  @media (prefers-reduced-motion: reduce) { .btn:hover { transform: none; } }
+</style>
+</head>
+<body>
+<header class="knoll-head">
+  <a class="knoll-brand" href="/"><img src="/logo/logo-icon.svg" alt="" width="26" height="26"><span>knoll</span></a>
+  <nav class="knoll-switch" aria-label="your pages">
+    <a href="/yard/">yard</a>
+    <a href="/dashboard/">dashboard</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div class="eyebrow">YOUR PAGE · KNOLL</div>
+  <h1>Edits to your page</h1>
+  <p class="lede">What other gnomes propose for your yard and your name. Nothing of yours changes until you take it — and whatever you take can be put back.</p>
+
+  <div class="warn" id="warn" role="alert">You have changes to your yard in this browser that are not saved yet. <a href="/yard/">Save your yard</a> first: an edit is added to your page as it was last saved, and saving afterwards from here would put your unsaved copy over it.</div>
+
+  <section class="card" aria-labelledby="h-wait">
+    <div class="pin" style="background:#e8484a" aria-hidden="true"></div>
+    <h2 id="h-wait">Waiting for you</h2>
+    <div class="sub" id="wait-sub">asking the door…</div>
+    <div class="bar" id="bar" hidden>
+      <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer"><input type="checkbox" id="all" style="width:20px; height:20px; accent-color:#17120b; margin:0"> <span>choose all</span></label>
+      <span id="chosen" aria-live="polite">none chosen</span>
+      <span class="grow"></span>
+      <button class="btn ink" id="take" type="button" disabled>take the chosen</button>
+      <button class="btn" id="leave" type="button" disabled>leave the chosen</button>
+    </div>
+    <ul class="props" id="props"></ul>
+    <div class="say" id="say" role="status"></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-look" id="look">
+    <div class="pin" style="background:#5a8fd6" aria-hidden="true"></div>
+    <h2 id="h-look">How your page would look</h2>
+    <div class="sub">the yard itself, drawn twice — nothing here is kept until you take an edit</div>
+    <div class="looks">
+      <div class="look"><h3 id="now-h">your page now</h3><div class="frame" id="f-now"></div></div>
+      <div class="look"><h3 id="then-h">with the chosen edits</h3><div class="frame" id="f-then"></div></div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="h-hist">
+    <div class="pin" style="background:#7bc264" aria-hidden="true"></div>
+    <h2 id="h-hist">History</h2>
+    <div class="sub">what was decided these thirty days, and every save of your yard it still keeps — newest first</div>
+    <ul class="hist" id="hist"></ul>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  const ME = (/(?:^|;\s*)knoll_in=([0-9a-f]{16})(?:;|$)/.exec(document.cookie) || [])[1];
+  if (!ME) return;
+  const HILL = 'u-' + ME, DOOR = '/api/hill', FRAME_W = 1260, FRAME_H = 2400;
+  const $ = id => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const st = { open: [], done: [], looks: [], t: 0, chosen: new Set(), peek: null, busy: false, whole: new Set() };
+
+  const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const two = n => (n < 10 ? '0' : '') + n;
+  const day = t => { const d = new Date(+t); return d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear(); };
+  const dayTime = t => { const d = new Date(+t); return d.getDate() + ' ' + MONTHS[d.getMonth()] + ' · ' + two(d.getHours()) + ':' + two(d.getMinutes()); };
+  const n = (k, one, many) => k + ' ' + (k === 1 ? one : many);
+  const num = k => { try { return +localStorage.getItem(k) || 0; } catch (e) { return 0; } };
+  // this browser's own copy of the yard has work on it that was never saved (yard/tools.js: touched > applied)
+  const dirty = () => num('knoll-yard:touched') > num('knoll-yard:applied') && (function () { try { return localStorage.getItem('knoll-yard:owner') === ME; } catch (e) { return false; } })();
+
+  const get = q => fetch(DOOR + '?' + q, { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json().catch(() => ({})).then(v => Object.assign({ http: r.status }, v))).catch(() => ({ ok: false, http: 0, error: 'the door did not answer — are you online?' }));
+  const post = body => fetch(DOOR, { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+    .then(r => r.json().catch(() => ({})).then(v => Object.assign({ http: r.status }, v))).catch(() => ({ ok: false, http: 0, error: 'the door did not answer — are you online?' }));
+  function say(text, bad) { const s = $('say'); s.textContent = text || ''; s.className = 'say' + (bad ? ' bad' : ''); }
+
+  // ── what a proposal would change, in chips ───────────────────────────────
+  function chips(p) {
+    const ul = el('ul', 'chips'), c = (p.to && p.to.changes) || null, add = (cls, text) => ul.appendChild(el('li', 'chip ' + cls, text));
+    if (p.to && p.to.name) add('nam', 'your name → ' + p.to.name);
+    if (c) {
+      if (c.add) add('add', '+ ' + n(c.add, 'piece', 'pieces'));
+      if (c.del) add('del', '− ' + n(c.del, 'piece', 'pieces'));
+      if (c.moved) add('mov', n(c.moved, 'tree moved', 'trees moved'));
+      if (c.filed) add('mov', n(c.filed, 'tracing filed', 'tracings filed'));
+      if (c.plotName != null) add('nam', 'your plot → ' + (c.plotName || 'no name'));
+    } else if (p.to && p.to.doc) add('mov', 'a yard of ' + n(+p.to.pieces || 0, 'piece', 'pieces'));
+    return ul;
+  }
+  const yardOf = id => '/YardView/?u=' + id;
+
+  function draw() {
+    const open = st.open, ids = open.map(p => p.id);
+    st.chosen.forEach(id => { if (ids.indexOf(id) < 0) st.chosen.delete(id); });
+    $('wait-sub').textContent = open.length ? n(open.length, 'edit waits', 'edits wait') + ' — an edit not decided in seven days lapses' : 'nothing waits';
+    $('bar').hidden = !open.length;
+    const list = $('props'); list.textContent = '';
+    if (!open.length) list.appendChild(el('li', 'none', 'Nobody has proposed anything. When somebody does, your bell says so, and it waits here.'));
+    open.forEach(p => {
+      const li = el('li', 'prop' + (location.hash === '#' + p.id ? ' hit' : '')); li.id = p.id;
+      const box = el('input'); box.type = 'checkbox'; box.checked = st.chosen.has(p.id); box.disabled = st.busy; box.setAttribute('aria-label', 'choose the edit from ' + (p.name || 'a gnome'));
+      box.addEventListener('change', () => { if (box.checked) st.chosen.add(p.id); else st.chosen.delete(p.id); st.peek = null; draw(); look(); });
+      const body = el('div'), who = el('div', 'who'), a = el('a', '', p.name || 'a gnome');
+      a.href = yardOf(p.by); who.append(a, document.createTextNode(p.to && p.to.doc ? (p.to.name ? ' proposes changes to your yard, and a name' : ' proposes changes to your yard') : ' proposes a name for you'));
+      body.appendChild(who);
+      body.appendChild(el('div', 'when', dayTime(p.at) + (p.to && p.to.doc ? (p.base ? ' · against your save of ' + dayTime(p.base) : ' · before your yard had a save') : '')));
+      if (p.why) body.appendChild(el('div', 'why', p.why));
+      body.appendChild(chips(p));
+      const acts = el('div', 'acts');
+      const b = (cls, word, fn, off) => { const x = el('button', 'btn' + (cls ? ' ' + cls : ''), word); x.type = 'button'; x.disabled = st.busy || !!off; x.addEventListener('click', fn); acts.appendChild(x); return x; };
+      if (p.to && p.to.doc) b('', 'look', () => { st.chosen = new Set([p.id]); st.peek = null; draw(); look(); $('look').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+      if (st.whole.has(p.id)) b('ink', 'take theirs whole', () => whole(p), dirty());
+      else b('ink', 'take it', () => take([p.id]), dirty());
+      b('', 'leave it', () => leave([p.id]));
+      body.appendChild(acts);
+      li.append(box, body);
+      list.appendChild(li);
+    });
+    const k = st.chosen.size;
+    $('chosen').textContent = k ? n(k, 'edit', 'edits') + ' chosen' : 'none chosen';
+    $('all').checked = !!open.length && k === open.length; $('all').disabled = st.busy;
+    $('take').disabled = st.busy || !k || dirty(); $('take').textContent = k > 1 ? 'take the ' + k + ' together' : 'take the chosen';
+    $('leave').disabled = st.busy || !k;
+    $('warn').className = 'warn' + (dirty() && open.length ? ' on' : '');
+    history_();
+  }
+
+  // ── the two pictures ─────────────────────────────────────────────────────
+  function frame(box, src, title, blank) {
+    box.textContent = '';
+    const w = box.clientWidth || 480, k = w / FRAME_W;
+    box.style.height = Math.round(Math.min(FRAME_H * k, 720)) + 'px';
+    if (!src) { box.appendChild(el('div', 'blank', blank)); return; }
+    const f = el('iframe'); f.title = title; f.setAttribute('tabindex', '-1'); f.setAttribute('inert', ''); f.setAttribute('loading', 'lazy');
+    f.style.height = FRAME_H + 'px'; f.style.transform = 'scale(' + k.toFixed(4) + ')';
+    f.src = src;
+    box.appendChild(f);
+  }
+  function look() {
+    frame($('f-now'), st.t ? '/yard/?embed=1&at=' + st.t : '', 'your page as it stands', 'Your yard has no save yet.');
+    $('now-h').textContent = st.t ? 'your page now · saved ' + dayTime(st.t) : 'your page now';
+    if (st.peek) {   // a past save, from the history
+      frame($('f-then'), '/yard/?embed=1&at=' + st.peek, 'your page as saved ' + dayTime(st.peek), '');
+      $('then-h').textContent = 'as saved ' + dayTime(st.peek);
+      return;
+    }
+    const ids = st.open.filter(p => st.chosen.has(p.id) && p.to && p.to.doc).map(p => p.id);
+    frame($('f-then'), ids.length ? '/yard/?embed=1&with=' + ids.join(',') : '', 'your page with the chosen edits', st.chosen.size ? 'The chosen propose a name, and nothing for the yard.' : 'Choose an edit above, or press look on one.');
+    $('then-h').textContent = ids.length ? 'with ' + n(ids.length, 'edit', 'edits') + ' taken' : 'with the chosen edits';
+  }
+
+  // ── the history: decisions and saves, one list, newest first ─────────────
+  function history_() {
+    const list = $('hist'); list.textContent = '';
+    const tookBy = {}; st.done.forEach(p => { if (p.took) (tookBy[p.took] = tookBy[p.took] || []).push(p); });
+    const rows = st.done.map(p => ({ at: (p.decided && p.decided.at) || p.at, p })).concat(st.looks.map(l => ({ at: +l.t, l }))).sort((a, b) => b.at - a.at);
+    if (!rows.length) { list.appendChild(el('li', 'none', 'Nothing yet.')); return; }
+    rows.forEach(r => {
+      const li = el('li'), d = el('div', 'd', dayTime(r.at)), t = el('div', 't');
+      if (r.p) {
+        const p = r.p, a = el('a', '', p.name || 'a gnome'); a.href = yardOf(p.by);
+        const what = p.to && p.to.name && !p.to.doc ? 'the name ' + p.to.name : p.to && p.to.name ? 'an edit and the name ' + p.to.name : 'an edit';
+        if (p.status === 'withdrawn') t.append(a, document.createTextNode(' took back ' + what));
+        else { t.append(document.createTextNode((p.decided && p.decided.by !== ME ? 'a moderator ' : 'you ') + (p.status === 'accepted' ? 'took ' : 'left ') + what + ' from '), a);
+               if (p.among > 1) t.appendChild(document.createTextNode(', with ' + n(p.among - 1, 'other', 'others'))); }
+        if (p.answer) t.appendChild(el('div', 'why', p.answer));
+        t.appendChild(chips(p));
+      } else {
+        const l = r.l, from = tookBy[l.t];
+        t.appendChild(document.createTextNode((from ? 'saved with ' + n(from.length, 'edit', 'edits') + ' taken' : 'your yard was saved') + ' · ' + n(+l.n || 0, 'piece', 'pieces')));
+        if (l.t === st.t) t.appendChild(el('span', 'now', 'THIS IS YOUR PAGE NOW'));
+        const acts = el('div', 'acts');
+        const see = el('button', 'btn', 'look'); see.type = 'button';
+        see.addEventListener('click', () => { st.peek = l.t; look(); $('look').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+        acts.appendChild(see);
+        if (l.t !== st.t) {
+          const back = el('button', 'btn', 'bring this back'); back.type = 'button'; back.disabled = st.busy || dirty();
+          back.addEventListener('click', () => restore(l.t));
+          acts.appendChild(back);
+        }
+        t.appendChild(acts);
+      }
+      li.append(d, t); list.appendChild(li);
+    });
+  }
+
+  // ── the door ─────────────────────────────────────────────────────────────
+  function load(first) {
+    return get('proposals=1&hill=' + HILL).then(v => {
+      if (v.http === 401) { location.replace('/login/?next=' + encodeURIComponent(location.pathname + location.hash)); return; }
+      if (!v.ok) { $('wait-sub').textContent = 'the door did not answer'; say(v.error || 'Try again in a moment.', true); return; }
+      // an id goes into an address and an element's id here, so it is held to what an id looks like; a version likewise
+      const sane = p => p && /^p[a-z0-9]{12,40}$/.test(p.id || '') && /^[0-9a-f]{16}$/.test(p.by || '');
+      st.open = (v.proposals || []).filter(sane).sort((a, b) => b.at - a.at); st.done = (v.done || []).filter(sane);
+      st.looks = (v.looks || []).filter(l => l && /^\d{10,16}$/.test(String(l.t))); st.t = /^\d{10,16}$/.test(String(v.t)) ? +v.t : 0;
+      if (first && /^#p[a-z0-9]{12,40}$/.test(location.hash) && st.open.some(p => '#' + p.id === location.hash)) st.chosen = new Set([location.hash.slice(1)]);
+      draw(); look();
+      if (first && location.hash && document.getElementById(location.hash.slice(1))) document.getElementById(location.hash.slice(1)).scrollIntoView({ block: 'center' });
+    });
+  }
+  const names = ids => st.open.filter(p => ids.indexOf(p.id) >= 0).map(p => p.name || 'a gnome').join(', ');
+  function run(what, job) {
+    if (st.busy) return;
+    st.busy = true; say(what); draw();
+    job().then(text => { st.busy = false; return load().then(() => say(text.text, text.bad)); }).catch(() => { st.busy = false; draw(); say('That did not go through — try again.', true); });
+  }
+  // the yard's own copy in this browser is the last save it applied: a save made HERE must be what it opens on next
+  function take(ids) {
+    if (dirty()) { say('Save your yard first — see the note above.', true); return; }
+    run('taking…', () => post({ op: 'take', ids }).then(v => {
+      if (v.ok) { st.chosen.clear(); st.peek = null; return { text: (ids.length > 1 ? n(ids.length, 'edit', 'edits') + ' taken together' : 'taken') + ' ✓ — your page is saved with ' + (ids.length > 1 ? 'them' : 'it') + ', and the history can bring the old one back.' }; }
+      if (v.code === 'old' && v.id) st.whole.add(v.id);   // that one can only be taken whole
+      return { text: v.error || 'That did not go through.', bad: true };
+    }));
+  }
+  function whole(p) {
+    if (!window.confirm('Take ' + (p.name || 'their') + ' yard WHOLE, in place of yours as it stands? Yours stays in the history, and can be brought back.')) return;
+    run('taking…', () => post({ op: 'decide', id: p.id, do: 'accept', force: true }).then(v => (v.ok ? (st.whole.delete(p.id), { text: 'taken whole ✓ — your page is theirs now, and the history can bring yours back.' }) : { text: v.error || 'That did not go through.', bad: true })));
+  }
+  function leave(ids) {
+    const why = window.prompt('A line for ' + names(ids) + ' about why (you can leave it empty):', '');
+    if (why === null) return;
+    run('leaving…', () => Promise.all(ids.map(id => post({ op: 'decide', id, do: 'decline', why: String(why).slice(0, 140) }))).then(out => {
+      const bad = out.filter(v => !v.ok);
+      ids.forEach(id => st.chosen.delete(id));
+      return bad.length ? { text: bad[0].error || 'That did not go through.', bad: true } : { text: n(ids.length, 'edit', 'edits') + ' left ✓ — ' + (ids.length > 1 ? 'they have' : names(ids) + ' has') + ' been told.' };
+    }));
+  }
+  function restore(t) {
+    if (!window.confirm('Put your page back as it was saved on ' + dayTime(t) + '? Your page as it stands stays in the history.')) return;
+    run('bringing it back…', () => post({ op: 'restore', t }).then(v => (v.ok ? (st.peek = null, { text: 'brought back ✓ — your page is as it was on ' + dayTime(t) + '.' }) : { text: v.error || 'That did not go through.', bad: true })));
+  }
+
+  $('all').addEventListener('change', e => { st.chosen = new Set(e.target.checked ? st.open.map(p => p.id) : []); st.peek = null; draw(); look(); });
+  $('take').addEventListener('click', () => take(Array.from(st.chosen)));
+  $('leave').addEventListener('click', () => leave(Array.from(st.chosen)));
+  let sized = 0;
+  window.addEventListener('resize', () => { clearTimeout(sized); sized = setTimeout(look, 200); });
+  window.addEventListener('focus', () => { if (!st.busy) draw(); });   // back from saving the yard in another tab: the note goes
+  window.EditsPage = { load, get state() { return st; } };              // for the probe
+  load(true);
+})();
+</script>
+</body>
+</html>

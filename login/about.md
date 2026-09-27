@@ -167,3 +167,51 @@ and so has a 0×0 viewport that refuses clicks.
 near (30, 30)** — that is the house bar's brand link now, and the click
 navigates away instead of blurring. The sign-up probes were moved to y=300 for
 exactly this reason.
+
+---
+
+## The reset, and Discord (2026-09-27)
+
+**Forgot your password?** is real. It turns the paper — `state.stage`, the way
+`/signup` turns to its code step — through three of them on the one scroll:
+
+| stage | what is on the paper | what the key does |
+|---|---|---|
+| `login` | email, password, remember me, the terms line | `{ op: 'login' }`, as before |
+| `forgot` | the email alone | `{ op: 'reset', email }` — the door posts a six-digit code to it |
+| `reset` | the code, a new password, the new password again | `{ op: 'reset', email, code, password }`, then `{ op: 'login' }` with the new password |
+
+The door (`api/auth.js`: THE RESET) keeps the new password and **signs nobody
+in**; the page logs in with it straight after, through the same post the
+log-in paper makes, and the lock opens on *that* answer. If the password was
+changed and the log-in was turned away (the hour's cap, say), the paper goes
+back to `login` with the new password still in the blank and a note that says
+both. A reset ends every session the account had. An address with no account
+is told so (404 `none`); one that came in by Google or Discord has no password
+to forget and is sent to those buttons (409 `google`), which is why the
+`forgot` paper keeps them. With no postman (`GET /api/auth` says
+`mail: false`) the link says reset is not available right now.
+
+**Continue with Discord** is Google's button over again, to `/auth/discord`
+(`api/wall.js`: THE WAYS IN BESIDE A PASSWORD). It needs `DISCORD_CLIENT_ID` and
+`DISCORD_CLIENT_SECRET` in the environment and
+`https://www.knoll.space/auth/discord/callback` (and the bare-domain twin)
+registered as redirects on the Discord application; until then
+`GET /api/auth` says `discord: false` and the button says so in the margin.
+
+**A name that was taken twice.** `onBack` is the window coming back into focus
+(it wakes the gnome). `/signup`'s "go back" was given the same name on
+2026-09-24, and a class field written twice keeps the second — so the focus
+and mouseenter listeners ran "go back", and coming back to the tab from
+reading the code threw the code step away. Both pages call theirs
+`onWrongEmail` now. **A new handler must not be named after an existing one**:
+the file does not complain, the second one simply wins.
+
+The button's `aria-label` follows the stage now (`Log in` · `Send code` ·
+`Reset password`), and the wagging finger goes to the blank the no is about
+(`m.wagAt`), since not every paper has a password on it.
+
+**Checks.** `node lab2/perf/verify-auth.js` (the door: 157) and
+`node lab2/perf/probe-gate-google.js` (the pages in headless Chrome: 163 — §6
+is the reset, §7 Discord, and both code steps are checked against the window
+losing and regaining focus).

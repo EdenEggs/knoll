@@ -21,7 +21,12 @@ const waitPort = (port, tries = 80) => new Promise((res, rej) => { const t = () 
 const post = (p, body) => p.evaluate(b => fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) }).then(r => r.json()), body);
 // both steps of a sign-up (api/auth.js: THE CODE): the code goes out, the preload hands it over (gnome.js), and it comes back with the same form
 const signup = async (ctx, p, who) => { await post(p, who); return post(p, Object.assign({ code: await require('./gnome.js').code(ctx, BASE, who.email) }, who)); };
-const settle =async (p, ms = 3000) => { await p.waitForTimeout(ms); return { path: new URL(p.url()).pathname + new URL(p.url()).search, view: await p.evaluate(() => !!window.YARD_VIEW), own: await p.evaluate(() => !!document.querySelector('.yard-tools')) }; };
+/* `pill` is what the page DREW, not what it says it is: the visitor's view has a Propose edits pill in its bar and
+   the owner's has none. Until 2026-09-27 this probe took window.YARD_VIEW's word for it, while the runtime — reading
+   the page again by the pretty address — was handing visitors the owner's template (YardView/index.html: …AND NOT
+   BEFORE THE RUNTIME HAS READ THIS PAGE). */
+const settle =async (p, ms = 3000) => { await p.waitForTimeout(ms); return { path: new URL(p.url()).pathname + new URL(p.url()).search, view: await p.evaluate(() => !!window.YARD_VIEW), own: await p.evaluate(() => !!document.querySelector('.yard-tools')),
+  pill: await p.evaluate(() => [...document.querySelectorAll('#dc-root .lab-save')].map(b => b.textContent.trim()).join()), save: await p.evaluate(() => /save yard/i.test((document.querySelector('#dc-root') || document.body).innerText)) }; };
 (async () => {
   const srv = spawn(process.execPath, ['-r', path.join(SITE, 'lab2/perf/probe-gate-google.js'), 'serve.js', String(PORT)], { cwd: SITE, stdio: ['ignore', 'pipe', 'pipe'] });
   let log = ''; srv.stdout.on('data', d => log += d); srv.stderr.on('data', d => log += d);
@@ -60,11 +65,13 @@ const settle =async (p, ms = 3000) => { await p.waitForTimeout(ms); return { pat
     ok(s.path === '/yard/Inky~2' && s.own, 'their address is /yard/Inky~2', JSON.stringify(s));
     s = await (await p.goto(BASE + '/yard/Inky'), settle(p, 4000));
     ok(s.path === '/yard/Inky' && s.view, 'the first Inky\'s address, seen by the second, is the visitor\'s view wearing the pretty address', JSON.stringify(s));
+    ok(s.pill === 'Propose edits' && !s.save, '…and it is the VISITOR\'s page that is drawn: Propose edits in the bar, and no save yard', JSON.stringify(s));
 
     // a signed-out visitor
     const v = await (await b.newContext({ viewport: { width: 1400, height: 1000 } })).newPage();
     s = await (await v.goto(BASE + '/yard/Inky~2'), settle(v, 4000));
     ok(s.path === '/yard/Inky~2' && s.view, 'a signed-out visitor at /yard/Inky~2 gets the visitor\'s view, pretty address kept', JSON.stringify(s));
+    ok(s.pill === 'Propose edits' && !s.save, '…drawn as the visitor\'s page too', JSON.stringify(s));
     s = await (await v.goto(BASE + '/yard/nobody-here'), settle(v, 2500));
     ok(/^\/login\/\?next=/.test(s.path), 'a signed-out visitor at a name nobody goes by is sent to the gate', JSON.stringify(s));
     s = await (await v.goto(BASE + '/yard/'), settle(v, 2500));

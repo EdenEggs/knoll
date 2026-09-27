@@ -150,6 +150,11 @@
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 14px; font-size: 18px; line-height: 1.5">
+              <!-- THE RESET (2026-09-27): three papers on one scroll. 'login' is the form as it was; "Forgot your
+                   password?" turns it to 'forgot' (the email alone, and the key sends a code to it); the code
+                   gone, to 'reset' (the code, a new password, and the new password again). The same blanks
+                   serve all three, so what was typed into the email stays typed. -->
+              <sc-if value="{{ emailStep }}" hint-placeholder-val="{{ true }}">
               <!-- email -->
               <div style="position: relative">
                 <label for="f-email" style="display: block">Email</label>
@@ -164,15 +169,39 @@
                   </div>
                 </sc-if>
               </div>
-              <!-- password -->
+              </sc-if>
+              <!-- the code: the six figures the door posted to the address (/signup's blank, and its words) -->
+              <sc-if value="{{ resetStep }}" hint-placeholder-val="{{ false }}">
               <div style="position: relative">
-                <label for="f-pw" style="display: block">Password</label>
+                <label for="f-code" style="display: block">Code</label>
+                <div style="position: relative; border-bottom: 2px dotted rgba(23,18,11,0.5)">
+                  <input ref="{{ codeRef }}" id="f-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" value="{{ code }}" sc-camel-on-change="{{ onCode }}" sc-camel-on-focus="{{ onFocusCode }}" sc-camel-on-blur="{{ onBlurCode }}" aria-describedby="e-code" style="display: block; width: 100%; box-sizing: border-box; background: transparent; border: 0; outline: none; padding: 4px 0 3px; font-family: 'Public Sans', sans-serif; font-size: 17px; letter-spacing: 4px; color: #3b2a1a; caret-color: #3b2a1a">
+                  <div style="position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: #17120b; transform-origin: left; transform: scaleX({{ codeLine }}); transition: transform 0.35s ease-out"></div>
+                </div>
+                <div style="font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">{{ codeHint }}</div>
+                <sc-if value="{{ codeErr }}" hint-placeholder-val="{{ false }}">
+                  <div id="e-code" style="position: {{ notePos }}; left: 100%; top: 0; margin-left: {{ noteMl }}; width: {{ noteW }}; color: #b83739; font-size: 15px; line-height: 1.3; transform: rotate(1.5deg); display: flex; gap: 6px; align-items: flex-start; margin-top: {{ noteMt }}">
+                    <svg width="34" height="20" sc-camel-view-box="0 0 34 20" style="flex: none; margin-top: 3px"><path d="M32,4 Q20,2 4,14 M12,15 L3,14 L8,7" fill="none" stroke="#b83739" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <span>{{ codeErr }}</span>
+                  </div>
+                </sc-if>
+              </div>
+              </sc-if>
+              <sc-if value="{{ pwStep }}" hint-placeholder-val="{{ true }}">
+              <!-- password: the one you have, or — resetting — the one you want -->
+              <div style="position: relative">
+                <label for="f-pw" style="display: block">{{ pwLabel }}</label>
                 <div style="position: relative; border-bottom: 2px dotted rgba(23,18,11,0.5); display: flex; align-items: center; gap: 8px">
-                  <input ref="{{ pwRef }}" id="f-pw" name="password" type="{{ pwType }}" autocomplete="current-password" value="{{ pw }}" sc-camel-on-change="{{ onPw }}" sc-camel-on-focus="{{ onFocusPw }}" sc-camel-on-blur="{{ onBlurPw }}" aria-describedby="e-pw" style="display: block; flex: 1; min-width: 0; background: transparent; border: 0; outline: none; padding: 4px 0 3px; font-family: 'Public Sans', sans-serif; font-size: 17px; color: #3b2a1a; caret-color: #3b2a1a; letter-spacing: {{ pwSpacing }}">
+                  <input ref="{{ pwRef }}" id="f-pw" name="password" type="{{ pwType }}" autocomplete="{{ pwAuto }}" value="{{ pw }}" sc-camel-on-change="{{ onPw }}" sc-camel-on-focus="{{ onFocusPw }}" sc-camel-on-blur="{{ onBlurPw }}" aria-describedby="e-pw" style="display: block; flex: 1; min-width: 0; background: transparent; border: 0; outline: none; padding: 4px 0 3px; font-family: 'Public Sans', sans-serif; font-size: 17px; color: #3b2a1a; caret-color: #3b2a1a; letter-spacing: {{ pwSpacing }}">
                   <button type="button" sc-camel-on-click="{{ togglePw }}" aria-pressed="{{ showPw }}" style="flex: none; background: transparent; border: 0; padding: 2px 4px; cursor: pointer; font-family: VT323, monospace; font-size: 16px; letter-spacing: 1px; color: #17120b; opacity: 0.7" style-hover="opacity: 1">{{ pwToggleLabel }}</button>
                   <div style="position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: #17120b; transform-origin: left; transform: scaleX({{ pwLine }}); transition: transform 0.35s ease-out"></div>
                 </div>
+                <sc-if value="{{ loginStep }}" hint-placeholder-val="{{ true }}">
                 <div style="font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px"><a href="#" sc-camel-on-click="{{ onForgot }}" style="color: #b83739; font-style: italic">Forgot your password?</a></div>
+                </sc-if>
+                <sc-if value="{{ resetStep }}" hint-placeholder-val="{{ false }}">
+                <div style="font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(at least 8 characters)</div>
+                </sc-if>
                 <sc-if value="{{ pwErr }}" hint-placeholder-val="{{ false }}">
                   <div id="e-pw" style="position: {{ notePos }}; left: 100%; top: 0; margin-left: {{ noteMl }}; width: {{ noteW }}; color: #b83739; font-size: 15px; line-height: 1.3; transform: rotate(-1deg); display: flex; gap: 6px; align-items: flex-start; margin-top: {{ noteMt }}">
                     <svg width="34" height="20" sc-camel-view-box="0 0 34 20" style="flex: none; margin-top: 3px"><path d="M32,4 Q20,2 4,14 M12,15 L3,14 L8,7" fill="none" stroke="#b83739" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -180,11 +209,29 @@
                   </div>
                 </sc-if>
               </div>
+              </sc-if>
+              <sc-if value="{{ resetStep }}" hint-placeholder-val="{{ false }}">
+              <!-- the new password again -->
+              <div style="position: relative">
+                <label for="f-pw2" style="display: block">Confirm new password</label>
+                <div style="position: relative; border-bottom: 2px dotted rgba(23,18,11,0.5)">
+                  <input ref="{{ pw2Ref }}" id="f-pw2" name="password2" type="{{ pwType }}" autocomplete="new-password" value="{{ pw2 }}" sc-camel-on-change="{{ onPw2 }}" sc-camel-on-focus="{{ onFocusPw2 }}" sc-camel-on-blur="{{ onBlurPw2 }}" aria-describedby="e-pw2" style="display: block; width: 100%; box-sizing: border-box; background: transparent; border: 0; outline: none; padding: 4px 0 3px; font-family: 'Public Sans', sans-serif; font-size: 17px; color: #3b2a1a; caret-color: #3b2a1a; letter-spacing: {{ pwSpacing }}">
+                  <div style="position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: #17120b; transform-origin: left; transform: scaleX({{ pw2Line }}); transition: transform 0.35s ease-out"></div>
+                </div>
+                <div style="font-style: italic; font-size: 14px; opacity: 0.65; margin-top: 3px">(type your new password again)</div>
+                <sc-if value="{{ pw2Err }}" hint-placeholder-val="{{ false }}">
+                  <div id="e-pw2" style="position: {{ notePos }}; left: 100%; top: 0; margin-left: {{ noteMl }}; width: {{ noteW }}; color: #b83739; font-size: 15px; line-height: 1.3; transform: rotate(1deg); display: flex; gap: 6px; align-items: flex-start; margin-top: {{ noteMt }}">
+                    <svg width="34" height="20" sc-camel-view-box="0 0 34 20" style="flex: none; margin-top: 3px"><path d="M32,4 Q20,2 4,14 M12,15 L3,14 L8,7" fill="none" stroke="#b83739" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <span>{{ pw2Err }}</span>
+                  </div>
+                </sc-if>
+              </div>
+              </sc-if>
             </div>
 
             <!-- the lock, and the key that fits it -->
             <div style="display: flex; align-items: center; gap: 14px; margin-top: 6px; position: relative">
-              <button ref="{{ sealRef }}" type="submit" disabled="{{ sealBusy }}" sc-camel-on-mouse-enter="{{ onSealEnter }}" sc-camel-on-mouse-leave="{{ onSealLeave }}" aria-label="Log in" style="position: relative; width: 162px; height: 100px; flex: none; background: transparent; border: 0; padding: 0; cursor: {{ sealCursor }}">
+              <button ref="{{ sealRef }}" type="submit" disabled="{{ sealBusy }}" sc-camel-on-mouse-enter="{{ onSealEnter }}" sc-camel-on-mouse-leave="{{ onSealLeave }}" aria-label="{{ sealAria }}" style="position: relative; width: 162px; height: 100px; flex: none; background: transparent; border: 0; padding: 0; cursor: {{ sealCursor }}">
                 <!-- the padlock -->
                 <div style="position: absolute; left: 8px; top: 4px; width: 64px; height: 94px; animation: {{ lockAnim }}; transform-origin: 50% 80%">
                   <div style="position: absolute; left: 12px; top: 0; width: 40px; height: 46px; border: 7px solid #17120b; border-bottom: 0; border-radius: 22px 22px 0 0; box-sizing: border-box; transform-origin: 100% 100%; transform: {{ shackleT }}; transition: transform 0.4s cubic-bezier(.3,1.4,.5,1)">
@@ -215,10 +262,14 @@
               <div style="display: flex; flex-direction: column; gap: 3px">
                 <div style="font-family: VT323, monospace; font-size: 22px; letter-spacing: 3px; color: #17120b">{{ sealLabel }}</div>
                 <div style="font-style: italic; font-size: 14px; opacity: 0.65">{{ sealHint }}</div>
+                <sc-if value="{{ loginStep }}" hint-placeholder-val="{{ true }}">
                 <label style="display: flex; align-items: center; gap: 8px; font-style: italic; font-size: 14px; opacity: 0.75; cursor: pointer; margin-top: 2px"><input type="checkbox" checked="{{ remember }}" sc-camel-on-change="{{ onRemember }}" style="width: 15px; height: 15px; accent-color: #b83739; margin: 0"><span>Remember me</span></label>
                 <div style="font-style: italic; font-size: 13px; opacity: 0.65; margin-top: 4px">By logging in, you agree to our <a href="#" style="color: #b83739">Terms of Service</a></div>
+                </sc-if>
               </div>
             </div>
+            <!-- the other ways in: on the log-in paper, and on the forgot one — where an address that came in by one of them is sent -->
+            <sc-if value="{{ vouchStep }}" hint-placeholder-val="{{ true }}">
             <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
               <div style="display: flex; align-items: center; gap: 10px; width: 100%">
                 <div style="flex: 1; height: 0; border-top: 2px dotted rgba(23,18,11,0.4)"></div>
@@ -230,9 +281,27 @@
                 <span style="flex: 1">Continue with Google</span>
                 <span style="font-family: VT323, monospace; font-size: 14px; letter-spacing: 1px; opacity: 0.6">→</span>
               </button>
+              <!-- DISCORD (2026-09-27): the same button, to /auth/discord — the mark is Discord's, in Discord's blurple -->
+              <button type="button" sc-camel-on-click="{{ onDiscord }}" disabled="{{ sealBusy }}" style="display: flex; align-items: center; gap: 12px; width: 100%; max-width: 300px; box-sizing: border-box; padding: 9px 16px 8px; background: #fdf7e3; border: 3px solid #17120b; border-radius: 10px 7px 11px 8px; box-shadow: 4px 4px 0 rgba(23,18,11,0.55); cursor: pointer; font-family: 'Kalam', cursive; font-size: 16px; color: #17120b; text-align: left; transition: transform 0.08s" style-hover="background: #fffaf0; transform: translate(-1px,-1px)" style-active="transform: translate(2px,2px); box-shadow: 2px 2px 0 rgba(23,18,11,0.55)">
+                <svg width="22" height="22" sc-camel-view-box="0 0 24 24" aria-hidden="true" style="flex: none"><path fill="#5865F2" d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"></path></svg>
+                <span style="flex: 1">Continue with Discord</span>
+                <span style="font-family: VT323, monospace; font-size: 14px; letter-spacing: 1px; opacity: 0.6">→</span>
+              </button>
               <div style="font-style: italic; font-size: 13px; opacity: 0.6; text-align: center; margin-top: -4px">no password needed</div>
             </div>
+            </sc-if>
+            <sc-if value="{{ loginStep }}" hint-placeholder-val="{{ true }}">
             <div style="font-style: italic; font-size: 14.5px; opacity: 0.7; text-align: center">Don't have an account? <a href="{{ signupHref }}" style="color: #b83739">Sign up</a></div>
+            </sc-if>
+            <sc-if value="{{ forgotStep }}" hint-placeholder-val="{{ false }}">
+            <div style="font-style: italic; font-size: 14.5px; opacity: 0.75; text-align: center">Remembered it? <button type="button" sc-camel-on-click="{{ onLogin }}" disabled="{{ sealBusy }}" style="background: transparent; border: 0; padding: 0; cursor: pointer; font: inherit; color: #b83739; text-decoration: underline">Back to log in</button></div>
+            </sc-if>
+            <sc-if value="{{ resetStep }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; font-style: italic; font-size: 14.5px; opacity: 0.75; text-align: center">
+              <div>Didn't get it? Check your spam folder, or <button type="button" sc-camel-on-click="{{ onResend }}" disabled="{{ sealBusy }}" style="background: transparent; border: 0; padding: 0; cursor: pointer; font: inherit; color: #b83739; text-decoration: underline">send a new code</button></div>
+              <div>Wrong email? <button type="button" sc-camel-on-click="{{ onWrongEmail }}" disabled="{{ sealBusy }}" style="background: transparent; border: 0; padding: 0; cursor: pointer; font: inherit; color: #b83739; text-decoration: underline">go back</button></div>
+            </div>
+            </sc-if>
           </form>
           <div style="height: 16px; background: #e4d9bb; border-top: 2px solid rgba(23,18,11,0.25)"></div>
         </div>
@@ -310,7 +379,7 @@
              which is the village as far as this site has one. Nothing was logged
              in to; the form still sends nothing. /yard's SIGN OUT is the way
              back here, and it says the same thing about what it does not do. -->
-        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">you're logged in · <a href="{{ nextHref }}" style="text-decoration: none">{{ nextWord }}</a></div>
+        <div style="font-family: VT323, monospace; font-size: 17px; letter-spacing: 2px; opacity: 0.65">{{ doneWord }} · <a href="{{ nextHref }}" style="text-decoration: none">{{ nextWord }}</a></div>
       </div>
     </sc-if>
   </div>
@@ -369,22 +438,39 @@
    localPath), or — with nowhere to go back to — your yard. "keep the gate
    unlatched for me" is real now too: unticked, the session ends with the
    browser. And "Google knows me" goes to Google, when this site has Google
-   set up, and says so in the margin when it has not. */
+   set up, and says so in the margin when it has not.
+
+   THE RESET (2026-09-27). "Forgot your password?" used to say there was no
+   such thing. Now it turns the paper (stage 'forgot'): the email alone, and
+   the key sends a code to it — the door's op 'reset', which says so in the
+   margin if the address has no account, or came in by Google or Discord and
+   has no password to forget. The code gone, the paper turns again (stage
+   'reset'): the code, a new password, and the new password again, with
+   "send a new code" and "go back" under the lock as /signup has them. The
+   key turned on those posts the three; the door keeps the new password and
+   signs nobody in, so the page logs in with it in the same breath — the same
+   post the log-in paper makes — and the lock opens on THAT answer. If the
+   password was changed and the log-in was not let through, the paper goes
+   back to 'login' and says both.
+
+   DISCORD (2026-09-27) is Google's button over again, to /auth/discord. */
 const NEXT = (function () { const v = new URLSearchParams(location.search).get('next') || ''; return v.length <= 512 && /^\/(?![\/\\])[^\s\\]*$/.test(v) ? v : '/yard/'; })();
 const NEXT_WORD = /^\/yard\//.test(NEXT) ? 'go to your yard →' : /^\/toem2\//.test(NEXT) ? 'back to TOEM 2 →' : NEXT === '/' ? 'back to the home page →' : 'back where you were →';
 const GATE = body => fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
   .then(r => r.json().catch(() => ({})).then(o => Object.assign({ http: r.status }, o)))
   .catch(() => ({ ok: false, http: 0, error: 'could not reach the server — are you online?' }));
-const GATE_SAYS = { 'no-store': 'accounts are not available on this site yet — please try again later' };
-let GATE_INFO = null;                          // what the door says about itself (is Google set up?), asked once
+const GATE_SAYS = { 'no-store': 'accounts are not available on this site yet — please try again later',
+                    'no-mail': 'password reset is not available right now — please try again later' };
+let GATE_INFO = null;                          // what the door says about itself (is Google set up? Discord? the post?), asked once
 const gateInfo = () => GATE_INFO || (GATE_INFO = fetch('/api/auth', { cache: 'no-store' }).then(r => r.json()).catch(() => ({})));
 class Component extends DCLogic {
   state = { pose: 'point', paperH: '0px', paperT: 'none', swung: false, focused: null, name: '', email: '', pw: '', pw2: '', showPw: false,
-    errs: {}, seal: 'idle', remember: true, asleep: false, narrow: false, jostle: false, hatSlip: false, done: false, live: '', rolledUp: false };
+    errs: {}, seal: 'idle', remember: true, asleep: false, narrow: false, jostle: false, hatSlip: false, done: false, live: '', rolledUp: false,
+    stage: 'login', code: '', sentTo: '', codeNote: '', changed: false };   // THE RESET: 'login', 'forgot' (the email, for a code), 'reset' (the code and a new password)
   refs = {};
   r = (k) => (el) => { this.refs[k] = el; };
   armInkRef = this.r('armInk'); armCoatRef = this.r('armCoat'); cuffRef = this.r('cuff'); cuffRef2 = this.r('cuff2');
-  scrollRef = this.r('scroll'); paperInnerRef = this.r('paperInner'); nameRef = this.r('name'); emailRef = this.r('email'); pwRef = this.r('pw'); pw2Ref = this.r('pw2');
+  scrollRef = this.r('scroll'); paperInnerRef = this.r('paperInner'); nameRef = this.r('name'); emailRef = this.r('email'); pwRef = this.r('pw'); pw2Ref = this.r('pw2'); codeRef = this.r('code');
   sealRef = this.r('seal'); keyRef = this.r('key'); gnomeRef = this.r('gnome'); shoulderRef = this.r('shoulder'); headRef = this.r('head'); pupilsRef = this.r('pupils');
   handRef = this.r('hand'); handInnerRef = this.r('handInner'); mirrorRef = this.r('mirror');
 
@@ -467,6 +553,8 @@ class Component extends DCLogic {
   onPw = (e) => this.setState({ pw: e.target.value }, this.typed);
   onPw2 = (e) => this.setState({ pw2: e.target.value }, this.typed);
   onFocusPw2 = () => this.focusField('pw2'); onBlurPw2 = () => this.blurField('pw2');
+  onCode = (e) => this.setState({ code: e.target.value }, this.typed);
+  onFocusCode = () => this.focusField('code'); onBlurCode = () => this.blurField('code');
   typed = () => { this.m.scribbleT = performance.now(); this.m.mode = 'caret'; if (this.state.focused) { this.m.touched = this.m.touched || {}; this.m.touched[this.state.focused] = true; } };
   focusField(f) { this.setState({ focused: f }); this.m.mode = 'caret'; this.m.focusMouse = { x: this.m.mx, y: this.m.my }; }
   onFocusName = () => this.focusField('name'); onFocusEmail = () => this.focusField('email'); onFocusPw = () => this.focusField('pw');
@@ -475,7 +563,9 @@ class Component extends DCLogic {
     const s = this.state;
     if (f === 'name') return s.name.trim() ? '' : 'please enter a username';
     if (f === 'email') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email) ? '' : 'please enter a valid email address';
-    if (f === 'pw') return s.pw ? '' : 'please enter your password';
+    if (f === 'pw') return s.stage === 'reset' ? (s.pw.length >= 8 ? '' : 'your password must be at least 8 characters') : (s.pw ? '' : 'please enter your password');
+    if (f === 'pw2') return s.pw2 === s.pw ? '' : 'the passwords do not match';
+    if (f === 'code') return /^\d{6}$/.test(s.code.replace(/\s/g, '')) ? '' : 'please enter the 6-digit code from the email';
     return '';
   }
   blurField(f) {
@@ -491,16 +581,42 @@ class Component extends DCLogic {
   togglePw = () => this.setState((s) => ({ showPw: !s.showPw }));
   onRemember = (e) => this.setState({ remember: e.target.checked });
 
-  // (THE GATE IS REAL) away to Google and back to NEXT through api/wall.js's sign-in — or, with no Google here, a note
-  onGoogle = () => {
+  // (THE GATE IS REAL) away to Google — or Discord — and back to NEXT through api/wall.js's sign-in; or, with none of it set up here, a note
+  vouch(which, Name) {
     if (this.state.seal !== 'idle' && this.state.seal !== 'cracked') return;
     gateInfo().then(g => {
-      if (g && g.google) { this.setState({ seal: 'cooling', errs: {}, live: 'Redirecting to Google' }); location.assign('/auth/google?next=' + encodeURIComponent(NEXT)); return; }
-      this.note('email', 'Google sign-in is not available yet — please log in with your email and password');
+      if (g && g[which]) { this.setState({ seal: 'cooling', errs: {}, live: 'Redirecting to ' + Name }); location.assign('/auth/' + which + '?next=' + encodeURIComponent(NEXT)); return; }
+      this.note('email', Name + ' sign-in is not available yet — please log in with your email and password');
+    });
+  }
+  onGoogle = () => this.vouch('google', 'Google');
+  onDiscord = () => this.vouch('discord', 'Discord');
+  note(f, msg) { this.setState({ errs: Object.assign({}, this.state.errs, { [f]: msg }), live: msg }); this.m.noteAt = f; this.m.noteT = performance.now(); }
+  // THE RESET: the paper turned — to the email alone, back to the log-in, or back from the code to the email
+  idle() { return this.state.seal === 'idle' || this.state.seal === 'cracked'; }
+  turn(stage, more) { this.m.touched = {}; this.setState(Object.assign({ stage, seal: 'idle', errs: {}, code: '', pw: '', pw2: '', codeNote: '', showPw: false }, more || {})); }
+  onForgot = (e) => {
+    e.preventDefault();
+    if (!this.idle()) return;
+    gateInfo().then(g => {
+      if (g && g.mail === false) { this.note('pw', GATE_SAYS['no-mail']); return; }
+      this.turn('forgot', { live: 'Reset your password' });
+      setTimeout(() => { if (this.refs.email) this.refs.email.focus(); }, 80);
     });
   };
-  note(f, msg) { this.setState({ errs: Object.assign({}, this.state.errs, { [f]: msg }), live: msg }); this.m.noteAt = f; this.m.noteT = performance.now(); }
-  onForgot = (e) => { e.preventDefault(); this.note('pw', 'password reset is not available yet — please try the password you usually use'); };
+  onLogin = () => { if (this.idle()) this.turn('login'); };
+  // (not `onBack`: that is the window coming back into focus, above — /signup's "go back" took its name, and coming back from reading the code threw the code step away)
+  onWrongEmail = () => { if (this.idle()) this.turn('forgot'); };
+  // …and another code, without the key: the same ask again, and the door posts a fresh one
+  onResend = () => {
+    if (!this.idle()) return;
+    this.setState({ seal: 'idle', errs: {}, codeNote: 'sending a new code…' });
+    GATE({ op: 'reset', email: this.state.sentTo }).then(out => {
+      if (out.ok && out.sent) { this.setState({ code: '', codeNote: 'a new code is on its way — check your email', live: 'A new code is on its way' }); return; }
+      const msg = GATE_SAYS[out.code] || out.error || 'something went wrong — please try again';
+      this.setState({ codeNote: '' }); this.note('code', msg);
+    });
+  };
 
   // ─── the lock ───
   onSealEnter = () => { this.m.sealHover = true; };
@@ -508,26 +624,43 @@ class Component extends DCLogic {
   onSubmit = (e) => {
     e.preventDefault();
     if (this.state.seal !== 'idle' && this.state.seal !== 'cracked') return;
-    const errs = {}; ['email', 'pw'].forEach((f) => { const er = this.validate(f); if (er) errs[f] = er; });
+    const stage = this.state.stage, forgot = stage === 'forgot', reset = stage === 'reset';   // THE RESET: which paper the key is turned on
+    const errs = {}; (forgot ? ['email'] : reset ? ['code', 'pw', 'pw2'] : ['email', 'pw']).forEach((f) => { const er = this.validate(f); if (er) errs[f] = er; });
     if (Object.keys(errs).length) { this.setState({ errs, live: Object.values(errs)[0] }); this.m.noteAt = Object.keys(errs)[0]; this.m.noteT = performance.now(); return; }
     // the door is asked now, and has answered by the time the key has turned (THE GATE IS REAL)
-    const asked = GATE({ op: 'login', email: this.state.email.trim(), password: this.state.pw, remember: this.state.remember });
+    const email = reset ? this.state.sentTo : this.state.email.trim(), pw = this.state.pw;
+    const login = () => GATE({ op: 'login', email, password: pw, remember: this.state.remember });
+    const asked = forgot ? GATE({ op: 'reset', email })
+      // THE RESET: the new password kept — and then the log-in with it, which is the answer the lock opens on
+      : reset ? GATE({ op: 'reset', email, code: this.state.code.replace(/\s/g, ''), password: pw }).then(out => (out.ok ? login().then(o => Object.assign(o, { changed: true })) : out))
+      : login();
     // the hand fetches the key, carries it to the lock, fits it, turns it
-    this.setState({ seal: 'reach', errs: {} });
+    this.setState({ seal: 'reach', errs: {}, codeNote: '' });
     setTimeout(() => this.setState({ seal: 'grip' }), 380);
     setTimeout(() => this.setState({ seal: 'carry' }), 520);
     setTimeout(() => this.setState({ seal: 'insert' }), 980);
     setTimeout(() => this.setState({ seal: 'turn', jostle: true, hatSlip: true }), 1180);
-    setTimeout(() => this.setState({ seal: 'cooling', jostle: false, live: 'Logging you in' }), 1500);
+    setTimeout(() => this.setState({ seal: 'cooling', jostle: false, live: forgot ? 'Sending you a code' : reset ? 'Changing your password' : 'Logging you in' }), 1500);
     Promise.all([asked, new Promise(r => setTimeout(r, 2200))]).then(([out]) => {
       if (!out.ok) {
-        const f = out.code === 'email' ? 'email' : 'pw', msg = GATE_SAYS[out.code] || out.error || 'could not log you in — please try again';
+        const said = GATE_SAYS[out.code] || out.error;
+        // the password WAS changed and only the log-in was turned away: back to the log-in paper, which says both
+        const f = out.changed ? 'pw' : forgot ? 'email' : reset ? ({ password: 'pw', email: 'code' }[out.code] || 'code') : (out.code === 'email' ? 'email' : 'pw');
+        const msg = out.changed ? 'your password has been changed, but we could not log you in — ' + (said || 'please try again')
+                  : said || (forgot ? 'could not send you a code — please try again' : reset ? 'could not change your password — please try again' : 'could not log you in — please try again');
         this.setState({ seal: 'eject' });
-        setTimeout(() => this.setState({ seal: 'cracked', errs: { [f]: msg }, live: msg }), 120);
-        this.m.wagT = performance.now();   // no, no, no — then the note
+        setTimeout(() => this.setState(Object.assign({ seal: 'cracked', errs: { [f]: msg }, live: msg }, out.changed ? { stage: 'login', email, code: '', pw2: '' } : {})), 120);
+        this.m.wagT = performance.now(); this.m.wagAt = f;   // no, no, no — then the note
         setTimeout(() => { this.m.noteAt = f; this.m.noteT = performance.now(); }, 1500);
+      } else if (out.sent) {
+        // THE RESET: the code has gone — the lock springs, and the paper turns to the code and the new password
+        this.setState({ seal: 'set', live: 'We emailed you a code' });
+        setTimeout(() => {
+          this.turn('reset', { sentTo: email });
+          setTimeout(() => { if (this.refs.code) this.refs.code.focus(); }, 80);
+        }, 900);
       } else {
-        this.setState({ seal: 'set', live: 'Welcome back to Knoll' });
+        this.setState({ seal: 'set', changed: !!out.changed, live: out.changed ? 'Your password has been changed, and you are logged in' : 'Welcome back to Knoll' });
         setTimeout(() => this.setState({ paperT: 'height 380ms cubic-bezier(.6,0,.8,1)', paperH: '0px', rolledUp: true, open: false }), 600);
         setTimeout(() => this.setState({ done: true }), 1050);
         setTimeout(() => location.assign(NEXT), 2300);   // and on through the gate; the card's link is there for a slow one
@@ -539,7 +672,7 @@ class Component extends DCLogic {
   caretPoint() {
     const f = this.state.focused; const el = this.refs[f]; const mir = this.refs.mirror; if (!el || !mir) return null;
     const v = el.value; const hid = (f === 'pw' || f === 'pw2') && !this.state.showPw;
-    mir.textContent = hid ? '\u2022'.repeat(v.length) : v; mir.style.letterSpacing = hid ? '3px' : '0';
+    mir.textContent = hid ? '\u2022'.repeat(v.length) : v; mir.style.letterSpacing = hid ? '3px' : f === 'code' ? '4px' : '0';
     const r = el.getBoundingClientRect(); const w = Math.min(mir.getBoundingClientRect().width, r.width - 4);
     return { x: r.left + w, y: r.bottom - 6 };
   }
@@ -554,7 +687,8 @@ class Component extends DCLogic {
       if (s.seal === 'insert' || s.seal === 'turn') return { x: lx, y: ly - 12, pose: 'grab', hand: true, onPaper: true };
       return { x: lx + 30, y: ly - 40, pose: s.seal === 'cooling' ? 'palm' : 'thumb', hand: true, onPaper: true };
     }
-    if (m.wagT && now - m.wagT < 1500 && this.refs.pw) { const r = this.refs.pw.getBoundingClientRect(); const sr0 = this.refs.scroll.getBoundingClientRect(); return { x: sr0.left - 44, y: r.top - 30, pose: 'point', hand: true, wag: true, k: (now - m.wagT) / 1500 }; }
+    const wagAt = this.refs[m.wagAt] || this.refs.pw || this.refs.email;   // beside the blank the no is about (THE RESET: not every paper has a password on it)
+    if (m.wagT && now - m.wagT < 1500 && wagAt) { const r = wagAt.getBoundingClientRect(); const sr0 = this.refs.scroll.getBoundingClientRect(); return { x: sr0.left - 44, y: r.top - 30, pose: 'point', hand: true, wag: true, k: (now - m.wagT) / 1500 }; }
     if (m.noteAt && now - m.noteT < 900) {
       const el = document.getElementById('e-' + m.noteAt); if (el) { const r = el.getBoundingClientRect(); return { x: r.left + 40 + (now - m.noteT) / 900 * Math.min(r.width - 60, 120), y: r.top + 14, pose: 'quill', hand: true, scribble: true }; }
     }
@@ -663,7 +797,16 @@ class Component extends DCLogic {
     const inLock = s.seal === 'insert' || turning;
     const carried = s.seal === 'carry' || s.seal === 'eject';
     const pwFocused = s.focused === 'pw' || s.focused === 'pw2';
+    const forgot = s.stage === 'forgot', reset = s.stage === 'reset';   // THE RESET: which paper is up
     return {
+      // THE RESET, and DISCORD
+      loginStep: !forgot && !reset, forgotStep: forgot, resetStep: reset, emailStep: !reset, pwStep: !forgot, vouchStep: !reset,
+      pwLabel: reset ? 'New password' : 'Password', pwAuto: reset ? 'new-password' : 'current-password',
+      sealAria: forgot ? 'Send code' : reset ? 'Reset password' : 'Log in',
+      code: s.code, codeRef: this.codeRef, onCode: this.onCode, onFocusCode: this.onFocusCode, onBlurCode: this.onBlurCode,
+      codeLine: s.focused === 'code' ? 1 : 0, codeErr: s.errs.code || false, codeHint: s.codeNote || '(we emailed a 6-digit code to ' + s.sentTo + ')',
+      onResend: this.onResend, onWrongEmail: this.onWrongEmail, onLogin: this.onLogin, onDiscord: this.onDiscord,
+      doneWord: s.changed ? 'password changed · you\'re logged in' : 'you\'re logged in',
       armInkRef: this.armInkRef, armCoatRef: this.armCoatRef, cuffRef: this.cuffRef, cuffRef2: this.cuffRef2, scrollRef: this.scrollRef, paperInnerRef: this.paperInnerRef,
       keyRef: this.keyRef, nameRef: this.nameRef, emailRef: this.emailRef, pwRef: this.pwRef, sealRef: this.sealRef, gnomeRef: this.gnomeRef, shoulderRef: this.shoulderRef,
       headRef: this.headRef, pupilsRef: this.pupilsRef, handRef: this.handRef, handInnerRef: this.handInnerRef, mirrorRef: this.mirrorRef,
@@ -686,13 +829,16 @@ class Component extends DCLogic {
       keyT: carried || inLock ? 'translate(-56px,6px) rotate(0deg)' : 'rotate(-12deg)', keyOp: inLock ? 0 : 1,
       keyInLock: inLock, keyTurn: turning ? 90 : 0,
       shackleT: s.seal === 'set' ? 'translateY(-10px) rotate(28deg)' : 'none',
-      sealLabel: s.seal === 'set' ? 'DONE' : (busy ? 'LOGGING IN…' : 'LOG IN'),
-      sealHint: s.seal === 'cracked' ? 'something went wrong — see the note by the field' : (busy ? 'logging you in…' : 'press the key to log in'),
+      sealLabel: s.seal === 'set' ? (forgot ? 'SENT' : 'DONE') : busy ? (forgot ? 'SENDING…' : reset ? 'CHANGING…' : 'LOGGING IN…') : forgot ? 'SEND CODE' : reset ? 'RESET' : 'LOG IN',
+      sealHint: s.seal === 'cracked' ? 'something went wrong — see the note by the field'
+              : s.seal === 'set' ? (forgot ? 'a code is on its way to your email' : reset ? 'your password has been changed' : 'you\'re logged in')
+              : busy ? (forgot ? 'sending you a code…' : reset ? 'changing your password…' : 'logging you in…')
+              : forgot ? 'press the key to get a code by email' : reset ? 'press the key to change your password' : 'press the key to log in',
       done: s.done, liveMsg: s.live, interlude: !!s.interlude,
       remember: s.remember, onRemember: this.onRemember, onForgot: this.onForgot,
       nextHref: NEXT, nextWord: NEXT_WORD, signupHref: '../signup/?next=' + encodeURIComponent(NEXT),
-      heading: 'Welcome back',
-      subhead: 'Log in to Knoll',
+      heading: forgot ? 'Reset your password' : reset ? 'Check your email' : 'Welcome back',
+      subhead: forgot ? 'We\'ll email you a code' : reset ? 'Enter the code and a new password' : 'Log in to Knoll',
       handOpacity: this.m.rest ? 0.92 : 1,
       armZ: busy ? 4 : 2,
       posePoint: p === 'point', poseQuill: p === 'quill', poseGrab: p === 'grab', poseThumb: p === 'thumb', posePalm: p === 'palm',

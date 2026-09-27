@@ -106,6 +106,7 @@
   // toolbar and all — no cover, no "go to the wall" — the address bar naming the page
   document.title = sp.title + ' · Knoll';
   $('sign').textContent = sp.title;
+  try { localStorage.setItem('knoll-' + sp.slug + ':paper', sp.palette); } catch (e) {}   // its paper, told ahead: the bench opens in it from the first paint (toem2/lab.css: A SPACE'S OWN PAPER)
   location.replace('/toem2/?page=' + encodeURIComponent(sp.slug) + (location.search.length > 1 ? '&' + location.search.slice(1) : ''));   // ?join=, ?live=1 ride along
 })();
 </script>

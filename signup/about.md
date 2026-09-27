@@ -357,3 +357,27 @@ twin's, next door.
 near (30, 30)** — that is the house bar's brand link now, and the click
 navigates away instead of blurring. The two probes that did were moved to
 y=300 when the bar went in.
+
+---
+
+## Discord, and a name that was taken twice (2026-09-27)
+
+**Continue with Discord** sits under Google's button and goes to
+`/auth/discord`. A new account Discord vouched for comes back as
+`?discord=1` to the same one-field form `?google=1` gets, which says
+*Signed in with Discord* under Discord's mark (`VIA`, `VIA_NAME`).
+`login/about.md` has the setup.
+
+**KNOLL-SIGNUP FIX, the code step.** "Wrong email? go back" was `onBack` —
+which is also the handler for the window coming back into focus. The second
+definition won, so the `focus` and `mouseenter` listeners ran "go back": a
+person who went to their mail to read the code and came back to the tab found
+the form again and the code step gone. It is `onWrongEmail` now.
+`probe-gate-google.js` §5 fires blur/focus on the code step and checks it
+stays. It was live from 2026-09-25 until this shipped, unseen only because no
+letter could be sent yet.
+
+**The letters are counted by the day** (`api/auth.js`: THE POSTMAN'S DAY): past
+`RATE.mail` the seal cracks with "we have sent all the emails we can for
+today". "Taken" is said after the network's hourly count now, and a code's
+guesses are counted before they are judged.

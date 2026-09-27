@@ -113,10 +113,12 @@ async function waitPort() {
     await page.click('button[role="radio"]:has-text("Tended")');
     await page.click('label:has-text("Notes") input');
     check('changes count up on the bar', /3 UNSAVED CHANGES/.test(await page.locator('text=UNSAVED CHANGE').textContent()));
+    await page.click('button[role="radio"]:has-text("Sticky pad")');   // the paper: the wall is drawn in it (3, below)
     await page.click('button:has-text("Save changes")');
     await page.waitForSelector('text=SAVED — IT IS LIVE.', { timeout: 20000 });
     sp = await (await fetch(BASE + '/api/wall?space=probe-hollow')).json();
     check('Save changes puts them live: the sign, the level, the switch', sp.space.title === 'Probe Hollow Two' && sp.space.chaos === 1 && sp.space.feats[2] === true, j({ title: sp.space.title, chaos: sp.space.chaos, notes: sp.space.feats[2] }));
+    check('…and the paper: Sticky pad at the door, and told ahead to the wall', sp.space.palette === 'sticky' && (await page.evaluate(() => localStorage.getItem('knoll-probe-hollow:paper'))) === 'sticky', sp.space.palette);
     check('…and the title follows the name', await page.title() === 'Probe Hollow Two settings · Knoll');
     await page.close();
     // a stranger who lands here looks and cannot save
@@ -135,6 +137,18 @@ async function waitPort() {
     await page.click('#toem-chaos');
     check('…and the maker\'s doors hang off the stamp: the rules, the settings, the dashboard', await page.locator('#toem-chaos-pop button:has-text("settings")').count() === 1 && await page.locator('#toem-chaos-pop button:has-text("dashboard")').count() === 1);
     check('a space with no inks of its own keeps the wheel', await page.locator('#dock-wheel').count() === 1 && await page.locator('[data-ink]').count() === 0);
+    // A SPACE'S OWN PAPER (2026-09-27, lab.css): the bench in the set its settings chose — until then every space opened on TOEM 2's
+    const paper = () => page.evaluate(() => { const c = (s, p) => getComputedStyle(document.querySelector(s))[p]; return [document.documentElement.dataset.paper || '', c('#bench', 'backgroundColor'), c('.lab-head', 'backgroundColor'), c('.lab-name', 'color'), c('#tool-dock', 'backgroundColor'), c('#toem-chaos', 'color')]; });
+    let look = await paper();
+    check('the bench is drawn in the paper its settings chose: the paper, the card, the accent, the dock', j(look) === j(['sticky', 'rgb(255, 226, 122)', 'rgb(255, 244, 194)', 'rgb(201, 59, 130)', 'rgb(38, 33, 42)', 'rgb(201, 59, 130)']), j(look));
+    await maker.ctx.request.post(BASE + '/api/wall', { data: { op: 'settings', page: 'probe-hollow', palette: 'yard' }, headers: { origin: BASE } });
+    await page.evaluate(() => Seed.readRules(true));
+    look = await paper();
+    check('…and a paper changed while the page is open is the next read of the rules away', j(look) === j(['yard', 'rgb(253, 247, 227)', 'rgb(255, 252, 240)', 'rgb(232, 72, 74)', 'rgb(23, 18, 11)', 'rgb(232, 72, 74)']), j(look));
+    await page.route(/\/api\/wall\?rules=1/, r => r.abort());            // the rules never land: what the bench wears now is what the head put on it
+    await page.reload();
+    await page.waitForFunction(() => window.Seed && Seed.base && Seed.base.rev > 0, null, { timeout: 30000 });
+    check('…and kept, so the next visit opens in it before the rules are read', await page.evaluate(() => document.documentElement.dataset.paper === 'yard' && !Seed.rules && getComputedStyle(document.getElementById('bench')).backgroundColor === 'rgb(253, 247, 227)'));
     await page.close();
     page = await maker.ctx.newPage();
     await page.goto(BASE + '/nowhere-at-all');
@@ -143,7 +157,7 @@ async function waitPort() {
     await page.close();
 
     // ── 4 · the wall: the stamp, a keeper's live edit, a stranger's proposal ──
-    const openWall = async (who, q) => { const p = await who.ctx.newPage(); await p.goto(BASE + '/toem2/?page=probe-hollow&live=1' + (q || '')); await p.waitForFunction(() => window.Seed && Seed.LIVE && Seed.base && Seed.base.rev > 0 && !!Seed.rules, null, { timeout: 30000 }); return p; };
+    const openWall = async (who, q) => { const p = await who.ctx.newPage(); await p.goto(BASE + '/toem2/?page=probe-hollow&live=1' + (q || '')); await p.waitForFunction(() => window.Seed && Seed.LIVE && Seed.base && Seed.base.rev > 0 && !!Seed.rules && document.querySelector('#toem-chaos') && !document.querySelector('#toem-chaos').hidden, null, { timeout: 30000 }); return p; };   // the stamp painted, not only the rules read: a council's and a wild page's rules wait on a second ask before they are worn
     const put = (p, n, x) => p.evaluate(([n, x]) => { Wall.store.update(st => { st.items.push({ n, k: 'd', f: 'tm-p01-slab-03', o: 0, x, y: 20, z: 100 }); }); return Seed.submit().then(() => document.getElementById('toem-save').textContent); }, [n, x]);
     page = await openWall(friend);
     check('the bench is the space\'s: its keys, its title, TENDED on the stamp', (await page.evaluate(() => document.documentElement.dataset.page)) === 'probe-hollow' && (await page.locator('#toem-chaos').textContent()) === 'TENDED · the keepers decide'
@@ -243,6 +257,7 @@ async function waitPort() {
     await page.goto(BASE + '/toem2/?live=1');
     await page.waitForFunction(() => window.Seed && Seed.rules, null, { timeout: 30000 });
     check('TOEM 2 wears TENDED, and keeps its own keys', (await page.locator('#toem-chaos').textContent()) === 'TENDED · the keepers decide' && (await page.evaluate(() => document.documentElement.dataset.page == null && !!localStorage.getItem('knoll-toem2:wall'))));
+    check('…and its own paper, and the level\'s own green on the stamp', await page.evaluate(() => document.documentElement.dataset.paper == null && getComputedStyle(document.getElementById('bench')).backgroundColor === 'rgb(239, 231, 237)' && getComputedStyle(document.getElementById('toem-chaos')).color === 'rgb(47, 143, 91)'));
     await page.close();
   } catch (e) {
     check('the probe ran to the end', false, String((e && e.stack) || e).split('\n').slice(0, 4).join(' | '));

@@ -1030,3 +1030,61 @@ Things this re-cut deliberately did not decide. None of them is broken.
    start it (fix 5) and end it (Escape), but stepping through it means tabbing
    the whole page. A focus trap is the right fix and a bigger change than
    anything in §9.
+
+---
+
+## The bell, opened — and three things it found (2026-09-27)
+
+**The bell lays a sheet over the page.** The card it used to let down is gone
+from the template; a press calls `KnollBell.open()` (`/bell.js`, a plain script
+at the site's root, like `account.js`). The sheet lists everything that
+concerns the gnome who is signed in under four headings — **Friends**, **Your
+page**, **Your spaces**, **Your edits** — with what is new marked, what waits
+on you first, and the things that can be done about a line on the line: yes
+and no to an ask, and the way to wherever it leads. Escape, the ×, or a press
+beside the sheet puts it away and the focus goes back to the bell.
+
+**Every door rings it now** (`api/wall.js`: THE STORE'S MAP lists the kinds):
+an edit waiting at a space you keep, a thread begun there, a photo hung there,
+a change proposed to your yard or your name, and — for what *you* sent — an
+edit put up or turned back, a change of yours taken or left, a reply to your
+thread, a heart on your photo. The ones that happen over and over are said
+once a place while unread (`tellOnce`).
+
+**The fence is not the door's.** Likes and notes at the fence are kept by the
+Apps Script, where nobody has an account, so no door can ring for them. The
+page hands the sheet the fence as it read it, and what is new is told by two
+fields the friends' door keeps for that: `noted` (when the bell was last
+opened) and `hearts` (how many likes the fence had then). The number on the
+bell counts them too. **Nothing is asked of the script from localhost**, so
+there the fence's part of the sheet is empty; `lab2/perf/probe-bell.js` hands
+it a fence by `window.yard.setState`.
+
+**A pending ask is drawn from `asks`, not from its note.** The bell keeps fifty
+notes; an ask whose note had fallen off the end had no button left to answer
+it with.
+
+**Three things found on the way, each live until this ships:**
+
+1. **A look wrote over the yard.** The dashboard's past looks are frames of
+   `?embed=1&at=<t>`, and a frame shares this browser's storage with the yard.
+   `tools.js`'s stores wrote the look's version over `knoll-yard:wall` — it was
+   only never marked applied — so the yard opened next on whichever look had
+   loaded last. A look's stores are in memory now (`PEEK`). The probe that was
+   meant to guard it read `knoll-lab2:wall`, a key no yard writes.
+2. **A visitor was handed the owner's page.** `/YardView` put the pretty
+   address (`/yard/<name>`) in the bar as soon as the wall said whose yard it
+   was; `support.js` then read "this page" again by that address — which is
+   `yard/index.html` — and took its template. Whenever the wall answered before
+   the runtime was up, a visitor got *save yard* and no *Propose edits*. The
+   address waits for `#dc-root` now. `probe-yard-url.js` checks what is DRAWN.
+3. **Propose edits sent nothing.** It does now (`api/hill.js`: op `propose`);
+   `dashboard/about.md` has the screen the owner decides on.
+
+**A look ahead.** `?embed=1&with=<proposal>,<proposal>` is the yard as it would
+be with those changes taken — the door makes it, for the owner alone — drawn
+the way a look back is, and kept the same way: not at all.
+
+**Checks.** `node lab2/perf/probe-bell.js` (60, headless Chrome),
+`node lab2/perf/verify-bell.js` (37, the doors), `node lab2/perf/probe-looks.js`
+(12), `node lab2/perf/probe-yard-url.js` (17).

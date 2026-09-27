@@ -40,6 +40,11 @@ const stroke = i => ({ k: 's', d: 'M' + (40 + i * 60) + ' 40 L' + (400 + i * 60)
 
     const p = await ctx.newPage();
     const errs = []; p.on('pageerror', e => errs.push(String(e)));
+    // the yard itself first, so this browser HAS a copy of it to lose (knoll-yard:wall — the key the yard's store writes)
+    const keptWall = () => p.evaluate(() => { try { return JSON.parse(localStorage.getItem('knoll-yard:wall') || 'null'); } catch (e) { return null; } });
+    await p.goto(BASE + '/yard/?embed=1');
+    await p.waitForFunction(() => { try { return (JSON.parse(localStorage.getItem('knoll-yard:wall')) || {}).items.length === 2; } catch (e) { return false; } }, null, { timeout: 25000 }).catch(() => {});
+    ok(((await keptWall()) || { items: [] }).items.length === 2, 'the yard, opened, keeps the newest save in this browser', j(await keptWall()).slice(0, 200));
     await p.goto(BASE + '/dashboard/');
     await p.waitForSelector('#dc-root iframe[title^="your page as saved"]', { state: 'attached', timeout: 25000 });
     const prints = p.locator('#dc-root iframe[title^="your page as saved"]');
@@ -51,10 +56,14 @@ const stroke = i => ({ k: 's', d: 'M' + (40 + i * 60) + ' 40 L' + (400 + i * 60)
     const drawn = async t => { const f = frameOf(t); if (!f) return -1; await f.waitForFunction(() => window.Wall && document.querySelectorAll('#bench-world svg.wall-ink .wall-item').length > 0, null, { timeout: 25000 }).catch(() => {}); return f.evaluate(() => document.querySelectorAll('#bench-world svg.wall-ink .wall-item').length); };
     ok(await drawn(t2) === 2 && await drawn(t1) === 1, 'the frames draw that version\'s pieces: two strokes in the newest, one in the older', j([await drawn(t2), await drawn(t1)]));
     ok(await frameOf(t1).evaluate(() => window.LAB_LOOK === true && document.documentElement.classList.contains('yard-embed')), 'a look knows it is one: embedded, and keeping nothing');
-    // the live page's kept wall (the map's frame applied the newest save) is untouched by the looks
-    const kept = await p.evaluate(() => { try { return JSON.parse(localStorage.getItem('knoll-lab2:wall') || 'null'); } catch (e) { return null; } });
-    ok(!kept || (Array.isArray(kept.items) && kept.items.length === 2), 'what this browser keeps of the yard is the newest save, not a look\'s', j(kept && kept.items && kept.items.length));
-    ok((await p.evaluate(() => localStorage.getItem('knoll-yard:applied'))) !== String(t1), '…and the older version was never marked applied');
+    /* the yard's kept wall is untouched by the looks. Until 2026-09-27 this read knoll-lab2:wall — a key no yard
+       writes, so it passed on nothing — while every look wrote its version over knoll-yard:wall (yard/tools.js:
+       A LOOK'S STORES ARE IN MEMORY). It reads the yard's own key now, and wants the newest save still in it. */
+    await p.waitForTimeout(1500);
+    const kept = await keptWall();
+    ok(!!kept && Array.isArray(kept.items) && kept.items.length === 2, 'what this browser keeps of the yard is still the newest save, not a look\'s', j(kept && kept.items && kept.items.length));
+    ok((await p.evaluate(() => localStorage.getItem('knoll-yard:applied'))) === String(t2), '…marked as the save it is, and the older version never');
+    ok(!(await p.evaluate(() => localStorage.getItem('knoll-yard:touched'))), '…and no look has marked the yard as having unsaved work');
     await p.locator('#dc-root [role="button"]:has(iframe[title^="your page as saved"])').first().click(); await p.waitForTimeout(600);
     const big = p.locator('#dc-root [role="dialog"][aria-label="snapshot"] iframe');
     ok(await big.count() === 1 && (await big.getAttribute('src')) === '../yard/?embed=1&at=' + t2 && (await big.evaluate(e => e.parentElement.getBoundingClientRect().height)) > 500, 'a print opens the peek: the same save, framed larger, the whole page');

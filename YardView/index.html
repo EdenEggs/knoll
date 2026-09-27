@@ -364,9 +364,11 @@
       <a href="../yard/">yard</a>
       <a href="../dashboard/">dashboard</a>
     </nav>
-    <!-- YARD VIEW: the visitor's save. There is no door for a proposal yet, so
-         a press says so on the pill's face instead of pretending to send. -->
-    <button class="lab-save" sc-camel-on-click="{{ propose }}" title="send your edits to this yard's owner — not wired up yet" style="margin-left:auto"><span aria-live="polite">{{ proposeWord }}</span></button>
+    <!-- YARD VIEW: the visitor's save. Since 2026-09-27 it SENDS (api/hill.js: op propose):
+         what you changed on this yard goes to its owner — it rings their bell, and waits on
+         the screen where they take or leave it (dashboard/edits/). Nothing of theirs
+         changes until they do. The pill's face says how it went. -->
+    <button class="lab-save" sc-camel-on-click="{{ propose }}" title="send your edits to this yard's owner — they decide whether to take them" style="margin-left:auto"><span aria-live="polite">{{ proposeWord }}</span></button>
   </header>
 
   <div class="yard-col" style="max-width:1200px; margin:0 auto">
@@ -1394,11 +1396,17 @@ class Component extends DCLogic {
         { initial: 'O', name: 'Opal Fen', when: '2 MONTHS AGO', bg: C.YEL, fg: C.INK, rot: rot('-1.5deg') }
       ],
       edits: this.editList(C),
-      /* YARD VIEW: add friend and Propose edits. Neither has anywhere to send
-         to yet, so add friend is this page's own toggle and Propose edits
-         says it is not wired up; neither claims to have sent anything. The pop
+      /* YARD VIEW: add friend and Propose edits. Add friend has nowhere to send
+         to yet, so it is this page's own toggle and claims nothing. The pop
          is the Web Animations API rather than a class, so a re-render cannot
-         cut it short, and calm() keeps it still where motion is turned off. */
+         cut it short, and calm() keeps it still where motion is turned off.
+
+         PROPOSE EDITS SENDS (2026-09-27). The yard as you have changed it goes to
+         its owner through api/hill.js (op propose) with a line of why, if you
+         give one; the door works out what you changed, rings their bell, and
+         keeps it for them to take or leave. Signed out, the gate first — your
+         edits are in this browser and are still here when you come back. The
+         same edits are not sent twice. */
       friended: !!this.state.friended,
       friendWord: this.state.friended ? 'friends \u2713' : 'add friend',
       friendBg: this.state.friended ? '#4e8c3f' : '#17120b',
@@ -1413,9 +1421,27 @@ class Component extends DCLogic {
       },
       proposeWord: this.state.proposeWord || 'Propose edits',
       propose: () => {
-        clearTimeout(this._propose);
-        this.setState({ proposeWord: window.YardTools && YardTools.dirty() ? 'not wired up yet' : 'no edits yet' });
-        this._propose = setTimeout(() => this.setState({ proposeWord: null }), 2400);
+        const say = (word, ms) => { clearTimeout(this._propose); this.setState({ proposeWord: word }); this._propose = setTimeout(() => this.setState({ proposeWord: null }), ms || 2400); };
+        if (this._proposing) return;
+        if (!(window.YardTools && YardTools.dirty())) return say('no edits yet');
+        const hill = window.YARD_HILL || '', me = (/(?:^|;\s*)knoll_in=([0-9a-f]{16})(?:;|$)/.exec(document.cookie) || [])[1];
+        if (!/^u-[0-9a-f]{16}$/.test(hill)) return say('this yard takes no edits');
+        if (!me) { location.assign('/login/?next=' + encodeURIComponent(location.pathname + location.search)); return; }
+        if (hill === 'u-' + me) return say('it is your own yard — edit it at /yard', 4000);
+        const doc = YardTools.collect(), sent = JSON.stringify(doc);
+        if (sent === this._sent) return say('already sent ✓', 3000);
+        const why = window.prompt('A line for ' + (settings.displayName || 'the owner') + ' about what you changed (you can leave it empty):', '');
+        if (why === null) return;                 // cancelled: nothing is sent
+        this._proposing = true; say('sending…', 30000);
+        fetch('/api/hill', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ op: 'propose', hill, doc, why: String(why).slice(0, 140) }) })
+          .then(r => r.json().catch(() => ({})).then(v => ({ status: r.status, v })))
+          .catch(() => ({ status: 0, v: { error: 'the door did not answer — are you online?' } }))
+          .then(({ status, v }) => {
+            this._proposing = false;
+            if (status === 401) { location.assign('/login/?next=' + encodeURIComponent(location.pathname + location.search)); return; }
+            if (v && v.ok) { this._sent = sent; say('sent ✓ — it is in their bell', 5000); }
+            else say('not sent: ' + ((v && v.error) || 'the door answered ' + status), 8000);
+          });
       },
       drawerOpen,
       openDrawer: () => this.setState({ drawerOpen: true, signoutNote: false }),
@@ -1456,9 +1482,20 @@ class Component extends DCLogic {
        comes back here through yard/index.html. Your own yard seen as a visitor keeps this
        page's address, since /yard/<you> is the page you edit. */
     var mine = (/(?:^|;\s*)knoll_in=([0-9a-f]{16})(?:;|$)/.exec(document.cookie) || [])[1];
+    /* …AND NOT BEFORE THE RUNTIME HAS READ THIS PAGE (2026-09-27). support.js reads the page
+       again by its address as it boots (boot: fetch(location.href)) and takes its template
+       from what comes back. With the pretty address already in the bar that was /yard/<name>
+       — yard/index.html, the OWNER's page — so whenever the wall answered before the runtime
+       was up, a visitor was handed the owner's template: save yard where Propose edits should
+       be, and no add friend. The address waits for #dc-root, which the runtime makes only
+       after it has asked. */
     if (u && /[?&]u=/.test(location.search) && u !== mine) fetch('/api/wall?who=' + u, { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (w) {
-      var t = w && w.ok && w.who && /^(.+)#(\d+)$/.exec(w.who.tag || '');
-      if (t) history.replaceState(null, '', '/yard/' + encodeURIComponent(t[1]) + (+t[2] === 1 ? '' : '~' + t[2]));
+      var t = w && w.ok && w.who && /^(.+)#(\d+)$/.exec(w.who.tag || ''), tries = 0;
+      if (!t) return;
+      (function say() {
+        if (!document.getElementById('dc-root')) { if (++tries < 400) setTimeout(say, 50); return; }
+        history.replaceState(null, '', '/yard/' + encodeURIComponent(t[1]) + (+t[2] === 1 ? '' : '~' + t[2]));
+      })();
     }).catch(function () {});
     /* ONE YARD AT A TIME. Whoever's yard this is, it is kept under
        knoll-yardview:, so opening a different one first clears what the last

@@ -172,9 +172,11 @@ async function post(req, res) {
       }
       const x = { id: newId(), by: me.id, at: Date.now(), text: ch === 'chat' ? text(body.text, CAP.line) : prose(body.text, CAP.body) };
       if (!x.text) throw bad(400, 'text', 'say something');
+      let under = null;                       // the thread a reply is under
       if (ch !== 'chat' && tab.kind === 'threads' && body.re != null && body.re !== '') {
         const re = String(body.re), list = (await db('LRANGE', key, 0, -1)).map(one);
-        if (!list.some(t => t && t.id === re && !t.re)) throw bad(404, 're', 'no such thread');
+        under = list.find(t => t && t.id === re && !t.re);
+        if (!under) throw bad(404, 're', 'no such thread');
         x.re = re;
       } else if (ch !== 'chat') {
         x.title = text(body.title, CAP.title);
@@ -182,6 +184,14 @@ async function post(req, res) {
       }
       await dbm([['LPUSH', key, JSON.stringify(x)], ['LTRIM', key, 0, keepOf(tabs, ch) - 1]]);
       if (ch === 'chat' && chat.wait) await db('SET', waitKey, String(x.at), 'EX', chat.wait);
+      /* THE BELL (2026-09-27): a thread begun at a space rings its keepers' bells, and a reply the
+         bell of whoever began the thread — once a place while unread (api/wall.js: tellOnce). The
+         chat rings nobody's, and neither do the keepers' own tabs: those are theirs to write. */
+      if (ch !== 'chat' && tab.kind === 'threads') {
+        const rules = await rulesOf({ slug }, null);
+        if (under) { if (USER_RE.test(under.by) && under.by !== me.id) await W.tellOnce(under.by, 'reply', me.id, { slug, title: rules.title, what: under.title }); }
+        else await W.tellKeepers(rules, me.id, 'thread', { what: x.title });
+      }
       return answer(res, 200, { ok: true, post: Object.assign({ tag: me.tag }, x) });
     }
     case 'drop': {

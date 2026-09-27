@@ -507,7 +507,7 @@ try { hillApi = require('./api/hill.js'); } catch (e) { console.log('  ! api/hil
    Redis in the environment the module keeps everything in toem2/wall-db.json
    (ignored), so the owner reviews edits on localhost with nothing to set up.
    Its own header has the rest. */
-const WALL_API = '/api/wall', WALL_AUTH = /^\/auth\/google(\/callback)?$/;
+const WALL_API = '/api/wall', WALL_AUTH = /^\/auth\/(google|discord)(\/callback)?$/;
 let wallApi = null;
 try { wallApi = require('./api/wall.js'); } catch (e) { console.log('  ! api/wall.js did not load: ' + e.message); }
 

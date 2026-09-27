@@ -6,7 +6,11 @@
    callback this browser never started, and an address that has a password —
    and THE CODE (2026-09-24): the seal sends a code, the page turns to the
    code step, a wrong code, a new code, "go back", and the right code making
-   the account and sending it on to ?next=.
+   the account and sending it on to ?next= — and since 2026-09-27 THE RESET
+   ("Forgot your password?" to the email paper, who it will not send to, the
+   code paper, a wrong code, a new code, "go back", and the right code with a
+   new password changing it and logging in) and DISCORD, played here the way
+   Google is.
 
    Google is played by this file: it starts serve.js on its own port with
    itself as a preload (node -r), which points the store at a temp folder
@@ -36,8 +40,9 @@ if (require.main !== module) {
   process.env.WALL_DB = path.join(store, 'wall-db.json');
   process.env.HILL_ROOT = store;
   process.env.GOOGLE_CLIENT_ID = 'cid'; process.env.GOOGLE_CLIENT_SECRET = 'secret';
+  process.env.DISCORD_CLIENT_ID = 'did'; process.env.DISCORD_CLIENT_SECRET = 'dsecret';
   process.env.NO_BROWSER = '1';
-  ['KV_REST_API_URL', 'KV_REST_API_TOKEN', 'UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN', 'VERCEL', 'BLOB_READ_WRITE_TOKEN', 'SITE_ORIGIN', 'ADMIN_EMAILS'].forEach(k => delete process.env[k]);
+  ['KV_REST_API_URL', 'KV_REST_API_TOKEN', 'UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN', 'VERCEL', 'BLOB_READ_WRITE_TOKEN', 'SITE_ORIGIN', 'ADMIN_EMAILS', 'RESEND_API_KEY'].forEach(k => delete process.env[k]);
   const readOr = (name, dflt) => { try { return fs.readFileSync(path.join(store, name), 'utf8').trim() || dflt; } catch (e) { return dflt; } };
   const realFetch = global.fetch;
   global.fetch = async (url, opts) => {
@@ -45,6 +50,9 @@ if (require.main !== module) {
     if (u.startsWith('https://oauth2.googleapis.com/tokeninfo'))   // before /token, which is a prefix of it
       return { json: async () => ({ aud: 'cid', email_verified: 'true', email: readOr('vouch.txt', 'tester@example.com'), iss: 'https://accounts.google.com' }) };
     if (u.startsWith('https://oauth2.googleapis.com/token')) return { json: async () => ({ id_token: 'a.b.c' }) };
+    // Discord, the same way: a token, and whose it is — vouch.txt's address, confirmed unless discord-verified.txt says no
+    if (u === 'https://discord.com/api/oauth2/token') return { json: async () => ({ access_token: 'dtok', token_type: 'Bearer' }) };
+    if (u === 'https://discord.com/api/v10/users/@me') return { json: async () => ({ id: '1', username: 'tester', email: readOr('vouch.txt', 'tester@example.com'), verified: readOr('discord-verified.txt', 'yes') === 'yes' }) };
     return realFetch(url, opts);
   };
   const PORT = process.argv[2] || 4321, mk = http.createServer;
@@ -62,9 +70,9 @@ if (require.main !== module) {
         const q = new URL(req.url, 'http://x').searchParams, mode = readOr('google-mode.txt', 'code');
         res.statusCode = 302; res.setHeader('location', q.get('redirect_uri') + '?state=' + encodeURIComponent(q.get('state')) + (mode === 'code' ? '&code=abcd' : '&error=' + mode)); res.end(); return;
       }
-      if (/^\/auth\/google(\?|$)/.test(req.url)) {
+      if (/^\/auth\/(google|discord)(\?|$)/.test(req.url)) {   // Discord's sign-in page is the same stand-in: it only ever bounces back to redirect_uri
         const sh = res.setHeader.bind(res);
-        res.setHeader = (k, v) => sh(k, String(k).toLowerCase() === 'location' ? String(v).replace('https://accounts.google.com/o/oauth2/v2/auth', 'http://localhost:' + PORT + '/fake-google') : v);
+        res.setHeader = (k, v) => sh(k, String(k).toLowerCase() === 'location' ? String(v).replace(/^https:\/\/(accounts\.google\.com\/o\/oauth2\/v2\/auth|discord\.com\/oauth2\/authorize)/, 'http://localhost:' + PORT + '/fake-google') : v);
       }
       h(req, res);
     };
@@ -107,7 +115,7 @@ const whoami = p => p.evaluate(() => fetch('/api/auth', { cache: 'no-store' }).t
     await p.goto(BASE + '/signup/'); await p.waitForTimeout(2500);
     let t = await text();
     for (const s of ['Create your account', 'Sign up for Knoll', 'Username', 'Email', 'Password', 'Confirm password', 'SIGN UP', 'press the seal to create your account',
-                     'Continue with Google', 'no password needed', 'Already have an account?', 'By signing up, you agree to our Rules and Terms of Service.']) ok(t.includes(s), 'signup shows "' + s + '"');
+                     'Continue with Google', 'Continue with Discord', 'no password needed', 'Already have an account?', 'By signing up, you agree to our Rules and Terms of Service.']) ok(t.includes(s), 'signup shows "' + s + '"');
     for (const s of ['Let it be known', 'Hear ye', 'secret word', 'gnome', 'petition', 'vouch', 'OR, BY OTHER POST', 'Rule Book', 'Residency']) ok(!t.includes(s), 'signup no longer shows "' + s + '"');
     let labels = await labelsOf(['f-name', 'f-email', 'f-pw', 'f-pw2']);
     ok(JSON.stringify(labels) === JSON.stringify(['Username', 'Email', 'Password', 'Confirm password']), 'each sign-up input has exactly one label, the plain one', JSON.stringify(labels));
@@ -136,14 +144,13 @@ const whoami = p => p.evaluate(() => fetch('/api/auth', { cache: 'no-store' }).t
     await p.goto(BASE + '/login/?next=%2Ftoem2%2F'); await p.waitForTimeout(2500);
     t = await text();
     for (const s of ['Welcome back', 'Log in to Knoll', 'Email', 'Password', 'Forgot your password?', 'Remember me', 'LOG IN', 'press the key to log in',
-                     'Continue with Google', 'no password needed', "Don't have an account?", 'By logging in, you agree to our Terms of Service']) ok(t.includes(s), 'login shows "' + s + '"');
+                     'Continue with Google', 'Continue with Discord', 'no password needed', "Don't have an account?", 'By logging in, you agree to our Terms of Service']) ok(t.includes(s), 'login shows "' + s + '"');
     for (const s of ['Halt', 'Hear ye', 'secret word', 'gatekeeper', 'unlatched', 'Petition', 'OR, BY OTHER POST', 'Residency']) ok(!t.includes(s), 'login no longer shows "' + s + '"');
     labels = await labelsOf(['f-email', 'f-pw']);
     ok(JSON.stringify(labels) === JSON.stringify(['Email', 'Password']), 'each log-in input has exactly one label, the plain one', JSON.stringify(labels));
     await p.click('button[aria-label="Log in"]'); await p.waitForTimeout(500);
     t = await text(); ok(t.includes('please enter a valid email address'), 'an empty log-in complains in plain words', t.slice(0, 300));
-    await p.click('text=Forgot your password?'); await p.waitForTimeout(500);
-    t = await text(); ok(t.includes('password reset is not available yet'), 'the forgot-password link answers in plain words');
+    ok(await p.evaluate(() => document.getElementById('f-pw').autocomplete === 'current-password' && !document.getElementById('f-code') && !document.getElementById('f-pw2')), 'the log-in paper asks for the password you have, and nothing of the reset\'s');
     await p.click('text=Continue with Google');
     await p.waitForURL(/\/toem2\//, { timeout: 20000 });
     me = await whoami(p);
@@ -184,6 +191,11 @@ const whoami = p => p.evaluate(() => fetch('/api/auth', { cache: 'no-store' }).t
     ok(await p.evaluate(() => document.activeElement && document.activeElement.id === 'f-code'), 'the code field has the focus');
     me = await whoami(p); ok(!me.me, 'no account yet — the code has not come back', JSON.stringify(me));
     labels = await labelsOf(['f-code']); ok(labels[0] === 'Code', 'the code input has its one label', JSON.stringify(labels));
+    // off to the mail to read the code, and back to the tab: the code step is still there (until 2026-09-27 "go back" had the focus handler's name)
+    const away = () => p.evaluate(() => { window.dispatchEvent(new Event('blur')); document.dispatchEvent(new Event('mouseleave')); window.dispatchEvent(new Event('focus')); document.dispatchEvent(new Event('mouseenter')); });
+    await p.fill('#f-code', '12'); await away(); await p.waitForTimeout(400);
+    ok(await p.evaluate(() => { const c = document.getElementById('f-code'); return !!c && c.value === '12' && !document.getElementById('f-name'); }), 'going to read the mail and coming back leaves the code step, and what was typed, where they were');
+    await p.fill('#f-code', '');
     const c1 = await gnome.code(ctx, BASE, 'coder@example.com');
     ok(/^\d{6}$/.test(c1), 'the door posted a six-figure code to the address, lower-cased', c1);
     await p.click('button[aria-label="Sign up"]'); await p.waitForTimeout(400);
@@ -207,6 +219,117 @@ const whoami = p => p.evaluate(() => fetch('/api/auth', { cache: 'no-store' }).t
     await p.waitForURL(/\/toem2\//, { timeout: 20000 });
     me = await whoami(p);
     ok(me.me && me.me.name === 'Coder', '…and the account is made and sent on to ?next=, signed in', JSON.stringify(me));
+
+    // ── 6 · THE RESET: forgot → a code by email → the code and a new password → logged in ──
+    const KEY = 'form button[type="submit"]', aria = () => p.evaluate(() => document.querySelector('form button[type="submit"]').getAttribute('aria-label'));
+    const ids = () => p.evaluate(() => ['f-email', 'f-code', 'f-pw', 'f-pw2'].filter(id => document.getElementById(id)).join());
+    await post(p, { op: 'logout' });
+    await p.goto(BASE + '/login/?next=%2Ftoem2%2F'); await p.waitForTimeout(2500);
+    await p.fill('#f-pw', 'a-password-i-forgot');
+    await p.click('text=Forgot your password?'); await p.waitForTimeout(600);
+    t = await text();
+    for (const s of ['Reset your password', 'We\'ll email you a code', 'Email', 'SEND CODE', 'press the key to get a code by email', 'Remembered it?', 'Back to log in', 'Continue with Google', 'Continue with Discord'])
+      ok(t.includes(s), 'the forgot paper shows "' + s + '"', t.slice(0, 500));
+    for (const s of ['Welcome back', 'Remember me', 'Forgot your password?', 'Don\'t have an account?', 'password reset is not available']) ok(!t.includes(s), 'the forgot paper does not show "' + s + '"');
+    ok(await ids() === 'f-email' && await aria() === 'Send code', 'it is the email alone, and the key is named for what it does', await ids() + ' · ' + await aria());
+    ok(await p.evaluate(() => document.activeElement && document.activeElement.id === 'f-email'), 'the email has the focus');
+    await p.click(KEY); await p.waitForTimeout(500);
+    t = await text(); ok(t.includes('please enter a valid email address'), 'the key with no email asks for one, plainly');
+    await p.fill('#f-email', 'nobody-here@example.com'); await p.click(KEY);
+    ok(await says('we could not find an account with that email'), 'an address with no account is told so');
+    await p.fill('#f-email', 'tester@example.com'); await p.click(KEY);
+    ok(await says('signed up with Google or Discord'), 'an address that came in by Google is sent to that button — which is on this paper');
+    await p.click('text=Back to log in'); await p.waitForTimeout(500);
+    t = await text();
+    ok(t.includes('Welcome back') && t.includes('Remember me') && t.includes('Forgot your password?') && !t.includes('Remembered it?'), '"Back to log in" returns to the log-in paper');
+    ok(await p.evaluate(() => document.getElementById('f-email').value === 'tester@example.com' && document.getElementById('f-pw').value === ''), '…the email as it was left, the forgotten password gone');
+    await p.click('text=Forgot your password?'); await p.waitForTimeout(600);
+    await p.fill('#f-email', 'Pw@Example.com'); await p.click(KEY);
+    ok(await says('SENT'), 'the lock says SENT once the code has gone');
+    ok(await p.waitForSelector('#f-code', { timeout: 8000 }).then(() => true, () => false), 'the paper turns to the code and the new password');
+    await p.waitForTimeout(400); t = await text();
+    for (const s of ['Check your email', 'Enter the code and a new password', 'Code', 'New password', 'Confirm new password', 'we emailed a 6-digit code to Pw@Example.com', '(at least 8 characters)',
+                     'RESET', 'press the key to change your password', 'send a new code', 'Wrong email?']) ok(t.includes(s), 'the reset paper shows "' + s + '"', t.slice(0, 600));
+    for (const s of ['Continue with Google', 'Continue with Discord', 'Remember me', 'Forgot your password?', 'Back to log in']) ok(!t.includes(s), 'the reset paper does not show "' + s + '"');
+    ok(await ids() === 'f-code,f-pw,f-pw2' && await aria() === 'Reset password', 'it is the code and the two passwords, and the key is named for what it does', await ids() + ' · ' + await aria());
+    labels = await labelsOf(['f-code', 'f-pw', 'f-pw2']);
+    ok(JSON.stringify(labels) === JSON.stringify(['Code', 'New password', 'Confirm new password']), 'each reset input has exactly one label, the plain one', JSON.stringify(labels));
+    ok(await p.evaluate(() => document.getElementById('f-pw').autocomplete === 'new-password' && document.getElementById('f-pw2').autocomplete === 'new-password' && document.getElementById('f-code').autocomplete === 'one-time-code'
+                              && document.getElementById('f-pw').value === '' && document.activeElement.id === 'f-code'), 'the blanks say what they are to the browser, start empty, and the code has the focus');
+    me = await whoami(p); ok(!me.me, 'nobody is logged in by asking');
+    await p.fill('#f-code', '12'); await away(); await p.waitForTimeout(400);
+    ok(await ids() === 'f-code,f-pw,f-pw2' && await p.evaluate(() => document.getElementById('f-code').value === '12'), 'going to read the mail and coming back leaves the reset paper, and what was typed, where they were');
+    await p.fill('#f-code', '');
+    const r1c = await gnome.code(ctx, BASE, 'pw@example.com');
+    ok(/^\d{6}$/.test(r1c), 'the door posted a six-figure code to the address, lower-cased', r1c);
+    await p.click(KEY); await p.waitForTimeout(400);
+    t = await text(); ok(t.includes('please enter the 6-digit code from the email') && t.includes('your password must be at least 8 characters'), 'the key on an empty paper asks for the code and a password, plainly');
+    await p.fill('#f-code', r1c); await p.fill('#f-pw', 'brand-new-1'); await p.fill('#f-pw2', 'brand-new-2'); await p.click(KEY); await p.waitForTimeout(400);
+    t = await text(); ok(t.includes('the passwords do not match'), 'two new passwords that differ are sent back before the door is asked');
+    await p.fill('#f-pw2', 'brand-new-1'); await p.fill('#f-code', r1c === '000000' ? '111111' : '000000'); await p.click(KEY);
+    ok(await says('that code is not right'), 'a wrong code jams the lock and says so');
+    let r3 = await post(p, { op: 'login', email: 'pw@example.com', password: 'toadstool1' });
+    ok(r3.ok === true, '…and the old password still opens the account', JSON.stringify(r3));
+    await post(p, { op: 'logout' });
+    await p.click('text=send a new code');
+    ok(await says('a new code is on its way'), '"send a new code" says a new one is coming');
+    const r2c = await gnome.code(ctx, BASE, 'pw@example.com');
+    if (r1c !== r2c) { await p.fill('#f-code', r1c); await p.click(KEY); ok(await says('that code is not right'), 'the first code is no good once a new one has gone'); await p.waitForTimeout(1800); }
+    await p.click('text=go back'); await p.waitForTimeout(500);
+    t = await text(); ok(t.includes('Reset your password') && !t.includes('Wrong email?') && await ids() === 'f-email', '"go back" returns to the email paper');
+    ok(await p.evaluate(() => document.getElementById('f-email').value === 'Pw@Example.com'), '…with the email as it was');
+    await p.click(KEY);
+    ok(await p.waitForSelector('#f-code', { timeout: 8000 }).then(() => true, () => false), 'the key sends another code and the reset paper is back');
+    await p.waitForTimeout(400);
+    const r3c = await gnome.code(ctx, BASE, 'pw@example.com');
+    await p.fill('#f-code', r3c.slice(0, 3) + ' ' + r3c.slice(3)); await p.fill('#f-pw', 'brand-new-1'); await p.fill('#f-pw2', 'brand-new-1'); await p.click(KEY);
+    ok(await says('password changed'), 'the right code and a new password open the lock: password changed, and logged in');
+    await p.waitForURL(/\/toem2\//, { timeout: 20000 });
+    me = await whoami(p);
+    ok(me.me && me.me.name === 'Pw Person', '…and the account is sent on to ?next=, logged in', JSON.stringify(me));
+    await post(p, { op: 'logout' });
+    r3 = await post(p, { op: 'login', email: 'pw@example.com', password: 'toadstool1' });
+    ok(r3.code === 'wrong', 'the old password is no good any more', JSON.stringify(r3));
+    r3 = await post(p, { op: 'login', email: 'pw@example.com', password: 'brand-new-1' });
+    ok(r3.ok === true && r3.me.name === 'Pw Person', 'the new one is the account\'s', JSON.stringify(r3));
+
+    // ── 7 · DISCORD: the button on both papers, a new person named at /signup, a named one straight to ?next= ──
+    await post(p, { op: 'logout' });
+    vouch('disco@example.com');
+    await p.goto(BASE + '/signup/?next=%2Ftoem2%2F'); await p.waitForTimeout(2500);
+    await p.click('text=Continue with Discord');
+    await p.waitForURL(/\/signup\/\?discord=1/, { timeout: 15000 });
+    await p.waitForTimeout(2500); t = await text();
+    ok(t.includes('One more thing') && t.includes('Signed in with Discord, using your Discord email') && !t.includes('Signed in with Google'), 'back from Discord, the naming form says it is signed in with Discord', t.slice(0, 300));
+    ok(await p.evaluate(() => { const svgs = [...document.querySelectorAll('#dc-root form svg path[fill="#5865F2"]')]; return svgs.length === 1 && !document.querySelector('#dc-root form svg path[fill="#EA4335"]'); }), '…under Discord\'s mark, not Google\'s');
+    ok(!t.includes('Confirm password') && !t.includes('Continue with Discord'), 'the naming form has no password fields and no second Discord button');
+    await p.fill('#f-name', 'Disco'); await p.click('button[aria-label="Sign up"]');
+    await p.waitForURL(/\/toem2\//, { timeout: 20000 });
+    me = await whoami(p);
+    ok(me.me && me.me.name === 'Disco', 'named, and sent on to ?next= signed in', JSON.stringify(me));
+    await post(p, { op: 'logout' });
+    await p.goto(BASE + '/login/?next=%2Fyard%2F'); await p.waitForTimeout(2500);
+    await p.click('text=Continue with Discord');
+    await p.waitForURL(/\/yard\//, { timeout: 20000 });
+    me = await whoami(p);
+    ok(me.me && me.me.name === 'Disco', 'from /login a named account comes straight back to ?next=, signed in', JSON.stringify(me));
+    await post(p, { op: 'logout' });
+    vouch('tester@example.com');                  // Google vouched for Tester in §2
+    await p.goto(BASE + '/auth/discord?next=%2Ftoem2%2F'); await p.waitForURL(/\/toem2\//, { timeout: 20000 });
+    me = await whoami(p);
+    ok(me.me && me.me.name === 'Tester', 'an address Google vouched for is the same account by Discord', JSON.stringify(me));
+    await post(p, { op: 'logout' });
+    vouch('pw@example.com');
+    await p.goto(BASE + '/auth/discord?next=%2Fyard%2F'); await p.waitForTimeout(500);
+    t = await text(); ok(t.includes('already has a password'), 'Discord cannot open a password account, and says so plainly', t.slice(0, 300));
+    vouch('unsure@example.com'); fs.writeFileSync(path.join(store, 'discord-verified.txt'), 'no');
+    await p.goto(BASE + '/auth/discord?next=%2Fyard%2F'); await p.waitForTimeout(500);
+    t = await text(); ok(t.includes('no confirmed email') && t.includes('back to log in'), 'an address Discord has not confirmed signs nobody in, and says what to do', t.slice(0, 300));
+    me = await whoami(p); ok(!me.me, '…and nobody is signed in afterwards', JSON.stringify(me));
+    mode('access_denied');
+    await p.goto(BASE + '/auth/discord?next=%2Fyard%2F'); await p.waitForTimeout(500);
+    t = await text(); ok(t.includes('The Discord sign-in was cancelled'), 'a cancelled Discord sign-in lands on a plain page', t.slice(0, 300));
+    mode('code');
 
     ok(pageErrors.length === 0, 'no uncaught page errors along the way', pageErrors.join(' | '));
   } catch (e) { fails.push('CRASH ' + (e && e.stack || e)); }

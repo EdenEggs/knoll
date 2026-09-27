@@ -855,8 +855,6 @@ body[data-wall-tool="delete"] .gz:not(.gz-copy){pointer-events:none}
   padding:0;border:2px solid var(--pink);border-radius:7px;background:var(--field);cursor:ew-resize;
   display:grid;place-items:center;touch-action:none}
 .wall-note-grip::before{content:"";width:2px;height:16px;border-radius:2px;background:var(--pink);opacity:.75}
-.wall-note-hint{position:absolute;left:1px;top:calc(100% + 7px);margin:0;white-space:nowrap;
-  pointer-events:none;font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--mute-2)}
 /* ── carried by its frame, counted, and written on something (2026-09-22) ──
    The border and padding are the box's handle: drag them and the note goes with
    the pointer, while the words stay for writing in. Over the top right corner,

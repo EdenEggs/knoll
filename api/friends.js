@@ -17,16 +17,21 @@
    one back off.
    THE BELL is notes:<u>, newest first, the last NOTES_KEEP; whatever came
    after the bell was last opened (`noted` on the account) is unseen. An ask
-   leaves it once answered.
+   leaves it once answered. Since 2026-09-27 every door rings it (api/wall.js:
+   THE STORE'S MAP lists the kinds), and the answer carries `noted` and
+   `hearts` — when the bell was last opened, and how many likes the yard's
+   fence had then — because the fence is kept by the Apps Script and not by
+   this store (yard/tools.js): the page reads it there and tells what is new
+   by these two, and says what it saw when the bell is opened (op seen).
 
      GET  → { ok, me: {id, tag}, friends: [{id, tag}], asks: [{id, tag}],
-              notes: [{kind, from: {id, tag}, at, slug?, title?}], unseen }
+              notes: [{kind, from: {id, tag}, at, slug?, title?, …}], unseen, noted, hearts }
      POST { op: 'ask', tag }            → { ok, friends }   (true when they had asked you first)
           { op: 'answer', id, yes }     → { ok }
           { op: 'drop', id }            → { ok }            (friends no longer, both ways)
           { op: 'invite', slug, ids }   → { ok, sent }      (your space, your friends: its keepers)
           { op: 'uninvite', slug, ids } → { ok, gone }      (your space: keepers no more)
-          { op: 'seen' }                → { ok }            (the bell was opened)
+          { op: 'seen', hearts? }       → { ok }            (the bell was opened; hearts: the fence's likes as the page saw them)
 
    ponytail: an hour's counter per account; a gnome who keeps asking one who
    keeps saying no is slowed, not stopped — a block list when that is a thing. */
@@ -71,8 +76,8 @@ async function get(req, res) {
     const found = ids.filter((u, i) => banned[i] !== '1').slice(0, 8), tag = await tagsOf(found);
     return answer(res, 200, { ok: true, users: found.map(u => ({ id: u, tag: tag[u] })) });
   }
-  const [friends, asks, raw, noted] = await dbm([['SMEMBERS', K.friends(me.id)], ['SMEMBERS', K.asks(me.id)],
-                                                ['LRANGE', K.notes(me.id), 0, -1], ['HGET', K.user(me.id), 'noted']]);
+  const [friends, asks, raw, noted, hearts] = await dbm([['SMEMBERS', K.friends(me.id)], ['SMEMBERS', K.asks(me.id)],
+                                                        ['LRANGE', K.notes(me.id), 0, -1], ['HGET', K.user(me.id), 'noted'], ['HGET', K.user(me.id), 'hearts']]);
   const asked = new Set();
   const notes = raw.map(s => JSON.parse(s)).filter(n => n.kind !== 'ask' || (asks.includes(n.from) && !asked.has(n.from) && asked.add(n.from)));
   const tag = await tagsOf(friends.concat(asks, notes.map(n => n.from)));
@@ -80,7 +85,7 @@ async function get(req, res) {
     friends: friends.map(u => ({ id: u, tag: tag[u] })).sort((a, b) => a.tag.localeCompare(b.tag)),
     asks: asks.map(u => ({ id: u, tag: tag[u] })),
     notes: notes.map(n => Object.assign(n, { from: { id: n.from, tag: tag[n.from] } })),
-    unseen: notes.filter(n => n.at > (+noted || 0)).length });
+    unseen: notes.filter(n => n.at > (+noted || 0)).length, noted: +noted || 0, hearts: +hearts || 0 });
 }
 
 async function post(req, res) {
@@ -90,7 +95,11 @@ async function post(req, res) {
   if (me.banned) throw bad(403, 'banned', 'this account may not do that');
   const body = await readBody(req);
   if (!body || typeof body !== 'object' || Array.isArray(body)) throw bad(400, 'body', 'the post is not an op');
-  if (body.op === 'seen') { await db('HSET', K.user(me.id), 'noted', String(Date.now())); return answer(res, 200, { ok: true }); }
+  if (body.op === 'seen') {
+    const hearts = Number.isFinite(+body.hearts) && body.hearts != null ? Math.max(0, Math.min(1e9, Math.floor(+body.hearts))) : null;
+    await db('HSET', K.user(me.id), 'noted', String(Date.now()), ...(hearts == null ? [] : ['hearts', String(hearts)]));
+    return answer(res, 200, { ok: true });
+  }
   if (!(await spend(me.id))) throw bad(429, 'rate', 'that is a lot in one hour — take a breath');
   const id = String(body.id == null ? '' : body.id);
   switch (body.op) {

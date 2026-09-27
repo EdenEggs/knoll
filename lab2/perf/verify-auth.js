@@ -12,7 +12,11 @@
    in per address, the name, the tour and the picture, TOEM 2's door taking
    the cookie — and the sign-up code (2026-09-24): the letter, its hash, a
    wrong code, one address's code against another, five tries, five an hour,
-   the code spent, Vercel with no postman, and the post to Resend.
+   the code spent, Vercel with no postman, and the post to Resend. Since
+   2026-09-27: the reset (who may ask, the letter, a wrong code, a sign-up's
+   code against it, the new word in the old one's place, every session over,
+   the lock forgotten, its caps), the postman's day, and Discord's way in
+   beside Google's, Discord played by this script.
 
      node lab2/perf/verify-auth.js
 */
@@ -26,6 +30,7 @@ const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'knoll-auth-'));
 process.env.WALL_DB = path.join(TMP, 'wall-db.json');
 delete process.env.KV_REST_API_URL; delete process.env.UPSTASH_REDIS_REST_URL; delete process.env.VERCEL;
 delete process.env.GOOGLE_CLIENT_ID; delete process.env.GOOGLE_CLIENT_SECRET;
+delete process.env.DISCORD_CLIENT_ID; delete process.env.DISCORD_CLIENT_SECRET; delete process.env.RESEND_API_KEY;
 process.env.ADMIN_EMAILS = 'boss@example.com';
 const ROOT = path.join(__dirname, '..', '..');
 const auth = require(path.join(ROOT, 'api', 'auth.js'));
@@ -62,6 +67,7 @@ const signup = async (body, headers) => {       // both steps (api/auth.js: THE 
   let r = await who();
   A.deepStrictEqual([r.json.ok, r.json.open, r.json.google, r.json.me], [true, true, false, null], 'nobody signed in; the gate is open; Google is not set up');
   A.strictEqual(r.json.mail, true, 'off Vercel, the outbox stands in for the postman');
+  A.strictEqual(r.json.discord, false, '…and Discord is not set up either');
 
   // ── signing up ──────────────────────────────────────────────────────────
   const good = { op: 'signup', name: 'Mossy', email: 'Mossy@Example.com ', password: 'toadstool1' };
@@ -234,6 +240,90 @@ const signup = async (body, headers) => {       // both steps (api/auth.js: THE 
   r = await gate(Object.assign({}, tries, { code: codeIn(auth.OUTBOX, tries.email) }), from);
   A.strictEqual(r.status, 200, '…while the fifth still opens: ' + JSON.stringify(r.json));
 
+  // ── the reset (api/auth.js: THE RESET) ──────────────────────────────────
+  const fernIs = { op: 'signup', name: 'Fern', email: 'fern@example.com', password: 'oldword-1' }, rip = { 'x-real-ip': '10.11.11.11' };
+  r = await signup(fernIs, rip);
+  const fern = r.json.me, f1 = jar(r);
+  r = await gate({ op: 'login', email: fernIs.email, password: fernIs.password }, { 'x-real-ip': '10.11.11.12' });
+  const f2 = jar(r);                            // a second browser of Fern's, signed in
+  await wall.finishLogin('gina@example.com');   // Google vouched for Gina: no password to reset
+  const codeKey = wall.K.code(fern.id), lettersTo = to => fs.readFileSync(auth.OUTBOX, 'utf8').trim().split('\n').map(l => JSON.parse(l)).filter(l => l.to === to);
+  r = await gate({ op: 'reset', email: 'fern' }, rip);
+  A.deepStrictEqual([r.status, r.json.code], [400, 'email'], 'a reset for no proper address is sent back');
+  r = await gate({ op: 'reset', email: 'nobody@example.com' }, rip);
+  A.deepStrictEqual([r.status, r.json.code], [404, 'none'], '…one for an address with no account says there is none');
+  A.strictEqual(lettersTo('nobody@example.com').length, 0, '…and posts nothing to it');
+  r = await gate({ op: 'reset', email: 'gina@example.com' }, rip);
+  A.deepStrictEqual([r.status, r.json.code, lettersTo('gina@example.com').length], [409, 'google', 0], '…and one for an address Google vouches for says to use that, with no letter');
+  r = await gate({ op: 'reset', email: ' Fern@Example.com ' }, rip);
+  A.deepStrictEqual([r.status, r.json.sent, r.cookies.length], [200, true, 0], 'a reset for an account with a password sends a code: no cookie');
+  const rl = lettersTo('fern@example.com').pop(), rc1 = codeIn(auth.OUTBOX, 'fern@example.com');
+  A.ok(rl.subject === 'Your Knoll password reset code: ' + rc1 && rl.text.includes('code is ' + rc1 + '.') && /10 minutes/.test(rl.text) && /has not been changed/.test(rl.text),
+    'the letter: the code in the subject and the text, ten minutes, and that nothing has changed yet: ' + JSON.stringify(rl));
+  A.ok(!fs.readFileSync(process.env.WALL_DB, 'utf8').includes(rc1), 'the store keeps the reset code hashed, never the code');
+  const wrongCode = rc1 === '123456' ? '654321' : '123456', fresh = { op: 'reset', email: 'fern@example.com', password: 'newword-22' };
+  r = await gate(Object.assign({}, fresh, { code: wrongCode }), rip);
+  A.deepStrictEqual([r.status, r.json.code], [400, 'code'], 'a wrong code changes nothing');
+  r = await gate(Object.assign({}, fresh, { code: rc1, password: 'short' }), rip);
+  A.deepStrictEqual([r.status, r.json.code, (await wall.db('HGETALL', codeKey)).tries], [400, 'password', '1'], 'a new password under eight letters is sent back, and spends no guess');
+  r = await gate({ op: 'login', email: 'fern@example.com', password: 'oldword-1' }, { 'x-real-ip': '10.11.11.13' });
+  A.strictEqual(r.status, 200, 'until the code comes back the old password still opens the account');
+  const f3 = jar(r);
+  await wall.db('HSET', codeKey, 'h', wall.sha(fern.id + ':' + wrongCode));   // what a SIGN-UP code of those figures would have left there
+  r = await gate(Object.assign({}, fresh, { code: wrongCode }), rip);
+  A.deepStrictEqual([r.status, r.json.code], [400, 'code'], 'a sign-up\'s code does not open a reset: each is hashed with what it is for');
+  r = await gate({ op: 'reset', email: 'fern@example.com' }, rip);
+  const rc2 = codeIn(auth.OUTBOX, 'fern@example.com');
+  r = await gate(Object.assign({}, fresh, { code: rc2.slice(0, 3) + ' ' + rc2.slice(3) }), rip);
+  A.deepStrictEqual([r.status, r.json.ok, r.json.me, r.cookies.length], [200, true, undefined, 0], 'the right code and a new password: done, and nobody is signed in by it: ' + JSON.stringify(r.json));
+  const fernRec = await wall.db('HGETALL', wall.K.user(fern.id));
+  A.ok(/^s1\$32768\$8\$1\$[\w-]{22}\$[\w-]{43}$/.test(fernRec.pw) && fernRec.gen === '1' && fernRec.name === 'Fern' && fernRec.made === String(fern.made), 'the new password is kept as scrypt in the old one\'s place, and the rest of the account is as it was');
+  A.deepStrictEqual(await wall.db('HGETALL', codeKey), {}, '…and the code is spent');
+  for (const [c, what] of [[f1, 'the browser that signed up'], [f2, 'a second browser'], [f3, 'one that logged in while the code was out']]) {
+    r = await who(sent(c));
+    A.strictEqual(r.json.me, null, 'a reset ends every session the account had: ' + what);
+  }
+  r = await call(wall, 'GET', '/api/wall?me=1', undefined, sent(f2));
+  A.strictEqual(r.status, 401, '…at the wall\'s door too');
+  r = await gate(Object.assign({}, fresh, { code: rc2 }), rip);
+  A.deepStrictEqual([r.status, r.json.code], [400, 'expired'], 'a code opens one reset');
+  r = await gate({ op: 'login', email: 'fern@example.com', password: 'oldword-1' }, { 'x-real-ip': '10.11.11.14' });
+  A.deepStrictEqual([r.status, r.json.code], [401, 'wrong'], 'the old password is no good any more');
+  r = await gate({ op: 'login', email: 'fern@example.com', password: 'newword-22' }, { 'x-real-ip': '10.11.11.14' });
+  const f4 = jar(r);
+  A.strictEqual(r.status, 200, 'the new one opens the account');
+  r = await who(sent(f4));
+  A.deepStrictEqual([r.json.me && r.json.me.id, r.json.me && r.json.me.tag], [fern.id, 'Fern#1'], '…the same account, with a session of the new generation');
+  r = await call(wall, 'GET', '/api/wall?me=1', undefined, sent(f4));
+  A.deepStrictEqual([r.status, r.json.id], [200, fern.id], '…which the wall\'s door takes');
+  for (let i = 0; i < auth.RATE.fails; i++) await gate({ op: 'login', email: 'fern@example.com', password: 'guess' + i }, { 'x-real-ip': '10.12.12.' + (i % 250) });
+  r = await gate({ op: 'login', email: 'fern@example.com', password: 'newword-22' }, { 'x-real-ip': '10.11.11.15' });
+  A.strictEqual(r.status, 429, 'twenty wrong words lock Fern out for the hour…');
+  r = await gate({ op: 'reset', email: 'fern@example.com' }, rip);
+  r = await gate({ op: 'reset', email: 'fern@example.com', password: 'thirdword-3', code: codeIn(auth.OUTBOX, 'fern@example.com') }, rip);
+  r = await gate({ op: 'login', email: 'fern@example.com', password: 'thirdword-3' }, { 'x-real-ip': '10.11.11.15' });
+  A.strictEqual(r.status, 200, '…and a reset lets her back in: the hour\'s wrong words are forgotten with the old password');
+  A.strictEqual((await wall.db('HGETALL', wall.K.user(fern.id))).gen, '2', 'every reset is a new generation');
+  r = await gate({ op: 'reset', email: 'fern@example.com' }, rip);   // the fifth letter to Fern this hour: her sign-up's, and four resets
+  A.deepStrictEqual([r.status, r.json.sent], [200, true], 'five codes an hour to one address, a sign-up\'s and a reset\'s counted together');
+  r = await gate({ op: 'reset', email: 'fern@example.com' }, rip);
+  A.deepStrictEqual([r.status, r.json.code], [429, 'rate'], '…and the sixth waits');
+  await wall.db('DEL', wall.K.rl('code:' + fern.id, Math.floor(Date.now() / 36e5)));                    // the next hour…
+  await wall.db('SET', wall.K.rl('code:' + fern.id, 'x' + Math.floor(Date.now() / 864e5)), String(auth.RATE.codeDay));   // …of a day that has had its ten
+  r = await gate({ op: 'reset', email: 'fern@example.com' }, rip);
+  A.ok(r.status === 429 && r.json.code === 'rate' && /today/.test(r.json.error), 'ten codes a day to one address, and the eleventh waits for tomorrow: ' + JSON.stringify(r.json));
+  for (let i = 0; i <= auth.RATE.reset; i++) last = await gate({ op: 'reset', email: 'who' + i + '@example.com' }, { 'x-real-ip': '10.13.13.13' });
+  A.deepStrictEqual([last.status, last.json.code], [429, 'rate'], 'twenty resets asked for from one network in an hour, then it waits — asking who has an account is counted');
+
+  // ── the postman's day (api/auth.js: THE POSTMAN'S DAY) ──────────────────
+  const dayKey = wall.K.rl('mail', 'x' + Math.floor(Date.now() / 864e5)), posted0 = +(await wall.db('GET', dayKey)), mailCap = auth.RATE.mail;
+  A.ok(posted0 > 20 && posted0 === fs.readFileSync(auth.OUTBOX, 'utf8').trim().split('\n').length, 'every letter posted is counted against the day: ' + posted0);
+  auth.RATE.mail = posted0;
+  r = await gate(Object.assign({}, good, { email: 'late@example.com' }), { 'x-real-ip': '10.14.14.14' });
+  A.deepStrictEqual([r.status, r.json.code, lettersTo('late@example.com').length], [429, 'busy', 0], 'past the day\'s letters a sign-up says to come back tomorrow, and nothing is posted');
+  A.deepStrictEqual(await wall.db('HGETALL', wall.K.code(wall.userKey('late@example.com'))), {}, '…with no code kept for a letter that never went');
+  auth.RATE.mail = mailCap;
+
   // ── logging out ─────────────────────────────────────────────────────────
   r = await gate({ op: 'logout' }, sent(c2));
   A.ok(r.status === 200 && /knoll_s=;.*Max-Age=0/.test(flags(r, 'knoll_s')), 'logging out clears the cookies');
@@ -303,6 +393,62 @@ const signup = async (body, headers) => {       // both steps (api/auth.js: THE 
   r = await who();
   A.strictEqual(r.json.google, true, 'with its client set, the gate says Google is there');
   global.fetch = realFetch; delete process.env.GOOGLE_CLIENT_ID; delete process.env.GOOGLE_CLIENT_SECRET;
+
+  // ── Discord, with Discord played by this script (api/wall.js: THE WAYS IN BESIDE A PASSWORD) ──
+  r = await hop('/auth/discord?next=/');
+  A.ok(r.status === 400 && /Discord sign-in is not set up/.test(r.text) && !/GOOGLE/.test(r.text), 'with no Discord client the button\'s address says Discord is not set up');
+  process.env.DISCORD_CLIENT_ID = 'did'; process.env.DISCORD_CLIENT_SECRET = 'dsecret';
+  let dme = { id: '1', username: 'ivy', email: 'ivy@example.com', verified: true }, asked = [];
+  global.fetch = async (url, o) => {
+    asked.push({ url: String(url), headers: (o && o.headers) || {}, body: String((o && o.body) || '') });
+    if (String(url) === 'https://discord.com/api/oauth2/token') return { json: async () => ({ access_token: 'dtok', token_type: 'Bearer', scope: 'identify email' }) };
+    if (String(url) === 'https://discord.com/api/v10/users/@me') return { json: async () => dme };
+    throw new Error('this probe has no network');
+  };
+  r = await who();
+  A.deepStrictEqual([r.json.discord, r.json.google], [true, false], 'with its client set, the gate says Discord is there (and Google, unset, is not)');
+  r = await hop('/auth/discord?next=' + encodeURIComponent('/toem2/'));
+  const dto = new URL(r.headers.location), d1 = dto.searchParams.get('state');
+  A.ok(r.status === 302 && dto.origin + dto.pathname === 'https://discord.com/oauth2/authorize' && dto.searchParams.get('client_id') === 'did' && dto.searchParams.get('scope') === 'identify email'
+       && dto.searchParams.get('response_type') === 'code' && dto.searchParams.get('redirect_uri') === 'http://localhost:4321/auth/discord/callback',
+    'the Discord button goes to Discord, asking who and their address, with this site\'s Discord callback: ' + r.headers.location);
+  A.ok(new RegExp('^knoll_o=' + d1 + ';.*HttpOnly').test(r.cookies[0] || ''), '…and the state rides in the same HttpOnly cookie');
+  r = await hop('/auth/discord/callback?state=' + d1 + '&code=abcd');
+  A.ok(r.status === 400 && /another browser/.test(r.text) && /Discord/.test(r.text), 'a Discord callback without that cookie signs nobody in');
+  r = await hop('/auth/discord/callback?state=' + d1 + '&code=abcd', { cookie: 'knoll_o=' + d1 });
+  c = jar(r);
+  A.ok(r.status === 302 && r.headers.location === '/signup/?discord=1&next=' + encodeURIComponent('/toem2/') && /^[0-9a-f]{32}$/.test(c.knoll_s) && c.knoll_in === wall.userKey('ivy@example.com'),
+    'a new gnome Discord vouched for is signed in and sent to /signup to be named: ' + r.headers.location);
+  const swap = asked.find(a => a.url.endsWith('/oauth2/token')), asksMe = asked.find(a => a.url.endsWith('/users/@me'));
+  A.ok(swap && /client_id=did/.test(swap.body) && /client_secret=dsecret/.test(swap.body) && /grant_type=authorization_code/.test(swap.body) && /redirect_uri=http%3A%2F%2Flocalhost%3A4321%2Fauth%2Fdiscord%2Fcallback/.test(swap.body),
+    'the code is changed for a token with this site\'s Discord client and the same callback: ' + (swap && swap.body));
+  A.ok(asksMe && asksMe.headers.authorization === 'Bearer dtok' && /^DiscordBot \(/.test(asksMe.headers['user-agent'] || ''), '…and the token asks Discord whose it is, saying what is asking');
+  const ivy = await wall.db('HGETALL', wall.K.user(wall.userKey('ivy@example.com')));
+  A.ok(ivy.made && !ivy.pw && !JSON.stringify(ivy).includes('ivy@') && !fs.readFileSync(process.env.WALL_DB, 'utf8').includes('dtok'), 'the account has no password, and neither the address, the name at Discord nor the token is kept');
+  r = await gate({ op: 'name', name: 'Ivy' }, sent(c));
+  r = await hop('/api/wall?op=discord&next=/');   // as vercel.json's rewrite hands it over
+  const d2 = new URL(r.headers.location).searchParams.get('state');
+  r = await hop('/api/wall?op=discord-back&state=' + d2 + '&code=abcd', { cookie: 'knoll_o=' + d2 });
+  A.ok(r.status === 302 && r.headers.location === '/' && jar(r).knoll_in === wall.userKey('ivy@example.com'), 'a named gnome comes straight back — by the rewrite\'s address too: ' + r.headers.location);
+  const door = async (headers) => { const h = await hop('/auth/discord?next=/'), s = new URL(h.headers.location).searchParams.get('state'); return hop('/auth/discord/callback?state=' + s + '&code=abcd', { cookie: 'knoll_o=' + s }); };
+  dme = { id: '2', username: 'sly', email: 'sly@example.com', verified: false };
+  r = await door();
+  A.ok(r.status === 400 && /no confirmed email/.test(r.text) && !r.cookies.some(x => x.startsWith('knoll_s=')), 'an address Discord has not confirmed signs nobody in');
+  A.deepStrictEqual(await wall.db('HGETALL', wall.K.user(wall.userKey('sly@example.com'))), {}, '…and makes no account');
+  dme = { id: '3', username: 'nomail', verified: true };
+  r = await door();
+  A.ok(r.status === 400 && /no confirmed email/.test(r.text), '…nor does a Discord account with no address at all');
+  dme = { id: '4', username: 'fern', email: 'fern@example.com', verified: true };   // has a password (above)
+  r = await door();
+  A.ok(r.status === 400 && /already has a password/.test(r.text) && !r.cookies.some(x => x.startsWith('knoll_s=')), 'Discord cannot open an account a password made (one address, one way in)');
+  dme = { id: '5', username: 'gina', email: 'Gina@Example.com', verified: true };    // Google vouched for her (above)
+  r = await door();
+  A.ok(r.status === 302 && jar(r).knoll_in === wall.userKey('gina@example.com') && r.headers.location === '/signup/?discord=1&next=%2F', 'an address Google vouched for is the same account when Discord vouches for it (not yet named, so to /signup)');
+  r = await hop('/auth/discord/callback?state=' + d1 + '&error=access_denied', { cookie: 'knoll_o=' + d1 });
+  A.ok(r.status === 400 && /The Discord sign-in was cancelled/.test(r.text) && !r.cookies.length, 'a cancelled Discord sign-in says so, and signs nobody in');
+  r = await gate({ op: 'login', email: 'ivy@example.com', password: 'toadstool1' }, { 'x-real-ip': '10.15.15.15' });
+  A.ok(r.status === 401 && r.json.code === 'google' && /Google or Discord/.test(r.json.error), 'logging in to it with a password says to use the button it came in by');
+  global.fetch = realFetch; delete process.env.DISCORD_CLIENT_ID; delete process.env.DISCORD_CLIENT_SECRET;
 
   // ── the postman (api/auth.js: THE POSTMAN): Vercel with no key, and Resend with one ──
   process.env.VERCEL = '1'; delete process.env.RESEND_API_KEY;

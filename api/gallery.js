@@ -181,6 +181,8 @@ async function post(req, res) {
         await pictures.del(gone.map(g => g.key).filter(Boolean));
       }
       await db('LPUSH', key, JSON.stringify(p));
+      // THE BELL (2026-09-27): a photo hung at a space rings its keepers' bells — once a place while unread (api/wall.js: tellOnce)
+      await W.tellKeepers(await rulesOf({ slug }, null), me.id, 'photo', { what: cap });
       return answer(res, 200, { ok: true, photo: shown(p, me.tag, 0, false, sections) });
     }
     case 'like': {
@@ -188,7 +190,9 @@ async function post(req, res) {
       const [, p] = await find();
       if (!p) throw bad(404, 'photo', 'no such photo');
       const on = body.on === undefined ? true : !!body.on;
-      await db(on ? 'SADD' : 'SREM', K.albumLike(slug, id), me.id);
+      const fresh = await db(on ? 'SADD' : 'SREM', K.albumLike(slug, id), me.id);
+      // THE BELL (2026-09-27): a heart — a new one, not one pressed twice — rings the bell of whoever took the photo
+      if (on && fresh && p.by !== me.id && W.USER_RE.test(p.by)) await W.tellOnce(p.by, 'heart', me.id, { slug, title: (await rulesOf({ slug }, null)).title, what: p.cap });
       return answer(res, 200, { ok: true, likes: +(await db('SCARD', K.albumLike(slug, id))) || 0, liked: on });
     }
     case 'drop': {

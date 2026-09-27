@@ -40,6 +40,11 @@
      page's, under knoll-<slug>: keys, and every ask of the door names it. A slug
      that is not one, or TOEM 2's own, is nothing: the bench is TOEM 2's. -->
 <script>(function(){var m=/[?&]page=([a-z0-9][a-z0-9-]{0,31})(?:&|$)/i.exec(location.search);if(m&&m[1].toLowerCase()!=='toem2')document.documentElement.dataset.page=m[1].toLowerCase();})();</script>
+<!-- …and A SPACE'S OWN PAPER (2026-09-27, lab.css): the set its settings chose, by name, as this
+     browser last heard it — from seed.js's read of the rules, from space.html on the way here,
+     or from /settings/ at a save — so the bench is that colour from the first paint. Read
+     before ?embed=1 below swaps the store for one of its own. -->
+<script>(function(){var d=document.documentElement,p=d.dataset.page;if(!p)return;try{var c=localStorage.getItem('knoll-'+p+':paper');if(c)d.dataset.paper=c;}catch(e){}})();</script>
 <!-- ?visitor (2026-09-21): localhost, but the landing page — how the site shows
      this bench, header, account corner and all, for a look at it before a push -->
 <!-- ?embed=1 — THE YARD'S PICTURE OF THIS PAGE (2026-09-21). /yard frames

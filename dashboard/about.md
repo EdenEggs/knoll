@@ -220,3 +220,40 @@ card back to this page's own numbers. Each card minimizes to its name with the
 – / + at its corner, and which ones are shut is this browser's to remember, a
 page at a time (`knoll-corner:<slug>:shut`). `node toem2/probe-manage.js`
 walks it all in headless Chrome.
+
+---
+
+## Edits to your page (2026-09-27)
+
+`/dashboard/edits/` is the screen the bell leads to when somebody proposes a
+change to your yard or your name. A plain page — no runtime — in the house's
+paper; signed out, the gate first.
+
+| part | what it does |
+|---|---|
+| **Waiting for you** | every open proposal: who, when, against which save, their line of why, and what it would CHANGE in chips (`+ 2 pieces`, `− 1 piece`, `1 tree moved`, `your name → …`). Each can be looked at, taken or left; several are chosen and taken **together**, as one save. |
+| **How your page would look** | two frames of the yard itself: as it stands (`?embed=1&at=<t>`) and with the chosen edits taken (`?embed=1&with=<ids>`). Nothing is kept until something is taken. |
+| **History** | what was decided these thirty days, and every save the yard still keeps, newest first. A save can be looked at, and **brought back** — put up again as a new save — which is what undoes a change taken and regretted. |
+
+**Taking is not replacing.** `api/hill.js` works out what a proposal changes by
+holding it against the save it was made on, and `take` makes those changes to
+the yard *as it stands now* — so the owner's own saves since are kept, and two
+people's ideas can both be had (WHAT A PROPOSAL CHANGES, in that file's head).
+A proposal whose base has fallen off the end of the forty saves cannot be told
+apart from it: the page then offers **take theirs whole**, which is the old
+`accept`.
+
+**Unsaved work holds the taking back.** The yard is kept in the browser until
+SAVE YARD; an edit is added to the page as it was last *saved*. If this browser
+has unsaved changes to the yard (`knoll-yard:touched` > `knoll-yard:applied`)
+the page says to save first and the take buttons wait — otherwise the next
+save from here would put the unsaved copy over what was just taken.
+ponytail: only THIS browser's copy can be seen from here; unsaved work on
+another device is that device's to lose.
+
+**Nothing somebody else wrote is markup**: names, reasons and proposed names
+are set as text.
+
+**Checks.** `node lab2/perf/probe-bell.js` §3 walks the page;
+`node lab2/perf/verify-hill.js` (108) has the door: `take`, `?with=`,
+`restore`, the history and the bell's notes.

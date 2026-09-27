@@ -1008,8 +1008,6 @@ body[data-wall-tool="delete"] .gz:not(.gz-copy){pointer-events:none}
   padding:0;border:2px solid var(--pink);border-radius:7px;background:var(--field);cursor:ew-resize;
   display:grid;place-items:center;touch-action:none}
 .wall-note-grip::before{content:"";width:2px;height:16px;border-radius:2px;background:var(--pink);opacity:.75}
-.wall-note-hint{position:absolute;left:1px;top:calc(100% + 7px);margin:0;white-space:nowrap;
-  pointer-events:none;font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--mute-2)}
 /* ── carried by its frame, counted, and written on something (2026-09-22) ──
    The border and padding are the box's handle: drag them and the note goes with
    the pointer, while the words stay for writing in. Over the top right corner,
@@ -1035,7 +1033,6 @@ body[data-wall-tool="delete"] .gz:not(.gz-copy){pointer-events:none}
    the grip stay exactly as they are, since both read on either ground. */
 .wall-note.wall-note-dark{background:var(--gz-handle-bg)}
 .wall-note-dark .wall-note-in::placeholder{color:rgba(255,255,255,.42)}
-.wall-note-dark .wall-note-hint{color:rgba(255,255,255,.5)}
 
 /* and the tab that reshapes a note once it is on the paper: nothing at all
    until the move tool is up, then a hint of one until you are on it */

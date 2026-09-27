@@ -45,7 +45,8 @@
      knoll_in is the cookie that says which account is in (api/wall.js). -->
 <script>(function () {
   // A LOOK at a past save (?embed=1&at=<t> — the dashboard's past looks): before any script, so lab.js's stores keep nothing (tools.js: LOOK)
-  if (/[?&]embed\b/.test(location.search) && /[?&]at=\d{10,16}\b/.test(location.search)) window.LAB_LOOK = true;
+  // …and a look AHEAD, at the yard with proposals taken (?embed=1&with=<id>,… — dashboard/edits/): the same, nothing kept
+  if (/[?&]embed\b/.test(location.search) && /[?&](at=\d{10,16}|with=p[a-z0-9]{12,40})\b/.test(location.search)) window.LAB_LOOK = true;
   var id = (/(?:^|;\s*)knoll_in=([0-9a-f]{16})(?:;|$)/.exec(document.cookie) || [])[1];
   if (!id) { if (!/[?&]embed\b/.test(location.search) && !window.YARD_WHO) location.replace('/login/?next=' + encodeURIComponent(location.pathname + location.search)); return; }   // a visitor at /yard/<name> is sent on above
   try {
@@ -66,6 +67,9 @@
 <!-- THE ACCOUNT CORNER (account.js, 2026-09-21): the search and your gnome at the right of
      the house bar — and KnollAccount.me, which the tour below asks whether it is owed -->
 <script src="/account.js" defer></script>
+<!-- THE BELL, OPENED (bell.js, 2026-09-27): the sheet the bell lays over the page — every
+     notification that concerns you, under its heading — in place of the card it let down -->
+<script src="/bell.js" defer></script>
 
 
 </head>
@@ -515,36 +519,20 @@
              opening it says so to the door. The button is the search button's
              twin and inverts the same way while it is open; Escape or a second
              press closes it. z-index 14 puts the list over the wall (12) and
-             under the tour (15+) and the settings drawer (20+). -->
+             under the tour (15+) and the settings drawer (20+).
+
+             THE BELL, OPENED (2026-09-27). The card it let down is gone: a
+             press lays bell.js's sheet over the page instead — everything that
+             concerns you, from every door, under its heading — and the number
+             counts the fence's new notes and likes with the door's. The button
+             is all that is left of it here. -->
         <div style="position:relative; flex:none">
-          <button sc-camel-on-click="{{ toggleBell }}" aria-label="{{ bellLabel }}" aria-expanded="{{ bellOpen }}" title="notifications" style="position:relative; width:52px; height:52px; background:{{ bellBg }}; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0" style-hover="transform:rotate(-8deg)">
+          <button sc-camel-on-click="{{ toggleBell }}" aria-label="{{ bellLabel }}" aria-haspopup="dialog" aria-expanded="{{ bellOpen }}" title="notifications" style="position:relative; width:52px; height:52px; background:{{ bellBg }}; border:4px solid #17120b; box-shadow:5px 6px 0 rgba(60,50,80,0.2); display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0" style-hover="transform:rotate(-8deg)">
             <svg sc-camel-view-box="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M6,17 L6,11 Q6,5 12,5 Q18,5 18,11 L18,17 L20,19 L4,19 Z" fill="none" stroke="{{ bellFg }}" stroke-width="2.4" stroke-linejoin="round"></path><path d="M10,21.4 Q12,23.2 14,21.4" fill="none" stroke="{{ bellFg }}" stroke-width="2.4" stroke-linecap="round"></path><line x1="12" y1="2.6" x2="12" y2="5" stroke="{{ bellFg }}" stroke-width="2.4" stroke-linecap="round"></line></svg>
             <sc-if value="{{ bellNew }}" hint-placeholder-val="{{ false }}">
               <span aria-hidden="true" style="position:absolute; top:-11px; right:-11px; min-width:22px; height:22px; padding:0 3px; box-sizing:border-box; background:#e8484a; color:#fdf7e3; border:3px solid #17120b; font-family:'VT323',monospace; font-size:17px; line-height:1; display:flex; align-items:center; justify-content:center">{{ bellCount }}</span>
             </sc-if>
           </button>
-          <sc-if value="{{ bellOpen }}" hint-placeholder-val="{{ false }}">
-            <div role="region" aria-label="notifications" style="position:absolute; left:0; top:calc(100% + 14px); z-index:14; width:min(280px, calc(100vw - 120px)); box-sizing:border-box; background:#fdf7e3; border:4px solid #17120b; box-shadow:7px 8px 0 rgba(60,50,80,0.25); padding:12px 16px 14px; transform:rotate(-0.6deg)">
-              <div style="font-size:14px; letter-spacing:2px; color:#4a4054; opacity:0.75; margin-bottom:8px">NOTIFICATIONS</div>
-              <sc-if value="{{ noNotes }}" hint-placeholder-val="{{ false }}">
-                <div style="font-size:15px; letter-spacing:1px; color:#4a4054; opacity:0.8">NOTHING YET — FRIENDS, INVITES AND WORD FROM THE WALLS LAND HERE.</div>
-              </sc-if>
-              <div style="display:flex; flex-direction:column; gap:10px; font-size:17px; line-height:1.25; color:#3a3342; max-height:340px; overflow-y:auto">
-                <sc-for list="{{ bellNotes }}" as="n" hint-placeholder-count="3">
-                  <div>
-                    <span>{{ n.text }}</span><sc-if value="{{ n.isInvite }}" hint-placeholder-val="{{ false }}"> <a href="{{ n.href }}">{{ n.title }}</a></sc-if>
-                    <sc-if value="{{ n.isAsk }}" hint-placeholder-val="{{ false }}">
-                      <div style="display:flex; gap:8px; margin-top:6px">
-                        <button sc-camel-on-click="{{ n.yes }}" style="border:3px solid #17120b; background:#17120b; color:#fdf7e3; font-family:'VT323',monospace; font-size:16px; letter-spacing:1px; padding:1px 12px; cursor:pointer; box-shadow:2px 3px 0 rgba(60,50,80,0.25)" style-hover="transform:translate(1px,1px); box-shadow:1px 2px 0 rgba(60,50,80,0.25)">yes</button>
-                        <button sc-camel-on-click="{{ n.no }}" style="border:3px solid #17120b; background:#fdf7e3; color:#17120b; font-family:'VT323',monospace; font-size:16px; letter-spacing:1px; padding:1px 12px; cursor:pointer" style-hover="transform:translate(1px,1px)">no</button>
-                      </div>
-                    </sc-if>
-                    <div style="font-size:13px; letter-spacing:1px; color:#4a4054; opacity:0.7; margin-top:2px">{{ n.when }}</div>
-                  </div>
-                </sc-for>
-              </div>
-            </div>
-          </sc-if>
         </div>
         <!-- The export drew this button and pointed it at `#dashboard`, i.e. at
              nothing. It now goes where it says. It is the SECOND way to the
@@ -1156,7 +1144,7 @@ class Component extends DCLogic {
          The order below is the paint order read from the top down. */
       if (e.key === 'Escape' && this.state.drawerOpen) this.setState({ drawerOpen: false, signoutNote: false });
       else if (e.key === 'Escape' && this.state.tour >= 0) this.endTour();
-      else if (e.key === 'Escape' && this.state.bellOpen) this.setState({ bellOpen: false });
+      // (the bell's sheet takes its own Escape, before this sees it — bell.js)
       /* ctrl+s is lab 2's shortcut for the same button and means the same
          thing here: keep this arrangement as the default. It is taken off
          the browser unconditionally — 'save page' is not what anybody has
@@ -1486,6 +1474,7 @@ class Component extends DCLogic {
     YardTools.fence.load().then(function (f) {
       if (!f || !f.ok || !Array.isArray(f.notes)) return;   // the waitlist-only script says ok too, without a fence
       self.setState({ likes: +f.likes || 0, views: +f.views || 0, fenceLive: true,
+                      fence: { likes: +f.likes || 0, notes: f.notes || [] },   // as the script said it, for the bell (bell.js: what is new at the fence)
                       notes: (f.notes || []).map(function (n, i) { return self.noteRow(n, i); }) });
     }).catch(function () {});
   }
@@ -1854,6 +1843,8 @@ class Component extends DCLogic {
     const hour = new Date().getHours();
     const hover = this.state.hoverHill;
     const fr = this.state.fr || { me: null, friends: [], notes: [], unseen: 0 };   // until the door answers: nobody, nothing
+    // the bell's number: what the door counted, and what the fence has had since the bell was last opened (bell.js)
+    const bellN = window.KnollBell ? KnollBell.unseen(fr, this.state.fence || null) : fr.unseen;
     // two lists this device keeps; anything but an array there (a hand-edited key, an older shape) reads as the default
     const kept = (k, d) => { let v = null; try { v = JSON.parse(localStorage.getItem(k)); } catch (_) {} return Array.isArray(v) ? v : d; };
     const favs = this.state.favHills || kept('yard.favHills', []);   // nothing saved until you save it
@@ -1894,23 +1885,20 @@ class Component extends DCLogic {
       bellOpen: !!this.state.bellOpen,
       bellBg: this.state.bellOpen ? '#17120b' : '#fdf7e3',
       bellFg: this.state.bellOpen ? '#fdf7e3' : '#17120b',
-      // opening the bell sees what is in it: the count goes, here and at the door
-      toggleBell: () => { const open = !this.state.bellOpen; this.setState({ bellOpen: open }); if (open && fr.unseen) { this.setState({ fr: Object.assign({}, fr, { unseen: 0 }) }); this.friendsDo({ op: 'seen' }); } },
-      bellNew: fr.unseen > 0, bellCount: fr.unseen > 9 ? '9+' : String(fr.unseen),
-      bellLabel: fr.unseen ? 'notifications, ' + fr.unseen + ' new' : 'notifications',
-      noNotes: !fr.notes.length,
-      bellNotes: fr.notes.map(n => ({
-        text: n.kind === 'ask' ? n.from.tag + ' wants to be friends' : n.kind === 'friend' ? n.from.tag + ' said yes — you are friends now'
-            : n.kind === 'invite' ? n.from.tag + ' invited you to' : n.kind === 'keeper' ? n.from.tag + ' made you a keeper of'
-            : n.kind === 'okd' ? 'your edit went up at' : n.kind === 'rej' ? 'your edit was turned back' + (n.why ? ' — ' + n.why : '') + ' at'
-            : n.kind === 'passed' ? 'your motion carried, ' + (n.ayes || 0) + '–' + (n.nays || 0) + ', at' : n.kind === 'failed' ? 'your motion fell, ' + (n.ayes || 0) + '–' + (n.nays || 0) + ', at'
-            : n.kind === 'ballot' ? 'a motion is on the ballot at' : n.from.tag + ' sent word',
-        isAsk: n.kind === 'ask', isInvite: /^(invite|keeper|okd|rej|passed|failed|ballot)$/.test(n.kind) && /^[a-z0-9-]{1,32}$/.test(n.slug || ''),
-        href: /^(invite|keeper)$/.test(n.kind) ? '/' + n.slug : (n.slug === 'toem2' ? '/toem2/' : '/toem2/?page=' + n.slug) + (n.kind === 'ballot' ? (n.slug === 'toem2' ? '?' : '&') + 'ballot=1' : ''),
-        title: n.title || n.slug, when: AGO(n.at),
-        yes: () => this.friendsDo({ op: 'answer', id: n.from.id, yes: true }),
-        no: () => this.friendsDo({ op: 'answer', id: n.from.id, yes: false })
-      })),
+      /* THE BELL, OPENED (2026-09-27): the press lays bell.js's sheet over the page. It is handed
+         the list as this page read it, the fence as the script said it, and this page's own way
+         of posting — so a yes or a no answered on the sheet is the friends card's news too. The
+         sheet tells the door what has been seen (the fence's likes with it), and the number
+         here goes with the list that comes back. */
+      toggleBell: (e) => {
+        if (!window.KnollBell) return;
+        if (KnollBell.isOpen) { KnollBell.close(); return; }
+        this.setState({ bellOpen: true });
+        KnollBell.open({ fr: this.state.fr, fence: this.state.fence || null, back: e && e.currentTarget,
+          act: body => this.friendsDo(body), again: () => Promise.resolve(this.state.fr), shut: () => this.setState({ bellOpen: false }) });
+      },
+      bellNew: bellN > 0, bellCount: bellN > 9 ? '9+' : String(bellN),
+      bellLabel: bellN ? 'notifications, ' + bellN + ' new' : 'notifications',
       fileRef: this.fileRef || (this.fileRef = React.createRef()),
       kTitle: this.state.picNote || (this.state.pic ? 'your picture — click to change it' : 'give yourself a picture'),
       pic: this.state.pic, hasPic: !!this.state.pic,

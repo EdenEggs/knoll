@@ -51,7 +51,7 @@ const head = html => (/<head[^>]*>([\s\S]*?)<\/head>/i.exec(html) || [, ''])[1];
 const meta = (h, k) => { const m = new RegExp('<meta\\s+(?:name|property)="' + k + '"\\s+content="([^"]*)"', 'i').exec(h); return m ? m[1] : null; };
 const PUBLIC = ['lab2/index.html', 'toem2/index.html', 'ironhive/index.html', 'login/index.html', 'signup/index.html',
                 'privacy/index.html', 'terms/index.html', 'space.html', 'YardView/index.html', 'coming-soon.html'];
-const SIGNED_IN = ['yard/index.html', 'yard/new/index.html', 'dashboard/index.html', 'settings/index.html'];
+const SIGNED_IN = ['yard/index.html', 'yard/new/index.html', 'dashboard/index.html', 'dashboard/edits/index.html', 'settings/index.html'];
 for (const f of PUBLIC.concat(SIGNED_IN)) {
   // a page not in this tree yet (terms/, while it waits on its placeholders) is not a failure here:
   // the sitemap's check below is what says whether anything that is FOR search is missing

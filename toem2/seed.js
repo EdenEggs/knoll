@@ -102,7 +102,7 @@ window.Seed = (function () {
      site's, not a page's. */
   const PAGE = document.documentElement.dataset.page || 'toem2', NS = 'knoll-' + PAGE + ':', HOME = PAGE === 'toem2';
   const KEY = { wall: NS + 'wall', flatfile: NS + 'flatfile', cam: NS + 'cam', mark: NS + 'seeded',
-                token: 'knoll-toem2:token', resume: NS + 'resume', before: NS + 'wall-before-live', hinted: NS + 'hinted' };
+                token: 'knoll-toem2:token', resume: NS + 'resume', before: NS + 'wall-before-live', hinted: NS + 'hinted', paper: NS + 'paper' };
   const FILE = 'wall-seed.json', DOOR = '/_toem2/wall', API = '/api/wall', PQ = 'page=' + encodeURIComponent(PAGE);
   const NARROW = 700;                       // under this the bench is a phone's — the same line as lab.css's zoom dock
   const LOCAL = document.documentElement.classList.contains('lab-local');
@@ -329,6 +329,8 @@ window.Seed = (function () {
       const n = document.querySelector('.lab-name');
       if (n && rules.title) n.textContent = rules.title;
       if (rules.title) document.title = 'Knoll · ' + rules.title;
+      // …and its paper (2026-09-27): the set its settings chose, by name, which lab.css draws the bench in (A SPACE'S OWN PAPER) — kept, so index.html's head has it before the next first paint
+      if (rules.palette) { document.documentElement.dataset.paper = rules.palette; set(KEY.paper, rules.palette); }
     }
     if (rules && window.Wall && Wall.setInks) Wall.setInks(rules.inks || []);   // …and offers only its inks on the dock (wall.js: THE INKS OF A SPACE)
     paintStamp(); hintDock();

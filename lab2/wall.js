@@ -131,7 +131,10 @@ window.Wall = (function () {
   const PIX = [0, 10, 20, 40];           // 0 is a free hand; the rest are cells, in world units
   const GRID = 20;                       // what the bench is ruled at when nothing has re-cut it
   const NW = [90, 1400];                 // how narrow and how wide a note may be reshaped to
-  const NOTE_MAX = 100;                // how many characters a note may hold (2026-09-22)
+  /* HOW MANY CHARACTERS A NOTE MAY HOLD GOES BY ITS SIZE (2026-09-27; a flat hundred since
+     2026-09-22): NOTE_MAX at the smallest size, NOTE_MIN at the biggest, and a straight line
+     through the sizes between them — capAt(), under TSZ. */
+  const NOTE_MAX = 100, NOTE_MIN = 20;
   const NOTE_SLOP = 5;                  // screen px a press on a note may shiver and still open it
   const LH = 1.32;                       // a line of a note, as a multiple of its size
   const SK = ['hat', 'gnome', 'toadstool', 'beard', 'lantern'];
@@ -155,6 +158,8 @@ window.Wall = (function () {
      36 is the one people mean and 22 → 24 → 26 is not. */
   const TSZ = [12, 14, 16, 18, 22, 28, 36, 48, 64, 88];
   const DEF_Z = TSZ.indexOf(22);         // the size a note has always come out at
+  // …and what a note of each size may hold: 100 91 82 73 64 56 47 38 29 20 (NOTE_MAX, above)
+  const capAt = z => Math.round(NOTE_MAX - (NOTE_MAX - NOTE_MIN) * z / (TSZ.length - 1));
   const ALIGN = ['start', 'middle', 'end'];      // left, centred, right — in SVG's own words
   const CSS_AL = ['left', 'center', 'right'];    // …and in the box you type into
   /* The five pads, KEPT FOR WHAT IS ALREADY ON THE WALL. Nothing picks one any
@@ -906,21 +911,13 @@ window.Wall = (function () {
     grip.setAttribute('aria-label', 'how wide the note is');
     grip.tabIndex = -1;
 
-    const hint = document.createElement('p');
-    hint.className = 'wall-note-hint';
-    hint.textContent = 'enter to pin it · drag the edge to move it · shift+enter for a new line · ctrl b/i/u · ctrl [ ] for size';
-
-    /* HOW MANY ARE LEFT (2026-09-22), over the box's top right corner: the box takes NOTE_MAX
-       characters and no more, and the count turns pink for the last ten. A note from before the
-       limit can hold more; it says how far over it is, and still pins. */
+    /* HOW MANY ARE LEFT (2026-09-22), over the box's top right corner: the box takes what its
+       size holds (noteRoom, by stepSize) and no more, and the count turns pink for the last ten.
+       A note from before the limit can hold more; it says how far over it is, and still pins.
+       The line of keys that hung under the box came off on 2026-09-27. */
     const ta = noteIn, left = document.createElement('span');
     left.className = 'wall-note-left';
-    const count = () => {
-      const n = NOTE_MAX - ta.value.length;
-      left.textContent = n < 0 ? -n + ' over' : n + ' left';
-      left.classList.toggle('wall-note-low', n <= 10);
-    };
-    noteBox.append(noteIn, grip, hint, left);
+    noteBox.append(noteIn, grip, left);
     world.appendChild(noteBox);
     styleNote();
     buildOpts();                         // the type case comes up WITH the box
@@ -929,8 +926,20 @@ window.Wall = (function () {
     // over all of them: coming back to add something is the ordinary case
     if (editing) noteIn.setSelectionRange(noteIn.value.length, noteIn.value.length);
 
-    count();
-    noteIn.addEventListener('input', () => { grow(); count(); });
+    /* …AND NO MORE GOES IN THAN THE SIZE HOLDS (2026-09-27). maxlength is the flat hundred, so
+       this is what keeps a note to noteRoom(): whatever was just typed or pasted past it comes
+       back out from under the caret, the way maxlength would have cut it — and never a word that
+       was in the box already. Not while an IME is still composing a word; when it has. */
+    let was = ta.value.length;
+    const fit = ev => {
+      if (ev.isComposing) return;
+      const v = ta.value, e = ta.selectionEnd, cut = Math.min(v.length - noteRoom(), v.length - was, e);
+      if (cut > 0) { ta.value = v.slice(0, e - cut) + v.slice(e); ta.setSelectionRange(e - cut, e - cut); }
+      was = ta.value.length;
+      grow(); noteCount();
+    };
+    noteIn.addEventListener('input', fit);
+    noteIn.addEventListener('compositionend', fit);
     noteIn.addEventListener('keydown', ev => {
       /* The word-processor keys. Only the ones a browser will actually let a
          page have: ctrl B / I / U are free inside an editable box, and ctrl [
@@ -951,9 +960,9 @@ window.Wall = (function () {
     });
     noteIn.addEventListener('blur', () => commitNote());
 
-    /* A PRESS ON THE BOX'S OWN CHROME MUST NOT FILE THE NOTE. Its padding, its
-       border and the hint under it are all part of the thing you are writing
-       in, but none of them is the textarea — so a press there would move focus
+    /* A PRESS ON THE BOX'S OWN CHROME MUST NOT FILE THE NOTE. Its padding and
+       its border are part of the thing you are writing in, but neither of them
+       is the textarea — so a press there would move focus
        to the page, and losing focus is what pins a note. Same fix as the
        options row: swallow the pointerdown and put the caret back. It is also
        what lets a double click land anywhere on a note that has just opened
@@ -1069,11 +1078,26 @@ window.Wall = (function () {
     const bg = bgOf(fbg);
     if (noteBox) noteBox.style.background = bg ? 'var(--' + bg + ')' : '';
     grow();
+    noteCount();                         // what the box holds goes by the size it was just given
+  }
+
+  /* WHAT THE BOX HOLDS RIGHT NOW (2026-09-27): what its size holds (capAt). ponytail: a
+     courtesy of the box's, not a lock — nothing downstream of it counts. */
+  const noteRoom = () => capAt(fz);
+  // the count over the box's corner — or, for as long as nothing else is typed, why A+ did nothing
+  function noteCount(say) {
+    const left = noteBox && noteBox.querySelector('.wall-note-left');
+    if (!left) return;
+    const n = noteRoom() - noteIn.value.length;
+    left.textContent = say || (n < 0 ? -n + ' over' : n + ' left');
+    left.classList.toggle('wall-note-low', !!say || n <= 10);
   }
 
   function stepSize(d) {
     const z = clamp(0, TSZ.length - 1, fz + d);
     if (z === fz) return;
+    // a bigger size holds fewer characters: the words already in the box keep it from one that would not hold them
+    if (d > 0 && noteIn && noteIn.value.length > capAt(z)) { noteCount('too many characters to go bigger'); return; }
     fz = z; buildOpts(); styleNote();
   }
 

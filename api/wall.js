@@ -352,14 +352,16 @@ const dbm = cmds => storeFor().many(cmds);
 
    ACCOUNTS — the site's
      user:<u>          hash    made seen name n role pw toured banned struck strikes avatar noted watch
+                               · gen — how many times its password has been reset (THE SESSION'S GENERATION)
+                               · hearts — the likes on its yard's fence when the bell was last opened (api/friends.js: op seen)
                                · live held okd rej won rvd rvs rvw votes — the counters (HABITS)
      users             zset    every account, scored by when it was made
      names:<u>         list    {name, n, at, by} — every name it has gone by, newest first
      tagn:<name>       string  how many have taken that name (lower-cased): the last #n given
      tags              hash    '<name>#<n>' → the account; a tag is never given twice
-     sess:<sha>        string  a session → its account (expires)
-     oauth:<state>     string  a Google sign-in on its way (ten minutes)
-     code:<u>          hash    h tries — a sign-up code posted to an address, hashed, and the wrong guesses (api/auth.js: THE CODE; ten minutes)
+     sess:<sha>        string  a session → its account, and '.<gen>' once the account has one (expires)
+     oauth:<state>     string  a Google or Discord sign-in on its way (ten minutes)
+     code:<u>          hash    h tries — a code posted to an address, a sign-up's or a reset's, hashed, and the guesses (api/auth.js: THE CODE, THE RESET; ten minutes)
      days:<u>          set     standing days — rep, earned on any page
      rl:<who>:<hour>   string  the hour's counters · rl:chat:<slug>:<u>:wait — the chat's wait between two lines (api/board.js)
      fp:<u>:<day>      set     the pieces touched today, any page (the footprint)
@@ -380,11 +382,14 @@ const dbm = cmds => storeFor().many(cmds);
      prop:<id>         string  a change somebody else proposes to a gnome's yard or name
      propdoc:<id>      string  …the yard it proposes, while it is open
      props:<hill>      list    the open ones, for that yard's owner to decide
+     propsdone:<hill>  list    the decided ones, newest first, trimmed — the yard's history of what was proposed (their records last PROP_KEEP days)
      propsby:<u>       list    the open ones this account has made · propsip:<h> the same by address
    FRIENDS — api/friends.js
      friends:<u>       set     the accounts it is friends with, both ways
      asks:<u>          set     the accounts asking to be its friend
-     notes:<u>         list    its bell, newest first: {kind ask|friend|keeper|okd|rej|passed|failed|ballot, from, at, slug, title, why, ayes, nays}
+     notes:<u>         list    its bell, newest first: {kind, from, at, slug, title, why, ayes, nays, prop, what} — kind is ask · friend · keeper (friends.js),
+                               okd · rej · passed · failed · ballot · waiting (here), proposal · taken · left (hill.js), thread · reply (board.js),
+                               photo · heart (gallery.js)
      invited:<slug>    set     the accounts invited to a space — its keepers, while they are still the maker's friends
    THE TOWN BOARD AND THE CHAT — api/board.js
      board:<slug>:<ch> list    a page's news · updates · forum (threads and replies) · chat, newest first, trimmed
@@ -401,7 +406,7 @@ const K = {
   fp: (u, day) => P + 'fp:' + u + ':' + day, pending: u => P + 'pending:' + u, pendingIp: h => P + 'pendingip:' + h,
   page: s => P + 'page:' + s, pages: P + 'pages', spaces: u => P + 'spaces:' + u, edit: id => P + 'edit:' + id,
   prop: id => P + 'prop:' + id, propDoc: id => P + 'propdoc:' + id, props: hill => P + 'props:' + hill,
-  propsBy: u => P + 'propsby:' + u, propsIp: h => P + 'propsip:' + h, audit: P + 'audit',
+  propsBy: u => P + 'propsby:' + u, propsIp: h => P + 'propsip:' + h, propsDone: hill => P + 'propsdone:' + hill, audit: P + 'audit',
   friends: u => P + 'friends:' + u, asks: u => P + 'asks:' + u, notes: u => P + 'notes:' + u, invited: s => P + 'invited:' + s,
   lock: id => P + 'lock:' + id, board: (s, ch) => P + 'board:' + s + ':' + ch,
   album: s => P + 'album:' + s, albumLike: (s, id) => P + 'album:' + s + ':like:' + id,
@@ -512,18 +517,29 @@ function sameSite(req) {
    and no spaces; anything else goes to your yard */
 const localPath = v => (typeof v === 'string' && v.length <= 512 && /^\/(?![\/\\])[^\s\\]*$/.test(v) ? v : '/yard/');
 
+/* THE SESSION'S GENERATION (2026-09-27). A session is kept as its account and,
+   once the account has had its password reset, a dot and the account's `gen`
+   as it stood when the session was made. A reset turns `gen` (api/auth.js: THE
+   RESET), so every session from before it names a generation that is over,
+   and is nobody's — whoever held them is signed out at their next request. A
+   session from before any reset names none, which is the generation of an
+   account that has never had one. */
+const sessOf = v => String(v || '').split('.');                       // [the account, its generation]
+const inGen = (rec, gen) => (rec.gen || '') === (gen || '');
+
 async function whoIs(req) {
   const t = sessionOf(req);
   if (!t) return null;
-  const u = await db('GET', K.sess(sha(t)));
-  if (!u || !USER_RE.test(u)) return null;
+  const [u, gen] = sessOf(await db('GET', K.sess(sha(t))));
+  if (!USER_RE.test(u)) return null;
   const [rec, rep] = await dbm([['HGETALL', K.user(u)], ['SCARD', K.days(u)]]);
-  if (!rec || !Object.keys(rec).length) return null;
+  if (!rec || !Object.keys(rec).length || !inGen(rec, gen)) return null;
   return profile(u, await ensureTag(u, rec), rep);
 }
-async function mintSession(u, days) {
+async function mintSession(u, days, gen) {     // gen: the account's, when the caller has its record to hand; asked for otherwise
   const s = crypto.randomBytes(16).toString('hex');
-  await db('SET', K.sess(sha(s)), u, 'EX', Math.round((days || SESSION_DAYS) * 86400));
+  if (gen === undefined) gen = await db('HGET', K.user(u), 'gen');
+  await db('SET', K.sess(sha(s)), gen ? u + '.' + gen : u, 'EX', Math.round((days || SESSION_DAYS) * 86400));
   return s;
 }
 /* An address has been vouched for — by Google, or by its secret word
@@ -545,7 +561,7 @@ async function finishLogin(email, days, proved = true) {
   if (proved && admins().includes(String(email).trim().toLowerCase())) sets.push('role', 'admin');
   else if (rec.role === 'admin') sets.push('role', 'user');
   await dbm([['HSET', K.user(u), ...sets], ['ZADD', K.users, +(rec.made || now), u]]);   // counted among the accounts (again is harmless)
-  return { user: u, session: await mintSession(u, days), fresh, named: !!rec.name };
+  return { user: u, session: await mintSession(u, days, rec.gen || ''), fresh, named: !!rec.name };
 }
 
 /* ── THE NAMES (2026-09-22) ─────────────────────────────────────────────────
@@ -604,6 +620,24 @@ async function audit(by, what, extra) {        // the moderators' record: who di
 // THE BELL (api/friends.js reads it): one note, newest first, the last NOTES_KEEP kept
 const tell = (to, kind, from, extra) => dbm([['LPUSH', K.notes(to), JSON.stringify(Object.assign({ kind, from, at: Date.now() }, extra || {}))],
                                             ['LTRIM', K.notes(to), 0, NOTES_KEEP - 1]]);
+/* …AND ONCE (2026-09-27): the things that happen at a space over and over — an edit waiting, a
+   thread begun, a photo hung, a heart given — are said once per place while that note is still
+   unread (newer than `noted`, the bell last opened), so a busy afternoon is one line in a bell of
+   fifty and not the whole of it. The bell says THAT there is something; the page it points at
+   says how much. */
+async function tellOnce(to, kind, from, extra) {
+  const [raw, noted] = await dbm([['LRANGE', K.notes(to), 0, NOTES_KEEP - 1], ['HGET', K.user(to), 'noted']]);
+  const slug = (extra || {}).slug;
+  if (raw.some(s => { try { const n = JSON.parse(s); return n.kind === kind && n.slug === slug && n.at > (+noted || 0); } catch (e) { return false; } })) return;
+  await tell(to, kind, from, extra);
+}
+/* A space's keepers, told of something that happened there — all but the one who did it, and
+   TOLD_MAX of them at most: a maker may invite whom they like, and one post must not become a
+   store call for every keeper of a space with a thousand. The maker is first in the list. */
+const TOLD_MAX = 25;
+async function tellKeepers(rules, from, kind, extra) {
+  for (const u of rules.keepers.filter(u => u !== from).slice(0, TOLD_MAX)) await tellOnce(u, kind, from, Object.assign({ slug: rules.page, title: rules.title }, extra || {}));
+}
 async function tagsOf(ids) {                   // account → Name#n, for the ones a page will draw
   const uniq = [...new Set(ids)], out = {};
   if (!uniq.length) return out;
@@ -976,6 +1010,8 @@ async function enqueue(pg, me, patch, c, req, status, rules, why) {
     await db('HSET', K.page(pg.slug), 'told', String(rec.closes));
     for (const u of rules.keepers) if (u !== me.id) await tell(u, 'ballot', me.id, { slug: pg.slug, title: rules.title });
   }
+  // an edit waiting for a look rings the bells of those who can give it one: the space's maker and keepers (TOEM 2 has none of its own)
+  if (rec.status === 'queued') await tellKeepers(rules, me.id, 'waiting');
   return { id, closes: rec.closes };
 }
 async function settle(ed, status, me, extra) {
@@ -1292,7 +1328,7 @@ async function opRole(req, res, me, body) {
    branch at the top of decide() when it is wanted. */
 const SPACES_MAX = 3;                         // three since 2026-09-25 (the yard's YOUR SPACES row holds three); two before
 const RESERVED = new Set(['404', 'api', 'apps-script', 'auth', 'coming-soon', 'dashboard', 'features', 'fonts', 'ironhive', 'lab', 'lab2',
-                          'login', 'logo', 'posters', 'privacy', 'settings', 'signup', 'uploads', 'vendor', 'yard', 'yardview']);
+                          'login', 'logo', 'posters', 'privacy', 'settings', 'signup', 'terms', 'uploads', 'vendor', 'yard', 'yardview']);
 // the form's four papers (yard/new/: PALETTES, keep in step), which space.html and the yard's hills draw with
 const PAPERS = {
   yard:   { paper: '#fdf7e3', ink: '#17120b', card: '#fffcf0', line: '#d9cdb0', mute: '#4a4054', accent: '#e8484a' },
@@ -1382,7 +1418,8 @@ async function opPage(req, res, me, body) {
 async function get(req, res, q, op) {
   const st = storeFor();
   if (q.get('ping')) return answer(res, 200, { ok: true, door: true, store: st ? st.kind : 'none', login: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) });
-  if (op === 'google' || op === 'callback') return oauth(req, res, q, op);
+  const way = vouchOf(op);
+  if (way) return oauth(req, res, q, way[1], !!way[2]);
   if (!st) return answer(res, 503, { ok: false, code: 'no-store', error: 'this site has no store for the wall yet (KV_REST_API_URL / KV_REST_API_TOKEN)' });
   if (q.get('me')) {
     const me = await whoIs(req);
@@ -1477,12 +1514,42 @@ function originOf(req) {
   const host = String(h['x-forwarded-host'] || h.host || 'localhost').split(',')[0].trim();
   return proto + '://' + host;
 }
-async function oauth(req, res, q, op) {
-  const id = process.env.GOOGLE_CLIENT_ID, secret = process.env.GOOGLE_CLIENT_SECRET;
-  if (!id || !secret) return page(res, 'Google sign-in is not set up on this site yet (GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are not set) — please log in with your email and password instead.');
+/* THE WAYS IN BESIDE A PASSWORD: Google, and since 2026-09-27 Discord. It is
+   one walk — out to them with a state, back with a code, the code changed
+   for a token — and what differs is where each lives, what it is asked for,
+   and how it says whose address this is: `email` answers a CONFIRMED address
+   or nothing. Google's is in its id token, read back by Google itself (it
+   names this site's client, and Google); Discord's is on the account the
+   token is for, and `verified` is Discord saying its owner answered a letter
+   there. Each wants its own pair in the environment (<NAME>_CLIENT_ID and
+   <NAME>_CLIENT_SECRET) and its own callback (/auth/<name>/callback)
+   registered with it. Neither waits on the other's servers past eight seconds. */
+const WAIT = () => AbortSignal.timeout(8000);
+const VOUCH = {
+  google: { name: 'Google', ask: 'https://accounts.google.com/o/oauth2/v2/auth', scope: 'openid email', prompt: 'select_account', token: 'https://oauth2.googleapis.com/token', headers: {},
+            unsure: 'Google could not confirm that email address.',
+            email: async (tok, id) => {
+              if (!tok.id_token) return '';
+              const info = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(tok.id_token), { signal: WAIT() }).then(r => r.json()).catch(() => ({}));
+              return info.aud === id && info.email_verified === 'true' && info.email && /^(https:\/\/)?accounts\.google\.com$/.test(String(info.iss || '')) ? String(info.email) : '';
+            } },
+  discord: { name: 'Discord', ask: 'https://discord.com/oauth2/authorize', scope: 'identify email', prompt: 'none', token: 'https://discord.com/api/oauth2/token',
+             headers: { 'user-agent': 'DiscordBot (https://www.knoll.space, 1)' },   // Discord's API wants a client that says what it is
+             unsure: 'Your Discord account has no confirmed email address. Please confirm your email in Discord and try again, or sign up with an email and password.',
+             email: async tok => {
+               if (!tok.access_token) return '';
+               const me = await fetch('https://discord.com/api/v10/users/@me', { headers: { authorization: 'Bearer ' + tok.access_token, 'user-agent': VOUCH.discord.headers['user-agent'] }, signal: WAIT() }).then(r => r.json()).catch(() => ({}));
+               return me.verified === true && typeof me.email === 'string' ? me.email : '';
+             } }
+};
+const vouchOf = op => /^(google|discord)(-back)?$/.exec(op === 'callback' ? 'google-back' : op);   // 'callback' is Google's, from before there were two
+async function oauth(req, res, q, which, back_) {
+  const way = VOUCH[which], NAME = way.name, VAR = which.toUpperCase();
+  const id = process.env[VAR + '_CLIENT_ID'], secret = process.env[VAR + '_CLIENT_SECRET'];
+  if (!id || !secret) return page(res, NAME + ' sign-in is not set up on this site yet (' + VAR + '_CLIENT_ID and ' + VAR + '_CLIENT_SECRET are not set) — please log in with your email and password instead.');
   if (!storeFor()) return page(res, 'This site has no account store yet, so there is nothing to sign in to.');
-  const back = (process.env.SITE_ORIGIN || originOf(req)).replace(/\/+$/, '') + '/auth/google/callback';
-  if (op === 'google') {
+  const back = (process.env.SITE_ORIGIN || originOf(req)).replace(/\/+$/, '') + '/auth/' + which + '/callback';
+  if (!back_) {
     /* THE STATE IS THIS BROWSER'S: kept in the store with where to go back
        to (?next=, a path on this site), and in a cookie only this browser
        holds — so a callback link somebody else started (their Google, their
@@ -1491,36 +1558,39 @@ async function oauth(req, res, q, op) {
        handed over in the URL fragment; the session is a cookie now.) */
     const state = crypto.randomBytes(16).toString('base64url');
     await db('SET', K.oauth(state), localPath(q.get('next')), 'EX', 600);
-    const to = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({ client_id: id, redirect_uri: back, response_type: 'code', scope: 'openid email', state, prompt: 'select_account' });
+    const to = way.ask + '?' + new URLSearchParams({ client_id: id, redirect_uri: back, response_type: 'code', scope: way.scope, state, prompt: way.prompt });
     res.statusCode = 302; res.setHeader('location', to); res.setHeader('cache-control', 'no-store');
     res.setHeader('set-cookie', cookie(req, OAUTH, state, 600 / 86400));
     res.end();
     return;
   }
-  // Google comes back with ?error= and no code when the person cancels, or when the consent screen does not let them in (2026-09-23)
+  // they come back with ?error= and no code when the person cancels, or when the consent screen does not let them in (2026-09-23)
   const oerr = q.get('error');
-  if (oerr) return page(res, oerr === 'access_denied' ? 'The Google sign-in was cancelled, or Google did not allow it. Please go back and try again.' : 'Google sign-in did not go through (' + String(oerr).slice(0, 64) + '). Please go back and try again.');
+  if (oerr) return page(res, oerr === 'access_denied' ? 'The ' + NAME + ' sign-in was cancelled, or ' + NAME + ' did not allow it. Please go back and try again.' : NAME + ' sign-in did not go through (' + String(oerr).slice(0, 64) + '). Please go back and try again.');
   const state = q.get('state') || '', code = q.get('code') || '';
-  if (!/^[A-Za-z0-9_-]{16,32}$/.test(state) || !/^[A-Za-z0-9._\/-]{4,512}$/.test(code)) return page(res, 'That Google sign-in did not come back correctly. Please go back and press the Google button again.');
-  if (cookieOf(req, OAUTH) !== state) return page(res, 'That Google sign-in was started in another browser, or this one has forgotten it. Please go back and press the Google button again.');
+  if (!/^[A-Za-z0-9_-]{16,32}$/.test(state) || !/^[A-Za-z0-9._\/-]{4,512}$/.test(code)) return page(res, 'That ' + NAME + ' sign-in did not come back correctly. Please go back and press the ' + NAME + ' button again.');
+  if (cookieOf(req, OAUTH) !== state) return page(res, 'That ' + NAME + ' sign-in was started in another browser, or this one has forgotten it. Please go back and press the ' + NAME + ' button again.');
   const next = await db('GETDEL', K.oauth(state));
-  if (!next) return page(res, 'That Google sign-in has expired. Please go back and press the Google button again.');
-  const tok = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' },
+  if (!next) return page(res, 'That ' + NAME + ' sign-in has expired. Please go back and press the ' + NAME + ' button again.');
+  const tok = await fetch(way.token, { method: 'POST', headers: Object.assign({ 'content-type': 'application/x-www-form-urlencoded' }, way.headers), signal: WAIT(),
     body: String(new URLSearchParams({ code, client_id: id, client_secret: secret, redirect_uri: back, grant_type: 'authorization_code' })) }).then(r => r.json()).catch(() => ({}));
-  if (!tok.id_token) return page(res, 'Google did not sign you in: ' + (tok.error_description || tok.error || 'no token came back') + '.');
-  const info = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(tok.id_token)).then(r => r.json()).catch(() => ({}));
-  if (info.aud !== id || info.email_verified !== 'true' || !info.email || !/^(https:\/\/)?accounts\.google\.com$/.test(String(info.iss || ''))) return page(res, 'Google could not confirm that email address.');
-  /* ONE ADDRESS, ONE WAY IN. An account made at /signup proves nothing about
-     its address — there is no letter to answer — so Google vouching for the
-     same address later must not open it: that would hand whoever typed the
-     address first (and knows the secret word) the account of the person who
-     really owns it. So a secret word's account is the secret word's, and
-     /signup refuses an address Google has already vouched for. */
-  if (await db('HGET', K.user(userKey(info.email)), 'pw')) return page(res, 'That email already has a password on this site — please log in with your email and password.');
-  const { user, session, named } = await finishLogin(info.email);
+  if (!tok.id_token && !tok.access_token) return page(res, NAME + ' did not sign you in: ' + (tok.error_description || tok.error || 'no token came back') + '.');
+  const email = await way.email(tok, id);
+  if (!email) return page(res, way.unsure);
+  /* ONE ADDRESS, ONE WAY IN. A password's account is the password's: Google
+     or Discord vouching for the same address later does not open it, and
+     /signup refuses an address either has already vouched for. (When this
+     was written a sign-up proved nothing about its address, and opening it
+     would have handed whoever typed the address first the account of the
+     person who owns it; a sign-up answers a letter now — api/auth.js: THE
+     CODE — and the rule has stayed.) An address Google vouched for IS opened
+     by Discord vouching for it, and the other way about: the account is the
+     address's, and both have had its owner prove it. */
+  if (await db('HGET', K.user(userKey(email)), 'pw')) return page(res, 'That email already has a password on this site — please log in with your email and password.');
+  const { user, session, named } = await finishLogin(email);
   setSession(res, req, session, user, SESSION_DAYS, [cookie(req, OAUTH, '', 0)]);
   // a new account has no name yet: /signup asks for one, then goes on to next
-  res.statusCode = 302; res.setHeader('location', named ? next : '/signup/?google=1&next=' + encodeURIComponent(next)); res.setHeader('cache-control', 'no-store'); res.end();
+  res.statusCode = 302; res.setHeader('location', named ? next : '/signup/?' + which + '=1&next=' + encodeURIComponent(next)); res.setHeader('cache-control', 'no-store'); res.end();
 }
 
 // ── the handler ───────────────────────────────────────────────────────────
@@ -1528,8 +1598,8 @@ async function handler(req, res) {
   try {
     const url = new URL(req.url, 'http://x'), q = url.searchParams;
     let op = q.get('op') || '';
-    if (/\/auth\/google\/callback$/.test(url.pathname)) op = 'callback';
-    else if (/\/auth\/google$/.test(url.pathname)) op = 'google';
+    const door = /\/auth\/(google|discord)(\/callback)?$/.exec(url.pathname);   // the sign-in paths vercel.json rewrites here, as serve.js hands them over
+    if (door) op = door[1] + (door[2] ? '-back' : '');
     if (req.method === 'GET') return await get(req, res, q, op);
     if (req.method !== 'POST') return answer(res, 405, { ok: false, error: 'GET or POST' });
     if (!storeFor()) return answer(res, 503, { ok: false, code: 'no-store', error: 'this site has no store for the wall yet' });
@@ -1565,8 +1635,8 @@ async function handler(req, res) {
 module.exports = handler;
 // for the probes: the store (and a way to swap it), the keys, and the two things a test signs in with
 Object.assign(handler, { storeFor, useStore: s => { STORE = s; }, db, dbm, K, pageKeys, HOME, CAP, LINE, RATE, TIER_REP, MOTION_HOURS, MOTION_QUORUM, TAG_MAX, mintSession, finishLogin, userKey, CAS,
-                         CHAOS, PERIODS, MIN_OPEN_H, VOTE, FEATS_DEFAULT });
+                         CHAOS, PERIODS, MIN_OPEN_H, VOTE, FEATS_DEFAULT, NOTES_KEEP });
 // …and for api/auth.js (the accounts) and api/hill.js (a yard of one's own, and proposals to it): who
 // is asking, the session's two cookies, the names, and the checks a piece that other people's browsers will draw has to pass
-Object.assign(handler, { whoIs, isMod, sessionOf, setSession, clearSession, sameSite, localPath, answer, readBody, Bad, bad, text, sha, ipHash,
-                         rename, cleanName, tagOf, foldName, ensureTag, audit, tell, tagsOf, habits, rulesOf, cleanRecord, cleanTracing, cleanPic, KINDS, GIF_RE, VID_RE, USER_RE, SLUG_RE, SESSION_DAYS });
+Object.assign(handler, { whoIs, isMod, sessionOf, sessOf, inGen, setSession, clearSession, sameSite, localPath, answer, readBody, Bad, bad, text, sha, ipHash,
+                         rename, cleanName, tagOf, foldName, ensureTag, audit, tell, tellOnce, tellKeepers, tagsOf, habits, rulesOf, cleanRecord, cleanTracing, cleanPic, KINDS, GIF_RE, VID_RE, USER_RE, SLUG_RE, SESSION_DAYS });

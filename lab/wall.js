@@ -475,7 +475,9 @@ window.Wall = (function () {
     noteIn = document.createElement('textarea');
     noteIn.className = 'wall-note-in';
     noteIn.rows = 1;
-    noteIn.maxLength = 400;
+    // what a note of this size holds on every other bench — a hundred at the smallest size down
+    // to twenty at the biggest, and this bench writes at 22 (2026-09-27; it was 400)
+    noteIn.maxLength = 64;
     noteIn.placeholder = s.k ? 'write on the sticky…' : 'say something…';
     noteIn.style.width = round(nw) + 'px';
     noteIn.style.fontFamily = f.f;
@@ -488,11 +490,7 @@ window.Wall = (function () {
     grip.setAttribute('aria-label', 'how wide the note is');
     grip.tabIndex = -1;
 
-    const hint = document.createElement('p');
-    hint.className = 'wall-note-hint';
-    hint.textContent = 'enter to pin it · shift+enter for a new line · drag the tab to reshape';
-
-    noteBox.append(noteIn, grip, hint);
+    noteBox.append(noteIn, grip);   // the line of keys that hung under the box came off on 2026-09-27
     world.appendChild(noteBox);
     grow();
     noteIn.focus();

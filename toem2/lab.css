@@ -16,6 +16,7 @@
   --ink:#26212a; --ink-2:#2e2636; --ink-3:#3d3346;
   --mute:#8b7f92; --mute-2:#bcaebf; --line:#e2d4df;
   --pink:#c93b82; --pink-2:#ef4d98; --pink-soft:#f9d3e6;
+  --pink-deep:#a52c68; --pink-wash:#fff6fb;   /* the accent pressed on (a link's hover), and washed right out (a lit pill) */
   --blue:#5871f5; --green:#2fae76; --amber:#f59321;
 
   /* ── type ────────────────────────────────────────────────────────────── */
@@ -57,6 +58,35 @@
   --st-drop:rgba(23,18,11,.82);
 }
 
+/* A SPACE'S OWN PAPER (2026-09-27). This bench is every space's wall as well
+   as TOEM 2's (index.html: ?page=), and a space was given a paper when it was
+   made (/yard/new/) or after (/settings/): one set of four, each the seven
+   colours its preview there is drawn in — the paper, the ink, the card, the
+   line, the mute, the accent and the dock (settings/index.html: PALETTES, and
+   api/wall.js: PAPERS — keep in step). Until now the wall took the space's
+   name and its inks and never its paper, so every space opened on TOEM 2's.
+
+   seed.js puts the set's name on <html data-paper> when it reads the rules,
+   and index.html's head puts the one this browser saw last there before the
+   first paint. The first rule is the yard's set — what the door answers for
+   a name it has not heard of, so what this sheet does too — and lays the
+   seven over the bench's own tokens, so everything drawn in those follows:
+   the paper and its dots, the header, the name, the links, the pick, both
+   docks. TOEM 2 has no data-paper and is as it was. */
+html[data-paper]{
+  --sp-paper:#fdf7e3;--sp-ink:#17120b;--sp-card:#fffcf0;--sp-line:#d9cdb0;--sp-mute:#4a4054;--sp-accent:#e8484a;--sp-dock:#17120b;
+  --bench-bg:var(--sp-paper);--bench-dot:rgba(38,33,42,.1);
+  --paper:var(--sp-paper);--card:var(--sp-card);--line:var(--sp-line);
+  --ink:var(--sp-ink);--ink-2:var(--sp-dock);--ink-3:var(--sp-ink);
+  --mute:var(--sp-mute);--mute-2:color-mix(in srgb,var(--sp-mute) 55%,var(--sp-card));
+  --pink:var(--sp-accent);--pink-2:var(--sp-accent);
+  --pink-soft:color-mix(in srgb,var(--sp-accent) 22%,#fff);
+  --pink-deep:color-mix(in srgb,var(--sp-accent) 78%,#000);--pink-wash:var(--sp-card);
+  --gz-handle-bg:var(--sp-dock)}
+html[data-paper="knoll"]{--sp-paper:#faf7f9;--sp-ink:#26212a;--sp-card:#fdfbfd;--sp-line:#e2d4df;--sp-mute:#8b7f92;--sp-accent:#c93b82;--sp-dock:#2e2636}
+html[data-paper="bench"]{--sp-paper:#efe7ed;--sp-ink:#2e2636;--sp-card:#fdfbfd;--sp-line:#e2d4df;--sp-mute:#8b7f92;--sp-accent:#f59321;--sp-dock:#2e2636}
+html[data-paper="sticky"]{--sp-paper:#ffe27a;--sp-ink:#26212a;--sp-card:#fff4c2;--sp-line:#d9bd55;--sp-mute:#5a5140;--sp-accent:#c93b82;--sp-dock:#26212a}
+
 *{box-sizing:border-box}
 [hidden]{display:none!important}   /* the hidden attribute must beat any author display */
 html,body{margin:0;padding:0;height:100%}
@@ -64,7 +94,7 @@ html,body{margin:0;padding:0;height:100%}
    rest and the camera in lab.js moves the sheet inside it */
 body{background:var(--paper);font-family:var(--body);color:var(--ink);
   height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;overscroll-behavior:none}
-a{color:var(--pink)}a:hover{color:#a52c68}
+a{color:var(--pink)}a:hover{color:var(--pink-deep)}
 ::selection{background:var(--pink-soft)}
 button,input{font-family:inherit}
 
@@ -78,7 +108,7 @@ button,input{font-family:inherit}
 .lab-hint{margin:0;flex:1 1 320px;font-size:13px;color:var(--mute);line-height:1.5;text-wrap:pretty}
 .lab-tools{display:flex;gap:14px;align-items:center}
 .lab-link{background:none;border:0;padding:0;font-size:12.5px;font-weight:600;color:var(--pink);cursor:pointer;text-decoration:none}
-.lab-link:hover{color:#a52c68;text-decoration:underline}
+.lab-link:hover{color:var(--pink-deep);text-decoration:underline}
 /* THE DEV SERVER'S "PUBLISH THE WALL" (seed.js) stands under the tools row
    and OUT of its width: a fourth link in the row was enough, at 1600 wide,
    to wrap the row under the hint — forty pixels off the bench, one under
@@ -124,7 +154,7 @@ html.lab-local .lab-tools{display:flex}
   font-family:var(--body);font-size:11.5px;font-weight:700;letter-spacing:.02em;
   color:#fff;background:var(--pink);white-space:nowrap;
   transition:background .16s,transform .1s}
-.lab-save:hover{background:#a52c68}
+.lab-save:hover{background:var(--pink-deep)}
 .lab-save:active{transform:translateY(1px)}
 .lab-save.is-done{background:#2f8f5b}
 .lab-save.is-bad{background:#b3261e}
@@ -133,7 +163,7 @@ html.lab-local .lab-tools{display:flex}
    the same pill stepped back — nothing to do, so it stops asking — and pink
    again the moment something moves. */
 .lab-save.is-clean{color:var(--mute);background:transparent;box-shadow:inset 0 0 0 1.5px var(--line)}
-.lab-save.is-clean:hover{color:var(--pink);background:#fff6fb}
+.lab-save.is-clean:hover{color:var(--pink);background:var(--pink-wash)}
 /* ONE WIDTH, WHATEVER IT SAYS. The first cut let the label size the button,
    and a wider label squeezed the long hint beside it onto more lines — the
    header grew, and the whole bench slid down and back with every press (and a
@@ -168,6 +198,8 @@ html.lab-live:not(.lab-local) .lab-tools>:not(#toem-save):not(#toem-save-note):n
 .toem-chaos:hover{transform:rotate(0deg)}
 .toem-chaos:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
 .toem-chaos.is-0{color:#6b6478} .toem-chaos.is-1{color:#2f8f5b} .toem-chaos.is-2{color:#b8860b} .toem-chaos.is-3{color:#b3261e}
+/* …and on a space it is stamped in the space's own accent, as its preview stamps it (A SPACE'S OWN PAPER) */
+html[data-paper] .toem-chaos{color:var(--pink)}
 .toem-chaos[hidden]{display:none}
 .toem-chaos-pop{position:absolute;top:calc(100% + 8px);left:0;z-index:3;width:max-content;max-width:min(30em,92vw);padding:8px 12px;border-radius:8px;
   background:var(--paper);box-shadow:0 2px 10px rgba(0,0,0,.14);font-family:var(--body);font-size:12px;line-height:1.5;color:var(--ink-3);text-align:left;text-wrap:pretty}
@@ -246,7 +278,7 @@ html.lab-live:not(.lab-local) .lab-tools>:not(#toem-save):not(#toem-save-note):n
 .lab-keep::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;
   opacity:.65;flex:none}
 .lab-keep:hover{border-color:var(--mute-2);color:var(--ink-3)}
-.lab-keep.is-saved{color:var(--pink);border-color:var(--pink-soft);background:#fff6fb}
+.lab-keep.is-saved{color:var(--pink);border-color:var(--pink-soft);background:var(--pink-wash)}
 .lab-keep.is-off{color:var(--mute-2)}
 .lab-keep.is-off::before{opacity:.3}
 .lab-keep.is-bad{color:#b3261e;border-color:#f0c4c0;background:#fff5f4}
@@ -555,7 +587,7 @@ body.lab-hand .gz iframe,body.lab-panning .gz iframe{pointer-events:none}
    docks at 6000, which are furniture and not paper. lab.js draws it; see
    DRAGGING THE BARE PAPER: THE BAND. */
 .lab-band{position:fixed;z-index:9080;pointer-events:none;
-  border:1.5px dashed var(--pink);background:rgba(201,59,130,.07)}
+  border:1.5px dashed var(--pink);background:color-mix(in srgb,var(--pink) 7%,transparent)}
 /* …and no selecting while it is drawn, which body.lab-panning has always had
    and the band, being younger, was never given. A band pulled across the
    paper runs over the words on the page behind it and was selecting them the
@@ -1120,8 +1152,6 @@ body[data-wall-tool="delete"] .gz:not(.gz-copy){pointer-events:none}
   padding:0;border:2px solid var(--pink);border-radius:7px;background:var(--field);cursor:ew-resize;
   display:grid;place-items:center;touch-action:none}
 .wall-note-grip::before{content:"";width:2px;height:16px;border-radius:2px;background:var(--pink);opacity:.75}
-.wall-note-hint{position:absolute;left:1px;top:calc(100% + 7px);margin:0;white-space:nowrap;
-  pointer-events:none;font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--mute-2)}
 /* ── carried by its frame, counted, and written on something (2026-09-22) ──
    The border and padding are the box's handle: drag them and the note goes with
    the pointer, while the words stay for writing in. Over the top right corner,
@@ -1147,7 +1177,6 @@ body[data-wall-tool="delete"] .gz:not(.gz-copy){pointer-events:none}
    the grip stay exactly as they are, since both read on either ground. */
 .wall-note.wall-note-dark{background:var(--gz-handle-bg)}
 .wall-note-dark .wall-note-in::placeholder{color:rgba(255,255,255,.42)}
-.wall-note-dark .wall-note-hint{color:rgba(255,255,255,.5)}
 
 /* and the tab that reshapes a note once it is on the paper: nothing at all
    until the move tool is up, then a hint of one until you are on it */
