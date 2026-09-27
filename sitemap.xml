@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The pages that are for search, by hand: a page is added here when it is made. Not the benches,
+     spaces and yards (noindex in their own heads), and not the signed-in pages. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://www.knoll.space/</loc></url>
+  <url><loc>https://www.knoll.space/signup/</loc></url>
+  <url><loc>https://www.knoll.space/login/</loc></url>
+  <url><loc>https://www.knoll.space/privacy/</loc></url>
+</urlset>

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html><head>
+<html lang="en"><head>
 <meta charset="utf-8">
-<title>Your Yard</title>
+<title>Your yard · Knoll</title>
+<meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- The icon sits HERE and not in the helmet, which is where this page used to
      keep it and where /dashboard still does. The helmet is hoisted into <head>
@@ -1888,7 +1889,7 @@ class Component extends DCLogic {
         const f = favs.slice(), k = f.indexOf(name); if (k >= 0) f.splice(k, 1); else f.push(name);
         try { localStorage.setItem('yard.favHills', JSON.stringify(f)); } catch (_) {}
         this.setState({ favHills: f, hoverHill: -1 }); } }; };
-    return Object.assign(this.plotVals(), this.tourVals(), {
+    return Object.assign(this.plotVals(), this.tourVals(), this.tierVals(), {   // tierVals: YOUR STANDING's stamp and line — written, and until 2026-09-26 never handed to the template
       greetWord: hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening',
       bellOpen: !!this.state.bellOpen,
       bellBg: this.state.bellOpen ? '#17120b' : '#fdf7e3',

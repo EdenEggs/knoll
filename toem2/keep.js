@@ -228,10 +228,13 @@ window.Keep = (function () {
 
   const start = () => { clearInterval(timer); timer = setInterval(push, EVERY); };
 
-  /* One knock before anything else. A 404 here is the deployed site saying
-     there is no door, which is not an error and does not want a red pill —
-     it wants this file to stop having an opinion. */
-  fetch(DOOR, { method: 'GET' }).then(r => r.ok ? r.json() : null).then(v => {
+  /* One knock before anything else — on the dev server only (html.lab-local,
+     which index.html decided before the stylesheet). The deployed site has no
+     door, and the knock was a 404 in every visitor's console and a wasted
+     request on every load (2026-09-26); off localhost, and under ?visitor,
+     this file stops having an opinion. A 404 on the dev server is still not
+     an error and still does not want a red pill. */
+  if (document.documentElement.classList.contains('lab-local')) fetch(DOOR, { method: 'GET' }).then(r => r.ok ? r.json() : null).then(v => {
     if (!v || !v.door) return;
     live = true;
     say('autosave on', '');

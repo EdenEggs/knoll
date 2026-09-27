@@ -185,3 +185,7 @@ things; for a family of things, make a kit.
   the lists, but only by making every unknown path on the whole site fall
   through to this bench, and by putting the bench's cache times on files
   that are not the bench's (`support.js` sits at the site's own root).
+  `node lab2/perf/probe-launch.js` reads both lists back against what
+  index.html asks for (2026-09-26: `stickers.js` and `benches.js` had been
+  added beside `lab.js` and to neither list, and the front page had no
+  sticker drawer until the probe's first run said so).

@@ -3,8 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex,nofollow">
-<title>Knoll Lab 2</title>
+<!-- FOR SEARCH SINCE 2026-09-26. This page said noindex,nofollow from the day it became the
+     front page (2026-09-04: "the right setting while it is still a bench"), which hid the whole
+     site — it is the landing page, and the owner's word is that it is ready to be found. The
+     benches and spaces (toem2, ironhive, lab) and people's yards still say noindex. -->
+<title>Knoll — the fan page, by the fans</title>
+<!-- WHAT A LINK TO THIS PAGE SAYS (2026-09-26): the line under a search result, and the card
+     a chat or a feed draws when the address is pasted into it -->
+<meta name="description" content="Knoll is a shared canvas where your community draws and builds together in real time. Doodle, stamp stickers, leave notes, and vote on what stays.">
+<link rel="canonical" href="https://www.knoll.space/">
+<meta property="og:title" content="Knoll — the fan page, by the fans">
+<meta property="og:description" content="Knoll is a shared canvas where your community draws and builds together in real time. Doodle, stamp stickers, leave notes, and vote on what stays.">
+<meta property="og:image" content="https://www.knoll.space/logo/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="../logo/logo-icon.svg">
 <!-- Sora + Public Sans are the house faces. VT323 is the caution tape, which
      is printed rather than written — and the tracing table's plates. Kalam is
@@ -25,8 +36,10 @@
      in lab.css. Decided here, before the stylesheet, so neither side ever
      paints the other's header for a frame. keep.js makes the same call for
      its own pill by knocking on the door, which is the same fact asked the
-     slow way. -->
-<script>if(/^(localhost|127.0.0.1|[::1])$/.test(location.hostname)&&!/[?&]visitor\b/.test(location.search))document.documentElement.classList.add('lab-local');</script>
+     slow way. The tab is named the same way (2026-09-26): the <title> above is
+     the landing page's, for a search result and a pasted link, and the bench
+     keeps the name it has always had. -->
+<script>if(/^(localhost|127.0.0.1|[::1])$/.test(location.hostname)&&!/[?&]visitor\b/.test(location.search)){document.documentElement.classList.add('lab-local');document.title='Knoll Lab 2';}</script>
 <!-- ?visitor (2026-09-21): localhost, but the landing page — how the site shows
      this bench, header, account corner and all, for a look at it before a push -->
 <link href="fonts/fonts.css" rel="stylesheet">
@@ -44,12 +57,11 @@
 <link rel="preload" href="features/gnome.dc.html" as="fetch" crossorigin>
 <link rel="preload" href="features/village.dc.html" as="fetch" crossorigin>
 <link rel="preload" href="posters/index.json" as="fetch" crossorigin>
-<link rel="preload" href="posters/rule-book.png" as="image">
-<link rel="preload" href="posters/gnome-bubbles.png" as="image">
-<link rel="preload" href="posters/knoll-cards-consensus.png" as="image">
-<link rel="preload" href="posters/knoll-cards-fans.png" as="image">
-<link rel="preload" href="posters/knoll-cards-rules.png" as="image">
-<link rel="preload" href="posters/fan-mark-banner.png" as="image">
+<link rel="preload" href="posters/rule-book.webp" as="image">
+<link rel="preload" href="posters/knoll-cards-consensus.webp" as="image">
+<link rel="preload" href="posters/knoll-cards-fans.webp" as="image">
+<link rel="preload" href="posters/knoll-cards-rules.webp" as="image">
+<link rel="preload" href="posters/fan-mark-banner.webp" as="image">
 <link rel="stylesheet" href="lab.css">
 <!-- THE ACCOUNT CORNER (2026-09-21): log in and sign up — or, signed in, your
      gnome — and the search, at the right-hand end of the header. account.js
@@ -65,6 +77,10 @@
     <img src="../logo/logo-icon.svg" alt="" width="26" height="26">
     <span>knoll</span><span class="lab-slash">/</span><span class="lab-name">lab 2</span>
   </a>
+  <!-- THE PAGE'S ONE HEADING (2026-09-26). The sign on the bench is five drawings, one to a
+       letter, and says nothing to a screen reader or a search engine; this says it for them, in the
+       title's words. Out of the header's flow and one pixel big, so nothing on the page moves. -->
+  <h1 style="position:absolute;width:1px;height:1px;margin:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap">Knoll — the fan page, by the fans</h1>
   <!-- NEW BENCH (benches.js, 2026-09-12): a press makes the next folder_N — an
        empty bench from lab2/bench-template, with an empty sticker drawer and a
        name that changes when you press it — and opens it in a new tab. Here,

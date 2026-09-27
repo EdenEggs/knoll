@@ -3,6 +3,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>A space · Knoll</title>
+<!-- WHAT A LINK TO THIS PAGE SAYS (2026-09-26): the line under a search result, and the card
+     a chat or a feed draws when the address is pasted into it -->
+<meta name="description" content="A space on Knoll — a page its community draws on, stamps and tends together.">
+<meta property="og:title" content="A space · Knoll">
+<meta property="og:description" content="A space on Knoll — a page its community draws on, stamps and tends together.">
+<meta property="og:image" content="https://www.knoll.space/logo/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <!-- A SPACE'S OWN ADDRESS (2026-09-23): knoll.space/<slug>. vercel.json's last two
      rewrites and serve.js send every one-word address with no file behind it here,
      so every url in this page is root-absolute, as in 404.html. It asks api/wall.js
@@ -86,6 +93,8 @@
   const sp = out && out.ok && out.space;
   if (!sp) {
     const nothing = out && out.code === 'page';
+    // nothing stands here, and the address still answers 200 (the rewrite knows no better): not a page for a search result
+    document.head.appendChild(Object.assign(document.createElement('meta'), { name: 'robots', content: 'noindex' }));
     $('sign').textContent = nothing ? 'nothing here' : 'not now';
     $('by').textContent = nothing ? 'NOTHING STANDS AT ' + location.host.replace(/^www\./, '').toUpperCase() + '/' + slug.toUpperCase() + ' YET.'
                                   : 'THE HILL DID NOT ANSWER — TRY AGAIN IN A MOMENT.';

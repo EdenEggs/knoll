@@ -653,6 +653,25 @@ body.lab-banding,body.lab-banding .bench *{cursor:crosshair}
 .dock-btn span{font-size:8.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
 .dock-btn:hover{opacity:1;background:rgba(255,255,255,.09)}
 .dock-btn[aria-pressed="true"]{opacity:1;background:var(--pink);color:#fff}
+/* THE TOOL DOCK WRAPS ON A PHONE (2026-09-26: the hive's and TOEM 2's rule
+   of 2026-09-11, which never reached this bench — and this bench is the
+   front page). It is one row of nine, wider than the screen, and centred —
+   so a phone got the middle of it: no MOVE or DRAW off the left, REDO and
+   DELETE cut off the right. Under 700 it wraps into rows inside 94vw, the
+   groups wrapping too; the rules between the groups come off, since a rule
+   at the start of a row is a scratch. The options row and the storage-full
+   line stand up over the two rows. AFTER the rules above on purpose: at one
+   specificity the later rule wins. width:max-content is load-bearing: a
+   fixed box at left:50% with no width is shrunk to fit the half of the
+   screen right of that line. */
+@media (max-width:700px){
+  .tool-dock{flex-wrap:wrap;justify-content:center;width:max-content;max-width:94vw;padding:4px;gap:2px;bottom:10px}
+  .tool-dock .dock-grp{flex-wrap:wrap;justify-content:center}
+  .tool-dock .dock-rule{display:none}
+  .dock-btn{padding:4px 7px 3px}
+  .tool-opts{bottom:118px;width:max-content}
+  .lab-warn{bottom:170px}
+}
 .dock-mini{opacity:.5}
 
 /* the ink, and the wheel that changes it. One swatch, painted with whatever

@@ -4,7 +4,7 @@
 
    USAGE (from C:/Users/bobb9/Desktop/site, serve.js up on :4321):
        node lab2/perf/posters.js
-   Writes lab2/posters/<name>.png (2× — the box's size doubled) and
+   Writes lab2/posters/<name>.webp (2× — the box's size doubled) and
    lab2/posters/index.json { "<data-src>": { file, w, h } }.
 
    HOW: open the bench with the autosave door blocked; for every standing
@@ -126,20 +126,22 @@ const OUT = path.join(__dirname, '..', 'posters');
     const rect2 = await page.evaluate(id => { const el = document.querySelector('[data-gizmo="' + CSS.escape(id) + '"]'); const r = Lab.bench.getBoundingClientRect(); Lab.camTo(1, r.width / 2 - ((parseFloat(el.style.left) || 0) + parseFloat(el.style.width) / 2), r.height / 2 - ((parseFloat(el.style.top) || 0) + parseFloat(el.style.height) / 2), 0); const q = el.getBoundingClientRect(); return { x: q.left, y: q.top, w: q.width, h: q.height }; }, it.id);
     await page.waitForTimeout(300);
     const name = it.src.replace(/^features\//, '').replace(/\.dc\.html|\.html/, '').replace(/#(?:card|part|who)=/, '-').replace(/[^\w-]+/g, '-');
-    const file = name + '.png';
+    const file = name + '.webp';
     const buf = await page.screenshot({ clip: { x: rect2.x, y: rect2.y, width: rect2.w, height: rect2.h }, omitBackground: true });
-    // never a blank picture: count the painted pixels before keeping it
-    const painted = await page.evaluate(async (b64) => {
+    // never a blank picture: count the painted pixels before keeping it. The same canvas writes the
+    // picture out as WEBP (2026-09-26): the twelve PNGs were 3.3 MB of the front page's first visit,
+    // and the same pictures are 1.4 MB at 0.9, the paper showing through them as before
+    const { painted, webp } = await page.evaluate(async (b64) => {
       const img = new Image(); img.src = 'data:image/png;base64,' + b64; await img.decode();
       const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
       const x = c.getContext('2d'); x.drawImage(img, 0, 0);
       const d = x.getImageData(0, 0, c.width, c.height).data; let n = 0;
       for (let i = 3; i < d.length; i += 4) if (d[i] > 8) n++;
-      return n / (c.width * c.height);
+      return { painted: n / (c.width * c.height), webp: c.toDataURL('image/webp', 0.9).split(',')[1] };
     }, buf.toString('base64'));
     if (painted < 0.02) { console.log('  ! blank picture, not kept:', it.id, (painted * 100).toFixed(1) + '% painted'); }
     else {
-      fs.writeFileSync(path.join(OUT, file), buf);
+      fs.writeFileSync(path.join(OUT, file), Buffer.from(webp, 'base64'));
       index[it.src] = { file, w: Math.round(rect2.w), h: Math.round(rect2.h), label: it.label };
       console.log('  ' + file.padEnd(34), Math.round(rect2.w) + 'x' + Math.round(rect2.h), (painted * 100).toFixed(0) + '% painted');
     }

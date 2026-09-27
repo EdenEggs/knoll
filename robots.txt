@@ -1,0 +1,8 @@
+# knoll.space — what a crawler may fetch. Pages that are not for search say so
+# themselves (<meta name="robots" content="noindex">), which a crawler has to be
+# allowed to read, so they are not listed here; only the doors are shut.
+User-agent: *
+Disallow: /api/
+Disallow: /auth/
+
+Sitemap: https://www.knoll.space/sitemap.xml

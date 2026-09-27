@@ -155,7 +155,9 @@ window.Frames = (function () {
     if (j && j.posters) posters = j.posters;
   }).catch(() => {}).then(() => {
     postersAsked = true;                // with or without an answer, the bench boots what it wants
-    panels.forEach(dress);
+    // a poster is fetched when its panel is within reach, not before: all twelve at once were
+    // 3.3 MB on a first visit, most of it for machines a screen away (the observer dresses the rest)
+    panels.forEach(p => { if (p.wanted) dress(p); });
     panels.forEach(p => { if (p.wanted && !p.loading && big(p)) load(p); });
   });
 
@@ -998,6 +1000,7 @@ window.Frames = (function () {
         io.unobserve(r.target);
         if (!p) return;
         p.wanted = true;                          // within reach; boots when big enough (THE POSTERS)
+        dress(p);                                 // …and its picture is asked for now (nothing, until index.json is in)
         if (big(p)) load(p);
       }), { root: bench, rootMargin: '400px' })
     : null;

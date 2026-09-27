@@ -30,6 +30,8 @@
     { "source": "/gif.js", "destination": "/lab2/gif.js" },
     { "source": "/cursors.js", "destination": "/lab2/cursors.js" },
     { "source": "/spotlight.js", "destination": "/lab2/spotlight.js" },
+    { "source": "/stickers.js", "destination": "/lab2/stickers.js" },
+    { "source": "/benches.js", "destination": "/lab2/benches.js" },
 
     { "source": "/yard/:who", "destination": "/yard/index.html" },
     { "source": "/yard/:who/", "destination": "/yard/index.html" },
@@ -86,7 +88,7 @@
       ]
     },
     {
-      "source": "/(lab\\.css|lab\\.js|frames\\.js|wall\\.js|vol\\.js|tape\\.js|ink\\.js|keep\\.js|kits\\.js|sign\\.js|tracer\\.js|gif\\.js|cursors\\.js|spotlight\\.js)",
+      "source": "/(lab\\.css|lab\\.js|frames\\.js|wall\\.js|vol\\.js|tape\\.js|ink\\.js|keep\\.js|kits\\.js|sign\\.js|tracer\\.js|gif\\.js|cursors\\.js|spotlight\\.js|stickers\\.js|benches\\.js)",
       "headers": [
         {
           "key": "Cache-Control",

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html><head>
+<html lang="en"><head>
 <meta charset="utf-8">
 <!-- YARD VIEW (2026-09-21) — a yard as somebody else sees it. A copy of
      yard/index.html with the owner's own controls taken off (dashboard,
@@ -13,7 +13,17 @@
      this page its own storage (a visitor's edits never land in their own
      yard) and lets the owner's latest save win over a visitor's edits.
      Changes made to /yard do not reach this copy. -->
-<title>Yard View</title>
+<title>A yard · Knoll</title>
+<!-- a gnome's yard is theirs to hand out, not a search engine's to list (the owner's word,
+     2026-09-26) — as a space is, which opens on a bench that says the same -->
+<meta name="robots" content="noindex">
+<!-- WHAT A LINK TO THIS PAGE SAYS (2026-09-26): the card a chat or a feed draws when the
+     address is pasted into it -->
+<meta name="description" content="A gnome’s yard on Knoll — their plot, the notes at their fence, and the badges they have earned.">
+<meta property="og:title" content="A yard · Knoll">
+<meta property="og:description" content="A gnome’s yard on Knoll — their plot, the notes at their fence, and the badges they have earned.">
+<meta property="og:image" content="https://www.knoll.space/logo/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- The icon sits HERE and not in the helmet, which is where this page used to
      keep it and where /dashboard still does. The helmet is hoisted into <head>
@@ -884,6 +894,7 @@ class Component extends DCLogic {
     const plot = doc.plot && Object.keys(doc.plot).length ? TIDY(doc.plot) : null;
     const patch = {};
     if (doc.name) patch.displayName = String(doc.name).slice(0, 24);
+    if (doc.name) document.title = patch.displayName + '’s yard · Knoll';   // the tab says whose yard this is
     if (doc.plotName) patch.plotName = String(doc.plotName).slice(0, 28);
     const settings = Object.assign({}, this.state.settings, patch);
     this.setState({ spots: plot ? JSON.parse(JSON.stringify(plot)) : {}, mine: plot, settings: settings, held: null });
@@ -1370,7 +1381,7 @@ class Component extends DCLogic {
       viewCount: this.state.views == null ? '—' : this.state.views,
       eyebrow: this.eyebrow(),
       noNotes: !this.state.notes.length,
-      noNotesWord: this.state.fenceLive ? 'NOBODY HAS LEFT A NOTE YET — BE THE FIRST.' : 'THE FENCE IS NOT WIRED TO THE SHEET YET, SO A NOTE STAYS ON THIS DEVICE (see about.md).',
+      noNotesWord: this.state.fenceLive ? 'NOBODY HAS LEFT A NOTE YET — BE THE FIRST.' : 'THE FENCE IS NOT WIRED TO THE SHEET YET, SO A NOTE STAYS ON THIS DEVICE.',
       tFenceRef: this.R.fence,
       captionsOn,
       stats: this.standing(),

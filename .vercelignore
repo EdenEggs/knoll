@@ -39,3 +39,15 @@ yard/*.ico
 YardView/*.lnk
 YardView/*.ico
 toem2/outbox.jsonl
+toem2/session.js
+lab2/test
+lab/*.bak
+lab/*.bat
+lab/*.lnk
+lab/ABOUT.txt
+uploads
+logo/*.dc.html
+Wallspace Coming Soon.dc.html
+apps-script
+.thumbnail
+*.md

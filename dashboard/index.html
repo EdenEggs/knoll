@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html><head>
+<html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dashboard · Knoll</title>
+<meta name="robots" content="noindex">
 <!-- The icon sits HERE and not in the helmet, which is where this page used to
      keep it. The helmet is hoisted into <head> by support.js, i.e. after the
      runtime boots — and Chrome, finding no icon before then, asks for
@@ -845,7 +846,7 @@ class Component extends DCLogic {
       { title: 'Tools people reach for', sub: rangeWord, rows: toolRows, rot: rot('-0.6deg'), pip: C.RED,
         emptyOn: !toolRows.length, empty: 'NOTHING PUT ON THE PAGE ' + rangeWord + ' — PICK UP A TOOL ON YOUR YARD.' },
       { title: 'How they visit', sub: rangeWord, rows: devRows, rot: rot('0.5deg'), pip: C.GRN,
-        emptyOn: !devRows.length, empty: live ? 'NO VISITS ' + rangeWord + '.' : 'NOT COUNTING VISITS YET — THE APPS SCRIPT WANTS ITS NEW VERSION DEPLOYED (yard/about.md).' }
+        emptyOn: !devRows.length, empty: live ? 'NO VISITS ' + rangeWord + '.' : 'NOT COUNTING VISITS YET.' }
     ];
     if (SP) {                                                      // who edits here, from the log
       const whoTally = {};
@@ -878,12 +879,12 @@ class Component extends DCLogic {
     const statusPage = SP ? (S.doc == null ? 'WALL: FETCHING…' : S.docFrom === 'space' ? 'WALL: LIVE · ' + P.length + (P.length === 1 ? ' PIECE' : ' PIECES') + ' · REVISION ' + this.fmt(S.doc.rev || 1) + ' · ' + log.length + ' IN THE LOG' : 'WALL: NOTHING STANDS AT /' + SP)
       : S.doc == null ? 'PAGE: FETCHING…'
       : S.docFrom === 'live' ? 'PAGE: LIVE · ' + P.length + (P.length === 1 ? ' PIECE' : ' PIECES') + (S.doc.t ? ' · LAST SAVED ' + this.fmtDate(new Date(S.doc.t), true) : ' · NEVER SAVED')
-      : S.docFrom === 'shipped' ? 'PAGE: THE COPY THAT SHIPPED WITH THE SITE · ' + P.length + (P.length === 1 ? ' PIECE' : ' PIECES') + ' · NO STORE IS LINKED YET (yard/about.md)'
+      : S.docFrom === 'shipped' ? 'PAGE: THE COPY THAT SHIPPED WITH THE SITE · ' + P.length + (P.length === 1 ? ' PIECE' : ' PIECES') + ' · NO STORE IS LINKED YET'
       : 'PAGE: NOTHING PUBLISHED YET';
     const statusVisits = SP ? 'VISITS: NOT COUNTED ON A SPACE YET — ITS EDITS ARE'
       : S.statsState === 'loading' ? 'VISITS: COUNTING…'
       : live ? 'VISITS: ' + this.fmt(hits.length) + ' COUNTED IN 180 DAYS' + (hits.length ? ' · THE FIRST ON ' + this.fmtDate(new Date(hits[0][0]), true) : '')
-      : 'VISITS: NOT COUNTING YET — THE APPS SCRIPT WANTS ITS NEW VERSION DEPLOYED (yard/about.md)';
+      : 'VISITS: NOT COUNTING YET';   // (the why is the owner's and is in yard/about.md — the Apps Script wants its new version deployed — not every gnome's to read)
 
     return {
       rChip: rot('1.2deg'), rTrend: rot('-0.4deg'), rContrib: rot('0.6deg'),
@@ -908,7 +909,7 @@ class Component extends DCLogic {
       trendRows,
       contributors,
       refsEmpty: !contributors.length,
-      refsNote: SP ? 'VISITS ARE NOT COUNTED ON A SPACE YET — THE WALL COUNTS EDITS INSTEAD.' : live ? 'NO VISITS ' + rangeWord + '.' : 'NOT COUNTING VISITS YET — THE APPS SCRIPT WANTS ITS NEW VERSION DEPLOYED (yard/about.md).',
+      refsNote: SP ? 'VISITS ARE NOT COUNTED ON A SPACE YET — THE WALL COUNTS EDITS INSTEAD.' : live ? 'NO VISITS ' + rangeWord + '.' : 'NOT COUNTING VISITS YET.',
       heatSub: 'PIECES ON YOUR PAGE, BY WHERE THEY LAND · ' + rangeWord,
       heatChartOn: true,               // the table view was taken out (2026-09-24): the map is the one view
       heatCardRef: (el) => { this._heatCard = el; },
@@ -928,7 +929,7 @@ class Component extends DCLogic {
       rampLo: this.mix('#fffbea', deep, 0.03), rampHi: this.mix('#fffbea', deep, 0.98),
       rankedCards, looks,
       looksEmpty: !looks.length,
-      looksNote: SP ? 'A WALL KEEPS REVISIONS, NOT SAVES — OPEN THE WALL AND PRESS HISTORY TO STEP THROUGH THEM.' : S.docFrom === 'live' ? 'NO SAVES YET — PRESS SAVE YARD ON YOUR PAGE AND THE FIRST ONE APPEARS HERE.' : 'SAVES ARE KEPT BEHIND THE PUBLISH DOOR, WHICH THIS SITE DOES NOT HAVE YET (yard/about.md).',
+      looksNote: SP ? 'A WALL KEEPS REVISIONS, NOT SAVES — OPEN THE WALL AND PRESS HISTORY TO STEP THROUGH THEM.' : S.docFrom === 'live' ? 'NO SAVES YET — PRESS SAVE YARD ON YOUR PAGE AND THE FIRST ONE APPEARS HERE.' : 'SAVES ARE KEPT BEHIND THE PUBLISH DOOR, WHICH THIS SITE DOES NOT HAVE YET.',
       statusPage, statusVisits,
       // whose numbers these are (A SPACE'S NUMBERS)
       isSpace: !!SP,
