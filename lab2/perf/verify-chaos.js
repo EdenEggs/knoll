@@ -62,7 +62,8 @@ const breathe = who => { const h = Math.floor(Date.now() / 36e5); return wall.db
   A.deepStrictEqual(Object.values(G).map(g => g.tag), ['Mossy#1', 'Juno#1', 'Bram#1', 'Pip#1'], 'four gnomes through the gate, one made a moderator by hand');
 
   // ── a space, tended: its maker, an invited friend who keeps it, a stranger who proposes ──
-  let r = await door('Mossy', { op: 'page', slug: 'hollow', title: 'Mossy Hollow', chaos: 1, period: 3, feats: [true, true, true, false, false, false] });
+  let r = await door('Mossy', { op: 'page', slug: 'hollow', title: 'Mossy Hollow', chaos: 1, feats: [true, true, true, false, false, false] });
+  A.strictEqual((await read(null, '?rules=1&page=hollow')).json.every, 6, 'a page\'s clock comes round every six hours unless its maker says otherwise');
   A.deepStrictEqual([r.json.ok, r.json.page.chaos, r.json.page.feats], [true, 1, [true, true, true, false, false, false]], 'Mossy makes a tended space with its six switches');
   await act('Mossy', { op: 'ask', tag: 'Juno#1' }); await act('Juno', { op: 'answer', id: G.Mossy.id, yes: true });
   r = await act('Mossy', { op: 'invite', slug: 'hollow', ids: [G.Juno.id] }); A.strictEqual(r.json.sent, 1, 'Mossy invites Juno');
@@ -82,7 +83,9 @@ const breathe = who => { const h = Math.floor(Date.now() / 36e5); return wall.db
   // ── the council ───────────────────────────────────────────────────────
   await breathe('Bram');
   r = await door('Juno', { op: 'settings', page: 'hollow', chaos: 2 }); A.deepStrictEqual([r.status, r.json.code], [403, 'owner'], 'a keeper does not set the rules');
-  r = await door('Mossy', { op: 'settings', page: 'hollow', chaos: 2, period: 1 }); A.deepStrictEqual([r.json.rules.chaos, r.json.rules.period, r.json.rules.closes > Date.now()], [2, 1, true], 'the maker calls a daily council');
+  r = await door('Mossy', { op: 'settings', page: 'hollow', every: 5 }); A.deepStrictEqual([r.status, r.json.code], [400, 'every'], 'the clock comes round every 1, 3, 6, 12, 24, 72 or 168 hours, and no other');
+  r = await door('Mossy', { op: 'settings', page: 'hollow', chaos: 2, every: 24 });
+  A.deepStrictEqual([r.json.rules.chaos, r.json.rules.every, Math.abs(r.json.rules.closes - Date.now() - 24 * 3600e3) < 5000], [2, 24, true], 'the maker calls a council whose clock comes round daily: the first round is a day from now');
   r = await edit('Bram', 'hollow', { abcdefgh0004: piece(40) }); A.deepStrictEqual([r.json.status, r.json.why], ['motion', 'council'], "Bram's next edit is a motion on the ballot");
   r = await see('Juno'); A.strictEqual(kinds(r.json.notes)[0], 'ballot', "…and Juno's bell rings: the ballot has a motion on it");
   r = await see('Mossy'); A.strictEqual(kinds(r.json.notes)[0], 'ballot', "…so does Mossy's");
@@ -110,6 +113,53 @@ const breathe = who => { const h = Math.floor(Date.now() / 36e5); return wall.db
   r = await gate('Pip', '?users=1'); A.strictEqual(r.json.users.find(u => u.id === G.Bram.id).watched, true, '…and the list says so');
   r = await read('Pip', '?audit=50'); const what = r.json.audit.map(e => e.what);
   A.ok(what.includes('invite') && what.includes('uninvite') && what.includes('settings') && what.includes('review') && what.includes('role'), 'the record holds the invite, the uninvite, the settings, the reviews and the watch: ' + what.join(' '));
+
+  // ── THE COUNCIL'S CLOCK, AND HEARTS (2026-09-28): Bram's two motions wait on the ballot, the first with Juno's aye ──
+  const ballot = async who => (await read(who, '?ballot=1&page=hollow')).json, from = (who, ip) => Object.assign({}, G[who].h, { 'x-real-ip': ip });
+  const round = async () => { await wall.db('HSET', wall.K.page('hollow'), 'closes', String(Date.now() - 1)); return ballot(null); };   // the clock, wound on to a moment ago (what was filed after it came round waits for the next)
+  await wall.db('SADD', wall.K.days(G.Mossy.id), '2026-09-01');   // Mossy has a standing day now, as Juno has
+  let b = await ballot('Juno');
+  const [m4, m5] = b.queue.map(m => m.id);
+  A.deepStrictEqual([b.every, b.waiting.map(w => [w.id, w.size, w.hearts, w.hearted, w.name])], [24, [[m4, 1, 1, true, 'Bram#1'], [m5, 1, 0, false, 'Bram#1']]], 'the ballot\'s pictures: each edit that waits, how much it changes, its hearts and whether one is yours');
+  r = await door('Bram', { op: 'heart', edit: m5 }); A.deepStrictEqual([r.status, r.json.code], [403, 'self'], 'no heart for your own');
+  r = await call(wall, 'POST', '/api/wall', { op: 'heart', edit: m5 }, from('Mossy', G.Bram.h['x-real-ip'])); A.deepStrictEqual([r.status, r.json.code], [403, 'self'], '…nor from the address it was sent from');
+  r = await door('Bram', { op: 'heart', edit: 'nonsense' }); A.deepStrictEqual([r.status, r.json.code], [400, 'heart'], 'a heart wants an edit');
+  r = await door('Pip', { op: 'heart', edit: m5 }); A.deepStrictEqual([r.json.ok, r.json.hearts, r.json.hearted, r.json.status], [true, 1, true, 'motion'], 'Pip gives the second a heart: on a motion, that is an aye — and nothing goes up before the clock comes round');
+  r = await door('Mossy', { op: 'heart', edit: m5 }); A.deepStrictEqual([r.json.hearts, r.json.ayes, r.json.nays], [2, 2, 0], 'Mossy another');
+  r = await door('Pip', { op: 'heart', edit: m5, on: false }); A.deepStrictEqual([r.json.hearts, r.json.hearted], [1, false], 'a heart taken back is no vote at all');
+  r = await door('Pip', { op: 'heart', edit: m5 }); A.strictEqual(r.json.hearts, 2, '…and given again');
+  b = await ballot('Pip'); A.deepStrictEqual(b.waiting.map(w => [w.id, w.hearts, w.hearted]), [[m5, 2, true], [m4, 1, false]], 'of two that change as much, the one with more hearts is first');
+  b = await round();
+  A.deepStrictEqual([b.waiting.map(w => w.id), b.last.carried, b.last.waiting, Math.abs(b.closesAt - Date.now() - 24 * 3600e3) < 5000], [[m4], 1, 1, true], 'the clock comes round: the one with the most hearts goes up, the other waits, and the next round is a day on');
+  r = await read(null, '?edit=' + m5 + '&page=hollow'); A.deepStrictEqual([r.json.edit.status, (await read(null, '?page=hollow')).json.wall.items.some(it => it.n === 'abcdefgh0005')], ['live', true], '…and is on the wall');
+  r = await see('Bram'); A.deepStrictEqual([r.json.notes[0].kind, r.json.notes[0].ayes], ['passed', 2], 'Bram\'s bell says his motion carried, with its hearts');
+  r = await door('Pip', { op: 'vote', edit: m4, aye: false }); A.deepStrictEqual([r.json.ayes, r.json.nays], [1, 1], 'a nay against the one that waits: one heart, one nay');
+  b = await round(); A.deepStrictEqual([b.waiting.map(w => w.id), b.last.carried, b.last.waiting], [[m4], 0, 1], 'with no more hearts than nays it does not go up, and waits on');
+  await door('Juno', { op: 'heart', edit: m4, on: false }); await door('Pip', { op: 'heart', edit: m4, on: false });
+  b = await round(); A.deepStrictEqual([b.waiting.map(w => [w.id, w.hearts]), b.last.carried], [[[m4, 0]], 0], 'nor with no heart at all');
+  r = await door('Mossy', { op: 'heart', edit: m4 }); b = await round(); A.deepStrictEqual([b.waiting.length, b.last.carried, b.last.waiting], [0, 1, 0], 'one heart is enough when it is the most there is');
+  // …but not for a drastic edit, which wants three to be in the running at all
+  await breathe('Juno');
+  const many = {}; for (let i = 0; i < 45; i++) many['abcdefgh1' + String(i).padStart(3, '0')] = piece(i * 5);
+  r = await edit('Juno', 'hollow', many); const big = r.json.edit; A.deepStrictEqual([r.json.status, r.json.cls], ['motion', 'drastic'], 'forty-five pieces at once is a drastic motion');
+  await door('Mossy', { op: 'heart', edit: big }); await door('Pip', { op: 'heart', edit: big });
+  b = await round(); A.deepStrictEqual([b.waiting.map(w => [w.id, w.hearts, w.size]), b.last.carried], [[[big, 2, 45]], 0], 'two hearts do not carry it');
+  await wall.db('SADD', wall.K.days(G.Bram.id), '2026-09-01'); await wall.db('HSET', wall.K.user(G.Bram.id), 'watch', '0');
+  r = await door('Bram', { op: 'heart', edit: big }); b = await round(); A.deepStrictEqual([r.json.hearts, b.waiting.length, b.last.carried], [3, 0, 1], 'three do');
+  // a motion the clock never takes lapses in a week; and on a page that is a council no longer, what waited for the clock falls to the moderators
+  await breathe('Juno');
+  r = await edit('Juno', 'hollow', { abcdefgh0007: piece(70) }); const m7 = r.json.edit; A.deepStrictEqual([r.json.status, Math.abs(r.json.closes - b.closesAt) < 5], ['motion', true], 'a new motion is told when the clock next comes round');
+  r = await edit('Juno', 'hollow', { abcdefgh0008: piece(80) }); const m8 = r.json.edit;
+  const old = JSON.parse(await wall.db('GET', wall.K.edit(m7))); old.at = Date.now() - 8 * 86400e3; await wall.db('SET', wall.K.edit(m7), JSON.stringify(old));
+  await wall.sweepQueue(wall.pageKeys('hollow'));
+  A.strictEqual(JSON.parse(await wall.db('GET', wall.K.edit(m7))).status, 'expired', 'a motion eight days old has lapsed');
+  r = await door('Mossy', { op: 'settings', page: 'hollow', chaos: 1 }); await wall.sweepQueue(wall.pageKeys('hollow'));
+  const fell = JSON.parse(await wall.db('GET', wall.K.edit(m8))); A.deepStrictEqual([fell.status, fell.tick, (await read(null, '?queue=1&page=hollow')).json.queue.map(q => q.status)], ['queued', undefined, ['queued']], 'tended again: the motion that waited for the clock waits for the moderators');
+  // on a tended page a heart decides nothing, and anybody signed in gives one
+  r = await door('Bram', { op: 'heart', edit: m8 }); A.deepStrictEqual([r.json.ok, r.json.hearts, r.json.status], [true, 1, 'queued'], 'Bram — watched, with no standing — gives Juno\'s waiting edit a heart');
+  r = await door('Bram', { op: 'vote', edit: m8, aye: false }); A.deepStrictEqual([r.status, r.json.code], [409, 'decided'], '…and no nay: an edit that waits for the moderators is not voted on');
+  b = await ballot('Bram'); A.deepStrictEqual([b.queue.length, b.waiting.map(w => [w.id, w.status, w.hearts, w.hearted])], [0, [[m8, 'queued', 1, true]]], 'the ballot of a tended page has its picture too, and no motion');
+  r = await door('Mossy', { op: 'review', edit: m8, do: 'approve' }); A.strictEqual(r.json.status, 'live', 'the moderators decide it, hearts or none');
 
   fs.rmSync(TMP, { recursive: true, force: true });
   console.log('verify-chaos: ' + n + ' checks, all good');

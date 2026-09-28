@@ -15,6 +15,17 @@
 .gal-n{margin-left:7px;font-size:12.5px;font-weight:400;opacity:.65;font-variant-caps:normal;letter-spacing:0}
 .gal-body{padding:18px 16px 22px;background-image:radial-gradient(#e6e0e6 1px,transparent 1.2px);background-size:16px 16px}
 
+/* a section's own line over its prints; and, where the section is open to it, the way to hang a photo of your own */
+.gal-sec{margin:0 6px 2px;flex:none}
+.gal-add{margin:0 6px 6px;flex:none}
+form.gal-add{padding:10px 12px;background:#fff;border:3px dashed #17120b;border-radius:14px 12px 15px 13px;align-items:flex-start}
+.gal-file{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.gal-file:focus-visible + .gal-pick{outline:3px solid #e8479c;outline-offset:3px}
+.gal-pick{align-self:flex-start;display:inline-flex;align-items:center}
+.gal-thumb{width:96px;height:96px;object-fit:cover;display:block;border:3px solid #17120b;background:#e9e4e8}
+.gal-add-f{display:flex;flex-direction:column;gap:8px;width:100%}
+.gal-thumb[hidden],.gal-add-f[hidden]{display:none}
+
 /* the prints: a white border, a hard shadow, each leaning its own way */
 .gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:22px 18px;padding:4px 6px}
 .gal-card{display:flex;flex-direction:column;gap:6px;padding:8px 8px 10px;background:#fff;color:#17120b;border:3px solid #17120b;border-radius:6px;

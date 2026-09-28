@@ -146,11 +146,30 @@
 :root[data-page] .town-send:hover{background:var(--k-red);transform:translate(-1px,-1px)}
 :root[data-page] .town-send:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--k-dot)}
 
+/* who is here, and a name's menu: the count a lamp and a line under it, the list on cards, the menu a card at the pointer */
+:root[data-page] .town-here{text-decoration-thickness:1.5px;letter-spacing:inherit;text-transform:inherit}
+:root[data-page] .town-here::before{background:#7bc264;border-color:var(--k-ink)}
+:root[data-page] .town-here:hover{color:#b83739}
+:root[data-page] .town-here:focus-visible{background:var(--k-yel);box-shadow:0 0 0 3px var(--k-yel)}
+:root[data-page] .town-person{padding:7px 10px;background:var(--k-card);border:2.5px solid var(--k-ink);border-radius:9px 7px 10px 8px;box-shadow:3px 3px 0 var(--k-sh)}
+:root[data-page] .town-person:nth-child(even){border-radius:7px 10px 8px 9px}
+:root[data-page] .town-person .town-btn{height:32px;padding:0 12px;font-size:14px}
+:root[data-page] .town-you{font:400 15px/1 'VT323',monospace;letter-spacing:1.5px;text-transform:uppercase;opacity:.65}
+:root[data-page] .town-menu{background:var(--k-card);border:2.5px solid var(--k-ink);border-radius:8px 11px 7px 10px;box-shadow:4px 4px 0 var(--k-dot);font-family:'Kalam',cursive;font-size:15.5px}
+:root[data-page] .town-menu-h{border-bottom:2px dotted rgba(23,18,11,.4)}
+:root[data-page] .town-menu-i{border-radius:6px 8px 5px 7px}
+:root[data-page] .town-menu-i:hover,:root[data-page] .town-menu-i:focus-visible{background:var(--k-yel)}
+:root[data-page] .town-menu-i:focus-visible{box-shadow:none}
+:root[data-page] .town-menu-i:disabled{background:none}
+
 /* ── the photo wall: prints on cream, a red heart; its button is three prints fanned out over a plate ── */
 :root[data-page] .gal-panel{width:540px}
 :root[data-page] .gal-panel .town-tab{flex:0 1 auto;padding:0 14px}
 :root[data-page] .gal-n{margin-left:6px;font-size:inherit;opacity:.6}
 :root[data-page] .gal-body{padding:18px 16px 22px;background-image:none}
+:root[data-page] .gal-sec,:root[data-page] .gal-add{margin-left:0;margin-right:0}
+:root[data-page] form.gal-add{background:var(--k-card);border:2.5px dashed var(--k-ink);border-radius:9px 7px 10px 8px}
+:root[data-page] .gal-thumb{border:2.5px solid var(--k-ink);background:#e6eefb}
 :root[data-page] .gal-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:22px 16px;padding:0}
 :root[data-page] .gal-card{padding:8px 8px 9px;background:var(--k-card);border:2.5px solid var(--k-ink);border-radius:3px 5px 4px 6px;box-shadow:4px 4px 0 var(--k-sh);font-family:'Kalam',cursive}
 :root[data-page] .gal-card:hover,:root[data-page] .gal-card:focus-visible{box-shadow:5px 7px 0 var(--k-sh)}

@@ -14,23 +14,31 @@
    fetches once each.
 
    THE SECTIONS (2026-09-24, later that day): the keepers arrange the album
-   into sections from the dashboard — {id, title, desc}, up to twelve, kept
-   on the page's hash (api/wall.js: page:<slug> `sections`) — and a photo
-   names the one it hangs in (`sec`, or none). A section taken down leaves
-   its photos in the album, unsectioned. A photo has a title (`cap`) and a
-   description (`desc`); its taker, or a keeper, may change them, and the
-   section, after the fact (`edit`). The dashboard is where the keepers
-   upload; nothing on the bench takes a photo yet.
+   into sections from the dashboard — {id, title, desc, open}, up to five
+   (twelve until 2026-09-28), a description a hundred characters at most,
+   kept on the page's hash (api/wall.js: page:<slug> `sections`) — and a
+   photo names the one it hangs in (`sec`, or none). A section taken down
+   leaves its photos in the album, unsectioned. A photo has a title (`cap`,
+   twenty characters) and a description (`desc`, a hundred); its taker, or a
+   keeper, may change them, and the section, after the fact (`edit`).
+
+   WHO PUTS PHOTOS UP (2026-09-28). The keepers, from the dashboard, into
+   any section or none. Anyone else signed in, from the album on the bench,
+   into a section the keepers have OPENED to them (`open` — off until it is
+   turned on, a section at a time) and nowhere else: a photo of theirs is
+   not moved by them into a section that is shut. Anyone signed in gives a
+   heart.
 
      GET  ?page=<slug>
-          → { ok, me: {id, tag, keeper, mod} | null, sections: [{id, title, desc}],
+          → { ok, me: {id, tag, keeper, mod} | null, sections: [{id, title, desc, open}],
               photos: [{id, by, tag, at, cap, desc, sec, where, src, likes, liked}] }
      POST { op: 'post', cap, desc?, sec?, where?, src: 'data:image/(jpeg|png|webp);base64,…' }
-                                        → { ok, photo }        (anyone signed in; twenty an hour; a picture ≤ 300 KB)
+                                        → { ok, photo }        (a keeper; or anyone signed in, into an open section; twenty an hour; a picture ≤ 300 KB)
           { op: 'edit', id, cap?, desc?, sec? } → { ok, photo } (your own, or a keeper's)
           { op: 'like', id, on? }       → { ok, likes, liked } (on: false takes the heart back)
           { op: 'drop', id }            → { ok }               (your own, or a keeper's to hide — audited)
-          { op: 'sections', sections: [{id, title, desc}] } → { ok, sections }   (the keepers)
+          { op: 'sections', sections: [{id, title, desc, open}] } → { ok, sections }   (the keepers)
+          { op: 'sections', reset: true }                   → { ok, sections }   (back to none, as an album starts; the photos stay)
 
    ponytail: the hearts are one set a photo, read with a pipeline of SCARDs —
    fine to the 200 the list keeps; a count on the record if it ever grows. */
@@ -42,8 +50,8 @@ const H = require('./hill.js');
 const { db, dbm, K, answer, readBody, Bad, bad, sameSite, whoIs, isMod, rulesOf, tagsOf, text, HOME, SLUG_RE } = W;
 
 const KEEP = 200;                             // photos a page keeps; the oldest fall off the end
-const CAP = { cap: 60, desc: 300, where: 40, src: 400000, sec: 40, secDesc: 200 };
-const SECTIONS_MAX = 12, SEC_RE = /^[a-z0-9][a-z0-9-]{0,19}$/;
+const CAP = { cap: 20, desc: 100, where: 40, src: 400000, sec: 40, secDesc: 100 };
+const SECTIONS_MAX = 5, SEC_RE = /^[a-z0-9][a-z0-9-]{0,19}$/;
 const BYTES = 300 * 1024;                     // the picture, decoded
 const RATE = { post: 20, other: 200 };        // an hour, an account
 const EXT = { jpeg: 'jpg', png: 'png', webp: 'webp' };
@@ -71,7 +79,11 @@ async function meOf(req, slug) {              // who is asking, and what they ar
 const said = me => me && { id: me.id, tag: me.tag, keeper: me.keeper, mod: me.mod };
 
 // ── THE SECTIONS, off the page's hash ──────────────────────────────────────
-const sectionsOf = p => { try { const s = p.sections ? JSON.parse(p.sections) : []; return Array.isArray(s) ? s : []; } catch (e) { return []; } };
+// what was saved under the old caps is read to the new ones: the first five, a description's first hundred — and shut to visitors' photos, as none was opened
+const sectionsOf = p => {
+  try { const s = p.sections ? JSON.parse(p.sections) : []; return Array.isArray(s) ? s.slice(0, SECTIONS_MAX).map(x => Object.assign({}, x, { desc: String((x && x.desc) || '').slice(0, CAP.secDesc), open: !!(x && x.open) })) : []; }
+  catch (e) { return []; }
+};
 function cleanSections(v) {
   if (!Array.isArray(v) || v.length > SECTIONS_MAX) throw bad(400, 'sections', 'an album has up to ' + SECTIONS_MAX + ' sections');
   const seen = new Set();
@@ -81,11 +93,15 @@ function cleanSections(v) {
     if (!SEC_RE.test(id)) throw bad(400, 'sections', 'a section\'s name is lower-case letters, numbers and dashes, 20 at most');
     if (seen.has(id)) throw bad(400, 'sections', 'two sections are called ' + id);
     seen.add(id);
-    if (!title) throw bad(400, 'sections', 'every section needs a title');
-    return { id, title, desc: text(s.desc, CAP.secDesc) };
+    if (!title) throw bad(400, 'sections', 'every section needs a name');
+    return { id, title, desc: text(s.desc, CAP.secDesc), open: s.open === true };
   });
 }
 const secOf = (v, sections) => { const id = String(v == null ? '' : v).toLowerCase(); return sections.some(s => s.id === id) ? id : ''; };
+// WHO PUTS PHOTOS UP: a keeper anywhere; anyone else only in a section opened to them
+function mayHang(me, sec, sections) {
+  if (!me.keeper && !sections.some(s => s.id === sec && s.open)) throw bad(403, 'role', 'photos go up here from the moderators — or in a section they have opened to everyone');
+}
 const descOf = v => text(String(v == null ? '' : v).replace(/[\r\n\t]+/g, ' '), CAP.desc);   // a description is one line here: a line break typed in becomes a space, not nothing
 
 // ── the picture: a data: url the browser made, checked twice — the header says jpeg, png or webp, and so must the bytes ──
@@ -145,9 +161,9 @@ async function post(req, res) {
   const find = async () => { const raw = await db('LRANGE', key, 0, -1); const i = raw.findIndex(s => { const p = one(s); return p && p.id === id; }); return i < 0 ? [null, null, -1] : [raw[i], one(raw[i]), i]; };
   switch (body.op) {
     case 'sections': {                        // THE SECTIONS: the keepers arrange the album
-      if (!me.keeper) throw bad(403, 'role', 'the album\'s sections are the keepers\' to arrange');
+      if (!me.keeper) throw bad(403, 'role', 'the album\'s sections are the moderators\' to arrange');
       if (!(await spend(me.id, 'other'))) throw bad(429, 'rate', 'that is a lot in one hour — take a breath');
-      const next = cleanSections(body.sections);
+      const next = body.reset === true ? [] : cleanSections(body.sections);   // BACK TO THE DEFAULT: an album starts with none
       await db('HSET', K.page(slug), 'sections', JSON.stringify(next));
       await W.audit(me.id, 'sections', { page: slug, sections: next.map(s => s.id).join(',') });
       return answer(res, 200, { ok: true, sections: next });
@@ -159,13 +175,14 @@ async function post(req, res) {
       if (p.by !== me.id && !me.keeper) throw bad(403, 'role', 'that is somebody else\'s photo');
       if (body.cap != null) { p.cap = text(body.cap, CAP.cap); if (!p.cap) throw bad(400, 'cap', 'give it a title'); }
       if (body.desc != null) p.desc = descOf(body.desc);
-      if (body.sec != null) p.sec = secOf(body.sec, sections);
+      if (body.sec != null && secOf(body.sec, sections) !== secOf(p.sec, sections)) { p.sec = secOf(body.sec, sections); mayHang(me, p.sec, sections); }   // moved: where it may hang is asked again
       await db('LSET', key, i, JSON.stringify(p));   // ponytail: the index read a moment ago; a photo dropped in between moves it by one
       if (p.by !== me.id) await W.audit(me.id, 'edit', { page: slug, ch: 'album', id, of: p.by, text: String(p.cap || '').slice(0, 140) });
       const [likes, liked] = await dbm([['SCARD', K.albumLike(slug, id)], ['SISMEMBER', K.albumLike(slug, id), me.id]]);
       return answer(res, 200, { ok: true, photo: shown(p, (await tagsOf([p.by]))[p.by], likes, liked, sections) });
     }
     case 'post': {
+      mayHang(me, secOf(body.sec, sections), sections);
       if (!(await spend(me.id, 'post'))) throw bad(429, 'rate', 'that is a lot of photos in one hour — take a breath');
       const cap = text(body.cap, CAP.cap);
       if (!cap) throw bad(400, 'cap', 'give it a title');

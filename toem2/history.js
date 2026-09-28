@@ -58,10 +58,11 @@ window.History = (function () {
          : /^strike/.test(h) ? 'struck' + of : /^undo/.test(h) ? 'undone' + of : /^revert/.test(h) ? 'undid' + of : h;
   };
   const what = n => [n.put ? n.put + ' changed' : '', n.del ? n.del + ' deleted' : '', n.art ? n.art + ' tracings' : ''].filter(Boolean).join(' · ') || 'nothing';
-  const LEVELS = [[0, 'Read-only', 'the maker alone draws on it'], [1, 'Tended', 'the keepers decide what stays'], [2, 'Council', 'every change from a non-keeper is a motion'], [3, 'Wild', 'anyone edits anything, live']];
+  const LEVELS = [[0, 'Read-only', 'the maker alone draws on it'], [1, 'Tended', 'the moderators decide what stays'], [2, 'Council', 'every change from anyone but a moderator is a motion'], [3, 'Wild', 'anyone edits anything, live']];
   const KINDS = ['ink', 'stickers', 'notes', 'tracings', 'embeds', "others' pieces"];
-  const PERIODS = [[1, 'daily'], [3, 'every 3 days'], [7, 'weekly']];
-  const periodWord = d => (PERIODS.find(p => p[0] === d) || [0, 'every few days'])[1];
+  // THE COUNCIL'S CLOCK (api/wall.js): how often it comes round, in hours — six unless the page's maker says otherwise
+  const EVERY = [[1, 'every hour'], [3, 'every 3 hours'], [6, 'every 6 hours'], [12, 'every 12 hours'], [24, 'daily'], [72, 'every 3 days'], [168, 'weekly']];
+  const everyWord = h => (EVERY.find(p => p[0] === h) || [0, 'every few hours'])[1];
 
   let panel = null, body = null, foot = null, diff = null, rev = null, pend = null, open = false, shown = null, busy = false, lastLog = [];
   const me = () => (window.Seed && Seed.me) || null;
@@ -146,7 +147,7 @@ window.History = (function () {
     const items = Wall.store.get().items, byN = new Map();
     items.forEach(it => { if (it && it.n) byN.set(it.n, it); });
     const g = sv('g', { class: pendingKind === 'motion' ? 'th-ballot' : 'th-wait' });
-    const title = sv('title'); title.textContent = pendingKind === 'motion' ? 'on the ballot' : 'waiting for the keepers'; g.appendChild(title);
+    const title = sv('title'); title.textContent = pendingKind === 'motion' ? 'on the ballot' : 'waiting for the moderators'; g.appendChild(title);
     pendingNames.forEach(n => {
       const b = box(byN.get(n));
       if (b) g.appendChild(sv('rect', { x: b.x - 5, y: b.y - 5, width: b.w + 10, height: b.h + 10, rx: 7, 'stroke-width': 2.5, 'vector-effect': 'non-scaling-stroke' }));
@@ -240,8 +241,8 @@ window.History = (function () {
       sec.append(p);
       return sec;
     }
-    const draft = { chaos: r.chaos, period: r.period, feats: (r.feats || []).slice() };
-    const dirty = () => draft.chaos !== r.chaos || draft.period !== r.period || JSON.stringify(draft.feats) !== JSON.stringify(r.feats || []);
+    const draft = { chaos: r.chaos, every: r.every, feats: (r.feats || []).slice() };
+    const dirty = () => draft.chaos !== r.chaos || draft.every !== r.every || JSON.stringify(draft.feats) !== JSON.stringify(r.feats || []);
     const group = el('div', 'th-levels'); group.setAttribute('role', 'radiogroup'); group.setAttribute('aria-label', 'how wild is it');
     const radios = LEVELS.map(([n, name, sub]) => {
       const b = el('button', 'th-row th-radio'); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.n = n;
@@ -252,30 +253,30 @@ window.History = (function () {
     });
     sec.append(group);
     const per = el('div', 'th-period');
-    const chips = PERIODS.map(([d, label]) => { const b = el('button', 'th-link', label); b.type = 'button'; b.addEventListener('click', () => { draft.period = d; paint(); }); per.append(b); return b; });
-    per.append(el('small', null, 'the ballot closes at midnight UTC; a change of period takes effect at the next close'));
+    const chips = EVERY.map(([h, label]) => { const b = el('button', 'th-link', label); b.type = 'button'; b.addEventListener('click', () => { draft.every = h; paint(); }); per.append(b); return b; });
+    per.append(el('small', null, 'when the clock comes round, the motion with the most hearts goes up; changing this starts the clock again'));
     sec.append(per);
-    const sw = el('div', 'th-switches'); sw.append(el('div', 'th-h2', 'WHAT EVERYONE MAY DO · off means the keepers only'));
+    const sw = el('div', 'th-switches'); sw.append(el('div', 'th-h2', 'WHAT EVERYONE MAY DO · off means the moderators only'));
     const boxes = KINDS.map((k, i) => { const l = el('label'), c = el('input'); c.type = 'checkbox'; c.addEventListener('change', () => { draft.feats[i] = c.checked; paint(); }); l.append(c, ' ' + k); sw.append(l); return c; });
     const wildNote = el('small', null, "wild: everything is everyone's"); sw.append(wildNote);
     sec.append(sw);
-    const ks = el('p', 'th-me', 'keepers: ' + (r.keepers || []).map(k => k.tag).filter(Boolean).concat('the moderators and the trusted').join(', ') + '. ');
+    const ks = el('p', 'th-me', 'moderators: ' + (r.keepers || []).map(k => k.tag).filter(Boolean).concat('Knoll\'s own and the trusted').join(', ') + '. ');
     if (r.owner) { const a = el('a', 'th-link', 'name them in the settings'); a.href = '/settings/?space=toem2'; ks.append(a); }   // TOEM 2's maker, and the master (api/wall.js: THE MASTER)
     sec.append(ks);
     const seal = el('button', 'th-link th-seal', 'seal it'); seal.type = 'button'; const note = el('small', 'th-note');
     seal.addEventListener('click', async () => {
       if (!dirty() || busy) return;
       busy = true; seal.textContent = 'sealing…';
-      const out = await post({ op: 'settings', chaos: draft.chaos, period: draft.period, feats: draft.feats });
+      const out = await post({ op: 'settings', chaos: draft.chaos, every: draft.every, feats: draft.feats });
       busy = false; seal.textContent = 'seal it';
-      note.textContent = out.ok ? (out.rules.chaos === 2 && r.chaos !== 2 ? 'Sealed — the first ballot closes ' + closesIn(out.rules.closes) + '.' : 'Sealed.') : 'Not sealed: ' + (out.error || 'the door said no') + '.';
+      note.textContent = out.ok ? (out.rules.chaos === 2 && (r.chaos !== 2 || r.every !== out.rules.every) ? 'Sealed — the clock first comes round ' + closesIn(out.rules.closes) + '.' : 'Sealed.') : 'Not sealed: ' + (out.error || 'the door said no') + '.';
       if (out.ok && window.Seed && Seed.readRules) { await Seed.readRules(true); render.all(); }
     });
     sec.append(seal, note);
     function paint() {
       radios.forEach(b => { const on = +b.dataset.n === draft.chaos; b.setAttribute('aria-checked', on); b.classList.toggle('is-on', on); b.tabIndex = on ? 0 : -1; });
       per.hidden = draft.chaos !== 2;
-      chips.forEach((b, i) => b.setAttribute('aria-pressed', PERIODS[i][0] === draft.period));
+      chips.forEach((b, i) => b.setAttribute('aria-pressed', EVERY[i][0] === draft.every));
       boxes.forEach((c, i) => { c.checked = !!draft.feats[i]; c.parentNode.hidden = draft.chaos === 3; });
       wildNote.hidden = draft.chaos !== 3;
       seal.classList.toggle('is-dirty', dirty());
@@ -332,7 +333,7 @@ window.History = (function () {
     page: e => 'page: made /' + e.page + (e.title ? ' — ' + e.title : ''),
     handoff: e => (e.revoked ? 'handoff: took back the code for /' : 'handoff: made a code for /') + e.page,
     claim: e => 'claim: /' + e.page + ' is theirs' + (e.from ? ', from ' + short(e.from) : '') + (e.giver ? ' — handed on by ' + short(e.giver) : ''),
-    settings: e => 'settings: ' + [e.chaos != null ? (LEVELS[e.chaos] || LEVELS[1])[1].toLowerCase() : '', e.period ? periodWord(e.period) : '', e.feats ? e.feats.filter(Boolean).length + ' of 6 for everyone' : '', e.look ? 'the look' : ''].filter(Boolean).join(', '),
+    settings: e => 'settings: ' + [e.chaos != null ? (LEVELS[e.chaos] || LEVELS[1])[1].toLowerCase() : '', e.every ? 'the clock ' + everyWord(e.every) : '', e.feats ? e.feats.filter(Boolean).length + ' of 6 for everyone' : '', e.look ? 'the look' : ''].filter(Boolean).join(', '),
     invite: e => 'invite: ' + (e.ids || []).map(short).join(', ') + ' to /' + e.page,
     uninvite: e => 'uninvite: ' + (e.ids || []).map(short).join(', ') + ' from /' + e.page,
     review: e => 'review: ' + (e.how || e.do) + ' ' + e.edit + ' by ' + short(e.of) + (e.why ? ' — ' + e.why : '') + (e.skipped ? ' · ' + e.skipped + ' skipped' : ''),
@@ -388,7 +389,7 @@ window.History = (function () {
         body.append(el('h3', 'th-h', motions === queue.queue.length ? 'ON THE BALLOT' : motions ? 'WAITING · ON THE BALLOT' : 'WAITING'));
         queue.queue.forEach(q => {
           const row = el('div', 'th-row'), mine = !!m && q.by === m.id, motion = q.status === 'motion';
-          row.append(whoEl(q), ' · ' + ago(q.at) + ' · ' + q.cls + (motion ? ' — a vote: ' + (q.ayes || 0) + ' for, ' + (q.nays || 0) + ' against' + (q.closes ? ' · closes ' + closesIn(q.closes) : '') : '') + (mine ? ' · yours' : ''));
+          row.append(whoEl(q), ' · ' + ago(q.at) + ' · ' + q.cls + (motion ? ' — a vote: ' + (q.ayes || 0) + ' for, ' + (q.nays || 0) + ' against' + (q.closes ? ' · decided ' + closesIn(q.closes) : '') : '') + (mine ? ' · yours' : ''));
           row.append(el('small', null, what(q.n) + (q.why && !/^(small|large|drastic|council)$/.test(q.why) ? ' · why: ' + q.why : '') + (q.look ? ' · look: ' + [q.look.title, q.look.palette].filter(Boolean).join(', ') : '')));
           const acts = el('div');
           const rv = el('button', 'th-link', 'look'); rv.type = 'button';
@@ -427,7 +428,7 @@ window.History = (function () {
       foot.textContent = '';
       const r = rules();
       if (r && r.chaos === 2) {
-        const line = el('div', 'th-fine'); line.append('ballot closes ' + closesIn(r.closesAt) + (r.motions ? ' · ' + r.motions + (r.motions === 1 ? ' motion' : ' motions') : ''));
+        const line = el('div', 'th-fine'); line.append('the ballot\'s clock comes round ' + closesIn(r.closesAt) + (r.motions ? ' · ' + r.motions + (r.motions === 1 ? ' motion' : ' motions') : ''));
         const b = el('button', 'th-link', 'see the ballot'); b.type = 'button'; b.addEventListener('click', () => { close(); if (window.Ballot) Ballot.open(); }); line.append(' ', b);
         foot.append(line);
       }
@@ -506,5 +507,6 @@ window.History = (function () {
     window.addEventListener('keydown', e => { if (e.key !== 'Escape' || (window.Lab && Lab.menuUp)) return; if (cardEl) { closeCard(); return; } if (open) close(); });
     if (window.Wall && Wall.store && Wall.store.on) Wall.store.on(() => { if (pendingNames.length) paintPending(); });
   });
-  return { open: openUp, close, show, clear, markPending, card, get shown() { return shown; }, get isOpen() { return open; } };
+  return { open: openUp, close, show, clear, markPending, card, mark: draw,   // mark: the boxes round what an edit touches — the ballot's picture of it (seed.js: review)
+           get shown() { return shown; }, get isOpen() { return open; } };
 })();

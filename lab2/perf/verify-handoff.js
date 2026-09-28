@@ -163,6 +163,7 @@ const wrong = i => 'ZZZZ-ZZZZ-ZZZZ-' + String(1000 + i);   // well formed, and n
   // ── TOEM 2, handed on ───────────────────────────────────────────────────
   r = await door('Juno', { op: 'settings', page: 'toem2', chaos: 2 }); A.deepStrictEqual([r.status, r.json.code], [403, 'owner'], 'TOEM 2\'s rules are not Juno\'s to set');
   r = await read('Juno', '?space=toem2'); A.deepStrictEqual([r.status, r.json.space.slug, r.json.space.title, r.json.space.by], [200, 'toem2', 'TOEM 2', ''], 'the first page has a face like any space, and no maker');
+  A.deepStrictEqual([r.json.space.palette, r.json.space.paper, r.json.space.accent, r.json.space.inks], ['toem2', '#efe7ed', '#c93b82', []], '…on its own paper, in every colour: what it has always worn (2026-09-28)');
   const home = (await door('Mossy', { op: 'handoff', page: 'toem2' })).json;
   A.deepStrictEqual([CODE.test(home.code), home.page, home.title], [true, 'toem2', 'TOEM 2'], 'the master asks for a code for TOEM 2');
   r = await door('Juno', { op: 'claim', code: home.code });
@@ -172,9 +173,18 @@ const wrong = i => 'ZZZZ-ZZZZ-ZZZZ-' + String(1000 + i);   // well formed, and n
   r = await read('Juno', '?space=toem2'); A.deepStrictEqual([r.json.space.by, r.json.space.tag, r.json.space.title], [G.Juno.id, 'Juno#1', 'TOEM 2'], 'its face says whose');
   r = await read('Juno', '?spaces=1'); A.deepStrictEqual(r.json.spaces.map(s => [s.slug, s.title, !!s.handed]), [['hollow-two', 'Another', false], ['toem2', 'TOEM 2', true]], 'it stands among Juno\'s spaces');
   r = await read('Juno', '?rules=1'); A.deepStrictEqual([r.json.owner, r.json.keeper, r.json.keepers.map(k => k.tag)], [true, true, ['Juno#1']], 'Juno is TOEM 2\'s maker by the rules');
-  r = await door('Juno', { op: 'settings', page: 'toem2', chaos: 2, period: 7, feats: [true, false, true, false, false, false] });
-  A.deepStrictEqual([r.status, r.json.rules.chaos, r.json.rules.period, r.json.rules.feats[1]], [200, 2, 7, false], '…sets its rules');
-  r = await door('Juno', { op: 'settings', page: 'toem2', title: 'Juno\'s Wall' }); A.deepStrictEqual([r.status, (await pageRec('toem2')).title], [400, undefined], '…but not its name: TOEM 2 is TOEM 2');
+  r = await door('Juno', { op: 'settings', page: 'toem2', chaos: 2, every: 168, feats: [true, false, true, false, false, false] });
+  A.deepStrictEqual([r.status, r.json.rules.chaos, r.json.rules.every, r.json.rules.feats[1]], [200, 2, 168, false], '…sets its rules');
+  // THE FIRST PAGE'S LOOK (2026-09-28): its name, its paper and its inks are its maker's to set, as any page's are — and a moderator's part is the rules alone
+  r = await door('Juno', { op: 'settings', page: 'toem2', title: 'Juno\'s Wall', palette: 'sticky', inks: ['#E8484A', 'red'] });
+  A.deepStrictEqual([r.status, r.json.rules.title, r.json.rules.palette, r.json.rules.inks], [200, 'Juno\'s Wall', 'sticky', ['#e8484a']], '…and its name, its paper and its inks');
+  r = await read(null, '?space=toem2'); A.deepStrictEqual([r.json.space.title, r.json.space.palette, r.json.space.paper], ['Juno\'s Wall', 'sticky', '#ffe27a'], 'its face wears them');
+  r = await read(null, '?pages=1'); A.strictEqual(r.json.pages[0].title, 'Juno\'s Wall', '…and so does the list of pages');
+  await wall.db('HSET', wall.K.user(G.Wren.id), 'role', 'mod');
+  r = await door('Wren', { op: 'settings', page: 'toem2', title: 'Wren\'s Wall' }); A.deepStrictEqual([r.status, r.json.code, (await pageRec('toem2')).title], [403, 'owner', 'Juno\'s Wall'], 'a moderator who is not its maker does not rename TOEM 2');
+  r = await door('Wren', { op: 'settings', page: 'toem2', every: 72 }); A.strictEqual(r.status, 200, '…though its rules are a moderator\'s to set, as they were');
+  await wall.db('HSET', wall.K.user(G.Wren.id), 'role', 'user');
+  r = await door('Juno', { op: 'settings', page: 'toem2', title: 'TOEM 2', palette: 'toem2', inks: [] }); A.deepStrictEqual([r.status, r.json.rules.title, r.json.rules.palette, r.json.rules.inks], [200, 'TOEM 2', 'toem2', []], 'and TOEM 2 is TOEM 2 again, on its own paper');
   r = await keep('Juno', { op: 'invite', slug: 'toem2', ids: [G.Tansy.id] }); A.deepStrictEqual([r.status, r.json.sent], [200, 1], '…and names its keepers');
   r = await read('Tansy', '?rules=1'); A.deepStrictEqual([r.json.keeper, r.json.owner, r.json.keepers.map(k => k.tag)], [true, false, ['Juno#1', 'Tansy#1']], 'who keep it');
   r = await door('Bram', { op: 'settings', page: 'toem2', chaos: 3 }); A.deepStrictEqual([r.status, r.json.code], [403, 'owner'], 'a stranger still sets nothing there');

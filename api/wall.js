@@ -56,9 +56,9 @@
    pieces — off is the keepers' only) on pieces of their own, by the tier
    rules above, and anything past that is a proposal in the queue, never a
    refusal; 2 COUNCIL — the keepers edit live and every other patch is a
-   MOTION on the page's BALLOT, which closes at a UTC midnight every
-   `period` days (each motion carries the close it is decided at, at least
-   twelve hours after it was filed); 3 WILD — anyone signed in edits
+   MOTION on the page's BALLOT, which has a clock (THE COUNCIL'S CLOCK,
+   below: every `every` hours the motion with the most hearts goes up);
+   3 WILD — anyone signed in edits
    anything, live, with no canon, no cooldown and no queue; the caps, the
    rate and the history stay, and a strike is refused there (a revert is a
    revert). KEEPERS are the moderators everywhere, the trusted tier on
@@ -66,9 +66,24 @@
    friends they invited (api/friends.js) while they are still friends.
    Every piece carries `by` — who put it up, stamped here and never by a
    client — and a non-keeper touches only their own. VOTES take a standing
-   day (rep 1 or more): one per address, the proposer excluded, quorum
-   three, a simple majority at the close, a tie falls, and nothing passes
-   early — a keeper's approve is the fast track, a reject the veto.
+   day (rep 1 or more): one per address, the proposer and their address
+   excluded. A motion with a close of its own — a drastic edit, on a page
+   that is no council — wants a quorum of three and a simple majority at
+   that close, a tie falls, and nothing passes early; a keeper's approve is
+   the fast track, a reject the veto.
+
+   THE COUNCIL'S CLOCK, AND HEARTS (2026-09-28). The ballot shows every edit
+   that waits as a picture of the page with it on, and each has a HEART. On
+   a motion a heart IS the vote — an aye, or the vote taken back (op heart;
+   op vote still marks aye or nay) — and takes what a vote takes. On an edit
+   waiting for the keepers it decides nothing: it says which the page likes,
+   and anybody signed in gives one. A council's motions are decided by the
+   page's clock and not one by one: every `every` hours (1 · 3 · 6 · 12 · 24
+   · 72 · 168; six unless its maker says otherwise) the motion with the most
+   hearts — one at least (three, for a drastic edit), and more than it has
+   nays; the older of two level ones — goes up, and the rest wait for the
+   next round, a week at most. The midnight closes, the period in days and
+   the quorum of three on an ordinary motion are gone.
    STANDING is earned on TOEM 2 while it is not wild, and nowhere else.
    WATCHED (a moderator's flag, op role) makes an account a newcomer
    wherever it goes. The counters an account keeps (HABITS, below) are
@@ -145,9 +160,9 @@ const RATE = { newcomer: 3, contributor: 12, trusted: 30, mod: 1e9, admin: 1e9, 
 const TIER_REP = { contributor: 3, trusted: 10 };
 const STRIKE = 5, STRIKES_BAN = 2, STRIKE_DAYS = 30, APPROVER_COST = 2;
 const MOTION_HOURS = 72, MOTION_QUORUM = 3, CONTESTED_HOURS = 24;
-/* THREE LEVELS OF CHAOS: a page's chaos (0 read-only · 1 tended · 2 council · 3 wild), its ballot's period in days, the least a motion is open,
+/* THREE LEVELS OF CHAOS: a page's chaos (0 read-only · 1 tended · 2 council · 3 wild), how often a council's clock comes round, in hours,
    and FEATS — which kinds everyone may add live (ink · stickers · notes · tracings · embeds · others' pieces); off is the keepers' only */
-const CHAOS = [0, 1, 2, 3], PERIODS = [1, 3, 7], CHAOS_DEFAULT = 1, PERIOD_DEFAULT = 3, MIN_OPEN_H = 12;
+const CHAOS = [0, 1, 2, 3], EVERY = [1, 3, 6, 12, 24, 72, 168], CHAOS_DEFAULT = 1, EVERY_DEFAULT = 6, HOUR = 3600e3;
 const FEATS_DEFAULT = [true, true, true, false, false, false], KIND_SLOT = { s: 0, p: 0, b: 0, d: 1, k: 1, t: 2, i: 3, g: 4, v: 4 }, OTHERS_SLOT = 5;
 const LOCK_S = 5, NOTES_KEEP = 50;            // a vote's lock on its motion (seconds) · bell entries kept (api/friends.js reads them)
 const VOTE = { id: 'vote', name: 'the vote' }; // the hand that closes a ballot
@@ -374,7 +389,7 @@ const dbm = cmds => storeFor().many(cmds);
      fp:<u>:<day>      set     the pieces touched today, any page (the footprint)
      pending:<u>       list    edits of theirs waiting, any page · pendingip:<h> the same by address
    PAGES
-     page:<slug>       hash    made title kind by, its look: palette inks pic, its rules: chaos period closes last told feats
+     page:<slug>       hash    made title kind by, its look: palette inks pic, its rules: chaos every closes last told feats (period: the clock in days, until 2026-09-28 — unread)
                                (mod: the form's old word, kept, unread) — every page; the first keeps a settings-only hash (no made)
                                · hand given giver — the code it may be claimed by ({h, at, ex, by}, or none), when it last
                                  changed hands and who handed it on (THE MASTER); the first page has a `by` once it is claimed
@@ -404,6 +419,8 @@ const dbm = cmds => storeFor().many(cmds);
      invited:<slug>    set     the accounts invited to a space — its keepers, while they are still the maker's friends
    THE TOWN BOARD AND THE CHAT — api/board.js
      board:<slug>:<ch> list    a page's news · updates · forum (threads and replies) · chat, newest first, trimmed
+     here:<slug>       zset    the accounts with the page open, scored by when each was last seen (a minute and a half; expires)
+     joined:<slug>     hash    account → when it was first seen with the page open: the JOINED lines of the page's history (?history=1)
    THE PHOTO ALBUM — api/gallery.js
      album:<slug>      list    a page's photos, newest first, trimmed: {id, by, at, cap, where, src, key} — the picture is a file (Blob, or toem2/album/)
      album:<slug>:like:<id> set  who gave the photo a heart
@@ -422,7 +439,7 @@ const K = {
   friends: u => P + 'friends:' + u, asks: u => P + 'asks:' + u, notes: u => P + 'notes:' + u, invited: s => P + 'invited:' + s,
   lock: id => P + 'lock:' + id, board: (s, ch) => P + 'board:' + s + ':' + ch,
   album: s => P + 'album:' + s, albumLike: (s, id) => P + 'album:' + s + ':like:' + id,
-  lb: s => P + 'lb:' + s
+  lb: s => P + 'lb:' + s, here: s => P + 'here:' + s, joined: s => P + 'joined:' + s
 };
 function pageKeys(slug) {
   const p = slug === HOME ? P : P + 'p:' + slug + ':';
@@ -468,7 +485,6 @@ function streakOf(days) {                      // standing days in a row, ending
   while (have.has(dayOf(t))) { n++; t -= DAY; }
   return n;
 }
-const nextMidnight = now => { const t = new Date(now); t.setUTCHours(24, 0, 0, 0); return t.getTime(); };
 /* A PICTURE: an account's (the yard's K and the corner's face — api/auth.js)
    or a space's (its "?" at /yard/new/). The page cuts it to a 128-pixel
    square JPEG in the browser, so the door takes exactly that and nothing
@@ -658,7 +674,7 @@ async function tagsOf(ids) {                   // account → Name#n, for the on
   uniq.forEach((u, i) => { out[u] = tagOf({ name: got[2 * i], n: got[2 * i + 1] }) || 'a gnome'; });
   return out;
 }
-const titleOf = async slug => (slug === HOME || !slug ? 'TOEM 2' : (await db('HGET', K.page(slug), 'title')) || slug);
+const titleOf = async slug => (await db('HGET', K.page(slug || HOME), 'title')) || (slug === HOME || !slug ? 'TOEM 2' : slug);
 
 const ipOf = req => String(req.headers['x-real-ip'] || String(req.headers['x-forwarded-for'] || '').split(',')[0] || (req.socket && req.socket.remoteAddress) || '?').trim();
 const ipHash = req => sha((process.env.IP_SALT || 'knoll') + '|' + ipOf(req)).slice(0, 16);
@@ -942,40 +958,57 @@ async function credit(u, touched, standing) {   // the day's footprint, and — 
 }
 
 // ── the queue ─────────────────────────────────────────────────────────────
-/* The queue swept: every motion whose close has come is settled, in the
-   order it was filed; a queued edit nobody looked at in QUEUE_DAYS lapses;
-   and on a council page the ballot's clock is kept — a close that has
-   passed is written down (last) and the next one set. ponytail: timed
-   things happen on reads; a ballot closes when somebody opens the ballot,
-   the queue or one of its motions — a cron pinging ?queue is the upgrade. */
+/* The queue swept: every motion with a close of its own whose close has
+   come is settled, in the order it was filed; an edit nobody decided in
+   QUEUE_DAYS lapses, a motion the council's clock never took among them;
+   and on a council page the clock is kept (THE COUNCIL'S CLOCK): when it
+   has come round, the motion with the most hearts goes up, the round is
+   written down (last) and the next one set. A motion the clock was to
+   decide, on a page that is a council no longer, falls to the keepers'
+   queue. ponytail: timed things happen on reads; the clock comes round
+   when somebody opens the ballot, the queue or one of its motions, and a
+   page nobody looked at for three rounds has one motion go up, not three —
+   a cron pinging ?queue is the upgrade. */
+// …a drastic one wants MOTION_QUORUM of them to be in the running at all: one friend's heart does not take fifty pieces off a wall
+const leads = eds => eds.map(e => Object.assign({ e }, tally(e))).filter(x => x.ayes >= (x.e.cls === 'drastic' ? MOTION_QUORUM : 1) && x.ayes > x.nays)
+  .sort((a, b) => b.ayes - a.ayes || a.nays - b.nays || a.e.at - b.e.at)[0];
 async function sweepQueue(pg) {
-  const rules = await rulesOf(pg);
+  const rules = await rulesOf(pg), now = Date.now(), round = rules.chaos === 2 && rules.closes > 0 && rules.closes <= now;
   const ids = await db('LRANGE', pg.queue, 0, -1);
   const raws = ids.length ? await dbm(ids.map(id => ['GET', K.edit(id)])) : [], cmds = [], count = { carried: 0, fell: 0, kept: 0 };
-  for (const raw of raws) {
-    const e = raw && JSON.parse(raw);
-    if (!e || e.status !== 'motion') continue;
+  const eds = raws.map(raw => raw && JSON.parse(raw)).filter(Boolean);
+  for (const e of eds) {
+    if (e.status !== 'motion' || e.tick) continue;
     const out = await settleMotion(e, VOTE, rules);
     if (out) count[out.status === 'live' ? 'carried' : out.status === 'rejected' ? 'fell' : 'kept']++;
   }
+  if (round) {                               // the clock has come round: of the motions filed before it did, the one with the most hearts
+    const up = leads(eds.filter(e => e.status === 'motion' && e.tick && e.at <= rules.closes));
+    if (up) {
+      const out = await applyEdit(up.e, VOTE, 'motion');
+      count.carried++;
+      await audit(VOTE.id, 'close', { edit: up.e.id, page: pg.slug, of: up.e.by, result: 'passed', ayes: up.ayes, nays: up.nays, skipped: out.skipped || undefined });
+    }
+  }
   const again = ids.length ? await dbm(ids.map(id => ['GET', K.edit(id)])) : [];
+  let waiting = 0;
   again.forEach((raw, i) => {
     const id = ids[i], e = raw && JSON.parse(raw);
     if (!e) { cmds.push(['LREM', pg.queue, 0, id]); return; }
-    if (e.status === 'motion') return;
-    if (e.status !== 'queued') { cmds.push(['LREM', pg.queue, 0, id], ['LREM', K.pending(e.by), 0, id]); return; }
-    if (Date.now() - (e.queued || e.at) > QUEUE_DAYS * 86400e3) {
+    if (e.status === 'motion' && e.tick && rules.chaos !== 2) { delete e.tick; e.status = 'queued'; e.queued = now; cmds.push(['SET', K.edit(id), JSON.stringify(e)]); return; }
+    if (e.status === 'motion' && !e.tick) return;
+    if (e.status !== 'queued' && e.status !== 'motion') { cmds.push(['LREM', pg.queue, 0, id], ['LREM', K.pending(e.by), 0, id]); return; }
+    if (now - (e.queued || e.at) > QUEUE_DAYS * 86400e3) {
       e.status = 'expired';
       cmds.push(['SET', K.edit(id), JSON.stringify(e), 'EX', EDIT_DAYS * 86400], ['LREM', pg.queue, 0, id], ['LREM', K.pending(e.by), 0, id]);
-    }
+    } else if (e.status === 'motion') waiting++;
   });
   if (rules.chaos === 2) {
-    const now = Date.now();
-    if (!rules.closes) cmds.push(['HSET', K.page(pg.slug), 'closes', String(nextMidnight(now) + (rules.period - 1) * DAY)]);
-    else if (rules.closes <= now) {
+    if (!rules.closes) cmds.push(['HSET', K.page(pg.slug), 'closes', String(now + rules.every * HOUR)]);
+    else if (round) {
       let next = rules.closes;
-      while (next <= now) next += rules.period * DAY;
-      cmds.push(['HSET', K.page(pg.slug), 'closes', String(next), 'last', JSON.stringify(Object.assign({ at: rules.closes }, count))]);
+      while (next <= now) next += rules.every * HOUR;
+      cmds.push(['HSET', K.page(pg.slug), 'closes', String(next), 'last', JSON.stringify({ at: rules.closes, carried: count.carried, waiting })]);
     }
   }
   if (cmds.length) await dbm(cmds);
@@ -999,11 +1032,12 @@ async function sweepQueueSometimes(pg, rules) {   // except that a ballot whose 
   sweptAt[pg.slug] = Date.now();
   await sweepQueue(pg);
 }
-// when a motion filed now is decided: the page's next scheduled close at least MIN_OPEN_H away (council), or MOTION_HOURS from now
-function closeOf(rules, now) {
-  if (rules.chaos !== 2) return now + MOTION_HOURS * 3600e3;
-  let t = rules.closes || nextMidnight(now) + (rules.period - 1) * DAY;
-  while (t < now + MIN_OPEN_H * 3600e3) t += rules.period * DAY;
+// when the council's clock next comes round — set here if the page has none yet (a council from before it had a clock)
+async function roundOf(pg, rules, now) {
+  if (rules.closes > now) return rules.closes;
+  let t = rules.closes || now + rules.every * HOUR;
+  while (t <= now) t += rules.every * HOUR;
+  if (!rules.closes) await db('HSET', K.page(pg.slug), 'closes', String(t));
   return t;
 }
 async function enqueue(pg, me, patch, c, req, status, rules, why) {
@@ -1015,17 +1049,19 @@ async function enqueue(pg, me, patch, c, req, status, rules, why) {
   const id = newId(), now = Date.now();
   const rec = { id, page: pg.slug, by: me.id, name: me.tag || me.name, ip, at: now, base: patch.base, put: patch.put, del: patch.del, art: patch.art, cls: c.cls, status: status || 'queued', prev: c.prev, why };
   if (patch.look) rec.look = patch.look;
-  if (rec.status === 'motion') { rec.votes = {}; rec.voters = {}; rec.closes = closeOf(rules, now); }
+  // a motion on a council is the clock's to decide (tick) and carries no close of its own; anywhere else it is decided MOTION_HOURS on
+  let round = 0;
+  if (rec.status === 'motion') { rec.votes = {}; rec.voters = {}; if (rules.chaos === 2) { rec.tick = true; round = await roundOf(pg, rules, now); } else rec.closes = now + MOTION_HOURS * HOUR; }
   await dbm([['SET', K.edit(id), JSON.stringify(rec)], ['RPUSH', pg.queue, id], ['RPUSH', K.pending(me.id), id], ['RPUSH', K.pendingIp(ip), id], ['EXPIRE', K.pendingIp(ip), QUEUE_DAYS * 86400],
              ['HINCRBY', K.user(me.id), 'held', 1]]);
-  // the first motion on a ballot rings the keepers' bells, once per ballot: told is the close it rang for
-  if (rec.status === 'motion' && rules.chaos === 2 && rules.told !== rec.closes) {
-    await db('HSET', K.page(pg.slug), 'told', String(rec.closes));
+  // the first motion of a round rings the keepers' bells, once a round: told is the round it rang for
+  if (rec.tick && rules.told !== round) {
+    await db('HSET', K.page(pg.slug), 'told', String(round));
     for (const u of rules.keepers) if (u !== me.id) await tell(u, 'ballot', me.id, { slug: pg.slug, title: rules.title });
   }
   // an edit waiting for a look rings the bells of those who can give it one: the space's maker and keepers (TOEM 2 has none of its own)
   if (rec.status === 'queued') await tellKeepers(rules, me.id, 'waiting');
-  return { id, closes: rec.closes };
+  return { id, closes: rec.tick ? round : rec.closes };
 }
 async function settle(ed, status, me, extra) {
   const was = ed.status;
@@ -1061,7 +1097,7 @@ async function opEdit(pg, req, res, me, body) {
   let why = to === 'motion' ? (c.cls === 'drastic' ? reason(c) : 'council')
           : foot + c.touched.length > CAP.footprint ? 'footprint'
           : !rules.keeper && c.others ? 'others' : !rules.keeper && c.kept ? 'keeper' : !rules.keeper && c.look ? 'look' : c.cls;
-  if (to === 'no') throw bad(400, 'drastic', 'this edit is drastic (' + reason(c) + ') — that takes standing here, or a keeper');
+  if (to === 'no') throw bad(400, 'drastic', 'this edit is drastic (' + reason(c) + ') — that takes standing here, or a moderator');
   if (to === 'live' && !isMod(me) && rules.chaos !== 3 && await contested(pg, c.touched)) { to = 'queued'; why = 'contested'; }
   if (to !== 'live') {
     const q = await enqueue(pg, me, patch, c, req, to, rules, why);
@@ -1088,7 +1124,7 @@ async function opReview(req, res, me, body) {
   if (ed.status !== 'queued' && ed.status !== 'motion') throw bad(409, 'decided', 'that edit is already ' + ed.status);
   const rules = await rulesOf(pageOfEdit(ed), me), motion = ed.status === 'motion';
   if (!isMod(me) && !rules.owner) {
-    if (!rules.keeper) throw bad(403, 'role', 'the queue is for the keepers and the moderators to decide');
+    if (!rules.keeper) throw bad(403, 'role', 'the queue is for the moderators to decide');
     if (ed.cls === 'drastic' || motion) throw bad(403, 'role', 'a drastic edit is decided by a vote, or by a moderator');
     if (ed.by === me.id) throw bad(403, 'self', 'not your own edit');
     if (ed.ip && ed.ip === ipHash(req)) throw bad(403, 'self', 'not an edit from your own address');
@@ -1136,36 +1172,55 @@ async function applyEdit(ed, me, how) {
 
 // ── motions ───────────────────────────────────────────────────────────────
 const tally = ed => { let ayes = 0, nays = 0; Object.values(ed.votes || {}).forEach(v => (v ? ayes++ : nays++)); return { ayes, nays }; };
-/* A vote takes a standing day (or a moderator), is not the proposer's, and
-   lands under a five-second lock on its motion, so two at once do not lose
-   one; a vote after the close is 409, and the close is settled there and
-   then. One per address: the later voter's counts. A first vote is counted
-   on the account; changing it is not. */
-async function opVote(req, res, me, body) {
-  const id = String(body.edit || '');
-  if (!EDIT_RE.test(id) || typeof body.aye !== 'boolean') throw bad(400, 'vote', 'vote wants an edit id, and aye true or false');
+/* A vote takes a standing day (or a moderator), is not the proposer's nor
+   from the proposer's address, and lands under a five-second lock on its
+   motion, so two at once do not lose one; a vote after the close is 409,
+   and the close is settled there and then. One per address: the later
+   voter's counts. A first vote is counted on the account; changing it is
+   not. A HEART is the same mark made another way (THE COUNCIL'S CLOCK, AND
+   HEARTS): on a motion an aye, or — taken back — no vote at all; on an edit
+   that waits for the keepers, a heart that decides nothing, which anybody
+   signed in gives. `v` is 1 aye · 0 nay · null taken back. */
+async function mark(req, me, id, v) {
   const raw0 = await db('GET', K.edit(id));
   if (!raw0) throw bad(404, 'edit', 'no such edit');
-  const ed0 = JSON.parse(raw0);
-  if (ed0.status !== 'motion') throw bad(409, 'decided', 'that edit is ' + ed0.status + ', not up for a vote');
-  if (ed0.by === me.id) throw bad(403, 'self', 'not on your own motion');
-  if (me.watched || !(isMod(me) || me.tier === 'trusted' || me.rep >= 1)) throw bad(403, 'role', 'voting takes a standing day on the hill — one day of edits on TOEM 2');
-  const rules = await rulesOf(pageOfEdit(ed0), me);
-  if (ed0.closes && Date.now() >= ed0.closes) { await settleMotion(ed0, VOTE, rules); throw bad(409, 'closed', 'that ballot has closed — it is being counted'); }
+  const ed0 = JSON.parse(raw0), pg = pageOfEdit(ed0), ip = ipHash(req);
+  let rules = await rulesOf(pg, me);
+  if (ed0.tick && ed0.status === 'motion') await sweepQueueSometimes(pg, rules);   // the clock may have come round: that is settled first, and what is marked is what is left
+  const open = e => e.status === 'motion' || (e.status === 'queued' && v !== 0);   // a nay is a vote, and only a motion is voted on
+  const shut = e => bad(409, 'decided', 'that edit is ' + e.status + ', not up for a vote');
+  if (!open(ed0)) throw shut(ed0);
+  if (ed0.by === me.id) throw bad(403, 'self', ed0.status === 'motion' ? 'not on your own motion' : 'not on your own edit');
+  if (ed0.ip && ed0.ip === ip) throw bad(403, 'self', 'not on an edit sent from your own address');
+  const vote = ed0.status === 'motion';       // a mark on a motion is a vote, and takes what a vote takes
+  if (vote) if (me.watched || !(isMod(me) || me.tier === 'trusted' || me.rep >= 1)) throw bad(403, 'role', 'voting takes a standing day on the hill — one day of edits on TOEM 2');
+  if (ed0.status === 'motion' && !ed0.tick && ed0.closes && Date.now() >= ed0.closes) { await settleMotion(ed0, VOTE, rules); throw bad(409, 'closed', 'that ballot has closed — it is being counted'); }
   if (!(await db('SET', K.lock(id), '1', 'NX', 'EX', LOCK_S))) throw bad(503, 'busy', 'another ballot is landing on that motion — try again');
   let ed;
   try {
     ed = JSON.parse(await db('GET', K.edit(id)));
-    if (ed.status !== 'motion') throw bad(409, 'decided', 'that edit is ' + ed.status + ', not up for a vote');
+    if (!open(ed)) throw shut(ed);
     ed.votes = ed.votes || {}; ed.voters = ed.voters || {};
-    const ip = ipHash(req), prior = ed.voters[ip], first = ed.votes[me.id] === undefined;
+    const prior = ed.voters[ip], first = ed.votes[me.id] === undefined && v !== null;
     if (prior && prior !== me.id) delete ed.votes[prior];   // one vote per address: the later voter's is the one that counts
-    ed.voters[ip] = me.id;
-    ed.votes[me.id] = body.aye ? 1 : 0;
-    await dbm([['SET', K.edit(id), JSON.stringify(ed)]].concat(first ? [['HINCRBY', K.user(me.id), 'votes', 1]] : []));
+    if (v === null) { delete ed.votes[me.id]; if (ed.voters[ip] === me.id) delete ed.voters[ip]; }
+    else { ed.voters[ip] = me.id; ed.votes[me.id] = v; }
+    await dbm([['SET', K.edit(id), JSON.stringify(ed)]].concat(first && ed.status === 'motion' ? [['HINCRBY', K.user(me.id), 'votes', 1]] : []));
   } finally { await db('DEL', K.lock(id)); }
-  const out = await settleMotion(ed, me, rules);
-  answer(res, 200, Object.assign({ ok: true, edit: id, mine: body.aye ? 1 : 0, closes: ed.closes }, tally(ed), out || { status: 'motion' }));
+  const out = ed.status === 'motion' ? await settleMotion(ed, me, rules) : null;
+  if (ed.tick) rules = await rulesOf(pg, me);
+  return Object.assign({ ok: true, edit: id, closes: ed.tick ? rules.closes : ed.closes }, tally(ed), out || { status: ed.status });
+}
+async function opVote(req, res, me, body) {
+  const id = String(body.edit || '');
+  if (!EDIT_RE.test(id) || typeof body.aye !== 'boolean') throw bad(400, 'vote', 'vote wants an edit id, and aye true or false');
+  answer(res, 200, Object.assign(await mark(req, me, id, body.aye ? 1 : 0), { mine: body.aye ? 1 : 0 }));
+}
+async function opHeart(req, res, me, body) {
+  const id = String(body.edit || '');
+  if (!EDIT_RE.test(id) || (body.on != null && typeof body.on !== 'boolean')) throw bad(400, 'heart', 'a heart wants an edit id, and on true or false');
+  const out = await mark(req, me, id, body.on === false ? null : 1);
+  answer(res, 200, Object.assign(out, { hearts: out.ayes, hearted: body.on !== false }));
 }
 /* Decided at its close, and not before: with three or more voters, a
    simple majority passes it and anything else (a tie included) rejects it;
@@ -1179,6 +1234,7 @@ async function settleMotion(ed, me, rules) {
 }
 async function closeMotion(ed, me) {
   const { ayes, nays } = tally(ed), total = ayes + nays;
+  if (ed.tick) return null;                   // the council's clock decides it, among the others (sweepQueue)
   if (Date.now() < (ed.closes || ed.at + MOTION_HOURS * 3600e3)) return null;
   if (total >= MOTION_QUORUM && ayes > nays) return applyEdit(ed, me, 'motion');
   if (total >= MOTION_QUORUM) { await settle(ed, 'rejected', me, { why: 'the vote: ' + ayes + ' for, ' + nays + ' against' }); return { status: 'rejected', why: 'the vote' }; }
@@ -1232,7 +1288,7 @@ async function revertRev(pg, rev, me, how, strike, req) {
     let to = decide(me, c, 0, rules), why = to === 'motion' ? reason(c) : !rules.keeper && c.others ? 'others' : c.cls;
     if (to === 'live' && rules.chaos !== 3 && await contested(pg, c.touched)) { to = 'queued'; why = 'contested'; }   // the edit war's second round waits
     if (to !== 'live') {
-      if (to === 'no') throw bad(400, 'drastic', 'undoing that is a drastic edit — ask a keeper');
+      if (to === 'no') throw bad(400, 'drastic', 'undoing that is a drastic edit — ask a moderator');
       const q = await enqueue(pg, me, patch, c, req, to, rules, why);
       return { queued: q.id, status: to, why, cls: c.cls, skipped, by: was.by, closes: q.closes };
     }
@@ -1342,13 +1398,18 @@ async function opRole(req, res, me, body) {
 const SPACES_MAX = 3;                         // three since 2026-09-25 (the yard's YOUR SPACES row holds three); two before
 const RESERVED = new Set(['404', 'api', 'apps-script', 'auth', 'coming-soon', 'dashboard', 'features', 'fonts', 'ironhive', 'lab', 'lab2',
                           'login', 'logo', 'posters', 'privacy', 'settings', 'signup', 'terms', 'uploads', 'vendor', 'yard', 'yardview']);
-// the form's four papers (yard/new/: PALETTES, keep in step), which space.html and the yard's hills draw with
+// the form's four papers (yard/new/: PALETTES, keep in step), which space.html and the yard's hills draw with —
+// and TOEM 2's own (2026-09-28): the bench as it has always stood, which is what the first page wears until its maker picks another
 const PAPERS = {
   yard:   { paper: '#fdf7e3', ink: '#17120b', card: '#fffcf0', line: '#d9cdb0', mute: '#4a4054', accent: '#e8484a' },
   knoll:  { paper: '#faf7f9', ink: '#26212a', card: '#fdfbfd', line: '#e2d4df', mute: '#8b7f92', accent: '#c93b82' },
   bench:  { paper: '#efe7ed', ink: '#2e2636', card: '#fdfbfd', line: '#e2d4df', mute: '#8b7f92', accent: '#f59321' },
-  sticky: { paper: '#ffe27a', ink: '#26212a', card: '#fff4c2', line: '#d9bd55', mute: '#5a5140', accent: '#c93b82' }
+  sticky: { paper: '#ffe27a', ink: '#26212a', card: '#fff4c2', line: '#d9bd55', mute: '#5a5140', accent: '#c93b82' },
+  toem2:  { paper: '#efe7ed', ink: '#26212a', card: '#fdfbfd', line: '#e2d4df', mute: '#8b7f92', accent: '#c93b82' }
 };
+// a page's name and its paper, as its record has them — the first page's are TOEM 2 and its own paper until its maker says otherwise (settings/)
+const nameIn = (slug, p) => (p && p.title) || (slug === HOME ? 'TOEM 2' : slug);
+const paperIn = (slug, p) => (p && PAPERS[p.palette] ? p.palette : slug === HOME ? 'toem2' : 'yard');
 const MODS = ['open', 'friends', 'approve', 'read'];
 const listOf = s => { try { const v = JSON.parse(s || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
 const featsOf = v => { const f = FEATS_DEFAULT.slice(); if (Array.isArray(v)) v.slice(0, 6).forEach((x, i) => { f[i] = !!x; }); return f; };   // six switches, the missing ones as shipped
@@ -1358,14 +1419,14 @@ function lookOf(body) {                        // what a post says the space loo
                 mod: MODS.includes(body.mod) ? body.mod : 'open', feats: JSON.stringify(Array.isArray(body.feats) ? featsOf(body.feats) : FEATS_DEFAULT),
                 pic: cleanPic(body.pic) };
   if (body.chaos != null) out.chaos = String(CHAOS.includes(+body.chaos) ? +body.chaos : CHAOS_DEFAULT);
-  if (body.period != null) out.period = String(PERIODS.includes(+body.period) ? +body.period : PERIOD_DEFAULT);
+  if (body.every != null) out.every = String(EVERY.includes(+body.every) ? +body.every : EVERY_DEFAULT);
   return out;
 }
-const chaosOf = p => ({ chaos: CHAOS.includes(+p.chaos) ? +p.chaos : CHAOS_DEFAULT, period: PERIODS.includes(+p.period) ? +p.period : PERIOD_DEFAULT,
+const chaosOf = p => ({ chaos: CHAOS.includes(+p.chaos) ? +p.chaos : CHAOS_DEFAULT, every: EVERY.includes(+p.every) ? +p.every : EVERY_DEFAULT,
                         closes: numOf(p.closes), told: numOf(p.told), last: (() => { try { return p.last ? JSON.parse(p.last) : null; } catch (e) { return null; } })() });
-const spaceOf = (slug, p) => Object.assign({ slug, title: slug === HOME ? 'TOEM 2' : p.title || slug, by: p.by || '', made: +p.made || 0, given: numOf(p.given), palette: PAPERS[p.palette] ? p.palette : 'yard',
-  inks: listOf(p.inks), mod: p.mod || 'open', feats: featsOf(listOf(p.feats)), pic: p.pic || '' }, PAPERS[p.palette] || PAPERS.yard,
-  (({ chaos, period, closes }) => ({ chaos, period, closesAt: closes }))(chaosOf(p)));
+const spaceOf = (slug, p) => Object.assign({ slug, title: nameIn(slug, p), by: p.by || '', made: +p.made || 0, given: numOf(p.given), palette: paperIn(slug, p),
+  inks: listOf(p.inks), mod: p.mod || 'open', feats: featsOf(listOf(p.feats)), pic: p.pic || '' }, PAPERS[paperIn(slug, p)],
+  (({ chaos, every, closes }) => ({ chaos, every, closesAt: closes }))(chaosOf(p)));
 /* THE RULES of a page, as every op asks them: its chaos, period and next close, the six kind switches, its keepers — the maker,
    then the invited who are still their friends; on TOEM 2 the trusted — and whether the one asking is the maker (owner) or a
    keeper. A watched account keeps nothing. THE MASTER is the maker of every page (owner), TOEM 2 included, and TOEM 2 has a
@@ -1378,7 +1439,7 @@ async function rulesOf(pg, me) {
   const owner = !!me && ((!!by && by === me.id) || master(me));
   const keeper = owner || (!!me && !me.watched && (isMod(me) || keepers.includes(me.id) || (slug === HOME && me.tier === 'trusted')));
   return Object.assign({ page: slug, by, keepers, owner, keeper, master: master(me), feats: featsOf(listOf(p.feats)),
-                         title: slug === HOME ? 'TOEM 2' : (p.title || slug), palette: PAPERS[p.palette] ? p.palette : 'yard',
+                         title: nameIn(slug, p), palette: paperIn(slug, p),
                          inks: listOf(p.inks) }, chaosOf(p));   // the inks: the only colours the dock offers there; none = every colour
 }
 function cleanLook(v) {                        // a look a patch or a settings post proposes: the sign's words, the paper, the inks — nothing else
@@ -1395,18 +1456,22 @@ async function opSettings(pg, req, res, me, body) {
   if (!(isMod(me) || (!!p.by && p.by === me.id))) throw bad(403, 'owner', 'the rules here are the maker\'s');   // TOEM 2's too, once it has one (THE MASTER)
   const was = chaosOf(p), sets = [], said = {};
   if (body.chaos != null) { if (!CHAOS.includes(+body.chaos)) throw bad(400, 'chaos', 'chaos is 0 (read-only), 1 (tended), 2 (council) or 3 (wild)'); said.chaos = +body.chaos; sets.push('chaos', String(said.chaos)); }
-  if (body.period != null) { if (!PERIODS.includes(+body.period)) throw bad(400, 'period', 'a ballot closes every 1, 3 or 7 days'); said.period = +body.period; sets.push('period', String(said.period)); }
+  if (body.every != null) { if (!EVERY.includes(+body.every)) throw bad(400, 'every', 'the ballot\'s clock comes round every ' + EVERY.slice(0, -1).join(', ') + ' or ' + EVERY[EVERY.length - 1] + ' hours'); said.every = +body.every; sets.push('every', String(said.every)); }
   if (Array.isArray(body.feats)) { said.feats = featsOf(body.feats); sets.push('feats', JSON.stringify(said.feats)); }
-  const look = slug === HOME ? undefined : cleanLook(body);
+  /* THE FIRST PAGE'S LOOK (2026-09-28): TOEM 2's name, paper and inks are set like any page's — by its maker or the master, and
+     not by the moderators, whose part of its settings is the rules. Until somebody does, it is TOEM 2 on its own paper. */
+  const look = cleanLook(body);
+  if (look && slug === HOME && !(master(me) || (!!p.by && p.by === me.id))) throw bad(403, 'owner', 'TOEM 2\'s name and colours are its maker\'s');
   if (look) { said.look = look; sets.push(...Object.entries(look).flat()); }
   if (slug !== HOME && body.pic != null) {      // the page's picture: a 128-pixel JPEG (A PICTURE), or none
     const pic = body.pic === '' ? '' : cleanPic(body.pic);
     if (body.pic !== '' && !pic) throw bad(400, 'pic', 'the picture is not one the form makes');
     said.pic = pic ? 'set' : 'none'; sets.push('pic', pic);
   }
-  if (!sets.length) throw bad(400, 'settings', 'settings wants a chaos, a period, feats, or a look');
-  const chaos = said.chaos || was.chaos, period = said.period || was.period;
-  if (chaos === 2 && (!was.closes || was.chaos !== 2)) { said.closes = nextMidnight(Date.now()) + (period - 1) * DAY; sets.push('closes', String(said.closes)); }   // ponytail: a period change waits for the next close
+  if (!sets.length) throw bad(400, 'settings', 'settings wants a chaos, how often the ballot\'s clock comes round, feats, or a look');
+  const chaos = said.chaos != null ? said.chaos : was.chaos, every = said.every || was.every;
+  // the clock starts when the page becomes a council, and starts again when how often it comes round is changed
+  if (chaos === 2 && (!was.closes || was.chaos !== 2 || (said.every && said.every !== was.every))) { said.closes = Date.now() + every * HOUR; sets.push('closes', String(said.closes)); }
   await db('HSET', K.page(slug), ...sets);
   await audit(me.id, 'settings', Object.assign({ page: slug }, said));
   answer(res, 200, { ok: true, rules: await rulesOf(pg, me) });
@@ -1421,7 +1486,7 @@ async function opPage(req, res, me, body) {
   // counted again once claimed: two made at once, both past the count, and neither stands
   if (counted && (await db('SCARD', mine)) > SPACES_MAX) { await dbm([['SREM', mine, slug], ['DEL', K.page(slug)]]); throw full(); }
   const look = lookOf(body);
-  if (look.chaos === '2') look.closes = String(nextMidnight(now) + ((+look.period || PERIOD_DEFAULT) - 1) * DAY);
+  if (look.chaos === '2') look.closes = String(now + (+look.every || EVERY_DEFAULT) * HOUR);
   await dbm([['HSET', K.page(slug), 'title', title, 'kind', 'wall', 'by', me.id, ...Object.entries(look).flat()], ['ZADD', K.pages, now, slug]]);
   await audit(me.id, 'page', { page: slug, title });
   answer(res, 200, { ok: true, page: spaceOf(slug, Object.assign({ made: now, title, by: me.id }, look)) });
@@ -1538,8 +1603,8 @@ async function get(req, res, q, op) {
     return answer(res, 200, { ok: true, edit: Object.assign(e, t) });
   }
   if (q.get('pages')) {                         // the first page, and every one made since
-    const slugs = await db('ZRANGEBYSCORE', K.pages, '-inf', '+inf'), recs = await dbm(slugs.map(s => ['HGETALL', K.page(s)]));
-    return answer(res, 200, { ok: true, pages: [{ slug: HOME, title: 'TOEM 2', kind: 'wall' }].concat(recs.map((p, i) => ({ slug: slugs[i], title: p.title, kind: p.kind, by: p.by, made: +p.made }))) });
+    const slugs = await db('ZRANGEBYSCORE', K.pages, '-inf', '+inf'), [home, ...recs] = await dbm([HOME].concat(slugs).map(s => ['HGETALL', K.page(s)]));
+    return answer(res, 200, { ok: true, pages: [{ slug: HOME, title: nameIn(HOME, home), kind: 'wall' }].concat(recs.map((p, i) => ({ slug: slugs[i], title: p.title, kind: p.kind, by: p.by, made: +p.made }))) });
   }
   if (q.get('space')) {                         // one space, for its own address (space.html): anybody's to read — the first page too, since it may have a maker (THE MASTER)
     const slug = String(q.get('space')).toLowerCase(), p = SLUG_RE.test(slug) ? await db('HGETALL', K.page(slug)) : {};
@@ -1564,7 +1629,7 @@ async function get(req, res, q, op) {
     const tags = await tagsOf(recs.map(p => p.by).filter(u => USER_RE.test(u || '')));
     return answer(res, 200, { ok: true, me: me.id, days: HANDOFF_DAYS, pages: slugs.map((s, i) => {
       const p = recs[i], hand = handOf(p);
-      return { slug: s, title: s === HOME ? 'TOEM 2' : p.title || s, by: p.by || '', tag: p.by ? tags[p.by] || '' : '', made: numOf(p.made), given: numOf(p.given),
+      return { slug: s, title: nameIn(s, p), by: p.by || '', tag: p.by ? tags[p.by] || '' : '', made: numOf(p.made), given: numOf(p.given),
                code: hand ? { at: +hand.at || 0, expires: +hand.ex } : null };
     }) });
   }
@@ -1578,16 +1643,43 @@ async function get(req, res, q, op) {
     const me = await whoIs(req), rules = await rulesOf(pg, me), tags = await tagsOf(rules.keepers);
     return answer(res, 200, Object.assign({ ok: true }, rules, PAPERS[rules.palette], { closesAt: rules.closes, keepers: rules.keepers.map(u => ({ id: u, tag: tags[u] })), me: me ? me.id : null }));
   }
+  if (q.get('history')) {
+    /* THE PAGE'S HISTORY, FOR ITS DASHBOARD (2026-09-28): who joined, and the edits that went up — newest first, all the log keeps
+       (LOG_KEEP revisions), on any page whatever its rules. JOINED is the first time an account was seen with the page open
+       (joined:<slug>, kept by api/board.js: WHO IS HERE) — or, for whoever was here before that was kept, their first edit in the
+       log. AN EDIT THAT WENT UP went live, was approved, was carried by the council or was put up at a moderator's word; what was
+       undone, reverted or struck is the wall's own history's to tell (toem2/history.js). The keepers' to read: it says who came.
+       ponytail: every account that ever came is read and named here, two store reads each, a dashboard's load at a time — fine to
+       a few thousand; a page past that wants its joins in a sorted set, read a screen at a time. */
+    const me = await whoIs(req), rules = await rulesOf(pg, me);
+    if (!rules.keeper) return answer(res, me ? 403 : 401, { ok: false, code: me ? 'role' : 'who', error: 'a page\'s history is its moderators\' to read' });
+    const [raw, seen] = await dbm([['LRANGE', pg.log, 0, LOG_KEEP - 1], ['HGETALL', K.joined(pg.slug)]]);
+    const log = raw.map(s => JSON.parse(s)).filter(e => USER_RE.test(String(e.by || ''))), first = {};
+    Object.keys(seen || {}).forEach(u => { if (USER_RE.test(u) && +seen[u] > 0) first[u] = +seen[u]; });
+    log.forEach(e => { if (+e.at > 0 && !(first[e.by] <= e.at)) first[e.by] = +e.at; });
+    const edits = log.filter(e => ['live', 'approved', 'motion', 'fiat'].includes(e.how)), via = e => (USER_RE.test(String(e.via || '')) ? e.via : '');
+    const tags = await tagsOf(Object.keys(first).concat(edits.map(via).filter(Boolean)));
+    const history = Object.keys(first).map(u => ({ kind: 'join', at: first[u], by: u, tag: tags[u] }))
+      .concat(edits.map(e => ({ kind: 'edit', at: +e.at || 0, by: e.by, tag: tags[e.by], how: e.how, via: via(e) ? tags[via(e)] : undefined, rev: e.rev, cls: e.cls, n: e.n })))
+      .sort((a, b) => b.at - a.at || (a.kind === 'join') - (b.kind === 'join'));   // at one moment, the joining is the older of the two
+    return answer(res, 200, { ok: true, history, kept: LOG_KEEP });
+  }
   if (q.get('queue') || q.get('ballot')) {      // the queue — or, for the ballot, its motions, with the clock and the one asking's own votes
     const ballot = !!q.get('ballot');
     await sweepQueueSometimes(pg, await rulesOf(pg));
     const rules = await rulesOf(pg), me = ballot ? await whoIs(req) : null, mine = {};
     const ids = await db('LRANGE', pg.queue, 0, -1);
-    const queue = (ids.length ? await dbm(ids.map(id => ['GET', K.edit(id)])) : []).filter(Boolean).map(r => JSON.parse(r)).filter(e => !ballot || e.status === 'motion')
+    const all = (ids.length ? await dbm(ids.map(id => ['GET', K.edit(id)])) : []).filter(Boolean).map(r => JSON.parse(r)).filter(e => e.status === 'queued' || e.status === 'motion' || !ballot)
       .map(e => { if (me && e.votes && e.votes[me.id] != null) mine[e.id] = e.votes[me.id];
-                  return Object.assign({ id: e.id, by: e.by, name: e.name, at: e.at, cls: e.cls, status: e.status, why: e.why, look: e.look, closes: e.closes,
-                                         n: { put: Object.keys(e.put).length, del: e.del.length, art: (e.art || []).length } }, e.status === 'motion' ? tally(e) : {}); });
-    return answer(res, 200, { ok: true, queue, chaos: rules.chaos, period: rules.period, closesAt: rules.closes, last: rules.last, quorum: MOTION_QUORUM, mine });
+                  return Object.assign({ id: e.id, by: e.by, name: e.name, at: e.at, cls: e.cls, status: e.status, why: e.why, look: e.look, closes: e.tick ? rules.closes : e.closes, tick: e.tick || undefined,
+                                         n: { put: Object.keys(e.put).length, del: e.del.length, art: (e.art || []).length } }, e.status === 'motion' || ballot ? tally(e) : {}); });
+    const queue = all.filter(e => !ballot || e.status === 'motion');
+    if (!ballot) return answer(res, 200, { ok: true, queue, chaos: rules.chaos, every: rules.every, closesAt: rules.closes, last: rules.last, quorum: MOTION_QUORUM, mine });
+    /* THE BALLOT'S PICTURES: every edit that waits — for the keepers, or for a vote — with how much it changes and its hearts (on a
+       motion, its ayes), the one that changes the most first; then the most hearts, then the older */
+    const size = e => e.n.put + e.n.del + e.n.art;
+    const waiting = all.map(e => Object.assign({}, e, { size: size(e), hearts: e.ayes, hearted: mine[e.id] === 1 })).sort((a, b) => b.size - a.size || b.hearts - a.hearts || a.at - b.at);
+    return answer(res, 200, { ok: true, queue, waiting, chaos: rules.chaos, every: rules.every, closesAt: rules.closes, last: rules.last, quorum: MOTION_QUORUM, mine });
   }
   if (q.get('at')) {
     const n = Math.floor(+q.get('at'));
@@ -1714,6 +1806,7 @@ async function handler(req, res) {
       case 'edit': return await opEdit(await pageOf(body.page), req, res, me, body);
       case 'review': return await opReview(req, res, me, body);
       case 'vote': return await opVote(req, res, me, body);
+      case 'heart': return await opHeart(req, res, me, body);
       case 'revert': return await opRevert(await pageOf(body.page), req, res, me, body, false);
       case 'strike': return await opRevert(await pageOf(body.page), req, res, me, body, true);
       case 'undo': return await opUndo(await pageOf(body.page), req, res, me, body);
@@ -1736,7 +1829,7 @@ async function handler(req, res) {
 module.exports = handler;
 // for the probes: the store (and a way to swap it), the keys, and the two things a test signs in with
 Object.assign(handler, { storeFor, useStore: s => { STORE = s; }, db, dbm, K, pageKeys, HOME, CAP, LINE, RATE, TIER_REP, MOTION_HOURS, MOTION_QUORUM, TAG_MAX, mintSession, finishLogin, userKey, CAS,
-                         CHAOS, PERIODS, MIN_OPEN_H, VOTE, FEATS_DEFAULT, NOTES_KEEP });
+                         CHAOS, EVERY, EVERY_DEFAULT, QUEUE_DAYS, VOTE, FEATS_DEFAULT, NOTES_KEEP, sweepQueue });
 // …and for api/auth.js (the accounts) and api/hill.js (a yard of one's own, and proposals to it): who
 // is asking, the session's two cookies, the names, and the checks a piece that other people's browsers will draw has to pass
 Object.assign(handler, { whoIs, isMod, master, titleOf, HANDOFF_DAYS, CLAIM_TRIES, sessionOf, sessOf, inGen, setSession, clearSession, sameSite, localPath, answer, readBody, Bad, bad, text, sha, ipHash,

@@ -375,7 +375,7 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
                                      ['v0'], ['v1', 'user', D1], ['v2', 'user', D1], ['v3', 'user', D1], ['v4', 'user', D1], ['v5', 'user', D1]]) await mk(nme, role, days);
     const pdoc = async page => (await GET('?page=' + page)).json;
     const breathe = async who => { const h = Math.floor(Date.now() / 36e5); await API.dbm([['DEL', API.K.rl('u:' + U[who], h)], ['DEL', API.K.rl('e:' + U[who], h)]]); };
-    const closeNow = () => API.db('HSET', API.K.page('brook'), 'closes', String(Date.now() - 1000));   // the ballot's own close has come
+    const closeNow = () => API.db('HSET', API.K.page('brook'), 'closes', String(Date.now() - 1));   // the clock has come round, a moment ago
     const pedit = async (who, page, put, del, more) => POST(Object.assign({ op: 'edit', page, base: (await pdoc(page)).rev, put: put || {}, del: del || [] }, more || {}), who);
     const canonOf = dd => dd.wall.items.filter(it => it.c === 1);
     r = await edit('c1', { [nm(301)]: fresh('d', { by: U.adm }) }); d = await doc();
@@ -394,7 +394,7 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
     r = await POST({ op: 'settings', page: 'toem2', feats: [1, 1, 1, 0, 0, 0] }, 'mod'); r = await edit('c1', { [nm(303)]: { k: 't', t: 'a note', x: 0, y: 0, c: '#000000' } });
     check('…and with notes open to everyone again, the same note is live', r.json.status === 'live', brief(r));
     r = await POST({ op: 'settings', page: 'toem2', chaos: 1 }, 'k1'); check("TOEM 2's rules are the moderators' to set: a trusted user gets 403", r.status === 403 && r.json.code === 'owner', brief(r));
-    r = await GET('?rules=1'); check('?rules tells anybody the level and the six switches, and that a stranger keeps nothing', r.json.ok && r.json.chaos === 1 && r.json.feats.length === 6 && r.json.keeper === false && r.json.period === 3, j({ chaos: r.json.chaos, feats: r.json.feats, keeper: r.json.keeper }));
+    r = await GET('?rules=1'); check('?rules tells anybody the level and the six switches, and that a stranger keeps nothing', r.json.ok && r.json.chaos === 1 && r.json.feats.length === 6 && r.json.keeper === false && r.json.every === 6, j({ chaos: r.json.chaos, feats: r.json.feats, keeper: r.json.keeper, every: r.json.every }));
     r = await GET('?rules=1', 'k1'); check('…and a trusted user that they are a keeper here', r.json.keeper === true && r.json.owner === false);
     r = await edit('k1', {}, [nm(301)]); const del301 = r.json.rev; r = await POST({ op: 'revert', rev: del301 }, 'c1'); d = await doc();
     check("a contributor reverting the deletion of their own piece is live, and the piece comes back as theirs", r.json.status === 'live' && at(d, nm(301)) && at(d, nm(301)).by === U.c1, brief(r));
@@ -414,7 +414,7 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
     r = await edit('mod', ninety); const bigRev = r.json.rev; r = await POST({ op: 'revert', rev: bigRev }, 'c2');
     check("undoing ninety moves is drastic: a contributor's revert becomes a motion", r.json.status === 'motion' && r.json.cls === 'drastic', brief(r));
     await POST({ op: 'review', edit: r.json.queued, do: 'reject', why: 'leave it' }, 'mod');
-    r = await POST({ op: 'page', slug: 'brook', title: 'The Brook', chaos: 1, period: 3, feats: [1, 1, 1, 0, 0, 0] }, 'mk1'); check('a newcomer makes a space with its rules', r.json.ok && r.json.page.chaos === 1, brief(r));
+    r = await POST({ op: 'page', slug: 'brook', title: 'The Brook', chaos: 1, feats: [1, 1, 1, 0, 0, 0] }, 'mk1'); check('a newcomer makes a space with its rules', r.json.ok && r.json.page.chaos === 1, brief(r));
     await API.db('SADD', API.K.friends(U.mk1), U.kp1); await API.db('SADD', API.K.friends(U.kp1), U.mk1); await API.db('SADD', API.K.invited('brook'), U.kp1);
     r = await GET('?rules=1&page=brook', 'kp1'); check("an invited friend is a keeper of the space, and ?rules names both by tag", r.json.keeper === true && r.json.keepers.length === 2 && /^kp1#\d+$/.test(r.json.keepers[1].tag), j(r.json.keepers));
     r = await pedit('kp1', 'brook', { [nm(320)]: fresh('d') }); check("…and edits live there, standing days or none", r.json.status === 'live', brief(r));
@@ -428,7 +428,7 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
     r = await edit('mk1', {}, [canonOf(await doc())[2].n]); check('…and on TOEM 2 the same newcomer is refused a drastic edit, as ever', r.status === 400 && r.json.code === 'drastic', brief(r));
     r = await POST({ op: 'settings', page: 'brook', chaos: 2 }, 'st1'); check("a stranger cannot set a space's rules", r.status === 403 && r.json.code === 'owner', brief(r));
     r = await POST({ op: 'settings', page: 'brook', chaos: 9 }, 'mk1'); check('chaos is 0, 1, 2 or 3', r.status === 400 && r.json.code === 'chaos', brief(r));
-    r = await POST({ op: 'settings', page: 'brook', period: 2 }, 'mk1'); check('a period is 1, 3 or 7 days', r.status === 400 && r.json.code === 'period', brief(r));
+    r = await POST({ op: 'settings', page: 'brook', every: 2 }, 'mk1'); check('the clock comes round every 1, 3, 6, 12, 24, 72 or 168 hours', r.status === 400 && r.json.code === 'every', brief(r));
     r = await POST({ op: 'settings', page: 'brook', title: 'Brook Rules', palette: 'sticky' }, 'mk1'); const sp2 = (await GET('?space=brook')).json.space;
     check("the maker changes the sign and the paper", r.json.ok && sp2.title === 'Brook Rules' && sp2.palette === 'sticky' && sp2.chaos === 1, j({ title: sp2.title, palette: sp2.palette }));
     r = await GET('?spaces=1', 'mk1'); check('?spaces carries each space\'s level and how many wait there', r.json.spaces[0].chaos === 1 && r.json.spaces[0].waiting === 1, j(r.json.spaces.map(x => [x.slug, x.chaos, x.waiting])));
@@ -440,68 +440,85 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
     r = await pedit('mk1', 'brook', { [nm(340)]: fresh('d') }); check('…while the maker draws on', r.json.status === 'live', brief(r));
 
     // ── 20 · the council ─────────────────────────────────────────────────
+    // THE COUNCIL'S CLOCK, AND HEARTS (2026-09-28): the page's clock decides among the motions — every six hours (unless its maker says
+    // otherwise) the one with the most hearts goes up, and the rest wait for the next round
     r = await POST({ op: 'settings', page: 'brook', chaos: 2 }, 'mk1'); const rulesB = r.json.rules;
-    check('the maker calls a council: the next close is set, at a UTC midnight, at least the period away', r.json.ok && rulesB.chaos === 2 && rulesB.closes % 86400e3 === 0 && rulesB.closes > Date.now() + 2 * 86400e3, j({ closes: rulesB.closes, now: Date.now() }));
+    check('the maker calls a council: its clock comes round every six hours, the first time six hours from now', r.json.ok && rulesB.chaos === 2 && rulesB.every === 6 && Math.abs(rulesB.closes - Date.now() - 6 * 3600e3) < 5000, j({ closes: rulesB.closes, now: Date.now() }));
     r = await pedit('kp1', 'brook', { [nm(341)]: fresh('d') }); check("a keeper's edit is live on a council page", r.json.status === 'live', brief(r));
     r = await pedit('st1', 'brook', { [nm(342)]: fresh('d') }); const cm1 = r.json.edit;
-    check("a stranger's small edit is a motion on the ballot, with the close it is decided at", r.json.status === 'motion' && r.json.why === 'council' && r.json.closes === rulesB.closes, brief(r) + ' closes ' + r.json.closes);
-    r = await pedit('st0', 'brook', { [nm(343)]: fresh('d') }); check("a newcomer's too — nothing queues, nothing is refused", r.json.status === 'motion', brief(r));
+    check("a stranger's small edit is a motion on the ballot, told when the clock next comes round", r.json.status === 'motion' && r.json.why === 'council' && r.json.closes === rulesB.closes, brief(r) + ' closes ' + r.json.closes);
+    r = await pedit('st0', 'brook', { [nm(343)]: fresh('d') }); const cm0 = r.json.edit; check("a newcomer's too — nothing queues, nothing is refused", r.json.status === 'motion', brief(r));
     const lots = {}; for (let i = 0; i < 45; i++) lots[nm(350 + i)] = fresh('d', { x: i });
-    r = await pedit('st0', 'brook', lots); check("even a newcomer's drastic edit is a motion here, not a 400", r.json.status === 'motion' && r.json.cls === 'drastic', brief(r));
+    r = await pedit('st0', 'brook', lots); const cmBig = r.json.edit; check("even a newcomer's drastic edit is a motion here, not a 400", r.json.status === 'motion' && r.json.cls === 'drastic', brief(r));
     r = await pedit('mk1', 'brook', { [nm(341)]: fresh('d', { x: 60 }) }); check('(the maker moves a keeper\'s piece: live)', r.json.status === 'live', brief(r));
     r = await POST({ op: 'revert', page: 'brook', rev: r.json.rev }, 'mk1'); check('(…and reverts their own move: live, the piece contested)', r.json.status === 'live', brief(r));
     r = await pedit('kp1', 'brook', { [nm(341)]: fresh('d', { x: 70 }) }); check("a keeper's edit on a piece a revert just touched waits: keepers keep the cooldowns", r.json.status === 'queued' && r.json.why === 'contested', brief(r));
     r = await POST({ op: 'vote', edit: cm1, aye: true }, 'v0'); check('a vote takes a standing day: none, no vote', r.status === 403 && r.json.code === 'role', brief(r));
+    r = await POST({ op: 'heart', edit: cm1 }, 'v0'); check('…and a heart on a motion is a vote: none, no heart', r.status === 403 && r.json.code === 'role', brief(r));
     r = await POST({ op: 'vote', edit: cm1, aye: true }, 'st1'); check('the proposer does not vote', r.status === 403 && r.json.code === 'self', brief(r));
+    r = await call('POST', '/api/wall', { op: 'vote', edit: cm1, aye: true }, T.v5, ipOf('st1')); check('nor does anybody from the proposer\'s address', r.status === 403 && r.json.code === 'self', brief(r));
     r = await POST({ op: 'vote', edit: cm1, aye: true }, 'v1'); check('one standing day votes: one aye, and the ballot says which way you went', r.json.ok && r.json.ayes === 1 && r.json.mine === 1 && r.json.status === 'motion', brief(r) + ' ayes ' + r.json.ayes);
-    r = await POST({ op: 'vote', edit: cm1, aye: true }, 'v2'); r = await POST({ op: 'vote', edit: cm1, aye: true }, 'v3');
-    check('three ayes and it is still a motion: nothing passes before the close', r.json.status === 'motion' && r.json.ayes === 3, brief(r) + ' ayes ' + r.json.ayes);
+    r = await POST({ op: 'vote', edit: cm1, aye: true }, 'v2'); r = await POST({ op: 'heart', edit: cm1 }, 'v3');
+    check('two ayes and a heart are three, and it is still a motion: nothing goes up before the clock comes round', r.json.status === 'motion' && r.json.ayes === 3 && r.json.hearts === 3 && r.json.hearted === true, brief(r) + ' ayes ' + r.json.ayes);
     r = await call('POST', '/api/wall', { op: 'vote', edit: cm1, aye: false }, T.v4, ipOf('v3')); check("a nay from v3's address replaces v3's aye: two ayes, one nay", r.json.ayes === 2 && r.json.nays === 1, brief(r) + ' ' + r.json.ayes + '/' + r.json.nays);
     r = await POST({ op: 'vote', edit: cm1, aye: true }, 'v3'); check('…and v3 back from their own address takes it back: three ayes', r.json.ayes === 3 && r.json.nays === 0, r.json.ayes + '/' + r.json.nays);
     r = await GET('?edit=' + cm1); check('the motion reads its tally and never who voted which way', r.json.edit.ayes === 3 && r.json.edit.votes === undefined && r.json.edit.voters === undefined, j(Object.keys(r.json.edit)));
     r = await GET('?edit=' + cm1, 'mod'); check('…except to a moderator', r.json.edit.votes && Object.keys(r.json.edit.votes).length === 3);
-    r = await GET('?ballot=1&page=brook', 'v1'); check('?ballot lists the motions with the clock, the quorum and my own votes', r.json.ok && r.json.chaos === 2 && r.json.closesAt === rulesB.closes && r.json.quorum === 3 && r.json.mine[cm1] === 1 && r.json.queue.every(q => q.status === 'motion') && r.json.queue.length === 3, j({ n: r.json.queue.length, mine: r.json.mine }));
+    r = await POST({ op: 'heart', edit: cm0 }, 'v5'); check('a heart for the newcomer\'s motion', r.json.ok && r.json.hearts === 1 && r.json.hearted === true, brief(r));
+    r = await POST({ op: 'heart', edit: cm0, on: false }, 'v5'); check('…taken back: no vote at all, not a nay', r.json.ok && r.json.hearts === 0 && r.json.nays === 0 && r.json.hearted === false, brief(r) + ' ' + r.json.ayes + '/' + r.json.nays);
+    r = await GET('?ballot=1&page=brook', 'v1'); const W = r.json.waiting || [];
+    check('?ballot lists the motions with the clock and my own votes', r.json.ok && r.json.chaos === 2 && r.json.every === 6 && r.json.closesAt === rulesB.closes && r.json.mine[cm1] === 1 && r.json.queue.every(q => q.status === 'motion') && r.json.queue.length === 3, j({ n: r.json.queue.length, mine: r.json.mine }));
+    check('…and every edit that waits, a motion or not, the one that changes the most first — then the most hearts, then the older', W.length === 5 && W[0].id === cmBig && W[0].size === 45 && W[1].id === cm1 && W[1].hearts === 3 && W[1].hearted === true
+          && W.every((w, i) => !i || W[i - 1].size >= w.size) && W.slice(2).map(w => w.status).sort().join() === 'motion,queued,queued' && W.slice(2).every((w, i, l) => !i || l[i - 1].at <= w.at) && W.every(w => w.closes === undefined || w.status === 'motion'),
+          j(W.map(w => [w.status, w.size, w.hearts])));
     await API.db('SET', API.K.lock(cm1), '1', 'NX', 'EX', 5); r = await POST({ op: 'vote', edit: cm1, aye: true }, 'v5'); await API.db('DEL', API.K.lock(cm1));
     check('a ballot landing while another lands on the same motion waits: 503 busy', r.status === 503 && r.json.code === 'busy', brief(r));
-    await API.db('HSET', API.K.page('brook'), 'closes', String(Date.now() + 1000));
-    r = await pedit('st2', 'brook', { [nm(344)]: fresh('d') }); const cm2 = r.json.edit; check('a motion filed a second before the close joins the ballot after: twelve hours at least', r.json.closes > Date.now() + 11 * 3600e3, j({ closes: r.json.closes, now: Date.now() }));
-    await API.db('HSET', API.K.page('brook'), 'closes', String(rulesB.closes));
     r = await pedit('st1', 'brook', {}, [], { look: { title: 'New Brook', palette: 'knoll', inks: ['#000000', 'nope'], mod: 'wild', by: 'x', feats: [0, 0, 0, 0, 0, 0] } }); const cm3 = r.json.edit;
     check('a motion may carry only the look — the sign, the paper, the inks, and nothing else', r.json.status === 'motion' && !!cm3, brief(r));
     r = await GET('?ballot=1&page=brook'); const lookRow = r.json.queue.find(q => q.id === cm3);
     check('…and the ballot shows it, cut to those three', lookRow && lookRow.n.put === 0 && j(lookRow.look) === j({ title: 'New Brook', palette: 'knoll', inks: '["#000000"]' }), j(lookRow && lookRow.look));
-    for (const v of ['v1', 'v2', 'v3']) await POST({ op: 'vote', edit: cm3, aye: true }, v);
-    await age(cm1); await age(cm3); r = await GET('?edit=' + cm1); const dB = await pdoc('brook');
-    check('at the close, three to none carries the first: live, the piece on the wall, and the proposer has a motion carried', r.json.edit.status === 'live' && !!at(dB, nm(342)) && (await GET('?me=1', 'st1')).json.won === 1, r.json.edit.status);
-    r = await GET('?edit=' + cm3); const sp3 = (await GET('?space=brook')).json.space; check('…and the look motion changes the sign and the paper', r.json.edit.status === 'live' && sp3.title === 'New Brook' && sp3.palette === 'knoll', j({ st: r.json.edit.status, title: sp3.title }));
-    r = await GET('?me=1', 'st1'); check('a standing day is earned on the hill only: three still, after a motion carried on a space', r.json.rep === 3, 'rep ' + r.json.rep);
-    r = await pedit('st1', 'brook', { [nm(345)]: fresh('d') }); const cm4 = r.json.edit; r = await pedit('st2', 'brook', { [nm(346)]: fresh('d') }); const cm5 = r.json.edit;
-    for (const [v, aye] of [['v1', true], ['v2', true], ['v3', false], ['v4', false]]) await POST({ op: 'vote', edit: cm4, aye }, v);
-    await POST({ op: 'vote', edit: cm5, aye: true }, 'v1');
-    await age(cm4); await age(cm5); const e5 = JSON.parse(await API.db('GET', API.K.edit(cm5))); e5.at -= 8 * 86400e3; await API.db('SET', API.K.edit(cm5), JSON.stringify(e5));
+    for (const v of ['v1', 'v2']) await POST({ op: 'heart', edit: cm3 }, v);
+    // the clock comes round
+    const round = async () => { await closeNow(); return (await GET('?ballot=1&page=brook')).json; };
     await closeNow();
-    r = await GET('?queue=1&page=brook'); const a4 = (await GET('?edit=' + cm4)).json.edit, a5 = (await GET('?edit=' + cm5)).json.edit;
-    check('two to two falls: a tie is rejected by the vote', a4.status === 'rejected' && /vote/.test(a4.why), a4.status + ' ' + a4.why);
-    check("one vote is no quorum: it falls to the keepers' queue, and its week starts then, not when it was filed", a5.status === 'queued' && !!a5.queued, a5.status);
-    r = await GET('?ballot=1&page=brook'); check("the ballot's clock moved on, and remembers the last close", r.json.closesAt > Date.now() && r.json.last && r.json.last.fell >= 1 && r.json.last.kept >= 1, j(r.json.last));
-    r = await POST({ op: 'review', edit: cm5, do: 'approve' }, 'kp1'); check("a motion that fell to the queue is a keeper's to decide: approved", r.json.status === 'live', brief(r));
-    r = await pedit('st2', 'brook', { [nm(346)]: fresh('d', { x: 9 }) }); const cm5b = r.json.edit;
-    r = await POST({ op: 'review', edit: cm5b, do: 'approve' }, 'kp1'); check('a keeper who is not the maker cannot decide a motion still on the ballot', r.status === 403, brief(r));
-    r = await POST({ op: 'review', edit: cm5b, do: 'approve' }, 'mk1'); check('the maker can: fast-tracked', r.json.status === 'live', brief(r));
-    r = await GET('?log=1&page=brook'); check('…as fiat', r.json.log[0].how === 'fiat', r.json.log[0].how);
+    r = await pedit('st2', 'brook', { [nm(344)]: fresh('d') }); const cm2 = r.json.edit; check('a motion filed after the clock came round is told the round after', r.json.status === 'motion' && r.json.closes > Date.now() && r.json.closes <= Date.now() + 6 * 3600e3, j({ closes: r.json.closes, now: Date.now() }));
+    let bal = (await GET('?ballot=1&page=brook')).json; r = await GET('?edit=' + cm1); let dB = await pdoc('brook');
+    check('the clock comes round: the motion with the most hearts goes up — live, the piece on the wall, and the proposer has a motion carried', r.json.edit.status === 'live' && !!at(dB, nm(342)) && (await GET('?me=1', 'st1')).json.won === 1, r.json.edit.status);
+    check('…the rest wait for the next round, the one filed after it among them; the clock is six hours on, and remembers the round', bal.queue.map(q => q.id).sort().join() === [cm0, cmBig, cm3, cm2].sort().join() && Math.abs(bal.closesAt - Date.now() - 6 * 3600e3) < 5000
+          && bal.last && bal.last.carried === 1 && bal.last.waiting === 4, j({ last: bal.last, n: bal.queue.length }));
+    bal = await round(); r = await GET('?edit=' + cm3); const sp3 = (await GET('?space=brook')).json.space;
+    check('the next round the look motion leads: it changes the sign and the paper', r.json.edit.status === 'live' && sp3.title === 'New Brook' && sp3.palette === 'knoll' && bal.last.carried === 1, j({ st: r.json.edit.status, title: sp3.title }));
+    r = await GET('?me=1', 'st1'); check('a standing day is earned on the hill only: three still, after a motion carried on a space', r.json.rep === 3, 'rep ' + r.json.rep);
+    bal = await round(); check('a round with no heart on anything: nothing goes up, and they wait on', bal.last.carried === 0 && bal.last.waiting === 3 && bal.queue.length === 3, j(bal.last));
+    r = await pedit('st1', 'brook', { [nm(345)]: fresh('d') }); const cm4 = r.json.edit; r = await pedit('st2', 'brook', { [nm(346)]: fresh('d') }); const cm5 = r.json.edit;
+    await POST({ op: 'heart', edit: cm5 }, 'v2'); await POST({ op: 'heart', edit: cm4 }, 'v1');
+    bal = await round(); let a4 = (await GET('?edit=' + cm4)).json.edit, a5 = (await GET('?edit=' + cm5)).json.edit;
+    check('a heart each: the older of two level ones goes up, one a round', a4.status === 'live' && a5.status === 'motion' && bal.last.carried === 1, a4.status + ' ' + a5.status);
+    bal = await round(); a5 = (await GET('?edit=' + cm5)).json.edit; check('…and the other the round after', a5.status === 'live', a5.status);
     r = await pedit('kp1', 'brook', { [nm(347)]: fresh('d', { x: 5 }) }); r = await pedit('st1', 'brook', { [nm(347)]: fresh('d', { x: 100 }) }); const cm6 = r.json.edit;
     r = await pedit('st2', 'brook', { [nm(347)]: fresh('d', { x: 200 }) }); const cm7 = r.json.edit;
-    for (const id of [cm6, cm7]) for (const v of ['v1', 'v2', 'v3']) await POST({ op: 'vote', edit: id, aye: true }, v);
-    await age(cm6); await age(cm7); await closeNow(); r = await GET('?queue=1&page=brook'); const dB2 = await pdoc('brook'), a7 = (await GET('?edit=' + cm7)).json.edit;
-    check('two motions on one piece: the first filed lands, the second finds it changed and leaves it', at(dB2, nm(347)).x === 100 && a7.status === 'live' && a7.nothing === true && a7.skipped === 1, j({ x: at(dB2, nm(347)).x, a7: [a7.status, a7.skipped] }));
+    for (const v of ['v1', 'v2', 'v3']) await POST({ op: 'heart', edit: cm6 }, v);
+    for (const v of ['v1', 'v2']) await POST({ op: 'heart', edit: cm7 }, v);
+    await round(); await round(); const dB2 = await pdoc('brook'), a7 = (await GET('?edit=' + cm7)).json.edit;
+    check('two motions on one piece, two rounds: the one with more hearts lands, the second finds it changed and leaves it', at(dB2, nm(347)).x === 100 && a7.status === 'live' && a7.nothing === true && a7.skipped === 1, j({ x: at(dB2, nm(347)).x, a7: [a7.status, a7.skipped] }));
+    r = await pedit('st1', 'brook', { [nm(348)]: fresh('d') }); const cm9 = r.json.edit;
+    await POST({ op: 'heart', edit: cm9 }, 'v1'); await POST({ op: 'vote', edit: cm9, aye: false }, 'v2');
+    bal = await round(); check('a heart and a nay: with no more hearts than nays it does not go up', (await GET('?edit=' + cm9)).json.edit.status === 'motion' && bal.last.carried === 0, j(bal.last));
+    r = await POST({ op: 'review', edit: cm9, do: 'approve' }, 'kp1'); check('a keeper who is not the maker cannot decide a motion still on the ballot', r.status === 403, brief(r));
+    r = await POST({ op: 'review', edit: cm9, do: 'approve' }, 'mk1'); check('the maker can: fast-tracked', r.json.status === 'live', brief(r));
+    r = await GET('?log=1&page=brook'); check('…as fiat', r.json.log[0].how === 'fiat', r.json.log[0].how);
     r = await GET('?audit=300', 'mod'); const closes = r.json.audit.filter(e => e.what === 'close');
-    check('every close is on the record, with the tally', closes.filter(e => e.page === 'brook').length >= 4 && closes.every(e => e.by === 'vote' && typeof e.ayes === 'number'), closes.length + ' closes');
-    r = await pedit('st2', 'brook', { [nm(348)]: fresh('d') }); const cm8 = r.json.edit; r = await POST({ op: 'review', edit: cm8, do: 'reject', why: 'not this' }, 'mk1');
+    check('every motion the clock took is on the record, with its hearts', closes.filter(e => e.page === 'brook').length === 6 && closes.every(e => e.by === 'vote' && typeof e.ayes === 'number'), closes.filter(e => e.page === 'brook').length + ' on brook');
+    r = await pedit('st2', 'brook', { [nm(349)]: fresh('d') }); const cm8 = r.json.edit; r = await POST({ op: 'review', edit: cm8, do: 'reject', why: 'not this' }, 'mk1');
     check('…and the maker vetoes one', r.json.status === 'rejected', brief(r));
+    const old2 = JSON.parse(await API.db('GET', API.K.edit(cm2))); old2.at -= 8 * 86400e3; await API.db('SET', API.K.edit(cm2), JSON.stringify(old2));
+    bal = await round(); check('a motion the clock never took lapses in a week', (await GET('?edit=' + cm2)).json.edit.status === 'expired' && !bal.queue.some(q => q.id === cm2), (await GET('?edit=' + cm2)).json.edit.status);
+    r = await POST({ op: 'settings', page: 'brook', every: 1 }, 'mk1');
+    check('how often the clock comes round is the maker\'s to change, and it starts again from then', r.json.ok && r.json.rules.every === 1 && Math.abs(r.json.rules.closes - Date.now() - 3600e3) < 5000, j({ every: r.json.rules && r.json.rules.every }));
     const notes = (await API.db('LRANGE', API.K.notes(U.st2), 0, -1)).map(x => JSON.parse(x));
-    check("the proposer's bell heard of each: a motion that failed, with the tally, one that passed, one that carried", notes.some(x => x.kind === 'failed' && x.slug === 'brook' && x.nays === 0) && notes.some(x => x.kind === 'passed' && x.title === 'New Brook'), j(notes.map(x => x.kind)));
+    check("the proposer's bell heard of each: a motion that failed, with the tally, and the ones that carried", notes.some(x => x.kind === 'failed' && x.slug === 'brook' && x.nays === 0) && notes.filter(x => x.kind === 'passed' && x.title === 'New Brook').length === 2, j(notes.map(x => x.kind)));
     const kn = (await API.db('LRANGE', API.K.notes(U.kp1), 0, -1)).map(x => JSON.parse(x));
-    check("the keepers' bells rang for the ballot — once per ballot, not once per motion (nine were filed)", kn.filter(x => x.kind === 'ballot').length >= 1 && kn.filter(x => x.kind === 'ballot').length < 9, j(kn.map(x => x.kind)));
+    check("the keepers' bells rang for the ballot — once a round, not once a motion (twelve were filed)", kn.filter(x => x.kind === 'ballot').length >= 1 && kn.filter(x => x.kind === 'ballot').length < 12, j(kn.map(x => x.kind)));
 
     // ── 21 · wild ─────────────────────────────────────────────────────────
     r = await POST({ op: 'settings', page: 'meadow', chaos: 3 }, 'mod'); check('a moderator turns their page wild', r.json.ok && r.json.rules.chaos === 3, brief(r));

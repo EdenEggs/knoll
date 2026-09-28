@@ -14,7 +14,21 @@
    is posted by pressing the slot, or the button under the ballot on a
    phone (the machine is hidden there). The drag is the joke, not the only
    door. Own state is one number, how many ballots this browser has posted,
-   under knoll-<page>:ballot. */
+   under knoll-<page>:ballot.
+
+   THE PICTURES, THE HEARTS AND THE CLOCK (2026-09-28). Over the machine, on a
+   tended wall as on a council, stands every edit that waits as a PICTURE of
+   the page with it on — the way the dashboard's past looks are the page
+   itself: each is this bench again in a frame (?embed=1&review=<edit>, which
+   lays the edit over the wall and brings the camera to what it touches) —
+   with who sent it, when, and how much it changes; the one that changes the
+   most first (the door's order). Each has a HEART and the count of them: on
+   a motion a heart is an aye (op heart), on an edit that waits for the
+   moderators it decides nothing. A council has a CLOCK: when it comes round
+   the motion with the most hearts goes up, and the clock counts down here,
+   to the second. ponytail: LOOKS pictures are drawn at once and the rest on
+   asking — each is a whole bench; a thumbnail drawn from the edit's own
+   pieces when a page has dozens waiting. */
 window.Ballot = (function () {
   const API = '/api/wall', TOKEN = 'knoll-toem2:token';
   const PAGE = document.documentElement.dataset.page || 'toem2', PQ = 'page=' + encodeURIComponent(PAGE), CAST = 'knoll-' + PAGE + ':ballot';
@@ -25,6 +39,8 @@ window.Ballot = (function () {
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const ago = t => { const s = Math.max(0, (Date.now() - t) / 1000); return s < 60 ? 'just now' : s < 3600 ? Math.floor(s / 60) + ' min ago' : s < 86400 ? Math.floor(s / 3600) + ' h ago' : Math.floor(s / 86400) + ' d ago'; };
   const get = q => fetch(API + q + '&' + PQ, { cache: 'no-store', headers: token() ? { authorization: 'Bearer ' + token() } : {} }).then(r => (r.ok ? r.json() : null)).catch(() => null);
+  const send = body => fetch(API, { method: 'POST', cache: 'no-store', headers: Object.assign({ 'content-type': 'application/json' }, token() ? { authorization: 'Bearer ' + token() } : {}), body: JSON.stringify(Object.assign({ page: PAGE }, body)) })
+    .then(r => r.json().then(o => Object.assign(o, { http: r.status }))).catch(() => ({ ok: false, error: 'the door did not answer' }));
   const me = () => (window.Seed && Seed.me) || null;
   const closesIn = t => (window.Seed && Seed.closesIn ? Seed.closesIn(t) : 'soon');
   const canVote = () => !!(window.Seed && Seed.canVote && Seed.canVote());
@@ -32,6 +48,8 @@ window.Ballot = (function () {
   const summary = m => what(m.n) || (m.look ? 'the look only' : 'nothing');
 
   let panel = null, stage = null, screen = null, slot = null, machine = null, col = null, qEl = null, nEl = null, castEl = null, list = null, closeEl = null, foot = null, link = null;
+  let rig = null, looks = null, clockEl = null, looksN = 6, second = 0;
+  const LOOKS = 6, cards = new Map();           // THE PICTURES: how many are drawn at once, and the ones that are, by their edit
   let data = null, curId = null, choice = null, phase = 'mark', outcome = null, timer = 0, open = false, poll = 0, tick = 0, cast = 0;
   try { cast = +localStorage.getItem(CAST) || 0; } catch (e) {}
 
@@ -140,14 +158,20 @@ window.Ballot = (function () {
   function say(text, warn) {
     screen.innerHTML = '<div class="bo-screen-in"><div class="bo-say' + (warn ? ' warn' : '') + '"><p>' + esc(text) + '</p><i></i></div></div>';
   }
+  // THE COUNCIL'S CLOCK: of the motions it decides, the one that would go up were it to come round now — the most hearts, one at least
+  // (a drastic edit's, the quorum), and more than its nays: the door's rule (api/wall.js: leads), said here before the door says it
+  const needs = m => (m.cls === 'drastic' ? (data && data.quorum) || 3 : 1);
+  const leader = () => votable().filter(m => m.tick && (m.ayes || 0) >= needs(m) && (m.ayes || 0) > (m.nays || 0)).sort((a, b) => b.ayes - a.ayes || (a.nays || 0) - (b.nays || 0) || a.at - b.at)[0] || null;
   function results(m) {
     const ayes = m.ayes || 0, nays = m.nays || 0, total = ayes + nays, quorum = (data && data.quorum) || 3;
-    const pct = total ? Math.round(ayes / total * 100) : 50, margin = Math.abs(ayes - nays), toLine = Math.max(0, quorum - total);
-    const verdict = outcome === 'carried' ? 'CARRIED' : outcome === 'fell' ? 'FELL' : m.status === 'queued' ? 'FELL TO THE KEEPERS'
+    const pct = total ? Math.round(ayes / total * 100) : 50, margin = Math.abs(ayes - nays), toLine = Math.max(0, quorum - total), lead = leader();
+    const verdict = outcome === 'carried' ? 'CARRIED' : outcome === 'fell' ? 'FELL' : m.status === 'queued' ? 'FELL TO THE MODERATORS'
+                  : m.tick ? (lead && lead.id === m.id ? 'LEADS THE BALLOT' : !ayes ? 'NO HEART YET' : ayes < needs(m) ? (needs(m) - ayes) + ' MORE TO RUN — IT IS DRASTIC' : ayes <= nays ? 'NO MORE HEARTS THAN NAYS'
+                             : lead && lead.ayes - ayes ? (lead.ayes - ayes) + ' BEHIND THE LEADER' : 'LEVEL — THE OLDER LEADS')
                   : ayes === nays ? 'DEAD HEAT — A TIE FALLS' : ayes > nays ? 'AYE LEADS BY ' + margin : 'NAY LEADS BY ' + margin;
     const mine = data && data.mine && data.mine[m.id] != null ? (data.mine[m.id] ? 'AYE' : 'NAY') : m.mine != null ? (m.mine ? 'AYE' : 'NAY') : 'NONE';
     screen.innerHTML = '<div class="bo-screen-in"><div class="bo-results">' +
-      '<b>LIVE TALLY · ' + (toLine ? toLine + ' MORE TO THE LINE' : 'AT THE LINE') + '</b>' +
+      '<b>LIVE TALLY · ' + (m.tick ? 'THE MOST HEARTS GOES UP' : toLine ? toLine + ' MORE TO THE LINE' : 'AT THE LINE') + '</b>' +
       '<div class="bo-bar bo-bar-yes"><span>AYE</span><i><b style="width:' + pct + '%"></b></i><em>' + ayes + '</em></div>' +
       '<div class="bo-bar bo-bar-no"><span>NAY</span><i><b style="width:' + (100 - pct) + '%"></b></i><em>' + nays + '</em></div>' +
       '<div class="bo-verdict">' + verdict + '</div>' +
@@ -164,12 +188,14 @@ window.Ballot = (function () {
     castEl.textContent = String(cast).padStart(4, '0');
     machine.classList.toggle('counting', phase === 'counting');
     col.classList.toggle('counting', phase === 'counting');
-    closeEl.textContent = data && data.chaos === 2 ? 'closes ' + closesIn(m && m.closes ? m.closes : data.closesAt) : r && r.chaos !== 2 ? 'a ' + (r.chaos === 3 ? 'wild' : r.chaos === 0 ? 'read-only' : 'tended') + ' wall' : '';
+    closeEl.textContent = data && data.chaos === 2 ? 'next round ' + closesIn(data.closesAt) : r && r.chaos !== 2 ? 'a ' + (r.chaos === 3 ? 'wild' : r.chaos === 0 ? 'read-only' : 'tended') + ' wall' : '';
+    renderLooks();
     renderList();
+    rig.hidden = !m && !!data && data.chaos !== 2;   // the machine is for motions: a wall that is no council has it only while one is up
     if (!m) {
       nEl.textContent = '— / —';
-      qEl.innerHTML = data && data.chaos !== 2 ? 'the ballot is for council walls.<small>this one is ' + (data.chaos === 3 ? 'wild — anything goes, live' : data.chaos === 0 ? 'read-only' : 'tended — the keepers decide') + '; a drastic edit still comes here as a motion.</small>'
-                    : 'nothing on the ballot.<small>the wall is quiet. a change from anybody who is not a keeper lands here.</small>';
+      qEl.innerHTML = data && data.chaos !== 2 ? 'no motion on the ballot.<small>this wall is ' + (data.chaos === 3 ? 'wild — anything goes, live' : data.chaos === 0 ? 'read-only' : 'tended — the moderators decide what waits') + '; a drastic edit still comes here as a motion.</small>'
+                    : 'nothing on the ballot.<small>the wall is quiet. a change from anybody who is not a moderator lands here.</small>';
       stage.innerHTML = '<p class="bo-empty">the reader is empty.</p>';
       say('NO MOTIONS\nON THE BALLOT');
       return;
@@ -180,8 +206,8 @@ window.Ballot = (function () {
     qEl.innerHTML = '<span class="bo-who" data-u="' + esc(m.by || '') + '">' + who + '</span>, ' + ago(m.at) + ' — ' + esc(m.cls) + ': ' + esc(summary(m)) +
       '<small>' + (m.why && !/^(small|large|drastic|council)$/.test(m.why) ? 'why: ' + esc(m.why) + ' · ' : '') +
       (m.look ? 'the look: ' + esc([m.look.title, m.look.palette].filter(Boolean).join(', ')) + ' · ' : '') +
-      (m.closes ? 'closes ' + esc(closesIn(m.closes)) + ' · ' : '') +
-      (m.status !== 'motion' ? 'this one is settled — ' + (m.status === 'live' ? 'carried' : m.status === 'rejected' ? 'fell' : 'fell to the keepers') + ' · ' : '') +
+      (m.closes ? 'decided ' + esc(closesIn(m.closes)) + ' · ' : '') +
+      (m.status !== 'motion' ? 'this one is settled — ' + (m.status === 'live' ? 'carried' : m.status === 'rejected' ? 'fell' : 'fell to the moderators') + ' · ' : '') +
       '<a href="#" class="bo-look">look at it on the paper</a></small>';
     const lookA = qEl.querySelector('.bo-look'); if (lookA) lookA.addEventListener('click', e => { e.preventDefault(); const id = m.id; close(); if (window.Seed && Seed.review) Seed.review(id); });
     const whoS = qEl.querySelector('.bo-who'); if (whoS && m.by && window.History && History.card) { whoS.tabIndex = 0; whoS.setAttribute('role', 'button'); whoS.addEventListener('click', () => History.card(m.by, whoS)); }
@@ -214,7 +240,7 @@ window.Ballot = (function () {
     if (!open.length) { list.append(el('p', 'th-empty', 'nothing on the ballot — the wall is quiet')); }
     open.forEach(m => {
       const row = el('div', 'th-row' + (m.id === curId ? ' is-on' : '')), mine = !!me() && m.by === me().id;
-      row.append((m.name || 'gnome ' + String(m.by || '').slice(0, 6)) + ' · ' + ago(m.at) + ' · ' + m.cls + ' · ' + (m.ayes || 0) + ' for, ' + (m.nays || 0) + ' against' + (m.closes ? ' · closes ' + closesIn(m.closes) : '') + (mine ? ' · yours' : ''));
+      row.append((m.name || 'gnome ' + String(m.by || '').slice(0, 6)) + ' · ' + ago(m.at) + ' · ' + m.cls + ' · ' + (m.ayes || 0) + ' for, ' + (m.nays || 0) + ' against' + (m.closes ? ' · decided ' + closesIn(m.closes) : '') + (mine ? ' · yours' : ''));
       row.append(el('small', null, summary(m) + (m.look ? ' · look: ' + [m.look.title, m.look.palette].filter(Boolean).join(', ') : '') + (data.mine && data.mine[m.id] != null ? ' · you: ' + (data.mine[m.id] ? 'aye' : 'nay') : '')));
       const acts = el('div');
       const mk = (label, fn) => { const b = el('button', 'th-link', label); b.type = 'button'; b.addEventListener('click', fn); acts.append(b); };
@@ -224,16 +250,95 @@ window.Ballot = (function () {
       row.append(acts);
       list.append(row);
     });
-    if (data && data.last) {
-      const l = data.last, parts = [l.carried ? l.carried + ' carried' : '', l.fell ? l.fell + ' fell' : '', l.kept ? l.kept + ' to the keepers' : ''].filter(Boolean);
-      list.append(el('p', 'th-fine', 'last ballot closed ' + ago(l.at) + (parts.length ? ': ' + parts.join(' · ') : ': nothing was on it')));
+    if (data && data.last) {                    // the last round: what went up, and what waited on (a round from before the clock says what carried, fell and was kept)
+      const l = data.last, parts = [l.carried ? (l.waiting != null && l.carried === 1 ? 'one went up' : l.carried + ' carried') : '', l.fell ? l.fell + ' fell' : '', l.kept ? l.kept + ' to the moderators' : '', l.waiting ? l.waiting + ' waited on' : ''].filter(Boolean);
+      list.append(el('p', 'th-fine', 'the clock last came round ' + ago(l.at) + (parts.length ? ': ' + parts.join(' · ') : ': nothing was on the ballot')));
     }
     if (foot) {
       foot.textContent = '';
       if (!me()) { foot.append('looking is free; '); if (window.Seed) { const a = el('a', 'th-link', 'log in to vote'); a.href = '/login/?next=' + encodeURIComponent(location.pathname + location.search); foot.append(a); } }
       else if (!canVote()) foot.append('a day of live edits on TOEM 2 earns a vote');
-      else if (r && r.chaos === 2) foot.append('one ballot per motion · a simple majority at the close, three voters at least · a tie falls');
-      else foot.append('drastic edits come here as motions; the rest of this wall is ' + (r && r.chaos === 3 ? 'wild' : r && r.chaos === 0 ? 'read-only' : "the keepers'"));
+      else if (r && r.chaos === 2) foot.append('a heart is an aye · when the clock comes round the motion with the most hearts goes up — one at least (three, if it is drastic), and more than its nays');
+      else foot.append('drastic edits come here as motions; the rest of this wall is ' + (r && r.chaos === 3 ? 'wild' : r && r.chaos === 0 ? 'read-only' : "the moderators'"));
+    }
+  }
+  /* ── THE PICTURES: every edit that waits, as the page would look with it on ──
+     A card is built once for an edit and kept (its frame is a whole bench): a redraw moves the cards into the door's
+     order, takes away the ones that were decided, and repaints the words and the hearts in place. */
+  const frameOf = id => location.pathname + '?embed=1&live=1' + (PAGE === 'toem2' ? '' : '&page=' + encodeURIComponent(PAGE)) + '&review=' + encodeURIComponent(id);
+  const FRAME_W = 560;                          // the bench in a picture is this wide (ballot.css), and drawn as small as its print
+  const fit = typeof ResizeObserver === 'function' ? new ResizeObserver(es => es.forEach(e => { const f = e.target.firstElementChild; if (f && e.contentRect.width) f.style.transform = 'scale(' + (e.contentRect.width / FRAME_W).toFixed(4) + ')'; })) : null;
+  const whyNot = w => (!me() ? 'log in to give a heart' : w.by === me().id ? 'your own edit — the others give the hearts' : w.status === 'motion' && !canVote() ? 'a heart on a motion is a vote: it takes a standing day on the hill' : '');
+  function cardOf(w) {
+    const c = el('article', 'bo-print'), pic = el('button', 'bo-print-pic'), f = el('iframe');
+    pic.type = 'button'; pic.title = 'look at it on the paper';
+    f.src = frameOf(w.id); f.loading = 'lazy'; f.tabIndex = -1; f.title = ''; f.setAttribute('aria-hidden', 'true'); f.setAttribute('inert', ''); f.setAttribute('scrolling', 'no');
+    pic.append(f);
+    if (fit) fit.observe(pic);
+    pic.addEventListener('click', () => { close(); if (window.Seed && Seed.review) Seed.review(w.id); });
+    const cap = el('div', 'bo-print-cap'), who = el('b', 'bo-print-who'), when = el('span', 'bo-print-when'), n = el('span', 'bo-print-n'), kind = el('span', 'bo-print-kind');
+    const heart = el('button', 'bo-heart'); heart.type = 'button';
+    heart.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 17S3 12.5 3 7.5A3.5 3.5 0 0 1 10 6a3.5 3.5 0 0 1 7 1.5C17 12.5 10 17 10 17Z"/></svg><b></b>';
+    const note = el('p', 'bo-print-note'); note.hidden = true;
+    heart.addEventListener('click', async () => {
+      const now = c.w, no = whyNot(now);
+      if (no) { note.textContent = no; note.hidden = false; return; }
+      heart.disabled = true;
+      const out = await send({ op: 'heart', edit: now.id, on: !now.hearted });
+      heart.disabled = false;
+      if (!out.ok) { note.textContent = 'Not counted: ' + (out.error || 'the door said no') + '.'; note.hidden = false; return; }
+      note.hidden = true;
+      await fetchBallot();
+      if (out.status === 'live' && window.Seed && Seed.pull) Seed.pull(true);
+      render();
+    });
+    cap.append(who, when, n, kind);
+    c.append(pic, cap, heart, note);
+    c.paint = now => {
+      c.w = now;
+      const hearts = now.hearts || 0, mine = !!me() && now.by === me().id;
+      who.textContent = now.name || 'gnome ' + String(now.by || '').slice(0, 6);
+      when.textContent = ago(now.at) + (mine ? ' · yours' : '');
+      n.textContent = summary(now);
+      kind.textContent = now.status === 'motion' ? 'ON THE BALLOT' : 'WAITS FOR THE MODERATORS';
+      pic.setAttribute('aria-label', 'look at ' + who.textContent + '’s edit on the paper');
+      heart.classList.toggle('is-on', !!now.hearted);
+      heart.setAttribute('aria-pressed', String(!!now.hearted));
+      heart.setAttribute('aria-label', (now.hearted ? 'take your heart back' : 'give it a heart') + ' — ' + hearts + (hearts === 1 ? ' heart' : ' hearts'));
+      heart.title = whyNot(now) || (now.hearted ? 'take your heart back' : now.status === 'motion' ? 'a heart: an aye for this one' : 'a heart: it says which you like — the moderators decide');
+      heart.lastChild.textContent = String(hearts);
+    };
+    return c;
+  }
+  function renderLooks() {
+    const all = (data && data.waiting) || [], shown = all.slice(0, looksN), council = !!data && data.chaos === 2;
+    looks.hidden = !all.length && !council;
+    const head = looks.querySelector('.bo-looks-h'), grid = looks.querySelector('.bo-looks-grid'), more = looks.querySelector('.bo-more'), none = looks.querySelector('.bo-looks-none');
+    head.textContent = all.length === 1 ? 'ONE EDIT WAITS' : all.length + ' EDITS WAIT' + (all.length > 1 ? ' · THE BIGGEST FIRST' : '');
+    clockEl.parentNode.hidden = !council;
+    none.hidden = !!all.length;
+    const keep = new Set(shown.map(w => w.id));
+    cards.forEach((c, id) => { if (!keep.has(id)) { c.remove(); cards.delete(id); } });
+    shown.forEach((w, i) => {
+      let c = cards.get(w.id);
+      if (!c) { c = cardOf(w); cards.set(w.id, c); }
+      c.paint(w);
+      if (grid.children[i] !== c) grid.insertBefore(c, grid.children[i] || null);
+    });
+    more.hidden = all.length <= looksN;
+    more.textContent = 'show ' + Math.min(LOOKS, all.length - looksN) + ' more';
+    paintClock();
+  }
+  // the clock, to the second — and when it has come round, the ballot is read again (which is what settles the round at the door)
+  const two = v => String(v).padStart(2, '0');
+  function paintClock() {
+    if (!clockEl || !data || data.chaos !== 2 || !data.closesAt) return;
+    const s = Math.max(0, Math.ceil((data.closesAt - Date.now()) / 1000)), d = Math.floor(s / 86400);
+    clockEl.textContent = (d ? d + 'd ' : '') + two(Math.floor(s % 86400 / 3600)) + ':' + two(Math.floor(s % 3600 / 60)) + ':' + two(s % 60);
+    clockEl.setAttribute('datetime', new Date(data.closesAt).toISOString());
+    if (!s && !paintClock.asked) {
+      paintClock.asked = true;
+      fetchBallot().then(() => { paintClock.asked = false; if (window.Seed && Seed.pull) Seed.pull(true); if (window.Seed && Seed.readRules) Seed.readRules(true); if (open && phase !== 'counting') render(); });
     }
   }
   async function fetchBallot() {
@@ -248,7 +353,12 @@ window.Ballot = (function () {
     panel = el('aside', 'lab-panel toem-ballot'); panel.id = 'toem-ballot-panel'; panel.hidden = true;
     panel.innerHTML =
       '<div class="lp-bar"><span class="lp-plate">THE BALLOT</span><span class="lp-count" id="bo-close"></span><span class="lp-gap"></span><button type="button" class="lp-x" id="bo-x" aria-label="close the ballot">×</button></div>' +
-      '<div class="lp-body"><div class="bo-rig">' +
+      '<div class="lp-body">' +
+      '<section class="bo-looks" id="bo-looks" aria-label="the edits that wait"><div class="bo-looks-top"><span class="st-tab bo-looks-h">0 EDITS WAIT</span>' +
+        '<p class="bo-clock">THE MOST HEARTED GOES UP IN <time id="bo-clock" role="timer" aria-live="off">--:--:--</time></p></div>' +
+        '<p class="bo-looks-none">nothing waits — an edit that does stands here as a picture of the page with it on, with a heart to give it.</p>' +
+        '<div class="bo-looks-grid"></div><button type="button" class="th-link bo-more" hidden>show more</button></section>' +
+      '<div class="bo-rig" id="bo-rig">' +
         '<div class="bo-left">' +
           '<div class="st-sticky bo-note" aria-hidden="true">1. read the motion<br>2. mark your ballot<br>3. DRAG it into the slot<small>the engine counts the rest.</small></div>' +
           '<div class="bo-issue"><span class="st-tab st-tab-float">01 THE MOTION</span><span class="bo-issue-n" id="bo-n">— / —</span><p class="bo-issue-q" id="bo-q">nothing on the ballot.</p></div>' +
@@ -270,6 +380,8 @@ window.Ballot = (function () {
     document.body.appendChild(panel);
     stage = $('bo-stage'); screen = $('bo-screen'); slot = $('bo-slot'); machine = $('bo-machine'); col = $('bo-machine-col');
     qEl = $('bo-q'); nEl = $('bo-n'); castEl = $('bo-cast'); list = $('bo-list'); closeEl = $('bo-close'); foot = $('bo-foot');
+    rig = $('bo-rig'); looks = $('bo-looks'); clockEl = $('bo-clock');
+    looks.querySelector('.bo-more').addEventListener('click', () => { looksN += LOOKS; renderLooks(); });
     $('bo-x').addEventListener('click', close);
     slot.addEventListener('click', () => { if (choice && phase === 'mark') post(); });
     if (window.Lab && Lab.gripPanel) try { Lab.gripPanel(panel); } catch (e) {}
@@ -284,11 +396,13 @@ window.Ballot = (function () {
     render();
     clearInterval(poll); poll = setInterval(async () => { if (phase === 'counting') return; await fetchBallot(); render(); }, 60000);
     clearInterval(tick); tick = setInterval(() => { if (open && phase !== 'counting') render(); }, 60000);
+    clearInterval(second); second = setInterval(paintClock, 1000);
   }
   function close() {
     if (!panel) return;
     open = false; panel.hidden = true;
-    clearInterval(poll); clearInterval(tick);
+    clearInterval(poll); clearInterval(tick); clearInterval(second);
+    cards.forEach(c => c.remove()); cards.clear(); looksN = LOOKS;   // the pictures are whole benches: they go when the panel does
     if (link) link.setAttribute('aria-expanded', 'false');
   }
   document.addEventListener('DOMContentLoaded', () => {
@@ -296,7 +410,7 @@ window.Ballot = (function () {
     const tools = document.querySelector('.lab-tools');
     if (!tools) return;
     link = el('button', 'lab-link', 'ballot'); link.type = 'button'; link.id = 'toem-ballot'; link.setAttribute('aria-expanded', 'false');
-    link.title = "the council's ballot — mark aye or nay and post it in the machine";
+    link.title = 'the ballot — the edits that wait, as pictures of the page, and a heart for the ones you like';
     link.addEventListener('click', () => (open ? close() : openUp()));
     tools.appendChild(link);
     window.addEventListener('keydown', e => { if (e.key === 'Escape' && open && !(window.Lab && Lab.menuUp)) close(); });

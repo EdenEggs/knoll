@@ -43,8 +43,9 @@
 <!-- …and A SPACE'S OWN PAPER (2026-09-27, lab.css): the set its settings chose, by name, as this
      browser last heard it — from seed.js's read of the rules, from space.html on the way here,
      or from /settings/ at a save — so the bench is that colour from the first paint. Read
-     before ?embed=1 below swaps the store for one of its own. -->
-<script>(function(){var d=document.documentElement,p=d.dataset.page;if(!p)return;try{var c=localStorage.getItem('knoll-'+p+':paper');if(c)d.dataset.paper=c;}catch(e){}})();</script>
+     before ?embed=1 below swaps the store for one of its own. TOEM 2 has settings of its own
+     since 2026-09-28, so its paper is read here too; its own ('toem2') is the bench as it stands. -->
+<script>(function(){var d=document.documentElement,p=d.dataset.page||'toem2';try{var c=localStorage.getItem('knoll-'+p+':paper');if(c&&c!=='toem2')d.dataset.paper=c;}catch(e){}})();</script>
 <!-- ?visitor (2026-09-21): localhost, but the landing page — how the site shows
      this bench, header, account corner and all, for a look at it before a push -->
 <!-- ?embed=1 — THE YARD'S PICTURE OF THIS PAGE (2026-09-21). /yard frames
@@ -224,13 +225,13 @@ html.toem-embed .keymap, html.toem-embed .lab-panel, html.toem-embed .lab-warn {
     <dt><kbd>drag</kbd></dt><dd>a picked sticker — the whole pick goes with it, and one undo brings it all back</dd>
     <dt><kbd>corner</kbd><kbd>ring</kbd></dt><dd>press one sticker on its own: the corner scales it, the ring above it turns it (<kbd>shift</kbd> for 15°) — double-click either to reset</dd>
     <dt><kbd>shift</kbd><kbd>h</kbd><kbd>v</kbd></dt><dd>mirror what is picked, left-to-right or top-to-bottom — a group flips about the group</dd>
-    <dt><kbd>ctrl</kbd><kbd>s</kbd></dt><dd>save the paper into the site — every piece as it is now becomes what TOEM 2 opens on (hold shift to save this view as the opening one too); on the live wall, <b>submit</b>: what you changed goes to the wall, to the keepers, or to the ballot, as the stamp says</dd>
+    <dt><kbd>ctrl</kbd><kbd>s</kbd></dt><dd>save the paper into the site — every piece as it is now becomes what TOEM 2 opens on (hold shift to save this view as the opening one too); on the live wall, <b>submit</b>: what you changed goes to the wall, to the moderators, or to the ballot, as the stamp says</dd>
     <dt><kbd>history</kbd></dt><dd>every revision, the queue, and the rules of this wall</dd>
-    <dt><kbd>ballot</kbd></dt><dd>the council's ballot — mark aye or nay and post it in the machine; a standing day on TOEM 2 lets you vote</dd>
-    <dt><kbd>board</kbd></dt><dd>the town board, bottom left — news and updates from the keepers, the rules, and a forum for everyone</dd>
-    <dt><kbd>chat</kbd></dt><dd>the chat beside it — whoever is signed in, under their own name and picture</dd>
-    <dt><kbd>album</kbd></dt><dd>the photo album, the third button — the photos taken around this page, and a heart to keep one; empty until something takes a photo</dd>
-    <dt><kbd>ranks</kbd></dt><dd>the leaderboard, the fourth button — who has edited this wall the most, on the most days, or first, or posted or photographed the most, as its keepers chose; a podium, and your own line at the foot</dd>
+    <dt><kbd>ballot</kbd></dt><dd>the ballot — every edit that waits, as a picture of the page with it on, and a heart for the ones you like; on a council the one with the most hearts goes up each time the clock comes round. The machine under them still takes an aye or a nay; a standing day on TOEM 2 lets you vote</dd>
+    <dt><kbd>board</kbd></dt><dd>the town board, bottom left — news and updates from the moderators, the rules, and a forum for everyone</dd>
+    <dt><kbd>chat</kbd></dt><dd>the chat beside it — whoever is signed in, under their own name and picture; how many are on the page stands under its name, and opens the list of them; right-click a name to ask to be friends or see their page</dd>
+    <dt><kbd>album</kbd></dt><dd>the photo album, the third button — the photos hung around this page, in their sections, and a heart to keep one; where a section is open to it, your own photos too</dd>
+    <dt><kbd>ranks</kbd></dt><dd>the leaderboard, the fourth button — who has edited this wall the most, on the most days, or first, or posted or photographed the most, as its moderators chose; a podium, and your own line at the foot</dd>
     <dt><kbd>ctrl</kbd><kbd>z</kbd></dt><dd>undo — the last thing moved, or the last thing drawn</dd>
     <dt><kbd>ctrl</kbd><kbd>c</kbd><kbd>v</kbd></dt><dd>copy what is picked, and paste it a nudge down-right — a group stays a group</dd>
     <dt><kbd>right click</kbd></dt><dd>a feature — raise it, lower it, or delete it (undo puts it back)</dd>
@@ -329,6 +330,7 @@ html.toem-embed .keymap, html.toem-embed .lab-panel, html.toem-embed .lab-warn {
      empty: nothing takes a photo yet, and api/gallery.js is the door a camera will post
      through. After board.js, whose corner and whose case (.town-*) it shares. -->
 <link rel="stylesheet" href="gallery.css">
+<script src="shrink.js"></script>
 <script src="gallery.js"></script>
 <!-- the leaderboard (2026-09-24): the fourth corner button, a trophy — the sticker kit's
      leaderboard on the bench. Who stands where, counted from this page's wall, board

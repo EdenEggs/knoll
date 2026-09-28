@@ -221,6 +221,22 @@ card back to this page's own numbers. Each card minimizes to its name with the
 page at a time (`knoll-corner:<slug>:shut`). `node toem2/probe-manage.js`
 walks it all in headless Chrome.
 
+**The second sitting (2026-09-28).** Every word a page says calls the keepers
+**moderators** now; `keeper` stays the code's word and the door's (`me.keeper`,
+`who: 'keepers'`, the bell's `keeper` kind), so nothing stored had to move.
+The Rules tab's **five rules** stand in rows on the Town Board card — a notice
+is its words and up to ten numbered rules (`rules: [{title, text}]`), and a
+page nobody has written for has the five it starts with (`api/board.js`:
+START). The album has **five sections at most**, a section's line a hundred
+characters, a photo's title twenty and its line a hundred; each section has a
+tick, off until ticked, that lets anyone signed in hang **their own photos**
+there from the album on the page (`toem2/shrink.js` is the one shrinker for
+both places). Every card but the last has **Back to the default** — a confirm,
+then `{ op, reset: true }`, which empties the field on the page's record. And a
+fifth card, **History**: who joined the page (the first time an account had it
+open, kept by the who-is-here door — or their first edit, for those from
+before) and the edits that went up, all the wall's log keeps, newest first.
+
 ---
 
 ## Edits to your page (2026-09-27)

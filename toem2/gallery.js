@@ -27,6 +27,14 @@
    corner with the other buttons — pointer moves and a kept place when that
    is wanted.
 
+   A SECTION'S LINE, AND YOUR OWN PHOTOS (2026-09-28): a section's tab opens
+   on the line its moderators wrote about it, and — where they have opened
+   the section to it (dashboard: "visitors may put photos up here", off
+   until ticked) — on the way to hang a photo of your own: a picture, shrunk
+   here as the dashboard shrinks one (shrink.js), a title of twenty
+   characters and a line of a hundred. A moderator has that in every
+   section. Anybody signed in gives a photo a heart, full size.
+
    ponytail: the album asks the door once a minute for the count and when it
    opens — no live push; the board's poll is the pattern if one is wanted. */
 window.Gallery = (function () {
@@ -34,7 +42,7 @@ window.Gallery = (function () {
   const PAGE = document.documentElement.dataset.page || 'toem2', PQ = 'page=' + encodeURIComponent(PAGE);
   const KNOLL = PAGE !== 'toem2';               // KNOLL'S OWN CORNER: a space's; TOEM 2 keeps its own
   const API = '/api/gallery', CARD = '/api/wall?who=', TOKEN = 'knoll-toem2:token', SEEN = 'knoll-' + PAGE + ':album:seen';
-  const POLL = 60000;
+  const POLL = 60000, CAP = { cap: 20, desc: 100 };   // a photo's title and its line, as the door cuts them (api/gallery.js)
   const WORDS = KNOLL ? { name: 'Photo Wall', btn: 'the photo wall', back: 'Back to the wall' } : { name: 'Photo Album', btn: 'the photo album', back: 'Back to album' };
   const TONES = ['#ffd23f', '#5a9e58', '#f5b8c4', '#5a8fd6', '#f0cfae'];
   const tone = id => TONES[(parseInt(String(id || '0').slice(0, 4), 16) || 0) % TONES.length];
@@ -69,6 +77,7 @@ window.Gallery = (function () {
 
   let me = null, photos = [], tab = 'all', viewing = null, seen = +get(SEEN) || 0, open = false, loading = false, busy = false, timer = 0;
   let fab, panel, tabsEl, body, view, sub, note;
+  let adding = null;                            // YOUR OWN PHOTOS: the form while a photo is being put up — kept through a redraw, so nothing typed is lost
 
   // ── the door ────────────────────────────────────────────────────────────
   async function load() {
@@ -132,9 +141,54 @@ window.Gallery = (function () {
     c.addEventListener('click', () => { viewing = p.id; render(); });
     return c;
   }
+  // YOUR OWN PHOTOS: the way to hang one in this section — for anyone signed in where it is open to them, for a moderator anywhere
+  function adder(sec) {
+    if (!me) { const g = el('p', 'town-gate gal-add'), a = el('a', null, 'Log in'); a.href = gate(); g.append(a, ' to hang a photo of your own here.'); return g; }
+    if (adding && adding.sec === sec.id) return adding.form;
+    const f = el('form', 'town-form gal-add'), err = el('p', 'town-note'); err.hidden = true;
+    const say = words => { err.textContent = words || ''; err.hidden = !words; };
+    const file = el('input', 'gal-file'); file.type = 'file'; file.accept = 'image/*'; file.id = 'gal-file';
+    const pick = el('label', 'town-btn gal-pick', 'Add a photo'); pick.htmlFor = 'gal-file';
+    const thumb = el('img', 'gal-thumb'); thumb.alt = ''; thumb.hidden = true;
+    const cap = el('input'); cap.type = 'text'; cap.maxLength = CAP.cap; cap.placeholder = 'A title — 20 characters at most'; cap.setAttribute('aria-label', 'title'); cap.autocomplete = 'off';
+    const desc = el('input'); desc.type = 'text'; desc.maxLength = CAP.desc; desc.placeholder = 'A line about it — 100 at most (optional)'; desc.setAttribute('aria-label', 'description'); desc.autocomplete = 'off';
+    const go = el('button', 'town-btn', 'Hang it'); go.type = 'submit';
+    const no = el('button', 'town-btn is-plain', 'Cancel'); no.type = 'button';
+    const fields = el('div', 'gal-add-f'), acts = el('div', 'town-form-acts'); fields.hidden = true;
+    const stop = () => { adding = null; render(); };
+    let src = '';
+    file.addEventListener('change', async () => {
+      const picked = file.files && file.files[0]; file.value = '';
+      if (!picked) return;
+      say('');
+      try { src = await window.Shrink(picked); } catch (e) { say('That is not a picture this album takes — a JPEG, a PNG or a WebP.'); return; }
+      thumb.src = src; thumb.hidden = false; fields.hidden = false; pick.textContent = 'Another picture';
+      if (!cap.value) cap.value = picked.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim().slice(0, CAP.cap);
+      adding = { sec: sec.id, form: f };        // from here the poll leaves the grid alone (tick)
+      cap.focus(); cap.select();
+    });
+    no.addEventListener('click', stop);
+    f.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (busy || !src) return;
+      if (!cap.value.trim()) { say('Give it a title.'); cap.focus(); return; }
+      busy = true; go.disabled = true; say('');
+      const out = await send({ op: 'post', cap: cap.value, desc: desc.value, sec: sec.id, src });
+      busy = false; go.disabled = false;
+      if (!out.ok) { say('Not hung: ' + (out.error || 'the door said no') + '.'); return; }
+      photos.unshift(out.photo); look();
+      stop();
+    });
+    acts.append(no, go);
+    fields.append(cap, desc, acts);
+    f.append(file, pick, thumb, fields, err);
+    return f;
+  }
   function renderGrid() {
     body.replaceChildren();
-    const list = listOf(tab);
+    const list = listOf(tab), sec = tab.slice(0, 4) === 'sec:' ? secOf(tab.slice(4)) : null;
+    if (sec && sec.desc) body.append(el('p', 'town-intro gal-sec', sec.desc));   // A SECTION'S LINE
+    if (sec && (sec.open || (me && me.keeper))) body.append(adder(sec));
     if (!list.length) {
       const e = el('div', 'gal-empty'), [h, t] = emptyOf(tab);
       e.append(el('b', null, h), el('span', null, t));
@@ -201,7 +255,7 @@ window.Gallery = (function () {
     if (viewing) renderView(); else view.hidden = true;
     badge();
   }
-  function pick(t) { tab = t; viewing = null; render(); }
+  function pick(t) { tab = t; viewing = null; adding = null; render(); }
 
   // ── once a minute for the count; when it opens, and whenever the tab comes back ──
   function schedule() { clearTimeout(timer); timer = setTimeout(tick, POLL); }
@@ -210,7 +264,7 @@ window.Gallery = (function () {
       loading = true;
       const ok = await load();
       loading = false;
-      if (ok && open) render(); else badge();
+      if (ok && open && !adding) render(); else badge();   // a photo half put up is left as it is: the grid is drawn again once it is hung, or let go
     }
     schedule();
   }
@@ -226,7 +280,7 @@ window.Gallery = (function () {
   }
   function hide() {
     if (!open) return;
-    open = false; viewing = null; panel.hidden = true; fab.setAttribute('aria-expanded', 'false');
+    open = false; viewing = null; adding = null; panel.hidden = true; fab.setAttribute('aria-expanded', 'false');
     badge(); schedule();
   }
 
@@ -279,7 +333,7 @@ window.Gallery = (function () {
     document.addEventListener('click', e => { if (open && e.target.closest('#town-board-btn,#town-chat-btn')) hide(); }, true);
     window.addEventListener('keydown', e => {
       if (!open || (window.Lab && Lab.menuUp)) return;
-      if (e.key === 'Escape') { if (viewing) { viewing = null; render(); } else hide(); return; }
+      if (e.key === 'Escape') { if (viewing) { viewing = null; render(); } else if (adding) { adding = null; render(); } else hide(); return; }
       if (viewing && (e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.target.closest('input,textarea')) {
         const list = listOf(tab), pos = list.findIndex(p => p.id === viewing);
         if (list.length > 1 && pos >= 0) { viewing = list[(pos + (e.key === 'ArrowRight' ? 1 : -1) + list.length) % list.length].id; renderView(); e.preventDefault(); }

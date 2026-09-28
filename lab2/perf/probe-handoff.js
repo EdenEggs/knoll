@@ -101,8 +101,31 @@ const CODE = /^[0-9A-HJKMNP-TV-Z]{4}(-[0-9A-HJKMNP-TV-Z]{4}){3}$/;
     await g.goto(BASE + '/settings/?space=toem2');
     ok(await says(g, 'TOEM 2 settings', 20000) && await says(g, 'ALL CHANGES SAVED.', 20000), 'TOEM 2 has a settings page, and it is its new maker\'s');
     const words = await g.evaluate(() => document.querySelector('#dc-root').innerText);
-    ok(!/PAGE NAME/.test(words) && !/THE PAPER · ONE SET/.test(words) && !/How it looks/.test(words) && /Who can edit/.test(words) && /What everyone may do/.test(words) && /ON TOEM 2 THE SITE'S MODERATORS/.test(words),
-       'its name, its paper and the preview stand aside; who can edit and what everyone may do are there', words.slice(0, 300));
+    ok(/PAGE NAME/.test(words) && /THE PAPER · ONE SET/.test(words) && /How it looks/.test(words) && /Who can edit/.test(words) && /What everyone may do/.test(words) && /ON TOEM 2 KNOLL'S OWN MODERATORS/.test(words),
+       'its name, its paper and the preview are there as any page\'s are (2026-09-28), with who can edit and what everyone may do', words.slice(0, 300));
+    // THE FIRST PAGE'S LOOK: the cards open on what TOEM 2 wears now — its own name, its own paper picked (the first of five), every colour
+    const papers = (await g.locator('[role=radiogroup][aria-label=palette] button').allInnerTexts()).map(t => t.replace(/\s+/g, ' ').trim());
+    ok(await g.locator('input[aria-label="page name"]').inputValue() === 'TOEM 2' && papers.join('|') === 'TOEM 2 PICKED ✓|Yard|Knoll|Bench|Sticky pad' && await g.locator('button[aria-label="all colours"]').getAttribute('aria-checked') === 'true',
+       'they open on how TOEM 2 looks now: its name, its own paper picked, all colours', j(papers));
+    await g.locator('[role=radiogroup][aria-label=palette] button', { hasText: 'Sticky pad' }).click();
+    await g.locator('input[aria-label="page name"]').fill('Probe Town');
+    await g.locator('button', { hasText: 'Save changes' }).click();
+    const looked = await says(g, 'SAVED — IT IS LIVE.') && await api(G, '/api/wall?rules=1');
+    ok(looked && looked.title === 'Probe Town' && looked.palette === 'sticky' && await g.evaluate(() => localStorage.getItem('knoll-toem2:paper')) === 'sticky', 'a new name and another paper, saved: the door has both, and the wall is told ahead', j(looked && [looked.title, looked.palette]));
+    await g.goto(BASE + '/toem2/?live=1');
+    ok(await g.waitForFunction(() => document.documentElement.dataset.paper === 'sticky' && document.querySelector('.lab-name').textContent === 'Probe Town', null, { timeout: 30000 }).then(() => true, () => false)
+       && await g.evaluate(() => getComputedStyle(document.getElementById('bench')).backgroundColor) === 'rgb(255, 226, 122)', 'the wall wears them: the name in its header, the sticky pad on its paper');
+    await g.goto(BASE + '/settings/?space=toem2');
+    await says(g, 'ALL CHANGES SAVED.', 20000);
+    await g.locator('[role=radiogroup][aria-label=palette] button', { hasText: 'TOEM 2' }).click();
+    await g.locator('input[aria-label="page name"]').fill('TOEM 2');
+    await g.locator('button', { hasText: 'Save changes' }).click();
+    ok(await says(g, 'SAVED — IT IS LIVE.') && (await api(G, '/api/wall?rules=1')).palette === 'toem2', '…and its own paper again');
+    await g.goto(BASE + '/toem2/?live=1');
+    ok(await g.waitForFunction(() => window.Seed && !!Seed.rules && document.documentElement.dataset.paper === undefined && document.querySelector('.lab-name').textContent === 'TOEM 2', null, { timeout: 30000 }).then(() => true, () => false)
+       && await g.evaluate(() => getComputedStyle(document.getElementById('bench')).backgroundColor) === 'rgb(239, 231, 237)', 'on its own paper the wall is as it always was: no set laid over it');
+    await g.goto(BASE + '/settings/?space=toem2');
+    await says(g, 'ALL CHANGES SAVED.', 20000);
     await g.locator('button[role=radio]', { hasText: 'Council' }).click();
     await g.locator('button', { hasText: 'Save changes' }).click();
     ok(await says(g, 'SAVED — IT IS LIVE.') && (await api(G, '/api/wall?rules=1')).chaos === 2, 'Council, saved: the door says TOEM 2 is a council now');
@@ -115,7 +138,7 @@ const CODE = /^[0-9A-HJKMNP-TV-Z]{4}(-[0-9A-HJKMNP-TV-Z]{4}){3}$/;
     ok(await g.waitForFunction(() => window.Seed && !!Seed.rules && document.querySelector('#toem-chaos') && !document.querySelector('#toem-chaos').hidden, null, { timeout: 30000 }).then(() => true, () => false), 'on the wall, the stamp');
     await g.click('#toem-chaos');
     const pop = await g.evaluate(() => document.querySelector('#toem-chaos-pop').innerText);
-    ok(/you: the maker/.test(pop) && /settings/.test(pop) && /dashboard/.test(pop) && new RegExp('keepers: ' + got.tag.replace('#', '#') + ', the moderators and the trusted').test(pop), 'its popover says "you: the maker", names the keepers, and has the maker\'s doors', pop);
+    ok(/you: the maker/.test(pop) && /settings/.test(pop) && /dashboard/.test(pop) && new RegExp('moderators: ' + got.tag.replace('#', '#') + ', Knoll\'s own and the trusted').test(pop), 'its popover says "you: the maker", names the moderators, and has the maker\'s doors', pop);
 
     // ── a stranger ───────────────────────────────────────────────────────
     const s = await S.newPage();

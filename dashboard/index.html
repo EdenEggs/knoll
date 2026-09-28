@@ -23,6 +23,7 @@
 <!-- THE CORNER'S SETTINGS (manage.js, 2026-09-24): on a page's dashboard, for its keepers — the town board's tabs, the
      chat's rules and the photo album, built into the #corner-manage slot below -->
 <link rel="stylesheet" href="./manage.css">
+<script src="/toem2/shrink.js" defer></script>
 <script src="./manage.js" defer></script>
 <!-- THE MASTER'S DESK (master.js, 2026-09-27): for the site's master — every page, and a code to hand each on -->
 <script src="./master.js" defer></script>
@@ -743,9 +744,9 @@ class Component extends DCLogic {
       kpiDefs = [
         { label: 'PIECES ON THE WALL', value: this.fmt(P.length), d: { t: 'REVISION ' + this.fmt((S.doc && S.doc.rev) || 1), c: '#4a4054' }, sp: flat, pip: C.RED },
         { label: 'EDITS ' + rangeWord, value: this.fmt(eIn.length), d: dl(eIn.length, ePrev.length), sp: spark(perDay(eIn, e => e.at)), pip: C.BLU },
-        chaos === 2 ? { label: 'ON THE BALLOT', value: this.fmt(motions), d: { t: 'CLOSES ' + closesIn(rules ? rules.closes : 0), c: '#4a4054' }, sp: flat, pip: C.YEL }
-                    : { label: 'WAITING FOR THE KEEPERS', value: this.fmt(waiting), d: { t: waiting ? 'OPEN THE WALL, PRESS HISTORY' : 'NOTHING WAITS', c: '#4a4054' }, sp: flat, pip: C.YEL },
-        { label: 'HOW WILD', value: LEVEL[chaos] || 'TENDED', d: { t: rules ? rules.keepers.length + (rules.keepers.length === 1 ? ' KEEPER' : ' KEEPERS') : '—', c: '#4a4054' }, sp: flat, pip: C.GRN }
+        chaos === 2 ? { label: 'ON THE BALLOT', value: this.fmt(motions), d: { t: 'NEXT ROUND ' + closesIn(rules ? rules.closes : 0), c: '#4a4054' }, sp: flat, pip: C.YEL }
+                    : { label: 'WAITING FOR MODERATORS', value: this.fmt(waiting), d: { t: waiting ? 'OPEN THE WALL, PRESS HISTORY' : 'NOTHING WAITS', c: '#4a4054' }, sp: flat, pip: C.YEL },
+        { label: 'HOW WILD', value: LEVEL[chaos] || 'TENDED', d: { t: rules ? rules.keepers.length + (rules.keepers.length === 1 ? ' MODERATOR' : ' MODERATORS') : '—', c: '#4a4054' }, sp: flat, pip: C.GRN }
       ];
     }
     const kpis = kpiDefs.map((k, i) => ({
@@ -942,7 +943,7 @@ class Component extends DCLogic {
       dashTitle: SP ? ((S.space && S.space.title) || SP) + ' dashboard' : (S.meName || (S.doc && S.doc.settings && S.doc.settings.displayName) || 'Your') + ' Profile Dashboard',
       meBg: SP ? '#fdf7e3' : '#ffd23f',
       hasPic: !!S.mePic, noPic: !S.mePic, picSrc: S.mePic || '',
-      dashSub: SP ? '· ' + (LEVEL[chaos] || 'TENDED') + ' · ' + (chaos === 2 && rules ? 'THE BALLOT CLOSES ' + closesIn(rules.closes) : rules ? rules.keepers.length + (rules.keepers.length === 1 ? ' KEEPER' : ' KEEPERS') : 'A SPACE') + ' ·'
+      dashSub: SP ? '· ' + (LEVEL[chaos] || 'TENDED') + ' · ' + (chaos === 2 && rules ? 'THE BALLOT\'S NEXT ROUND ' + closesIn(rules.closes) : rules ? rules.keepers.length + (rules.keepers.length === 1 ? ' MODERATOR' : ' MODERATORS') : 'A SPACE') + ' ·'
                   : '· EVERY VISITOR COUNTED BY HAND · GNOME-CERTIFIED ·',
       chipHref: SP ? '/' + SP : '../yard/', chipTitle: SP ? 'open the space' : 'open your page', chipLabel: SP ? 'THE SPACE' : 'YOUR HILL', chipPath: SP ? '/' + SP : '/yard',
       gearHref: SP ? '/settings/?space=' + SP : '', gearOn: !!SP && (SP !== 'toem2' || !!(rules && rules.owner)),   // TOEM 2's settings are its maker's and the master's (api/wall.js: THE MASTER); its moderators set its rules on the wall

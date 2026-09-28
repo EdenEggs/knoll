@@ -10,15 +10,36 @@
    keepers write from the dashboard, no posts — the page's rules, say).
    `who` is `keepers` or `anyone` (signed in). A page with none set has the
    four it started with: News and Updates (posts, the keepers), Rules (a
-   notice; empty means the client's five default rules) and Forum (threads,
-   anyone). The list lives on the page's hash (api/wall.js: page:<slug>
-   `tabs`), so a page not designed yet has the defaults. A tab taken down,
-   or turned into another kind, takes its posts with it.
+   notice) and Forum (threads, anyone). The list lives on the page's hash
+   (api/wall.js: page:<slug> `tabs`), so a page not designed yet has the
+   defaults. A tab taken down, or turned into another kind, takes its posts
+   with it.
+
+   A NOTICE'S RULES (2026-09-28). A notice is its words (`text`) and, under
+   them, numbered rules — `rules`: [{title, text}], ten at most — which the
+   dashboard lists one to a row. A Rules tab nobody has written has the five
+   its page starts with (START: the town's on TOEM 2, Knoll's on a space);
+   a notice saved before there were rules has its words and none.
+
+   BACK TO THE DEFAULT (2026-09-28): `reset: true` on `tabs` or `chat` puts
+   that field back as a page starts with it — the four tabs and the five
+   rules; anyone signed in and no wait. A tab that was added goes, and its
+   posts with it; one taken down comes back empty.
 
    THE CHAT'S RULES live beside them (`chat`): `who` may say something —
    anyone signed in, the keepers, or the people the keepers `named` — and
    `wait`, the seconds one account must leave between two lines (0 = none),
    kept as a key that expires (rl:chat:<slug>:<u>:wait).
+
+   WHO IS HERE (2026-09-28). A read that says `here` — the bench's board
+   says it every half minute, and when the list is opened — marks the
+   account that asks as on the page (here:<slug>, a sorted set scored by
+   when; signed in, not banned, and asked from a page of this site) and
+   answers with who was seen in the last minute and a half: how many
+   (`here=1`), to anyone, and who (`here=2`), to the signed in — so nobody
+   lists a page's visitors from outside. That list is kept no longer
+   than that; what IS kept is the first time an account was ever seen on a
+   page (joined:<slug>), for the history on the page's dashboard.
 
    A CHANNEL IS A LIST, newest first, under board:<slug>:<ch>, trimmed to
    what its kind keeps: {id, by, at, text, title?, re?, label?, major?} — re
@@ -27,14 +48,16 @@
    rename shows; pictures are the gnome's card's (/api/wall?who=), which
    the page fetches once per author.
 
-     GET  ?page=<slug>&ch=board | chat | board,chat | <ch>,<ch>…      (board: every tab that keeps posts)
-          → { ok, me: {id, tag, keeper, mod} | null, tabs: [{ch, title, kind, who, text?}],
+     GET  ?page=<slug>&ch=board | chat | board,chat | <ch>,<ch>… [&here=1 | 2]      (board: every tab that keeps posts)
+          → { ok, me: {id, tag, keeper, mod} | null, tabs: [{ch, title, kind, who, text?, rules?: [{title, text}]}],
               chat: { who, wait, can, named?: [{id, tag}] (for a keeper) },
-              posts: { <ch>: [{id, by, tag, at, text, title?, re?}] } }
+              posts: { <ch>: [{id, by, tag, at, text, title?, re?}] },
+              here?: { n, who?: [{id, tag}] (signed in) } }
      POST { op: 'post', ch, text, title?, re?, label?, major? } → { ok, post }   (a keepers' tab: the keepers; a thread wants a title; the chat: by its rules)
           { op: 'drop', ch, id }                 → { ok, gone }   (your own, or a keeper's to hide — audited; a thread takes its replies)
-          { op: 'tabs', tabs: [{ch, title, kind, who, text?}] } → { ok, tabs }   (the keepers; one to eight)
+          { op: 'tabs', tabs: [{ch, title, kind, who, text?, rules?}] } → { ok, tabs }   (the keepers; one to eight)
           { op: 'chat', who, wait, named: [id] } → { ok, chat }   (the keepers)
+          { op: 'tabs' | 'chat', reset: true }   → { ok, tabs } | { ok, chat }   (the keepers: back to the default)
 
    ponytail: an hour's counter per account; a list is trimmed, so the oldest
    fall off the end rather than being paged — pages when a forum fills. */
@@ -46,10 +69,21 @@ const { db, dbm, K, answer, readBody, Bad, bad, sameSite, whoIs, isMod, rulesOf,
 
 const KIND = { posts: 100, threads: 500, notice: 0 };       // what a kind of tab keeps
 const CHAT_KEEP = 200;
+const HERE_S = 90, HERE_MAX = 50;             // on the page: seen in the last minute and a half; fifty named at most
 const TABS = [{ ch: 'news', title: 'News', kind: 'posts', who: 'keepers' }, { ch: 'updates', title: 'Updates', kind: 'posts', who: 'keepers' },
               { ch: 'rules', title: 'Rules', kind: 'notice', who: 'keepers', text: '' }, { ch: 'forum', title: 'Forum', kind: 'threads', who: 'anyone' }];
-const TABS_MAX = 8, CH_RE = /^[a-z0-9][a-z0-9-]{0,19}$/, WHO = ['anyone', 'keepers', 'named'], WAIT_MAX = 3600, NAMED_MAX = 50;
-const CAP = { title: 80, line: 500, body: 2000, tab: 24, notice: 4000, label: 16 };
+const TABS_MAX = 8, RULES_MAX = 10, CH_RE = /^[a-z0-9][a-z0-9-]{0,19}$/, WHO = ['anyone', 'keepers', 'named'], WAIT_MAX = 3600, NAMED_MAX = 50;
+const CAP = { title: 80, line: 500, body: 2000, tab: 24, notice: 4000, label: 16, rule: 60, ruleText: 200 };
+// THE RULES A PAGE STARTS WITH: the town's on TOEM 2, Knoll's on a space (toem2/board.js keeps the same two, for while the door is quiet)
+const START = {
+  town: ['Keep the town friendly. Moderators can hide posts that break these.',
+         ['Be kind', 'No insults, name-calling or pile-ons.'], ['Share your own photos', 'Credit others when posting their shots.'], ['No spoilers in titles', 'Put quest solutions inside the thread.'],
+         ['One thread per topic', 'Search before posting a new one.'], ['No selling or ads', 'Stamp trades are fine, money is not.']],
+  space: ['Keep the place friendly. Moderators can hide posts that break these.',
+          ['Be kind', 'No insults, name-calling or pile-ons.'], ['Credit the maker', 'Say whose work it is when you share it.'], ['No spoilers in titles', 'Keep surprises inside the thread.'],
+          ['One thread per topic', 'Search before posting a new one.'], ['No selling or ads', 'Swaps are fine, money is not.']]
+};
+const startOf = slug => { const [words, ...rules] = START[slug === HOME ? 'town' : 'space']; return { text: words, rules: rules.map(([title, line]) => ({ title, text: line })) }; };
 const RATE = 60;                              // posts an hour, an account
 const hour = () => Math.floor(Date.now() / 36e5);
 async function spend(u) {
@@ -79,7 +113,9 @@ async function meOf(req, slug) {              // who is asking, and what they ar
 const said = me => me && { id: me.id, tag: me.tag, keeper: me.keeper, mod: me.mod };
 
 // ── the tabs and the chat's rules, off the page's hash ─────────────────────
-const tabsOf = p => { const t = parse(p.tabs, null); return Array.isArray(t) && t.length ? t : TABS; };
+// a notice is read with its rules: a Rules tab nobody has written has the five its page starts with; a notice from before there were rules has none
+const ruled = (list, slug) => list.map(t => (t.kind !== 'notice' || Array.isArray(t.rules) ? t : Object.assign({}, t, !t.text && t.ch === 'rules' ? startOf(slug) : { rules: [] })));
+const tabsOf = (p, slug) => { const t = parse(p.tabs, null); return ruled(Array.isArray(t) && t.length ? t : TABS, slug); };
 const chatOf = p => { const c = parse(p.chat, null) || {}; return { wait: Math.min(WAIT_MAX, Math.max(0, Math.floor(+c.wait) || 0)), who: WHO.includes(c.who) ? c.who : 'anyone',
                                                                     named: Array.isArray(c.named) ? [...new Set(c.named.filter(u => typeof u === 'string' && USER_RE.test(u)))].slice(0, NAMED_MAX) : [] }; };
 const canChat = (me, chat) => !!me && (me.keeper || chat.who === 'anyone' || (chat.who === 'named' && chat.named.includes(me.id)));
@@ -89,6 +125,14 @@ async function chatSaid(chat, me) {           // what the page says about its ch
   const out = { who: chat.who, wait: chat.wait, can: canChat(me, chat) };
   if (me && me.keeper) { const tags = chat.named.length ? await tagsOf(chat.named) : {}; out.named = chat.named.map(u => ({ id: u, tag: tags[u] || '' })); }
   return out;
+}
+function cleanRules(v) {
+  if (!Array.isArray(v) || v.length > RULES_MAX) throw bad(400, 'tabs', 'a notice has up to ' + RULES_MAX + ' rules');
+  return v.map(r => {
+    const title = text(r && r.title, CAP.rule);
+    if (!title) throw bad(400, 'tabs', 'every rule needs a title');
+    return { title, text: text(r.text, CAP.ruleText) };
+  });
 }
 function cleanTabs(v) {
   if (!Array.isArray(v) || !v.length || v.length > TABS_MAX) throw bad(400, 'tabs', 'a board has one to ' + TABS_MAX + ' tabs');
@@ -102,7 +146,7 @@ function cleanTabs(v) {
     if (!title) throw bad(400, 'tabs', 'every tab needs a title');
     if (!(kind in KIND)) throw bad(400, 'tabs', 'a tab is posts, threads or a notice');
     const out = { ch, title, kind, who: kind === 'notice' || t.who !== 'anyone' ? 'keepers' : 'anyone' };
-    if (kind === 'notice') out.text = prose(t.text, CAP.notice);
+    if (kind === 'notice') { out.text = prose(t.text, CAP.notice); if (t.rules != null) out.rules = cleanRules(t.rules); }   // no rules sent (a dashboard from before them): none kept, and the tab reads as it did
     return out;
   });
 }
@@ -117,7 +161,7 @@ function cleanChat(b) {
 
 async function get(req, res) {
   const q = new URL(req.url, 'http://x').searchParams, slug = await pageOf(q), p = await db('HGETALL', K.page(slug));
-  const tabs = tabsOf(p), chat = chatOf(p);
+  const tabs = tabsOf(p, slug), chat = chatOf(p);
   const chs = [...new Set(String(q.get('ch') || 'board').split(',').flatMap(c => (c === 'board' ? tabs.filter(t => t.kind !== 'notice').map(t => t.ch) : [chOf(tabs, c)])))];
   const me = await meOf(req, slug);
   const live = chs.filter(ch => keepOf(tabs, ch) > 0);
@@ -125,9 +169,24 @@ async function get(req, res) {
   const posts = {};
   chs.forEach(ch => { posts[ch] = []; });
   live.forEach((ch, i) => { posts[ch] = lists[i].map(one).filter(Boolean); });
-  const tag = await tagsOf(Object.values(posts).flat().map(x => x.by));
+  // WHO IS HERE: here=1 marks and counts, here=2 names them as well — and only a page of this site marks anybody: a link from elsewhere, followed, is nobody arriving
+  const mine = sameSite(req) ? me : null, on = q.get('here') ? await hereOf(slug, mine, q.get('here') === '2' && !!mine) : null;
+  const tag = await tagsOf(Object.values(posts).flat().map(x => x.by).concat(on && on.who ? on.who : []));
   for (const ch of live) posts[ch].forEach(x => { x.tag = tag[x.by]; });
-  answer(res, 200, { ok: true, me: said(me), tabs, chat: await chatSaid(chat, me), posts });
+  const here = on ? Object.assign({ n: on.n }, on.who ? { who: on.who.map(u => ({ id: u, tag: tag[u] })).sort((a, b) => a.tag.localeCompare(b.tag)) } : {}) : undefined;
+  answer(res, 200, { ok: true, me: said(me), tabs, chat: await chatSaid(chat, me), posts, here });
+}
+/* WHO IS HERE: the one asking is marked, the ones not seen for HERE_S are swept, and the rest are counted — or, when
+   they are asked for by name, listed. Whoever is newly here is kept the first time ever, with when (joined:<slug>):
+   the JOINED lines of the page's history, which its keepers read on its dashboard (api/wall.js: THE PAGE'S HISTORY).
+   ponytail: four commands a mark, and two more a name when the list is asked for — fine to the fifty it names; a
+   count kept beside the set if a page ever has hundreds on it at once. */
+async function hereOf(slug, me, named) {
+  const key = K.here(slug), now = Date.now(), since = now - HERE_S * 1000, mark = !!me && !me.banned;
+  const out = await dbm((mark ? [['ZADD', key, now, me.id], ['EXPIRE', key, HERE_S * 2]] : []).concat([['ZREMRANGEBYSCORE', key, '-inf', since], named ? ['ZRANGEBYSCORE', key, since, '+inf'] : ['ZCARD', key]]));
+  if (mark && out[0]) await db('HSETNX', K.joined(slug), me.id, String(now));
+  const last = out[out.length - 1];
+  return named ? { n: last.length, who: last.filter(u => USER_RE.test(u)).slice(-HERE_MAX) } : { n: +last || 0 };
 }
 
 async function post(req, res) {
@@ -135,25 +194,26 @@ async function post(req, res) {
   const body = await readBody(req);
   if (!body || typeof body !== 'object' || Array.isArray(body)) throw bad(400, 'body', 'the post is not an op');
   const slug = await pageOf(new URL(req.url, 'http://x').searchParams, body), p = await db('HGETALL', K.page(slug));
-  const tabs = tabsOf(p), chat = chatOf(p);
+  const tabs = tabsOf(p, slug), chat = chatOf(p);
   const me = await meOf(req, slug);
   if (!me) throw bad(401, 'who', 'sign in to post');
   if (me.banned) throw bad(403, 'banned', 'this account may not post');
   if (!(await spend(me.id))) throw bad(429, 'rate', 'that is a lot in one hour — take a breath');
   switch (body.op) {
     case 'tabs': {                            // THE TABS: the keepers arrange the board
-      if (!me.keeper) throw bad(403, 'role', 'the board\'s tabs are the keepers\' to arrange');
-      const next = cleanTabs(body.tabs), gone = tabs.filter(t => t.kind !== 'notice' && !next.some(n => n.ch === t.ch && n.kind === t.kind));
-      await db('HSET', K.page(slug), 'tabs', JSON.stringify(next));
+      if (!me.keeper) throw bad(403, 'role', 'the board\'s tabs are the moderators\' to arrange');
+      // BACK TO THE DEFAULT: the field is emptied, so the page has what a page starts with (the file store has no HDEL)
+      const reset = body.reset === true, next = reset ? TABS : cleanTabs(body.tabs), gone = tabs.filter(t => t.kind !== 'notice' && !next.some(n => n.ch === t.ch && n.kind === t.kind));
+      await db('HSET', K.page(slug), 'tabs', reset ? '' : JSON.stringify(next));
       if (gone.length) await dbm(gone.map(t => ['DEL', K.board(slug, t.ch)]));   // a tab taken down, or made another kind, takes its posts
-      await W.audit(me.id, 'tabs', { page: slug, tabs: next.map(t => t.ch).join(','), gone: gone.map(t => t.ch).join(',') });
-      return answer(res, 200, { ok: true, tabs: next });
+      await W.audit(me.id, 'tabs', { page: slug, tabs: next.map(t => t.ch).join(','), gone: gone.map(t => t.ch).join(','), reset: reset || undefined });
+      return answer(res, 200, { ok: true, tabs: ruled(next, slug) });
     }
     case 'chat': {                            // THE CHAT'S RULES: who may say something, and the wait between two lines
-      if (!me.keeper) throw bad(403, 'role', 'the chat\'s rules are the keepers\' to set');
-      const next = cleanChat(body);
-      await db('HSET', K.page(slug), 'chat', JSON.stringify(next));
-      await W.audit(me.id, 'chat', { page: slug, who: next.who, wait: next.wait, named: next.named.length });
+      if (!me.keeper) throw bad(403, 'role', 'the chat\'s rules are the moderators\' to set');
+      const reset = body.reset === true, next = reset ? chatOf({}) : cleanChat(body);
+      await db('HSET', K.page(slug), 'chat', reset ? '' : JSON.stringify(next));
+      await W.audit(me.id, 'chat', { page: slug, who: next.who, wait: next.wait, named: next.named.length, reset: reset || undefined });
       return answer(res, 200, { ok: true, chat: await chatSaid(next, me) });
     }
   }
@@ -162,14 +222,14 @@ async function post(req, res) {
     case 'post': {
       const waitKey = K.rl('chat:' + slug + ':' + me.id, 'wait');
       if (ch === 'chat') {
-        if (!canChat(me, chat)) throw bad(403, 'role', chat.who === 'keepers' ? 'only the keepers may chat here' : 'this chat is for the people the keepers named');
+        if (!canChat(me, chat)) throw bad(403, 'role', chat.who === 'keepers' ? 'only the moderators may chat here' : 'this chat is for the people the moderators named');
         if (chat.wait) {                      // THE WAIT: the last line's time, kept as long as the wait lasts
           const left = Math.ceil(((+(await db('GET', waitKey)) || 0) + chat.wait * 1000 - Date.now()) / 1000);
           if (left > 0) throw bad(429, 'wait', 'please wait ' + left + (left === 1 ? ' second' : ' seconds') + ' before your next message', { wait: left });
         }
       } else {
-        if (tab.kind === 'notice') throw bad(400, 'ch', 'that tab is a notice the keepers write from the dashboard');
-        if (tab.who === 'keepers' && !me.keeper) throw bad(403, 'role', 'the keepers write the ' + tab.title.toLowerCase());
+        if (tab.kind === 'notice') throw bad(400, 'ch', 'that tab is a notice the moderators write from the dashboard');
+        if (tab.who === 'keepers' && !me.keeper) throw bad(403, 'role', 'the moderators write the ' + tab.title.toLowerCase());
       }
       const x = { id: newId(), by: me.id, at: Date.now(), text: ch === 'chat' ? text(body.text, CAP.line) : prose(body.text, CAP.body) };
       if (!x.text) throw bad(400, 'text', 'say something');
@@ -230,4 +290,4 @@ module.exports = async function handler(req, res) {
     answer(res, 500, { ok: false, code: 'server', error: 'the board is having trouble — try again in a moment' });
   }
 };
-Object.assign(module.exports, { TABS, TABS_MAX, WAIT_MAX, tabsOf });   // for the probes, and the leaderboard's count (api/leaderboard.js)
+Object.assign(module.exports, { TABS, TABS_MAX, RULES_MAX, WAIT_MAX, tabsOf, startOf });   // for the probes, and the leaderboard's count (api/leaderboard.js)

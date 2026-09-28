@@ -1,5 +1,6 @@
 /* dashboard/manage.js — THE CORNER'S SETTINGS (2026-09-24): on a page's dashboard (?space=<slug>, TOEM 2's own
-   included), for its keepers, the three things in the bench's bottom-left corner are arranged from here —
+   included), for its keepers — "moderators" in every word a page says since 2026-09-28; `keeper` is still the
+   code's word, and the door's — the three things in the bench's bottom-left corner are arranged from here —
      THE TOWN BOARD's tabs: each a title, a kind (posts · threads · a notice the keepers write here) and who writes there;
      THE CHAT's rules: who may say something (anyone signed in · the keepers · people named here) and the wait between
        two lines from one person;
@@ -9,18 +10,28 @@
    says who is asking is a keeper; the profile dashboard has no slot to fill. The books are api/board.js's and
    api/gallery.js's; the bench's board.js and gallery.js read what is saved here on their next poll.
 
+   A NOTICE'S RULES (2026-09-28): a notice tab is its words and, under them, numbered rules — the five a page starts
+   with stand in the Rules tab's rows from the first look, each to be changed, moved, taken off or added to.
+   BACK TO THE DEFAULT (2026-09-28): every card has the button; it asks first (a confirm), posts { op, reset: true },
+   and draws the card again from what the door answered.
+   THE BALLOT (2026-09-28): a fifth card — how often a council's clock comes round and the edit with the most
+   hearts goes up (api/wall.js: THE COUNCIL'S CLOCK; six hours until it is set otherwise), which is the page's
+   maker's to set.
+   THE PAGE'S HISTORY (2026-09-28): a sixth, under its own heading — who joined the page and the edits that went up,
+   all the door keeps of both (api/wall.js ?history=1), newest first; nothing in it is set, so it has no way back.
+
    ponytail: each card redraws its rows on a structural change (add, move, remove) and edits the draft in place on a
    keystroke, so nothing loses the caret; one Save a card sends the whole draft. */
 (function () {
   'use strict';
   const SLUG = String(new URLSearchParams(location.search).get('space') || '').toLowerCase();
   if (!/^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/.test(SLUG)) return;
-  const PQ = 'page=' + encodeURIComponent(SLUG), BOARD = '/api/board', ALBUM = '/api/gallery', RANKS = '/api/leaderboard', FIND = '/api/friends?find=';
+  const PQ = 'page=' + encodeURIComponent(SLUG), BOARD = '/api/board', ALBUM = '/api/gallery', RANKS = '/api/leaderboard', STORY = '/api/wall?history=1&', FIND = '/api/friends?find=';
   const KINDS = [['posts', 'posts'], ['threads', 'threads'], ['notice', 'a notice']];
-  const KIND_WORDS = { posts: 'titled entries, newest first', threads: 'a forum: threads and their replies', notice: 'one text, written here by the keepers, that everyone reads' };
-  const WHOS = [['keepers', 'the keepers write here'], ['anyone', 'anyone signed in writes here']];
+  const KIND_WORDS = { posts: 'titled entries, newest first', threads: 'a forum: threads and their replies', notice: 'words and numbered rules, written here by the moderators, that everyone reads' };
+  const WHOS = [['keepers', 'moderators write here'], ['anyone', 'anyone signed in writes here']];
   const WAITS = [[0, 'no wait'], [5, '5 seconds'], [10, '10 seconds'], [30, '30 seconds'], [60, '1 minute'], [300, '5 minutes'], [900, '15 minutes'], [3600, '1 hour']];
-  const CAP = { tab: 24, notice: 4000, sec: 40, secDesc: 200, cap: 60, desc: 300, bytes: 300 * 1024, side: 1600, tabs: 8, sections: 12 };
+  const CAP = { tab: 24, notice: 4000, rule: 60, ruleText: 200, rules: 10, sec: 40, secDesc: 100, cap: 20, desc: 100, tabs: 8, sections: 5 };
 
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const line = (cls, ...nodes) => { const d = el('div', cls); d.append(...nodes); return d; };
@@ -62,14 +73,54 @@
     return c;
   }
 
-  let me = null, tabs = [], chat = { who: 'anyone', wait: 0, named: [] }, sections = [], photos = [], lb = null;
+  // BACK TO THE DEFAULT: asked first, sent as { op, reset: true }; `done` takes what the door answered
+  const revert = (ask, api, op, note, done) => {
+    const b = btn('cm-btn cm-revert', 'Back to the default', async () => {
+      if (!confirm(ask)) return;
+      b.disabled = true; say(note, 'Putting it back…');
+      const out = await send(api, { op, reset: true });
+      b.disabled = false;
+      if (!out.ok) { say(note, 'Not put back: ' + (out.error || 'the door said no') + '.', true); return; }
+      done(out);
+    });
+    return b;
+  };
+
+  let me = null, tabs = [], chat = { who: 'anyone', wait: 0, named: [] }, sections = [], photos = [], lb = null, rules = null;
 
   // ── THE TOWN BOARD: its tabs ────────────────────────────────────────────
-  function boardCard() {
-    const c = card('Town Board', 'THE TABS · WHAT EACH IS · WHO WRITES THERE', '#e8484a', '-0.4deg', 'board');
-    let draft = tabs.map(t => Object.assign({}, t, { _old: true }));
+  function boardCard(said) {
+    const c = card('Town Board', 'THE TABS · WHAT EACH IS · WHO WRITES THERE · THE RULES', '#e8484a', '-0.4deg', 'board');
+    const draftOf = list => list.map(t => Object.assign({}, t, { _old: true }, t.rules ? { rules: t.rules.map(r => Object.assign({}, r)) } : {}));
+    let draft = draftOf(tabs);
     const rows = el('div', 'cm-rows'), note = noteEl();
     const draw = () => { rows.replaceChildren(); draft.forEach((t, i) => rows.append(tabRow(t, i))); add.disabled = draft.length >= CAP.tabs; };
+    // A NOTICE'S RULES: one to a row under its words — a title, a line about it, up and down, taken off; ten at most
+    const ruleRows = (t, i) => {
+      const box = el('div', 'cm-rules'), list = el('div', 'cm-rows');
+      const more = btn('cm-btn', '+ add a rule', () => {
+        if (t.rules.length >= CAP.rules) return;
+        t.rules.push({ title: '', text: '' }); drawRules();
+        const last = list.lastElementChild.querySelector('input'); if (last) last.focus();
+      });
+      const drawRules = () => {
+        list.replaceChildren(); more.disabled = t.rules.length >= CAP.rules;
+        if (!t.rules.length) list.append(el('span', 'cm-hint', 'no rules — the tab shows its words alone'));
+        t.rules.forEach((r, j) => {
+          const row = el('div', 'cm-rule cm-row-l');
+          const title = input('cm-in cm-in-title', r.title, CAP.rule, 'The rule'); title.setAttribute('aria-label', 'rule ' + (j + 1) + ' of tab ' + (i + 1));
+          title.addEventListener('input', () => { r.title = title.value; });
+          const words = input('cm-in cm-in-desc', r.text, CAP.ruleText, 'A line about it (optional)'); words.setAttribute('aria-label', 'what rule ' + (j + 1) + ' of tab ' + (i + 1) + ' means');
+          words.addEventListener('input', () => { r.text = words.value; });
+          const x = btn('cm-x', '×', () => { t.rules.splice(j, 1); drawRules(); }); x.title = 'take this rule off'; x.setAttribute('aria-label', 'take rule ' + (j + 1) + ' off');
+          row.append(mover(t.rules, j, drawRules), el('span', 'cm-n', String(j + 1)), title, words, x);
+          list.append(row);
+        });
+      };
+      drawRules();
+      box.append(el('span', 'cm-label-t', 'THE RULES, NUMBERED UNDER ITS WORDS'), list, line('cm-actions', more));
+      return box;
+    };
     const tabRow = (t, i) => {
       const r = el('div', 'cm-row'), top = el('div', 'cm-row-l');
       const chip = el('code', 'cm-chip', '/' + t.ch); chip.title = 'its name in the door — settled once saved';
@@ -79,14 +130,15 @@
       const who = select('cm-sel', WHOS, t.who); who.setAttribute('aria-label', 'who writes on tab ' + (i + 1));
       const text = el('textarea', 'cm-notice'); text.maxLength = CAP.notice; text.value = t.text || ''; text.placeholder = 'The notice — what this tab says to everyone (line breaks kept)'; text.setAttribute('aria-label', 'the notice of tab ' + (i + 1));
       text.addEventListener('input', () => { t.text = text.value; });
-      const hint = el('span', 'cm-hint');
-      const show = () => { const n = kind.value === 'notice'; who.hidden = n; text.hidden = !n; hint.textContent = KIND_WORDS[kind.value]; };
+      if (!Array.isArray(t.rules)) t.rules = [];
+      const hint = el('span', 'cm-hint'), rules = ruleRows(t, i);
+      const show = () => { const n = kind.value === 'notice'; who.hidden = n; text.hidden = rules.hidden = !n; hint.textContent = KIND_WORDS[kind.value]; };
       kind.addEventListener('change', () => { t.kind = kind.value; if (t.kind === 'notice') t.who = 'keepers'; show(); });
       who.addEventListener('change', () => { t.who = who.value; });
       const x = btn('cm-x', '×', () => { if (t._old && t.kind !== 'notice' && !confirm('Take the ' + (t.title || t.ch) + ' tab down? Its posts go with it.')) return; draft.splice(i, 1); draw(); });
       x.title = 'take this tab down'; x.setAttribute('aria-label', x.title);
       top.append(mover(draft, i, draw), title, chip, kind, who, x);
-      r.append(top, hint, text);
+      r.append(top, hint, text, rules);
       show();
       return r;
     };
@@ -97,22 +149,26 @@
     });
     const save = btn('cm-btn is-main', 'Save the tabs', async () => {
       if (draft.some(t => !t.title.trim())) { say(note, 'Every tab needs a title.', true); return; }
+      if (draft.some(t => t.kind === 'notice' && t.rules.some(r => !r.title.trim()))) { say(note, 'Every rule needs a title.', true); return; }
       const was = ch => tabs.find(o => o.ch === ch) || {};
       if (draft.some(t => t._old && was(t.ch).kind !== 'notice' && t.kind !== was(t.ch).kind) && !confirm('A tab made another kind starts empty — its posts go. Save anyway?')) return;
       save.disabled = true; say(note, 'Saving…');
-      const out = await send(BOARD, { op: 'tabs', tabs: draft.map(t => ({ ch: t.ch, title: t.title, kind: t.kind, who: t.who, text: t.text })) });
+      const out = await send(BOARD, { op: 'tabs', tabs: draft.map(t => ({ ch: t.ch, title: t.title, kind: t.kind, who: t.who, text: t.text, rules: t.kind === 'notice' ? t.rules : undefined })) });
       save.disabled = false;
       if (!out.ok) { say(note, 'Not saved: ' + (out.error || 'the door said no') + '.', true); return; }
-      tabs = out.tabs; draft = tabs.map(t => Object.assign({}, t, { _old: true })); draw();
+      tabs = out.tabs; draft = draftOf(tabs); draw();
       say(note, 'Saved — the board wears it now.');
     });
+    const back = revert('Put the Town Board back to how it started — News, Updates, Rules and Forum, with the five rules? A tab you added goes, and its posts with it; one you took down comes back empty.',
+                        BOARD, 'tabs', note, out => { tabs = out.tabs; c.replaceWith(boardCard('Back to the default — the four tabs and the five rules.')); });
     draw();
-    c.append(rows, line('cm-actions', add, save), note);
+    c.append(rows, line('cm-actions', add, save, back), note);
+    if (said) say(note, said);
     return c;
   }
 
   // ── THE CHAT: its rules ─────────────────────────────────────────────────
-  function chatCard() {
+  function chatCard(said) {
     const c = card('Chat', 'WHO MAY SAY SOMETHING · THE WAIT BETWEEN TWO LINES', '#5a8fd6', '0.5deg', 'chat');
     let who = chat.who, wait = chat.wait, named = (chat.named || []).slice();
     const note = noteEl(), radios = el('div', 'cm-radios'), namedBox = el('div', 'cm-named'), chips = el('div', 'cm-chips'), hits = el('div', 'cm-hits');
@@ -125,7 +181,7 @@
         ch.append(x); chips.append(ch);
       });
     };
-    [['anyone', 'Anyone signed in'], ['keepers', 'The keepers only'], ['named', 'People named here (and the keepers)']].forEach(([v, words]) => {
+    [['anyone', 'Anyone signed in'], ['keepers', 'Moderators only'], ['named', 'People named here (and the moderators)']].forEach(([v, words]) => {
       const l = el('label', 'cm-radio'), r = el('input'); r.type = 'radio'; r.name = 'cm-chat-who'; r.value = v; r.checked = who === v;
       r.addEventListener('change', () => { if (r.checked) { who = v; namedBox.hidden = who !== 'named'; } });
       l.append(r, words); radios.append(l);
@@ -149,7 +205,7 @@
     waitSel.setAttribute('aria-label', 'wait between messages');
     waitSel.addEventListener('change', () => { wait = +waitSel.value; });
     const save = btn('cm-btn is-main', 'Save the chat\'s rules', async () => {
-      if (who === 'named' && !named.length && !confirm('Nobody is named, so only the keepers will be able to chat. Save anyway?')) return;
+      if (who === 'named' && !named.length && !confirm('Nobody is named, so only the moderators will be able to chat. Save anyway?')) return;
       save.disabled = true; say(note, 'Saving…');
       const out = await send(BOARD, { op: 'chat', who, wait, named: named.map(n => n.id) });
       save.disabled = false;
@@ -157,69 +213,65 @@
       chat = out.chat; named = (chat.named || []).slice(); drawChips();
       say(note, 'Saved — the chat keeps to it from now on.');
     });
+    const back = revert('Put the chat back to how it started — anyone signed in may message, with no wait, and nobody named?',
+                        BOARD, 'chat', note, out => { chat = out.chat; c.replaceWith(chatCard('Back to the default — anyone signed in, no wait.')); });
     drawChips();
     c.append(line('cm-field', el('span', 'cm-label-t', 'WHO CAN MESSAGE'), radios, namedBox),
-             line('cm-field', el('span', 'cm-label-t', 'WAIT BETWEEN MESSAGES'), waitSel, el('span', 'cm-hint', 'how long one person waits after a line before the next — the keepers wait too')),
-             line('cm-actions', save), note);
+             line('cm-field', el('span', 'cm-label-t', 'WAIT BETWEEN MESSAGES'), waitSel, el('span', 'cm-hint', 'how long one person waits after a line before the next — the moderators wait too')),
+             line('cm-actions', save, back), note);
+    if (said) say(note, said);
     return c;
   }
 
   // ── THE PHOTO ALBUM: its sections, photos put up, the ones hanging ──────
-  // a picture as the door takes it: 1600 px a side at most and under 300 KB, as a JPEG — smaller and softer until it fits
-  function shrink(file) {
-    return new Promise((ok, no) => {
-      const url = URL.createObjectURL(file), img = new Image();
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        const c = document.createElement('canvas'), x = c.getContext('2d');
-        for (const side of [CAP.side, 1200, 900, 640, 480]) {
-          const s = Math.min(1, side / Math.max(img.naturalWidth, img.naturalHeight));
-          c.width = Math.max(1, Math.round(img.naturalWidth * s)); c.height = Math.max(1, Math.round(img.naturalHeight * s));
-          x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
-          for (const q of [0.86, 0.76, 0.66, 0.56]) { const out = c.toDataURL('image/jpeg', q); if (out.length * 0.75 <= CAP.bytes) return ok(out); }
-        }
-        no(new Error('too big'));
-      };
-      img.onerror = () => { URL.revokeObjectURL(url); no(new Error('not a picture')); };
-      img.src = url;
-    });
-  }
+  const shrink = file => window.Shrink(file);   // a picture as the door takes it (toem2/shrink.js, the album's own on the bench too)
   function albumCard() {
     const c = card('Photo Album', 'ITS SECTIONS · PHOTOS PUT UP HERE · THE ONES HANGING', '#7bc264', '-0.3deg', 'album'); c.classList.add('is-wide');
     const secOptions = () => [['', 'no section']].concat(sections.map(s => [s.id, s.title]));
-    // the sections
+    // the sections: five at most — each a name, a line about it, and whether anyone signed in may put photos up in it
     let draft = sections.map(s => Object.assign({}, s, { _old: true }));
     const secRows = el('div', 'cm-rows'), secNote = noteEl();
     const drawSecs = () => {
       secRows.replaceChildren(); draft.forEach((s, i) => secRows.append(secRow(s, i))); addSec.disabled = draft.length >= CAP.sections;
+      addSec.title = addSec.disabled ? 'an album has five sections at most' : '';
       if (!draft.length) secRows.append(el('span', 'cm-hint', 'no sections yet — the album is one grid until there are'));
     };
     const secRow = (s, i) => {
       const r = el('div', 'cm-row cm-row-l');
       const chip = el('code', 'cm-chip', '/' + s.id); chip.title = 'its name in the door — settled once saved';
-      const title = input('cm-in cm-in-title', s.title, CAP.sec, 'The section\'s title'); title.setAttribute('aria-label', 'title of section ' + (i + 1));
+      const title = input('cm-in cm-in-title', s.title, CAP.sec, 'The section\'s name'); title.setAttribute('aria-label', 'name of section ' + (i + 1));
       title.addEventListener('input', () => { s.title = title.value; if (!s._old) { s.id = unique(slugify(s.title) || 'section', new Set(draft.filter(x => x !== s).map(x => x.id))); chip.textContent = '/' + s.id; } });
-      const desc = input('cm-in cm-in-desc', s.desc, CAP.secDesc, 'A line about it (optional)'); desc.setAttribute('aria-label', 'description of section ' + (i + 1));
+      const desc = input('cm-in cm-in-desc', s.desc, CAP.secDesc, 'A line about it — 100 characters at most (optional)'); desc.setAttribute('aria-label', 'description of section ' + (i + 1));
       desc.addEventListener('input', () => { s.desc = desc.value; });
+      // VISITORS' PHOTOS: off until it is ticked — then anyone signed in may put their own photos up in this section, from the album itself
+      const open = el('label', 'cm-radio cm-open'), tick = el('input'); tick.type = 'checkbox'; tick.checked = !!s.open;
+      tick.addEventListener('change', () => { s.open = tick.checked; });
+      open.append(tick, 'visitors may put photos up here');
       const x = btn('cm-x', '×', () => { if (s._old && !confirm('Take the ' + (s.title || s.id) + ' section down? Its photos stay in the album, unsectioned.')) return; draft.splice(i, 1); drawSecs(); });
       x.title = 'take this section down'; x.setAttribute('aria-label', x.title);
-      r.append(mover(draft, i, drawSecs), title, chip, desc, x);
+      r.append(mover(draft, i, drawSecs), title, chip, desc, open, x);
       return r;
     };
     const addSec = btn('cm-btn', '+ add a section', () => {
       if (draft.length >= CAP.sections) return;
-      draft.push({ id: unique('section', new Set(draft.map(x => x.id))), title: '', desc: '' }); drawSecs();
+      draft.push({ id: unique('section', new Set(draft.map(x => x.id))), title: '', desc: '', open: false }); drawSecs();
       const last = secRows.lastElementChild.querySelector('input'); if (last) last.focus();
     });
+    // what the door answered is the album's now: the rows, the two lists' section boxes — and a photo whose section went hangs in none
+    const took = (out, words) => {
+      sections = out.sections; draft = sections.map(s => Object.assign({}, s, { _old: true }));
+      photos.concat(queue).forEach(p => { if (!sections.some(s => s.id === p.sec)) p.sec = ''; });
+      drawSecs(); drawPending(); drawPhotos(); say(secNote, words);
+    };
     const saveSecs = btn('cm-btn is-main', 'Save the sections', async () => {
-      if (draft.some(s => !s.title.trim())) { say(secNote, 'Every section needs a title.', true); return; }
+      if (draft.some(s => !s.title.trim())) { say(secNote, 'Every section needs a name.', true); return; }
       saveSecs.disabled = true; say(secNote, 'Saving…');
-      const out = await send(ALBUM, { op: 'sections', sections: draft.map(s => ({ id: s.id, title: s.title, desc: s.desc })) });
+      const out = await send(ALBUM, { op: 'sections', sections: draft.map(s => ({ id: s.id, title: s.title, desc: s.desc, open: !!s.open })) });
       saveSecs.disabled = false;
       if (!out.ok) { say(secNote, 'Not saved: ' + (out.error || 'the door said no') + '.', true); return; }
-      sections = out.sections; draft = sections.map(s => Object.assign({}, s, { _old: true })); drawSecs(); drawPending(); drawPhotos();
-      say(secNote, 'Saved — the album has ' + (sections.length === 1 ? 'one section' : sections.length + ' sections') + ' now.');
+      took(out, 'Saved — the album has ' + (out.sections.length === 1 ? 'one section' : out.sections.length + ' sections') + ' now.');
     });
+    const backSecs = revert('Put the album back to how it started — one grid, no sections? The photos stay, in no section.', ALBUM, 'sections', secNote, out => took(out, 'Back to the default — no sections; the photos stay.'));
     // photos put up here
     const file = el('input', 'cm-file'); file.type = 'file'; file.accept = 'image/*'; file.multiple = true; file.id = 'cm-file';
     const pick = el('label', 'cm-btn', 'Choose photos…'); pick.htmlFor = 'cm-file';
@@ -288,14 +340,15 @@
       });
     };
     drawSecs(); drawPending(); drawPhotos();
-    c.append(el('span', 'cm-label-t', 'SECTIONS'), secRows, line('cm-actions', addSec, saveSecs), secNote,
+    c.append(el('span', 'cm-label-t', 'SECTIONS'), el('span', 'cm-hint cm-hint-b', 'up to five — each a name, a line about it (100 characters at most), and whether visitors may put their own photos up in it'),
+             secRows, line('cm-actions', addSec, saveSecs, backSecs), secNote,
              el('span', 'cm-label-t', 'PUT PHOTOS UP'), el('span', 'cm-hint', 'a JPEG, PNG or WebP — shrunk here to 1600 px and 300 KB before it goes'), line('cm-actions', pick, file), pending, upNote,
              el('span', 'cm-label-t', 'HANGING NOW'), list, listNote);
     return c;
   }
 
   // ── THE LEADERBOARD: what it ranks, in what order, its title, how many rows ──
-  function ranksCard() {
+  function ranksCard(said) {
     const c = card('Leaderboard', 'WHAT IT RANKS · IN WHAT ORDER · ITS TITLE · HOW MANY ROWS', '#ffd23f', '0.4deg', 'ranks');
     const all = Object.keys(lb.metrics), chosen = lb.settings.tabs.filter(m => lb.metrics[m]);
     const order = chosen.concat(all.filter(m => !chosen.includes(m))), on = new Set(chosen);
@@ -323,10 +376,70 @@
       if (!out.ok) { say(note, 'Not saved: ' + (out.error || 'the door said no') + '.', true); return; }
       lb.settings = out.settings; say(note, 'Saved — the leaderboard shows it now, counted afresh.');
     });
+    const back = revert('Put the leaderboard back to how it started — its first three rankings, its own title and line, ten rows?',
+                        RANKS, 'settings', note, out => { lb.settings = out.settings; c.replaceWith(ranksCard('Back to the default — counted afresh.')); });
     draw();
     c.append(el('span', 'cm-label-t', 'RANKINGS, IN THE ORDER THEIR TABS STAND'), rows,
              line('cm-field cm-field-row', line('cm-label', el('span', 'cm-label-t', 'TITLE'), title), line('cm-label', el('span', 'cm-label-t', 'UNDER THE TITLE'), sub), line('cm-label', el('span', 'cm-label-t', 'ROWS'), top)),
-             line('cm-actions', save), note);
+             line('cm-actions', save, back), note);
+    if (said) say(note, said);
+    return c;
+  }
+
+  // ── THE BALLOT: how often a council's clock comes round, and the motion with the most hearts goes up (api/wall.js: THE COUNCIL'S CLOCK) ──
+  const EVERY = [[1, 'every hour'], [3, 'every 3 hours'], [6, 'every 6 hours'], [12, 'every 12 hours'], [24, 'every day'], [72, 'every 3 days'], [168, 'every week']], EVERY_DEFAULT = 6;
+  const LEVELS = ['read-only', 'tended', 'a council', 'wild'];
+  const inWords = t => { const m = Math.max(0, Math.round((t - Date.now()) / 60000)); return m >= 2880 ? 'in ' + Math.floor(m / 1440) + ' days' : m >= 60 ? 'in ' + Math.floor(m / 60) + ' h ' + (m % 60) + ' min' : m ? 'in ' + m + ' min' : 'now'; };
+  function ballotCard(said) {
+    const c = card('Ballot', 'HOW OFTEN THE EDIT WITH THE MOST HEARTS GOES UP', '#5a8fd6', '-0.3deg', 'ballot');
+    const note = noteEl(), can = !!rules.owner || !!me.mod, sel = select('cm-sel', EVERY, rules.every);
+    sel.setAttribute('aria-label', 'how often the edit with the most hearts goes up'); sel.disabled = !can;
+    const put = async (every, words) => {
+      save.disabled = back.disabled = true; say(note, 'Saving…');
+      const out = await send('/api/wall', { op: 'settings', every });
+      save.disabled = back.disabled = !can;
+      if (!out.ok) { say(note, 'Not saved: ' + (out.error || 'the door said no') + '.', true); return; }
+      rules = Object.assign({}, rules, out.rules);
+      c.replaceWith(ballotCard(words));
+    };
+    const save = btn('cm-btn is-main', 'Save the timer', () => { if (+sel.value !== rules.every) put(+sel.value, 'Saved — the clock starts again from now.'); else say(note, 'That is what it is set to.'); });
+    const back = btn('cm-btn cm-revert', 'Back to the default', () => { if (confirm('Put the ballot\'s timer back to how it started — the edit with the most hearts goes up every 6 hours? The clock starts again from now.')) put(EVERY_DEFAULT, 'Back to the default — every 6 hours.'); });
+    save.disabled = back.disabled = !can;
+    c.append(line('cm-field', el('span', 'cm-label-t', 'THE TIMER'), sel,
+                  el('span', 'cm-hint', 'on a council, every edit from somebody who is no moderator waits on the ballot, where anyone with a vote gives the ones they like a heart; each time the timer runs out, the one with the most hearts goes up, and the rest wait for the next round')),
+             el('span', 'cm-hint cm-hint-b', rules.chaos === 2 ? 'this page is a council — the timer next runs out ' + inWords(rules.closes) : 'this page is ' + (LEVELS[rules.chaos] || 'tended') + ': the timer runs once it is made a council (its settings, under Who can edit)'),
+             can ? '' : el('span', 'cm-hint cm-hint-b', 'the timer is the page\'s maker\'s to set'),
+             line('cm-actions', save, back), note);
+    if (said) say(note, said);
+    return c;
+  }
+
+  // ── THE PAGE'S HISTORY: who joined, and the edits that went up — all the door keeps of both, newest first ──
+  function historyCard(out) {
+    const c = card('History', 'WHO JOINED THE PAGE · THE EDITS THAT WENT UP · ALL OF IT, NEWEST FIRST', '#e0598c', '0.3deg', 'history'); c.classList.add('is-wide');
+    const list = out.history || [], rows = el('div', 'cm-story'), count = el('span', 'cm-hint'), pick = el('div', 'cm-actions');
+    const when = t => new Date(t).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    const what = n => [n && n.put ? n.put + ' changed' : '', n && n.del ? n.del + ' deleted' : '', n && n.art ? n.art + (n.art === 1 ? ' tracing' : ' tracings') : ''].filter(Boolean).join(' · ');
+    const how = e => (e.how === 'approved' ? 'approved by ' + (e.via || 'a moderator') : e.how === 'motion' ? 'carried by the council' : e.how === 'fiat' ? 'put up by ' + (e.via || 'a moderator') : 'went live');
+    let show = 'all';
+    const draw = () => {
+      const these = list.filter(e => show === 'all' || e.kind === show);
+      rows.replaceChildren();
+      if (!these.length) rows.append(el('span', 'cm-hint', show === 'join' ? 'nobody has joined yet' : show === 'edit' ? 'no edit has gone up yet' : 'nothing yet — the first to open the page, and the first edit to go up, start it'));
+      these.forEach(e => {
+        const r = el('div', 'cm-line is-' + e.kind), who = el('b', null, e.tag || 'a gnome');
+        r.append(el('time', 'cm-when', when(e.at)), el('span', 'cm-mark', e.kind === 'join' ? 'JOINED' : 'EDIT'));
+        const words = el('span', 'cm-said'); words.append(who, e.kind === 'join' ? ' joined the page' : '’s edit ' + how(e) + (what(e.n) ? ' — ' + what(e.n) : ''));
+        r.append(words);
+        rows.append(r);
+      });
+      count.textContent = these.length + (these.length === 1 ? ' line' : ' lines');
+      pick.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.show === show)));
+    };
+    [['all', 'Everything'], ['join', 'Who joined'], ['edit', 'Edits']].forEach(([k, words]) => { const b = btn('cm-btn cm-pick', words, () => { show = k; draw(); }); b.dataset.show = k; pick.append(b); });
+    pick.append(count);
+    draw();
+    c.append(pick, rows, el('span', 'cm-hint cm-hint-b', 'an edit is here once it is on the wall — gone live, approved, carried by the council; the wall keeps its last ' + (out.kept || 500) + ', and its own history (on the page, under “history”) has what was undone'));
     return c;
   }
 
@@ -338,9 +451,12 @@
     if (!s || !b.ok || !b.me || !b.me.keeper) return;   // not a page, or not one of its keepers: nothing to arrange here
     me = b.me; tabs = b.tabs; chat = b.chat; sections = g.ok ? g.sections : []; photos = g.ok ? g.photos : []; lb = r.ok ? r : null;
     s.classList.add('cm');
-    s.append(line('cm-head', el('span', 'cm-label-t', 'THE CORNER'), el('span', 'cm-hint', 'the town board, the chat, the photo album and the leaderboard — the four buttons in the page\'s bottom-left corner, arranged here by its keepers')),
+    s.append(line('cm-head', el('span', 'cm-label-t', 'THE CORNER'), el('span', 'cm-hint', 'the town board, the chat, the photo album and the leaderboard — the four buttons in the page\'s corners, arranged here by its moderators')),
              boardCard(), chatCard(), albumCard());
     if (lb) s.append(ranksCard());
+    const [w, h] = await Promise.all([get('/api/wall?rules=1&' + PQ), get(STORY + PQ)]);   // asked only once the door has said who is asking keeps the page: the history is theirs alone to read
+    if (w.ok) { rules = w; s.append(ballotCard()); }
+    if (h.ok) s.append(line('cm-head', el('span', 'cm-label-t', 'THE PAGE\'S HISTORY'), el('span', 'cm-hint', 'for its moderators to read')), historyCard(h));
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
   window.CornerManage = { get me() { return me; }, get tabs() { return tabs; }, get chat() { return chat; }, get sections() { return sections; }, get photos() { return photos; }, get ranks() { return lb && lb.settings; } };   // for the probes

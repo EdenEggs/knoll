@@ -97,6 +97,13 @@ const ids = list => list.map(r => r.id);
   check('a space\'s leaderboard starts as the Hall of Fame — empty, the same three rankings', r.status === 200 && r.json.settings.title === 'Hall of Fame' && r.json.settings.tabs.join() === 'edits,days,first' && Object.values(r.json.ranks).every(l => l.length === 0), r.json.settings);
   r = await POST({ op: 'settings', page: 'glade', tabs: ['posts'], title: 'Top Gnomes', sub: '', top: 5 }, 'nu');
   check('…and its maker calls it what they like', r.json.ok && (await GET('?page=glade')).json.settings.title === 'Top Gnomes', r.json);
+  // BACK TO THE DEFAULT (2026-09-28)
+  check('back to the default is the moderators\' too', brief(await POST({ op: 'settings', page: 'glade', reset: true }, 'nu2')).code === 'role');
+  r = await POST({ op: 'settings', page: 'glade', reset: true }, 'nu');
+  check('back to the default: the Hall of Fame, its first three rankings, ten rows', r.json.ok && r.json.settings.title === 'Hall of Fame' && r.json.settings.tabs.join() === 'edits,days,first' && r.json.settings.top === 10
+        && JSON.stringify((await GET('?page=glade')).json.settings) === JSON.stringify(r.json.settings), r.json.settings);
+  r = await POST({ op: 'settings', reset: true }, 'mod');
+  check('…and TOEM 2\'s is the Leaderboard again, counted afresh', r.json.ok && r.json.settings.title === 'Leaderboard' && r.json.settings.sub === 'Counted up every ten minutes' && (await W.db('GET', W.K.lb('toem2'))) === null, r.json.settings);
 
   fs.rmSync(tmp, { recursive: true, force: true });
   console.log(fails ? '\n' + fails + ' FAILED' : '\nall passed');

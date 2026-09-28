@@ -23,6 +23,7 @@
               counted: <ms>, ranks: { <m>: [{id, tag, value, sub}] } (the top rows of each tab shown),
               you: { <m>: { rank, value, sub } | null } (signed in) }
      POST { op: 'settings', tabs, title, sub, top } → { ok, settings }   (the keepers)
+          { op: 'settings', reset: true }           → { ok, settings }   (back to the default: its first three, its own name, ten rows)
 
    ponytail: the whole log, the board and the album are read to count — a
    few thousand records at most, once in ten minutes; a running tally on the
@@ -135,11 +136,11 @@ async function post(req, res) {
   if (!me) throw bad(401, 'who', 'sign in to do that');
   if (me.banned) throw bad(403, 'banned', 'this account may not post');
   if (body.op !== 'settings') throw bad(400, 'op', 'no such op');
-  if (!me.keeper) throw bad(403, 'role', 'the leaderboard is the keepers\' to arrange');
+  if (!me.keeper) throw bad(403, 'role', 'the leaderboard is the moderators\' to arrange');
   if (!(await spend(me.id))) throw bad(429, 'rate', 'that is a lot in one hour — take a breath');
-  const next = cleanSettings(body);
-  await dbm([['HSET', K.page(slug), 'ranks', JSON.stringify(next)], ['DEL', K.lb(slug)]]);   // counted afresh on the next look
-  await W.audit(me.id, 'ranks', { page: slug, tabs: next.tabs.join(','), title: next.title, top: next.top });
+  const reset = body.reset === true, next = reset ? settingsOf({}, slug) : cleanSettings(body);   // BACK TO THE DEFAULT: the field emptied (api/board.js)
+  await dbm([['HSET', K.page(slug), 'ranks', reset ? '' : JSON.stringify(next)], ['DEL', K.lb(slug)]]);   // counted afresh on the next look
+  await W.audit(me.id, 'ranks', { page: slug, tabs: next.tabs.join(','), title: next.title, top: next.top, reset: reset || undefined });
   answer(res, 200, { ok: true, settings: next });
 }
 

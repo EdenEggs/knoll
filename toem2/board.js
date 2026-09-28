@@ -32,6 +32,19 @@
    how many are on the page (cursors.js's room, when it is up). Nothing is
    seeded there either.
 
+   A NOTICE'S RULES (2026-09-28): a notice is its words and, under them, the
+   numbered rules its moderators keep on the dashboard — the door sends both,
+   and the five a page starts with until somebody changes them.
+
+   WHO IS HERE, AND A NAME'S MENU (2026-09-28), on every page: under the
+   chat's name stands how many accounts have the page open — the door's
+   count (api/board.js: WHO IS HERE), asked for every half minute on the
+   poll — and it is a button: pressed, the chat gives way to the list of
+   them, each a face and a name that lead to their page (/YardView/?u=), and
+   a way to ask to be friends (api/friends.js: ask, by tag). A name in the
+   chat answers a right click — or a press, or Enter — with a small menu of
+   the same two things.
+
    ponytail: the chat polls — every 4 s open, every minute closed — rather
    than riding cursors.js's room; a 'chat' action on that room is the
    upgrade if the wait shows. Pictures are one card fetch per author per
@@ -40,8 +53,8 @@ window.Town = (function () {
   if (document.documentElement.classList.contains('toem-embed')) return null;
   const PAGE = document.documentElement.dataset.page || 'toem2', PQ = 'page=' + encodeURIComponent(PAGE);
   const KNOLL = PAGE !== 'toem2';               // KNOLL'S OWN CORNER: a space's; TOEM 2 keeps its own
-  const API = '/api/board', CARD = '/api/wall?who=', TOKEN = 'knoll-toem2:token', SEEN = 'knoll-' + PAGE + ':town:seen';
-  const POLL_OPEN = 4000, POLL_SHUT = 60000, CAP = { title: 80, line: 500, body: 2000, label: 16 };
+  const API = '/api/board', CARD = '/api/wall?who=', FRIENDS = '/api/friends', PROFILE = '/YardView/?u=', TOKEN = 'knoll-toem2:token', SEEN = 'knoll-' + PAGE + ':town:seen';
+  const POLL_OPEN = 4000, POLL_SHUT = 60000, HERE_EVERY = 30000, CAP = { title: 80, line: 500, body: 2000, label: 16 };
   const RULES = KNOLL ? [
     ['Be kind', 'No insults, name-calling or pile-ons.'],
     ['Credit the maker', 'Say whose work it is when you share it.'],
@@ -104,16 +117,21 @@ window.Town = (function () {
   const posts = { chat: [] };
   try { seen = JSON.parse(get(SEEN)) || {}; } catch (e) { seen = {}; }
   let fabs, boardBtn, chatBtn, board, chat, tabsEl, boardBody, boardSub, chatList, chatForm, chatIn, chatSend, chatGate, chatNote, chatWhy, chatSub, chatQuick = null;
+  let here = null, hereAt = 0, hereBtn, chatWho, hereSheet, hereHead, hereList, hereNote, hereDrawn = '';   // WHO IS HERE
+  let friends = null, menu = null, menuBack = null;   // who this gnome is friends with (asked for once, when first wanted); a name's menu, and what the focus goes back to
+  const asked = new Set();                      // …and who they asked, this visit
 
   // ── the door ────────────────────────────────────────────────────────────
-  async function load(chs) {
+  async function load(chs, ask) {               // ask: say who is here now, whenever they were last said (the list being opened)
     let out = null;
-    try { const r = await fetch(API + '?' + PQ + '&ch=' + chs, { headers: headers(), cache: 'no-store' }); out = r.ok ? await r.json() : null; } catch (e) {}
+    const say = ask || Date.now() - hereAt >= HERE_EVERY, named = hereSheet && !hereSheet.hidden;   // how many (1) — and who (2), while the list of them is up
+    try { const r = await fetch(API + '?' + PQ + '&ch=' + chs + (say ? '&here=' + (named ? 2 : 1) : ''), { headers: headers(), cache: 'no-store' }); out = r.ok ? await r.json() : null; } catch (e) {}
     if (!out || !out.ok) return false;
     me = out.me || null;
     Object.assign(posts, out.posts);
     if (Array.isArray(out.tabs) && out.tabs.length) setTabs(out.tabs);
     if (out.chat) chatRules = out.chat;
+    if (out.here) { here = out.here; hereAt = Date.now(); if (chatSub) paintSub(); }
     return true;
   }
   // THE TABS, as the door has them: the buttons are rebuilt when the list changes, and the subtitle names them
@@ -235,11 +253,15 @@ window.Town = (function () {
     if (mayWrite(ch)) boardBody.append(form(ch, { titleHint: 'A title', hint: 'What is new?', verb: 'post', after: () => { renderBoard(); look(ch); } }));
     else if (!me && tabOf(ch).who === 'anyone') boardBody.append(gateLine('to post.'));
   }
-  function renderNotice(t) {                    // what the keepers wrote from the dashboard — or, on an unwritten Rules tab, the five the town started with
-    if (t.text) { boardBody.append(el('p', 'town-intro town-notice', t.text)); return; }
-    if (t.ch !== 'rules') { boardBody.append(empty('Nothing written here yet.')); return; }
-    boardBody.append(el('p', 'town-intro', WORDS.intro));
-    RULES.forEach(([h, t2], i) => {
+  /* a notice: its words, and its rules under their numbers — as the door has them (A NOTICE'S RULES); while the door is
+     quiet, an unwritten Rules tab has the five the town started with. Words with no rules under them are a notice on
+     its own card, as one written before there were rules is. */
+  function renderNotice(t) {
+    const fromDoor = Array.isArray(t.rules), bare = !fromDoor && !t.text && t.ch === 'rules';
+    const words = bare ? WORDS.intro : t.text, rules = fromDoor ? t.rules.map(r => [r.title, r.text]) : bare ? RULES : [];
+    if (!words && !rules.length) { boardBody.append(empty('Nothing written here yet.')); return; }
+    if (words) boardBody.append(el('p', 'town-intro' + (rules.length ? '' : ' town-notice'), words));
+    rules.forEach(([h, t2], i) => {
       const c = el('article', 'town-card'), b = el('div', 'town-card-b');
       b.append(el('span', 'town-card-h', h), el('p', 'town-card-t', t2));
       c.append(el('span', 'town-n', String(i + 1)), b);
@@ -255,7 +277,7 @@ window.Town = (function () {
       b.addEventListener('click', () => { thread = 'new'; renderBoard(); });
       boardBody.append(b);
     } else if (!me && tabOf(ch).who === 'anyone') boardBody.append(gateLine('to start a thread.'));
-    else if (me) boardBody.append(el('p', 'town-gate', 'The keepers start the threads here.'));
+    else if (me) boardBody.append(el('p', 'town-gate', 'Moderators start the threads here.'));
     if (!threads.length) boardBody.append(empty('No threads yet.'));
     threads.forEach(t => {
       const c = el('button', 'town-card is-thread'); c.type = 'button';
@@ -290,7 +312,7 @@ window.Town = (function () {
     });
     if (mayWrite(ch)) boardBody.append(form(ch, { titleHint: 'A title for the thread', hint: 'Start it off…', verb: 'start a thread', after: p => { thread = p.id; renderBoard(); look(ch); } }));
     else if (!me && tabOf(ch).who === 'anyone') boardBody.append(gateLine('to start a thread.'));
-    else if (me) boardBody.append(el('p', 'town-gate', 'The keepers start the threads here.'));
+    else if (me) boardBody.append(el('p', 'town-gate', 'Moderators start the threads here.'));
   }
   function renderThread(ch) {
     if (KNOLL && thread === 'new') return renderNewK(ch);
@@ -324,10 +346,8 @@ window.Town = (function () {
     // THE CHAT'S RULES: the box for those who may; a word for the signed-in who may not; the gate for the signed-out
     chatForm.hidden = !me || !chatRules.can; chatGate.hidden = !!me;
     chatWhy.hidden = !me || chatRules.can;
-    chatWhy.textContent = chatRules.who === 'keepers' ? 'Only the keepers can chat here — everyone can read along.' : 'This chat is for the people the keepers named — everyone can read along.';
-    // how many are on the page, where the room is up (cursors.js) — counted, never made up; then whose chat it is
-    const here = KNOLL && window.Company && Company.room ? (Company.peers + 1) + ' online · ' : '';
-    chatSub.textContent = here + (chatRules.who === 'keepers' ? 'The keepers' : chatRules.who === 'named' ? 'The people the keepers named' : 'Everyone on this wall') + (chatRules.wait ? ' · one message every ' + waitWord(chatRules.wait) : '');
+    chatWhy.textContent = chatRules.who === 'keepers' ? 'Only moderators can chat here — everyone can read along.' : 'This chat is for the people the moderators named — everyone can read along.';
+    paintSub();
     if (chatQuick) chatQuick.hidden = chatForm.hidden;
     if (print === drawn) return;                // nothing new: the list stands (and so does a selection in it)
     drawn = print;
@@ -342,7 +362,8 @@ window.Town = (function () {
       const row = el('div', 'town-msg' + (me && m.by === me.id ? ' is-me' : '') + (more ? ' is-more' : ''));
       row.dataset.id = m.id;
       const pic = el('span', 'town-pic', initial(m.tag)); pic.dataset.pic = m.by; pic.style.setProperty('--tone', tone(m.by)); picIn(pic, m.by);
-      const name = el('span', 'town-name'); name.append(whoEl(m.tag));
+      const name = el('span', 'town-name'), u = { id: m.by, tag: m.tag }; name.append(named(whoEl(m.tag), u, true));
+      named(pic, u);                            // A NAME'S MENU: the name's, and the face's beside it
       const bubble = el('div', 'town-bubble', m.text); bubble.title = new Date(m.at).toLocaleString();
       row.append(name, pic, bubble);
       if (canDrop(m)) { const x = el('button', 'town-x', '×'); x.type = 'button'; x.title = m.by === me.id ? 'take it back' : 'hide it'; x.setAttribute('aria-label', x.title); x.addEventListener('click', () => drop('chat', m, () => { drawn = ''; renderChat(); })); row.append(x); }
@@ -367,6 +388,123 @@ window.Town = (function () {
     if (chatRules.wait) cooldown(chatRules.wait);
     chatIn.focus();
   }
+  // under the chat's name: how many have the page open — a button, WHO IS HERE — and whose chat it is
+  function paintSub() {
+    hereBtn.hidden = !here;
+    if (here) hereBtn.textContent = here.n + ' online';
+    chatWho.textContent = (here ? ' · ' : '') + (chatRules.who === 'keepers' ? 'Moderators' : chatRules.who === 'named' ? 'The people the moderators named' : 'Everyone on this wall') + (chatRules.wait ? ' · one message every ' + waitWord(chatRules.wait) : '');
+    if (!hereSheet.hidden) renderHere();
+  }
+
+  // ── friends: who this gnome has (asked of the door once, when a name is first pressed), and the asking ──
+  let friendsP = null;
+  const knowFriends = () => (!me ? Promise.resolve() : friendsP || (friendsP = fetch(FRIENDS, { headers: headers(), cache: 'no-store' }).then(r => (r.ok ? r.json() : null))
+    .then(o => { if (o && o.ok) friends = new Set(o.friends.map(f => f.id)); }).catch(() => {})));
+  async function befriend(u) {                  // by tag, as the yard asks (api/friends.js) — asking somebody who asked you first is saying yes
+    const out = await fetch(FRIENDS, { method: 'POST', headers: headers({ 'content-type': 'application/json' }), body: JSON.stringify({ op: 'ask', tag: u.tag }) })
+      .then(r => r.json()).catch(() => ({ ok: false, error: 'the door did not answer' }));
+    if (out.ok && out.friends) (friends || (friends = new Set())).add(u.id);
+    else if (out.ok) asked.add(u.id);
+    return out;
+  }
+  const standing = u => (friends && friends.has(u.id) ? 'Friends' : asked.has(u.id) ? 'Request sent' : '');
+
+  // ── A NAME'S MENU: ask to be friends, or go and see their page — at the pointer, kept on the screen ──
+  function closeMenu(quiet) {
+    if (!menu) return;
+    menu.remove(); menu = null;
+    if (!quiet && menuBack && menuBack.isConnected && menuBack.tabIndex >= 0) menuBack.focus({ preventScroll: true });
+    menuBack = null;
+  }
+  function openMenu(u, from, x, y) {
+    closeMenu(true);
+    menu = el('div', 'town-menu'); menu.setAttribute('role', 'menu'); menu.setAttribute('aria-label', initialFor(u.tag)[0]);
+    menuBack = from;
+    const head = el('div', 'town-menu-h'); head.append(face({ by: u.id, tag: u.tag }), whoEl(u.tag));
+    menu.append(head);
+    const mine = !!me && u.id === me.id;
+    if (!me) { const a = el('a', 'town-menu-i', 'Log in to add friends'); a.href = gate(); a.setAttribute('role', 'menuitem'); menu.append(a); }
+    else if (!mine) {
+      const b = el('button', 'town-menu-i', 'Send a friend request'); b.type = 'button'; b.setAttribute('role', 'menuitem');
+      const paint = () => { const s = standing(u); if (s && b.isConnected) { b.textContent = s; b.disabled = true; } };
+      b.addEventListener('click', async () => {
+        b.disabled = true; b.textContent = 'Asking…';
+        const out = await befriend(u);
+        if (!out.ok) { b.textContent = 'Not sent: ' + (out.error || 'the door said no'); return; }
+        b.textContent = out.friends ? 'You are friends now' : 'Request sent';
+        hereDrawn = ''; if (!hereSheet.hidden) renderHere();
+      });
+      menu.append(b);
+      paint(); knowFriends().then(paint);
+    }
+    const see = el('a', 'town-menu-i', mine ? 'See your page' : 'See their page'); see.href = mine ? '/yard/' : PROFILE + encodeURIComponent(u.id); see.setAttribute('role', 'menuitem');
+    menu.append(see);
+    document.body.append(menu);
+    menu.style.left = Math.max(8, Math.min(x, window.innerWidth - menu.offsetWidth - 8)) + 'px';
+    menu.style.top = Math.max(8, Math.min(y, window.innerHeight - menu.offsetHeight - 8)) + 'px';
+    menu.addEventListener('keydown', e => {     // up and down walk it, as a menu's do
+      const d = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : 0, its = [...menu.querySelectorAll('.town-menu-i:not(:disabled)')];
+      if (!d || !its.length) return;
+      e.preventDefault(); its[(its.indexOf(document.activeElement) + d + its.length) % its.length].focus();
+    });
+    const first = menu.querySelector('.town-menu-i:not(:disabled)'); if (first) first.focus({ preventScroll: true });
+  }
+  // a name (key: reachable by the keyboard too) or a face that answers a right click, a press or Enter with that menu
+  function named(node, u, key) {
+    if (!/^[0-9a-f]{16}$/.test(String(u.id))) return node;   // the shipped wall's, or nobody's: no page to see, nobody to ask
+    const open = (e, x, y) => { e.preventDefault(); e.stopPropagation(); openMenu(u, node, x, y); };
+    node.classList.add('town-named');
+    node.addEventListener('contextmenu', e => open(e, e.clientX, e.clientY));
+    node.addEventListener('click', e => open(e, e.clientX, e.clientY));
+    if (key) {
+      node.tabIndex = 0; node.setAttribute('role', 'button'); node.setAttribute('aria-haspopup', 'menu');
+      node.addEventListener('keydown', e => { if (e.key !== 'Enter' && e.key !== ' ') return; const r = node.getBoundingClientRect(); open(e, r.left, r.bottom + 4); });
+    }
+    return node;
+  }
+
+  // ── WHO IS HERE: the accounts with this page open, as the door counted them a moment ago ──
+  function renderHere() {
+    const who = (here && here.who) || [], print = (me ? me.id : '') + '|' + (here ? here.n : '') + '|' + who.map(u => u.id + standing(u)).join(',');
+    if (print === hereDrawn) return;            // nothing new: the list stands, and so does the focus in it
+    hereDrawn = print;
+    hereHead.textContent = !here ? 'On this page' : here.n === 1 ? '1 person on this page' : here.n + ' people on this page';
+    hereList.replaceChildren();
+    if (!me) { hereList.append(gateLine('to see who is here.')); return; }
+    if (!who.length) hereList.append(empty(here && here.who ? 'Nobody is here just now.' : 'Looking…'));
+    who.forEach(u => {
+      const row = el('div', 'town-person'), a = el('a', 'town-person-a'), mine = u.id === me.id;
+      a.href = mine ? '/yard/' : PROFILE + encodeURIComponent(u.id); a.title = mine ? 'your page' : 'see their page';
+      a.append(face({ by: u.id, tag: u.tag }), whoEl(u.tag));
+      row.append(a);
+      if (mine) row.append(el('span', 'town-you', 'you'));
+      else {
+        const b = el('button', 'town-btn is-plain town-ask', standing(u) || 'Add friend'); b.type = 'button'; b.disabled = !!standing(u);
+        b.addEventListener('click', async () => {
+          b.disabled = true;
+          const out = await befriend(u);
+          if (!out.ok) { b.disabled = false; note(hereNote, 'Not sent: ' + (out.error || 'the door said no') + '.'); return; }
+          note(hereNote, ''); hereDrawn = ''; renderHere();
+        });
+        row.append(b);
+      }
+      hereList.append(row);
+    });
+  }
+  function showHere() {
+    closeMenu(true);
+    hereSheet.hidden = false; chat.classList.add('is-here'); hereBtn.setAttribute('aria-expanded', 'true');
+    hereDrawn = ''; note(hereNote, ''); renderHere();
+    knowFriends().then(() => { hereDrawn = ''; if (!hereSheet.hidden) renderHere(); });
+    load('chat', true);                         // …and asked afresh: paintSub draws what comes back
+    hereSheet.querySelector('.town-back').focus({ preventScroll: true });
+  }
+  function hideHere(quiet) {
+    if (hereSheet.hidden) return;
+    hereSheet.hidden = true; chat.classList.remove('is-here'); hereBtn.setAttribute('aria-expanded', 'false');
+    if (!quiet) hereBtn.focus({ preventScroll: true });
+  }
+
   // THE WAIT: after a line, the box counts the seconds down before the next (the door counts too)
   function cooldown(s) {
     clearInterval(coolT);
@@ -400,6 +538,7 @@ window.Town = (function () {
   }
   function hide() {
     if (!openPanel) return;
+    closeMenu(true); hideHere(true);
     openPanel.hidden = true;
     (openPanel === board ? boardBtn : chatBtn).setAttribute('aria-expanded', 'false');
     openPanel = null;
@@ -444,8 +583,19 @@ window.Town = (function () {
     boardBody = el('div', 'town-body');
     board.append(tabsEl, boardBody);
 
-    chat = panel('town-chat', KNOLL ? KSVG.bubbleTile : SVG.bubble, WORDS.chat, 'Everyone on this wall');
+    chat = panel('town-chat', KNOLL ? KSVG.bubbleTile : SVG.bubble, WORDS.chat, '');
     chatSub = chat.querySelector('.town-title small');
+    hereBtn = el('button', 'town-here'); hereBtn.type = 'button'; hereBtn.hidden = true; hereBtn.title = 'see who is on this page';
+    hereBtn.setAttribute('aria-expanded', 'false'); hereBtn.setAttribute('aria-controls', 'town-here');
+    hereBtn.addEventListener('click', () => (hereSheet.hidden ? showHere() : hideHere()));
+    chatWho = el('span', null, 'Everyone on this wall');
+    chatSub.append(hereBtn, chatWho);
+    // WHO IS HERE: the sheet the chat gives way to — the way back, how many, the list, and a word when an ask did not go
+    hereSheet = el('div', 'town-body town-here-sheet'); hereSheet.id = 'town-here'; hereSheet.hidden = true;
+    const hereBack = el('button', 'town-back', KNOLL ? null : '← back to the chat'); hereBack.type = 'button'; hereBack.addEventListener('click', () => hideHere());
+    if (KNOLL) { hereBack.innerHTML = KSVG.back; hereBack.append(el('span', null, 'Back to the chat')); }
+    hereHead = el('b', 'town-sheet-h', 'On this page'); hereList = el('div', 'town-people'); hereNote = el('p', 'town-note'); hereNote.hidden = true;
+    hereSheet.append(hereBack, hereHead, hereList, hereNote);
     chatList = el('div', 'town-body town-chat-list'); chatList.setAttribute('aria-live', 'polite');
     chatNote = el('p', 'town-note town-chat-note'); chatNote.hidden = true;
     chatWhy = el('p', 'town-gate town-chat-gate'); chatWhy.hidden = true;
@@ -458,8 +608,9 @@ window.Town = (function () {
     if (KNOLL) {                                // three things to say at a press, over the box — for whoever has the box
       chatQuick = el('div', 'town-quick'); chatQuick.hidden = true;
       QUICK.forEach(q => { const b = el('button', null, q); b.type = 'button'; b.addEventListener('click', () => say(null, q)); chatQuick.append(b); });
-      chat.append(chatList, chatNote, chatWhy, chatGate, chatQuick, chatForm);
-    } else chat.append(chatList, chatNote, chatWhy, chatGate, chatForm);
+      chat.append(hereSheet, chatList, chatNote, chatWhy, chatGate, chatQuick, chatForm);
+    } else chat.append(hereSheet, chatList, chatNote, chatWhy, chatGate, chatForm);
+    chatList.addEventListener('scroll', () => closeMenu(true), { passive: true });
 
     document.body.append(fabs, board, chat);
   }
@@ -469,10 +620,17 @@ window.Town = (function () {
     tick();
     window.addEventListener('focus', () => { if (!loading) tick(); });
     document.addEventListener('visibilitychange', () => { if (!document.hidden && !loading) tick(); });
-    window.addEventListener('keydown', e => { if (e.key === 'Escape' && openPanel && !(window.Lab && Lab.menuUp)) hide(); });
+    // Escape puts away the nearest thing: a name's menu, then the list of who is here, then the panel
+    window.addEventListener('keydown', e => {
+      if (e.key !== 'Escape' || (window.Lab && Lab.menuUp)) return;
+      if (menu) closeMenu(); else if (!hereSheet.hidden) hideHere(); else if (openPanel) hide();
+    });
+    document.addEventListener('pointerdown', e => { if (menu && !menu.contains(e.target)) closeMenu(true); }, true);
+    window.addEventListener('resize', () => closeMenu(true));
+    window.addEventListener('blur', () => closeMenu(true));
   });
 
   return { open: which => show(which === 'chat' ? chat : board), close: hide, pick, load, get me() { return me; }, get posts() { return posts; },
-           get tabs() { return tabs; }, get chat() { return chatRules; }, get tab() { return tab; },
+           get tabs() { return tabs; }, get chat() { return chatRules; }, get tab() { return tab; }, get here() { return here; },
            get isOpen() { return openPanel === board ? 'board' : openPanel === chat ? 'chat' : null; } };
 })();

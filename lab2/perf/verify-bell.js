@@ -67,7 +67,7 @@ const JPEG = 'data:image/jpeg;base64,' + Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1,
 
 (async () => {
   for (const name of ['Mossy', 'Juno', 'Bram']) await join(name);
-  let r = await door('Mossy', { op: 'page', slug: 'hollow', title: 'Mossy Hollow', chaos: 1, period: 3 });
+  let r = await door('Mossy', { op: 'page', slug: 'hollow', title: 'Mossy Hollow', chaos: 1, every: 6 });
   A.strictEqual(r.json.ok, true, '(Mossy makes a tended space)');
   await act('Mossy', { op: 'invite', slug: 'hollow', ids: [G.Juno.id] });
   await act('Juno', { op: 'seen' });
@@ -153,7 +153,8 @@ const JPEG = 'data:image/jpeg;base64,' + Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1,
 
   // ── the album: a photo rings the keepers, a heart the one who took it ────
   await act('Mossy', { op: 'seen' }); await act('Juno', { op: 'seen' }); await act('Bram', { op: 'seen' });
-  r = await hang('Bram', { op: 'post', page: 'hollow', cap: 'The oak at dusk', src: JPEG });
+  await hang('Mossy', { op: 'sections', page: 'hollow', sections: [{ id: 'town', title: 'Around town', open: true }] });   // a section opened to visitors' photos (2026-09-28): a stranger hangs theirs there, and nowhere else
+  r = await hang('Bram', { op: 'post', page: 'hollow', cap: 'The oak at dusk', sec: 'town', src: JPEG });
   A.strictEqual(r.status, 200, '(Bram hangs a photo at Mossy Hollow): ' + JSON.stringify(r.json).slice(0, 120));
   const ph = r.json.photo.id;
   r = await see('Mossy');

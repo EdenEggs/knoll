@@ -64,6 +64,30 @@
 .cm-thumb{width:72px;height:72px;object-fit:cover;border:3px solid #17120b;background:#e9e4e8;display:block;box-sizing:border-box}
 .cm-photo-f{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-width:0}
 .cm-photo-a{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+/* a notice's rules, one to a row under its words, each under its number; a section's tick for visitors' photos; and the
+   way back to the default, at the far end of a card's buttons */
+.cm-rules{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.cm-rules[hidden]{display:none}
+.cm-rules .cm-label-t{margin:4px 0 0}
+.cm-rules .cm-actions{margin-top:0}
+.cm-rule{padding:6px 8px;background:#fff;border:2px solid #17120b;box-sizing:border-box}
+.cm-rule .cm-in-title{flex:1 1 120px}
+.cm-rule .cm-in-desc{flex:1 1 100%;order:2}   /* what the rule means has the row's second line to itself, so it is read whole */
+.cm-n{flex:none;width:26px;height:26px;border-radius:50%;background:#17120b;color:#fdf7e3;font-size:18px;line-height:26px;text-align:center}
+.cm-open{flex:none;font-size:14px}
+.cm-hint-b{display:block;margin:-2px 0 10px}
+.cm-revert{margin-left:auto}
+/* the page's history: a line a thing that happened — when, which kind, what — in a box that scrolls */
+.cm-pick[aria-pressed="true"]{background:#17120b;color:#fdf7e3}
+.cm-story{display:flex;flex-direction:column;max-height:460px;overflow-y:auto;margin:12px 0 10px;background:#fffcf0;border:3px solid #17120b;box-shadow:3px 4px 0 rgba(60,50,80,.15);scrollbar-width:thin;scrollbar-color:#17120b transparent}
+.cm-story > .cm-hint{padding:12px}
+.cm-line{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:7px 12px;border-bottom:2px dashed rgba(23,18,11,.25)}
+.cm-line:last-child{border-bottom:0}
+.cm-when{flex:none;min-width:170px;font-size:15.5px;letter-spacing:.5px;color:#4a4054}
+.cm-mark{flex:none;min-width:58px;text-align:center;font-size:13px;letter-spacing:1.5px;border:2px solid #17120b;padding:0 6px;background:#fdf7e3}
+.cm-line.is-join .cm-mark{background:#7bc264}
+.cm-line.is-edit .cm-mark{background:#ffd23f}
+.cm-said{flex:1 1 240px;min-width:0;font-family:'Public Sans',system-ui,sans-serif;font-size:15px;line-height:1.35;overflow-wrap:anywhere}
 /* THE MASTER'S DESK (master.js): a page's name, its doors at the row's end, and a code, large enough to read aloud */
 .md-name{font-family:'Rye',serif;font-weight:400;font-size:18px}
 .md-acts{display:inline-flex;gap:6px;margin-left:auto}

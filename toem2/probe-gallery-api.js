@@ -50,21 +50,35 @@ const file = src => path.join(tmp, src.replace(/^\/toem2\//, ''));
   check('a moderator is a keeper', (await GET('', 'mod')).json.me.keeper === true);
   check('a page that is not one', (await GET('?page=nowhere')).json.code === 'page');
 
+  // WHO PUTS PHOTOS UP (2026-09-28): a moderator anywhere; anyone else signed in only into a section opened to them — and none is, until one is
+  console.log('who puts photos up');
+  check('a page starts with no sections', Array.isArray((await GET()).json.sections) && !(await GET()).json.sections.length);
+  check('with no section opened, a photo from somebody who is no moderator is turned away', brief(await POST({ op: 'post', cap: 'x', src: PNG }, 'nu')).code === 'role');
+  r = await POST({ op: 'sections', sections: [{ id: 'town', title: 'Around town', open: true }, { id: 'shut', title: 'Shut' }, { id: 'nearly', title: 'Nearly', open: 'yes' }] }, 'mod');
+  check('a section is shut to visitors\' photos until it is opened — and opened is true, or it is not', r.json.ok && r.json.sections.map(s => s.open).join() === 'true,false,false' && (await GET()).json.sections.map(s => s.open).join() === 'true,false,false', r.json.sections);
+  check('into a section that is shut: no', brief(await POST({ op: 'post', cap: 'x', sec: 'shut', src: PNG }, 'nu')).code === 'role');
+  check('into none at all: no', brief(await POST({ op: 'post', cap: 'x', sec: 'nowhere', src: PNG }, 'nu')).code === 'role');
+  r = await POST({ op: 'post', cap: 'A title that runs on past twenty', desc: 'd'.repeat(140), src: PNG }, 'mod');
+  check('a moderator hangs one anywhere — its title twenty characters, its description a hundred', r.json.ok && r.json.photo.sec === '' && r.json.photo.cap === 'A title that runs on' && r.json.photo.desc.length === 100, r.json.photo);
+  await POST({ op: 'drop', id: r.json.photo.id }, 'mod');
+
   console.log('posting');
-  check('signed out: no', (await POST({ op: 'post', cap: 'x', src: PNG })).status === 401);
-  check('another site: no', brief(await POST({ op: 'post', cap: 'x', src: PNG }, 'nu', '', 'https://evil.example')).code === 'origin');
-  check('banned: no', (await POST({ op: 'post', cap: 'x', src: PNG }, 'ban')).status === 403);
-  check('a photo wants a caption', brief(await POST({ op: 'post', cap: '  ', src: PNG }, 'nu')).code === 'cap');
-  check('and a picture', brief(await POST({ op: 'post', cap: 'x', src: 'https://elsewhere.example/a.png' }, 'nu')).code === 'src');
-  check('a gif is not one', brief(await POST({ op: 'post', cap: 'x', src: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=' }, 'nu')).code === 'src');
-  check('a label the bytes do not bear', brief(await POST({ op: 'post', cap: 'x', src: PNG.replace('image/png', 'image/jpeg') }, 'nu')).code === 'src');
-  check('too big', brief(await POST({ op: 'post', cap: 'x', src: 'data:image/png;base64,' + 'A'.repeat(420000) }, 'nu')).status === 413);
-  r = await POST({ op: 'post', cap: '  Gull  on the mast ', where: 'Basto Harbour', src: PNG }, 'nu');
+  check('signed out: no', (await POST({ op: 'post', cap: 'x', sec: 'town', src: PNG })).status === 401);
+  check('another site: no', brief(await POST({ op: 'post', cap: 'x', sec: 'town', src: PNG }, 'nu', '', 'https://evil.example')).code === 'origin');
+  check('banned: no', (await POST({ op: 'post', cap: 'x', sec: 'town', src: PNG }, 'ban')).status === 403);
+  check('a photo wants a caption', brief(await POST({ op: 'post', cap: '  ', sec: 'town', src: PNG }, 'nu')).code === 'cap');
+  check('and a picture', brief(await POST({ op: 'post', cap: 'x', sec: 'town', src: 'https://elsewhere.example/a.png' }, 'nu')).code === 'src');
+  check('a gif is not one', brief(await POST({ op: 'post', cap: 'x', sec: 'town', src: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=' }, 'nu')).code === 'src');
+  check('a label the bytes do not bear', brief(await POST({ op: 'post', cap: 'x', sec: 'town', src: PNG.replace('image/png', 'image/jpeg') }, 'nu')).code === 'src');
+  check('too big', brief(await POST({ op: 'post', cap: 'x', sec: 'town', src: 'data:image/png;base64,' + 'A'.repeat(420000) }, 'nu')).status === 413);
+  r = await POST({ op: 'post', cap: '  Gull  on the mast ', where: 'Basto Harbour', sec: 'town', src: PNG }, 'nu');
   const p1 = r.json.photo;
-  check('a photo posts: one-line caption, where, a url, no hearts, the tag on it', r.json.ok && p1.cap === 'Gull on the mast' && p1.where === 'Basto Harbour' && /^\/toem2\/album\/toem2\/[a-z0-9]+\.png$/.test(p1.src) && p1.likes === 0 && p1.liked === false && p1.tag === 'nu#1', r.json);
+  check('anyone signed in hangs a photo in an open section: one-line caption, where, a url, no hearts, the tag on it', r.json.ok && p1.cap === 'Gull on the mast' && p1.sec === 'town' && p1.where === 'Basto Harbour' && /^\/toem2\/album\/toem2\/[a-z0-9]+\.png$/.test(p1.src) && p1.likes === 0 && p1.liked === false && p1.tag === 'nu#1', r.json);
   check('and its picture is a file, the bytes it sent', fs.existsSync(file(p1.src)) && fs.readFileSync(file(p1.src)).equals(Buffer.from(PNG.split(',')[1], 'base64')));
   check('the record keeps no picture in it', !JSON.stringify(await W.db('LRANGE', W.K.album('toem2'), 0, -1)).includes('base64'));
-  r = await POST({ op: 'post', cap: 'Lighthouse', src: JPG }, 'nu2');
+  check('its taker does not move it into a section that is shut, nor out of every section', brief(await POST({ op: 'edit', id: p1.id, sec: 'shut' }, 'nu')).code === 'role' && brief(await POST({ op: 'edit', id: p1.id, sec: '' }, 'nu')).code === 'role'
+        && (await GET()).json.photos[0].sec === 'town');
+  r = await POST({ op: 'post', cap: 'Lighthouse', sec: 'town', src: JPG }, 'nu2');
   const p2 = r.json.photo;
   check('a jpeg lands as .jpg', r.json.ok && /\.jpg$/.test(p2.src) && fs.existsSync(file(p2.src)), r.json);
   r = await GET('', 'nu');
@@ -85,17 +99,25 @@ const file = src => path.join(tmp, src.replace(/^\/toem2\//, ''));
   check('signed out sees the hearts and no liked', (await GET()).json.photos[1].likes === 1 && (await GET()).json.photos[1].liked === false);
 
   console.log('sections, titles and descriptions');
-  check('a page starts with no sections', Array.isArray((await GET()).json.sections) && !(await GET()).json.sections.length);
   check('the sections are the keepers\' to arrange', brief(await POST({ op: 'sections', sections: [] }, 'nu')).code === 'role');
-  for (const [what, sections] of [['thirteen', Array.from({ length: 13 }, (_, i) => ({ id: 's' + i, title: 's' + i }))], ['a bad name', [{ id: 'Bad!', title: 'x' }]], ['two alike', [{ id: 'a', title: 'x' }, { id: 'a', title: 'y' }]], ['no title', [{ id: 'a', title: '  ' }]]])
+  for (const [what, sections] of [['six', Array.from({ length: 6 }, (_, i) => ({ id: 's' + i, title: 's' + i }))], ['a bad name', [{ id: 'Bad!', title: 'x' }]], ['two alike', [{ id: 'a', title: 'x' }, { id: 'a', title: 'y' }]], ['no title', [{ id: 'a', title: '  ' }]]])
     check('sections refused: ' + what, brief(await POST({ op: 'sections', sections }, 'mod')).code === 'sections');
-  r = await POST({ op: 'sections', sections: [{ id: 'harbour', title: '  The  harbour ', desc: 'Boats and gulls' }, { id: 'hills', title: 'The hills' }] }, 'mod');
+  // FIVE AT MOST, A HUNDRED CHARACTERS OF DESCRIPTION (2026-09-28) — and what was saved under the old caps is read to the new ones
+  r = await POST({ op: 'sections', sections: Array.from({ length: 5 }, (_, i) => ({ id: 's' + i, title: 'S' + i, desc: 'd'.repeat(130) })) }, 'mod');
+  check('five sections are taken, a description cut at a hundred', r.json.ok && r.json.sections.length === 5 && r.json.sections.every(s => s.desc.length === 100), r.json.sections && r.json.sections.map(s => s.desc.length));
+  await W.db('HSET', W.K.page('toem2'), 'sections', JSON.stringify(Array.from({ length: 7 }, (_, i) => ({ id: 'old' + i, title: 'Old ' + i, desc: 'x'.repeat(200) }))));
+  r = await GET();
+  check('seven saved before the cap read as the first five, their descriptions a hundred long', r.json.sections.map(s => s.id).join() === 'old0,old1,old2,old3,old4' && r.json.sections.every(s => s.desc.length === 100), r.json.sections.map(s => s.id));
+  check('back to the default is the moderators\' too', brief(await POST({ op: 'sections', reset: true }, 'nu')).code === 'role');
+  r = await POST({ op: 'sections', reset: true }, 'mod');
+  check('back to the default: an album with no sections', r.json.ok && r.json.sections.length === 0 && (await GET()).json.sections.length === 0, r.json);
+  r = await POST({ op: 'sections', sections: [{ id: 'harbour', title: '  The  harbour ', desc: 'Boats and gulls', open: true }, { id: 'hills', title: 'The hills', open: true }] }, 'mod');
   check('a keeper arranges the album into sections', r.json.ok && r.json.sections.length === 2 && r.json.sections[0].title === 'The harbour' && r.json.sections[0].desc === 'Boats and gulls' && r.json.sections[1].desc === '', r.json);
   check('…which everyone reads', (await GET()).json.sections.map(s => s.id).join() === 'harbour,hills');
   r = await POST({ op: 'post', cap: 'Nets', desc: '  Drying on the quay,\nafter the catch. ', sec: 'harbour', src: PNG }, 'nu');
   const p3 = r.json.photo;
   check('a photo posts with a description and into a section', r.json.ok && p3.desc === 'Drying on the quay, after the catch.' && p3.sec === 'harbour', r.json.photo);
-  r = await POST({ op: 'post', cap: 'Lost', sec: 'nowhere', src: PNG }, 'nu');
+  r = await POST({ op: 'post', cap: 'Lost', sec: 'nowhere', src: PNG }, 'mod');
   const p4 = r.json.photo;
   check('a section that is not one is none, and no description is an empty one', r.json.ok && p4.sec === '' && p4.desc === '', r.json.photo);
   check('somebody else\'s title: no', brief(await POST({ op: 'edit', id: p3.id, cap: 'Mine now' }, 'nu2')).code === 'role');
@@ -112,7 +134,7 @@ const file = src => path.join(tmp, src.replace(/^\/toem2\//, ''));
   check('the record says a keeper changed it', (await W.db('LRANGE', W.K.audit, 0, -1)).map(s => JSON.parse(s)).some(e => e.what === 'edit' && e.by === U.mod && e.of === U.nu && e.ch === 'album'));
   r = await POST({ op: 'sections', sections: [{ id: 'harbour', title: 'The harbour' }] }, 'mod');
   check('a section taken down leaves its photos, unsectioned', r.json.ok && (await GET()).json.photos.find(p => p.id === p3.id).sec === '');
-  await POST({ op: 'drop', id: p3.id }, 'nu'); await POST({ op: 'drop', id: p4.id }, 'nu');   // the two of this section go, so the counts below are the album's first two again
+  await POST({ op: 'drop', id: p3.id }, 'nu'); await POST({ op: 'drop', id: p4.id }, 'mod');   // the two of this section go, so the counts below are the album's first two again
 
   console.log('dropping');
   check('somebody else\'s: no', brief(await POST({ op: 'drop', id: p1.id }, 'nu2')).code === 'role');
@@ -132,14 +154,15 @@ const file = src => path.join(tmp, src.replace(/^\/toem2\//, ''));
     await W.db('RPUSH', W.K.album('toem2'), JSON.stringify({ id, by: U.nu2, at: 1000 - i, cap: 'old ' + i, src: '/toem2/' + key, key }));   // newest first: old0000 is the newest
   }
   await W.db('SADD', W.K.albumLike('toem2', 'old0199'), U.mod);
-  r = await POST({ op: 'post', cap: 'the one that tips it', src: PNG }, 'nu');
+  await POST({ op: 'sections', sections: [{ id: 'town', title: 'Around town', open: true }] }, 'mod');
+  r = await POST({ op: 'post', cap: 'the one that tips it', sec: 'town', src: PNG }, 'nu');
   const kept = (await GET()).json.photos;
   check('a full album drops its oldest for the new one', r.json.ok && kept.length === API.KEEP && kept[0].id === r.json.photo.id && !kept.some(p => p.id === 'old0199') && kept.some(p => p.id === 'old0198'), kept.length);
   check('and the one that fell off takes its picture and its hearts', !fs.existsSync(path.join(tmp, 'album/toem2/old0199.png')) && fs.existsSync(path.join(tmp, 'album/toem2/old0198.png')) && (await W.db('SCARD', W.K.albumLike('toem2', 'old0199'))) === 0);
 
   console.log('the rate');
   let last = null;
-  for (let i = 0; i < 21; i++) last = await POST({ op: 'post', cap: 'p ' + i, src: PNG }, 'nu2');
+  for (let i = 0; i < 21; i++) last = await POST({ op: 'post', cap: 'p ' + i, sec: 'town', src: PNG }, 'nu2');
   check('an hour\'s twenty photos and no more', last.status === 429 && last.json.code === 'rate', brief(last));
 
   fs.rmSync(tmp, { recursive: true, force: true });

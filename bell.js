@@ -65,7 +65,7 @@
     switch (n.kind) {
       case 'friend':   return { cat: 'friends', text: who + ' said yes — you are friends now', go: to(theirs, 'see their yard') };
       case 'invite':
-      case 'keeper':   return { cat: 'friends', text: who + ' made you a keeper of ' + (at || 'a space'), go: to(slug && '/' + slug, 'go there') };
+      case 'keeper':   return { cat: 'friends', text: who + ' made you a moderator of ' + (at || 'a space'), go: to(slug && '/' + slug, 'go there') };
       // a page handed on with a code (api/wall.js: THE MASTER): the master hears it was claimed, whoever had it hears where it went
       case 'claimed':  return { cat: 'spaces', text: who + ' claimed ' + (at || 'a page') + ' with the code you made', go: to(slug && '/dashboard/?space=' + slug, 'see the page') };
       case 'handed':   return { cat: 'spaces', text: (at || 'a page of yours') + ' was handed on to ' + who, go: to(slug && '/' + slug, 'go there') };

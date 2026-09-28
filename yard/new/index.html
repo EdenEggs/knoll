@@ -206,14 +206,14 @@
               </button>
             </sc-for>
           </div>
-          <!-- the ballot's period, for a council -->
+          <!-- how often the council's clock comes round -->
           <sc-if value="{{ isCouncil }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap">
-              <span style="font-size:15px; letter-spacing:2px; color:#4a4054">THE BALLOT CLOSES</span>
-              <sc-for list="{{ periods }}" as="p" hint-placeholder-count="3">
+              <span style="font-size:15px; letter-spacing:2px; color:#4a4054">THE MOST HEARTED GOES UP</span>
+              <sc-for list="{{ periods }}" as="p" hint-placeholder-count="7">
                 <button sc-camel-on-click="{{ p.pick }}" aria-pressed="{{ p.on }}" style="font-family:'VT323',monospace; font-size:17px; letter-spacing:1px; padding:3px 12px; background:{{ p.bg }}; color:{{ p.fg }}; border:3px solid #17120b; cursor:pointer; box-shadow:{{ p.shadow }}" style-hover="transform:translate(1px,1px)">{{ p.name }}</button>
               </sc-for>
-              <span style="font-size:13px; letter-spacing:1px; color:#4a4054; opacity:0.75">AT MIDNIGHT UTC</span>
+              <span style="font-size:13px; letter-spacing:1px; color:#4a4054; opacity:0.75">CHANGE IT ANY TIME, IN THE SETTINGS</span>
             </div>
           </sc-if>
         </section>
@@ -388,14 +388,14 @@ const INKS = [
   ['#c93b82', 'knoll pink'], ['#5871f5', 'knoll blue'], ['#2fae76', 'knoll green'], ['#f59321', 'amber'], ['#17120b', 'ink'],
 ];
 /* HOW WILD IS IT (api/wall.js: THREE LEVELS OF CHAOS): the page's chaos level, and for a
-   council how often its ballot closes. The keepers are you and the friends you invite. */
+   council how often its clock comes round. The keepers are you and the friends you invite. */
 const MODS = [
-  { id: 1, name: 'Tended',    stamp: 'KEEPERS DECIDE',  sub: 'ANYONE MAY ADD AND PROPOSE; THE KEEPERS SAY WHAT STAYS', col: '#2f8f5b' },
-  { id: 2, name: 'Council',   stamp: 'AYE OR NAY',      sub: 'EVERY CHANGE FROM A NON-KEEPER IS A MOTION ON THE BALLOT; WHAT CARRIES GOES UP', col: '#b8860b' },
+  { id: 1, name: 'Tended',    stamp: 'MODERATORS DECIDE', sub: 'ANYONE MAY ADD AND PROPOSE; THE MODERATORS SAY WHAT STAYS', col: '#2f8f5b' },
+  { id: 2, name: 'Council',   stamp: 'AYE OR NAY',      sub: 'EVERY CHANGE FROM ANYONE BUT A MODERATOR IS A MOTION ON THE BALLOT; THE ONE WITH THE MOST HEARTS GOES UP', col: '#b8860b' },
   { id: 3, name: 'Wild',      stamp: 'NOTHING IS SAFE', sub: 'ANYONE EDITS ANYTHING, LIVE; THE HISTORY KEEPS EVERYTHING', col: '#b3261e' },
   { id: 0, name: 'Read-only', stamp: 'YOURS ALONE',     sub: 'VISITORS ONLY LOOK; YOU ALONE DRAW ON IT', col: '#6b6478' },
 ];
-const PERIODS = [[1, 'DAILY'], [3, 'EVERY 3 DAYS'], [7, 'WEEKLY']];
+const PERIODS = [[1, 'EVERY HOUR'], [3, 'EVERY 3 HOURS'], [6, 'EVERY 6 HOURS'], [12, 'EVERY 12 HOURS'], [24, 'DAILY'], [72, 'EVERY 3 DAYS'], [168, 'WEEKLY']];   // THE COUNCIL'S CLOCK (api/wall.js): how often it comes round, in hours
 // the six kinds everyone may add live; off is the keepers' only (the door's FEATS slots, in this order)
 const FEATS = ['Ink', 'Stickers', 'Notes', 'Tracings', 'Embeds', "Others' pieces"];
 const COATS = ['#7bc264', '#e0598c', '#ffd23f', '#5a8fd6', '#f59321'];   // a friend's coat, by their id
@@ -412,14 +412,14 @@ class Component extends DCLogic {
     let saved = {};
     try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) {}
     this.state = Object.assign({
-      name: '', palette: 'yard', inks: [], chaos: 1, period: 3,
+      name: '', palette: 'yard', inks: [], chaos: 1, every: 6,
       feats: [true, true, true, false, false, false], invited: [], agreed: false, pic: '',
     }, saved, { copied: false, claimed: false, join: Math.random().toString(36).slice(2, 8), friends: [], full: false, busy: false, made: null, note: '', picNote: '' });
   }
   keep(patch) {
     this.setState(patch, () => {
       const s = this.state;
-      try { localStorage.setItem(KEY, JSON.stringify({ name: s.name, palette: s.palette, inks: s.inks, custom: s.custom || [], chaos: s.chaos, period: s.period, feats: s.feats, invited: s.invited, agreed: s.agreed, pic: s.pic })); } catch (e) {}
+      try { localStorage.setItem(KEY, JSON.stringify({ name: s.name, palette: s.palette, inks: s.inks, custom: s.custom || [], chaos: s.chaos, every: s.every, feats: s.feats, invited: s.invited, agreed: s.agreed, pic: s.pic })); } catch (e) {}
     });
   }
   wheelRef = React.createRef();
@@ -481,7 +481,7 @@ class Component extends DCLogic {
   async make(sl) {
     const s = this.state, title = s.name.trim();
     this.setState({ busy: true, note: '' });
-    const out = await json('/api/wall', { op: 'page', slug: sl, title, palette: s.palette, inks: s.inks, chaos: s.chaos, period: s.period, feats: s.feats, pic: s.pic });
+    const out = await json('/api/wall', { op: 'page', slug: sl, title, palette: s.palette, inks: s.inks, chaos: s.chaos, every: s.every, feats: s.feats, pic: s.pic });
     if (!out.ok) { this.setState({ busy: false, full: out.code === 'full' || s.full, note: out.error ? out.error.charAt(0).toUpperCase() + out.error.slice(1) + '.' : 'That did not take — try again.' }); return; }
     const ids = s.invited.filter(id => s.friends.some(f => f.id === id));
     const sent = ids.length ? await json('/api/friends', { op: 'invite', slug: sl, ids }) : null;
@@ -499,7 +499,7 @@ class Component extends DCLogic {
     const friends = s.friends.map((f, i) => ({ id: f.id, name: f.tag.replace(/#\d+$/, ''), hill: f.tag.toUpperCase(), col: COATS[parseInt(f.id.slice(0, 2), 16) % COATS.length], rot: ['-0.8deg', '0.6deg', '-0.4deg'][i % 3] }));
     const coming = friends.filter(f => s.invited.includes(f.id));
     const featCount = s.feats.filter(Boolean).length;
-    const mod = MODS.find(m => m.id === s.chaos) || MODS[0], periodName = (PERIODS.find(p => p[0] === s.period) || PERIODS[1])[1].toLowerCase();
+    const mod = MODS.find(m => m.id === s.chaos) || MODS[0], periodName = (PERIODS.find(p => p[0] === s.every) || PERIODS[2])[1].toLowerCase();
     const kindsOn = FEATS.filter((n, i) => s.feats[i]).map(n => n.toLowerCase());
     const cant = !sl || !s.agreed || s.claimed || s.busy || s.full;
     const inviteLink = sl ? location.origin + '/' + sl + '?join=' + s.join : 'name the page first…';
@@ -553,13 +553,13 @@ class Component extends DCLogic {
       mods: MODS.map((m, i) => ({ name: m.name, sub: m.sub, stamp: m.stamp, col: m.col, on: m.id === s.chaos, rot: ['-0.5deg', '0.4deg', '-0.3deg', '0.6deg'][i],
         bg: m.id === s.chaos ? '#fffcf0' : 'transparent', dot: m.id === s.chaos ? '#e8484a' : 'transparent',
         shadow: m.id === s.chaos ? '4px 5px 0 rgba(60,50,80,0.25)' : 'none', pick: () => this.keep({ chaos: m.id }) })),
-      levelLine: s.chaos === 2 ? 'A BALLOT ' + periodName.toUpperCase() : s.chaos === 3 ? 'NOTHING WAITS FOR A LOOK' : s.chaos === 0 ? 'NOBODY ELSE DRAWS' : 'THE KEEPERS DECIDE',
+      levelLine: s.chaos === 2 ? 'A BALLOT ' + periodName.toUpperCase() : s.chaos === 3 ? 'NOTHING WAITS FOR A LOOK' : s.chaos === 0 ? 'NOBODY ELSE DRAWS' : 'THE MODERATORS DECIDE',
       isCouncil: s.chaos === 2,
-      periods: PERIODS.map(([d, name]) => ({ name, on: s.period === d, bg: s.period === d ? '#17120b' : '#fdf7e3', fg: s.period === d ? '#fdf7e3' : '#17120b',
-        shadow: s.period === d ? '3px 4px 0 rgba(60,50,80,0.25)' : 'none', pick: () => this.keep({ period: d }) })),
+      periods: PERIODS.map(([d, name]) => ({ name, on: s.every === d, bg: s.every === d ? '#17120b' : '#fdf7e3', fg: s.every === d ? '#fdf7e3' : '#17120b',
+        shadow: s.every === d ? '3px 4px 0 rgba(60,50,80,0.25)' : 'none', pick: () => this.keep({ every: d }) })),
       feats: FEATS.map((n, i) => ({ name: n, on: s.feats[i], toggle: () => { const f = s.feats.slice(); f[i] = !f[i]; this.keep({ feats: f }); } })),
       featCount, featTotal: FEATS.length,
-      featNote: s.chaos === 3 ? 'WILD — EVERYTHING IS EVERYONE\'S; THESE SWITCHES WAIT FOR A TAMER DAY.' : s.chaos === 0 ? 'READ-ONLY — NOBODY ELSE DRAWS, WHATEVER IS TICKED.' : 'OFF MEANS THE KEEPERS ONLY. THE KEEPERS ARE YOU AND THE FRIENDS YOU INVITE.',
+      featNote: s.chaos === 3 ? 'WILD — EVERYTHING IS EVERYONE\'S; THESE SWITCHES WAIT FOR A TAMER DAY.' : s.chaos === 0 ? 'READ-ONLY — NOBODY ELSE DRAWS, WHATEVER IS TICKED.' : 'OFF MEANS THE MODERATORS ONLY — YOU, AND THE FRIENDS YOU INVITE.',
       inviteLink, copyWord: s.copied ? 'copied ✓' : 'copy', copyBg: s.copied ? '#7bc264' : '#17120b', copyFg: s.copied ? '#17120b' : '#fdf7e3',
       selectAll: (e) => e.target.select(),
       copyLink: () => {
@@ -585,9 +585,9 @@ class Component extends DCLogic {
       summary: [
         { a: 'Named', b: s.name.trim() || '—', color: '#5a8fd6' },
         { a: 'On', b: pal.name + ' paper, ' + (s.inks.length ? s.inks.length + (s.inks.length === 1 ? ' ink' : ' inks') : 'all colours'), color: '#ffd23f' },
-        { a: 'The hill is', b: s.chaos === 2 ? 'a council, ' + periodName + ' ballot' : mod.name.toLowerCase(), color: '#e0598c' },
-        { a: 'Everyone may', b: s.chaos === 3 ? 'do everything' : s.chaos === 0 ? 'only look' : kindsOn.length ? kindsOn.join(', ') : 'only look; the keepers add', color: '#7bc264' },
-        { a: 'Keepers:', b: 'you' + (coming.length ? ', ' + coming.map(f => f.name).join(', ') : ''), color: '#e8484a' },
+        { a: 'The hill is', b: s.chaos === 2 ? 'a council — a round ' + periodName : mod.name.toLowerCase(), color: '#e0598c' },
+        { a: 'Everyone may', b: s.chaos === 3 ? 'do everything' : s.chaos === 0 ? 'only look' : kindsOn.length ? kindsOn.join(', ') : 'only look; the moderators add', color: '#7bc264' },
+        { a: 'Moderators:', b: 'you' + (coming.length ? ', ' + coming.map(f => f.name).join(', ') : ''), color: '#e8484a' },
       ],
     };
   }

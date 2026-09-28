@@ -299,15 +299,15 @@ window.Seed = (function () {
   };
   const KIND_NAMES = ['ink', 'stickers', 'notes', 'tracings', 'embeds', "others' pieces"], TOOL_SLOT = { draw: 0, sticker: 1, text: 2, upload: 3, gif: 4 };
   const QUEUED_NOTE = why => (
-    why === 'others' ? 'It touches somebody else\'s piece, so the keepers look first.'
-    : why === 'keeper' ? 'That kind is the keepers\' here, so they look first.'
+    why === 'others' ? 'It touches somebody else\'s piece, so the moderators look first.'
+    : why === 'keeper' ? 'That kind is the moderators\' here, so they look first.'
     : why === 'look' ? 'The sign is the maker\'s, so they look first.'
-    : why === 'footprint' ? 'You have changed a lot of the wall today, so this one waits for a keeper\'s look.'
-    : why === 'contested' ? 'That piece was put back today, so a keeper looks before it moves again.'
-    : 'Waiting for a keeper\'s look; it shows for everybody once it is approved.') + ' It stays on your paper meanwhile.';
+    : why === 'footprint' ? 'You have changed a lot of the wall today, so this one waits for a moderator\'s look.'
+    : why === 'contested' ? 'That piece was put back today, so a moderator looks before it moves again.'
+    : 'Waiting for a moderator\'s look; it shows for everybody once it is approved.') + ' It stays on your paper meanwhile.';
   const BALLOT_NOTE = out => (rules && rules.chaos === 2 && out.why === 'council'
-    ? 'This wall is a council: your change is a motion on the ballot, which closes ' + closesIn(out.closes) + '.'
-    : 'This one is drastic, so it goes to the council: the standing gnomes mark aye or nay, and the ballot closes ' + closesIn(out.closes) + '.') + ' It stays on your paper meanwhile.';
+    ? 'This wall is a council: your change is a motion on the ballot, and when its clock comes round — ' + closesIn(out.closes) + ' — the one with the most hearts goes up.'
+    : 'This one is drastic, so it goes to a vote: the standing gnomes give it a heart or mark nay, and it is decided ' + closesIn(out.closes) + '.') + ' It stays on your paper meanwhile.';
   async function readRules(force) {
     if (!LIVE || (!force && Date.now() - rulesAt < 300000)) return rules;
     rulesAt = Date.now();
@@ -325,22 +325,26 @@ window.Seed = (function () {
         rules.hour = l && l.ok ? l.log.filter(e => e.at > Date.now() - 36e5).length : null;
       }
     } catch (e) {}
-    if (rules && !HOME) {                      // a space's bench wears the space's name (2026-09-24)
+    if (rules) {                               // the bench wears the page's name (a space's since 2026-09-24; TOEM 2's too since 2026-09-28, when it was given settings of its own)
       const n = document.querySelector('.lab-name');
       if (n && rules.title) n.textContent = rules.title;
       if (rules.title) document.title = 'Knoll · ' + rules.title;
-      // …and its paper (2026-09-27): the set its settings chose, by name, which lab.css draws the bench in (A SPACE'S OWN PAPER) — kept, so index.html's head has it before the next first paint
-      if (rules.palette) { document.documentElement.dataset.paper = rules.palette; set(KEY.paper, rules.palette); }
+      /* …and its paper (2026-09-27): the set its settings chose, by name, which lab.css draws the bench in (A SPACE'S OWN PAPER) —
+         kept, so index.html's head has it before the next first paint. TOEM 2's own paper is the bench as it stands: no set laid over it. */
+      if (rules.palette) {
+        if (rules.palette === 'toem2') delete document.documentElement.dataset.paper; else document.documentElement.dataset.paper = rules.palette;
+        set(KEY.paper, rules.palette);
+      }
     }
     if (rules && window.Wall && Wall.setInks) Wall.setInks(rules.inks || []);   // …and offers only its inks on the dock (wall.js: THE INKS OF A SPACE)
     paintStamp(); hintDock();
     return rules;
   }
-  const LEVEL = { 0: ['READ-ONLY', 'the maker alone'], 1: ['TENDED', 'the keepers decide'], 2: ['COUNCIL', ''], 3: ['WILD', 'nothing is safe'] };
+  const LEVEL = { 0: ['READ-ONLY', 'the maker alone'], 1: ['TENDED', 'the moderators decide'], 2: ['COUNCIL', ''], 3: ['WILD', 'nothing is safe'] };
   function stampText(short) {
     if (!rules) return '';
     const c = rules.chaos, L = LEVEL[c] || LEVEL[1];
-    if (c === 2) return short ? 'COUNCIL · ' + closesIn(rules.closesAt).replace(/^in /, '') : 'COUNCIL · ' + (rules.motions ? rules.motions + ' on the ballot · ' : 'ballot ') + 'closes ' + closesIn(rules.closesAt);
+    if (c === 2) return short ? 'COUNCIL · ' + closesIn(rules.closesAt).replace(/^in /, '') : 'COUNCIL · ' + (rules.motions ? rules.motions + ' on the ballot · ' : '') + 'next round ' + closesIn(rules.closesAt);
     let t = L[0] + (short ? '' : ' · ' + L[1]);
     if (c === 3 && !short && rules.hour != null) t += ' · ' + (rules.hour ? rules.hour + ' edits this hour' : 'quiet this hour');
     return t;
@@ -348,18 +352,18 @@ window.Seed = (function () {
   function popLines() {
     const r = rules, out = [];
     if (!r) return out;
-    const per = { 1: 'daily', 3: 'every third day', 7: 'weekly' }[r.period] || 'every few days';
-    out.push({ text: r.chaos === 0 ? 'Read-only — its maker alone draws on it.' : r.chaos === 1 ? 'Tended — the keepers decide what stays.'
-                   : r.chaos === 2 ? 'Council — every change from a non-keeper is a motion; the ballot closes ' + per + '.' : 'Wild — anyone edits anything, live. The history keeps everything.' });
+    const per = { 1: 'every hour', 3: 'every three hours', 6: 'every six hours', 12: 'every twelve hours', 24: 'daily', 72: 'every third day', 168: 'weekly' }[r.every] || 'every few hours';
+    out.push({ text: r.chaos === 0 ? 'Read-only — its maker alone draws on it.' : r.chaos === 1 ? 'Tended — the moderators decide what stays.'
+                   : r.chaos === 2 ? 'Council — every change from anyone but a moderator is a motion; ' + per + ' the one with the most hearts goes up.' : 'Wild — anyone edits anything, live. The history keeps everything.' });
     const ks = (r.keepers || []).map(k => k.tag).filter(Boolean);
-    out.push({ text: HOME ? 'keepers: ' + ks.concat('the moderators and the trusted').join(', ') : (ks.length > 1 ? 'keepers: ' : 'keeper: ') + (ks.join(', ') || 'the maker') });   // TOEM 2 has a maker, and the keepers they name, once it has been handed on (api/wall.js: THE MASTER)
+    out.push({ text: HOME ? 'moderators: ' + ks.concat('Knoll\'s own and the trusted').join(', ') : (ks.length > 1 ? 'moderators: ' : 'moderator: ') + (ks.join(', ') || 'the maker') });   // TOEM 2 has a maker, and the keepers they name, once it has been handed on (api/wall.js: THE MASTER)
     const on = KIND_NAMES.filter((n, i) => r.feats && r.feats[i]), off = KIND_NAMES.filter((n, i) => !(r.feats && r.feats[i]));
     out.push({ text: r.chaos === 3 ? 'everyone may do everything here' : r.chaos === 0 ? 'only the maker edits here'
-                   : !off.length ? 'everyone may do everything here' : !on.length ? 'only the keepers edit here' : 'everyone may: ' + on.join(', ') + ' · keepers only: ' + off.join(', ') });
-    if (r.chaos === 2) out.push({ text: 'ballot closes ' + closesIn(r.closesAt) + (r.motions ? ' · ' + r.motions + (r.motions === 1 ? ' motion' : ' motions') : ''), links: [['see the ballot', () => { closePop(); if (window.Ballot) Ballot.open(); }]] });
+                   : !off.length ? 'everyone may do everything here' : !on.length ? 'only the moderators edit here' : 'everyone may: ' + on.join(', ') + ' · moderators only: ' + off.join(', ') });
+    if (r.chaos === 2) out.push({ text: 'next round ' + closesIn(r.closesAt) + (r.motions ? ' · ' + r.motions + (r.motions === 1 ? ' motion' : ' motions') : ''), links: [['see the ballot', () => { closePop(); if (window.Ballot) Ballot.open(); }]] });
     if (!hasSession()) out.push({ text: 'log in to edit for everybody', links: GATE });
     else if (!me) out.push({ text: 'you: signed in' });
-    else out.push({ text: 'you: ' + (owner() ? (r.master && r.by !== me.id ? 'the master' : 'the maker') : keeper() ? 'a keeper' : canVote() ? 'a voter — ' + (me.rep || 0) + ' standing day' + (me.rep === 1 ? '' : 's') : 'no standing yet — a day of live edits on TOEM 2 earns a vote') });
+    else out.push({ text: 'you: ' + (owner() ? (r.master && r.by !== me.id ? 'the master' : 'the maker') : keeper() ? 'a moderator' : canVote() ? 'a voter — ' + (me.rep || 0) + ' standing day' + (me.rep === 1 ? '' : 's') : 'no standing yet — a day of live edits on TOEM 2 earns a vote') });
     if (owner() || (HOME && isMod())) out.push({ text: '', links: [['the rules', () => { closePop(); if (window.History) History.open('rules'); }]].concat(
       owner() ? [['settings', () => location.assign('/settings/?space=' + encodeURIComponent(PAGE))], ['dashboard', () => location.assign('/dashboard/?space=' + encodeURIComponent(PAGE))]]
       : HOME && isMod() ? [['dashboard', () => location.assign('/dashboard/?space=toem2')]] : []) });   // the maker's doors, now the space opens on this bench (2026-09-24) — TOEM 2's maker's and the master's too (2026-09-27); TOEM 2's own dashboard is the moderators' as well (its board, chat and album are arranged there)
@@ -408,7 +412,7 @@ window.Seed = (function () {
       const free = keeper() || owner() || isMod();
       const off = !!rules && rules.chaos !== 3 && slot != null && !(rules.feats && rules.feats[slot]) && !free;
       b.classList.toggle('is-keepers', off);
-      b.title = b.getAttribute('data-title') + (off ? ' — keepers only here' : rules && rules.chaos === 2 && !free ? ' — this goes to the ballot' : '');
+      b.title = b.getAttribute('data-title') + (off ? ' — moderators only here' : rules && rules.chaos === 2 && !free ? ' — this goes to the ballot' : '');
     });
   }
   // the pieces of yours that wait — for the keepers, or on the ballot — wear a dashed box (history.js draws it)
@@ -588,12 +592,12 @@ window.Seed = (function () {
         const out = r.ok ? await r.json() : null, ed = out && out.edit, motion = pending.kind === 'motion';
         if (ed && motion && ed.status === 'queued') {          // too few voted: it fell to the keepers, and waits on
           base.update(st => { st.pending.kind = 'queued'; });
-          said = ['wait', 'queued', 'Too few voted, so it fell to the keepers. It stays on your paper meanwhile.'];
+          said = ['wait', 'queued', 'Too few voted, so it fell to the moderators. It stays on your paper meanwhile.'];
         } else if (r.status === 404 || (ed && ed.status !== 'queued' && ed.status !== 'motion')) {
           base.update(st => { delete st.pending; });
           const t = ed && ed.ayes != null ? ed.ayes + ' for, ' + ed.nays + ' against' : '';
           said = !ed ? ['bad', 'not sent', 'Your edit was not kept. It is still on your paper — submit it again.', true]
-               : ed.status === 'live' ? ['done', 'live ✓', motion ? 'The council carried it, ' + t + ' — it is on the wall for everybody.' : 'The keepers put it up — it is on the wall for everybody.']
+               : ed.status === 'live' ? ['done', 'live ✓', motion ? 'The council carried it, ' + t + ' — it is on the wall for everybody.' : 'The moderators put it up — it is on the wall for everybody.']
                : ed.status === 'expired' ? ['bad', 'not sent', 'Nobody looked in seven days, so it lapsed. It is still on your paper — submit it again.', true]
                : ['bad', 'not sent', (motion ? 'The council turned it back, ' + t : 'Your edit was turned back' + (ed.why ? ': ' + ed.why : '')) + '. It is still on your paper — change it and submit again.', true];
           markPending();
@@ -652,15 +656,25 @@ window.Seed = (function () {
     });
     reviewing = { id: ed.id, added };
     base.update(st => { st.review = { added }; });   // written down: a page left mid-review puts the paper back at its next load
-    Wall.pickN(touched);
-    Wall.fitPick();
+    /* THE BALLOT'S PICTURE OF IT (2026-09-28, ballot.js): in a frame (?embed=1) nothing is picked — what the edit puts up,
+       changes and takes off wears the boxes the history draws round a revision's pieces, and the camera goes close on them, at once */
+    const boxes = document.documentElement.classList.contains('toem-embed') && window.History && History.mark ? History.mark(ed) : [];
+    if (boxes.length) {
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      boxes.forEach(b => { x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h); });
+      const br = Lab.bench.getBoundingClientRect(), pad = 44, z = Math.max(0.02, Math.min(1.5, (br.width - pad * 2) / Math.max(x1 - x0, 1), (br.height - pad * 2) / Math.max(y1 - y0, 1)));
+      Lab.camTo(z, br.width / 2 - (x0 + x1) / 2 * z, br.height / 2 - (y0 + y1) / 2 * z, 0);
+    } else {
+      Wall.pickN(touched);
+      Wall.fitPick();
+    }
     const who = (ed.name || 'gnome ' + String(ed.by).slice(0, 6)) + ' (' + String(ed.by).slice(0, 6) + ')';
     const what = Object.keys(ed.put).length + ' changed · ' + (ed.del || []).length + ' deleted (shown faded)' + ((ed.art || []).length ? ' · ' + ed.art.length + ' tracings' : '')
                + (ed.why && !/^(small|large|drastic|council)$/.test(ed.why) ? ' · why: ' + ed.why : '')
                + (ed.look ? ' · the look: ' + [ed.look.title, ed.look.palette].filter(Boolean).join(', ') : '');
     const motion = ed.status === 'motion', mine = !!me && ed.by === me.id;
     const tally = motion ? ' · on the ballot: ' + (ed.ayes || 0) + ' for, ' + (ed.nays || 0) + ' against' + (ed.closes ? ' · closes ' + closesIn(ed.closes) : '') : '';
-    const suffix = canDecide(ed) ? '' : motion ? (mine ? ' · your own motion — the others decide' : !hasSession() ? ' · log in to vote' : canVote() ? '' : ' · voting takes a standing day on the hill') : ' · the keepers decide';
+    const suffix = canDecide(ed) ? '' : motion ? (mine ? ' · your own motion — the others decide' : !hasSession() ? ' · log in to vote' : canVote() ? '' : ' · voting takes a standing day on the hill') : ' · the moderators decide';
     const acts = canDecide(ed) ? [['approve', () => decide('approve')], ['reject', () => decide('reject')], ['close', leave]]
                : motion && canVote() && !mine ? [['aye', () => vote(ed.id, true)], ['nay', () => vote(ed.id, false)], ['vote at the machine', () => { const id = ed.id; leave(); if (window.Ballot) Ballot.open(id); }], ['close', leave]]
                : [['close', leave]];

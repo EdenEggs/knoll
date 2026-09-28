@@ -129,7 +129,7 @@ async function post(req, res) {
       const to = ids.filter((u, i) => recs[i] && recs[i].made && recs[i].banned !== '1');
       const fresh = to.length ? await dbm(to.map(u => ['SADD', K.invited(slug), u])) : [];
       const sent = to.filter((u, i) => fresh[i]);
-      for (const u of sent) await tell(u, 'keeper', me.id, { slug, title: slug === W.HOME ? 'TOEM 2' : p.title || slug });
+      for (const u of sent) await tell(u, 'keeper', me.id, { slug, title: p.title || (slug === W.HOME ? 'TOEM 2' : slug) });
       if (sent.length) await W.audit(me.id, 'invite', { page: slug, ids: sent });
       return answer(res, 200, { ok: true, sent: sent.length });
     }

@@ -72,7 +72,10 @@
    a name it has not heard of, so what this sheet does too — and lays the
    seven over the bench's own tokens, so everything drawn in those follows:
    the paper and its dots, the header, the name, the links, the pick, both
-   docks. TOEM 2 has no data-paper and is as it was. */
+   docks. TOEM 2 has no data-paper and is as it was — and its own paper, the
+   fifth set ('toem2', 2026-09-28: TOEM 2 has settings too), is exactly that:
+   the tokens above with nothing laid over them, so it has no rule here and
+   seed.js takes the attribute off for it. */
 html[data-paper]{
   --sp-paper:#fdf7e3;--sp-ink:#17120b;--sp-card:#fffcf0;--sp-line:#d9cdb0;--sp-mute:#4a4054;--sp-accent:#e8484a;--sp-dock:#17120b;
   --bench-bg:var(--sp-paper);--bench-dot:rgba(38,33,42,.1);
@@ -241,6 +244,11 @@ html[data-paper] .toem-chaos{color:var(--pink)}
 /* the pieces of yours that wait: a dashed box each — amber for the keepers' queue, blue for the ballot */
 .wall-diff .th-wait rect{fill:none;stroke:#b8860b;stroke-dasharray:3 5}
 .wall-diff .th-ballot rect{fill:none;stroke:#5871f5;stroke-dasharray:3 5}
+/* in the ballot's picture of an edit (a frame drawn at well under half size) the boxes are drawn heavier, to be read at that size */
+html.toem-embed .wall-diff rect,html.toem-embed .wall-diff line,html.toem-embed .wall-diff circle{stroke-width:6px}
+html.toem-embed .wall-diff .th-add{fill:rgba(91,208,122,.22);stroke-dasharray:14 9}
+html.toem-embed .wall-diff .th-del{fill:rgba(255,93,93,.2)}
+html.toem-embed .wall-diff .th-chg{fill:rgba(240,180,41,.2)}
 /* the panel's newer bits (history.js, 2026-09-24): a gnome's name you can press, their card, the rules, the flags on the moderators' rows, the scrubber */
 .th-who[role="button"]{cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px}
 .th-who[role="button"]:hover,.th-who[role="button"]:focus-visible{color:#ff9fd0;outline:none}
