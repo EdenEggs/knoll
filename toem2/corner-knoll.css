@@ -241,18 +241,47 @@
 :root[data-page] .lb-foot .lb-who small{opacity:.8}
 :root[data-page] .lb-foot a{color:var(--k-yel);font-weight:700}
 
-/* a phone: the buttons go under the header, smaller — the fan with them — and the panels between the header and the dock */
-@media (max-width:700px){
+/* what stands at the right under the header stands under the trophy (leaderboard.css), which is taller here: its
+   sixteen, its sixty-six and ten */
+:root[data-page]{--under-head-r:calc(var(--head-h,52px) + 92px)}
+/* THE BUTTONS GO UNDER THE HEADER WHEREVER THE FLOOR CANNOT HOLD THEM (2026-09-28; board.css has the sum): smaller — the
+   fan with them — and the panels between them and the dock. It was a phone's rule: on a tablet the two buttons and the
+   fan, 314 across, lay over MOVE, DRAW, STICKER and UPLOAD, and a press on UPLOAD opened the album. 72 = ten, the
+   buttons' fifty and twelve more: where the zoom dock, the keymap and the drawers start on a space (lab.css: --under-head). */
+@media (max-width:1210px){
+  :root[data-page]{--under-head:calc(var(--head-h,52px) + 72px);--under-head-r:calc(var(--head-h,52px) + 72px);--strip-r:70px}
   :root[data-page] .town-fabs{left:10px;bottom:auto;top:calc(var(--head-h,52px) + 10px);gap:10px;align-items:flex-start}
   :root[data-page] .town-fab{width:50px;height:50px}
   :root[data-page] .town-fab::before{width:34px;height:34px;margin:-19px 0 0 -19px}
   :root[data-page] .town-fab svg{width:22px;height:22px}
   .gal-fan{transform:scale(.46);transform-origin:0 0;margin:0 -81px -64px 0}
-  :root[data-page] .town-panel{left:10px;right:10px;width:auto;max-width:none;top:calc(var(--head-h,52px) + 72px);bottom:132px;font-size:15px}
+  :root[data-page] .town-panel{top:var(--under-head);bottom:calc(var(--floor) + 6px)}
   :root[data-page] .lb-dock{right:10px;top:calc(var(--head-h,52px) + 10px)}
-  :root[data-page] .lb-panel{left:10px;right:10px;width:auto;top:calc(var(--head-h,52px) + 72px);bottom:132px}
+  :root[data-page] .lb-panel{top:var(--under-head);bottom:calc(var(--floor) + 6px)}
+}
+/* a phone: the panels take the width */
+@media (max-width:700px){
+  :root[data-page] .town-panel{left:10px;right:10px;width:auto;max-width:none;font-size:15px}
+  :root[data-page] .lb-panel{left:10px;right:10px;width:auto}
   :root[data-page] .gal-panel .town-tab{padding:0 9px}
   :root[data-page] .gal-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:16px 12px}
+}
+/* a phone held sideways: the panels start where the buttons do, over them (board.css) — and the wooden head is a
+   thinner plank, and the three things to say at a press are put away: with them the chat's own box, where a line is
+   typed, was pushed out through the foot of the panel */
+@media (max-height:520px) and (max-width:1210px){
+  :root[data-page]{--under-head:calc(var(--head-h,52px) + 10px)}
+  :root[data-page] .town-head{padding:5px 10px 5px 12px;margin-bottom:14px;box-shadow:0 6px 0 var(--k-strip),0 8px 0 rgba(23,18,11,.25)}
+  :root[data-page] .town-plate{padding:3px 12px 3px 10px}
+  :root[data-page] .town-close{width:32px;height:32px}
+  :root[data-page] .town-quick{display:none}
+  :root[data-page] .town-chat-list{padding:8px 14px 6px}
+  :root[data-page] .town-chat-gate,:root[data-page] .town-say{padding:8px 14px 10px}
+}
+/* a small laptop: the buttons keep the floor, and the fan is drawn at six tenths — at its full 150 the corner is 334
+   across and the middled dock reaches it on anything under 1280, sooner with a space's own inks on it */
+@media (min-width:1211px) and (max-width:1330px){
+  .gal-fan{transform:scale(.6);transform-origin:0 0;margin:0 -60px -47px 0}
 }
 /* a wide screen: the drawers on the left stop above the corner's buttons, which stand taller here */
 @media (min-width:1301px){:root[data-page] .lab-panel{--lp-cap:calc(100dvh - var(--head-h,52px) - 160px)}}

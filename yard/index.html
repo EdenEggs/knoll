@@ -392,6 +392,18 @@
        these again — the coupling is the point, not the numbers. */
     .knoll-head { margin: -20px -14px 20px !important; }
   }
+  /* THE FOOT OF THE PAGE CLEARS THE DOCK (2026-09-28). The dock is fixed to the foot of the
+     screen — 66 of it, 126 where it wraps into two rows — and the page ended 56 under its last
+     card, 40 on a phone: scrolled right to the end, the last lines of the last card were under
+     the tools, with no more page to scroll them out on. --floor is the dock as it stands
+     (wall.js measures it; lab.css has a number for it until then). After the block above,
+     whose padding it finishes. */
+  .yard-root { padding-bottom: calc(var(--floor, 76px) + 20px) !important; }
+  /* …AND THE DRAWERS STOP ABOVE THE TOOL'S OPTIONS. On a bench lab.js measures that (clearDock); this page
+     has no lab.js, and lab.css's own cap stops a drawer above the DOCK — so the sticker drawer came down over
+     the row of sizes that goes with it, all of it on a phone. --floor-opts is the dock and the row over it as
+     they stand (wall.js measures them). Not on a short screen, where lab.css stands the row BESIDE the drawer. */
+  @media (max-width: 1300px) and (min-height: 521px) { .lab-panel { --lp-cap: calc(100dvh - var(--under-head) - var(--floor-opts, var(--floor)) - 12px); } }
 </style>
 </helmet>
 <div data-screen-label="Your Yard" class="yard-root" style="min-height:100vh; box-sizing:border-box; overflow-x:clip; background:#ece7f1; background-image:radial-gradient(circle, rgba(90,70,110,0.13) 1.3px, transparent 1.3px); background-size:24px 24px; padding:34px 30px 56px; font-family:'VT323',monospace; color:#17120b">
@@ -914,8 +926,10 @@
     </div>
   </sc-if>
   <sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
-    <div sc-camel-on-click="{{ closeDrawer }}" style="position:fixed; inset:0; background:rgba(23,18,11,0.4); z-index:20"></div>
-    <div role="dialog" aria-modal="true" aria-label="settings" style="position:fixed; top:0; right:0; bottom:0; width:min(370px,90vw); box-sizing:border-box; background:#fdf7e3; border-left:5px solid #17120b; z-index:21; padding:26px 24px; display:flex; flex-direction:column; gap:22px; overflow-y:auto; font-family:'VT323',monospace; color:#17120b">
+    <!-- OVER THE DOCK (2026-09-28): the scrim and the drawer were 20 and 21, and the dock is 6000 (lab.css) — so on any
+         screen under 1336 the dock lay over the drawer's foot, LOG OUT under it on a phone, and stood undimmed on the scrim -->
+    <div sc-camel-on-click="{{ closeDrawer }}" style="position:fixed; inset:0; background:rgba(23,18,11,0.4); z-index:6200"></div>
+    <div role="dialog" aria-modal="true" aria-label="settings" style="position:fixed; top:0; right:0; bottom:0; width:min(370px,90vw); box-sizing:border-box; background:#fdf7e3; border-left:5px solid #17120b; z-index:6201; padding:26px 24px; display:flex; flex-direction:column; gap:22px; overflow-y:auto; font-family:'VT323',monospace; color:#17120b">
       <div style="display:flex; align-items:center; justify-content:space-between">
         <h2 style="margin:0; font-family:'Rye',serif; font-size:24px; font-weight:400">Settings</h2>
         <button sc-camel-on-click="{{ closeDrawer }}" aria-label="close settings" style="border:none; background:none; font-family:'VT323',monospace; font-size:17px; letter-spacing:1px; color:#4a4054; text-decoration:underline; text-underline-offset:3px; cursor:pointer" style-hover="color:#e8484a">CLOSE</button>

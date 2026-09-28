@@ -102,8 +102,11 @@ a{color:var(--pink)}a:hover{color:var(--pink-deep)}
 button,input{font-family:inherit}
 
 /* header */
+/* OVER THE DOCKS AND THE CORNER'S BUTTONS (2026-09-28): what hangs from the header — the search and what
+   it finds, the gnome's menu, a stamp's note — hangs into the bench, where the zoom dock and the buttons
+   stand on a narrow screen, and at 20 it hung BEHIND them. Under the viewers and the spotlight (6100 up). */
 .lab-head{display:flex;align-items:center;gap:22px;padding:12px 22px;border-bottom:1.5px dashed var(--line);background:var(--card);flex-wrap:wrap;
-  flex:none;position:relative;z-index:20;max-height:42vh;overflow:auto}
+  flex:none;position:relative;z-index:6050;max-height:42vh;overflow:auto}
 .lab-brand{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-family:var(--display);font-weight:800;font-size:18px;letter-spacing:-0.01em}
 .lab-brand img{display:block}
 .lab-slash{color:var(--mute-2);font-weight:600;margin:0 -2px}
@@ -279,6 +282,17 @@ html.toem-embed .wall-diff .th-chg{fill:rgba(240,180,41,.2)}
 .th-scrub{flex:1;accent-color:#ff9fd0}
 .th-fine{font-size:12.5px;color:#bdb3c8}
 @media (max-width:560px){.toem-chaos{font-size:12px;letter-spacing:1.5px;padding:1px 6px}}
+/* THE HEADER ON A PHONE (2026-09-28). It wrapped into three rows, twenty-two apart — 145 of a phone's 640 — and
+   on a space at 360 the second of them, the stamp, the button and the two links, ran off the right edge and took
+   the page sixteen wider than the screen. So: closer rows; the account corner up beside the name, where it fits;
+   the row of tools last, across the whole width, wrapping if it must; and a long name cut with an ellipsis. */
+@media (max-width:700px){
+  html.lab-live:not(.lab-local) .lab-head{gap:8px 14px;padding:10px 14px}
+  html.lab-live:not(.lab-local) .lab-brand{min-width:0;max-width:100%}
+  html.lab-live:not(.lab-local) .lab-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.lab-live:not(.lab-local) .lab-tools{order:3;flex:1 1 100%;flex-wrap:wrap;gap:6px 10px}
+  html.lab-live:not(.lab-local) #toem-save{width:9em}   /* "save changes" and its padding, and no more: the row then fits a 375 phone */
+}
 
 /* a class sets display, so [hidden] has to be said again or it loses to it
    and the pill shows up on the deployed bench with nothing behind it */
@@ -730,8 +744,15 @@ body.lab-banding{user-select:none;-webkit-user-select:none}
 #zoom-fit:hover,#zoom-keys:hover,#zoom-keys[aria-expanded="true"]{background:var(--pink-soft);color:var(--pink)}
 .zoom-dock .dock-rule{width:1px;height:18px;background:var(--line);margin:0 3px}
 
-/* the keymap card — how to move about, on a ? */
+/* the keymap card — how to move about, on a ?
+   IT STOPS UNDER THE HEADER, AT EVERY WIDTH (2026-09-28). It hangs from the
+   floor and it is taller than most screens — 826 on the front page, more on
+   a bench with more to say — so on a laptop its top ran off the top of the
+   window, with no way to reach it. 68 = its own bottom:62 and six more, under
+   whatever stands at the right under the header (--under-head-r, below);
+   past that it reads down inside itself. */
 .keymap{position:fixed;right:16px;bottom:62px;z-index:6000;width:266px;padding:10px 12px 11px;
+  max-height:calc(100dvh - var(--under-head-r) - 68px);overflow:auto;overscroll-behavior:contain;
   background:var(--card);border:2px solid var(--ink-2);border-radius:12px;
   box-shadow:0 2px 0 var(--ink-2),0 18px 36px -18px rgba(var(--drop-rgb),.5)}
 .keymap b{display:block;font-size:9.5px;font-weight:800;letter-spacing:.18em;color:var(--mute-2);margin-bottom:7px}
@@ -761,9 +782,28 @@ body.lab-banding{user-select:none;-webkit-user-select:none}
    the header is one line on the deployed site and a paragraph of workbench
    notes at home, so where the bench starts is not a number this file can
    know. The fallback is the deployed header's own height, for the frame
-   before the first layout(). */
-@media (max-width:700px){
-  .zoom-dock{top:calc(var(--head-h,52px) + 10px);right:10px;bottom:auto;
+   before the first layout().
+
+   …AND ON A TABLET, AND A SMALL LAPTOP (2026-09-28). The line was 700, where
+   a phone ends — but the sum above was already right and the line was not:
+   the tool dock is 596 across and middled, the zoom dock 249 with its margin,
+   and they land on each other on any screen under 1110. At 768 UNDO, REDO
+   and DELETE lay under the zoom dock; at 1024, DELETE. So the zoom dock
+   stands up the side from 1210 down — 1110, and room for a dock that carries
+   a space's own inks — and the floor is the tools' alone. The TOOL dock
+   still wraps at 700, further down: it fits in one row until there.
+
+   --under-head is where what hangs under the header starts: ten below it,
+   unless a bench keeps its corner buttons there (toem2/board.css), which
+   says so by moving it — the side panels and the keymap start from it.
+   --under-head-r is the same line at the RIGHT, where a bench may keep a
+   button of its own (toem2/leaderboard.css): the zoom dock starts from that.
+   --floor is what the tools take of the foot: a measurement, wall.js's, and
+   these two numbers only until it has been made. */
+:root{--under-head:calc(var(--head-h,52px) + 10px);--under-head-r:calc(var(--head-h,52px) + 10px);--floor:76px}
+@media (max-width:700px){:root{--floor:128px}}
+@media (max-width:1210px){
+  .zoom-dock{top:var(--under-head-r);right:10px;bottom:auto;
     flex-direction:column;gap:2px;padding:4px 3px;border-radius:12px}
   .zoom-dock .dock-rule{width:16px;height:1px;margin:3px 0}
   /* a finger is not a pointer: every button in the column goes up to 32 */
@@ -784,10 +824,25 @@ body.lab-banding{user-select:none;-webkit-user-select:none}
      58 = 10 (the dock's own right) + 42 (its width) + the same 6px seam the
      corner had (its bottom:62 was 16 + 40 + 6), or the two 2px borders abut
      into one 4px line; 74 = 58 + the 16px left margin the clamp keeps. */
-  .keymap{top:calc(var(--head-h,52px) + 10px);right:58px;bottom:auto;
+  /* …and it stops above the tools (2026-09-28): it ran to the foot of the
+     screen, over the dock, and its last lines were read through the buttons */
+  .keymap{top:var(--under-head);right:58px;bottom:auto;
     width:min(266px,calc(100vw - 74px));
-    max-height:calc(100dvh - var(--head-h,52px) - 20px);overflow:auto;
-    overscroll-behavior:contain}
+    max-height:calc(100dvh - var(--under-head) - var(--floor))}
+}
+/* …AND ON A PHONE HELD SIDEWAYS IT LIES DOWN AGAIN, under the header (2026-09-28).
+   Standing, it is 223 tall, and a phone on its side is 375 high before the
+   browser has taken its own bars: under the header and a bench's corner
+   buttons it ran off the foot of the screen, over the tools on its way. There
+   the height is what is short and the width is not, so it lies along the top
+   at the right — beside a bench's own button there, not under it (--strip-r,
+   toem2/leaderboard.css) — and the keymap hangs under it. */
+@media (max-height:520px) and (min-width:560px) and (max-width:1210px){
+  .zoom-dock{top:calc(var(--head-h,52px) + 10px);right:var(--strip-r,10px);flex-direction:row;padding:4px}
+  .zoom-dock .dock-rule{width:1px;height:18px;margin:0 3px}
+  #zoom-val{min-width:40px;width:auto;height:30px;font-size:11px;letter-spacing:0}
+  .keymap{top:calc(var(--head-h,52px) + 62px);right:10px;
+    max-height:calc(100dvh - var(--head-h,52px) - 62px - var(--floor))}
 }
 
 /* ─── the volume in the dock ─────────────────────────────────────────────── */
@@ -816,14 +871,15 @@ body.lab-banding{user-select:none;-webkit-user-select:none}
   background:var(--gz-handle-bg);border:2px solid var(--hard-edge);
   box-shadow:0 2px 0 var(--hard-edge),0 16px 34px -16px rgba(var(--drop-rgb),.6)}
 .tool-dock{bottom:16px}
-.tool-opts{bottom:70px;padding:4px 8px;gap:5px;border-radius:12px;
+/* the row stands ON THE DOCK, however many rows the dock is (2026-09-28: --floor, wall.js's measurement) */
+.tool-opts{bottom:calc(var(--floor) - 6px);padding:4px 8px;gap:5px;border-radius:12px;
   flex-wrap:wrap;justify-content:center;max-width:min(94vw,960px)}
 /* ── A LINE OVER THE DOCK WHEN A SAVE DID NOT FIT ─────────────────────────
    lab.js puts it up when localStorage throws on a write and takes it down
    on the first write that fits again (A SAVE THAT DOES NOT FIT, there).
    The dock's own pill, amber words, fixed above the options row — never on
    the paper, never under the hand, and never in the way of a press. */
-.lab-warn{position:fixed;left:50%;bottom:122px;transform:translateX(-50%);z-index:6001;
+.lab-warn{position:fixed;left:50%;bottom:calc(var(--floor-opts,var(--floor)) + 4px);transform:translateX(-50%);z-index:6001;
   max-width:min(92vw,640px);padding:8px 14px;border-radius:12px;
   background:var(--gz-handle-bg);border:2px solid var(--hard-edge);color:var(--amber);
   font-family:var(--body);font-size:12.5px;font-weight:600;line-height:1.35;text-align:center;
@@ -859,8 +915,7 @@ body.lab-banding{user-select:none;-webkit-user-select:none}
   .tool-dock .dock-grp{flex-wrap:wrap;justify-content:center}
   .tool-dock .dock-rule{display:none}
   .dock-btn{padding:4px 7px 3px}
-  .tool-opts{bottom:118px;width:max-content}
-  .lab-warn{bottom:170px}
+  .tool-opts{width:max-content}   /* (where it and the storage line stand is measured now: --floor, above) */
 }
 .dock-mini{opacity:.5}
 
@@ -874,6 +929,16 @@ body.lab-banding{user-select:none;-webkit-user-select:none}
 .dock-sw:hover{transform:scale(1.12);border-color:#fff}
 /* a space's own inks (wall.js: THE INKS OF A SPACE): one swatch each in the wheel's place, the pressed one ringed */
 .dock-inks[aria-pressed="true"]{border-color:#fff;box-shadow:0 0 0 2px var(--gz-handle-bg),0 0 0 4px #fff}
+/* MORE INKS THAN FIVE STAND IN TWO ROWS (2026-09-28). A space may choose ten,
+   and ten in a row made the dock 801 across: on a 1280 laptop it lay over the
+   corner buttons on one side and the zoom dock on the other. Two rows of five
+   keep it the width it was drawn at. Eighteen across with six between them,
+   so a finger still has twenty-four to itself. On a phone the dock wraps into
+   rows of its own and they stay the size they were. */
+@media (min-width:701px){
+  .dock-pal:has(.dock-inks:nth-child(6)){display:grid;grid-template-columns:repeat(5,18px);gap:6px}
+  .dock-pal:has(.dock-inks:nth-child(6)) .dock-inks{width:18px;height:18px}
+}
 .dock-pal{position:relative;gap:6px;padding-left:3px}
 .dock-wheel-ico{display:block;width:16px;height:16px;border-radius:50%;
   background:conic-gradient(#ff3b3b,#ffd23f,#59d36a,#3fd0ff,#5871f5,#e259f0,#ff3b3b);
@@ -1360,7 +1425,7 @@ body[data-wall-tool="delete"] .gz:not(.gz-copy){pointer-events:none}
    here and a whole different rule takes over under 720px — an inline width
    would beat both and leave a phone with a 700px panel off the side of the
    screen. */
-.lab-panel{position:fixed;left:16px;top:calc(var(--head-h,52px) + 14px);z-index:6000;
+.lab-panel{position:fixed;left:16px;top:calc(var(--under-head) + 4px);z-index:6000;
   width:var(--lp-w,344px);max-width:calc(100vw - 32px);
   /* THE HEIGHT HAS TWO MASTERS NOW. --lp-cap is this file's: the screen less
      the header, and less the dock's row on a window narrow enough that the
@@ -1369,7 +1434,7 @@ body[data-wall-tool="delete"] .gz:not(.gz-copy){pointer-events:none}
      not narrow at all — which the media query below cannot see, because a
      media query cannot read how far the grip has been pulled. Whichever is
      the shorter wins, and with nothing pulled the second is not set. */
-  --lp-cap:calc(100dvh - var(--head-h,52px) - 34px);
+  --lp-cap:calc(100dvh - var(--under-head) - 24px);
   max-height:min(var(--lp-maxh,300dvh),var(--lp-cap));
   box-sizing:border-box;background:#251f2b;border:5px solid #100c16;
   border-radius:18px 22px 16px 20px;box-shadow:12px 14px 0 rgba(10,7,14,.45);
@@ -1379,16 +1444,40 @@ body[data-wall-tool="delete"] .gz:not(.gz-copy){pointer-events:none}
 /* narrow enough that the centred dock reaches the panel's column: stop above
    it and its options row rather than under them */
 @media (max-width:1300px){
-  .lab-panel{--lp-cap:calc(100dvh - var(--head-h,52px) - 130px)}
+  .lab-panel{--lp-cap:calc(100dvh - var(--under-head) - 120px)}
 }
 /* on a phone the dock stands up the side and the paper is precious: the
    panel takes the width it can get and stops being a margin ornament */
 @media (max-width:720px){
   .lab-panel{left:10px;right:10px;width:auto;max-width:none;
-    --lp-cap:calc(100dvh - var(--head-h,52px) - 150px)}
+    --lp-cap:calc(100dvh - var(--under-head) - 140px)}
   /* width:auto above ignores --lp-w, so the grip has nothing left to say */
   .lp-grip{display:none}
   .lp-body{margin-right:0;padding-right:16px}
+}
+/* A SHORT SCREEN — a phone held sideways (2026-09-28): 375 high, less the header,
+   less the tools. What is left goes to the panel whole: it stops above the dock
+   as the dock stands (--floor), whichever rule above has spoken, and stands over
+   the corner's buttons (toem2/board.css moves --under-head back up for it). */
+@media (max-height:520px){
+  /* …a column at the left at any width, as wide as leaves the zoom dock its place
+     along the top; and the tool's options stand beside it, not under it */
+  .lab-panel{z-index:6002;left:10px;right:auto;width:min(var(--lp-w,344px),calc(100vw - 330px));max-width:none;
+    --lp-cap:calc(100dvh - var(--under-head) - var(--floor) - 8px);max-height:var(--lp-cap)}
+  .lab-panel .lp-grip{display:none}
+  body:has(.lab-panel:not([hidden])) .tool-opts{left:auto;right:10px;transform:none;
+    max-width:calc(100vw - min(344px,100vw - 330px) - 40px)}
+}
+/* …AND IT SCROLLS WHOLE THERE, and on a small phone held upright. On a tall screen
+   the body is what scrolls, between a bar and a foot that hold still; on these the
+   bar and the foot were most of the case — the tracing table's flat file is 170 —
+   and the body was left twenty-eight pixels of it, ninety on a 360 by 640 phone. So
+   the case is the scroller, with its bar held at the top of it. (.lab-panel before
+   each name: the rules these answer are further down this file, and as strong.) */
+@media (max-height:520px),(max-height:700px) and (max-width:720px){
+  .lab-panel{overflow-y:auto;overscroll-behavior:contain}
+  .lab-panel .lp-bar{position:sticky;top:0;z-index:6;background:#251f2b}
+  .lab-panel .lp-body{flex:none;overflow:visible}
 }
 .lp-bar{display:flex;align-items:center;gap:8px;padding:13px 16px 10px;border-bottom:4px solid #100c16;flex:none}
 .lp-plate{font-family:'VT323',monospace;font-size:21px;letter-spacing:3px;color:#f4f0f7;background:#332b3c;

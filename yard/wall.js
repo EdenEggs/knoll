@@ -3450,6 +3450,28 @@ window.Wall = (function () {
   });
 
   buildDock(); buildOpts(); markTools(); syncGrid();
+  /* WHAT THE TOOLS TAKE OF THE FOOT, published for the CSS (2026-09-28), the way lab.js
+     publishes --head-h. The dock is one row, or two, or three: it wraps where the screen is
+     narrower than it is, and it is wider where a space has inks of its own — so how far up
+     the foot of the screen it reaches is a measurement and not something the screen's width
+     says, and what stands on it had been going by the width: the options row stood at 118
+     over a dock that had wrapped into three rows and reached 140, and on a phone held
+     sideways a panel was left ninety-nine pixels to stand in.
+     --floor is the dock's top and ten over it; the options row stands on that (lab.css).
+     --floor-opts is the same with the options row counted while it is up, for what stops
+     above BOTH. From their SIZES, not from where they are: the row is placed by the first
+     number, so where it is now is where the last number put it. */
+  if (dock && typeof ResizeObserver === 'function') {
+    const floor = () => {
+      const d = dock.getBoundingClientRect(), o = opts && !opts.hidden ? opts.getBoundingClientRect().height : 0;
+      if (!d.height) return;
+      const f = Math.round(window.innerHeight - d.top + 10), root = document.documentElement.style;
+      root.setProperty('--floor', f + 'px');
+      root.setProperty('--floor-opts', (o ? f + Math.round(o) + 4 : f) + 'px');
+    };
+    const ro = new ResizeObserver(floor);
+    ro.observe(dock); if (opts) ro.observe(opts);
+  }
   store.on(paint);
   /* AFTER paint AND NOT BEFORE IT: bounds() reads a stroke's box off its
      node, so the layer has to have been rebuilt before the rectangle the

@@ -145,6 +145,10 @@
     '#knoll-account .ka-me[href]:hover .ka-pic{transform:translateY(-2px) rotate(-4deg)}',
     '.lab-head.ka-open{overflow:visible}',            // lab.css clips the bar (for the workbench's long hint); an open search hangs below it
     '@media (max-width:560px){#knoll-account{gap:7px}#knoll-account .ka-btn{padding:0 8px;font-size:16px}#knoll-account .ka-lens{padding:0}}',
+    // THE NARROWEST PHONES (2026-09-28). A bar with the yard/dashboard switch in it is 368 across, and on a 320 screen the
+    // gnome — the way to the yard, and on the yard the way to LOG OUT — stood wholly off its right edge (clipped on the
+    // yard, a sideways scroll on the dashboard). There the mark stands without the name, and the bar's own gaps come in.
+    '@media (max-width:350px){.knoll-head:has(.knoll-switch){gap:10px!important;padding-left:14px!important;padding-right:14px!important}.knoll-head:has(.knoll-switch) .knoll-brand span{display:none}}',
     '@media (prefers-reduced-motion:reduce){#knoll-account .ka-btn,#knoll-account .ka-me svg,#knoll-account .ka-pic{transition:none}}'
   ].join('\n');
 

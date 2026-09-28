@@ -56,6 +56,9 @@
   .sp-btn svg { display: block; }
   .sp-note { min-height: 20px; font-size: 16px; letter-spacing: 1.5px; color: var(--mute); max-width: 560px; }
   [hidden] { display: none !important; }
+  /* a phone (2026-09-28): the bar was one row that could not break, so LOG IN and SIGN UP took the room and the address read "co…".
+     It wraps: the address keeps the first row, and the corner goes under it when the two do not fit */
+  @media (max-width: 560px) { .knoll-head { flex-wrap: wrap; gap: 8px 10px; padding: 10px 14px; } }
   @media (prefers-reduced-motion: reduce) { .sp-btn:hover:not(:disabled) { transform: rotate(-1deg); } }
 </style>
 </head>

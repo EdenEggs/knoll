@@ -69,9 +69,9 @@
      (`padding:34px 30px 56px`) spelled out, so the bar reaches the full width of
      the page instead of sitting inside the gutter. Change the root's padding and
      change these. Yard has this coupling in two places because it has a
-     breakpoint; this page has no @media at all, so it has it once. If a
-     breakpoint is ever added here, it is the second thing to add — yard's own
-     export broke exactly this and it took a measurement to see it. */
+     breakpoint — and since 2026-09-28 so has this page, at a phone's width
+     (A PHONE HAS THE YARD'S GUTTERS, below), where it is said the second time.
+     Yard's own export broke exactly this and it took a measurement to see it. */
   .knoll-head { display: flex; align-items: center; gap: 22px;
     margin: -34px -30px 34px; padding: 12px 22px;
     background: #fdfbfd; border-bottom: 1.5px dashed #e2d4df; }
@@ -113,9 +113,26 @@
   .knoll-switch a[aria-current="page"],
   .knoll-switch a[aria-current="page"]:hover { background: #26212a; border-color: #26212a;
     color: #fdfbfd; cursor: default; }
+
+  /* THE TREND, AND WHERE THEY CAME FROM BESIDE IT (2026-09-28). Two columns, the second never
+     under 280 — which on a phone left the first twenty-four pixels, a sliver of a card with its
+     title cut to a letter a line. Under 760 there is not room for both, and they stand one over
+     the other. The one rule on this page that asks how wide the screen is: the bar's margins
+     (THE COUPLING, above) are not touched by it. */
+  .dash-two { display: grid; grid-template-columns: minmax(0,2fr) minmax(280px,1fr); gap: 26px;
+    margin-bottom: 30px; align-items: start; }
+  @media (max-width: 760px) { .dash-two { grid-template-columns: minmax(0,1fr); } }
+  /* …AND A PHONE HAS THE YARD'S GUTTERS: thirty a side left a 320 screen 260 to stand a 36px title beside its
+     picture in, and the page ran two wider than the screen. The bar's margins go with the padding — THE COUPLING,
+     above: they are the same numbers — and a name with no break in it breaks where it must. */
+  @media (max-width: 560px) {
+    .dash-root { padding: 20px 14px 56px !important; }
+    .knoll-head { margin: -20px -14px 20px !important; }
+    .dash-title { font-size: 28px !important; overflow-wrap: anywhere; }
+  }
 </style>
 </helmet>
-<div data-screen-label="Owner Dashboard" style="min-height:100vh; box-sizing:border-box; background:#ece7f1; background-image:radial-gradient(circle, rgba(90,70,110,0.13) 1.3px, transparent 1.3px); background-size:24px 24px; padding:34px 30px 56px; font-family:'VT323',monospace; color:#17120b">
+<div data-screen-label="Owner Dashboard" class="dash-root" style="min-height:100vh; box-sizing:border-box; background:#ece7f1; background-image:radial-gradient(circle, rgba(90,70,110,0.13) 1.3px, transparent 1.3px); background-size:24px 24px; padding:34px 30px 56px; font-family:'VT323',monospace; color:#17120b">
   <!-- THE HOUSE BAR. `../` is the site root, which vercel.json rewrites to
        lab 2 — the same destination lab 2's own brand link uses. Locally that
        is a 404: there is no site/index.html and the rewrite is Vercel-only.
@@ -143,8 +160,8 @@
           <sc-if value="{{ noPic }}" hint-placeholder-val="{{ true }}">K</sc-if>
           <div style="position:absolute; bottom:-9px; right:-9px; width:12px; height:12px; background:#e8484a; border:3px solid #17120b; transform:rotate(45deg)"></div>
         </div>
-        <div>
-          <h1 style="margin:0; font-family:'Rye',serif; font-size:36px; font-weight:400; line-height:1">{{ dashTitle }}</h1>
+        <div style="min-width:0">
+          <h1 class="dash-title" style="margin:0; font-family:'Rye',serif; font-size:36px; font-weight:400; line-height:1">{{ dashTitle }}</h1>
           <div style="font-size:17px; letter-spacing:3px; color:#4a4054; opacity:0.7; margin-top:6px">{{ dashSub }}</div>
         </div>
       </div>
@@ -220,7 +237,7 @@
          for the site's master alone (api/wall.js: THE MASTER); empty, and so unseen, for everybody else. -->
     <section id="master-desk" aria-label="the master's desk"></section>
 
-    <section style="display:grid; grid-template-columns:minmax(0,2fr) minmax(280px,1fr); gap:26px; margin-bottom:30px; align-items:start">
+    <section class="dash-two">
 
       <div style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate({{ rTrend }}); min-width:0">
         <div aria-hidden="true" style="position:absolute; top:-11px; left:-11px; width:15px; height:15px; background:#5a8fd6; border:3px solid #17120b; transform:rotate(45deg)"></div>

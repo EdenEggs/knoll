@@ -143,14 +143,39 @@ span.town-named:focus-visible{outline:3px solid #e8479c;outline-offset:2px;borde
 .town-menu-i:focus-visible{box-shadow:0 0 0 3px #e8479c}
 .town-menu-i:disabled{opacity:.6;cursor:default;background:none}
 
-/* a phone: the dock stands across the bottom, so the buttons go under the header and the panel between the two */
-@media (max-width:700px){
+/* THE BUTTONS GO UNDER THE HEADER WHEREVER THE FLOOR CANNOT HOLD THEM (2026-09-28). It was a phone's rule, at 700 —
+   but the tool dock is 596 across and middled, so on a tablet the three buttons lay over MOVE, DRAW and STICKER, which
+   could not be pressed. 1210 is the line lab.css stands the zoom dock up at (THE DOCK ON A PHONE), for the same sum.
+   --under-head is lab.css's: where what hangs under the header starts. With the buttons there it is under THEM — 66 is
+   their ten, their forty-six and ten more — so the zoom dock stands under the trophy instead of behind it, and a
+   drawer opens under the buttons instead of wearing them on its name and its ✕. */
+@media (max-width:1210px){
+  :root{--under-head:calc(var(--head-h,52px) + 66px)}
   .town-fabs{left:10px;bottom:auto;top:calc(var(--head-h,52px) + 10px);gap:10px}
   .town-fab{width:46px;height:46px;border-radius:13px 11px 14px 10px}
   .town-fab svg{width:24px;height:24px}
-  .town-panel{left:10px;right:10px;width:auto;max-width:none;top:calc(var(--head-h,52px) + 66px);bottom:132px;font-size:14px}
+  .town-panel{top:var(--under-head);bottom:calc(var(--floor) + 6px)}   /* under the buttons, down to the dock as it stands (wall.js: --floor); the width it had */
+}
+/* a phone: the panel takes the width */
+@media (max-width:700px){
+  .town-panel{left:10px;right:10px;width:auto;max-width:none;font-size:14px}
   .town-tab{font-size:14px;padding:8px 4px 10px}
   .town-tab .town-badge{margin-left:4px}
+}
+/* A PHONE HELD SIDEWAYS is 375 high: the header, the buttons and the dock leave a panel a hundred and fifty of it. So
+   there a panel — and a drawer, lab.css — starts where the BUTTONS do and stands over them: it has its own ✕, and
+   they are only the way in. */
+@media (max-height:520px) and (max-width:1210px){
+  :root{--under-head:calc(var(--head-h,52px) + 10px)}
+  .town-panel{z-index:6002}
+  /* …and its head is a line, not a plate: what it takes comes off the little that is left for what is said */
+  .town-head{padding:8px 12px 6px;gap:10px}
+  .town-tile{width:34px;height:34px}
+  .town-tile svg{width:20px;height:20px}
+  .town-title small{display:none}
+  .town-close{width:34px;height:34px}
+  .town-chat-gate,.town-say{padding:8px 12px 10px}
+  .town-send{width:40px;height:40px}
 }
 /* a wide screen: the drawers on the left (.lab-panel) stop above the corner buttons instead of running under them */
 @media (min-width:1301px){.lab-panel{--lp-cap:calc(100dvh - var(--head-h,52px) - 96px)}}

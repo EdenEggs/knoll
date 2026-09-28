@@ -39,9 +39,18 @@
 .lb-foot a{color:#ffb3c9;font-weight:700}
 .lb-foot .town-pic{border-color:#fff}
 .lb-foot .lb-who small{opacity:.8}
-@media (max-width:700px){
+/* WHAT STANDS AT THE RIGHT UNDER THE HEADER STANDS UNDER THE TROPHY (2026-09-28; lab.css: --under-head-r). The keymap
+   hangs from the floor at the trophy's own right edge, and the zoom dock, where it stands up the side, in its column:
+   on a phone the trophy lay over the dock's first button. 80 is the trophy's fourteen, its fifty-six and ten. */
+:root{--under-head-r:calc(var(--head-h,52px) + 80px)}
+/* with the other three under the header (board.css: 1210 and down), the trophy at their size; its panel under it */
+@media (max-width:1210px){
+  :root{--under-head-r:calc(var(--head-h,52px) + 66px);--strip-r:66px}   /* --strip-r: beside the trophy, where the zoom dock lies down (lab.css: a phone held sideways) */
   .lb-dock{right:10px;top:calc(var(--head-h,52px) + 10px)}
   .lb-dock .town-fab{width:46px;height:46px;border-radius:13px 11px 14px 10px}
   .lb-dock .town-fab svg{width:24px;height:24px}
-  .lb-panel{left:10px;right:10px;width:auto;top:calc(var(--head-h,52px) + 66px);bottom:132px}
+  .lb-panel{top:var(--under-head);bottom:calc(var(--floor) + 6px)}
+}
+@media (max-width:700px){
+  .lb-panel{left:10px;right:10px;width:auto}
 }
