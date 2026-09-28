@@ -55,7 +55,7 @@ const KEEP = 200;                             // photos a page keeps; the oldest
 const MINE_MAX = 20;                          // …of which a visitor has this many up at a time, so one account cannot push the album off its own end (a moderator: as many as it keeps)
 const CAP = { cap: 20, desc: 100, where: 40, src: 400000, sec: 40, secDesc: 100 };
 const SECTIONS_MAX = 5, SEC_RE = /^[a-z0-9][a-z0-9-]{0,19}$/;
-const BYTES = 300 * 1024;                     // the picture, decoded
+const BYTES = 300 * 1024, SIDE = 2048;        // the picture, decoded: how much it weighs, and how big across it may say it is
 const RATE = { post: 20, other: 200 };        // an hour, an account
 const EXT = { jpeg: 'jpg', png: 'png', webp: 'webp' };
 const hour = () => Math.floor(Date.now() / 36e5);
@@ -77,7 +77,7 @@ async function meOf(req, slug) {              // who is asking, and what they ar
   const me = await whoIs(req);
   if (!me) return null;
   const rules = await rulesOf({ slug }, me), mod = isMod(me);
-  return { id: me.id, tag: me.tag, banned: me.banned, mod, keeper: mod || !!rules.keeper };
+  return { id: me.id, tag: me.tag, banned: me.banned, mod, keeper: mod || !!rules.tends };   // the corner's keeper: the page's moderators proper (api/wall.js: WHO TENDS ITS CORNER)
 }
 const said = me => me && { id: me.id, tag: me.tag, keeper: me.keeper, mod: me.mod };
 
@@ -118,6 +118,10 @@ function decode(v) {
            : m[1] === 'png' ? buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
            : buf.subarray(0, 4).toString('latin1') === 'RIFF' && buf.subarray(8, 12).toString('latin1') === 'WEBP';
   if (!ok) throw bad(400, 'src', 'that is not the picture it says it is');
+  // HOW BIG ACROSS (api/wall.js): the album's own shrinker stops at 1600 a side; a picture past 2048, or one that will not say, is not hung
+  const size = W.dims(buf, m[1]);
+  if (!size) throw bad(400, 'src', 'that is not the picture it says it is');
+  if (!W.fits(size, SIDE)) throw bad(400, 'src', 'that picture is too big across — ' + SIDE + ' pixels a side at most');
   return { buf, type: 'image/' + m[1], ext: EXT[m[1]] };
 }
 // where the pictures go: the Blob store on the site, files beside the wall's store off it, nowhere on a site with no store yet
@@ -129,7 +133,7 @@ const pictures = H.blob.token() ? {
       method: 'PUT',
       headers: H.blob.headers({ 'x-vercel-blob-access': 'public', 'x-content-type': pic.type, 'x-add-random-suffix': '0',
                                 'x-allow-overwrite': '1', 'x-cache-control-max-age': '31536000' }),
-      body: pic.buf
+      body: pic.buf, signal: AbortSignal.timeout(W.BLOB_MS)   // A DEADLINE (api/wall.js)
     });
     if (!r.ok) throw new Error('the store answered ' + r.status + ' writing ' + key + ': ' + (await r.text()).slice(0, 160));
     return H.blob.url(key);

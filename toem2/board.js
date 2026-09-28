@@ -54,7 +54,7 @@ window.Town = (function () {
   const PAGE = document.documentElement.dataset.page || 'toem2', PQ = 'page=' + encodeURIComponent(PAGE);
   const KNOLL = PAGE !== 'toem2';               // KNOLL'S OWN CORNER: a space's; TOEM 2 keeps its own
   const API = '/api/board', CARD = '/api/wall?who=', FRIENDS = '/api/friends', PROFILE = '/YardView/?u=', TOKEN = 'knoll-toem2:token', SEEN = 'knoll-' + PAGE + ':town:seen';
-  const POLL_OPEN = 4000, POLL_SHUT = 60000, HERE_EVERY = 30000, CAP = { title: 80, line: 500, body: 2000, label: 16 };
+  const POLL_OPEN = 4000, POLL_IDLE = 20000, POLL_SHUT = 60000, HERE_EVERY = 30000, CAP = { title: 80, line: 500, body: 2000, label: 16 };
   const RULES = KNOLL ? [
     ['Be kind', 'No insults, name-calling or pile-ons.'],
     ['Credit the maker', 'Say whose work it is when you share it.'],
@@ -383,6 +383,7 @@ window.Town = (function () {
     note(chatNote, '');
     if (!quick) chatIn.value = '';
     posts.chat.unshift(out.post);
+    newest = String(out.post.id); hurry(); schedule();   // somebody is talking: the answer is looked for every four seconds again
     renderChat(); look('chat');
     chatList.scrollTop = chatList.scrollHeight;
     if (chatRules.wait) cooldown(chatRules.wait);
@@ -513,13 +514,21 @@ window.Town = (function () {
     step(); coolT = setInterval(step, 1000);
   }
 
-  // ── polling: the chat every 4 s while it is up, everything every minute otherwise ──
-  function schedule() { clearTimeout(timer); timer = setTimeout(tick, openPanel === chat ? POLL_OPEN : POLL_SHUT); }
+  /* ── polling: the chat every 4 s while it is up and somebody is talking, everything every minute otherwise ──
+     A CHAT NOBODY IS TALKING IN IS ASKED AFTER LESS OFTEN (2026-09-28): each look that finds no new line waits half as
+     long again as the one before, to twenty seconds; a new line — theirs or yours — and it is every four again. An
+     open chat was the dearest thing a tab could do to the store, and most open chats are quiet. */
+  let pollAt = POLL_OPEN, newest = '';
+  const hurry = () => { pollAt = POLL_OPEN; };
+  function schedule() { clearTimeout(timer); timer = setTimeout(tick, openPanel === chat ? pollAt : POLL_SHUT); }
   async function tick() {
     if (!loading && !document.hidden) {
       loading = true;
       await load(openPanel === chat ? 'chat' : 'board,chat');
       loading = false;
+      const top = posts.chat.length ? String(posts.chat[0].id) : '';
+      pollAt = top !== newest ? POLL_OPEN : Math.min(POLL_IDLE, Math.round(pollAt * 1.5));
+      newest = top;
       if (openPanel === chat) { renderChat(); look('chat'); }
       badges();
     }
@@ -533,7 +542,7 @@ window.Town = (function () {
     openPanel = p; p.hidden = false;
     (p === board ? boardBtn : chatBtn).setAttribute('aria-expanded', 'true');
     if (p === board) { renderBoard(); look(tab); load('board').then(ok => { if (ok && openPanel === board) { renderBoard(); look(tab); } }); }
-    else { drawn = ''; renderChat(); look('chat'); load('chat').then(ok => { if (ok && openPanel === chat) { renderChat(); look('chat'); chatList.scrollTop = chatList.scrollHeight; } }); if (me) chatIn.focus(); }
+    else { drawn = ''; hurry(); renderChat(); look('chat'); load('chat').then(ok => { if (ok && openPanel === chat) { renderChat(); look('chat'); chatList.scrollTop = chatList.scrollHeight; } }); if (me) chatIn.focus(); }
     schedule();
   }
   function hide() {

@@ -516,8 +516,9 @@
           <h2 style="margin:0; font-family:'Rye',serif; font-size:20px; font-weight:400">Badges &amp; trophies</h2>
           <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin:2px 0 14px">PINNED TO YOUR FENCE</div>
           <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:12px">
-            <sc-for list="{{ badges }}" as="b" hint-placeholder-count="6">
-              <div style="display:flex; flex-direction:column; align-items:center; gap:3px; padding:12px 6px 9px; text-align:center; background:{{ b.bg }}; border:{{ b.border }}; box-shadow:{{ b.shadow }}; transform:rotate({{ b.rot }}); opacity:{{ b.op }}">
+            <!-- THE TWO STICKERS (2026-09-28), as on /yard/: the Founding Gnome sticker first and as wide as the card (b.col), I was here last -->
+            <sc-for list="{{ badges }}" as="b" hint-placeholder-count="7">
+              <div style="grid-column:{{ b.col }}; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:12px 6px 9px; text-align:center; background:{{ b.bg }}; border:{{ b.border }}; box-shadow:{{ b.shadow }}; transform:rotate({{ b.rot }}); opacity:{{ b.op }}">
                 {{ b.art }}
                 <span style="font-size:14.5px; letter-spacing:0.5px; line-height:1.15; color:#17120b; margin-top:3px">{{ b.name }}</span>
                 <span style="font-size:12.5px; letter-spacing:0.5px; color:#4a4054; opacity:0.75">{{ b.sub }}</span>
@@ -741,6 +742,8 @@ class Component extends DCLogic {
     };
     window.addEventListener('mousemove', this._mouse);
     if (window.YardTools) { YardTools.mounted(this); if (!EMBED) this.loadFence(); }
+    // THE TWO STICKERS: the owner's card, which this page's head asked the wall for (YARD_CARD) — their number, and whether they were at TOEM 2
+    if (window.YARD_CARD && !EMBED) window.YARD_CARD.then(w => { if (w && w.ok && w.who) this.setState({ who: w.who }); });
   }
   componentWillUnmount() {
     window.removeEventListener('keydown', this._key);
@@ -933,14 +936,29 @@ class Component extends DCLogic {
     const first = ts.length ? Math.min.apply(null, ts) : 0, days = first ? Math.floor((Date.now() - first) / 86400000) : 0, streak = this.streak(ts);
     const MON = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
     const mon = function (t) { const d = new Date(t); return MON[d.getMonth()] + ' ' + d.getFullYear(); };
+    /* THE TWO STICKERS (2026-09-28) are the owner's, as the wall's card has them (api/wall.js ?who=, asked for in this page's
+       head: YARD_CARD): their number among the first hundred thousand, and the month they first had TOEM 2 open. */
+    const w = this.state.who, founder = w && w.founder > 0 ? w.founder : 0, here = /^(\d{4})-(\d{2})$/.exec((w && w.here) || '');
     return [
+      founder ? tile({ name: 'FOUNDING GNOME', sub: 'No. ' + founder.toLocaleString('en-US') + ' of 100,000', art: this.stickerArt('founder', founder), rot: '-0.6deg', col: '1 / -1' })
+              : locked({ name: 'FOUNDING GNOME', sub: 'for the first 100,000 gnomes', col: '1 / -1' }),
       first ? tile({ name: 'FIRST PLANTING', sub: 'earned ' + mon(first), art: this.badgeIcon('star'), rot: '1.5deg' }) : locked({ name: 'FIRST PLANTING', sub: 'put one thing on the page' }),
       days >= 30 ? tile({ name: 'HILL TENDER', sub: 'kept a page 30 days', art: this.badgeIcon('trophy'), rot: '-2deg' }) : locked({ name: 'HILL TENDER', sub: first ? (30 - days) + ' days to go' : 'keep a page 30 days' }),
       streak >= 3 ? tile({ name: streak + '-DAY STREAK', sub: 'still burning', art: this.badgeIcon('flame'), rot: '-1deg' }) : locked({ name: 'A STREAK', sub: 'three days running' }),
       notes >= 10 ? tile({ name: 'WALL SCRIBBLER', sub: 'left 10 notes', art: this.badgeIcon('pencil'), rot: '2deg' }) : locked({ name: 'WALL SCRIBBLER', sub: (10 - notes) + ' notes to go' }),
       n >= 100 ? tile({ name: '100 EDITS', sub: 'a hundred pieces', art: this.badgeIcon('trophy'), rot: '1deg' }) : locked({ name: '100 EDITS', sub: (100 - n) + ' to go' }),
-      locked({ name: "FOUNDER'S PIN", sub: 'how? nobody knows' })
+      here ? tile({ name: 'I WAS HERE', sub: 'TOEM 2 · ' + MON[+here[2] - 1] + ' ' + here[1], art: this.stickerArt('here'), rot: '-1.5deg' }) : locked({ name: 'I WAS HERE', sub: 'open TOEM 2 to earn it' })
     ];
+  }
+  // THE STICKERS' ART, as /yard/ draws it (yard/index.html: stickerArt): the kit's own pictures, and the gnome's number laid on the plate
+  stickerArt(kind, n) {
+    const h = React.createElement;
+    if (kind === 'here') return h('img', { src: '/logo/i-was-here-toem2.webp', width: 96, height: 59, alt: '', decoding: 'async', style: { display: 'block' } });
+    const no = 'NO. ' + String(n).padStart(4, '0'), long = no.length > 8;
+    return h('svg', { width: 172, height: 121, viewBox: '0 0 480 337', role: 'img', 'aria-label': 'Founding Gnome number ' + n, style: { display: 'block', maxWidth: '100%', height: 'auto' } },
+      h('image', { href: '/logo/founding-gnome.webp', width: 480, height: 337 }),
+      h('text', { x: 236.5, y: 295.5, transform: 'rotate(-1.9 236.5 295.5)', textAnchor: 'middle', fontFamily: "'VT323', monospace", fontSize: 32, fill: '#fdf7e3',
+                  textLength: long ? 146 : 134, lengthAdjust: long ? 'spacingAndGlyphs' : 'spacing' }, no));
   }
   editList(C) {
     const P = this.pieces().filter(function (p) { return p.when; }).sort(function (a, b) { return b.when - a.when; }).slice(0, 6);
@@ -1302,10 +1320,10 @@ class Component extends DCLogic {
     const captionsOn = this.props.captions ?? true;
     const rot = (v) => jitter ? v : '0deg';
     const badgeTile = (b) => Object.assign({
-      bg: '#fffcf0', border: '3px solid #17120b', shadow: '4px 5px 0 rgba(60,50,80,0.18)', op: 1
+      bg: '#fffcf0', border: '3px solid #17120b', shadow: '4px 5px 0 rgba(60,50,80,0.18)', op: 1, col: 'auto'
     }, b, { rot: rot(b.rot) });
     const lockedTile = (b) => Object.assign({
-      bg: 'rgba(23,18,11,0.04)', border: '3px dashed rgba(23,18,11,0.4)', shadow: 'none', op: 0.7,
+      bg: 'rgba(23,18,11,0.04)', border: '3px dashed rgba(23,18,11,0.4)', shadow: 'none', op: 0.7, col: 'auto',
       art: this.badgeIcon('lock')
     }, b, { rot: '0deg' });
     let badges = this.badgeList(badgeTile, lockedTile);
@@ -1489,7 +1507,10 @@ class Component extends DCLogic {
        was up, a visitor was handed the owner's template: save yard where Propose edits should
        be, and no add friend. The address waits for #dc-root, which the runtime makes only
        after it has asked. */
-    if (u && /[?&]u=/.test(location.search) && u !== mine) fetch('/api/wall?who=' + u, { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (w) {
+    /* THE OWNER'S CARD (2026-09-28), asked of the wall once, for the two things that want it: the address below, and the two
+       stickers among the badges (the component: THE TWO STICKERS). Nobody's yard — the site's shared one — has no card. */
+    window.YARD_CARD = u ? fetch('/api/wall?who=' + u, { cache: 'no-store' }).then(function (r) { return r.json(); }).catch(function () { return null; }) : null;
+    if (u && /[?&]u=/.test(location.search) && u !== mine) window.YARD_CARD.then(function (w) {
       var t = w && w.ok && w.who && /^(.+)#(\d+)$/.exec(w.who.tag || ''), tries = 0;
       if (!t) return;
       (function say() {

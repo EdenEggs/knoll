@@ -11,10 +11,20 @@
 <meta property="og:description" content="What Knoll keeps about you, what it does not, where it lives, and how to take it away.">
 <meta property="og:image" content="https://www.knoll.space/logo/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<!-- WHAT KNOLL KEEPS (2026-09-23): the privacy page Google asks a published "Sign in
-     with Google" app to link to (Google Cloud project knoll-509514, Branding). Every
-     line is what the code does — api/auth.js, api/wall.js, api/hill.js,
-     api/friends.js — so a change to what they keep is a change to this page. -->
+<!-- WHAT KNOLL KEEPS (2026-09-23; redrawn with a contents rail and a link to
+     /terms/ on 2026-09-24): the privacy page Google asks a published "Sign in
+     with Google" app to link to (Google Cloud project knoll-509514, Branding).
+     Every line is what the code does — api/auth.js, api/wall.js, api/hill.js,
+     api/friends.js, api/board.js, api/gallery.js — so a change to what they
+     keep is a change to this page; lab2/perf/probe-legal.js holds its numbers
+     to theirs. Since 2026-09-28 it also says what a visitor's BROWSER is sent
+     to fetch or tell somebody else: the pointers (cursors.js and its Nostr
+     relays), the visit count and the fence (yard/tools.js → the Apps Script's
+     Google Sheet), the waiting list (coming-soon.html), YouTube and KLIPY
+     pieces (wall.js), React from unpkg (support.js) and Google Fonts — a page
+     that stops doing one of these, or starts another, changes this page too.
+     The owner's blanks were filled on 2026-09-28 (the age, thirteen; a deletion,
+     within thirty days), as on /terms/ (there, the cap and Wisconsin's law). -->
 <link rel="icon" href="/logo/logo-icon.svg">
 <link rel="stylesheet" href="/lab2/fonts/fonts.css">
 <script src="/account.js" defer></script>
@@ -24,50 +34,163 @@
   a { color: #e8484a; }
   a:hover { color: #b8302f; }
   ::selection { background: #ffd23f; }
-  .knoll-head { display: flex; align-items: center; gap: 22px; padding: 12px 22px; background: #fdfbfd; border-bottom: 1.5px dashed #e2d4df; }
+  .knoll-head { display: flex; align-items: center; gap: 22px; padding: 12px 22px; background: #fdfbfd; border-bottom: 1.5px dashed #e2d4df; box-sizing: border-box; }
   .knoll-brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #26212a; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: -0.01em; }
   .knoll-brand img { display: block; }
   .knoll-brand:hover { color: #a52c68; }
-  main { max-width: 760px; margin: 40px auto 60px; padding: 26px 30px 30px; background: #fdf7e3; border: 5px solid #17120b; box-shadow: 9px 10px 0 rgba(60,50,80,0.2); transform: rotate(-0.3deg); }
-  h1 { margin: 0 0 6px; font-family: 'Rye', serif; font-size: clamp(28px, 5vw, 40px); font-weight: 400; }
-  h2 { margin: 26px 0 6px; font-family: 'Rye', serif; font-size: 21px; font-weight: 400; }
-  p { margin: 0 0 10px; font-size: 20px; line-height: 1.35; color: #3a3342; }
+  .wrap { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: 32px; max-width: 1062px; margin: 40px auto 70px; padding: 0 20px; box-sizing: border-box; }
+  .toc { flex: 1 0 230px; max-width: 230px; display: flex; flex-direction: column; gap: 10px; background: #fdf7e3; border: 3px solid #17120b; box-shadow: 6px 7px 0 rgba(60,50,80,0.2); padding: 14px 16px 16px; box-sizing: border-box; }
+  .toc ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+  .toc ul a { display: flex; gap: 10px; align-items: baseline; color: #17120b; text-decoration: none; font-size: 18px; line-height: 1.2; }
+  .toc ul a:hover { color: #e8484a; }
+  .toc ul a b { width: 8px; height: 8px; background: #e8484a; border: 2px solid #17120b; transform: rotate(45deg); flex: none; margin-right: 6px; }
   .eyebrow { font-size: 15px; letter-spacing: 2px; color: #4a4054; opacity: 0.8; }
-  @media (max-width: 700px) { main { margin: 20px 12px 40px; padding: 20px 18px 22px; transform: none; } }
+  .rule { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 6px 0 2px; }
+  .rule i { flex: 1; height: 3px; background: #17120b; opacity: 0.5; }
+  .rule b { width: 10px; height: 10px; background: #e8484a; border: 2.5px solid #17120b; transform: rotate(45deg); flex: none; }
+  main .rule { margin: 30px 0 14px; }
+  main .rule i { flex: 0 0 60px; }
+  .btn { align-self: flex-start; height: 30px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; background: #fdf7e3; color: #17120b; border: 2.5px solid #17120b; box-shadow: 3px 3px 0 rgba(60,50,80,0.22);
+    font-size: 18px; line-height: 1; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; white-space: nowrap; box-sizing: border-box; transform: rotate(-1deg); transition: transform .15s, box-shadow .15s; }
+  .btn:hover { color: #17120b; transform: rotate(-1deg) translate(1px,1px); box-shadow: 2px 2px 0 rgba(60,50,80,0.22); }
+  main { flex: 1 1 480px; max-width: 760px; min-width: 0; padding: 26px 30px 30px; background: #fdf7e3; border: 5px solid #17120b; box-shadow: 9px 10px 0 rgba(60,50,80,0.2); transform: rotate(-0.3deg); box-sizing: border-box; }
+  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+  .top .eyebrow { padding-top: 6px; }
+  .stamp { font-size: 16px; letter-spacing: 3px; color: #e8484a; border: 3px solid #e8484a; border-radius: 4px; padding: 1px 10px; transform: rotate(-4deg); white-space: nowrap; margin: 2px 6px 0 0; }
+  h1 { margin: 6px 0 14px; font-family: 'Rye', serif; font-size: clamp(28px, 5vw, 40px); font-weight: 400; line-height: 1.1; }
+  h2 { margin: 26px 0 6px; font-family: 'Rye', serif; font-size: 21px; font-weight: 400; }
+  section { scroll-margin-top: 24px; }
+  p { margin: 0 0 10px; font-size: 20px; line-height: 1.35; color: #3a3342; }
+  mark.fill { background: #ffd23f; color: #17120b; padding: 0 5px; border-bottom: 2px dashed #17120b; }
+  .also { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; font-size: 16px; letter-spacing: 2px; color: #4a4054; text-align: center; }
+  .also a { text-decoration: none; }
+  @media (min-width: 900px) { .toc { position: sticky; top: 24px; } }
+  @media (max-width: 700px) { .wrap { margin: 20px auto 40px; padding: 0 12px; gap: 20px; } .toc { max-width: none; } main { padding: 20px 18px 22px; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
 </style>
 </head>
 <body>
 <header class="knoll-head">
   <a class="knoll-brand" href="/"><img src="/logo/logo-icon.svg" alt="" width="26" height="26"><span>knoll</span></a>
 </header>
-<main>
-  <h1>What Knoll keeps</h1>
-  <div class="eyebrow">PRIVACY · LAST CHANGED 23 SEPTEMBER 2026</div>
 
-  <h2>Your account</h2>
-  <p>A name, and the number that comes with it (Mossy#3); the last fifty names the account has gone by; your secret word as a one-way scrypt hash, never the word itself; when the account was made and last seen; and a small picture, if you give it one.</p>
-  <p>Your email address is not stored. Knoll keeps a sixteen-character fingerprint of it (the start of its SHA-256 hash), which is how the gate finds your account when you log in.</p>
+<div class="wrap">
+  <nav class="toc" aria-label="Contents">
+    <div class="eyebrow">CONTENTS</div>
+    <ul>
+      <li><a href="#p1"><b aria-hidden="true"></b><span>Your account</span></a></li>
+      <li><a href="#p2"><b aria-hidden="true"></b><span>Signing in with Google or Discord</span></a></li>
+      <li><a href="#p3"><b aria-hidden="true"></b><span>Cookies</span></a></li>
+      <li><a href="#p4"><b aria-hidden="true"></b><span>What you make</span></a></li>
+      <li><a href="#p5"><b aria-hidden="true"></b><span>Your network address</span></a></li>
+      <li><a href="#pointers"><b aria-hidden="true"></b><span>Other people's pointers</span></a></li>
+      <li><a href="#visits"><b aria-hidden="true"></b><span>Counting visits</span></a></li>
+      <li><a href="#elsewhere"><b aria-hidden="true"></b><span>Things from elsewhere</span></a></li>
+      <li><a href="#p6"><b aria-hidden="true"></b><span>On your device</span></a></li>
+      <li><a href="#p7"><b aria-hidden="true"></b><span>Where it lives</span></a></li>
+      <li><a href="#children"><b aria-hidden="true"></b><span>Children</span></a></li>
+      <li><a href="#p8"><b aria-hidden="true"></b><span>Taking it away</span></a></li>
+      <li><a href="#changes"><b aria-hidden="true"></b><span>When this page changes</span></a></li>
+    </ul>
+    <div class="rule" aria-hidden="true"><i></i><b></b><i></i></div>
+    <div class="eyebrow">SEE ALSO</div>
+    <a class="btn" href="/terms/">terms of service →</a>
+  </nav>
 
-  <h2>Signing in with Google</h2>
-  <p>Knoll asks Google for your email address and nothing else (the <i>openid</i> and <i>email</i> scopes). It is used once, to find or make your account the same way, and is not kept — nor is anything else from your Google account.</p>
+  <main>
+    <div class="top">
+      <div class="eyebrow">PRIVACY · KNOLL</div>
+      <div class="stamp">LAST CHANGED · 28 SEP 2026</div>
+    </div>
+    <h1>What Knoll keeps</h1>
+    <p>Knoll Space is run by Knoll, which answers for what this page says. What is kept is kept to run the site you asked for and to keep it safe from abuse, and for nothing else. To ask about any of it: <a href="mailto:contact@knoll.space">contact@knoll.space</a>.</p>
 
-  <h2>Cookies</h2>
-  <p><b>knoll_s</b> is your session: ninety days, or until the browser closes if you asked not to be remembered, and no script on any page can read it. <b>knoll_in</b> says which account is signed in, so pages can draw your corner. <b>knoll_o</b> lives ten minutes, while Google signs you in. There are no advertising or tracking cookies, and no third-party analytics.</p>
+    <section id="p1">
+      <h2>Your account</h2>
+      <p>A name, and the number that comes with it (Mossy#3); the last fifty names the account has gone by, and every name and number it has been given, so that none is ever handed to somebody else; your secret word as a one-way scrypt hash, never the word itself; when the account was made and last seen; and a small picture, if you give it one.</p>
+      <p>Your email address is not stored. Knoll keeps a sixteen-character fingerprint of it (the start of its SHA-256 hash), which is how the gate finds your account when you log in. The fingerprint is also the account's id: it stands beside your edits, posts and photos, so somebody who already knows your address could work out which account is yours.</p>
+      <p>When you sign up with an email and a password, or ask to reset a forgotten password, a six-digit code is emailed to the address you typed. The email is sent through Resend, which handles the address to deliver it and keeps its own record of what it sent. Knoll keeps a one-way hash of the code for ten minutes, and the address not at all. A password reset signs the account out everywhere it was signed in.</p>
+      <p>The one place an address is kept is the waiting list on the coming-soon page. If you leave yours there it is kept, with the date and the interest you chose, for the one email that says the wall has opened, and until you ask for it to be taken off.</p>
+      <p>As you use the walls, Knoll counts on your account: the days on which an edit of yours went live (your standing); how many of your edits went live, waited, were approved, turned down or reverted; the votes you cast; and any strikes against it.</p>
+      <p>Your name and number, your picture, the month you joined, your standing, and how many of your edits landed and votes you cast make a card that anybody can read. So do the two stickers on your yard: your number among the first hundred thousand accounts, and the month you first opened TOEM 2 while signed in. The rest of the count, a ban or a watch on the account, and when you were last seen are for Knoll's moderators.</p>
+    </section>
 
-  <h2>What you make</h2>
-  <p>Your yard, your edits to the walls, the notes you pin, the spaces you create (their names, colours and pictures), your friends, friend requests, invites, and the notifications about them. Your yard, your spaces, your tag and your edits, once they are live, are there for other gnomes to see — that is what they are for.</p>
+    <section id="p2">
+      <h2>Signing in with Google or Discord</h2>
+      <p>Knoll asks Google for your email address and nothing else (the <i>openid</i> and <i>email</i> scopes). It is used once, to find or make your account the same way, and is not kept — nor is anything else from your Google account.</p>
+      <p>Knoll asks Discord who you are and for your email address (the <i>identify</i> and <i>email</i> scopes, which are the least Discord offers for it). Only the address, and that Discord has confirmed it, is read; it is used once, the same way, and is not kept — nor is your Discord name, picture or anything else from your Discord account.</p>
+    </section>
 
-  <h2>Your network address</h2>
-  <p>Not stored. A salted one-way hash of it is used, for a while, to slow floods of posts and to keep anybody from approving or voting on their own edits.</p>
+    <section id="p3">
+      <h2>Cookies</h2>
+      <p><b>knoll_s</b> is your session: ninety days, or until the browser closes if you asked not to be remembered, and no script on any page can read it. <b>knoll_in</b> says which account is signed in, so pages can draw your corner. <b>knoll_o</b> lives ten minutes, while Google or Discord signs you in. Knoll sets no advertising or tracking cookies. Visits to a yard are counted, without a cookie: see <a href="#visits">Counting visits</a>.</p>
+    </section>
 
-  <h2>On your device</h2>
-  <p>The yard keeps your layout, your settings and your unsent drafts in your browser's own storage. Clearing the site's data there removes them.</p>
+    <section id="p4">
+      <h2>What you make</h2>
+      <p>Your yard, your edits to the walls, the notes you pin, the spaces you create (their names, colours and pictures), what you write on a space's board and in its chat, the photos you hang in its album and the hearts you give, your friends, friend requests, invites, and the notifications about them.</p>
+      <p>Your yard, your spaces, your tag, your edits once they are live, and your posts, chat lines and photos are there for anybody to see, signed in or not — that is what they are for. A chat that only some may write in can still be read by everyone, and who moderates a space with its maker is said on the space. Your friends and your bell are yours alone.</p>
+      <p>While you have a wall open and are signed in, the page tells Knoll so about every half minute, and the others signed in on that wall can see your name and picture among those who are there now; anybody can see how many are. Knoll keeps that for a minute and a half after it last heard from your browser, and no longer. What is kept is the first time you opened that wall while signed in: it stands, with your name, in the wall's history, which its moderators read on its dashboard beside the edits that went up.</p>
+      <p>A wall keeps a list of its last five hundred changes — who, what kind and when — and each change in full for a hundred and eighty days. An edit that waits for review lapses after a week; once decided, its record is kept a month, and for that month the moderators can see who voted which way. A yard keeps its last forty saves, which can be opened as the yard can. A board keeps the newest hundred entries of a tab, five hundred of a forum and two hundred lines of chat; an album, its newest two hundred photos. A photo taken down is deleted from the store, but copies may stay in browsers and in the network's caches for up to a year.</p>
+      <p>The moderators keep a record of what was done as moderation — roles, bans, watches, reverts, strikes, and posts or photos hidden, each with the account it was done to — the last thousand entries.</p>
+      <p>A change you propose to another gnome's page is kept, with your tag and the line you wrote with it, for them to take or leave: a week while it waits, and a month once it is decided. Your bell keeps the last fifty things it was told — who asked to be your friend, what was proposed to your page, what became of what you sent, and what happened at the spaces you moderate — and when you last opened it.</p>
+    </section>
 
-  <h2>Where it lives</h2>
-  <p>Knoll is hosted by Vercel, which also keeps the yards' files, and its records are kept by Upstash; both in the United States.</p>
+    <section id="p5">
+      <h2>Your network address</h2>
+      <p>Not stored as it is. A salted one-way hash of it is used to slow floods of posts, and to keep anybody from approving or voting on their own edits: for an hour in the counters, and for up to six weeks beside an edit, a vote or a proposal, until its record lapses. It is shown to nobody.</p>
+      <p>Vercel, which serves the site, sees your address as any host does, and keeps its own logs for a short while.</p>
+    </section>
 
-  <h2>Taking it away</h2>
-  <p>Write to <a href="mailto:knoll.space@gmail.com">knoll.space@gmail.com</a> from the address you signed up with, and your account and what is attached to it will be deleted.</p>
-</main>
+    <section id="pointers">
+      <h2>Other people's pointers</h2>
+      <p>On a wall you see where other visitors' pointers are, and they see yours. The pointers go from browser to browser, not through Knoll. To find each other, your browser announces itself on five public relays of the Nostr network, and asks Google's and Cloudflare's servers what its own address is, when the page has opened — whether or not you move your pointer.</p>
+      <p>Those who run the relays and those servers, anyone listening on the relays, and the other visitors of the page can learn your network address and when you came and went; never your name, your account or what you drew. Knoll stores none of it. A browser with WebRTC switched off announces nothing, and shows no pointers.</p>
+    </section>
+
+    <section id="visits">
+      <h2>Counting visits</h2>
+      <p>When you leave a yard, your browser sends one line to a Google Sheet that Knoll keeps: whose yard it was, a random id kept in your browser's storage (so that two visits from one browser count as one visitor), whether you were on a phone, a tablet or a desktop, how long you stayed, and the site you came from, if there was one. Your name, your account and your address are not in it. It goes to Google, which may read cookies of its own if your browser sends them.</p>
+      <p>The yard's owner sees the sums on their dashboard. The lines name nobody, and they are not secret: the counting script gives a yard's lines to whoever asks it for them.</p>
+      <p>A like or a note left on a yard's fence is kept in the same sheet: the note, the name given with it, and the same random id. The notes on a fence are there for anybody to read.</p>
+    </section>
+
+    <section id="elsewhere">
+      <h2>Things from elsewhere</h2>
+      <p>Some of what a page shows, your browser fetches from somebody else, who sees your network address as any site does, and is sent neither your name nor your account. A video pinned to a wall shows a still from YouTube as soon as the wall is drawn, and plays from YouTube's no-cookie player only when you press play. A gif pinned to a wall comes from KLIPY. An album's photos come from Vercel's file store. Some pages — the yard and the dashboard among them — fetch the React library from unpkg, and their lettering from Google Fonts.</p>
+    </section>
+
+    <section id="p6">
+      <h2>On your device</h2>
+      <p>Knoll keeps things in your browser's own storage: how you arranged a page, your own copy of a wall or a yard and the tracings you made for it, your settings and your unsent drafts, your account's picture, which yards you liked, when you last looked at a board or an album, and the random id that counts your visits. Clearing the site's data there removes them.</p>
+    </section>
+
+    <section id="p7">
+      <h2>Where it lives</h2>
+      <p>Knoll is hosted by Vercel, which also keeps the yards' files and the albums' photos, and its records are kept by Upstash; both in the United States. The emails that carry a code are sent by Resend, also in the United States. The visit counts, the fences and the waiting list are kept in a Google Sheet in Knoll's own Google account.</p>
+      <p>Nothing Knoll keeps is sold, or shared for advertising. It is handed over only where the law requires it.</p>
+    </section>
+
+    <section id="children">
+      <h2>Children</h2>
+      <p>Knoll is not for anyone under 13, and does not knowingly keep anything about a child younger than that. If you think one has made an account, write to <a href="mailto:contact@knoll.space">contact@knoll.space</a> and it will be taken away.</p>
+    </section>
+
+    <section id="p8">
+      <h2>Taking it away</h2>
+      <p>Write to <a href="mailto:contact@knoll.space">contact@knoll.space</a> from the address you signed up with, and within 30 days your account will be deleted: its record and its counts, its names, picture, friends, invitations and bell, its yard with its fence and its visit counts, and the spaces it made.</p>
+      <p>What you put on a wall or a board that others share stays where taking it out would change their work or the wall's history. It carries the account's id, which is not your address, and in a wall's history the name the account went by at the time.</p>
+      <p>The same way, you can ask for a copy of what Knoll keeps on your account, or for something to be put right; your name, your picture and your yard you can change yourself. Where you live may give you more rights than these — in the European Union, the United Kingdom or California, for instance — and you may complain to your data protection authority.</p>
+    </section>
+
+    <section id="changes">
+      <h2>When this page changes</h2>
+      <p>The date at the top says when this page last changed. A change that matters is said on the site before it takes effect.</p>
+    </section>
+
+    <div class="rule" aria-hidden="true"><i></i><b></b><i></i></div>
+    <div class="also"><span>SEE ALSO · <a href="/terms/">TERMS OF SERVICE →</a></span></div>
+  </main>
+</div>
 </body>
 </html>

@@ -257,8 +257,11 @@ window.Gallery = (function () {
   }
   function pick(t) { tab = t; viewing = null; adding = null; render(); }
 
-  // ── once a minute for the count; when it opens, and whenever the tab comes back ──
-  function schedule() { clearTimeout(timer); timer = setTimeout(tick, POLL); }
+  /* ── once a minute while it is open; when it opens, and whenever the tab comes back ──
+     SHUT, IT IS NOT ASKED AFTER (2026-09-28), as the leaderboard is not: the album's is the dearest read a page makes (a
+     count a photo, and whose heart), and a tab that never opened it asked every minute, for a number on a button. The
+     button's number is the page's load's, and the tab's coming back's. */
+  function schedule() { clearTimeout(timer); if (open) timer = setTimeout(tick, POLL); }
   async function tick() {
     if (!loading && !document.hidden) {
       loading = true;

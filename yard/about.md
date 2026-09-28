@@ -1101,3 +1101,28 @@ page stands in YOUR SPACES without a reload. A code that opens nothing says
 so, in the door's own words. The page's name is set as text.
 
 **Checks.** `node lab2/perf/probe-handoff.js` walks it.
+
+## The two stickers (2026-09-28)
+
+Two of the sticker kit's own among the badges, on `/yard/` and on the view of
+it everybody else has (`/YardView/`):
+
+- **Founding Gnome** — every one of the first hundred thousand accounts has
+  it, numbered in the order the accounts were made (`api/wall.js`: THE
+  FOUNDING GNOMES; the number is the account's for good). It took the
+  Founder's Pin's place and stands first, as wide as the card. The art is
+  `logo/founding-gnome.webp`, whose plate is blank: the number is type laid
+  on it in the picture's own measure (480 by 337), so it sits on the plate
+  at any size — four figures as the art came, five and six drawn closer.
+- **I was here · TOEM 2** — for an account that has had TOEM 2 open while
+  signed in (the wall is told by the board's poll — `api/board.js`: WHO IS
+  HERE — and the card says the month). `logo/i-was-here-toem2.webp`.
+
+Both are the wall's card's to say (`/api/wall?who=`: `founder`, `here`), so
+they are the same wherever the card is read. The two pictures were cut from
+the sheets they came on (lavender ground made clear, 480 wide) by
+`lab2/perf/sticker-cut.js`, which is how to cut them again if the art changes.
+
+**Checks.** `node lab2/perf/probe-stickers.js` (32, headless Chrome — the
+badges on both pages, the numbers on the plate, and the search that finds
+the pages people make); `node toem2/probe-wall-api.js` section 23.

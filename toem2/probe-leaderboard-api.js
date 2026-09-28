@@ -102,6 +102,11 @@ const ids = list => list.map(r => r.id);
   r = await POST({ op: 'settings', page: 'glade', reset: true }, 'nu');
   check('back to the default: the Hall of Fame, its first three rankings, ten rows', r.json.ok && r.json.settings.title === 'Hall of Fame' && r.json.settings.tabs.join() === 'edits,days,first' && r.json.settings.top === 10
         && JSON.stringify((await GET('?page=glade')).json.settings) === JSON.stringify(r.json.settings), r.json.settings);
+  // WHO TENDS THE CORNER (2026-09-28, api/wall.js): TOEM 2's trusted keep its wall, not its leaderboard
+  U.old = 'e'.repeat(16); await W.db('HSET', W.K.user(U.old), 'made', '1', 'name', 'old', 'role', 'user'); T.old = await W.mintSession(U.old);
+  await W.db('SADD', W.K.days(U.old), ...Array.from({ length: 12 }, (_, i) => '2026-08-' + String(i + 1).padStart(2, '0')));
+  check('ten standing days do not make TOEM 2\'s leaderboard somebody\'s to arrange', (await GET('', 'old')).json.me.keeper === false && brief(await POST({ op: 'settings', tabs: ['posts'], title: 'Mine', sub: '', top: 5 }, 'old')).code === 'role'
+        && brief(await POST({ op: 'settings', reset: true }, 'old')).code === 'role');
   r = await POST({ op: 'settings', reset: true }, 'mod');
   check('…and TOEM 2\'s is the Leaderboard again, counted afresh', r.json.ok && r.json.settings.title === 'Leaderboard' && r.json.settings.sub === 'Counted up every ten minutes' && (await W.db('GET', W.K.lb('toem2'))) === null, r.json.settings);
 

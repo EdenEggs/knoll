@@ -1,5 +1,8 @@
 {
   "cleanUrls": false,
+  "functions": {
+    "api/*.js": { "maxDuration": 30 }
+  },
   "redirects": [
     { "source": "/ironhive", "destination": "/ironhive/", "permanent": false },
     { "source": "/toem2", "destination": "/toem2/", "permanent": false }
@@ -100,6 +103,43 @@
     },
     {
       "source": "/(posters|fonts|vendor)/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, stale-while-revalidate=604800"
+        }
+      ]
+    },
+
+    {
+      "source": "/(toem2|yard|dashboard|settings|signup|login|YardView|ironhive)/(.*)\\.(js|css|json)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, stale-while-revalidate=3600"
+        }
+      ]
+    },
+    {
+      "source": "/(toem2|ironhive)/(fonts|vendor)/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, stale-while-revalidate=604800"
+        }
+      ]
+    },
+    {
+      "source": "/(account|bell|support)\\.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, stale-while-revalidate=3600"
+        }
+      ]
+    },
+    {
+      "source": "/logo/(.*)\\.(webp|svg|jpg)",
       "headers": [
         {
           "key": "Cache-Control",

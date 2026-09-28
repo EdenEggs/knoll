@@ -170,6 +170,15 @@ exactly this reason.
 
 ---
 
+## The legal pages (2026-09-24)
+
+**Terms of Service** points at `/terms/` now, and **Rules** (sign-up only) at
+`/terms/#s5`, Acceptable use; a **Privacy Policy** link beside them goes to
+`/privacy/`. All three open in a new tab so a half-filled form is not lost.
+`lab2/perf/probe-gate-google.js` checks the hrefs.
+
+---
+
 ## The reset, and Discord (2026-09-27)
 
 **Forgot your password?** is real. It turns the paper — `state.stage`, the way

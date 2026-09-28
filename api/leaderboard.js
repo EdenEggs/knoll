@@ -65,7 +65,7 @@ async function meOf(req, slug) {
   const me = await whoIs(req);
   if (!me) return null;
   const rules = await rulesOf({ slug }, me), mod = isMod(me);
-  return { id: me.id, tag: me.tag, banned: me.banned, mod, keeper: mod || !!rules.keeper };
+  return { id: me.id, tag: me.tag, banned: me.banned, mod, keeper: mod || !!rules.tends };   // the corner's keeper: the page's moderators proper (api/wall.js: WHO TENDS ITS CORNER)
 }
 const said = me => me && { id: me.id, tag: me.tag, keeper: me.keeper, mod: me.mod };
 

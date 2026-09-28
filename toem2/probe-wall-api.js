@@ -174,6 +174,25 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
     r = await edit('adm', { [cp.n]: Object.assign({}, at(d, cp.n), { c: 1 }) }); d = await doc();
     check('…and give it back', r.json.status === 'live' && at(d, cp.n).c === 1);
 
+    // ── 7b · `c` IS TWO THINGS (2026-09-28): a sticker's canon flag, and everything else's ink ──
+    r = await edit('tr', { [nm(40)]: fresh('s', { d: 'M0 0L9 9', sw: 3, c: '#ff0000' }), [nm(41)]: fresh('s', { d: 'M0 0L9 9', sw: 3, c: 3 }), [nm(42)]: fresh('p', { d: 'M0 0h4v4h-4z', g: 4, c: '#00AA00' }),
+                           [nm(43)]: { k: 't', x: 10, y: 10, t: 'in blue', c: '#3366ff', sz: 20 }, [nm(44)]: { k: 't', x: 10, y: 40, t: 'in ink four', c: 4, sz: 20 } }); d = await doc();
+    check('a gnome who is no moderator draws in the colour they chose, by the wheel or by number, and it is the colour everybody is sent',
+          r.json.status === 'live' && at(d, nm(40)).c === '#ff0000' && at(d, nm(41)).c === 3 && at(d, nm(42)).c === '#00AA00' && at(d, nm(43)).c === '#3366ff' && at(d, nm(44)).c === 4, brief(r) + ' ' + j([40, 41, 42, 43, 44].map(i => (at(d, nm(i)) || {}).c)));
+    r = await edit('tr', { [nm(43)]: Object.assign({}, at(d, nm(43)), { c: '#aa00aa' }) }); d = await doc();
+    check('…and changes the colour of a note of their own: a small edit, live — a colour is no canon flag', r.json.status === 'live' && r.json.cls === 'small' && at(d, nm(43)).c === '#aa00aa', brief(r));
+    r = await edit('tr', {}, [nm(44)]); check('…and takes a coloured one off, which is not one of the plates\' gone', r.json.status === 'live' && r.json.cls === 'small', brief(r));
+    const inks = { a: 'red', b: 'url(https://evil.example/x)', e: '#fff', f: '#12345g', g: 5, h: -1, i: 1.5, k: 'var(--pink)', l: '#ff0000;stroke-width:999', m: true, o: '' };
+    r = await edit('tr', Object.fromEntries(Object.keys(inks).map((k, i) => [nm(50 + i), fresh('s', { d: 'M0 0L9 9', sw: 3, x: i, c: inks[k] })]))); d = await doc();
+    check('what is neither one of the five nor a colour of the wheel\'s is no ink: the stroke lands in the bench\'s own, and nothing else is kept',
+          r.json.status === 'live' && Object.keys(inks).every((k, i) => at(d, nm(50 + i)) && !('c' in at(d, nm(50 + i)))), brief(r) + ' ' + j(Object.keys(inks).map((k, i) => (at(d, nm(50 + i)) || {}).c)));
+    r = await edit('adm', { [nm(62)]: fresh('s', { d: 'M0 0L9 9', sw: 3, c: '#00ff00' }), [nm(63)]: { k: 't', x: 0, y: 80, t: 'a moderator, in two', c: 2, sz: 20 } }); d = await doc();
+    check('a moderator\'s ink is the ink they chose, not the flag', r.json.status === 'live' && at(d, nm(62)).c === '#00ff00' && at(d, nm(63)).c === 2, j([at(d, nm(62)).c, at(d, nm(63)).c]));
+    r = await edit('tr', { [nm(62)]: Object.assign({}, at(d, nm(62)), { sw: 5 }) });
+    check('…and a moderator\'s coloured stroke is nobody\'s canon: changing it is somebody else\'s piece, and no more', r.json.cls === 'small' && r.json.why !== 'drastic', brief(r));
+    if (r.json.edit) await POST({ op: 'review', edit: r.json.edit, do: 'reject' }, 'adm');
+    d = await doc(); check('the plates\' own are canon still, every one a sticker', d.wall.items.filter(it => it.c === 1).length >= 370 && d.wall.items.filter(it => it.c === 1).every(it => it.k === 'd'), String(d.wall.items.filter(it => it.c === 1).length));
+
     // ── 8 · no-ops ───────────────────────────────────────────────────────
     const cpNow = at(d, cp.n);
     r = await edit('adm', { [cp.n]: Object.assign({}, cpNow, { x: cpNow.x + 1 }) }); check('a 1 px nudge is a no-op → 400', r.status === 400 && r.json.code === 'no-op');
@@ -345,7 +364,7 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
     r = await GET('?audit=1', 'mod'); check('…and it says who made the page, and who banned whom', r.json.audit.some(e => e.what === 'page' && e.page === 'meadow' && e.by === U.mod) && r.json.audit.some(e => e.what === 'role' && e.banned === true), j(r.json.audit.slice(0, 3)));
 
     // ── 18 · spaces: a page anybody makes, two each ──────────────────────
-    const JPEG = 'data:image/jpeg;base64,' + Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 16]).toString('base64');
+    const JPEG = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AVN//2Q==';   // a real JPEG, one pixel by one: the doors read a picture's size off its header (api/wall.js: HOW BIG ACROSS)
     r = await POST({ op: 'page', slug: 'yard', title: 'Yard' }, 'sp'); check('a space may not take a word the site already answers at', r.status === 409 && r.json.code === 'taken', brief(r));
     r = await POST({ op: 'page', slug: 'hollow', title: 'Mossy Hollow', palette: 'sticky', inks: ['#E8484A', '#e8484a', 'red', '#5a8fd6'], mod: 'read', feats: [true, 0, 'x'], pic: JPEG }, 'sp');
     check('a gnome makes a space, its look cut to what the form offers', r.json.ok && r.json.page.slug === 'hollow' && r.json.page.paper === '#ffe27a' && j(r.json.page.inks) === j(['#e8484a', '#5a8fd6']) &&
@@ -598,6 +617,60 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
     check('a second strike bans, and the ban is on the record as automatic', !!ban && ban.auto === true && ban.by === U.mod && (await GET('?me=1', 'c2')).json.banned === true, j(ban));
     r = await GET('?audit=400', 'mod'); const kinds = new Set(r.json.audit.map(e => e.what));
     check('the record now holds settings, reviews, reverts, strikes, undos, closes and bans', ['settings', 'review', 'revert', 'strike', 'undo', 'close', 'ban', 'role', 'page'].every(k => kinds.has(k)), j([...kinds]));
+
+    // ── 23 · THE FOUNDING GNOMES, I WAS HERE, and THE PAGES BY NAME (2026-09-28) ──
+    const card = async (who, as) => (await GET('?who=' + U[who], as)).json.who || {};
+    const everyone = async () => { const ids = await API.db('ZRANGEBYSCORE', API.K.users, '-inf', '+inf'); const f = await API.dbm(ids.map(u => ['HGET', API.K.user(u), 'founder'])); return ids.map((u, i) => [u, +f[i] || 0]); };
+    const whole = l => { const ns = l.map(x => x[1]).filter(Boolean).sort((a, b) => a - b); return ns.every((v, i) => v === i + 1); };   // 1, 2, 3 … with none twice and none skipped
+    r = await GET('?who=' + U.c1); const c1no = r.json.who.founder;
+    check('a gnome\'s card says its number among the founding gnomes, and says the same again', c1no >= 1 && (await card('c1')).founder === c1no && +(await API.db('HGET', API.K.user(U.c1), 'founder')) === c1no, 'c1 is No. ' + c1no);
+    check('every account that has been numbered has a number of its own, and none is skipped', whole(await everyone()) && +(await API.db('GET', API.K.founders)) === (await everyone()).filter(x => x[1]).length, j((await everyone()).map(x => x[1])));
+    // the first count: as if nobody had been numbered, three made in an order the list does not have them in
+    for (const [nme, made] of [['f3', 300], ['f1', 100], ['f2', 200]]) { await mk(nme); await API.dbm([['HSET', API.K.user(U[nme]), 'made', String(made)], ['ZADD', API.K.users, made, U[nme]]]); }
+    await API.db('ZADD', API.K.users, 50, 'f'.repeat(15) + '9');                  // a name in the list with no record behind it
+    await API.dbm((await everyone()).map(x => ['HSET', API.K.user(x[0]), 'founder', '']).concat([['DEL', API.K.founders], ['DEL', API.K.user('f'.repeat(15) + '9')]]));
+    const f2no = (await card('f2')).founder, f1no = (await card('f1')).founder, f3no = (await card('f3')).founder, all1 = await everyone();
+    check('the first count numbers every account there is in the order it was made — and nobody who has no record', f1no >= 1 && f2no === f1no + 1 && f3no === f2no + 1 && whole(all1) && all1.find(x => x[0] === 'f'.repeat(15) + '9')[1] === 0
+          && (await API.db('HGETALL', API.K.user('f'.repeat(15) + '9'))).made === undefined && +(await API.db('GET', API.K.founders)) === all1.filter(x => x[1]).length, j([f1no, f2no, f3no]));
+    const last = +(await API.db('GET', API.K.founders));
+    // six new ones, their cards read at the same moment: one at a time under the lock — a card that found it held says nothing yet, and the next read has it
+    const six = ['g1', 'g2', 'g3', 'g4', 'g5', 'g6']; for (const g of six) { await mk(g); await API.db('ZADD', API.K.users, 400, U[g]); }
+    const at1 = await Promise.all(six.map(g => card(g))), at2 = []; for (const g of six) at2.push((await card(g)).founder);
+    check('six cards read at once: six numbers, none given twice, none skipped, and a number once said is the one that stays', new Set(at2).size === 6 && at2.every(v => v > last) && whole(await everyone())
+          && at1.every((c, i) => c.founder === undefined || c.founder === at2[i]) && +(await API.db('GET', API.K.founders)) === last + 6 && (await API.db('GET', API.K.lock('founders'))) == null, j({ first: at1.map(c => c.founder), then: at2 }));
+    const fl = await API.finishLogin('founding@example.com', 1, false), flNo = +(await API.db('HGET', API.K.user(fl.user), 'founder'));
+    check('an account is numbered as it is made, before its card is ever read', fl.fresh === true && flNo === last + 7, 'No. ' + flNo);
+    await API.db('SET', API.K.founders, '100000'); await mk('late');
+    check('past the hundred thousand there is no number: the card says none, and the count stands', (await card('late')).founder === undefined && (await API.db('GET', API.K.founders)) === '100000' && (await API.db('HGET', API.K.user(U.late), 'founder')) == null);
+    await API.db('SET', API.K.founders, String(last + 7));
+    // I WAS HERE: the month the account first had TOEM 2 open — or of its first standing day, for one from before that was kept
+    await API.db('HSET', API.K.joined('toem2'), U.f1, String(Date.UTC(2026, 8, 28, 12)));
+    await API.db('HSET', API.K.joined('brook'), U.f3, String(Date.UTC(2026, 8, 28, 12)));
+    check('I was here: the month TOEM 2 was first open', (await card('f1')).here === '2026-09', j((await card('f1')).here));
+    check('…or of the first standing day, which is a day of edits there', (await card('st1')).here === '2026-08', j((await card('st1')).here));
+    check('…and nothing for somebody who never was — another page is not TOEM 2', (await card('f2')).here === undefined && (await card('f3')).here === undefined);
+    check('a card still says nothing private: no address, and no field of the record that is not the card\'s', ['pw', 'seen', 'made', 'banned', 'gen', 'noted', 'role'].every(k => !(k in at1[0])), j(Object.keys(at1[0])));
+    // THE PAGES, BY NAME
+    const found = async (text, who) => { const x = await GET('?find=' + encodeURIComponent(text), who); return Object.assign(x.json.pages || [], { status: x.status, cache: x.headers['cache-control'] }); };
+    check('before anybody has asked, there is no list of names', (await API.db('HGETALL', API.K.pageNames))['*'] === undefined);
+    r = await found('brook');
+    check('the search finds a page by its name — to anybody, signed in or not, and the CDN may keep the answer half a minute', r.status === 200 && j(r) === j([{ slug: 'brook', title: 'New Brook' }]) && r.cache === 'public, max-age=15, s-maxage=30', j(r) + ' ' + r.cache);
+    check('…the list made, the first time, from the pages themselves — the first page among them', (await API.db('HGETALL', API.K.pageNames))['*'] === '1' && (await API.db('HGETALL', API.K.pageNames)).toem2 === 'TOEM 2' && j(await found('toem')) === j([{ slug: 'toem2', title: 'TOEM 2' }]));
+    check('by a word of its name or a piece of its address, every word asked for, whatever the capitals — the names that begin with the question first', j((await found('mead')).map(p => p.slug)) === j(['meadow-2', 'meadow-3', 'meadow'])
+          && j(await found('the mead')) === j([{ slug: 'meadow', title: 'The Meadow' }]) && (await found('new br')).length === 1 && (await found('BROOK  new')).length === 1, j([await found('mead'), await found('new br'), await found('BROOK  new')]));
+    check('nothing for nothing, or for what no page is called', (await found('')).length === 0 && (await found('   ')).length === 0 && (await found('zzzz')).length === 0 && (await found('brook zzzz')).length === 0);
+    check('a question of any shape is only a question', (await found('a'.repeat(500))).status === 200 && (await found('.*+?^${}()|[]\\')).status === 200 && (await found('<script>alert(1)</script>')).length === 0 && (await found('%00\u0000‮')).status === 200);
+    r = await POST({ op: 'page', slug: 'brookside', title: 'Brookside Allotments' }, 'st1');
+    check('a page is found from the moment it is made, the name that begins with the question first', r.json.ok && j(await found('brook')) === j([{ slug: 'brookside', title: 'Brookside Allotments' }, { slug: 'brook', title: 'New Brook' }]), brief(r) + ' ' + j(await found('brook')));
+    r = await POST({ op: 'settings', page: 'brookside', title: 'Willow Row' }, 'st1');
+    check('renamed in its settings, it is found by the new name — and still by its address', r.json.ok && j(await found('willow')) === j([{ slug: 'brookside', title: 'Willow Row' }]) && (await found('brookside')).length === 1 && (await found('allotments')).length === 0, j(await found('willow')));
+    await API.db('HSET', API.K.user(U.st1), 'banned', '1'); await POST({ op: 'settings', page: 'meadow', title: 'The Meadow' }, 'mod');   // (a name written, so the list is read afresh)
+    check('a page whose maker is banned is not offered', (await found('willow')).length === 0 && (await found('brookside')).length === 0 && (await found('brook')).length === 1, j(await found('brook')));
+    await API.db('HSET', API.K.user(U.st1), 'banned', ''); await POST({ op: 'settings', page: 'meadow', title: 'The Meadow' }, 'mod');
+    check('…and is again once they are not', (await found('willow')).length === 1);
+    for (let i = 0; i < 12; i++) await API.db('HSET', API.K.pageNames, 'crowd-' + i, 'Crowded Corner ' + i);
+    await POST({ op: 'settings', page: 'meadow', title: 'The Meadow' }, 'mod');
+    check('eight at most', (await found('crowd')).length === 8);
 
     // ── 14 · nothing else was touched ────────────────────────────────────
     check('the real wall-seed.json is untouched', hash(SEED) === seedBefore);

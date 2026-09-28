@@ -115,8 +115,17 @@ const whoami = p => p.evaluate(() => fetch('/api/auth', { cache: 'no-store' }).t
     await p.goto(BASE + '/signup/'); await p.waitForTimeout(2500);
     let t = await text();
     for (const s of ['Create your account', 'Sign up for Knoll', 'Username', 'Email', 'Password', 'Confirm password', 'SIGN UP', 'press the seal to create your account',
-                     'Continue with Google', 'Continue with Discord', 'no password needed', 'Already have an account?', 'By signing up, you agree to our Rules and Terms of Service.']) ok(t.includes(s), 'signup shows "' + s + '"');
-    for (const s of ['Let it be known', 'Hear ye', 'secret word', 'gnome', 'petition', 'vouch', 'OR, BY OTHER POST', 'Rule Book', 'Residency']) ok(!t.includes(s), 'signup no longer shows "' + s + '"');
+                     'Continue with Google', 'Continue with Discord', 'no password needed', 'Already have an account?', 'By signing up, you agree to our Privacy Policy and Terms of Service.']) ok(t.includes(s), 'signup shows "' + s + '"');
+    for (const s of ['Let it be known', 'Hear ye', 'secret word', 'gnome', 'petition', 'vouch', 'OR, BY OTHER POST', 'Rule Book', 'Residency', 'our Rules']) ok(!t.includes(s), 'signup no longer shows "' + s + '"');
+    // the two it agrees to are links, by their own names, to their own pages — opened beside the form, which keeps what was typed
+    const legal = await p.evaluate(() => [...document.querySelectorAll('#dc-root a')].filter(a => /^(Privacy Policy|Terms of Service)$/.test(a.textContent.trim())).map(a => [a.textContent.trim(), a.getAttribute('href'), a.target, a.rel]));
+    ok(JSON.stringify(legal) === JSON.stringify([['Privacy Policy', '/privacy/', '_blank', 'noopener'], ['Terms of Service', '/terms/', '_blank', 'noopener']]), 'signup\'s Privacy Policy and Terms of Service are links to /privacy/ and /terms/', JSON.stringify(legal));
+    for (const [name, path, title] of [['Privacy Policy', '/privacy/', /Privacy/i], ['Terms of Service', '/terms/', /Terms/i]]) {
+      const [tab] = await Promise.all([ctx.waitForEvent('page'), p.click('#dc-root a:text-is("' + name + '")')]);
+      const there = await tab.waitForURL(u => u.pathname === path, { timeout: 15000 }).then(() => tab.waitForSelector('h1', { timeout: 15000 })).then(() => true, () => false);
+      ok(there && title.test(await tab.title()) && /\S/.test(await tab.evaluate(() => (document.querySelector('h1') || {}).textContent || '')), 'pressing ' + name + ' opens ' + path + ', and it is that page', tab.url() + ' — ' + await tab.title().catch(() => ''));
+      await tab.close();
+    }
     let labels = await labelsOf(['f-name', 'f-email', 'f-pw', 'f-pw2']);
     ok(JSON.stringify(labels) === JSON.stringify(['Username', 'Email', 'Password', 'Confirm password']), 'each sign-up input has exactly one label, the plain one', JSON.stringify(labels));
     await p.click('button[aria-label="Sign up"]'); await p.waitForTimeout(500);
@@ -146,6 +155,7 @@ const whoami = p => p.evaluate(() => fetch('/api/auth', { cache: 'no-store' }).t
     for (const s of ['Welcome back', 'Log in to Knoll', 'Email', 'Password', 'Forgot your password?', 'Remember me', 'LOG IN', 'press the key to log in',
                      'Continue with Google', 'Continue with Discord', 'no password needed', "Don't have an account?", 'By logging in, you agree to our Terms of Service']) ok(t.includes(s), 'login shows "' + s + '"');
     for (const s of ['Halt', 'Hear ye', 'secret word', 'gatekeeper', 'unlatched', 'Petition', 'OR, BY OTHER POST', 'Residency']) ok(!t.includes(s), 'login no longer shows "' + s + '"');
+    ok(await p.$('a[href="/terms/"]') !== null && await p.$('a[href="/privacy/"]') !== null, 'login links the Terms of Service and the Privacy Policy');
     labels = await labelsOf(['f-email', 'f-pw']);
     ok(JSON.stringify(labels) === JSON.stringify(['Email', 'Password']), 'each log-in input has exactly one label, the plain one', JSON.stringify(labels));
     await p.click('button[aria-label="Log in"]'); await p.waitForTimeout(500);

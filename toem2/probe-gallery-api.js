@@ -32,7 +32,7 @@ const POST = (body, who, q, origin) => call('POST', '/api/gallery' + (q || ''), 
 const brief = r => ({ status: r.status, code: r.json.code });
 // a real 1×1 png, and the same bytes wearing the wrong label
 const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
-const JPG = 'data:image/jpeg;base64,' + Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(60)]).toString('base64');
+const JPG = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AVN//2Q==';   // a real JPEG, one pixel by one: the doors read a picture's size off its header (api/wall.js: HOW BIG ACROSS)
 const file = src => path.join(tmp, src.replace(/^\/toem2\//, ''));
 
 (async () => {
@@ -71,6 +71,19 @@ const file = src => path.join(tmp, src.replace(/^\/toem2\//, ''));
   check('a gif is not one', brief(await POST({ op: 'post', cap: 'x', sec: 'town', src: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=' }, 'nu')).code === 'src');
   check('a label the bytes do not bear', brief(await POST({ op: 'post', cap: 'x', sec: 'town', src: PNG.replace('image/png', 'image/jpeg') }, 'nu')).code === 'src');
   check('too big', brief(await POST({ op: 'post', cap: 'x', sec: 'town', src: 'data:image/png;base64,' + 'A'.repeat(420000) }, 'nu')).status === 413);
+  // HOW BIG ACROSS (2026-09-28, api/wall.js): a picture is read for its size — a flat one weighs nothing and is thirty thousand a side
+  const pngOf = (w, h) => { const ih = Buffer.alloc(13); ih.writeUInt32BE(w, 0); ih.writeUInt32BE(h, 4); ih[8] = 1; return 'data:image/png;base64,' + Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13]), Buffer.from('IHDR'), ih, Buffer.alloc(4)]).toString('base64'); };
+  const jpgOf = (w, h) => 'data:image/jpeg;base64,' + Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 16]), Buffer.from('JFIF\0'), Buffer.alloc(9), Buffer.from([0xff, 0xc0, 0, 17, 8, h >> 8, h & 255, w >> 8, w & 255, 3, 1, 0x22, 0, 2, 0x11, 1, 3, 0x11, 1])]).toString('base64');
+  U.big = 'f'.repeat(16); await W.db('HSET', W.K.user(U.big), 'made', '1', 'name', 'big', 'role', 'user'); T.big = await W.mintSession(U.big);   // (an account of its own, so the hour's twenty of the others are theirs)
+  r = await POST({ op: 'post', cap: 'x', sec: 'town', src: pngOf(30000, 30000) }, 'big');
+  check('thirty thousand pixels a side in a hundred bytes: too big across, whatever it weighs', r.status === 400 && r.json.code === 'src' && /too big across/.test(r.json.error), r.json);
+  const wide = []; for (const s of [pngOf(2049, 10), pngOf(10, 2049), jpgOf(65535, 65535), jpgOf(2049, 1)]) wide.push(await POST({ op: 'post', cap: 'x', sec: 'town', src: s }, 'big'));
+  check('…a side past 2048 either way, in a png or a jpeg', wide.every(x => x.status === 400 && x.json.code === 'src' && /too big across/.test(x.json.error)), wide.map(brief));
+  r = await POST({ op: 'post', cap: 'x', sec: 'town', src: 'data:image/jpeg;base64,' + Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(60)]).toString('base64') }, 'big');
+  check('a picture that will not say how big it is is not one', r.status === 400 && /not the picture it says it is/.test(r.json.error) && (await POST({ op: 'post', cap: 'x', sec: 'town', src: pngOf(0, 10) }, 'big')).status === 400, r.json);
+  check('nothing was hung for any of them', (await GET()).json.photos.length === 0 && (!fs.existsSync(path.join(tmp, 'album', 'toem2')) || fs.readdirSync(path.join(tmp, 'album', 'toem2')).length === 0));
+  r = await POST({ op: 'post', cap: 'at the edge', sec: 'town', src: pngOf(2048, 2048) }, 'big');
+  check('2048 a side is taken', r.json.ok === true, r.json); await POST({ op: 'drop', id: r.json.photo.id }, 'big');
   r = await POST({ op: 'post', cap: '  Gull  on the mast ', where: 'Basto Harbour', sec: 'town', src: PNG }, 'nu');
   const p1 = r.json.photo;
   check('anyone signed in hangs a photo in an open section: one-line caption, where, a url, no hearts, the tag on it', r.json.ok && p1.cap === 'Gull on the mast' && p1.sec === 'town' && p1.where === 'Basto Harbour' && /^\/toem2\/album\/toem2\/[a-z0-9]+\.png$/.test(p1.src) && p1.likes === 0 && p1.liked === false && p1.tag === 'nu#1', r.json);
@@ -175,6 +188,16 @@ const file = src => path.join(tmp, src.replace(/^\/toem2\//, ''));
   await W.db('DEL', W.K.album('toem2'));
   for (let i = 0; i < API.MINE_MAX + 5; i++) await W.db('RPUSH', W.K.album('toem2'), JSON.stringify({ id: 'kept' + i, by: U.mod, at: 3000 - i, cap: 'kept ' + i, src: '/toem2/album/toem2/none.png' }));
   check('a moderator has as many up as the album keeps', (await POST({ op: 'post', cap: 'and another', src: PNG }, 'mod')).json.ok && (await GET()).json.photos.length === API.MINE_MAX + 6);
+
+  // WHO TENDS THE CORNER (2026-09-28, api/wall.js): TOEM 2's trusted keep its wall, not its album
+  console.log('who tends the album');
+  U.old = 'e'.repeat(16); await W.db('HSET', W.K.user(U.old), 'made', '1', 'name', 'old', 'role', 'user'); T.old = await W.mintSession(U.old);
+  await W.db('SADD', W.K.days(U.old), ...Array.from({ length: 12 }, (_, i) => '2026-08-' + String(i + 1).padStart(2, '0')));
+  const kept0 = (await GET('', 'old')).json;
+  check('ten standing days do not make the album somebody\'s to arrange: no sections, nobody else\'s photo changed or taken down, none hung where it is shut',
+        kept0.me.keeper === false && [await POST({ op: 'sections', sections: [] }, 'old'), await POST({ op: 'sections', reset: true }, 'old'), await POST({ op: 'edit', id: kept0.photos[0].id, cap: 'mine now' }, 'old'),
+                                      await POST({ op: 'drop', id: kept0.photos[0].id }, 'old'), await POST({ op: 'post', cap: 'x', src: PNG }, 'old')].map(x => x.status + ':' + x.json.code).join() === '403:role,403:role,403:role,403:role,403:role'
+        && (await GET()).json.photos.length === kept0.photos.length, kept0.me);
 
   console.log('the rate');
   let last = null;

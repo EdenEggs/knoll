@@ -2445,8 +2445,9 @@ window.Wall = (function () {
       // it lands on top, the way anything newly put up does (see order)
       delete it.L;
       // …and it is a NEW piece, whatever it was copied off: its own name, and
-      // not one of the plates' own however canon the original (api/wall.js)
-      it.n = Lab.uid(); delete it.c;
+      // not one of the plates' own however canon the original (api/wall.js) —
+      // which is a sticker's `c`; a stroke's or a note's is its ink, and the copy keeps it
+      it.n = Lab.uid(); if (it.k === 'd') delete it.c;
       /* a stroke and a square of pixel art carry their position INSIDE the
          path data, the same three-way split moveEnd makes — and pixel art
          moves by whole cells or it stops being pixel art */

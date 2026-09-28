@@ -107,6 +107,7 @@ const W = require('./wall.js');
 const ROOT = process.env.HILL_ROOT || path.join(__dirname, '..');   // the file store's; a probe points it at a temp folder
 const BLOB_API = 'https://blob.vercel-storage.com';
 const BLOB_VERSION = '12';                   // @vercel/blob 2.8's x-api-version
+const BLOB_MS = W.BLOB_MS;                   // how long the pictures' store is waited for (api/wall.js: A DEADLINE)
 const KEEP = 40;                             // versions kept per hill
 const MAX_BODY = 4 * 1024 * 1024;            // Vercel's own body limit is 4.5 MB
 const HILL = /^(yard|u-[0-9a-f]{16})$/, MINE = /^u-[0-9a-f]{16}$/;
@@ -158,7 +159,7 @@ const blobHeaders = extra => Object.assign({ authorization: 'Bearer ' + token(),
 const blob = {
   kind: 'blob',
   async get(name) {
-    const r = await fetch(publicUrl(name), { cache: 'no-store' });
+    const r = await fetch(publicUrl(name), { cache: 'no-store', signal: AbortSignal.timeout(BLOB_MS) });   // A DEADLINE (api/wall.js): ten seconds for the pictures' store, on each of its three calls
     if (r.status === 404 || r.status === 403) return null;
     if (!r.ok) throw new Error('the store answered ' + r.status + ' reading ' + name);
     return r.json();
@@ -171,14 +172,14 @@ const blob = {
       method: 'PUT',
       headers: blobHeaders({ 'x-vercel-blob-access': 'public', 'x-content-type': 'application/json', 'x-add-random-suffix': '0',
                              'x-allow-overwrite': '1', 'x-cache-control-max-age': String(maxAge) }),
-      body: JSON.stringify(obj)
+      body: JSON.stringify(obj), signal: AbortSignal.timeout(BLOB_MS)
     });
     if (!r.ok) throw new Error('the store answered ' + r.status + ' writing ' + name + ': ' + (await r.text()).slice(0, 160));
     return r.json();
   },
   async del(names) {
     if (!names.length) return;
-    await fetch(BLOB_API + '/delete', { method: 'POST', headers: blobHeaders({ 'content-type': 'application/json' }),
+    await fetch(BLOB_API + '/delete', { method: 'POST', headers: blobHeaders({ 'content-type': 'application/json' }), signal: AbortSignal.timeout(BLOB_MS),
                                         body: JSON.stringify({ urls: names.map(publicUrl) }) }).catch(() => {});
   }
 };

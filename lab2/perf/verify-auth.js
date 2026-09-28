@@ -134,13 +134,16 @@ const signup = async (body, headers) => {       // both steps (api/auth.js: THE 
   A.strictEqual(r.json.me.toured, true, 'once shown, the tour is marked on the account');
 
   // ── the picture (api/auth.js: THE PICTURE) ──────────────────────────────
-  const JPEG = 'data:image/jpeg;base64,' + Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4, 5]).toString('base64');
+  const JPEG = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AVN//2Q==';   // a real JPEG, one pixel by one: the doors read a picture's size off its header (api/wall.js: HOW BIG ACROSS)
   A.strictEqual(r.json.me.avatar, '', 'an account starts with no picture');
   r = await gate({ op: 'avatar', avatar: JPEG });
   A.deepStrictEqual([r.status, r.json.code], [401, 'who'], 'a picture goes on a signed-in account only');
   for (const [v, what] of [['data:image/svg+xml;base64,' + Buffer.from('<svg onload="alert(1)"/>').toString('base64'), 'an SVG'],
                            ['data:image/jpeg;base64,' + Buffer.from('<html>no jpeg</html>').toString('base64'), 'a JPEG in name only'],
                            [JPEG + 'A'.repeat(60000 - JPEG.length + 1), 'a picture one character past the size'],
+                           // HOW BIG ACROSS (2026-09-28, api/wall.js): a face is cut to 128 a side by the page; one that says it is 4000, or will not say, is not one
+                           ['data:image/jpeg;base64,' + Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 16]), Buffer.from('JFIF\0'), Buffer.alloc(9), Buffer.from([0xff, 0xc0, 0, 17, 8, 0x0f, 0xa0, 0x0f, 0xa0, 3, 1, 0x22, 0, 2, 0x11, 1, 3, 0x11, 1])]).toString('base64'), 'a JPEG four thousand pixels a side'],
+                           ['data:image/jpeg;base64,' + Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4, 5]).toString('base64'), 'a JPEG that does not say how big it is'],
                            [{ src: JPEG }, 'a picture that is not a string'], ['javascript:alert(1)', 'an address for a picture']]) {
     r = await gate({ op: 'avatar', avatar: v }, sent(c1));
     A.deepStrictEqual([r.status, r.json.code], [400, 'avatar'], 'the gate refuses ' + what);
@@ -216,9 +219,15 @@ const signup = async (body, headers) => {       // both steps (api/auth.js: THE 
   A.ok(ttl > 0 && ttl <= 86400e3 + 1000, 'unticked, the store keeps the session a day at most');
 
   // ── the hour's caps ─────────────────────────────────────────────────────
-  for (let i = 0; i < auth.RATE.fails; i++) await gate({ op: 'login', email: 'mossy@example.com', password: 'guess' + i }, { 'x-real-ip': '10.3.3.' + (i % 250) });
+  // THE WRONG WORDS ARE COUNTED PER ADDRESS AND NETWORK (2026-09-28): a guesser shuts their own network out of an address, and not its owner
+  for (let i = 0; i < auth.RATE.fails; i++) await gate({ op: 'login', email: 'mossy@example.com', password: 'guess' + i }, { 'x-real-ip': '10.3.3.3' });
+  r = await gate({ op: 'login', email: 'mossy@example.com', password: 'toadstool1' }, { 'x-real-ip': '10.3.3.3' });
+  A.deepStrictEqual([r.status, r.json.code], [429, 'rate'], 'twenty wrong words for one address from one network in an hour, and even the right one waits there');
   r = await gate({ op: 'login', email: 'mossy@example.com', password: 'toadstool1' }, { 'x-real-ip': '10.4.4.4' });
-  A.deepStrictEqual([r.status, r.json.code], [429, 'rate'], 'twenty wrong words for one address in an hour, and even the right one waits');
+  A.deepStrictEqual([r.status, !!(r.json.me && r.json.me.id)], [200, true], '…while the account\'s owner, somewhere else, is let in with the right one');
+  for (let i = 0; i < auth.RATE.fails; i++) await gate({ op: 'login', email: 'mossy@example.com', password: 'guess' + i }, { 'x-real-ip': '10.3.4.' + i });
+  r = await gate({ op: 'login', email: 'mossy@example.com', password: 'toadstool1' }, { 'x-real-ip': '10.4.4.4' });
+  A.strictEqual(r.status, 200, '…however many networks guess wrong');
   let last;
   for (let i = 0; i <= auth.RATE.login; i++) last = await gate({ op: 'login', email: 'someone' + i + '@example.com', password: 'whatever1' }, { 'x-real-ip': '10.5.5.5' });
   A.deepStrictEqual([last.status, last.json.code], [429, 'rate'], 'sixty knocks from one address in an hour, then it waits');
@@ -296,12 +305,13 @@ const signup = async (body, headers) => {       // both steps (api/auth.js: THE 
   A.deepStrictEqual([r.json.me && r.json.me.id, r.json.me && r.json.me.tag], [fern.id, 'Fern#1'], '…the same account, with a session of the new generation');
   r = await call(wall, 'GET', '/api/wall?me=1', undefined, sent(f4));
   A.deepStrictEqual([r.status, r.json.id], [200, fern.id], '…which the wall\'s door takes');
-  for (let i = 0; i < auth.RATE.fails; i++) await gate({ op: 'login', email: 'fern@example.com', password: 'guess' + i }, { 'x-real-ip': '10.12.12.' + (i % 250) });
-  r = await gate({ op: 'login', email: 'fern@example.com', password: 'newword-22' }, { 'x-real-ip': '10.11.11.15' });
-  A.strictEqual(r.status, 429, 'twenty wrong words lock Fern out for the hour…');
-  r = await gate({ op: 'reset', email: 'fern@example.com' }, rip);
-  r = await gate({ op: 'reset', email: 'fern@example.com', password: 'thirdword-3', code: codeIn(auth.OUTBOX, 'fern@example.com') }, rip);
-  r = await gate({ op: 'login', email: 'fern@example.com', password: 'thirdword-3' }, { 'x-real-ip': '10.11.11.15' });
+  const home = { 'x-real-ip': '10.12.12.12' };   // Fern's own network, where she has mistyped it twenty times
+  for (let i = 0; i < auth.RATE.fails; i++) await gate({ op: 'login', email: 'fern@example.com', password: 'guess' + i }, home);
+  r = await gate({ op: 'login', email: 'fern@example.com', password: 'newword-22' }, home);
+  A.strictEqual(r.status, 429, 'twenty wrong words lock Fern out for the hour, where she typed them…');
+  r = await gate({ op: 'reset', email: 'fern@example.com' }, home);
+  r = await gate({ op: 'reset', email: 'fern@example.com', password: 'thirdword-3', code: codeIn(auth.OUTBOX, 'fern@example.com') }, home);
+  r = await gate({ op: 'login', email: 'fern@example.com', password: 'thirdword-3' }, home);
   A.strictEqual(r.status, 200, '…and a reset lets her back in: the hour\'s wrong words are forgotten with the old password');
   A.strictEqual((await wall.db('HGETALL', wall.K.user(fern.id))).gen, '2', 'every reset is a new generation');
   r = await gate({ op: 'reset', email: 'fern@example.com' }, rip);   // the fifth letter to Fern this hour: her sign-up's, and four resets

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terms of Service · Knoll</title>
+<!-- WHAT A LINK TO THIS PAGE SAYS (2026-09-26): the line under a search result, and the card
+     a chat or a feed draws when the address is pasted into it -->
+<meta name="description" content="The terms for using Knoll: accounts, what you post, moderation, the spaces you create, and acceptable use.">
+<link rel="canonical" href="https://www.knoll.space/terms/">
+<meta property="og:title" content="Terms of Service · Knoll">
+<meta property="og:description" content="The terms for using Knoll: accounts, what you post, moderation, the spaces you create, and acceptable use.">
+<meta property="og:image" content="https://www.knoll.space/logo/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<!-- TERMS OF SERVICE (2026-09-24): the page the gate's "Terms of Service" links
+     point at (signup/, login/), and the one Google's consent screen may name
+     beside /privacy/. Sections 1, 3 and 4 say what api/auth.js and api/wall.js
+     actually do — accounts, standing, strikes, spaces — so a change to those
+     doors is a change to this page. The owner's blanks were filled on
+     2026-09-28, in their words: thirteen, fifty US dollars, and Wisconsin's law
+     and courts (no city was named, so the venue is the state's). The operator
+     is named "Knoll", the owner's word (2026-09-28), here and on /privacy/. -->
+<link rel="icon" href="/logo/logo-icon.svg">
+<link rel="stylesheet" href="/lab2/fonts/fonts.css">
+<script src="/account.js" defer></script>
+<style>
+  body { margin: 0; min-height: 100vh; background: #ece7f1; background-image: radial-gradient(circle, rgba(90,70,110,0.13) 1.3px, transparent 1.3px); background-size: 24px 24px;
+    color: #17120b; font-family: 'VT323', monospace; }
+  a { color: #e8484a; }
+  a:hover { color: #b8302f; }
+  ::selection { background: #ffd23f; }
+  .knoll-head { display: flex; align-items: center; gap: 22px; padding: 12px 22px; background: #fdfbfd; border-bottom: 1.5px dashed #e2d4df; box-sizing: border-box; }
+  .knoll-brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #26212a; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: -0.01em; }
+  .knoll-brand img { display: block; }
+  .knoll-brand:hover { color: #a52c68; }
+  .wrap { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: 32px; max-width: 1062px; margin: 40px auto 70px; padding: 0 20px; box-sizing: border-box; }
+  .toc { flex: 1 0 230px; max-width: 230px; display: flex; flex-direction: column; gap: 10px; background: #fdf7e3; border: 3px solid #17120b; box-shadow: 6px 7px 0 rgba(60,50,80,0.2); padding: 14px 16px 16px; box-sizing: border-box; }
+  .toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+  .toc ol a { display: flex; gap: 8px; align-items: baseline; color: #17120b; text-decoration: none; font-size: 18px; line-height: 1.2; }
+  .toc ol a:hover { color: #e8484a; }
+  .toc ol a b { font-family: 'Rye', serif; font-weight: 400; font-size: 14px; color: #e8484a; flex: none; width: 24px; }
+  .eyebrow { font-size: 15px; letter-spacing: 2px; color: #4a4054; opacity: 0.8; }
+  .rule { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 6px 0 2px; }
+  .rule i { flex: 1; height: 3px; background: #17120b; opacity: 0.5; }
+  .rule b { width: 10px; height: 10px; background: #e8484a; border: 2.5px solid #17120b; transform: rotate(45deg); flex: none; }
+  main .rule { margin: 30px 0 14px; }
+  main .rule i { flex: 0 0 60px; }
+  .btn { align-self: flex-start; height: 30px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; background: #fdf7e3; color: #17120b; border: 2.5px solid #17120b; box-shadow: 3px 3px 0 rgba(60,50,80,0.22);
+    font-size: 18px; line-height: 1; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; white-space: nowrap; box-sizing: border-box; transform: rotate(-1deg); transition: transform .15s, box-shadow .15s; }
+  .btn:hover { color: #17120b; transform: rotate(-1deg) translate(1px,1px); box-shadow: 2px 2px 0 rgba(60,50,80,0.22); }
+  main { flex: 1 1 480px; max-width: 760px; min-width: 0; padding: 26px 30px 30px; background: #fdf7e3; border: 5px solid #17120b; box-shadow: 9px 10px 0 rgba(60,50,80,0.2); transform: rotate(-0.3deg); box-sizing: border-box; }
+  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+  .top .eyebrow { padding-top: 6px; }
+  .stamp { font-size: 16px; letter-spacing: 3px; color: #e8484a; border: 3px solid #e8484a; border-radius: 4px; padding: 1px 10px; transform: rotate(-4deg); white-space: nowrap; margin: 2px 6px 0 0; }
+  h1 { margin: 6px 0 14px; font-family: 'Rye', serif; font-size: clamp(28px, 5vw, 40px); font-weight: 400; line-height: 1.1; }
+  h2 { margin: 26px 0 6px; font-family: 'Rye', serif; font-size: 21px; font-weight: 400; }
+  section { scroll-margin-top: 24px; }
+  p { margin: 0 0 10px; font-size: 20px; line-height: 1.35; color: #3a3342; }
+  p.in { margin-left: 24px; }
+  mark.fill { background: #ffd23f; color: #17120b; padding: 0 5px; border-bottom: 2px dashed #17120b; }
+  .also { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; font-size: 16px; letter-spacing: 2px; color: #4a4054; text-align: center; }
+  .also a { text-decoration: none; }
+  @media (min-width: 900px) { .toc { position: sticky; top: 24px; } }
+  @media (max-width: 700px) { .wrap { margin: 20px auto 40px; padding: 0 12px; gap: 20px; } .toc { max-width: none; } main { padding: 20px 18px 22px; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
+</style>
+</head>
+<body>
+<header class="knoll-head">
+  <a class="knoll-brand" href="/"><img src="/logo/logo-icon.svg" alt="" width="26" height="26"><span>knoll</span></a>
+</header>
+
+<div class="wrap">
+  <nav class="toc" aria-label="Contents">
+    <div class="eyebrow">CONTENTS</div>
+    <ol>
+      <li><a href="#s1"><b>1.</b><span>Accounts and age</span></a></li>
+      <li><a href="#s2"><b>2.</b><span>What you post</span></a></li>
+      <li><a href="#s3"><b>3.</b><span>Moderation</span></a></li>
+      <li><a href="#s4"><b>4.</b><span>Spaces you create</span></a></li>
+      <li><a href="#s5"><b>5.</b><span>Acceptable use</span></a></li>
+      <li><a href="#s6"><b>6.</b><span>Termination</span></a></li>
+      <li><a href="#s7"><b>7.</b><span>Warranty and liability</span></a></li>
+      <li><a href="#s8"><b>8.</b><span>Governing law</span></a></li>
+      <li><a href="#s9"><b>9.</b><span>Changes to these Terms</span></a></li>
+      <li><a href="#s10"><b>10.</b><span>Contact</span></a></li>
+    </ol>
+    <div class="rule" aria-hidden="true"><i></i><b></b><i></i></div>
+    <div class="eyebrow">SEE ALSO</div>
+    <a class="btn" href="/privacy/">privacy policy →</a>
+  </nav>
+
+  <main>
+    <div class="top">
+      <div class="eyebrow">TERMS OF SERVICE · KNOLL</div>
+      <div class="stamp">LAST CHANGED · 28 SEP 2026</div>
+    </div>
+    <h1>Terms of Service</h1>
+    <p>These Terms of Service (the "Terms") govern your access to and use of Knoll Space — the website at knoll.space, its walls, yards, spaces and related services (the "Service") — operated by Knoll ("we", "us"). By creating an account, signing in or using the Service you agree to these Terms and to our <a href="/privacy/">Privacy Policy</a>. If you do not agree, do not use the Service.</p>
+
+    <section id="s1">
+      <h2>1. Accounts and age</h2>
+      <p>1.1 You must be at least 13 years old to create an account. If you are under the age of majority where you live, you may use the Service only with the consent of a parent or guardian.</p>
+      <p>1.2 An account is created with an email address and a password, or through Google or Discord sign-in. An account created with a password is confirmed by a code sent to its email address, and its password may be reset by a code sent to the same address. Your account is identified by a name and a number (for example, Mossy#3). Any number of accounts may share a name; the name and number together belong to your account alone. The last fifty names your account has used are retained, and every name and number it has been given remains its own: it is never given to another account, and it continues to identify yours.</p>
+      <p>1.3 One email address corresponds to one account. An account created with a password cannot be opened through Google or Discord sign-in, and an account created through Google or Discord sign-in cannot be opened with a password; it may be opened through either of the two, where each has confirmed the same email address.</p>
+      <p>1.4 You are responsible for keeping your password confidential and for all activity that takes place under your account. Accounts created to evade a rate limit, a review, a watch or a ban may be removed without notice.</p>
+    </section>
+
+    <section id="s2">
+      <h2>2. What you post and the licence you grant</h2>
+      <p>2.1 The Service lets you draw, place stickers, pin notes, upload tracings, pictures and photos, build a yard, create spaces, post to a space's board, chat and album, and propose changes to other users' yards (together, "Content"). You retain whatever rights you hold in your Content.</p>
+      <p>2.2 By posting Content you grant Knoll a worldwide, non-exclusive, royalty-free licence to host, store, reproduce, display, adapt and distribute it for the purpose of operating, displaying and promoting the Service, including as part of the revision history of a wall.</p>
+      <p>2.3 Content that goes live on a wall, a yard or a space — its board, chat and album included — is public, and is shown with the name and number of the account that posted it. Other users may move, change, cover or remove it under the rules in section 3, and the Service keeps a history of revisions. Do not post anything you would not want kept, shown or changed.</p>
+      <p>2.4 You represent that you hold the rights needed to post your Content and that it does not infringe anyone's rights or break any law.</p>
+      <p>2.5 We may remove, revert or alter Content that breaks these Terms, or for any other reason at our discretion, without notice.</p>
+    </section>
+
+    <section id="s3">
+      <h2>3. Moderation: standing, strikes and bans</h2>
+      <p>3.1 Each wall has rules set by its moderators (section 4): it may be read-only, tended, decided by vote, or open to every signed-in account. On a tended wall, edits are classified by their size — small, large or drastic — and decided according to your standing. Standing is earned on the TOEM 2 wall, as one point for each day on which an edit of yours there goes live or is approved. Newcomers' edits wait for review; contributors' small edits go live at once; trusted editors' small and large edits go live at once. An edit to a piece that is not your own, or of a kind the wall's moderators have kept for themselves, waits for review. A drastic edit from a newcomer is refused; any other is decided by a vote of accounts with at least one point of standing, or by one of Knoll's moderators or the wall's maker.</p>
+      <p>3.2 Edits awaiting review are decided by the wall's moderators — on the TOEM 2 wall, its trusted editors as well — and by Knoll's moderators. You may not approve or vote on your own edits, or on edits sent from your own network address. Knoll's moderators may approve, reject, revert and undo edits on any wall, and may mark an account as watched, which treats it as a newcomer wherever it goes.</p>
+      <p>3.3 One of Knoll's moderators may strike an edit reverted as vandalism. A strike takes five points of standing and leaves no more than two, and takes two from whoever approved the edit. Two strikes within thirty days result in a ban. A banned account may not edit walls, publish a yard, create spaces, post to a board, chat or album, or propose changes to another user's yard.</p>
+      <p>3.4 Submissions are limited by the hour according to standing and by network address. The limits, the classification lines and the standing thresholds are set by the Service and may change without notice.</p>
+      <p>3.5 Knoll's moderators and administrators are appointed by Knoll; a wall's moderators are its maker and the accounts its maker names (section 4). Moderation decisions may be reviewed by Knoll at its discretion; we are not obliged to restore any Content or standing.</p>
+    </section>
+
+    <section id="s4">
+      <h2>4. Spaces you create</h2>
+      <p>4.1 A signed-in account may create up to three spaces at knoll.space/&lt;name&gt;; Knoll's moderators may create more. The account that makes a space is its first moderator and may set its name, colours, picture and rules, including who may edit it, what kinds of pieces may be added, and whether edits go live, wait for a moderator's review or are put to a vote. Its maker may name other accounts to moderate the space with them.</p>
+      <p>4.2 As a moderator of a space you are responsible for moderating it in keeping with these Terms. Knoll's moderators and its administrator may act on any space.</p>
+      <p>4.3 Space names are allocated on a first-come basis and confer no ownership. We may rename, reclaim or remove a space that infringes rights, impersonates a person or organisation, or breaks these Terms.</p>
+      <p>4.4 Knoll may hand a space on to another account by a code, which opens one space, once, to whoever enters it. A space handed to you is yours as if you had made it, and is not counted among the three you may create.</p>
+    </section>
+
+    <section id="s5">
+      <h2>5. Acceptable use</h2>
+      <p>You agree not to:</p>
+      <p class="in">(a) post Content that is unlawful, defamatory, harassing, threatening, hateful or sexually explicit, or that infringes intellectual property, privacy or other rights;</p>
+      <p class="in">(b) post Content that sexualises or exploits minors, or that promotes violence or self-harm;</p>
+      <p class="in">(c) impersonate another person or misrepresent your affiliation with any person or organisation;</p>
+      <p class="in">(d) use automated means to submit edits, create accounts or cast votes, or otherwise circumvent rate limits, review, watches or bans;</p>
+      <p class="in">(e) approve or vote on your own edits from another account, or coordinate votes to defeat review;</p>
+      <p class="in">(f) interfere with the operation of the Service, or attempt to access accounts, data or systems you are not authorised to access;</p>
+      <p class="in">(g) upload malicious code or use the Service to send unsolicited messages.</p>
+    </section>
+
+    <section id="s6">
+      <h2>6. Termination and deleting your account</h2>
+      <p>6.1 You may delete your account at any time by writing to <a href="mailto:contact@knoll.space">contact@knoll.space</a> from the address you signed up with. Your account and the data attached to it will be deleted as described in the <a href="/privacy/">Privacy Policy</a>. Content you have added to a shared wall may remain where removing it would alter other users' Content or a wall's revision history.</p>
+      <p>6.2 We may suspend or terminate your account, or restrict your access to the Service, if you break these Terms, if we are required to by law, or if the Service is discontinued. A ban under section 3 is a suspension of this kind.</p>
+      <p>6.3 Sections 2, 7 and 8, and any other provision that by its nature should survive, survive termination.</p>
+    </section>
+
+    <section id="s7">
+      <h2>7. Disclaimer of warranty and limitation of liability</h2>
+      <p>7.1 The Service is provided "as is" and "as available", without warranties of any kind, express or implied, including warranties of merchantability, fitness for a particular purpose and non-infringement. Knoll is a small, experimental service; it may change, break or stop at any time. We do not guarantee that Content will be kept, that the Service will be uninterrupted, or that errors will be corrected.</p>
+      <p>7.2 To the fullest extent permitted by law, Knoll and the people who make it are not liable for any indirect, incidental, special, consequential or punitive damages, or for any loss of data, Content, goodwill or profits, arising out of or relating to your use of the Service. Our total liability for all claims arising out of or relating to the Service will not exceed 50 US dollars (USD 50).</p>
+      <p>7.3 Nothing in these Terms limits liability that cannot be limited by law, including liability for fraud, or affects rights you have as a consumer that cannot be waived.</p>
+    </section>
+
+    <section id="s8">
+      <h2>8. Governing law</h2>
+      <p>These Terms are governed by the laws of the State of Wisconsin, United States, without regard to its conflict-of-law rules. Any dispute arising out of or relating to these Terms or the Service will be brought in the state or federal courts located in the State of Wisconsin, United States, and you consent to their jurisdiction, except where the law of your country of residence entitles you to bring proceedings there.</p>
+    </section>
+
+    <section id="s9">
+      <h2>9. Changes to these Terms</h2>
+      <p>We may change these Terms from time to time. The date at the top of this page says when they last changed. If a change is material we will give notice on the Service before it takes effect. Your continued use of the Service after a change takes effect means you accept the changed Terms.</p>
+    </section>
+
+    <section id="s10">
+      <h2>10. Contact</h2>
+      <p>Questions about these Terms: <a href="mailto:contact@knoll.space">contact@knoll.space</a>.</p>
+    </section>
+
+    <div class="rule" aria-hidden="true"><i></i><b></b><i></i></div>
+    <div class="also"><span>SEE ALSO · <a href="/privacy/">PRIVACY POLICY →</a></span></div>
+  </main>
+</div>
+</body>
+</html>

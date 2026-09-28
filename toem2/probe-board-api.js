@@ -229,6 +229,25 @@ const brief = r => ({ status: r.status, code: r.json.code });
   r = await POST({ op: 'post', ch: 'chat', text: 'x', label: 'Hello', major: true }, 'mod');
   check('nor does a line of the chat', r.json.ok && !('label' in r.json.post) && !('major' in r.json.post) && !('title' in r.json.post), r.json.post);
 
+  // WHO TENDS THE CORNER (2026-09-28): TOEM 2's trusted keep its WALL; its board, its chat's rules, its history and other people's lines are its moderators'
+  console.log('who tends the corner');
+  U.old = 'e'.repeat(16); U.named = 'f'.repeat(16);
+  for (const who of ['old', 'named']) { await W.db('HSET', W.K.user(U[who]), 'made', '1', 'name', who, 'role', 'user'); T[who] = await W.mintSession(U[who]); }
+  await W.db('SADD', W.K.days(U.old), ...Array.from({ length: 12 }, (_, i) => '2026-08-' + String(i + 1).padStart(2, '0')));   // twelve standing days: the trusted tier
+  await W.db('SADD', W.K.invited('toem2'), U.named);                                                                           // …and one its maker named
+  r = (await wall('?rules=1', 'old')).json;
+  check('ten standing days keep TOEM 2\'s wall — and not its corner', r.keeper === true && r.tends === false && (await GET('?ch=chat', 'old')).json.me.keeper === false, { keeper: r.keeper, tends: r.tends });
+  await POST({ op: 'tabs', reset: true }, 'mod');                                                                              // the four a page starts with, the news among them
+  const theirs = (await POST({ op: 'post', ch: 'chat', text: 'somebody else\'s line' }, 'nu')).json.post;
+  check('…so they arrange no tabs, put none back, set no rules for the chat, write no news, and take down nobody\'s line but their own',
+        [await POST({ op: 'tabs', tabs: [{ ch: 'forum', title: 'Forum', kind: 'posts', who: 'anyone' }] }, 'old'), await POST({ op: 'tabs', reset: true }, 'old'), await POST({ op: 'chat', who: 'keepers', wait: 0, named: [] }, 'old'),
+         await POST({ op: 'post', ch: 'news', title: 'Mine', text: 'x' }, 'old'), await POST({ op: 'drop', ch: 'chat', id: theirs.id }, 'old')].map(x => x.status + ':' + x.json.code).join() === '403:role,403:role,403:role,403:role,403:role'
+        && (await GET('?ch=chat')).json.posts.chat.some(p => p.id === theirs.id) && (await GET('?ch=forum')).json.tabs.map(t => t.ch + ':' + t.kind).join() === 'news:posts,updates:posts,rules:notice,forum:threads');
+  check('nor read who has come by', brief(await wall('?history=1', 'old')).status === 403);
+  r = (await wall('?rules=1', 'named')).json;
+  check('one the maker named tends both', r.keeper === true && r.tends === true && (await GET('?ch=chat', 'named')).json.me.keeper === true && (await POST({ op: 'drop', ch: 'chat', id: theirs.id }, 'named')).json.ok === true
+        && (await wall('?history=1', 'named')).status === 200, { keeper: r.keeper, tends: r.tends });
+
   console.log('the rate');
   let last = null;
   for (let i = 0; i < 62; i++) last = await POST({ op: 'post', ch: 'chat', text: 'line ' + i }, 'nu2');

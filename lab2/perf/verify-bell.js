@@ -63,7 +63,7 @@ const piece = x => ({ k: 'd', f: 'tm-p01-slab-03', o: 0, x: x || 0, y: 0, z: 100
 const edit = async (who, page, put) => door(who, { op: 'edit', page, base: (await read(null, '?page=' + page)).json.rev, put: put || {}, del: [] });
 const breathe = who => { const h = Math.floor(Date.now() / 36e5); return wall.dbm([['DEL', wall.K.rl('u:' + G[who].id, h)], ['DEL', wall.K.rl('e:' + G[who].id, h)]]); };
 const of = (r, kind) => r.json.notes.filter(x => x.kind === kind);
-const JPEG = 'data:image/jpeg;base64,' + Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4, 5]).toString('base64');
+const JPEG = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AVN//2Q==';   // a real JPEG, one pixel by one: the doors read a picture's size off its header (api/wall.js: HOW BIG ACROSS)
 
 (async () => {
   for (const name of ['Mossy', 'Juno', 'Bram']) await join(name);

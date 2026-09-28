@@ -360,6 +360,20 @@ y=300 when the bar went in.
 
 ---
 
+## The legal pages (2026-09-24)
+
+**Terms of Service** points at `/terms/` now, and a **Privacy Policy** link
+goes to `/privacy/`. Both open in a new tab so a half-filled form is not lost.
+`lab2/perf/probe-gate-google.js` checks the hrefs.
+
+**2026-09-28:** the line reads *By signing up, you agree to our Privacy Policy
+and Terms of Service.* — the owner's wording; **Rules** (which went to
+`/terms/#s5`) is gone from it, and the sentence that followed ("Our Privacy
+Policy says what Knoll keeps") with it, since the policy is now one of the two
+things agreed to. The probe presses each link and checks the page that opens.
+
+---
+
 ## Discord, and a name that was taken twice (2026-09-27)
 
 **Continue with Discord** sits under Google's button and goes to

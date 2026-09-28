@@ -59,7 +59,8 @@
    there, and never again (yard/index.html).
 
    ponytail: counters by the hour, in the store (api/wall.js's rl: keys) —
-   a patient guesser gets twenty wrong words an hour per address, and five
+   a patient guesser gets twenty wrong words an hour per address from one
+   network (and sixty knocks an hour from it in all), and five
    codes an hour per address with five guesses each: 25 in a million. The
    letters are counted by the day, site-wide (THE POSTMAN'S DAY). */
 'use strict';
@@ -106,6 +107,7 @@ async function spend(who, cap, span) {       // one more against the hour — or
   return n <= cap;
 }
 const spent = async who => +(await db('GET', K.rl(who, hour()))) || 0;
+const failsOf = (u, req) => 'fail:' + u + ':' + ipHash(req);   // the hour's wrong passwords for an address, from one network (login: THE WRONG WORDS)
 // …and `master`, said only to the site's master (api/wall.js: THE MASTER), so the dashboard asks for the desk on its account alone
 const meOf = (u, rec) => Object.assign({ id: u, name: rec.name || '', n: +rec.n || 0, tag: W.tagOf(rec), toured: rec.toured === '1', made: +rec.made || 0, avatar: rec.avatar || '' },
                                        W.master({ role: rec.role, banned: rec.banned === '1' }) ? { master: true } : {});
@@ -256,7 +258,7 @@ async function reset(req, res, body) {
   /* the new word in the old one's place, the code spent, the hour's wrong words forgotten — and the
      generation turned, which is every session the account had, over (api/wall.js: THE SESSION'S
      GENERATION). Nobody is signed in by this: the page logs in with the new word, like anybody. */
-  await dbm([['HSET', K.user(u), 'pw', await hashWord(pw)], ['HINCRBY', K.user(u), 'gen', 1], ['DEL', K.code(u)], ['DEL', K.rl('fail:' + u, hour())]]);
+  await dbm([['HSET', K.user(u), 'pw', await hashWord(pw)], ['HINCRBY', K.user(u), 'gen', 1], ['DEL', K.code(u)], ['DEL', K.rl(failsOf(u, req), hour())]]);
   answer(res, 200, { ok: true });
 }
 
@@ -265,15 +267,18 @@ async function login(req, res, body) {
   if (!email) throw bad(400, 'email', 'please enter a valid email address');
   if (!pw) throw bad(400, 'password', 'please enter your password');
   if (!(await spend('login:' + ipHash(req), RATE.login))) throw bad(429, 'rate', 'too many log-in attempts from your network — please wait a while and try again');
-  const u = userKey(email);
-  if ((await spent('fail:' + u)) >= RATE.fails) throw bad(429, 'rate', 'too many wrong passwords for this email — please try again in an hour');
+  /* THE WRONG WORDS ARE COUNTED PER ADDRESS AND NETWORK (2026-09-28). Counted per address alone, twenty wrong guesses from
+     anywhere shut the account's owner out of it for the hour, from everywhere: anybody who knew an address could keep its
+     owner out. A guesser's network is shut out of that address; the owner's own is not. */
+  const u = userKey(email), fails = failsOf(u, req);
+  if ((await spent(fails)) >= RATE.fails) throw bad(429, 'rate', 'too many wrong passwords for this email — please try again in an hour');
   const rec = await db('HGETALL', K.user(u));
   if (pw.length > WORD_MAX || !(await wordFits(pw, rec.pw))) {
-    await spend('fail:' + u, Infinity);
+    await spend(fails, Infinity);
     if (rec.made && !rec.pw) throw bad(401, 'google', NO_WORD);
     throw bad(401, 'wrong', WRONG);
   }
-  await db('DEL', K.rl('fail:' + u, hour()));
+  await db('DEL', K.rl(fails, hour()));
   await drop(req);
   // "keep the gate unlatched for me": ninety days; unticked, until the browser closes (and a day in the store)
   const keep = body.remember !== false;

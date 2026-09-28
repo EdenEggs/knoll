@@ -23,9 +23,13 @@
 
    THE SEARCH is the yard's — its lens, its box, its type — laid over the bar
    rather than in its row, so opening it never moves a thing. It finds the
-   site's places by name; gnomes and marks want an index there is not yet.
+   site's places by name, at once, from the list in this file — and the
+   pages people have made, by their name or their address, from the door
+   (api/wall.js: THE PAGES, BY NAME), a moment after the last key.
 
-   ponytail: the places are a list in this file; a new page is a line here. */
+   ponytail: the site's own places are a list in this file; a new one is a
+   line here. Gnomes are not searched for: a friend is found by their tag,
+   in the yard. */
 (function () {
   'use strict';
   if (window.KnollAccount) return;
@@ -33,7 +37,9 @@
   const LOCAL_PATH = /^\/(?![\/\\])[^\s\\]*$/;          // api/wall.js: localPath
   const id = (/(?:^|;\s*)knoll_in=([0-9a-f]{16})(?:;|$)/.exec(document.cookie) || [])[1] || null;
   const q = new URLSearchParams(location.search);
-  const PAGE = (/^\/(login|signup|yard)\/?$/.exec(location.pathname) || [])[1] || '';
+  // …the yard by either of its addresses: /yard/, and /yard/<name> — what the bar says once the yard has a name, and what a
+  // reload there asks for (yard/index.html: THE YARD HAS A NAME). /yard/new/ is the form that makes a space, and no yard.
+  const PAGE = (/^\/(login|signup|yard)\/?$/.exec(location.pathname) || (/^\/(yard)\/(?!new\/?$)[^/]+\/?$/.exec(location.pathname)) || [])[1] || '';
   const INK = '#17120b', CREAM = '#fdf7e3';
 
   // where a log-in from here comes back to: this page — or, on a gate page, wherever that gate was going
@@ -120,6 +126,7 @@
     '#knoll-account .ka-hits:empty{display:none}',
     "#knoll-account .ka-hits a{display:block;padding:6px 10px;color:" + INK + ";text-decoration:none;font:17px/1.1 'VT323',monospace;letter-spacing:1px;text-transform:uppercase}",
     '#knoll-account .ka-hits a:hover,#knoll-account .ka-hits a.is-first{background:#ffd23f;color:' + INK + '}',
+    '#knoll-account .ka-hits a small{margin-left:8px;font-size:15px;letter-spacing:.5px;text-transform:none;opacity:.6}',
     // the gnome's menu, on the yard: the search's list, hung under the corner's right end
     '#knoll-account .ka-menu{position:absolute;top:calc(100% + 12px);right:0;width:150px;margin:0;padding:4px 0;list-style:none;z-index:30;',
     '  background:' + CREAM + ';border:2.5px solid ' + INK + ';box-shadow:3px 3px 0 rgba(60,50,80,.22)}',
@@ -268,24 +275,46 @@
     ['Knoll — the front page', '/', 'home hill lab front knoll'],
     ['TOEM 2', '/toem2/', 'toem wall plates levels game'],
     ['Your yard', '/yard/', 'profile plot mine settings gnome', 'in'],
-    ['Your dashboard', '/dashboard/', 'numbers stats visits likes', 'in']
+    ['Your dashboard', '/dashboard/', 'numbers stats visits likes', 'in'],
+    ['Privacy — what Knoll keeps', '/privacy/', 'privacy policy data cookies email legal'],
+    ['Terms of Service', '/terms/', 'terms rules conditions legal']
   ];
+  /* THE PAGES PEOPLE MAKE (2026-09-28). The door is asked a quarter of a second after the last key, for two letters
+     or more, and its answer is drawn under the site's own places — if it is still the answer to what the box says. */
+  const ROWS = 8, said = () => input.value.trim().toLowerCase().replace(/\s+/g, ' ');
+  const hrefOf = p => (p.slug === 'toem2' ? '/toem2/' : '/' + p.slug);
+  let asked = null, pages = [], timer = 0;   // asked: what `pages` answers
+  function ask() {
+    const text = said();
+    clearTimeout(timer);
+    if (text.length < 2 || text === asked) return;
+    timer = setTimeout(() => {
+      fetch('/api/wall?find=' + encodeURIComponent(text)).then(r => (r.ok ? r.json() : null), () => null).then(out => {
+        if (said() !== text) return;          // the box has moved on
+        asked = text;
+        pages = out && out.ok && Array.isArray(out.pages) ? out.pages.filter(p => p && /^[a-z0-9][a-z0-9-]*$/.test(String(p.slug))) : [];
+        if (!box.hidden) list();
+      });
+    }, 250);
+  }
   function list() {
-    const words = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+    const text = said(), words = text.split(' ').filter(Boolean);
     const found = PLACES.filter(p => (!p[3] || (p[3] === 'in') === signedIn) &&
       words.every(w => (p[0] + ' ' + p[2]).toLowerCase().includes(w))).slice(0, 6);
+    const theirs = text === asked ? pages.filter(p => !found.some(f => f[1] === hrefOf(p))).slice(0, Math.max(2, ROWS - found.length)) : [];
     hits.textContent = '';
-    found.forEach((p, i) => {
+    found.map(p => ({ href: p[1], name: p[0] })).concat(theirs.map(p => ({ href: hrefOf(p), name: String(p.title || p.slug), at: hrefOf(p) }))).forEach((p, i) => {
       const li = document.createElement('li'), a = document.createElement('a');
-      a.href = p[1];
-      a.textContent = p[0];
+      a.href = p.href;
+      a.textContent = p.name;
+      if (p.at) { const s = document.createElement('small'); s.textContent = p.at; a.appendChild(s); }   // a page somebody made says its address too: two may share a name
       if (i === 0 && words.length) a.className = 'is-first';
       li.appendChild(a); hits.appendChild(li);
     });
-    if (!found.length) {
+    if (!found.length && !theirs.length) {
       const li = document.createElement('li');
       li.className = 'ka-none';
-      li.textContent = 'nothing on the hill by that name — gnome and mark search is still to come';
+      li.textContent = text.length >= 2 && text !== asked ? 'looking…' : 'nothing on the hill by that name';
       hits.appendChild(li);
     }
   }
@@ -301,12 +330,12 @@
     box.hidden = !on;
     lens.setAttribute('aria-expanded', String(on));
     if (bar) bar.classList.toggle('ka-open', on);
-    if (on) { place(); if (text != null) input.value = text; list(); input.focus(); }
-    else { input.value = ''; hits.textContent = ''; }
+    if (on) { place(); if (text != null) input.value = text; list(); ask(); input.focus(); }
+    else { input.value = ''; hits.textContent = ''; clearTimeout(timer); }
   }
   window.addEventListener('resize', () => { if (!box.hidden) place(); }, { passive: true });
   lens.addEventListener('click', () => open(box.hidden));
-  input.addEventListener('input', list);
+  input.addEventListener('input', () => { list(); ask(); });
   input.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); open(false); lens.focus(); } });
   box.addEventListener('submit', e => {
     e.preventDefault();

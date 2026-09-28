@@ -165,6 +165,7 @@ const MOTION_HOURS = 72, MOTION_QUORUM = 3, CONTESTED_HOURS = 24;
 const CHAOS = [0, 1, 2, 3], EVERY = [1, 3, 6, 12, 24, 72, 168], CHAOS_DEFAULT = 1, EVERY_DEFAULT = 6, HOUR = 3600e3;
 const FEATS_DEFAULT = [true, true, true, false, false, false], KIND_SLOT = { s: 0, p: 0, b: 0, d: 1, k: 1, t: 2, i: 3, g: 4, v: 4 }, OTHERS_SLOT = 5;
 const LOCK_S = 5, ROUND_LOCK_S = 30, NOTES_KEEP = 50;   // a vote's lock on its motion, a round's on its page (seconds) · bell entries kept (api/friends.js reads them)
+const STORE_MS = 5000, BLOB_MS = 10000;       // how long the store, and the pictures' store, are waited for (A DEADLINE)
 const VOTE = { id: 'vote', name: 'the vote' }; // the hand that closes a ballot
 const TAG_MAX = 1000000;                      // the most gnomes one name takes: Mossy#1 … Mossy#1000000
 const NAMES_KEEP = 50, AUDIT_KEEP = 1000;     // names kept per account; entries kept in the moderators' record
@@ -207,7 +208,8 @@ function answer(res, status, out, cache) {
    revision's record for a day (it never changes), the log for ten seconds.
    Everything that depends on who is asking, or changes when it is read, is
    no-store. */
-const CACHE = { doc: 'public, max-age=0, s-maxage=10, stale-while-revalidate=60', rev: 'public, max-age=3600, s-maxage=86400', log: 'public, max-age=0, s-maxage=10' };
+const CACHE = { doc: 'public, max-age=0, s-maxage=10, stale-while-revalidate=60', rev: 'public, max-age=3600, s-maxage=86400', log: 'public, max-age=0, s-maxage=10',
+                find: 'public, max-age=15, s-maxage=30' };   // the search's answer: the same whoever asks (THE PAGES, BY NAME)
 function page(res, text) {                   // the one non-JSON reply: what a sign-in that went wrong says
   res.statusCode = 400;
   res.setHeader('content-type', 'text/html; charset=utf-8');
@@ -261,8 +263,13 @@ const CAS = [
    folded into an object here, so both stores answer alike. */
 function redisStore(url, tok) {
   const base = String(url).replace(/\/+$/, '');
+  /* A DEADLINE (2026-09-28). Every door goes through this one fetch; with none on it, a store that took the call and
+     never answered held each request for as long as the platform lets a function run — every poll, every edit, every
+     sign-in, at once. Five seconds, and then a 503 `busy` the pages already read as "nothing new, ask again". */
   async function call(body, pipe) {
-    const r = await fetch(base + (pipe ? '/pipeline' : ''), { method: 'POST', headers: { authorization: 'Bearer ' + tok, 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    let r;
+    try { r = await fetch(base + (pipe ? '/pipeline' : ''), { method: 'POST', headers: { authorization: 'Bearer ' + tok, 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(STORE_MS) }); }
+    catch (e) { if (e && (e.name === 'TimeoutError' || e.name === 'AbortError')) throw bad(503, 'busy', 'the store is slow — try again in a moment'); throw e; }
     if (!r.ok) throw new Error('the store answered ' + r.status);
     return r.json();
   }
@@ -374,10 +381,12 @@ const dbm = cmds => storeFor().many(cmds);
 
    ACCOUNTS — the site's
      user:<u>          hash    made seen name n role pw toured banned struck strikes avatar noted watch
+                               · founder — its number among the first hundred thousand (THE FOUNDING GNOMES)
                                · gen — how many times its password has been reset (THE SESSION'S GENERATION)
                                · hearts — the likes on its yard's fence when the bell was last opened (api/friends.js: op seen)
                                · live held okd rej won rvd rvs rvw votes — the counters (HABITS)
      users             zset    every account, scored by when it was made
+     founders          string  how many accounts have been numbered: the last Founding Gnome's number (THE FOUNDING GNOMES)
      names:<u>         list    {name, n, at, by} — every name it has gone by, newest first
      tagn:<name>       string  how many have taken that name (lower-cased): the last #n given
      tags              hash    '<name>#<n>' → the account; a tag is never given twice
@@ -396,6 +405,7 @@ const dbm = cmds => storeFor().many(cmds);
                                · tabs chat (the board's tabs and the chat's rules — api/board.js) · sections (the album's — api/gallery.js)
                                · ranks (what the leaderboard shows — api/leaderboard.js), JSON
      pages             zset    those pages, scored by when they were made
+     pagenames         hash    slug → the page's name, every page's and the first's: what the search reads (THE PAGES, BY NAME); `*` says it has been made
      spaces:<u>        set     the pages an account made (SPACES: two, unless a moderator)
      given:<u>         set     the pages an account was handed (THE MASTER) — theirs as much, and not counted among the ones they may make
      handoff:<sha>     string  a code, by its sha256 → {page, by, at}: the page it opens, once (expires)
@@ -440,7 +450,8 @@ const K = {
   friends: u => P + 'friends:' + u, asks: u => P + 'asks:' + u, notes: u => P + 'notes:' + u, invited: s => P + 'invited:' + s,
   lock: id => P + 'lock:' + id, board: (s, ch) => P + 'board:' + s + ':' + ch,
   album: s => P + 'album:' + s, albumLike: (s, id) => P + 'album:' + s + ':like:' + id,
-  lb: s => P + 'lb:' + s, here: s => P + 'here:' + s, joined: s => P + 'joined:' + s
+  lb: s => P + 'lb:' + s, here: s => P + 'here:' + s, joined: s => P + 'joined:' + s,
+  founders: P + 'founders', pageNames: P + 'pagenames'
 };
 function pageKeys(slug) {
   const p = slug === HOME ? P : P + 'p:' + slug + ':';
@@ -492,11 +503,35 @@ function streakOf(days) {                      // standing days in a row, ending
    else — a JPEG data: URL, its first bytes a JPEG's, a size well past what
    the page sends but nowhere near a photograph's — because every GET that
    carries it carries all of it. It is only ever drawn as an <img>. */
-const PIC_MAX = 60000, PIC_HEAD = 'data:image/jpeg;base64,';
+const PIC_MAX = 60000, PIC_HEAD = 'data:image/jpeg;base64,', PIC_SIDE = 512;
+/* HOW BIG ACROSS (2026-09-28). A picture is weighed in bytes, and a flat one weighs nothing: thirty thousand pixels a side
+   of one colour is a hundred kilobytes of PNG, and every browser sent it is asked for gigabytes to draw it. So its size
+   is read off its own header — [w, h], or null where the header does not say, which a picture a browser made always
+   does — and one past the side the page cuts to (api/gallery.js: 2048; here, a face, 512) is not taken. */
+function dims(buf, kind) {
+  try {
+    if (kind === 'png') return [buf.readUInt32BE(16), buf.readUInt32BE(20)];
+    if (kind === 'webp') {
+      const c = buf.toString('latin1', 12, 16);
+      if (c === 'VP8 ') return [buf.readUInt16LE(26) & 0x3fff, buf.readUInt16LE(28) & 0x3fff];
+      if (c === 'VP8L') { const b = buf.readUInt32LE(21); return [1 + (b & 0x3fff), 1 + ((b >>> 14) & 0x3fff)]; }
+      if (c === 'VP8X') return [1 + buf.readUIntLE(24, 3), 1 + buf.readUIntLE(27, 3)];
+      return null;
+    }
+    for (let i = 2; i + 9 <= buf.length && buf[i] === 0xff;) {          // jpeg: walk the segments to the frame header
+      const m = buf[i + 1];
+      if (m === 0xd8 || (m >= 0xd0 && m <= 0xd7) || m === 0x01 || m === 0xff) { i += m === 0xff ? 1 : 2; continue; }
+      if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) return [buf.readUInt16BE(i + 7), buf.readUInt16BE(i + 5)];
+      i += 2 + buf.readUInt16BE(i + 2);
+    }
+  } catch (e) {}
+  return null;
+}
+const fits = (d, side) => !!d && d[0] > 0 && d[1] > 0 && d[0] <= side && d[1] <= side;
 function cleanPic(v) {
   if (typeof v !== 'string' || v.length > PIC_MAX || !/^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(v)) return '';
-  const b = Buffer.from(v.slice(PIC_HEAD.length, PIC_HEAD.length + 8), 'base64');
-  return b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff ? v : '';
+  const b = Buffer.from(v.slice(PIC_HEAD.length), 'base64');
+  return b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff && fits(dims(b, 'jpeg'), PIC_SIDE) ? v : '';
 }
 
 // ── who ───────────────────────────────────────────────────────────────────
@@ -591,7 +626,42 @@ async function finishLogin(email, days, proved = true) {
   if (proved && admins().includes(String(email).trim().toLowerCase())) sets.push('role', 'admin');
   else if (rec.role === 'admin') sets.push('role', 'user');
   await dbm([['HSET', K.user(u), ...sets], ['ZADD', K.users, +(rec.made || now), u]]);   // counted among the accounts (again is harmless)
+  await founderOf(u, Object.assign({ made: now }, rec)).catch(() => 0);   // numbered as it is made (THE FOUNDING GNOMES); a store in trouble there keeps nobody out — its card asks again
   return { user: u, session: await mintSession(u, days, rec.gen || ''), fresh, named: !!rec.name };
+}
+
+/* ── THE FOUNDING GNOMES (2026-09-28) ───────────────────────────────────────
+   The first FOUNDERS_MAX accounts are numbered in the order they were made —
+   No. 1, No. 2 … — and the number is the account's for good (`founder` on
+   its record): it is what its yard's Founding Gnome sticker says. An account
+   is numbered as it is made or next signs in (finishLogin), and one that has
+   not signed in since, the first time its card is read (?who=). The very
+   first time anybody is numbered, every account there already is takes its
+   number in the order it was made (K.users is scored by `made`), so whoever
+   was here first has the low ones. One at a time, under a lock: no number is
+   given twice and none is skipped. Past the hundred thousand there is none.
+   ponytail: the first count reads every account once — a handful on the day
+   it runs, and it never runs again; one lock for all numbering — a sign-up
+   that finds it held a few times over is numbered when its card is read. */
+const FOUNDERS_MAX = 100000;
+async function founderOf(u, rec) {
+  if (+rec.founder > 0) return +rec.founder;
+  if (!rec.made || !USER_RE.test(u)) return 0;
+  const lock = K.lock('founders');
+  for (let tries = 0; !(await db('SET', lock, '1', 'NX', 'EX', LOCK_S)); ) { if (++tries > 3) return 0; await new Promise(r => setTimeout(r, 120)); }
+  try {
+    let n = +(await db('GET', K.founders)) || 0;
+    if (!n) {                                  // THE FIRST COUNT
+      const all = (await db('ZRANGEBYSCORE', K.users, '-inf', '+inf')).filter(x => USER_RE.test(x));
+      const made = all.length ? await dbm(all.map(x => ['HGET', K.user(x), 'made'])) : [];
+      const ids = all.filter((x, i) => made[i]).slice(0, FOUNDERS_MAX);   // an account's record, not a name left in the list with none behind it
+      if (ids.length) await dbm(ids.map((x, i) => ['HSET', K.user(x), 'founder', String(i + 1)]).concat([['SET', K.founders, String(n = ids.length)]]));
+    }
+    const had = +(await db('HGET', K.user(u), 'founder')) || 0;   // the first count may have numbered this one — or the request before this did
+    if (had || n >= FOUNDERS_MAX) return had;
+    await dbm([['HSET', K.user(u), 'founder', String(n + 1)], ['SET', K.founders, String(n + 1)]]);
+    return n + 1;
+  } finally { await db('DEL', lock); }
 }
 
 /* ── THE NAMES (2026-09-22) ─────────────────────────────────────────────────
@@ -736,6 +806,8 @@ async function loadDoc(pg) {
    no line here; and kind-specific where a wrong value would be a hole: a
    video that is not a YouTube id, a gif from somewhere that is not KLIPY, a
    piece a mile off the paper. A three-letter key is dropped, not refused. */
+const isInk = v => (Number.isInteger(v) && v >= 0 && v <= 4) || (typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v));   // toem2/wall.js: PAL, and the wheel's toHex
+const isCanon = it => !!it && it.k === 'd' && !!it.c;          // one of the plates' own pieces (`c` IS TWO THINGS)
 function cleanRecord(n, rec, mod) {
   if (!rec || typeof rec !== 'object' || Array.isArray(rec)) throw bad(400, 'record', 'piece ' + n + ' is not a piece');
   const out = {}, keys = Object.keys(rec).filter(k => KEY_RE.test(k));
@@ -750,7 +822,12 @@ function cleanRecord(n, rec, mod) {
   }
   out.n = n;
   if (!KINDS.has(out.k)) throw bad(400, 'kind', 'piece ' + n + ' is of no kind this wall knows');
-  if (!mod || !out.c) delete out.c; else out.c = 1;   // canon is a flag, and a moderator's to give (and to take)
+  /* `c` IS TWO THINGS (2026-09-28). On a sticker (kind d) it is the canon flag, a moderator's to give and to take. On
+     everything drawn or written it is the INK — one of the five the bench has by number, or a colour of the wheel's
+     (#rrggbb) — and whoever draws it chooses it. Until today the one rule ran over every kind: a gnome's chosen colour
+     was thrown away as it landed, and a moderator's became ink 1. */
+  if (out.k === 'd') { if (!mod || !out.c) delete out.c; else out.c = 1; }
+  else if (!isInk(out.c)) delete out.c;
   delete out.by;                                     // who put a piece up is this door's to say (cleanPatch), never a client's
   if (JSON.stringify(out).length > CAP.record) throw bad(413, 'record', 'piece ' + n + ' is bigger than ' + (CAP.record >> 10) + ' KB');
   const k = out.k;
@@ -829,7 +906,7 @@ function classify(patch, doc, me, feats) {
   const byN = new Map(doc.wall.items.map(it => [it.n, it]));
   const have = new Set(doc.flatfile.list.map(t => t.id));
   let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
-  doc.wall.items.forEach(it => { if (it.c && fin(it.x) && fin(it.y)) { bx0 = Math.min(bx0, it.x); by0 = Math.min(by0, it.y); bx1 = Math.max(bx1, it.x); by1 = Math.max(by1, it.y); } });
+  doc.wall.items.forEach(it => { if (isCanon(it) && fin(it.x) && fin(it.y)) { bx0 = Math.min(bx0, it.x); by0 = Math.min(by0, it.y); bx1 = Math.max(bx1, it.x); by1 = Math.max(by1, it.y); } });
   const outside = r => isFinite(bx0) && fin(r.x) && fin(r.y) && (r.x < bx0 - LINE.pad || r.x > bx1 + LINE.pad || r.y < by0 - LINE.pad || r.y > by1 + LINE.pad);
   const others = !(feats && feats[OTHERS_SLOT]);   // are other people's pieces the keepers' only?
   const c = { moves: 0, props: 0, adds: 0, dels: 0, canonDel: 0, canonOut: 0, canonProp: 0, embeds: 0, art: patch.art.length, touched: [],
@@ -838,23 +915,23 @@ function classify(patch, doc, me, feats) {
     const rec = patch.put[n], was = byN.get(n);
     if (rec.k === 'i' && !have.has(rec.f) && !patch.art.some(a => a.id === rec.f)) throw bad(400, 'no-art', 'piece ' + n + ' is stamped from a tracing this wall has not got');
     if (!was) { c.adds++; if (rec.k === 'v' || rec.k === 'g') c.embeds++; if (!allowed(feats, rec.k)) c.kept++; c.prev[n] = null; c.touched.push(n); continue; }
-    if (!isMod(me)) { if (was.c) rec.c = was.c; else delete rec.c; }
+    if (!isMod(me) && rec.k === 'd') { if (isCanon(was)) rec.c = 1; else delete rec.c; }   // a sticker is canon, or not, as it was: the flag is a moderator's. An ink is whoever's hand it is in (`c` IS TWO THINGS)
     if (was.by) rec.by = was.by; else delete rec.by;   // a piece keeps its first owner, whoever sends it back
     const ch = Object.keys(Object.assign({}, was, rec)).filter(k => JSON.stringify(was[k]) !== JSON.stringify(rec[k]));
     if (!ch.length) { delete patch.put[n]; continue; }
     const onlyMove = ch.every(k => MOVE_KEYS.has(k));
     if (onlyMove && ch.every(k => k === 'x' || k === 'y') && Math.abs(rec.x - was.x) < 2 && Math.abs(rec.y - was.y) < 2) { delete patch.put[n]; continue; }
     if (onlyMove) c.moves++;
-    else { c.props++; if (was.c) c.canonProp++; if ((rec.k === 'v' && ch.includes('id')) || (rec.k === 'g' && ch.includes('u'))) c.embeds++; }
-    if (was.c && rec.k !== was.k) c.canonDel++;   // one of the plates' pieces turned into something else is one of them gone
-    if (was.c && outside(rec)) c.canonOut++;
+    else { c.props++; if (isCanon(was)) c.canonProp++; if ((rec.k === 'v' && ch.includes('id')) || (rec.k === 'g' && ch.includes('u'))) c.embeds++; }
+    if (isCanon(was) && rec.k !== was.k) c.canonDel++;   // one of the plates' pieces turned into something else is one of them gone
+    if (isCanon(was) && outside(rec)) c.canonOut++;
     if (rec.k !== was.k && !allowed(feats, rec.k)) c.kept++;
     if (others && was.by !== me.id) c.others++;   // somebody else's (a seed piece is the wall's)
     c.prev[n] = was;
     c.touched.push(n);
   }
   patch.del = patch.del.filter(n => byN.has(n));
-  for (const n of patch.del) { const was = byN.get(n); c.dels++; if (was.c) c.canonDel++; if (others && was.by !== me.id) c.others++; c.prev[n] = was; c.touched.push(n); }
+  for (const n of patch.del) { const was = byN.get(n); c.dels++; if (isCanon(was)) c.canonDel++; if (others && was.by !== me.id) c.others++; c.prev[n] = was; c.touched.push(n); }
   if (!c.touched.length && !patch.cam && !patch.look) throw bad(400, 'no-op', 'nothing in this edit changes the wall');
   const trusted = me.tier === 'trusted' || isMod(me);
   c.cls = 'small';
@@ -1473,7 +1550,13 @@ async function rulesOf(pg, me) {
   const keepers = (by ? [by] : []).concat(invited.filter(u => u !== by));
   const owner = !!me && ((!!by && by === me.id) || master(me));
   const keeper = owner || (!!me && !me.watched && (isMod(me) || keepers.includes(me.id) || (slug === HOME && me.tier === 'trusted')));
-  return Object.assign({ page: slug, by, keepers, owner, keeper, master: master(me), feats: featsOf(listOf(p.feats)),
+  /* …AND WHO TENDS ITS CORNER (2026-09-28). The board's tabs, the chat's rules, the album, the leaderboard and the page's
+     history are arranged — and other people's posts and photos taken down — by the page's moderators proper: a moderator
+     of the site, its maker, the ones its maker named. TOEM 2's trusted keep its WALL (a live hand, the queue); until today
+     they kept its corner too, so any account ten standing days old could have emptied the town's forum and read who had
+     come by. (api/board.js, api/gallery.js, api/leaderboard.js: meOf; ?history=1, below.) */
+  const tends = owner || (!!me && !me.watched && (isMod(me) || keepers.includes(me.id)));
+  return Object.assign({ page: slug, by, keepers, owner, keeper, tends, master: master(me), feats: featsOf(listOf(p.feats)),
                          title: nameIn(slug, p), palette: paperIn(slug, p),
                          inks: listOf(p.inks) }, chaosOf(p));   // the inks: the only colours the dock offers there; none = every colour
 }
@@ -1485,7 +1568,48 @@ function cleanLook(v) {                        // a look a patch or a settings p
   if (Array.isArray(v.inks)) out.inks = lookOf({ inks: v.inks }).inks;
   return Object.keys(out).length ? out : undefined;
 }
-async function applyLook(pg, look) { if (look && pg.slug !== HOME) await db('HSET', K.page(pg.slug), ...Object.entries(look).flat()); }   // ponytail: a revert does not undo a look; settings puts it back
+async function applyLook(pg, look) {           // ponytail: a revert does not undo a look; settings puts it back
+  if (!look || pg.slug === HOME) return;
+  await db('HSET', K.page(pg.slug), ...Object.entries(look).flat());
+  if (look.title) await named(pg.slug, look.title);
+}
+/* ── THE PAGES, BY NAME (2026-09-28) — what the search in every page's corner asks (account.js) ──
+   pagenames is slug → the page's name, kept beside the pages and written wherever a name is (a page made, its settings, a
+   look that carried): one read for the whole town's names, not one a page. The first time it is asked for it is made
+   from the pages themselves. ?find= answers with the pages whose name or address has every word of the question in it
+   — the ones whose name begins with it first — eight at most, and none whose maker is banned. The names are kept a
+   quarter of a minute where the function is warm, and the answer half a minute at the CDN (it is the same whoever
+   asks): a page just made is found within the minute.
+   ponytail: the whole list, read and sifted here — fine to a few thousand pages; a lex index (ZRANGEBYLEX) past that. */
+const FIND = { max: 8, keep: 15e3, q: 60, words: 6 };
+let names = null;                              // { at, list: [[slug, name, folded]], out: slug → is its maker banned }
+const named = (slug, title) => { names = null; return db('HSET', K.pageNames, slug, title); };
+async function namesOf() {
+  if (names && Date.now() - names.at < FIND.keep) return names;
+  let h = await db('HGETALL', K.pageNames);
+  if (!h['*']) {                               // never made: every page there is, and the first
+    const slugs = [HOME].concat((await db('ZRANGEBYSCORE', K.pages, '-inf', '+inf')).filter(s => SLUG_RE.test(s)));
+    const titles = await dbm(slugs.map(s => ['HGET', K.page(s), 'title']));
+    h = { '*': '1' };
+    slugs.forEach((s, i) => { h[s] = nameIn(s, { title: titles[i] }); });
+    await db('HSET', K.pageNames, ...Object.entries(h).flat());
+  }
+  return (names = { at: Date.now(), out: new Map(), list: Object.keys(h).filter(s => s !== '*' && h[s]).map(s => [s, h[s], foldName(h[s]), foldName(h[s] + ' ' + s)]) });
+}
+async function find(text) {
+  const words = foldName(String(text).slice(0, FIND.q)).split(/\s+/).filter(Boolean).slice(0, FIND.words);
+  if (!words.length) return [];
+  const all = await namesOf(), first = words.join(' ');
+  const rank = p => (p[2].startsWith(first) ? 0 : p[2].split(/\s+/).some(w => w.startsWith(words[0])) ? 1 : 2);
+  const hits = all.list.filter(p => words.every(w => p[3].includes(w))).sort((a, b) => rank(a) - rank(b) || a[2].localeCompare(b[2]) || a[0].localeCompare(b[0])).slice(0, FIND.max * 2);
+  const ask = hits.filter(p => !all.out.has(p[0]));   // whose maker has not been looked at this minute
+  if (ask.length) {
+    const by = await dbm(ask.map(p => ['HGET', K.page(p[0]), 'by'])), makers = [...new Set(by.filter(u => USER_RE.test(u || '')))];
+    const flag = makers.length ? await dbm(makers.map(u => ['HGET', K.user(u), 'banned'])) : [], gone = new Set(makers.filter((u, i) => flag[i] === '1'));
+    ask.forEach((p, i) => all.out.set(p[0], gone.has(by[i])));
+  }
+  return hits.filter(p => !all.out.get(p[0])).slice(0, FIND.max).map(p => ({ slug: p[0], title: p[1] }));
+}
 async function opSettings(pg, req, res, me, body) {
   const slug = pg.slug, p = await db('HGETALL', K.page(slug));
   if (!(isMod(me) || (!!p.by && p.by === me.id))) throw bad(403, 'owner', 'the rules here are the maker\'s');   // TOEM 2's too, once it has one (THE MASTER)
@@ -1508,6 +1632,7 @@ async function opSettings(pg, req, res, me, body) {
   // the clock starts when the page becomes a council, and starts again when how often it comes round is changed
   if (chaos === 2 && (!was.closes || was.chaos !== 2 || (said.every && said.every !== was.every))) { said.closes = Date.now() + every * HOUR; sets.push('closes', String(said.closes)); }
   await db('HSET', K.page(slug), ...sets);
+  if (look && look.title) await named(slug, look.title);   // THE PAGES, BY NAME: the search finds it by the name it has now
   await audit(me.id, 'settings', Object.assign({ page: slug }, said));
   answer(res, 200, { ok: true, rules: await rulesOf(pg, me) });
 }
@@ -1523,6 +1648,7 @@ async function opPage(req, res, me, body) {
   const look = lookOf(body);
   if (look.chaos === '2') look.closes = String(now + (+look.every || EVERY_DEFAULT) * HOUR);
   await dbm([['HSET', K.page(slug), 'title', title, 'kind', 'wall', 'by', me.id, ...Object.entries(look).flat()], ['ZADD', K.pages, now, slug]]);
+  await named(slug, title);                     // THE PAGES, BY NAME: a page is the search's to find from the moment it is made
   await audit(me.id, 'page', { page: slug, title });
   answer(res, 200, { ok: true, page: spaceOf(slug, Object.assign({ made: now, title, by: me.id }, look)) });
 }
@@ -1617,11 +1743,18 @@ async function get(req, res, q, op) {
   if (q.get('who')) {                           // a gnome's card: anybody's to read, the counters in full a moderator's
     const u = String(q.get('who'));
     if (!USER_RE.test(u)) return answer(res, 400, { ok: false, code: 'user', error: 'not a gnome id' });
-    const [rec, days] = await dbm([['HGETALL', K.user(u)], ['SMEMBERS', K.days(u)]]);
+    const [rec, days, seen] = await dbm([['HGETALL', K.user(u)], ['SMEMBERS', K.days(u)], ['HGET', K.joined(HOME), u]]);
     if (!rec || !rec.made) return answer(res, 404, { ok: false, code: 'user', error: 'the hill has no record of that gnome' });
-    const h = habits(rec), p = await profile(u, rec, days.length), me = await whoIs(req);
-    const who = { id: u, name: rec.name || '', n: +rec.n || 0, tag: tagOf(rec), since: new Date(numOf(rec.made) || Date.now()).toISOString().slice(0, 7), tier: p.tier, rep: days.length,
+    const h = habits(rec), p = await profile(u, rec, days.length), me = await whoIs(req), month = t => new Date(t).toISOString().slice(0, 7);
+    const who = { id: u, name: rec.name || '', n: +rec.n || 0, tag: tagOf(rec), since: month(numOf(rec.made) || Date.now()), tier: p.tier, rep: days.length,
                   streak: streakOf(days), avatar: rec.avatar || '', live: h.live, okd: h.okd, landed: h.landed, won: h.won, votes: h.votes };
+    /* THE TWO STICKERS ON A YARD (2026-09-28). `founder`: its number among the first hundred thousand (THE FOUNDING GNOMES).
+       `here`: I WAS HERE — the month the account first had TOEM 2 open, signed in (joined:toem2, kept by api/board.js: WHO IS
+       HERE) or, for one that came before that was kept, of its first standing day, which is a day of edits there. To the
+       month, as `since` is: a card says roughly when, not the minute. */
+    const founder = await founderOf(u, rec).catch(() => 0), first = +seen || (days.length ? Date.parse(days.slice().sort()[0]) : 0);
+    if (founder) who.founder = founder;
+    if (first > 0) who.here = month(first);
     if (p.role === 'mod' || p.role === 'admin') who.role = p.role;
     if (isMod(me)) Object.assign(who, { held: h.held, rej: h.rej, rvd: h.rvd, rvs: h.rvs, rvw: h.rvw, strikes: h.strikes, flak: h.flak, watched: h.watched, banned: rec.banned === '1', seen: numOf(rec.seen), made: numOf(rec.made) });
     return answer(res, 200, { ok: true, who });
@@ -1637,6 +1770,7 @@ async function get(req, res, q, op) {
     if (e.votes && !isMod(await whoIs(req))) delete e.votes;   // …and who voted which way is the tally's to say, and a moderator's to see
     return answer(res, 200, { ok: true, edit: Object.assign(e, t) });
   }
+  if (q.get('find') != null) return answer(res, 200, { ok: true, pages: await find(q.get('find')) }, CACHE.find);   // THE PAGES, BY NAME
   if (q.get('pages')) {                         // the first page, and every one made since
     const slugs = await db('ZRANGEBYSCORE', K.pages, '-inf', '+inf'), [home, ...recs] = await dbm([HOME].concat(slugs).map(s => ['HGETALL', K.page(s)]));
     return answer(res, 200, { ok: true, pages: [{ slug: HOME, title: nameIn(HOME, home), kind: 'wall' }].concat(recs.map((p, i) => ({ slug: slugs[i], title: p.title, kind: p.kind, by: p.by, made: +p.made }))) });
@@ -1687,7 +1821,7 @@ async function get(req, res, q, op) {
        ponytail: every account that ever came is read and named here, two store reads each, a dashboard's load at a time — fine to
        a few thousand; a page past that wants its joins in a sorted set, read a screen at a time. */
     const me = await whoIs(req), rules = await rulesOf(pg, me);
-    if (!rules.keeper) return answer(res, me ? 403 : 401, { ok: false, code: me ? 'role' : 'who', error: 'a page\'s history is its moderators\' to read' });
+    if (!rules.tends) return answer(res, me ? 403 : 401, { ok: false, code: me ? 'role' : 'who', error: 'a page\'s history is its moderators\' to read' });
     const [raw, seen] = await dbm([['LRANGE', pg.log, 0, LOG_KEEP - 1], ['HGETALL', K.joined(pg.slug)]]);
     const log = raw.map(s => JSON.parse(s)).filter(e => USER_RE.test(String(e.by || ''))), first = {};
     Object.keys(seen || {}).forEach(u => { if (USER_RE.test(u) && +seen[u] > 0) first[u] = +seen[u]; });
@@ -1868,4 +2002,5 @@ Object.assign(handler, { storeFor, useStore: s => { STORE = s; }, db, dbm, K, pa
 // …and for api/auth.js (the accounts) and api/hill.js (a yard of one's own, and proposals to it): who
 // is asking, the session's two cookies, the names, and the checks a piece that other people's browsers will draw has to pass
 Object.assign(handler, { whoIs, isMod, master, titleOf, HANDOFF_DAYS, CLAIM_TRIES, sessionOf, sessOf, inGen, setSession, clearSession, sameSite, localPath, answer, readBody, Bad, bad, text, sha, ipHash,
-                         rename, cleanName, tagOf, foldName, ensureTag, audit, tell, tellOnce, tellKeepers, tagsOf, habits, rulesOf, cleanRecord, cleanTracing, cleanPic, KINDS, GIF_RE, VID_RE, USER_RE, SLUG_RE, SESSION_DAYS });
+                         rename, cleanName, tagOf, foldName, ensureTag, audit, tell, tellOnce, tellKeepers, tagsOf, habits, rulesOf, cleanRecord, cleanTracing, cleanPic, KINDS, GIF_RE, VID_RE, USER_RE, SLUG_RE, SESSION_DAYS,
+                         dims, fits, BLOB_MS, STORE_MS, FOUNDERS_MAX });
