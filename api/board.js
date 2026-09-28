@@ -153,7 +153,7 @@ function cleanTabs(v) {
 function cleanChat(b) {
   const wait = Math.floor(+b.wait) || 0;
   if (!(wait >= 0 && wait <= WAIT_MAX)) throw bad(400, 'chat', 'the wait between messages is 0 to ' + WAIT_MAX + ' seconds');
-  if (!WHO.includes(b.who)) throw bad(400, 'chat', 'who may chat is anyone, keepers or named');
+  if (!WHO.includes(b.who)) throw bad(400, 'chat', 'who may chat is `anyone`, `keepers` (the moderators) or `named`');
   const named = Array.isArray(b.named) ? [...new Set(b.named.filter(u => typeof u === 'string' && USER_RE.test(u)))] : [];
   if (named.length > NAMED_MAX) throw bad(400, 'chat', 'name ' + NAMED_MAX + ' people at most');
   return { wait, who: b.who, named };
