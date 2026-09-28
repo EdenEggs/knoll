@@ -1088,3 +1088,16 @@ the way a look back is, and kept the same way: not at all.
 **Checks.** `node lab2/perf/probe-bell.js` (60, headless Chrome),
 `node lab2/perf/verify-bell.js` (37, the doors), `node lab2/perf/probe-looks.js`
 (12), `node lab2/perf/probe-yard-url.js` (17).
+
+## A page handed to you (2026-09-27)
+
+The settings drawer has a box for a **code**. The site's master hands a page
+on by making a code for it on their dashboard (`dashboard/about.md`: the
+master's desk) and sending it however they like; typed here — any capitals,
+dashes or spaces — it goes to the door as typed (`api/wall.js`: op `claim`),
+and the door says which page it opened. The drawer answers "<page> is yours
+now." with the way to its dashboard, and the hills are read again, so the
+page stands in YOUR SPACES without a reload. A code that opens nothing says
+so, in the door's own words. The page's name is set as text.
+
+**Checks.** `node lab2/perf/probe-handoff.js` walks it.

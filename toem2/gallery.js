@@ -19,13 +19,25 @@
    a photo carries its title, a description (under the print, full size) and
    the section it hangs in.
 
+   KNOLL'S OWN CORNER (2026-09-28): on a page that is not TOEM 2 the album is
+   the PHOTO WALL of the "Knoll Gallery Widget" sheet (corner-knoll.css) — and
+   its button is the sheet's: three prints fanned out, the newest photos on
+   them (blank while there are none), over a plate that says how many hang.
+   ponytail: the sheet's fan can be dragged about; here it stands in the
+   corner with the other buttons — pointer moves and a kept place when that
+   is wanted.
+
    ponytail: the album asks the door once a minute for the count and when it
    opens — no live push; the board's poll is the pattern if one is wanted. */
 window.Gallery = (function () {
   if (document.documentElement.classList.contains('toem-embed')) return null;
   const PAGE = document.documentElement.dataset.page || 'toem2', PQ = 'page=' + encodeURIComponent(PAGE);
+  const KNOLL = PAGE !== 'toem2';               // KNOLL'S OWN CORNER: a space's; TOEM 2 keeps its own
   const API = '/api/gallery', CARD = '/api/wall?who=', TOKEN = 'knoll-toem2:token', SEEN = 'knoll-' + PAGE + ':album:seen';
   const POLL = 60000;
+  const WORDS = KNOLL ? { name: 'Photo Wall', btn: 'the photo wall', back: 'Back to the wall' } : { name: 'Photo Album', btn: 'the photo album', back: 'Back to album' };
+  const TONES = ['#ffd23f', '#5a9e58', '#f5b8c4', '#5a8fd6', '#f0cfae'];
+  const tone = id => TONES[(parseInt(String(id || '0').slice(0, 4), 16) || 0) % TONES.length];
   const BASE = [['all', 'All'], ['mine', 'Mine'], ['fav', 'Favourites']];
   const EMPTY = { all: ['No photos yet', 'Photos taken around town will hang here.'],
                   mine: ['None of yours yet', 'The photos you take will be kept here.'],
@@ -39,7 +51,9 @@ window.Gallery = (function () {
     album: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="13" height="14" rx="1.5" fill="none" transform="rotate(-8 9.5 14)"/><rect x="9" y="4" width="12" height="13" rx="1.5" fill="#fff"/><rect x="11" y="6" width="8" height="6.5" stroke="none"/></svg>',
     heart: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 17S3 12.5 3 7.5A3.5 3.5 0 0 1 10 6a3.5 3.5 0 0 1 7 1.5C17 12.5 10 17 10 17Z"/></svg>',
     prev: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13 3 6 10l7 7" fill="none"/></svg>',
-    next: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3l7 7-7 7" fill="none"/></svg>'
+    next: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3l7 7-7 7" fill="none"/></svg>',
+    // Knoll's print on the panel's plate, each shape with its own paint (style, which no rule of the corner's outranks)
+    wall: '<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="4" width="22" height="25" rx="2" style="fill:#fdf7e3;stroke:#17120b;stroke-width:2.5;stroke-linejoin:round"/><rect x="8.5" y="7.5" width="15" height="13" style="fill:#5a8fd6;stroke:none"/><circle cx="19" cy="11.5" r="2" style="fill:#ffd23f;stroke:none"/><path d="M8.5 20.5l5-5 4 3.5 2.5-2 3.5 3.5" style="fill:none;stroke:#17120b;stroke-width:2;stroke-linejoin:round"/></svg>'
   };
 
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
@@ -81,7 +95,16 @@ window.Gallery = (function () {
   const look = () => { seen = Date.now(); set(SEEN, String(seen)); badge(); };
   function badge() {
     const b = fab.querySelector('.town-badge'), n = open ? 0 : unread();
-    b.textContent = n > 9 ? '9+' : n ? String(n) : '';
+    b.textContent = KNOLL ? (n ? (n > 9 ? '9+' : n) + ' new' : '') : n > 9 ? '9+' : n ? String(n) : '';
+    if (KNOLL) {                                // the fan: the three newest on its prints, and how many hang on its plate
+      fab.querySelector('.gal-fan-n').textContent = 'Album · ' + photos.length;
+      fab.querySelectorAll('.gal-fan-p').forEach((c, i) => {
+        const p = photos[i], src = p ? p.src : '';
+        if (c.dataset.src === src) return;
+        c.dataset.src = src; c.replaceChildren();
+        if (src) { const img = el('img'); img.src = src; img.alt = ''; img.loading = 'lazy'; c.append(img); }
+      });
+    }
     sub.textContent = photos.length === 1 ? '1 photo from around town' : photos.length + ' photos from around town';
     tabsNow().forEach(([t]) => { const c = tabsEl.querySelector('[data-tab="' + t + '"] .gal-n'); if (c) c.textContent = String(listOf(t).length); });
   }
@@ -132,7 +155,7 @@ window.Gallery = (function () {
     const step = d => { if (list.length < 2) return; viewing = list[(pos + d + list.length) % list.length].id; renderView(); };
     const arrow = (cls, icon, label, d) => { const b = el('button', 'gal-arrow ' + cls); b.type = 'button'; b.innerHTML = icon; b.setAttribute('aria-label', label); b.disabled = list.length < 2; b.addEventListener('click', () => step(d)); return b; };
     frame.append(img, arrow('is-prev', SVG.prev, 'previous', -1), arrow('is-next', SVG.next, 'next', 1));
-    const row = el('div', 'gal-row'), face = el('span', 'town-pic', initial(p.tag)); face.dataset.pic = p.by; picIn(face, p.by);
+    const row = el('div', 'gal-row'), face = el('span', 'town-pic', initial(p.tag)); face.dataset.pic = p.by; face.style.setProperty('--tone', tone(p.by)); picIn(face, p.by);
     const who = el('div', 'gal-who'), sec = secOf(p.sec);
     who.append(el('b', null, p.cap), el('small', null, nameOf(p.tag) + (p.where ? ' · ' + p.where : '') + (sec ? ' · ' + sec.title : '') + ' · ' + when(p.at)));
     const like = el('button', 'gal-like' + (p.liked ? ' is-on' : '')); like.type = 'button'; like.innerHTML = SVG.heart; like.append(String(p.likes));
@@ -142,7 +165,7 @@ window.Gallery = (function () {
     const foot = el('div', 'gal-foot'), pos2 = el('span', 'gal-pos', (pos + 1) + ' of ' + list.length);
     foot.append(pos2);
     if (canDrop(p)) { const x = el('button', 'town-x', p.by === me.id ? 'take it down' : 'hide it'); x.type = 'button'; x.addEventListener('click', () => drop(p)); foot.append(x); }
-    const back = el('button', 'town-btn', 'Back to album'); back.type = 'button'; back.addEventListener('click', () => { viewing = null; render(); });
+    const back = el('button', 'town-btn', WORDS.back); back.type = 'button'; back.addEventListener('click', () => { viewing = null; render(); });
     foot.append(back);
     note = el('p', 'town-note'); note.hidden = true;
     sheet.append(frame, row);
@@ -218,20 +241,22 @@ window.Gallery = (function () {
     });
   }
   function build() {
-    fab = el('button', 'town-fab gal-fab'); fab.type = 'button'; fab.id = 'gallery-btn'; fab.title = 'the photo album'; fab.setAttribute('aria-label', 'the photo album');
+    fab = el('button', KNOLL ? 'gal-fan' : 'town-fab gal-fab'); fab.type = 'button'; fab.id = 'gallery-btn'; fab.title = WORDS.btn; fab.setAttribute('aria-label', WORDS.btn);
     fab.setAttribute('aria-expanded', 'false'); fab.setAttribute('aria-controls', 'gallery-panel');
-    fab.innerHTML = SVG.album; fab.append(el('i', 'town-badge'));
+    if (KNOLL) { for (let i = 0; i < 3; i++) { const c = el('span', 'gal-fan-c'); c.append(el('span', 'gal-fan-p')); fab.append(c); } fab.append(el('span', 'gal-fan-n', 'Album · 0'), el('i', 'town-badge')); }
+    else { fab.innerHTML = SVG.album; fab.append(el('i', 'town-badge')); }
     fab.addEventListener('click', show);
     const fabs = document.querySelector('.town-fabs') || (() => { const d = el('div', 'town-fabs'); document.body.append(d); return d; })();
     fabs.append(fab);
 
-    panel = el('section', 'town-panel gal-panel'); panel.id = 'gallery-panel'; panel.hidden = true; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'the photo album');
-    const head = el('div', 'town-head'), tile = el('span', 'town-tile'), tt = el('div', 'town-title');
-    tile.innerHTML = SVG.album;
+    panel = el('section', 'town-panel gal-panel'); panel.id = 'gallery-panel'; panel.hidden = true; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', WORDS.btn);
+    const head = el('div', 'town-head'), plate = el('span', 'town-plate'), tile = el('span', 'town-tile'), tt = el('div', 'town-title');
+    tile.innerHTML = KNOLL ? SVG.wall : SVG.album;
     sub = el('small', null, '');
-    tt.append(el('b', null, 'Photo Album'), sub);
+    tt.append(el('b', null, WORDS.name), sub);
     const x = el('button', 'town-close', '✕'); x.type = 'button'; x.setAttribute('aria-label', 'close'); x.addEventListener('click', hide);
-    head.append(tile, tt, x);
+    plate.append(tile, tt);                     // the name plate (board.js: panel)
+    head.append(plate, x);
     tabsEl = el('div', 'town-tabs'); tabsEl.setAttribute('role', 'tablist');
     buildTabs();
     tabsEl.addEventListener('keydown', e => {

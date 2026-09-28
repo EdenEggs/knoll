@@ -4,15 +4,26 @@
    chose (dashboard/manage.js; api/leaderboard.js counts them from the page's wall, board and album), a blurb, a
    podium for the first three, the rows after them, and — signed in — your own line at the foot. Empty until
    people use the page: nothing is seeded or made up. It reads when it opens and once a minute while it is up.
-   Shares the corner and the case (.town-*) with board.js. Not on the yard's picture of this page (?embed=1). */
+   Shares the corner and the case (.town-*) with board.js. Not on the yard's picture of this page (?embed=1).
+
+   KNOLL'S OWN CORNER (2026-09-28): on a page that is not TOEM 2 it is the HALL OF FAME of the "Knoll Leaderboard"
+   sheet (corner-knoll.css; the name is what api/leaderboard.js calls a space's until its keepers call it another). */
 window.Ranks = (function () {
   if (document.documentElement.classList.contains('toem-embed')) return null;
   const PAGE = document.documentElement.dataset.page || 'toem2', PQ = 'page=' + encodeURIComponent(PAGE);
+  const KNOLL = PAGE !== 'toem2';               // KNOLL'S OWN CORNER: a space's; TOEM 2 keeps its own
   const API = '/api/leaderboard', CARD = '/api/wall?who=', TOKEN = 'knoll-toem2:token';
   const POLL = 60000;
+  const WORDS = KNOLL ? { name: 'Hall of Fame', btn: 'the hall of fame' } : { name: 'Leaderboard', btn: 'the leaderboard' };
+  const TONES = ['#ffd23f', '#5a9e58', '#f5b8c4', '#5a8fd6', '#f0cfae'];
+  const tone = id => TONES[(parseInt(String(id || '0').slice(0, 4), 16) || 0) % TONES.length];
+  // Knoll's cup, each shape with its own paint (style, which no rule of the corner's outranks): cream on the button, gold on the plate
+  const INK = 'stroke:#17120b;stroke-width:2.5;stroke-linejoin:round', cupK = (a, b) => '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9 5h14v7a7 7 0 0 1-14 0Z" style="fill:' + a + ';' + INK + '"/>' +
+    '<path d="M9 7H5v2a5 5 0 0 0 4 5M23 7h4v2a5 5 0 0 1-4 5" style="fill:none;' + INK + '"/><path d="M10 23h12v5H10Z" style="fill:' + b + ';' + INK + '"/><path d="M16 19v4" style="fill:none;stroke:#17120b;stroke-width:2.5"/></svg>';
   const SVG = {
     trophy: '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M11 6h18v9a9 9 0 0 1-18 0Z" fill="#fff"/><path d="M11 9H5v3a6 6 0 0 0 6 6M29 9h6v3a6 6 0 0 1-6 6" fill="none"/><path d="M17 24h6v5h-6Z" fill="currentColor"/><path d="M12 29h16v6H12Z" fill="#fff"/></svg>',
-    crown: '<svg viewBox="0 0 30 20" aria-hidden="true"><path d="M3 17 5 5l6 6 4-8 4 8 6-6 2 12Z" fill="#ffd23f" stroke="#17120b" stroke-width="3" stroke-linejoin="round"/></svg>'
+    crown: '<svg viewBox="0 0 30 20" aria-hidden="true"><path d="M3 17 5 5l6 6 4-8 4 8 6-6 2 12Z" fill="#ffd23f" stroke="#17120b" stroke-width="3" stroke-linejoin="round"/></svg>',
+    cupFab: cupK('#fdf7e3', '#fdf7e3'), cupTile: cupK('#ffd23f', '#8a6a42')
   };
   const EMPTY = { edits: 'The first edits here will put someone on it.', days: 'The first edits here will put someone on it.', first: 'The first edit here will put someone on it.',
                   posts: 'The first posts on the board, or lines in the chat, will put someone on it.', photos: 'The first photos in the album will put someone on it.', hearts: 'The first hearts on a photo will put someone on it.' };
@@ -51,7 +62,7 @@ window.Ranks = (function () {
       .then(o => { const src = (o && o.ok && o.who && o.who.avatar) || ''; pics.set(id, src); return src; }).catch(() => { pics.set(id, ''); return ''; }));
     pics.get(id).then(src => { if (src) panel.querySelectorAll('.town-pic[data-pic="' + id + '"]').forEach(n => showPic(n, src)); });
   }
-  const face = (r, cls) => { const f = el('span', 'town-pic' + (cls ? ' ' + cls : ''), initial(r.tag)); f.dataset.pic = r.id; picIn(f, r.id); return f; };
+  const face = (r, cls) => { const f = el('span', 'town-pic' + (cls ? ' ' + cls : ''), initial(r.tag)); f.dataset.pic = r.id; f.style.setProperty('--tone', tone(r.id)); picIn(f, r.id); return f; };
 
   // ── the board ───────────────────────────────────────────────────────────
   function render() {
@@ -128,19 +139,20 @@ window.Ranks = (function () {
 
   // ── the furniture ───────────────────────────────────────────────────────
   function build() {
-    fab = el('button', 'town-fab lb-fab'); fab.type = 'button'; fab.id = 'ranks-btn'; fab.title = 'the leaderboard'; fab.setAttribute('aria-label', 'the leaderboard');
+    fab = el('button', 'town-fab lb-fab'); fab.type = 'button'; fab.id = 'ranks-btn'; fab.title = WORDS.btn; fab.setAttribute('aria-label', WORDS.btn);
     fab.setAttribute('aria-expanded', 'false'); fab.setAttribute('aria-controls', 'ranks-panel');
-    fab.innerHTML = SVG.trophy;
+    fab.innerHTML = KNOLL ? SVG.cupFab : SVG.trophy;
     fab.addEventListener('click', show);
     const dock = el('div', 'lb-dock'); dock.append(fab); document.body.append(dock);   // the trophy stands at the top right, under the header — the other three keep the bottom-left
 
-    panel = el('section', 'town-panel lb-panel'); panel.id = 'ranks-panel'; panel.hidden = true; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'the leaderboard');
-    const head = el('div', 'town-head'), tile = el('span', 'town-tile lb-tile'), tt = el('div', 'town-title');
-    tile.innerHTML = SVG.trophy;
-    title = el('b', null, 'Leaderboard'); sub = el('small', null, '');
+    panel = el('section', 'town-panel lb-panel'); panel.id = 'ranks-panel'; panel.hidden = true; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', WORDS.btn);
+    const head = el('div', 'town-head'), plate = el('span', 'town-plate'), tile = el('span', 'town-tile lb-tile'), tt = el('div', 'town-title');
+    tile.innerHTML = KNOLL ? SVG.cupTile : SVG.trophy;
+    title = el('b', null, WORDS.name); sub = el('small', null, '');
     tt.append(title, sub);
     const x = el('button', 'town-close', '✕'); x.type = 'button'; x.setAttribute('aria-label', 'close'); x.addEventListener('click', hide);
-    head.append(tile, tt, x);
+    plate.append(tile, tt);                     // the name plate (board.js: panel)
+    head.append(plate, x);
     tabsEl = el('div', 'town-tabs'); tabsEl.setAttribute('role', 'tablist');
     tabsEl.addEventListener('keydown', e => {
       const T = data ? data.settings.tabs : [], i = T.indexOf(tab), d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;

@@ -91,6 +91,12 @@ const ids = list => list.map(r => r.id);
   check('a ranking twice is once; the title is one line; the line under it is cut to sixty', r.json.ok && r.json.settings.tabs.join() === 'photos,edits' && r.json.settings.title === 'The Wall of Fame' && r.json.settings.sub.length === 60, r.json.settings);
   check('the record says who arranged it', (await W.db('LRANGE', W.K.audit, 0, -1)).map(s => JSON.parse(s)).some(e => e.what === 'ranks' && e.by === U.mod && e.tabs === 'photos,edits'));
   check('the count is kept as a string that expires', typeof (await W.db('GET', W.K.lb('toem2'))) === 'string' || (await W.db('GET', W.K.lb('toem2'))) === null);
+  // KNOLL'S OWN CORNER (2026-09-28): a space's is the Hall of Fame until its keepers call it another; TOEM 2's was checked above
+  await W.db('HSET', W.K.page('glade'), 'made', '1', 'title', 'Glade', 'by', U.nu);
+  r = await GET('?page=glade');
+  check('a space\'s leaderboard starts as the Hall of Fame — empty, the same three rankings', r.status === 200 && r.json.settings.title === 'Hall of Fame' && r.json.settings.tabs.join() === 'edits,days,first' && Object.values(r.json.ranks).every(l => l.length === 0), r.json.settings);
+  r = await POST({ op: 'settings', page: 'glade', tabs: ['posts'], title: 'Top Gnomes', sub: '', top: 5 }, 'nu');
+  check('…and its maker calls it what they like', r.json.ok && (await GET('?page=glade')).json.settings.title === 'Top Gnomes', r.json);
 
   fs.rmSync(tmp, { recursive: true, force: true });
   console.log(fails ? '\n' + fails + ' FAILED' : '\nall passed');

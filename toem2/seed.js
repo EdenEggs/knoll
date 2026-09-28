@@ -352,17 +352,17 @@ window.Seed = (function () {
     out.push({ text: r.chaos === 0 ? 'Read-only — its maker alone draws on it.' : r.chaos === 1 ? 'Tended — the keepers decide what stays.'
                    : r.chaos === 2 ? 'Council — every change from a non-keeper is a motion; the ballot closes ' + per + '.' : 'Wild — anyone edits anything, live. The history keeps everything.' });
     const ks = (r.keepers || []).map(k => k.tag).filter(Boolean);
-    out.push({ text: HOME ? 'keepers: the moderators and the trusted' : (ks.length > 1 ? 'keepers: ' : 'keeper: ') + (ks.join(', ') || 'the maker') });
+    out.push({ text: HOME ? 'keepers: ' + ks.concat('the moderators and the trusted').join(', ') : (ks.length > 1 ? 'keepers: ' : 'keeper: ') + (ks.join(', ') || 'the maker') });   // TOEM 2 has a maker, and the keepers they name, once it has been handed on (api/wall.js: THE MASTER)
     const on = KIND_NAMES.filter((n, i) => r.feats && r.feats[i]), off = KIND_NAMES.filter((n, i) => !(r.feats && r.feats[i]));
     out.push({ text: r.chaos === 3 ? 'everyone may do everything here' : r.chaos === 0 ? 'only the maker edits here'
                    : !off.length ? 'everyone may do everything here' : !on.length ? 'only the keepers edit here' : 'everyone may: ' + on.join(', ') + ' · keepers only: ' + off.join(', ') });
     if (r.chaos === 2) out.push({ text: 'ballot closes ' + closesIn(r.closesAt) + (r.motions ? ' · ' + r.motions + (r.motions === 1 ? ' motion' : ' motions') : ''), links: [['see the ballot', () => { closePop(); if (window.Ballot) Ballot.open(); }]] });
     if (!hasSession()) out.push({ text: 'log in to edit for everybody', links: GATE });
     else if (!me) out.push({ text: 'you: signed in' });
-    else out.push({ text: 'you: ' + (owner() ? 'the maker' : keeper() ? 'a keeper' : canVote() ? 'a voter — ' + (me.rep || 0) + ' standing day' + (me.rep === 1 ? '' : 's') : 'no standing yet — a day of live edits on TOEM 2 earns a vote') });
+    else out.push({ text: 'you: ' + (owner() ? (r.master && r.by !== me.id ? 'the master' : 'the maker') : keeper() ? 'a keeper' : canVote() ? 'a voter — ' + (me.rep || 0) + ' standing day' + (me.rep === 1 ? '' : 's') : 'no standing yet — a day of live edits on TOEM 2 earns a vote') });
     if (owner() || (HOME && isMod())) out.push({ text: '', links: [['the rules', () => { closePop(); if (window.History) History.open('rules'); }]].concat(
-      owner() && !HOME ? [['settings', () => location.assign('/settings/?space=' + encodeURIComponent(PAGE))], ['dashboard', () => location.assign('/dashboard/?space=' + encodeURIComponent(PAGE))]]
-      : HOME && isMod() ? [['dashboard', () => location.assign('/dashboard/?space=toem2')]] : []) });   // the maker's doors, now the space opens on this bench (2026-09-24); TOEM 2's own dashboard is the moderators' (its board, chat and album are arranged there)
+      owner() ? [['settings', () => location.assign('/settings/?space=' + encodeURIComponent(PAGE))], ['dashboard', () => location.assign('/dashboard/?space=' + encodeURIComponent(PAGE))]]
+      : HOME && isMod() ? [['dashboard', () => location.assign('/dashboard/?space=toem2')]] : []) });   // the maker's doors, now the space opens on this bench (2026-09-24) — TOEM 2's maker's and the master's too (2026-09-27); TOEM 2's own dashboard is the moderators' as well (its board, chat and album are arranged there)
     return out;
   }
   function buildStamp() {

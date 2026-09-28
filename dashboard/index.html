@@ -24,6 +24,8 @@
      chat's rules and the photo album, built into the #corner-manage slot below -->
 <link rel="stylesheet" href="./manage.css">
 <script src="./manage.js" defer></script>
+<!-- THE MASTER'S DESK (master.js, 2026-09-27): for the site's master — every page, and a code to hand each on -->
+<script src="./master.js" defer></script>
 </head>
 <body>
 <x-dc>
@@ -213,6 +215,9 @@
          photos, for a page's keepers — manage.js builds them into this slot, plain DOM outside React's care, on a page's
          dashboard only; empty (and so unseen) everywhere else. Nothing of React's ever goes inside. -->
     <section id="corner-manage" aria-label="the town board, the chat and the photo album"></section>
+    <!-- THE MASTER'S DESK (2026-09-27): every page, whose it is, and a code to hand it on — master.js builds it into this slot
+         for the site's master alone (api/wall.js: THE MASTER); empty, and so unseen, for everybody else. -->
+    <section id="master-desk" aria-label="the master's desk"></section>
 
     <section style="display:grid; grid-template-columns:minmax(0,2fr) minmax(280px,1fr); gap:26px; margin-bottom:30px; align-items:start">
 
@@ -940,7 +945,7 @@ class Component extends DCLogic {
       dashSub: SP ? '· ' + (LEVEL[chaos] || 'TENDED') + ' · ' + (chaos === 2 && rules ? 'THE BALLOT CLOSES ' + closesIn(rules.closes) : rules ? rules.keepers.length + (rules.keepers.length === 1 ? ' KEEPER' : ' KEEPERS') : 'A SPACE') + ' ·'
                   : '· EVERY VISITOR COUNTED BY HAND · GNOME-CERTIFIED ·',
       chipHref: SP ? '/' + SP : '../yard/', chipTitle: SP ? 'open the space' : 'open your page', chipLabel: SP ? 'THE SPACE' : 'YOUR HILL', chipPath: SP ? '/' + SP : '/yard',
-      gearHref: SP ? '/settings/?space=' + SP : '', gearOn: !!SP && SP !== 'toem2',   // TOEM 2 has no settings page: its rules are the moderators', on the wall
+      gearHref: SP ? '/settings/?space=' + SP : '', gearOn: !!SP && (SP !== 'toem2' || !!(rules && rules.owner)),   // TOEM 2's settings are its maker's and the master's (api/wall.js: THE MASTER); its moderators set its rules on the wall
       canMake: !S.spacesFull,
       spaces: S.spaces.filter(s => /^[a-z0-9-]{1,32}$/.test(s.slug)).map((s, i) => ({
         slug: s.slug, title: s.title, level: LEVEL[s.chaos] || 'TENDED', col: LCOL[s.chaos] || LCOL[1],

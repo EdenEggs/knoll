@@ -259,7 +259,9 @@ window.History = (function () {
     const boxes = KINDS.map((k, i) => { const l = el('label'), c = el('input'); c.type = 'checkbox'; c.addEventListener('change', () => { draft.feats[i] = c.checked; paint(); }); l.append(c, ' ' + k); sw.append(l); return c; });
     const wildNote = el('small', null, "wild: everything is everyone's"); sw.append(wildNote);
     sec.append(sw);
-    sec.append(el('p', 'th-me', 'keepers: the moderators and the trusted'));
+    const ks = el('p', 'th-me', 'keepers: ' + (r.keepers || []).map(k => k.tag).filter(Boolean).concat('the moderators and the trusted').join(', ') + '. ');
+    if (r.owner) { const a = el('a', 'th-link', 'name them in the settings'); a.href = '/settings/?space=toem2'; ks.append(a); }   // TOEM 2's maker, and the master (api/wall.js: THE MASTER)
+    sec.append(ks);
     const seal = el('button', 'th-link th-seal', 'seal it'); seal.type = 'button'; const note = el('small', 'th-note');
     seal.addEventListener('click', async () => {
       if (!dirty() || busy) return;
@@ -328,6 +330,8 @@ window.History = (function () {
   const RECORD = {
     role: e => 'role: ' + (e.role ? 'made ' + short(e.user) + ' ' + e.role : e.banned != null ? (e.banned ? 'banned ' : 'unbanned ') + short(e.user) : e.watch != null ? (e.watch ? 'watched ' : 'unwatched ') + short(e.user) : short(e.user)),
     page: e => 'page: made /' + e.page + (e.title ? ' — ' + e.title : ''),
+    handoff: e => (e.revoked ? 'handoff: took back the code for /' : 'handoff: made a code for /') + e.page,
+    claim: e => 'claim: /' + e.page + ' is theirs' + (e.from ? ', from ' + short(e.from) : '') + (e.giver ? ' — handed on by ' + short(e.giver) : ''),
     settings: e => 'settings: ' + [e.chaos != null ? (LEVELS[e.chaos] || LEVELS[1])[1].toLowerCase() : '', e.period ? periodWord(e.period) : '', e.feats ? e.feats.filter(Boolean).length + ' of 6 for everyone' : '', e.look ? 'the look' : ''].filter(Boolean).join(', '),
     invite: e => 'invite: ' + (e.ids || []).map(short).join(', ') + ' to /' + e.page,
     uninvite: e => 'uninvite: ' + (e.ids || []).map(short).join(', ') + ' from /' + e.page,

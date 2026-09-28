@@ -56,6 +56,16 @@ const brief = r => ({ status: r.status, code: r.json.code });
   r = await POST({ op: 'post', ch: 'news', title: '  Opening  day ', text: 'The wall is open.\r\n\r\n\r\n\r\nCome and draw.' }, 'mod');
   check('a keeper posts news: one-line title, paragraphs kept, tag on it', r.json.ok && r.json.post.title === 'Opening day' && r.json.post.text === 'The wall is open.\n\nCome and draw.' && r.json.post.tag === 'mod#1', r.json);
   check('news wants a title', brief(await POST({ op: 'post', ch: 'updates', text: 'no title' }, 'mod')).code === 'title');
+  // A NOTICE'S LABEL, AND MAJOR (2026-09-28): a posts tab's entries may carry both; a space's board draws them
+  r = await POST({ op: 'post', ch: 'updates', title: 'Pins', text: 'One a board.', label: '  v1.2\n<b> ', major: true }, 'mod');
+  check('a keeper\'s notice keeps its label — one line, as a title is, and set as text wherever it is drawn — and is major', r.json.ok && r.json.post.label === 'v1.2<b>' && r.json.post.major === true, r.json.post);
+  r = await POST({ op: 'post', ch: 'updates', title: 'Long', text: 'x', label: 'L'.repeat(40), major: 'yes' }, 'mod');
+  check('…sixteen letters of it, and major is true or it is not said', r.json.ok && r.json.post.label === 'L'.repeat(16) && !('major' in r.json.post), r.json.post);
+  r = await POST({ op: 'post', ch: 'updates', title: 'Plain', text: 'x', label: '   ' }, 'mod');
+  check('no label is no label', r.json.ok && !('label' in r.json.post) && !('major' in r.json.post), r.json.post);
+  r = (await GET('?ch=updates')).json.posts.updates;
+  check('the book keeps them, newest first', r.map(p => [p.title, p.label, p.major]).join('|') === 'Plain,,|Long,' + 'L'.repeat(16) + ',|Pins,v1.2<b>,true', r.map(p => [p.title, p.label, p.major]));
+  for (const p of r) await POST({ op: 'drop', ch: 'updates', id: p.id }, 'mod');
   check('and words', brief(await POST({ op: 'post', ch: 'updates', title: 't', text: '   ' }, 'mod')).code === 'text');
   r = await POST({ op: 'post', ch: 'forum', title: 'First thread', text: 'Anyone here?' }, 'nu');
   const thread = r.json.post && r.json.post.id;
@@ -132,6 +142,16 @@ const brief = r => ({ status: r.status, code: r.json.code });
   await W.db('DEL', W.K.rl('chat:toem2:' + U.nu2, 'wait'));
   check('once the wait is over, the line goes', (await POST({ op: 'post', ch: 'chat', text: 'two' }, 'nu2')).json.ok);
   await POST({ op: 'chat', who: 'anyone', wait: 0 }, 'mod');
+
+  console.log('a label where it does not belong');
+  await POST({ op: 'tabs', tabs: [{ ch: 'open', title: 'Open', kind: 'posts', who: 'anyone' }, { ch: 'forum', title: 'Forum', kind: 'threads', who: 'anyone' }] }, 'mod');
+  await POST({ op: 'chat', who: 'anyone', wait: 0, named: [] }, 'mod');
+  r = await POST({ op: 'post', ch: 'open', title: 'Mine', text: 'x', label: 'Hello', major: true }, 'nu2');
+  check('anyone who may post labels their notice — and only a keeper makes one major', r.json.ok && r.json.post.label === 'Hello' && !('major' in r.json.post), r.json.post);
+  r = await POST({ op: 'post', ch: 'forum', title: 'A thread', text: 'x', label: 'Hello', major: true }, 'mod');
+  check('a thread carries neither', r.json.ok && !('label' in r.json.post) && !('major' in r.json.post), r.json.post);
+  r = await POST({ op: 'post', ch: 'chat', text: 'x', label: 'Hello', major: true }, 'mod');
+  check('nor does a line of the chat', r.json.ok && !('label' in r.json.post) && !('major' in r.json.post) && !('title' in r.json.post), r.json.post);
 
   console.log('the rate');
   let last = null;

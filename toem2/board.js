@@ -20,6 +20,18 @@
    named) and the wait one account keeps between two lines, which the box
    counts down after each.
 
+   KNOLL'S OWN CORNER (2026-09-28): on every page that is not TOEM 2 — the
+   pages gnomes make — the pair wears Knoll's hand instead of TOEM 2's: the
+   NOTICE BOARD and the TOWN CHAT of the "Knoll Announcement Board" and
+   "Knoll Chat Window" sheets (corner-knoll.css: cream paper, a wooden head
+   with its name on a plate, round red buttons). The books, the tabs, the
+   rules and the counts are the same ones; what a space has that TOEM 2 has
+   not is a notice's LABEL and whether it is MAJOR (api/board.js), a thread
+   begun on a sheet of its own, faces beside the threads and the replies,
+   the days between the chat's lines, three things to say at a press, and
+   how many are on the page (cursors.js's room, when it is up). Nothing is
+   seeded there either.
+
    ponytail: the chat polls — every 4 s open, every minute closed — rather
    than riding cursors.js's room; a 'chat' action on that room is the
    upgrade if the wait shows. Pictures are one card fetch per author per
@@ -27,15 +39,25 @@
 window.Town = (function () {
   if (document.documentElement.classList.contains('toem-embed')) return null;
   const PAGE = document.documentElement.dataset.page || 'toem2', PQ = 'page=' + encodeURIComponent(PAGE);
+  const KNOLL = PAGE !== 'toem2';               // KNOLL'S OWN CORNER: a space's; TOEM 2 keeps its own
   const API = '/api/board', CARD = '/api/wall?who=', TOKEN = 'knoll-toem2:token', SEEN = 'knoll-' + PAGE + ':town:seen';
-  const POLL_OPEN = 4000, POLL_SHUT = 60000, CAP = { title: 80, line: 500, body: 2000 };
-  const RULES = [
+  const POLL_OPEN = 4000, POLL_SHUT = 60000, CAP = { title: 80, line: 500, body: 2000, label: 16 };
+  const RULES = KNOLL ? [
+    ['Be kind', 'No insults, name-calling or pile-ons.'],
+    ['Credit the maker', 'Say whose work it is when you share it.'],
+    ['No spoilers in titles', 'Keep surprises inside the thread.'],
+    ['One thread per topic', 'Search before posting a new one.'],
+    ['No selling or ads', 'Swaps are fine, money is not.']
+  ] : [
     ['Be kind', 'No insults, name-calling or pile-ons.'],
     ['Share your own photos', 'Credit others when posting their shots.'],
     ['No spoilers in titles', 'Put quest solutions inside the thread.'],
     ['One thread per topic', 'Search before posting a new one.'],
     ['No selling or ads', 'Stamp trades are fine, money is not.']
   ];
+  const WORDS = KNOLL ? { board: 'Notice Board', boardBtn: 'the notice board', chat: 'Town Chat', chatBtn: 'the town chat', intro: 'Keep the place friendly. Moderators can hide posts that break these.' }
+                      : { board: 'Town Board', boardBtn: 'the town board', chat: 'Chat', chatBtn: 'the chat', intro: 'Keep the town friendly. Moderators can hide posts that break these.' };
+  const QUICK = ['Hello!', 'On my way', 'Brilliant'];   // the town chat's three things to say at a press
   // THE TABS (api/board.js): the four a page starts with, until the door says what the keepers arranged
   let tabs = [{ ch: 'news', title: 'News', kind: 'posts', who: 'keepers' }, { ch: 'updates', title: 'Updates', kind: 'posts', who: 'keepers' },
               { ch: 'rules', title: 'Rules', kind: 'notice', who: 'keepers', text: '' }, { ch: 'forum', title: 'Forum', kind: 'threads', who: 'anyone' }];
@@ -49,6 +71,24 @@ window.Town = (function () {
     bubble: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v10.5h-8.2L7.5 19.6v-3.6H4z"/></svg>',
     plane: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11.2L20.5 3.5l-7.4 17-2.2-7.4z"/></svg>'
   };
+  /* Knoll's marks, as its sheets draw them — each shape carries its own paint (style, which no rule of the
+     corner's outranks): on a button the mark is cream, on a panel's plate it has its colours */
+  const INK = 'stroke:#17120b;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round', DOT = 'fill:#17120b;stroke:none';
+  const hornK = (a, b) => '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 13h5l12-7v20l-12-7H5a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2Z" style="fill:' + a + ';' + INK + '"/><path d="M8 19l2 7h4l-2-7" style="fill:' + b + ';' + INK + '"/><path d="M26 12.5a4.5 4.5 0 0 1 0 7" style="fill:none;' + INK + '"/></svg>';
+  const bubbleK = a => '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 7h22a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3H15l-6 5v-5H5a3 3 0 0 1-3-3V10a3 3 0 0 1 3-3Z" style="fill:' + a + ';' + INK + '"/><circle cx="10.5" cy="15.5" r="2" style="' + DOT + '"/><circle cx="16" cy="15.5" r="2" style="' + DOT + '"/><circle cx="21.5" cy="15.5" r="2" style="' + DOT + '"/></svg>';
+  const KSVG = {
+    hornFab: hornK('#fdf7e3', '#fdf7e3'), hornTile: hornK('#ffd23f', '#e8484a'), bubbleFab: bubbleK('#fdf7e3'), bubbleTile: bubbleK('#5a8fd6'),
+    plane: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12 20 5 15 20 11.5 13.5Z" style="fill:#fdf7e3;stroke:#17120b;stroke-width:2;stroke-linejoin:round"/></svg>',
+    plus: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v14M3 10h14" style="fill:none;stroke:#17120b;stroke-width:3;stroke-linecap:round"/></svg>',
+    back: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13 3 6 10l7 7" style="fill:none;stroke:#17120b;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"/></svg>',
+    said: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14v9H9l-4 3v-3H3Z" style="fill:#5a8fd6;stroke:#17120b;stroke-width:2.2;stroke-linejoin:round"/></svg>'
+  };
+  const TONES = ['#ffd23f', '#5a9e58', '#f5b8c4', '#5a8fd6', '#f0cfae'];   // a face with no picture: its letter on one of the sheet's five, by the account
+  const tone = id => TONES[(parseInt(String(id || '0').slice(0, 4), 16) || 0) % TONES.length];
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const dayStart = t => { const d = new Date(t); return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); };
+  const dayWord = t => { const gap = Math.round((dayStart(Date.now()) - dayStart(t)) / 864e5), d = new Date(t); return gap <= 0 ? 'Today' : gap === 1 ? 'Yesterday' : MON[d.getMonth()] + ' ' + d.getDate() + (d.getFullYear() !== new Date().getFullYear() ? ', ' + d.getFullYear() : ''); };
+  const dateWord = t => { const d = new Date(t); return MON[d.getMonth()] + ' ' + String(d.getDate()).padStart(2, '0'); };
 
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const get = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
@@ -63,7 +103,7 @@ window.Town = (function () {
   let me = null, seen = {}, tab = 'news', thread = null, loading = false, busy = false, timer = 0, openPanel = null, drawn = '', coolT = 0, tabsKey = '';
   const posts = { chat: [] };
   try { seen = JSON.parse(get(SEEN)) || {}; } catch (e) { seen = {}; }
-  let fabs, boardBtn, chatBtn, board, chat, tabsEl, boardBody, boardSub, chatList, chatForm, chatIn, chatSend, chatGate, chatNote, chatWhy, chatSub;
+  let fabs, boardBtn, chatBtn, board, chat, tabsEl, boardBody, boardSub, chatList, chatForm, chatIn, chatSend, chatGate, chatNote, chatWhy, chatSub, chatQuick = null;
 
   // ── the door ────────────────────────────────────────────────────────────
   async function load(chs) {
@@ -138,26 +178,45 @@ window.Town = (function () {
     if (canDrop(p)) { const x = el('button', 'town-x', '×'); x.type = 'button'; x.title = p.by === me.id ? 'take it down' : 'hide it'; x.setAttribute('aria-label', x.title); x.addEventListener('click', () => drop(ch, p, after)); m.append(x); }
     return m;
   }
+  const face = p => { const f = el('span', 'town-pic', initial(p.tag)); f.dataset.pic = p.by; f.style.setProperty('--tone', tone(p.by)); picIn(f, p.by); return f; };
   function card(ch, p, after) {
     const c = el('article', 'town-card'), b = el('div', 'town-card-b');
+    if (KNOLL && (tabOf(ch) || {}).kind === 'posts') {   // a notice, pinned up: its label and its day over its title — and MAJOR, which stands out
+      const top = el('div', 'town-top');
+      top.append(el('span', 'town-pill', p.label || tabOf(ch).title), el('span', 'town-date', dateWord(p.at)));
+      b.append(top);
+      if (p.major) c.classList.add('is-major');
+    }
     if (p.title) b.append(el('span', 'town-card-h', p.title));
     b.append(el('p', 'town-card-t', p.text), meta(ch, p, after));
+    if (KNOLL && p.re) { c.classList.add('is-reply'); c.append(face(p)); }   // a reply: whose, by their face
     c.append(b);
     return c;
   }
   const gateLine = words => { const p = el('p', 'town-gate'), a = el('a', null, 'Log in'); a.href = gate(); p.append(a, ' ' + words); return p; };
   function form(ch, opts) {                     // a title (unless a reply), the words, and the button that sends them
-    const f = el('form', 'town-form'), err = el('p', 'town-note'); err.hidden = true;
-    let title = null;
+    const f = el('form', 'town-form' + (opts.re ? ' is-reply' : '')), err = el('p', 'town-note'); err.hidden = true;
+    let title = null, label = null, major = null;
     if (!opts.re) { title = el('input'); title.type = 'text'; title.maxLength = CAP.title; title.placeholder = opts.titleHint; title.setAttribute('aria-label', 'title'); title.autocomplete = 'off'; f.append(title); }
+    if (KNOLL && !opts.re && (tabOf(ch) || {}).kind === 'posts') {   // a notice's LABEL (Notice, v1.2, Fix — the tab's name when there is none), and MAJOR, the keepers' to tick
+      const row = el('div', 'town-form-row');
+      label = el('input'); label.type = 'text'; label.maxLength = CAP.label; label.placeholder = 'A label — Notice, Fix… (optional)'; label.setAttribute('aria-label', 'label'); label.autocomplete = 'off';
+      row.append(label);
+      if (me && me.keeper) { const l = el('label', 'town-check'); major = el('input'); major.type = 'checkbox'; l.append(major, ' major'); row.append(l); }
+      f.append(row);
+    }
     const ta = el('textarea'); ta.maxLength = CAP.body; ta.placeholder = opts.hint; ta.setAttribute('aria-label', 'the post'); f.append(ta);
     const go = el('button', 'town-btn', opts.verb); go.type = 'submit';
-    f.append(go, err);
+    if (KNOLL && opts.re) { go.className = 'town-send'; go.textContent = ''; go.innerHTML = KSVG.plane; go.title = opts.verb; go.setAttribute('aria-label', opts.verb); ta.rows = 1; }
+    if (opts.cancel) { const no = el('button', 'town-btn is-plain', 'Cancel'); no.type = 'button'; no.addEventListener('click', opts.cancel); const row = el('div', 'town-form-acts'); row.append(no, go); f.append(row, err); }
+    else f.append(go, err);
     f.addEventListener('submit', async e => {
       e.preventDefault();
       if (busy) return;
       const body = { op: 'post', ch, text: ta.value };
       if (title) body.title = title.value;
+      if (label && label.value.trim()) body.label = label.value;
+      if (major && major.checked) body.major = true;
       if (opts.re) body.re = opts.re;
       if (!body.text.trim() || (title && !title.value.trim())) { note(err, title && !title.value.trim() ? 'Give it a title.' : 'Say something.'); return; }
       busy = true; go.disabled = true;
@@ -179,7 +238,7 @@ window.Town = (function () {
   function renderNotice(t) {                    // what the keepers wrote from the dashboard — or, on an unwritten Rules tab, the five the town started with
     if (t.text) { boardBody.append(el('p', 'town-intro town-notice', t.text)); return; }
     if (t.ch !== 'rules') { boardBody.append(empty('Nothing written here yet.')); return; }
-    boardBody.append(el('p', 'town-intro', 'Keep the town friendly. Moderators can hide posts that break these.'));
+    boardBody.append(el('p', 'town-intro', WORDS.intro));
     RULES.forEach(([h, t2], i) => {
       const c = el('article', 'town-card'), b = el('div', 'town-card-b');
       b.append(el('span', 'town-card-h', h), el('p', 'town-card-t', t2));
@@ -187,7 +246,37 @@ window.Town = (function () {
       boardBody.append(c);
     });
   }
+  /* KNOLL'S FORUM: the way to a new thread first (a sheet of its own), then the threads — whose, by their face, its title,
+     when, and how many have answered */
+  function renderForumK(ch) {
+    const all = posts[ch] || [], threads = all.filter(p => !p.re), replies = id => all.filter(p => p.re === id).length;
+    if (mayWrite(ch)) {
+      const b = el('button', 'town-start'); b.type = 'button'; b.innerHTML = KSVG.plus; b.append(el('span', null, 'Start a thread'));
+      b.addEventListener('click', () => { thread = 'new'; renderBoard(); });
+      boardBody.append(b);
+    } else if (!me && tabOf(ch).who === 'anyone') boardBody.append(gateLine('to start a thread.'));
+    else if (me) boardBody.append(el('p', 'town-gate', 'The keepers start the threads here.'));
+    if (!threads.length) boardBody.append(empty('No threads yet.'));
+    threads.forEach(t => {
+      const c = el('button', 'town-card is-thread'); c.type = 'button';
+      const b = el('div', 'town-card-b'), m = el('div', 'town-meta'), n = replies(t.id), said = el('span', 'town-said');
+      m.append(whoEl(t.tag), ' · ' + ago(t.at));
+      b.append(el('span', 'town-card-h', t.title), m);
+      said.innerHTML = KSVG.said; said.append(el('span', null, String(n))); said.title = n === 1 ? '1 reply' : n + ' replies';
+      c.append(face(t), b, said);
+      c.addEventListener('click', () => { thread = t.id; renderBoard(); });
+      boardBody.append(c);
+    });
+  }
+  function renderNewK(ch) {                     // a new thread, on its own sheet: a title, what it says, and the two buttons
+    const leave = () => { thread = null; renderBoard(); };
+    if (!mayWrite(ch)) return leave();
+    boardBody.append(el('b', 'town-sheet-h', 'New thread'));
+    boardBody.append(form(ch, { titleHint: 'What\'s it about?', hint: 'Tell everyone…', verb: 'Post thread', cancel: leave, after: p => { thread = p.id; renderBoard(); look(ch); } }));
+    const first = boardBody.querySelector('.town-form input'); if (first) first.focus();
+  }
   function renderForum(ch) {
+    if (KNOLL) return renderForumK(ch);
     const all = posts[ch] || [], threads = all.filter(p => !p.re), replies = id => all.filter(p => p.re === id).length;
     if (!threads.length) boardBody.append(empty('No threads yet.'));
     threads.forEach(t => {
@@ -204,8 +293,10 @@ window.Town = (function () {
     else if (me) boardBody.append(el('p', 'town-gate', 'The keepers start the threads here.'));
   }
   function renderThread(ch) {
+    if (KNOLL && thread === 'new') return renderNewK(ch);
     const all = posts[ch] || [], t = all.find(p => p.id === thread && !p.re);
-    const back = el('button', 'town-back', '← all threads'); back.type = 'button'; back.addEventListener('click', () => { thread = null; renderBoard(); });
+    const back = el('button', 'town-back', KNOLL ? null : '← all threads'); back.type = 'button'; back.addEventListener('click', () => { thread = null; renderBoard(); });
+    if (KNOLL) { back.innerHTML = KSVG.back; back.append(el('span', null, 'All threads')); }
     boardBody.append(back);
     if (!t) { boardBody.append(empty('That thread is gone.')); return; }
     const leave = () => { thread = null; renderBoard(); };
@@ -234,7 +325,10 @@ window.Town = (function () {
     chatForm.hidden = !me || !chatRules.can; chatGate.hidden = !!me;
     chatWhy.hidden = !me || chatRules.can;
     chatWhy.textContent = chatRules.who === 'keepers' ? 'Only the keepers can chat here — everyone can read along.' : 'This chat is for the people the keepers named — everyone can read along.';
-    chatSub.textContent = (chatRules.who === 'keepers' ? 'The keepers' : chatRules.who === 'named' ? 'The people the keepers named' : 'Everyone on this wall') + (chatRules.wait ? ' · one message every ' + waitWord(chatRules.wait) : '');
+    // how many are on the page, where the room is up (cursors.js) — counted, never made up; then whose chat it is
+    const here = KNOLL && window.Company && Company.room ? (Company.peers + 1) + ' online · ' : '';
+    chatSub.textContent = here + (chatRules.who === 'keepers' ? 'The keepers' : chatRules.who === 'named' ? 'The people the keepers named' : 'Everyone on this wall') + (chatRules.wait ? ' · one message every ' + waitWord(chatRules.wait) : '');
+    if (chatQuick) chatQuick.hidden = chatForm.hidden;
     if (print === drawn) return;                // nothing new: the list stands (and so does a selection in it)
     drawn = print;
     const stick = chatList.scrollHeight - chatList.scrollTop - chatList.clientHeight < 48;
@@ -242,10 +336,12 @@ window.Town = (function () {
     if (!list.length) chatList.append(empty('Nobody has said anything yet.'));
     let prev = null;
     list.forEach(m => {
-      const more = !!prev && prev.by === m.by && m.at - prev.at < 5 * 60000;
+      const newDay = KNOLL && (!prev || dayStart(prev.at) !== dayStart(m.at));
+      if (newDay) chatList.append(el('div', 'town-day', dayWord(m.at)));   // the days between the lines
+      const more = !newDay && !!prev && prev.by === m.by && m.at - prev.at < 5 * 60000;
       const row = el('div', 'town-msg' + (me && m.by === me.id ? ' is-me' : '') + (more ? ' is-more' : ''));
       row.dataset.id = m.id;
-      const pic = el('span', 'town-pic', initial(m.tag)); pic.dataset.pic = m.by; picIn(pic, m.by);
+      const pic = el('span', 'town-pic', initial(m.tag)); pic.dataset.pic = m.by; pic.style.setProperty('--tone', tone(m.by)); picIn(pic, m.by);
       const name = el('span', 'town-name'); name.append(whoEl(m.tag));
       const bubble = el('div', 'town-bubble', m.text); bubble.title = new Date(m.at).toLocaleString();
       row.append(name, pic, bubble);
@@ -255,16 +351,16 @@ window.Town = (function () {
     });
     if (stick) chatList.scrollTop = chatList.scrollHeight;
   }
-  async function say(e) {
-    e.preventDefault();
-    const text = chatIn.value.trim();
-    if (!text || busy) return;
+  async function say(e, quick) {                // what is in the box — or one of the three things to say at a press, which leaves the box as it is
+    if (e) e.preventDefault();
+    const text = (quick || chatIn.value).trim();
+    if (!text || busy || (quick && chatSend.disabled)) return;
     busy = true; chatSend.disabled = true;
     const out = await send({ op: 'post', ch: 'chat', text });
     busy = false; chatSend.disabled = false;
     if (!out.ok) { note(chatNote, 'Not sent: ' + (out.error || 'the door said no') + '.'); if (out.code === 'wait' && out.wait) cooldown(out.wait); chatIn.focus(); return; }
     note(chatNote, '');
-    chatIn.value = '';
+    if (!quick) chatIn.value = '';
     posts.chat.unshift(out.post);
     renderChat(); look('chat');
     chatList.scrollTop = chatList.scrollHeight;
@@ -275,7 +371,7 @@ window.Town = (function () {
   function cooldown(s) {
     clearInterval(coolT);
     let left = Math.ceil(s);
-    const step = () => { chatSend.disabled = left > 0; chatIn.placeholder = left > 0 ? 'next message in ' + left + ' s…' : 'Say something nice…'; if (left <= 0) clearInterval(coolT); left--; };
+    const step = () => { chatSend.disabled = left > 0; if (chatQuick) chatQuick.querySelectorAll('button').forEach(b => { b.disabled = left > 0; }); chatIn.placeholder = left > 0 ? 'next message in ' + left + ' s…' : 'Say something nice…'; if (left <= 0) clearInterval(coolT); left--; };
     step(); coolT = setInterval(step, 1000);
   }
 
@@ -319,23 +415,24 @@ window.Town = (function () {
   }
   function panel(id, icon, title, sub) {
     const p = el('section', 'town-panel'); p.id = id; p.hidden = true; p.setAttribute('role', 'dialog'); p.setAttribute('aria-label', title);
-    const head = el('div', 'town-head'), tile = el('span', 'town-tile'), tt = el('div', 'town-title');
+    const head = el('div', 'town-head'), plate = el('span', 'town-plate'), tile = el('span', 'town-tile'), tt = el('div', 'town-title');
     tile.innerHTML = icon;
     tt.append(el('b', null, title), el('small', null, sub));
     const x = el('button', 'town-close', '✕'); x.type = 'button'; x.setAttribute('aria-label', 'close'); x.addEventListener('click', hide);
-    head.append(tile, tt, x);
+    plate.append(tile, tt);                     // the name plate: nothing of its own on TOEM 2 (board.css: display contents), a plate nailed to the wood on a space
+    head.append(plate, x);
     p.append(head);
     return p;
   }
   function build() {
     fabs = el('div', 'town-fabs');
-    boardBtn = fab('town-board-btn', 'the town board', SVG.horn, 'town-board');
-    chatBtn = fab('town-chat-btn', 'the chat', SVG.bubble, 'town-chat');
+    boardBtn = fab('town-board-btn', WORDS.boardBtn, KNOLL ? KSVG.hornFab : SVG.horn, 'town-board');
+    chatBtn = fab('town-chat-btn', WORDS.chatBtn, KNOLL ? KSVG.bubbleFab : SVG.bubble, 'town-chat');
     boardBtn.addEventListener('click', () => show(board));
     chatBtn.addEventListener('click', () => show(chat));
     fabs.append(boardBtn, chatBtn);
 
-    board = panel('town-board', SVG.horn, 'Town Board', tabs.map(t => t.title).join(' · '));
+    board = panel('town-board', KNOLL ? KSVG.hornTile : SVG.horn, WORDS.board, tabs.map(t => t.title).join(' · '));
     boardSub = board.querySelector('.town-title small');
     tabsEl = el('div', 'town-tabs'); tabsEl.setAttribute('role', 'tablist');
     buildTabs();
@@ -347,7 +444,7 @@ window.Town = (function () {
     boardBody = el('div', 'town-body');
     board.append(tabsEl, boardBody);
 
-    chat = panel('town-chat', SVG.bubble, 'Chat', 'Everyone on this wall');
+    chat = panel('town-chat', KNOLL ? KSVG.bubbleTile : SVG.bubble, WORDS.chat, 'Everyone on this wall');
     chatSub = chat.querySelector('.town-title small');
     chatList = el('div', 'town-body town-chat-list'); chatList.setAttribute('aria-live', 'polite');
     chatNote = el('p', 'town-note town-chat-note'); chatNote.hidden = true;
@@ -355,10 +452,14 @@ window.Town = (function () {
     chatGate = gateLine('to chat.'); chatGate.className = 'town-gate town-chat-gate'; chatGate.hidden = true;
     chatForm = el('form', 'town-say'); chatForm.hidden = true;
     chatIn = el('input'); chatIn.type = 'text'; chatIn.maxLength = CAP.line; chatIn.placeholder = 'Say something nice…'; chatIn.autocomplete = 'off'; chatIn.setAttribute('aria-label', 'your message');
-    chatSend = el('button', 'town-send'); chatSend.type = 'submit'; chatSend.title = 'send'; chatSend.setAttribute('aria-label', 'send'); chatSend.innerHTML = SVG.plane;
+    chatSend = el('button', 'town-send'); chatSend.type = 'submit'; chatSend.title = 'send'; chatSend.setAttribute('aria-label', 'send'); chatSend.innerHTML = KNOLL ? KSVG.plane : SVG.plane;
     chatForm.append(chatIn, chatSend);
     chatForm.addEventListener('submit', say);
-    chat.append(chatList, chatNote, chatWhy, chatGate, chatForm);
+    if (KNOLL) {                                // three things to say at a press, over the box — for whoever has the box
+      chatQuick = el('div', 'town-quick'); chatQuick.hidden = true;
+      QUICK.forEach(q => { const b = el('button', null, q); b.type = 'button'; b.addEventListener('click', () => say(null, q)); chatQuick.append(b); });
+      chat.append(chatList, chatNote, chatWhy, chatGate, chatQuick, chatForm);
+    } else chat.append(chatList, chatNote, chatWhy, chatGate, chatForm);
 
     document.body.append(fabs, board, chat);
   }

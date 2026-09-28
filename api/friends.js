@@ -121,22 +121,22 @@ async function post(req, res) {
       return answer(res, 200, { ok: true });
     case 'invite': {
       const slug = String(body.slug == null ? '' : body.slug).toLowerCase(), p = SLUG_RE.test(slug) ? await db('HGETALL', K.page(slug)) : {};
-      if (!p.made) throw bad(404, 'page', 'no such space');
-      if (p.by !== me.id) throw bad(403, 'owner', 'only the gnome who made a space invites to it');
+      if (!p.made && slug !== W.HOME) throw bad(404, 'page', 'no such space');
+      if (p.by !== me.id && !W.master(me)) throw bad(403, 'owner', 'only the gnome who made a space invites to it');   // …or the master, who is every page's maker (api/wall.js: THE MASTER)
       // anyone with an account, friend or not (2026-09-24: the settings' WHO CAN EDIT finds them by name); a banned one is not asked
       const ids = [...new Set(Array.isArray(body.ids) ? body.ids.map(String).filter(u => USER_RE.test(u) && u !== me.id) : [])];
       const recs = ids.length ? await dbm(ids.map(u => ['HGETALL', K.user(u)])) : [];
       const to = ids.filter((u, i) => recs[i] && recs[i].made && recs[i].banned !== '1');
       const fresh = to.length ? await dbm(to.map(u => ['SADD', K.invited(slug), u])) : [];
       const sent = to.filter((u, i) => fresh[i]);
-      for (const u of sent) await tell(u, 'keeper', me.id, { slug, title: p.title || slug });
+      for (const u of sent) await tell(u, 'keeper', me.id, { slug, title: slug === W.HOME ? 'TOEM 2' : p.title || slug });
       if (sent.length) await W.audit(me.id, 'invite', { page: slug, ids: sent });
       return answer(res, 200, { ok: true, sent: sent.length });
     }
     case 'uninvite': {
       const slug = String(body.slug == null ? '' : body.slug).toLowerCase(), p = SLUG_RE.test(slug) ? await db('HGETALL', K.page(slug)) : {};
-      if (!p.made) throw bad(404, 'page', 'no such space');
-      if (p.by !== me.id) throw bad(403, 'owner', 'only the gnome who made a space uninvites from it');
+      if (!p.made && slug !== W.HOME) throw bad(404, 'page', 'no such space');
+      if (p.by !== me.id && !W.master(me)) throw bad(403, 'owner', 'only the gnome who made a space uninvites from it');
       const ids = [...new Set(Array.isArray(body.ids) ? body.ids.map(String).filter(u => USER_RE.test(u)) : [])];
       const gone = ids.length ? (await dbm(ids.map(u => ['SREM', K.invited(slug), u]))).filter(Boolean).length : 0;
       if (gone) await W.audit(me.id, 'uninvite', { page: slug, ids });

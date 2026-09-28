@@ -21,8 +21,9 @@
    kept as a key that expires (rl:chat:<slug>:<u>:wait).
 
    A CHANNEL IS A LIST, newest first, under board:<slug>:<ch>, trimmed to
-   what its kind keeps: {id, by, at, text, title?, re?} — re names the
-   thread a reply is under. Names are looked up when read (tagsOf), so a
+   what its kind keeps: {id, by, at, text, title?, re?, label?, major?} — re
+   names the thread a reply is under; label and major are a posts tab's
+   (A NOTICE'S LABEL, below). Names are looked up when read (tagsOf), so a
    rename shows; pictures are the gnome's card's (/api/wall?who=), which
    the page fetches once per author.
 
@@ -30,7 +31,7 @@
           → { ok, me: {id, tag, keeper, mod} | null, tabs: [{ch, title, kind, who, text?}],
               chat: { who, wait, can, named?: [{id, tag}] (for a keeper) },
               posts: { <ch>: [{id, by, tag, at, text, title?, re?}] } }
-     POST { op: 'post', ch, text, title?, re? }  → { ok, post }   (a keepers' tab: the keepers; a thread wants a title; the chat: by its rules)
+     POST { op: 'post', ch, text, title?, re?, label?, major? } → { ok, post }   (a keepers' tab: the keepers; a thread wants a title; the chat: by its rules)
           { op: 'drop', ch, id }                 → { ok, gone }   (your own, or a keeper's to hide — audited; a thread takes its replies)
           { op: 'tabs', tabs: [{ch, title, kind, who, text?}] } → { ok, tabs }   (the keepers; one to eight)
           { op: 'chat', who, wait, named: [id] } → { ok, chat }   (the keepers)
@@ -48,7 +49,7 @@ const CHAT_KEEP = 200;
 const TABS = [{ ch: 'news', title: 'News', kind: 'posts', who: 'keepers' }, { ch: 'updates', title: 'Updates', kind: 'posts', who: 'keepers' },
               { ch: 'rules', title: 'Rules', kind: 'notice', who: 'keepers', text: '' }, { ch: 'forum', title: 'Forum', kind: 'threads', who: 'anyone' }];
 const TABS_MAX = 8, CH_RE = /^[a-z0-9][a-z0-9-]{0,19}$/, WHO = ['anyone', 'keepers', 'named'], WAIT_MAX = 3600, NAMED_MAX = 50;
-const CAP = { title: 80, line: 500, body: 2000, tab: 24, notice: 4000 };
+const CAP = { title: 80, line: 500, body: 2000, tab: 24, notice: 4000, label: 16 };
 const RATE = 60;                              // posts an hour, an account
 const hour = () => Math.floor(Date.now() / 36e5);
 async function spend(u) {
@@ -181,6 +182,14 @@ async function post(req, res) {
       } else if (ch !== 'chat') {
         x.title = text(body.title, CAP.title);
         if (!x.title) throw bad(400, 'title', 'give it a title');
+        /* A NOTICE'S LABEL, AND MAJOR (2026-09-28): an entry on a posts tab may carry a word of its own — Notice, v1.2, Fix —
+           and a keeper may mark it major; a space's board draws both (toem2/board.js: KNOLL'S OWN CORNER). One line of
+           text, like the title, and set as text wherever it is drawn. */
+        if (tab.kind === 'posts') {
+          const label = text(body.label, CAP.label);
+          if (label) x.label = label;
+          if (body.major === true && me.keeper) x.major = true;
+        }
       }
       await dbm([['LPUSH', key, JSON.stringify(x)], ['LTRIM', key, 0, keepOf(tabs, ch) - 1]]);
       if (ch === 'chat' && chat.wait) await db('SET', waitKey, String(x.at), 'EX', chat.wait);

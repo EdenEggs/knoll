@@ -80,7 +80,7 @@
 
     <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:16px 20px; flex-wrap:wrap; margin:6px 0 40px">
       <div style="display:flex; align-items:flex-start; gap:20px; min-width:0">
-        <button sc-camel-on-click="{{ pickPic }}" aria-label="{{ picTitle }}" title="{{ picTitle }}" disabled="{{ notMine }}" style="position:relative; width:56px; height:64px; padding:0; margin:0; background:#fdf7e3; border:4px solid #17120b; box-shadow:6px 7px 0 rgba(60,50,80,0.2); transform:rotate(-4deg); display:flex; align-items:center; justify-content:center; flex:none; cursor:pointer; overflow:hidden">
+        <button sc-camel-on-click="{{ pickPic }}" aria-label="{{ picTitle }}" title="{{ picTitle }}" disabled="{{ noPicEdit }}" style="position:relative; width:56px; height:64px; padding:0; margin:0; background:#fdf7e3; border:4px solid #17120b; box-shadow:6px 7px 0 rgba(60,50,80,0.2); transform:rotate(-4deg); display:flex; align-items:center; justify-content:center; flex:none; cursor:pointer; overflow:hidden">
           <sc-if value="{{ hasPic }}" hint-placeholder-val="{{ false }}">
             <img sc-camel-src="{{ pic }}" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block">
           </sc-if>
@@ -101,8 +101,11 @@
     </div>
 
     <div class="new-grid">
-      <div style="display:flex; flex-direction:column; gap:30px; min-width:0">
+      <div style="display:flex; flex-direction:column; gap:30px; min-width:0; grid-column:{{ mainSpan }}">
 
+        <!-- TOEM 2 (2026-09-27: it may have a maker — api/wall.js: THE MASTER) keeps its own name, paper and inks: its settings
+             are who can edit, who keeps it and what everyone may do, so the first two cards and the preview stand aside there. -->
+        <sc-if value="{{ notHome }}" hint-placeholder-val="{{ true }}">
         <!-- 1 · NAME -->
         <section style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 22px 22px; transform:rotate(-0.4deg)">
           <div aria-hidden="true" style="position:absolute; top:-11px; left:-11px; width:15px; height:15px; background:#5a8fd6; border:3px solid #17120b; transform:rotate(45deg)"></div>
@@ -177,6 +180,7 @@
             </div>
           </div>
         </section>
+        </sc-if>
 
         <!-- 3 · MODERATION -->
         <section style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 22px 22px; transform:rotate(-0.3deg)">
@@ -215,6 +219,9 @@
               <span>MODERATORS · THEY DRAW LIVE AND DECIDE WHAT STAYS</span>
               <span style="opacity:0.8">{{ invitedCount }} KEEPING IT</span>
             </div>
+            <sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin-bottom:10px">ON TOEM 2 THE SITE'S MODERATORS AND ITS TRUSTED GNOMES KEEP IT AS WELL — THESE ARE THE ONES YOU NAME.</div>
+            </sc-if>
             <sc-if value="{{ noFriends }}" hint-placeholder-val="{{ false }}">
               <div style="font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.8; margin-bottom:10px">NO FRIENDS YET — FIND ANYONE BY NAME BELOW, OR ADD A FRIEND BY THEIR TAG IN YOUR YARD.</div>
             </sc-if>
@@ -313,6 +320,7 @@
       </div>
 
       <!-- THE PREVIEW: the page as it would open, small -->
+      <sc-if value="{{ notHome }}" hint-placeholder-val="{{ true }}">
       <div class="new-preview">
         <section aria-label="preview" style="position:relative; background:#fdf7e3; border:5px solid #17120b; box-shadow:9px 10px 0 rgba(60,50,80,0.2); padding:18px 20px 20px; transform:rotate(0.6deg)">
           <div aria-hidden="true" style="position:absolute; top:-11px; right:-11px; width:15px; height:15px; background:#e8484a; border:3px solid #17120b; transform:rotate(45deg)"></div>
@@ -360,6 +368,7 @@
           </div>
         </section>
       </div>
+      </sc-if>
     </div>
 
     <div style="text-align:center; font-size:14px; letter-spacing:1.5px; color:#4a4054; opacity:0.75; margin-top:48px">CHANGES GO LIVE WHEN YOU SAVE. UNSAVED ONES WAIT ON THIS DEVICE. {{ note }}</div>
@@ -399,6 +408,7 @@ const FEATS = ['Ink', 'Stickers', 'Notes', 'Tracings', 'Embeds', "Others' pieces
 const COATS = ['#7bc264', '#e0598c', '#ffd23f', '#5a8fd6', '#f59321'];
 const SLUG = String(new URLSearchParams(location.search).get('space') || '').toLowerCase();
 const OK_SLUG = /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/.test(SLUG);
+const HOME = SLUG === 'toem2';                                 // the first page: its name, paper and inks are its own (api/wall.js: THE MASTER)
 const HOST = location.host.replace(/^www\./, '');
 const KEY = 'knoll-dashboard:space-settings:' + SLUG;          // an unsaved draft, on this device
 const FIELDS = ['name', 'palette', 'inks', 'custom', 'chaos', 'period', 'feats', 'invited', 'others', 'pic'];   // others: the keepers who are not friends, by tag, so a draft can name them
@@ -528,7 +538,7 @@ class Component extends DCLogic {
     if (out.ok && add.length) out = await json('/api/friends', { op: 'invite', slug: SLUG, ids: add });
     if (out.ok && drop.length) out = await json('/api/friends', { op: 'uninvite', slug: SLUG, ids: drop });
     if (!out.ok) { this.setState({ busy: false, note: 'NOT SAVED: ' + String(out.error || 'the door said no').toUpperCase() + '.' }); return; }
-    try { localStorage.removeItem(KEY); localStorage.setItem('knoll-' + SLUG + ':paper', s.palette); } catch (e) {}   // the paper, told ahead to the wall (toem2/lab.css: A SPACE'S OWN PAPER)
+    try { localStorage.removeItem(KEY); if (!HOME) localStorage.setItem('knoll-' + SLUG + ':paper', s.palette); } catch (e) {}   // the paper, told ahead to the wall (toem2/lab.css: A SPACE'S OWN PAPER)
     await this.load();
     this.setState({ busy: false, justSaved: true });
     clearTimeout(this._t); this._t = setTimeout(() => this.setState({ justSaved: false }), 2400);
@@ -550,13 +560,14 @@ class Component extends DCLogic {
     return {
       name: s.name, path, nameLeft: 28 - s.name.length,
       onName: (e) => this.keep({ name: e.target.value.slice(0, 28) }),
-      savedName: s.saved.name || (s.gone ? 'no space' : '…'), savedPath: path, savedHref: '/' + SLUG, wallHref: '/toem2/?page=' + encodeURIComponent(SLUG), dashHref: '/dashboard/?space=' + encodeURIComponent(SLUG),
+      savedName: s.saved.name || (s.gone ? 'no space' : '…'), savedPath: path, savedHref: '/' + SLUG, wallHref: HOME ? '/toem2/' : '/toem2/?page=' + encodeURIComponent(SLUG), dashHref: '/dashboard/?space=' + encodeURIComponent(SLUG),
+      isHome: HOME, notHome: !HOME, mainSpan: HOME ? '1 / -1' : 'auto', noPicEdit: HOME || (s.loaded && !s.mine),
       levelWord: s.loaded && !s.gone ? (s.saved.chaos === 2 ? 'a council' : (MODS.find(m => m.id === s.saved.chaos) || MODS[0]).name.toLowerCase()) : '',
       notMine: s.loaded && !s.mine, note: s.note,
       pic: s.pic, hasPic: !!s.pic, noPic: !s.pic,
-      picTitle: s.picNote || (s.pic ? "the page's picture — click to change it" : 'give the page a picture'),
+      picTitle: HOME ? 'TOEM 2' : s.picNote || (s.pic ? "the page's picture — click to change it" : 'give the page a picture'),
       fileRef: this.fileRef,
-      pickPic: () => { if (s.mine && this.fileRef.current) this.fileRef.current.click(); },
+      pickPic: () => { if (s.mine && !HOME && this.fileRef.current) this.fileRef.current.click(); },
       onFile: (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) this.setPic(f); },
       palettes: PALETTES.map((p, i) => ({
         name: p.name, paper: p.paper, ink: p.ink, swatches: p.swatches, on: p.id === s.palette,

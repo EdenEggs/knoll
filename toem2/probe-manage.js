@@ -182,7 +182,7 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR
     ok(/Hall of Fame/.test(await q.evaluate(() => document.querySelector('#ranks-panel .town-title b').textContent)) && /Who did the most/.test(await q.evaluate(() => document.querySelector('#ranks-panel .town-title small').textContent)), '…under its title and its line');
     ok(await q.evaluate(() => document.querySelectorAll('#ranks-panel .lb-stand:not(.is-empty)').length === 1 && !!document.querySelector('#ranks-panel .lb-stand.is-first .lb-crown') && document.querySelector('#ranks-panel .lb-stand.is-first .lb-name').textContent.startsWith('Probe') && document.querySelector('#ranks-panel .lb-stand.is-first .lb-value').textContent === '1'),
        'Most edits: the maker alone on the podium, first, crowned, with the one');
-    ok(/not on this board yet/.test(await q.evaluate(() => document.querySelector('#ranks-panel .lb-foot').innerText)), 'the stranger\'s own line at the foot: not on it yet');
+    ok(/not on this board yet/.test(await q.evaluate(() => document.querySelector('#ranks-panel .lb-foot').textContent)), 'the stranger\'s own line at the foot: not on it yet');   // its words, not its capitals: a space wears Knoll\'s corner, whose small lines are in capitals (corner-knoll.css)
     await q.click('#ranks-panel .town-tab[data-tab="photos"]'); await q.waitForTimeout(300);
     ok(await q.evaluate(() => document.querySelector('#ranks-panel .lb-stand.is-first .lb-value').textContent === '1' && /photos in the album/i.test(document.querySelector('#ranks-panel .lb-blurb').textContent)), 'Most photos: the one photo, and the blurb');
     ok(errs2.length === 0, 'no page errors on the bench', errs2.join(' | '));

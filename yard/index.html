@@ -936,6 +936,22 @@
           <span>Reduce motion (calmer wobbles and pops)</span>
         </label>
       </div>
+      <!-- A PAGE HANDED TO YOU (2026-09-27): the site's master hands a page on with a code (api/wall.js: THE MASTER). Typed
+           here it goes to the door as it was typed; the door is the judge, and says which page — which stands among
+           YOUR SPACES from that moment. The page's name is set as text, like every word somebody else chose. -->
+      <div>
+        <div style="font-size:15px; letter-spacing:2px; color:#4a4054; margin-bottom:8px">A PAGE HANDED TO YOU</div>
+        <div style="display:flex; gap:8px; align-items:stretch">
+          <input value="{{ claimCode }}" sc-camel-on-input="{{ onClaimCode }}" sc-camel-on-key-down="{{ claimKey }}" sc-camel-max-length="40" placeholder="XXXX-XXXX-XXXX-XXXX" aria-label="the code you were sent" autocomplete="off" spellcheck="false" style="flex:1; min-width:0; box-sizing:border-box; border:3px solid #17120b; background:#fffcf0; padding:7px 10px; font-family:'VT323',monospace; font-size:18px; letter-spacing:1px; text-transform:uppercase; color:#17120b; box-shadow:2px 3px 0 rgba(60,50,80,0.18); outline:none">
+          <button sc-camel-on-click="{{ claim }}" disabled="{{ claimOff }}" style="border:3px solid #17120b; background:#17120b; color:#fdf7e3; font-family:'VT323',monospace; font-size:17px; letter-spacing:1px; padding:6px 14px; cursor:pointer; box-shadow:3px 4px 0 rgba(60,50,80,0.25); opacity:{{ claimOp }}; flex:none" style-hover="background:#3a3342">{{ claimWord }}</button>
+        </div>
+        <sc-if value="{{ hasClaimNote }}" hint-placeholder-val="{{ false }}">
+          <div role="status" style="font-size:16px; letter-spacing:0.5px; color:{{ claimCol }}; margin-top:9px; line-height:1.3">{{ claimNote }}
+            <sc-if value="{{ claimWon }}" hint-placeholder-val="{{ false }}"><a href="{{ claimHref }}" style="color:#17120b">open its dashboard</a></sc-if>
+          </div>
+        </sc-if>
+        <div style="font-size:14px; letter-spacing:1px; color:#4a4054; opacity:0.75; margin-top:8px; line-height:1.3">TYPE THE CODE YOU WERE SENT. IT OPENS ONE PAGE, ONCE.</div>
+      </div>
       <div style="margin-top:auto; border-top:3px dashed rgba(23,18,11,0.35); padding-top:18px">
         <button sc-camel-on-click="{{ signOut }}" style="border:3px solid #17120b; background:#17120b; color:#fdf7e3; font-family:'VT323',monospace; font-size:18px; letter-spacing:1px; padding:8px 18px; cursor:pointer; box-shadow:3px 4px 0 rgba(60,50,80,0.25)" style-hover="background:#3a3342">SIGN OUT</button>
         <!-- THE WAY BACK TO THE GATE (2026-09-21: there is an account system now).
@@ -1089,7 +1105,8 @@ class Component extends DCLogic {
       liked: !!load('knoll-yard:liked', false), likes: 0, views: null, fenceLive: false, draft: '',
       notes: [],
       // FRIENDS AND THE BELL (api/friends.js) · YOUR SPACES (api/wall.js: SPACES) — both the door's, loaded at mount
-      fr: null, askDraft: '', askNote: '', spaces: [], full: false, fullNote: false   // spaces, not mine: mine (above) is the kept plot, an object (2026-09-24)
+      fr: null, askDraft: '', askNote: '', spaces: [], full: false, fullNote: false,   // spaces, not mine: mine (above) is the kept plot, an object (2026-09-24)
+      claimCode: '', claimNote: '', claimBusy: false, claimWon: ''   // A PAGE HANDED TO YOU: the code being typed, what the door said, and the page it opened
     };
     this.el = {};
     const ref = (k) => (el) => { this.el[k] = el; };
@@ -1222,6 +1239,21 @@ class Component extends DCLogic {
   loadSpaces() {
     fetch('/api/wall?spaces=1', { cache: 'no-store', credentials: 'same-origin' }).then(r => r.json())
       .then(v => { if (v && v.ok) this.setState({ spaces: Array.isArray(v.spaces) ? v.spaces : [], full: !!v.full }); }).catch(() => {});
+  }
+  /* A PAGE HANDED TO YOU (api/wall.js: THE MASTER): the code as it was typed, to the door; what comes back is
+     the page it opened, or why it opened nothing — and the hills are read again, because one more is yours */
+  claim() {
+    const code = (this.state.claimCode || '').trim();
+    if (!code || this.state.claimBusy) return;
+    this.setState({ claimBusy: true, claimNote: '', claimWon: '' });
+    fetch('/api/wall', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ op: 'claim', code }) })
+      .then(r => r.json()).catch(() => ({ ok: false, error: 'the hill did not answer — try again in a moment' }))
+      .then(out => {
+        if (!out || !out.ok) { this.setState({ claimBusy: false, claimNote: String((out && out.error) || 'the door said no').slice(0, 200) }); return; }
+        const p = out.page || {}, slug = /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/.test(p.slug || '') ? p.slug : '';
+        this.setState({ claimBusy: false, claimCode: '', claimWon: slug, claimNote: String(p.title || slug || 'the page').slice(0, 60) + (out.yours ? ' was yours already.' : ' is yours now.') });
+        this.loadSpaces();
+      });
   }
   componentWillUnmount() {
     clearTimeout(this._fullT);
@@ -1998,6 +2030,14 @@ class Component extends DCLogic {
       onSActivity: (e) => this.setSettings({ showActivity: e.target.checked }),
       sMotion: settings.reduceMotion,
       onSMotion: (e) => this.setSettings({ reduceMotion: e.target.checked }),
+      // A PAGE HANDED TO YOU
+      claimCode: this.state.claimCode, claimWord: this.state.claimBusy ? '…' : 'CLAIM',
+      onClaimCode: (e) => this.setState({ claimCode: e.target.value.slice(0, 40), claimNote: '', claimWon: '' }),
+      claimKey: (e) => { if (e.key === 'Enter') this.claim(); },
+      claim: () => this.claim(),
+      claimOff: this.state.claimBusy || !(this.state.claimCode || '').trim(), claimOp: this.state.claimBusy || !(this.state.claimCode || '').trim() ? 0.55 : 1,
+      hasClaimNote: !!this.state.claimNote, claimNote: this.state.claimNote, claimCol: this.state.claimWon ? '#2f6f4a' : '#b8302f',
+      claimWon: !!this.state.claimWon, claimHref: this.state.claimWon ? '/dashboard/?space=' + this.state.claimWon : '',
       // (see THE WAY BACK TO THE GATE) the session ends at the door; this device keeps the yard for whoever comes back to it
       signOut: () => this.gate({ op: 'logout' }).then(out => {
         if (out && out.ok) { location.assign('/login/'); return; }

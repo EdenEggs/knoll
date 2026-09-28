@@ -257,3 +257,29 @@ are set as text.
 **Checks.** `node lab2/perf/probe-bell.js` §3 walks the page;
 `node lab2/perf/verify-hill.js` (108) has the door: `take`, `?with=`,
 `restore`, the history and the bell's notes.
+
+## The master's desk (2026-09-27)
+
+`dashboard/master.js` builds one card into `#master-desk` — for the site's
+**master** and nobody else. The master is the admin (`ADMIN_EMAILS`, so an
+address Google or Discord has proved); on every page, TOEM 2 included, it
+stands where that page's maker stands (`api/wall.js`: THE MASTER).
+
+| part | what it does |
+|---|---|
+| **a row a page** | TOEM 2 first, then every space: its name, its address, whose it is, its dashboard and its settings. On a page's own dashboard (`?space=`), that page alone. |
+| **make a code to hand it on** | asks the door (`op: 'handoff'`) for a code — sixteen letters and numbers — and shows it **once**, with a copy button and what to tell whoever it is for. |
+| **a code is out** | the row says so, and when it ends (seven days). *a new code* ends the old one; *take it back* ends it and makes none. |
+
+The code is typed into the yard's settings (A PAGE HANDED TO YOU —
+`yard/about.md`), and the page is that gnome's from then on: it stands among
+their spaces without taking one of the three they may make, and whoever had
+it has it no longer. A code for somebody else's page asks first.
+
+**The door keeps the code's sha256, never the code**, so the desk cannot show
+one twice; the door counts wrong codes (ten an hour an account, thirty an
+address) and tells a wrong one, a used one and one past its days alike.
+
+**Checks.** `node lab2/perf/verify-handoff.js` (107, the door: every way a
+code must not open anything) and `node lab2/perf/probe-handoff.js` (34,
+headless Chrome: the desk → the yard → the settings, a space and TOEM 2).

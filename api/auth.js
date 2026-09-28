@@ -39,7 +39,7 @@
    COOKIE). Every post must come from this site (its Origin) and say JSON,
    which no other site's form can.
 
-     GET  → { ok, open, google, discord, mail, me: { id, name, n, tag, toured, made, avatar } | null }
+     GET  → { ok, open, google, discord, mail, me: { id, name, n, tag, toured, made, avatar, master? } | null }
           ?users=1 → { ok, count, users }   (a moderator: the accounts, newest first)
      POST { op: 'signup', name, email, password }     → { ok, sent: true }: a code is on its way · 409 taken · 503 no-mail · 429 busy (the day's letters are spent)
           { op: 'signup', name, email, password, code } → { ok, me } and the cookies · 400 code (wrong) · 400 expired (gone, or five wrong) · 409 taken
@@ -106,7 +106,9 @@ async function spend(who, cap, span) {       // one more against the hour — or
   return n <= cap;
 }
 const spent = async who => +(await db('GET', K.rl(who, hour()))) || 0;
-const meOf = (u, rec) => ({ id: u, name: rec.name || '', n: +rec.n || 0, tag: W.tagOf(rec), toured: rec.toured === '1', made: +rec.made || 0, avatar: rec.avatar || '' });
+// …and `master`, said only to the site's master (api/wall.js: THE MASTER), so the dashboard asks for the desk on its account alone
+const meOf = (u, rec) => Object.assign({ id: u, name: rec.name || '', n: +rec.n || 0, tag: W.tagOf(rec), toured: rec.toured === '1', made: +rec.made || 0, avatar: rec.avatar || '' },
+                                       W.master({ role: rec.role, banned: rec.banned === '1' }) ? { master: true } : {});
 // THE PICTURE: the yard's K and the corner's face (yard/index.html: THE PICTURE) — checked the way a space's is (api/wall.js: A PICTURE)
 const cleanPic = W.cleanPic;
 async function current(req) {                 // the account behind this request's session, record and all

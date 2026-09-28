@@ -1,0 +1,239 @@
+/* toem2/corner-knoll.css — KNOLL'S OWN CORNER (2026-09-28): the four things in the bench's corner — the board, the
+   chat, the album, the leaderboard — as the pages gnomes make wear them. They are the sheets "Knoll Announcement
+   Board", "Knoll Chat Window", "Knoll Gallery Widget" and "Knoll Leaderboard" (Downloads/assets) laid over the
+   corner that was already standing: cream paper and ink, a wooden head with the name on a plate nailed to it, round
+   red buttons with a ring inside, Rye for the names, VT323 for the labels, Kalam for what is said, Public Sans in
+   the boxes people type in. TOEM 2 keeps its own (board.css, gallery.css, leaderboard.css): every rule here hangs
+   off html[data-page], which only a space has (index.html's head), and this file comes after those three.
+   The parts a space has that TOEM 2 has not — a notice's label, the faces by the threads, the days in the chat,
+   the three things to say, the fan of prints — are built by board.js and gallery.js on a space alone. */
+:root[data-page]{--k-ink:#17120b;--k-paper:#f4ecd5;--k-card:#fdf7e3;--k-lift:#fffaf0;--k-wood:#8a6a42;--k-dark:#6b4a2e;--k-strip:#e4d9bb;
+  --k-sh:#d4c6d3;--k-red:#e8484a;--k-yel:#ffd23f;--k-blue:#5a8fd6;--k-hard:rgba(23,18,11,.45);--k-dot:rgba(23,18,11,.55);--k-type:#3b2a1a}
+
+/* ── the buttons: round and red, a ring inside, the mark in cream; the little counts in yellow ── */
+:root[data-page] .town-fabs{left:20px;bottom:20px;gap:16px;align-items:flex-end}
+:root[data-page] .town-fab{width:66px;height:66px;background:var(--k-red);color:var(--k-ink);border:3px solid var(--k-ink);border-radius:50% 46% 52% 48%;box-shadow:4px 4px 0 var(--k-dot)}
+:root[data-page] .town-fab::before{content:"";position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-25px 0 0 -25px;border-radius:50%;border:2px solid var(--k-dot);pointer-events:none}
+:root[data-page] .town-fab svg{position:relative;width:28px;height:28px}
+:root[data-page] .town-fab:hover{background:var(--k-red);transform:translate(-1px,-1px)}
+:root[data-page] .town-fab:active,:root[data-page] .town-fab[aria-expanded="true"]{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--k-dot)}
+:root[data-page] .town-badge{top:-8px;right:-8px;min-width:24px;height:24px;padding:0 6px;border:2.5px solid var(--k-ink);border-radius:999px;background:var(--k-yel);color:var(--k-ink);font:400 17px/19px 'VT323',monospace}
+:root[data-page] .town-tab .town-badge{position:absolute;top:-8px;right:-6px;margin:0;min-width:18px;height:18px;padding:0 4px;border:2px solid var(--k-ink);background:var(--k-red);font-size:14px;line-height:14px;letter-spacing:0;vertical-align:0}
+
+/* ── the panel: paper, a wooden head, the name on its plate ── */
+:root[data-page] .town-panel{left:20px;bottom:156px;width:400px;background:var(--k-paper);color:var(--k-ink);border:3px solid var(--k-ink);border-radius:6px 10px 5px 11px;
+  box-shadow:5px 5px 0 var(--k-sh);font-family:'Kalam',cursive;font-size:15.5px;overflow:hidden}
+:root[data-page] .town-head{position:relative;gap:10px;padding:9px 10px 9px 12px;background:var(--k-wood);border-bottom:3px solid var(--k-ink);
+  box-shadow:0 10px 0 var(--k-strip),0 12px 0 rgba(23,18,11,.25);margin-bottom:24px}
+:root[data-page] .town-head::before{content:"";position:absolute;left:12px;right:12px;top:7px;border-top:2px solid rgba(23,18,11,.28)}
+:root[data-page] .town-plate{position:relative;flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:6px 12px 6px 10px;background:var(--k-card);
+  border:2.5px solid var(--k-ink);border-radius:8px 11px 7px 10px;box-shadow:3px 3px 0 var(--k-hard)}
+:root[data-page] .town-plate::before,:root[data-page] .town-plate::after{content:"";position:absolute;top:5px;width:5px;height:5px;border-radius:50%;background:var(--k-ink)}
+:root[data-page] .town-plate::before{left:5px}
+:root[data-page] .town-plate::after{right:5px}
+:root[data-page] .town-tile{width:28px;height:28px;background:none;border:0;border-radius:0}
+:root[data-page] .town-tile svg{width:28px;height:28px}
+:root[data-page] .town-title b{font:400 18px/1 'Rye',serif;font-variant-caps:normal;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:root[data-page] .town-title small{margin-top:3px;font:400 16px/1 'VT323',monospace;letter-spacing:2px;text-transform:uppercase;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:root[data-page] .town-close{position:relative;width:36px;height:36px;background:var(--k-card);border:2.5px solid var(--k-ink);border-radius:9px 7px 10px 8px;box-shadow:3px 3px 0 var(--k-hard);font-size:0}
+:root[data-page] .town-close::before,:root[data-page] .town-close::after{content:"";position:absolute;left:50%;top:50%;width:17px;height:3px;margin:-1.5px 0 0 -8.5px;border-radius:2px;background:var(--k-ink);transform:rotate(45deg)}
+:root[data-page] .town-close::after{transform:rotate(-45deg)}
+:root[data-page] .town-close:hover{background:var(--k-lift)}
+:root[data-page] .town-close:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--k-hard)}
+
+/* ── the tabs: a row of plates, the open one yellow; a dotted rule under them ── */
+:root[data-page] .town-tabs{gap:6px;row-gap:8px;padding:0 12px}
+:root[data-page] .town-tabs::after{content:"";flex:0 0 100%;height:0;margin-top:4px;border-top:2px dotted rgba(23,18,11,.4)}
+:root[data-page] .town-tab{position:relative;overflow:visible;height:34px;padding:0 4px;background:var(--k-card);border:2.5px solid var(--k-ink);border-radius:7px 9px 6px 8px;
+  font:400 18px/1 'VT323',monospace;font-variant-caps:normal;letter-spacing:1.5px;text-transform:uppercase}
+:root[data-page] .town-tab:hover{background:var(--k-lift)}
+:root[data-page] .town-tab.is-on{background:var(--k-yel);box-shadow:3px 3px 0 var(--k-hard);margin-bottom:0;padding-bottom:0;z-index:auto}
+
+/* ── the body, and what hangs in it ── */
+:root[data-page] .town-body{border-top:0;padding:12px 14px;gap:10px}
+:root[data-page] .town-intro{font-size:15px;line-height:1.35;font-style:italic;opacity:.75}
+:root[data-page] .town-notice{font-style:normal;opacity:1;padding:11px 13px 12px;background:var(--k-card);border:2.5px solid var(--k-ink);border-radius:9px 7px 10px 8px;box-shadow:3px 3px 0 var(--k-sh)}
+:root[data-page] .town-card{background:var(--k-card);border:2.5px solid var(--k-ink);border-radius:9px 7px 10px 8px;box-shadow:3px 3px 0 var(--k-sh);padding:11px 13px 12px;gap:12px}
+:root[data-page] .town-card:nth-child(even){border-radius:7px 10px 8px 9px}
+:root[data-page] .town-card.is-major{background:var(--k-yel);border-radius:7px 11px 6px 10px}
+:root[data-page] button.town-card:hover{background:var(--k-lift)}
+:root[data-page] button.town-card:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--k-sh)}
+:root[data-page] .town-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+:root[data-page] .town-pill{max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:2px 8px 3px;border:2px solid var(--k-ink);border-radius:999px;background:var(--k-paper);
+  font:400 15px/1 'VT323',monospace;letter-spacing:1.5px;text-transform:uppercase}
+:root[data-page] .is-major .town-pill{background:var(--k-red)}
+:root[data-page] .town-date{margin-left:auto;font:400 15px/1 'VT323',monospace;letter-spacing:1.5px;text-transform:uppercase;opacity:.65}
+:root[data-page] .town-card-h{font:400 17px/1.15 'Rye',serif;font-variant-caps:normal;letter-spacing:0}
+:root[data-page] .town-card-t{margin-top:5px;font-size:15.5px;line-height:1.35;text-wrap:pretty}
+:root[data-page] .town-meta{font:400 15px/1 'VT323',monospace;letter-spacing:1.5px;text-transform:uppercase;opacity:.65}
+:root[data-page] .town-who{font-weight:400}
+:root[data-page] .town-x{color:#b83739;font-family:'Kalam',cursive;letter-spacing:0}
+:root[data-page] .town-n{width:30px;height:30px;box-sizing:border-box;border:2.5px solid var(--k-ink);border-radius:50% 46% 52% 48%;background:var(--k-yel);color:var(--k-ink);font:400 15px/25px 'Rye',serif}
+:root[data-page] .town-empty{padding:16px 14px;border:2.5px dashed var(--k-ink);border-radius:9px 7px 10px 8px;font-style:italic}
+:root[data-page] .town-gate a,:root[data-page] .town-meta a{color:#b83739}
+:root[data-page] .town-note{color:#b83739}
+/* a face: the gnome's picture, or their letter on one of the sheet's five colours */
+:root[data-page] .town-pic{width:32px;height:32px;border:2.5px solid var(--k-ink);background:var(--tone,var(--k-yel));color:var(--k-ink);font:400 14px/1 'Rye',serif}
+/* the forum: the way to a new thread, the threads, one thread and what was answered */
+:root[data-page] .town-start{display:flex;align-items:center;justify-content:center;gap:8px;height:42px;flex:none;box-sizing:border-box;border:2.5px dashed var(--k-ink);border-radius:9px 7px 10px 8px;
+  background:transparent;color:var(--k-ink);cursor:pointer;font:400 16px 'Kalam',cursive}
+:root[data-page] .town-start:hover{background:var(--k-card)}
+:root[data-page] .town-start:focus-visible{outline:3px solid #e8479c;outline-offset:3px}
+:root[data-page] .town-start svg{width:14px;height:14px}
+:root[data-page] .town-card.is-thread{align-items:center;padding:9px 12px}
+:root[data-page] .town-card .town-pic{width:34px;height:34px;flex:none;font-size:15px}
+:root[data-page] .town-card.is-thread .town-card-h{font-size:15.5px}
+:root[data-page] .town-card.is-thread .town-meta{margin-top:3px}
+:root[data-page] .town-said{display:inline-flex;align-items:center;gap:4px;flex:none;padding:2px 8px 3px;border:2px solid var(--k-ink);border-radius:999px;background:var(--k-paper);font:400 16px/1 'VT323',monospace}
+:root[data-page] .town-said svg{width:12px;height:12px}
+:root[data-page] .town-back{display:inline-flex;align-items:center;gap:6px;padding:3px 12px 4px 8px;border:2px solid var(--k-ink);border-radius:999px;background:var(--k-card);color:var(--k-ink);
+  font:400 16px/1 'VT323',monospace;letter-spacing:1.5px;text-transform:uppercase}
+:root[data-page] .town-back:hover{background:var(--k-lift)}
+:root[data-page] .town-back svg{width:11px;height:11px}
+:root[data-page] .town-card.is-reply{margin-left:12px;padding:0;background:none;border:0;box-shadow:none;gap:8px;align-items:flex-start}
+:root[data-page] .town-card.is-reply .town-pic{width:28px;height:28px;font-size:13px}
+:root[data-page] .town-card.is-reply .town-card-b{display:flex;flex-direction:column;padding:7px 11px 8px;border:2.5px solid var(--k-ink);border-radius:4px 11px 12px 11px;background:var(--k-card)}
+:root[data-page] .town-card.is-reply .town-meta{order:-1;margin:0 0 3px;font-size:14px}
+:root[data-page] .town-card.is-reply .town-card-t{margin-top:0;line-height:1.3}
+:root[data-page] .town-sheet-h{font:400 19px/1 'Rye',serif}
+
+/* ── writing: a dotted line to write a title on, a box for the rest, the button in yellow ── */
+:root[data-page] .town-form{gap:10px}
+:root[data-page] .town-form input[type=text]{background:transparent;border:0;border-bottom:2px dotted var(--k-dot);border-radius:0;padding:4px 0 3px;font:400 16px 'Public Sans',sans-serif;color:var(--k-type)}
+:root[data-page] .town-form textarea{background:var(--k-card);border:2.5px solid var(--k-ink);border-radius:7px 9px 6px 8px;padding:8px 10px;font:400 15px/1.4 'Public Sans',sans-serif;color:var(--k-type);resize:none;min-height:110px}
+:root[data-page] .town-form input:focus,:root[data-page] .town-form textarea:focus,:root[data-page] .town-say input:focus{box-shadow:none;outline:0}
+:root[data-page] .town-form input[type=text]:focus,:root[data-page] .town-say input:focus,:root[data-page] .town-form.is-reply textarea:focus{border-bottom:2px solid var(--k-ink)}
+:root[data-page] .town-form textarea:focus{box-shadow:0 0 0 3px var(--k-yel)}
+:root[data-page] .town-form input::placeholder,:root[data-page] .town-form textarea::placeholder,:root[data-page] .town-say input::placeholder{color:rgba(59,42,26,.4);opacity:1}
+:root[data-page] .town-form-row{display:flex;align-items:center;gap:12px}
+:root[data-page] .town-form-row input[type=text]{flex:1;min-width:0}
+:root[data-page] .town-check{display:inline-flex;align-items:center;gap:6px;flex:none;cursor:pointer;font:400 16px/1 'VT323',monospace;letter-spacing:1.5px;text-transform:uppercase}
+:root[data-page] .town-check input{width:16px;height:16px;margin:0;accent-color:var(--k-red)}
+:root[data-page] .town-form-acts{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+:root[data-page] .town-btn{height:40px;box-sizing:border-box;padding:0 18px;background:var(--k-yel);color:var(--k-ink);border:2.5px solid var(--k-ink);border-radius:8px 11px 7px 10px;font:400 16px/1 'Kalam',cursive;box-shadow:3px 3px 0 var(--k-hard)}
+:root[data-page] .town-btn:hover{background:#ffe066}
+:root[data-page] .town-btn.is-plain{background:var(--k-card)}
+:root[data-page] .town-btn.is-plain:hover{background:var(--k-lift)}
+:root[data-page] .town-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--k-hard)}
+/* an answer to a thread is written on the strip at the foot, as a line of the chat is */
+:root[data-page] .town-form.is-reply{position:sticky;bottom:-12px;z-index:1;flex-direction:row;align-items:center;gap:12px;margin:auto -14px -12px;padding:12px 14px 14px;border-top:3px solid var(--k-ink);background:var(--k-strip)}
+:root[data-page] .town-form.is-reply textarea{flex:1;min-width:0;min-height:0;height:34px;background:transparent;border:0;border-bottom:2px dotted var(--k-dot);border-radius:0;padding:6px 0 5px;font-size:16px;line-height:1.3;box-shadow:none}
+:root[data-page] .town-form.is-reply .town-note{position:absolute;left:14px;right:72px;top:0;font-size:13px;line-height:12px}
+
+/* ── the chat: theirs on the left with a face and a name, yours on the right in blue; the days between ── */
+:root[data-page] .town-chat-list{padding:16px 14px 10px;gap:12px}
+:root[data-page] .town-day{display:flex;align-items:center;gap:10px;flex:none;font:400 16px/1 'VT323',monospace;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;opacity:.65}
+:root[data-page] .town-day::before,:root[data-page] .town-day::after{content:"";flex:1;border-top:2px dotted var(--k-ink);opacity:.6}
+:root[data-page] .town-msg{grid-template-columns:32px fit-content(78%) auto;column-gap:8px;align-items:end}
+:root[data-page] .town-name{margin:0 0 3px 6px;font:400 15px/1 'VT323',monospace;font-variant-caps:normal;letter-spacing:1.5px;text-transform:uppercase;opacity:.65}
+:root[data-page] .town-bubble{padding:7px 12px 8px;background:var(--k-card);border:2.5px solid var(--k-ink);border-radius:11px 12px 12px 4px;box-shadow:3px 3px 0 var(--k-sh);font-size:16.5px;line-height:1.3;text-wrap:pretty}
+:root[data-page] .town-msg.is-me{display:flex;flex-direction:row-reverse;align-items:center;gap:8px}
+:root[data-page] .town-msg.is-me .town-name,:root[data-page] .town-msg.is-me .town-pic{display:none}
+:root[data-page] .town-msg.is-me .town-bubble{max-width:78%;background:var(--k-blue);border-radius:12px 11px 4px 12px}
+:root[data-page] .town-msg.is-me .town-x{margin:0}
+:root[data-page] .town-quick{display:flex;gap:8px;flex:none;padding:0 14px 10px;overflow-x:auto}
+:root[data-page] .town-quick[hidden]{display:none}
+:root[data-page] .town-quick button{flex:none;padding:6px 12px 7px;border:2.5px solid var(--k-ink);border-radius:999px;background:var(--k-card);color:var(--k-ink);cursor:pointer;font:400 14.5px/1 'Kalam',cursive;box-shadow:2px 2px 0 rgba(23,18,11,.35)}
+:root[data-page] .town-quick button:hover{background:var(--k-lift)}
+:root[data-page] .town-quick button:active{transform:translate(1px,1px);box-shadow:1px 1px 0 rgba(23,18,11,.35)}
+:root[data-page] .town-quick button:focus-visible{outline:3px solid #e8479c;outline-offset:2px}
+:root[data-page] .town-quick button:disabled{opacity:.5;cursor:default}
+:root[data-page] .town-chat-gate,:root[data-page] .town-say{border-top:3px solid var(--k-ink);background:var(--k-strip);padding:12px 14px 14px}
+:root[data-page] .town-say{gap:12px}
+:root[data-page] .town-say input{background:transparent;border:0;border-bottom:2px dotted var(--k-dot);border-radius:0;padding:6px 0 5px;font:400 16px 'Public Sans',sans-serif;color:var(--k-type);caret-color:var(--k-type)}
+:root[data-page] .town-send{width:46px;height:46px;background:var(--k-red);color:var(--k-ink);border:3px solid var(--k-ink);border-radius:50% 46% 52% 48%;box-shadow:3px 3px 0 var(--k-dot)}
+:root[data-page] .town-send svg{width:22px;height:22px;transform:none}
+:root[data-page] .town-send:hover{background:var(--k-red);transform:translate(-1px,-1px)}
+:root[data-page] .town-send:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--k-dot)}
+
+/* ── the photo wall: prints on cream, a red heart; its button is three prints fanned out over a plate ── */
+:root[data-page] .gal-panel{width:540px}
+:root[data-page] .gal-panel .town-tab{flex:0 1 auto;padding:0 14px}
+:root[data-page] .gal-n{margin-left:6px;font-size:inherit;opacity:.6}
+:root[data-page] .gal-body{padding:18px 16px 22px;background-image:none}
+:root[data-page] .gal-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:22px 16px;padding:0}
+:root[data-page] .gal-card{padding:8px 8px 9px;background:var(--k-card);border:2.5px solid var(--k-ink);border-radius:3px 5px 4px 6px;box-shadow:4px 4px 0 var(--k-sh);font-family:'Kalam',cursive}
+:root[data-page] .gal-card:hover,:root[data-page] .gal-card:focus-visible{box-shadow:5px 7px 0 var(--k-sh)}
+:root[data-page] .gal-card:focus-visible{box-shadow:5px 7px 0 var(--k-sh),0 0 0 3px #e8479c}
+:root[data-page] .gal-pic{border:2px solid var(--k-ink);background:#e6eefb}
+:root[data-page] .gal-likes{font:400 16px/1 'VT323',monospace;opacity:1}
+:root[data-page] .gal-likes svg,:root[data-page] .gal-like svg{fill:var(--k-card);stroke:var(--k-ink);stroke-width:2}
+:root[data-page] .gal-likes.is-on svg{fill:var(--k-red)}
+:root[data-page] .gal-empty b{font:400 19px/1.2 'Rye',serif;font-variant-caps:normal;letter-spacing:0}
+:root[data-page] .gal-empty span{font-style:italic}
+:root[data-page] .gal-view{background:rgba(23,18,11,.45);border-radius:0}
+:root[data-page] .gal-sheet{max-width:380px;padding:12px 12px 14px;background:var(--k-card);border:3px solid var(--k-ink);border-radius:4px 7px 5px 8px;box-shadow:6px 6px 0 var(--k-dot);font-family:'Kalam',cursive}
+:root[data-page] .gal-frame{border:2.5px solid var(--k-ink);background:#e6eefb}
+:root[data-page] .gal-arrow{width:36px;height:36px;margin-top:-18px;border:2.5px solid var(--k-ink);background:var(--k-card)}
+:root[data-page] .gal-arrow:hover{background:var(--k-lift)}
+:root[data-page] .gal-arrow svg{width:13px;height:13px;stroke-width:3}
+:root[data-page] .gal-row .town-pic{width:34px;height:34px;font-size:15px}
+:root[data-page] .gal-who b{font:400 17px/1.15 'Rye',serif;font-variant-caps:normal;letter-spacing:0}
+:root[data-page] .gal-who small{font:400 15px/1.1 'VT323',monospace;letter-spacing:1.5px;text-transform:uppercase;opacity:.65}
+:root[data-page] .gal-like{height:36px;border:2.5px solid var(--k-ink);background:var(--k-card);font:400 17px/1 'VT323',monospace;box-shadow:2px 2px 0 var(--k-hard)}
+:root[data-page] .gal-like.is-on{background:var(--k-red);color:var(--k-card)}
+:root[data-page] .gal-like.is-on svg{fill:var(--k-red);stroke:var(--k-card)}
+:root[data-page] .gal-like:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--k-hard)}
+:root[data-page] .gal-pos{font:400 16px/1 'VT323',monospace;letter-spacing:1.5px;text-transform:uppercase;opacity:.65}
+:root[data-page] .gal-foot .town-btn{height:36px;padding:0 14px;font-size:15px}
+.gal-fan{position:relative;width:150px;height:118px;flex:none;padding:0;border:0;background:none;color:var(--k-ink);cursor:pointer;font:inherit}
+.gal-fan:focus-visible{outline:3px solid #e8479c;outline-offset:3px}
+.gal-fan-c{position:absolute;left:var(--l);top:var(--t);width:72px;height:88px;box-sizing:border-box;padding:6px 6px 17px;display:flex;border:2.5px solid var(--k-ink);border-radius:3px 5px 4px 6px;background:var(--k-card);
+  transform:rotate(var(--r));transform-origin:50% 100%;box-shadow:3px 3px 0 var(--k-sh);transition:transform .12s,box-shadow .12s}
+.gal-fan-c:nth-child(1){--l:5px;--t:11px;--r:-10deg}
+.gal-fan-c:nth-child(2){--l:39px;--t:6px;--r:0deg;z-index:1}
+.gal-fan-c:nth-child(3){--l:73px;--t:14px;--r:10deg;z-index:2}
+.gal-fan:hover .gal-fan-c,.gal-fan:focus-visible .gal-fan-c{transform:translateY(-4px) rotate(calc(var(--r) * 1.3));box-shadow:6px 8px 0 var(--k-sh)}
+.gal-fan-p{flex:1;min-width:0;border:2px solid var(--k-ink);background:#e6eefb;overflow:hidden;display:flex}
+.gal-fan-c:nth-child(1) .gal-fan-p{background:#fdf7e3}
+.gal-fan-c:nth-child(3) .gal-fan-p{background:#fff1d0}
+.gal-fan-p img{width:100%;height:100%;object-fit:cover;display:block}
+.gal-fan-n{position:absolute;left:50%;bottom:0;z-index:3;transform:translateX(-50%);padding:4px 14px 5px;border:2.5px solid var(--k-ink);border-radius:8px 11px 7px 10px;background:var(--k-wood);color:var(--k-card);
+  font:400 15px/1 'Rye',serif;white-space:nowrap;box-shadow:3px 3px 0 var(--k-dot)}
+.gal-fan:hover .gal-fan-n{background:#96754a}
+.gal-fan:active .gal-fan-n,.gal-fan[aria-expanded="true"] .gal-fan-n{transform:translate(calc(-50% + 2px),2px);box-shadow:1px 1px 0 var(--k-dot)}
+:root[data-page] .gal-fan .town-badge{top:-4px;right:-2px;z-index:4;height:auto;min-width:0;padding:2px 8px 3px;font:400 16px/1 'VT323',monospace;letter-spacing:1px;text-transform:uppercase;transform:rotate(8deg)}
+
+/* ── the hall of fame: a podium in cream and gold, the rows after it, your own line on dark wood ── */
+:root[data-page] .lb-dock{right:20px;top:calc(var(--head-h,52px) + 16px)}
+:root[data-page] .lb-panel{left:auto;right:20px;top:calc(var(--head-h,52px) + 98px);bottom:92px;width:390px}
+:root[data-page] .lb-blurb{font-size:15px;line-height:1.3;font-style:italic;opacity:.75}
+:root[data-page] .lb-face{width:46px;height:46px;font-size:18px}
+:root[data-page] .lb-stand.is-first .lb-face{width:56px;height:56px;font-size:22px}
+:root[data-page] .lb-face.is-empty{width:46px;height:46px;border:2.5px dashed var(--k-ink);background:none}
+:root[data-page] .lb-name{font:400 14px/1.1 'Rye',serif;font-variant-caps:normal;letter-spacing:0}
+:root[data-page] .lb-block{height:54px;border:2.5px solid var(--k-ink);border-radius:7px 9px 0 0;background:var(--k-card);box-shadow:inset -5px 0 0 var(--k-strip)}
+:root[data-page] .lb-stand:nth-child(1) .lb-block{height:70px}
+:root[data-page] .lb-stand.is-first .lb-block{height:92px;background:var(--k-yel);color:var(--k-ink);box-shadow:inset -5px 0 0 #e6b92e}
+:root[data-page] .lb-stand.is-empty .lb-block{background:transparent;box-shadow:none}
+:root[data-page] .lb-rank{font:400 22px/1 'Rye',serif}
+:root[data-page] .lb-value{font:400 16px/1 'VT323',monospace;letter-spacing:1px}
+:root[data-page] .lb-row{padding:7px 12px 7px 8px;border:2.5px solid var(--k-ink);border-radius:7px 10px 8px 9px;background:var(--k-card);box-shadow:3px 3px 0 var(--k-sh)}
+:root[data-page] .lb-row:nth-child(even){background:var(--k-paper);border-radius:9px 7px 10px 8px}
+:root[data-page] .lb-row.is-me{background:#e6eefb}
+:root[data-page] .lb-n{width:28px;font:400 16px/1 'Rye',serif;opacity:.7}
+:root[data-page] .lb-row .town-pic,:root[data-page] .lb-foot .town-pic{width:30px;height:30px;font-size:13px}
+:root[data-page] .lb-who b{font:400 15px/1.05 'Rye',serif;font-variant-caps:normal;letter-spacing:0}
+:root[data-page] .lb-who small{font:400 15px/1 'VT323',monospace;letter-spacing:1.5px;text-transform:uppercase;opacity:.65}
+:root[data-page] .lb-val{font:400 19px/1 'VT323',monospace;letter-spacing:1px}
+:root[data-page] .lb-foot{border:0;border-top:3px solid var(--k-ink);border-radius:0;background:var(--k-dark);color:var(--k-card);padding:10px 14px 10px 10px;font-size:15px}
+:root[data-page] .lb-foot .town-pic{border-color:var(--k-ink)}
+:root[data-page] .lb-foot .lb-n{opacity:1}
+:root[data-page] .lb-foot .lb-who small{opacity:.8}
+:root[data-page] .lb-foot a{color:var(--k-yel);font-weight:700}
+
+/* a phone: the buttons go under the header, smaller — the fan with them — and the panels between the header and the dock */
+@media (max-width:700px){
+  :root[data-page] .town-fabs{left:10px;bottom:auto;top:calc(var(--head-h,52px) + 10px);gap:10px;align-items:flex-start}
+  :root[data-page] .town-fab{width:50px;height:50px}
+  :root[data-page] .town-fab::before{width:34px;height:34px;margin:-19px 0 0 -19px}
+  :root[data-page] .town-fab svg{width:22px;height:22px}
+  .gal-fan{transform:scale(.46);transform-origin:0 0;margin:0 -81px -64px 0}
+  :root[data-page] .town-panel{left:10px;right:10px;width:auto;max-width:none;top:calc(var(--head-h,52px) + 72px);bottom:132px;font-size:15px}
+  :root[data-page] .lb-dock{right:10px;top:calc(var(--head-h,52px) + 10px)}
+  :root[data-page] .lb-panel{left:10px;right:10px;width:auto;top:calc(var(--head-h,52px) + 72px);bottom:132px}
+  :root[data-page] .gal-panel .town-tab{padding:0 9px}
+  :root[data-page] .gal-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:16px 12px}
+}
+/* a wide screen: the drawers on the left stop above the corner's buttons, which stand taller here */
+@media (min-width:1301px){:root[data-page] .lab-panel{--lp-cap:calc(100dvh - var(--head-h,52px) - 160px)}}

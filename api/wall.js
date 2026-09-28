@@ -112,6 +112,12 @@
    and the two together, the TAG, are one gnome's and nobody else's, for good
    (THE NAMES, below). Every name an account has gone by is kept.
 
+   THE MASTER, AND A PAGE HANDED ON (2026-09-27). The admin is the site's
+   MASTER: on every page, the first included, it stands where the page's
+   maker stands. And a page changes hands by a CODE the master asks for
+   (op handoff) and the gnome who is to have it types into their yard's
+   settings (op claim) — TOEM 2 like any other (THE MASTER, below).
+
    ponytail: reads ship the whole doc (~260 KB) — past ~2 MB, tracings move
    out to keys of their own. */
 'use strict';
@@ -148,6 +154,7 @@ const VOTE = { id: 'vote', name: 'the vote' }; // the hand that closes a ballot
 const TAG_MAX = 1000000;                      // the most gnomes one name takes: Mossy#1 … Mossy#1000000
 const NAMES_KEEP = 50, AUDIT_KEEP = 1000;     // names kept per account; entries kept in the moderators' record
 const HOME = 'toem2';                         // the first page: its keys are the store's oldest, and stay put
+const HANDOFF_DAYS = 7, CLAIM_TRIES = 10, CLAIM_TRIES_IP = 30;   // a code's life · wrong codes an hour, an account and an address (THE MASTER)
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/;
 
 const REV_DAYS = 180;                        // a revision's full record (what a revert needs) is kept this long; the log's summary outlives it
@@ -369,10 +376,14 @@ const dbm = cmds => storeFor().many(cmds);
    PAGES
      page:<slug>       hash    made title kind by, its look: palette inks pic, its rules: chaos period closes last told feats
                                (mod: the form's old word, kept, unread) — every page; the first keeps a settings-only hash (no made)
+                               · hand given giver — the code it may be claimed by ({h, at, ex, by}, or none), when it last
+                                 changed hands and who handed it on (THE MASTER); the first page has a `by` once it is claimed
                                · tabs chat (the board's tabs and the chat's rules — api/board.js) · sections (the album's — api/gallery.js)
                                · ranks (what the leaderboard shows — api/leaderboard.js), JSON
      pages             zset    those pages, scored by when they were made
      spaces:<u>        set     the pages an account made (SPACES: two, unless a moderator)
+     given:<u>         set     the pages an account was handed (THE MASTER) — theirs as much, and not counted among the ones they may make
+     handoff:<sha>     string  a code, by its sha256 → {page, by, at}: the page it opens, once (expires)
      doc rev log rev:<n> queue contested
                                a page's wall: bare for toem2 (toem2:doc), p:<slug>: before
                                the rest for any other (toem2:p:<slug>:doc) — pageKeys()
@@ -405,6 +416,7 @@ const K = {
   sess: h => P + 'sess:' + h, oauth: s => P + 'oauth:' + s, code: u => P + 'code:' + u, days: u => P + 'days:' + u, rl: (who, hour) => P + 'rl:' + who + ':' + hour,
   fp: (u, day) => P + 'fp:' + u + ':' + day, pending: u => P + 'pending:' + u, pendingIp: h => P + 'pendingip:' + h,
   page: s => P + 'page:' + s, pages: P + 'pages', spaces: u => P + 'spaces:' + u, edit: id => P + 'edit:' + id,
+  given: u => P + 'given:' + u, handoff: h => P + 'handoff:' + h,
   prop: id => P + 'prop:' + id, propDoc: id => P + 'propdoc:' + id, props: hill => P + 'props:' + hill,
   propsBy: u => P + 'propsby:' + u, propsIp: h => P + 'propsip:' + h, propsDone: hill => P + 'propsdone:' + hill, audit: P + 'audit',
   friends: u => P + 'friends:' + u, asks: u => P + 'asks:' + u, notes: u => P + 'notes:' + u, invited: s => P + 'invited:' + s,
@@ -473,6 +485,7 @@ function cleanPic(v) {
 // ── who ───────────────────────────────────────────────────────────────────
 const bearer = req => { const m = /^Bearer\s+(\S+)$/i.exec(String(req.headers.authorization || '')); return m && SESS_RE.test(m[1]) ? m[1] : null; };
 const isMod = me => !!me && !me.banned && (me.role === 'mod' || me.role === 'admin');   // a banned moderator moderates nothing, reads included
+const master = me => !!me && !me.banned && me.role === 'admin';                          // THE MASTER: the admin, who is every page's maker
 async function profile(u, rec, rep) {
   if (rep == null) rep = await db('SCARD', K.days(u));
   const role = ROLES.includes(rec.role) ? rec.role : 'user', h = habits(rec);
@@ -1350,21 +1363,21 @@ function lookOf(body) {                        // what a post says the space loo
 }
 const chaosOf = p => ({ chaos: CHAOS.includes(+p.chaos) ? +p.chaos : CHAOS_DEFAULT, period: PERIODS.includes(+p.period) ? +p.period : PERIOD_DEFAULT,
                         closes: numOf(p.closes), told: numOf(p.told), last: (() => { try { return p.last ? JSON.parse(p.last) : null; } catch (e) { return null; } })() });
-const spaceOf = (slug, p) => Object.assign({ slug, title: p.title || slug, by: p.by || '', made: +p.made || 0, palette: PAPERS[p.palette] ? p.palette : 'yard',
+const spaceOf = (slug, p) => Object.assign({ slug, title: slug === HOME ? 'TOEM 2' : p.title || slug, by: p.by || '', made: +p.made || 0, given: numOf(p.given), palette: PAPERS[p.palette] ? p.palette : 'yard',
   inks: listOf(p.inks), mod: p.mod || 'open', feats: featsOf(listOf(p.feats)), pic: p.pic || '' }, PAPERS[p.palette] || PAPERS.yard,
   (({ chaos, period, closes }) => ({ chaos, period, closesAt: closes }))(chaosOf(p)));
 /* THE RULES of a page, as every op asks them: its chaos, period and next close, the six kind switches, its keepers — the maker,
    then the invited who are still their friends; on TOEM 2 the trusted — and whether the one asking is the maker (owner) or a
-   keeper. A watched account keeps nothing. ponytail: one HGETALL and two SMEMBERS per edit. */
+   keeper. A watched account keeps nothing. THE MASTER is the maker of every page (owner), TOEM 2 included, and TOEM 2 has a
+   maker of its own once it has been handed on. ponytail: one HGETALL and one SMEMBERS per edit. */
 async function rulesOf(pg, me) {
-  const slug = pg.slug, p = await db('HGETALL', K.page(slug));
+  const slug = pg.slug, [p, invited] = await dbm([['HGETALL', K.page(slug)], ['SMEMBERS', K.invited(slug)]]);
   const by = p.by && USER_RE.test(p.by) ? p.by : '';
-  const invited = by ? await db('SMEMBERS', K.invited(slug)) : [];
   // the keepers: the maker and whoever they invited — a friend or not, since 2026-09-24 (settings: WHO CAN EDIT adds anyone by name)
   const keepers = (by ? [by] : []).concat(invited.filter(u => u !== by));
-  const owner = !!me && !!by && by === me.id;
+  const owner = !!me && ((!!by && by === me.id) || master(me));
   const keeper = owner || (!!me && !me.watched && (isMod(me) || keepers.includes(me.id) || (slug === HOME && me.tier === 'trusted')));
-  return Object.assign({ page: slug, by, keepers, owner, keeper, feats: featsOf(listOf(p.feats)),
+  return Object.assign({ page: slug, by, keepers, owner, keeper, master: master(me), feats: featsOf(listOf(p.feats)),
                          title: slug === HOME ? 'TOEM 2' : (p.title || slug), palette: PAPERS[p.palette] ? p.palette : 'yard',
                          inks: listOf(p.inks) }, chaosOf(p));   // the inks: the only colours the dock offers there; none = every colour
 }
@@ -1379,7 +1392,7 @@ function cleanLook(v) {                        // a look a patch or a settings p
 async function applyLook(pg, look) { if (look && pg.slug !== HOME) await db('HSET', K.page(pg.slug), ...Object.entries(look).flat()); }   // ponytail: a revert does not undo a look; settings puts it back
 async function opSettings(pg, req, res, me, body) {
   const slug = pg.slug, p = await db('HGETALL', K.page(slug));
-  if (!(isMod(me) || (slug !== HOME && p.by === me.id))) throw bad(403, 'owner', 'the rules here are the maker\'s');
+  if (!(isMod(me) || (!!p.by && p.by === me.id))) throw bad(403, 'owner', 'the rules here are the maker\'s');   // TOEM 2's too, once it has one (THE MASTER)
   const was = chaosOf(p), sets = [], said = {};
   if (body.chaos != null) { if (!CHAOS.includes(+body.chaos)) throw bad(400, 'chaos', 'chaos is 0 (read-only), 1 (tended), 2 (council) or 3 (wild)'); said.chaos = +body.chaos; sets.push('chaos', String(said.chaos)); }
   if (body.period != null) { if (!PERIODS.includes(+body.period)) throw bad(400, 'period', 'a ballot closes every 1, 3 or 7 days'); said.period = +body.period; sets.push('period', String(said.period)); }
@@ -1412,6 +1425,79 @@ async function opPage(req, res, me, body) {
   await dbm([['HSET', K.page(slug), 'title', title, 'kind', 'wall', 'by', me.id, ...Object.entries(look).flat()], ['ZADD', K.pages, now, slug]]);
   await audit(me.id, 'page', { page: slug, title });
   answer(res, 200, { ok: true, page: spaceOf(slug, Object.assign({ made: now, title, by: me.id }, look)) });
+}
+/* ── THE MASTER, AND A PAGE HANDED ON (2026-09-27) ────────────────────────
+   THE MASTER is the admin — ADMIN_EMAILS', so an address Google or Discord
+   has proved. On every page, TOEM 2 included, it stands where the page's
+   maker stands: rulesOf() answers `owner` for it, and the doors that ask
+   whose a page is (settings here, invite and uninvite in api/friends.js) let
+   it through. It makes pages like anybody (op page, uncounted) and they are
+   its own until it hands them on.
+   A PAGE IS HANDED ON WITH A CODE. The master asks for one (op handoff) and
+   sends it, by whatever road, to the gnome who is to have the page; they
+   type it into the yard's settings (op claim) and the page is theirs: `by`
+   is their account, it stands among their spaces (given:<u> — a page handed
+   is not one of the three an account may MAKE, so a claim is never refused
+   for room), and whoever had it before has it no longer. TOEM 2 goes the
+   same way: its record gains a `by` and still has no `made`.
+   THE CODE is sixteen of Crockford's thirty-two letters and numbers — eighty
+   bits, and no I, L, O or U to misread — kept only as its sha256. It opens
+   one page, once, within HANDOFF_DAYS; a new one for the same page ends the
+   old, and the master can take one back (revoke). A guess is counted before
+   it is judged: CLAIM_TRIES an hour an account, CLAIM_TRIES_IP an address,
+   and a wrong code, a used one and one that has run out are told alike.
+   ponytail: the code is its bearer's — whoever holds it claims; tying one to
+   an account is a `for` on its record and a line in opClaim. The desk reads
+   every page in one go — fine to a few thousand. */
+const CODE_ABC = '0123456789ABCDEFGHJKMNPQRSTVWXYZ', CODE_LEN = 16;
+const newCode = () => Array.from(crypto.randomBytes(CODE_LEN), b => CODE_ABC[b & 31]).join('');   // 256 is eight 32s: every letter as likely as the next
+const showCode = c => c.replace(/(.{4})(?=.)/g, '$1-');
+// what was typed, as the code it means: any capitals, dashes or spaces, and the letters Crockford leaves out read as the digits they look like
+function cleanCode(v) {
+  const c = String(v == null ? '' : v).slice(0, 64).toUpperCase().replace(/O/g, '0').replace(/[IL]/g, '1').replace(/[\s-]/g, '');
+  return c.length === CODE_LEN && [...c].every(ch => CODE_ABC.includes(ch)) ? c : '';
+}
+const codeKey = c => K.handoff(sha('handoff|' + c));
+const handIn = p => { try { const h = p.hand ? JSON.parse(p.hand) : null; return h && typeof h.h === 'string' ? h : null; } catch (e) { return null; } };
+const handOf = p => { const h = handIn(p); return h && +h.ex > Date.now() ? h : null; };   // the code a page may be claimed by, while it lasts
+async function opHandoff(req, res, me, body) {
+  if (!master(me)) throw bad(403, 'role', 'a page is the master\'s to hand on');
+  const pg = await pageOf(body.page), slug = pg.slug, p = await db('HGETALL', K.page(slug)), was = handIn(p);
+  if (was) await db('DEL', K.handoff(was.h));   // one code a page: the old one ends here, used or not
+  if (body.revoke) {
+    await db('HSET', K.page(slug), 'hand', '');
+    await audit(me.id, 'handoff', { page: slug, revoked: true });
+    return answer(res, 200, { ok: true, page: slug, revoked: !!handOf(p) });
+  }
+  const code = newCode(), now = Date.now(), ex = now + HANDOFF_DAYS * DAY;
+  await dbm([['SET', codeKey(code), JSON.stringify({ page: slug, by: me.id, at: now }), 'EX', HANDOFF_DAYS * 86400],
+             ['HSET', K.page(slug), 'hand', JSON.stringify({ h: sha('handoff|' + code), at: now, ex, by: me.id })]]);
+  await audit(me.id, 'handoff', { page: slug });
+  answer(res, 200, { ok: true, page: slug, title: await titleOf(slug), code: showCode(code), expires: ex, days: HANDOFF_DAYS });
+}
+async function opClaim(req, res, me, body) {
+  const NO = 'that code opens nothing — it may be mistyped, used already, replaced, or past its ' + HANDOFF_DAYS + ' days';
+  if (!me.name) throw bad(400, 'name', 'choose a name first — a page is handed to somebody');
+  const hour = Math.floor(Date.now() / 36e5), ku = K.rl('claim:' + me.id, hour), ki = K.rl('claimip:' + ipHash(req), hour);
+  const [nu, ni] = await dbm([['INCR', ku], ['INCR', ki]]);   // counted before it is judged
+  if (nu === 1 || ni === 1) await dbm([['EXPIRE', ku, 3600], ['EXPIRE', ki, 3600]]);
+  if (nu > CLAIM_TRIES || ni > CLAIM_TRIES_IP) throw bad(429, 'rate', 'that is a lot of codes in one hour — try again in a while');
+  const code = cleanCode(body.code);
+  if (!code) throw bad(400, 'code', 'a code is sixteen letters and numbers, as it was sent to you');
+  const raw = await db('GETDEL', codeKey(code));   // taken as it is read: two who type it at once, and one of them has it
+  if (!raw) throw bad(404, 'code', NO);
+  const rec = JSON.parse(raw), slug = String(rec.page || ''), p = slug === HOME || SLUG_RE.test(slug) ? await db('HGETALL', K.page(slug)) : {}, hand = handOf(p);
+  if (!hand || hand.h !== sha('handoff|' + code) || (slug !== HOME && !p.made)) throw bad(404, 'code', NO);
+  const was = p.by && USER_RE.test(p.by) ? p.by : '', now = Date.now(), title = await titleOf(slug);
+  if (was === me.id) { await db('HSET', K.page(slug), 'hand', ''); return answer(res, 200, { ok: true, page: { slug, title }, yours: true }); }   // theirs already: the code is spent, nothing moves
+  const cmds = [['HSET', K.page(slug), 'by', me.id, 'given', String(now), 'giver', String(rec.by || ''), 'hand', ''],
+                ['SADD', K.given(me.id), slug], ['SREM', K.invited(slug), me.id]];
+  if (was) cmds.push(['SREM', K.spaces(was), slug], ['SREM', K.given(was), slug]);
+  await dbm(cmds);
+  await audit(me.id, 'claim', { page: slug, from: was || undefined, giver: rec.by || undefined });
+  if (USER_RE.test(rec.by || '') && rec.by !== me.id) await tell(rec.by, 'claimed', me.id, { slug, title });
+  if (was && was !== me.id && was !== rec.by) await tell(was, 'handed', me.id, { slug, title });   // whoever had it hears that it has gone
+  answer(res, 200, { ok: true, page: { slug, title, was: was || undefined } });
 }
 
 // ── GET ───────────────────────────────────────────────────────────────────
@@ -1455,19 +1541,32 @@ async function get(req, res, q, op) {
     const slugs = await db('ZRANGEBYSCORE', K.pages, '-inf', '+inf'), recs = await dbm(slugs.map(s => ['HGETALL', K.page(s)]));
     return answer(res, 200, { ok: true, pages: [{ slug: HOME, title: 'TOEM 2', kind: 'wall' }].concat(recs.map((p, i) => ({ slug: slugs[i], title: p.title, kind: p.kind, by: p.by, made: +p.made }))) });
   }
-  if (q.get('space')) {                         // one space, for its own address (space.html): anybody's to read
-    const slug = String(q.get('space')).toLowerCase(), p = SLUG_RE.test(slug) && slug !== HOME ? await db('HGETALL', K.page(slug)) : {};
-    if (!p.made) return answer(res, 404, { ok: false, code: 'page', error: 'no such space' });
+  if (q.get('space')) {                         // one space, for its own address (space.html): anybody's to read — the first page too, since it may have a maker (THE MASTER)
+    const slug = String(q.get('space')).toLowerCase(), p = SLUG_RE.test(slug) ? await db('HGETALL', K.page(slug)) : {};
+    if (!p.made && slug !== HOME) return answer(res, 404, { ok: false, code: 'page', error: 'no such space' });
     const [name, n] = p.by ? await dbm([['HGET', K.user(p.by), 'name'], ['HGET', K.user(p.by), 'n']]) : [];
     return answer(res, 200, { ok: true, space: Object.assign(spaceOf(slug, p), { tag: tagOf({ name, n }) }) }, CACHE.log);
   }
   if (q.get('spaces')) {                        // the spaces this account made, oldest first: the yard's hills, and whether it may make another
     const me = await whoIs(req);
     if (!me) return answer(res, 401, { ok: false, code: 'who', error: 'not signed in' });
-    const slugs = await db('SMEMBERS', K.spaces(me.id));
+    // the ones it made, and the ones it was handed (THE MASTER) — which are theirs as much, and take none of the three
+    const [made, given] = await dbm([['SMEMBERS', K.spaces(me.id)], ['SMEMBERS', K.given(me.id)]]), slugs = [...new Set(made.concat(given))];
     const recs = slugs.length ? await dbm(slugs.map(s => ['HGETALL', K.page(s)])) : [], lens = slugs.length ? await dbm(slugs.map(s => ['LLEN', pageKeys(s).queue])) : [];
-    const spaces = recs.map((p, i) => Object.assign(spaceOf(slugs[i], p), { waiting: numOf(lens[i]) })).filter(s => s.made).sort((a, b) => a.made - b.made);
-    return answer(res, 200, { ok: true, max: SPACES_MAX, full: !isMod(me) && spaces.length >= SPACES_MAX, spaces });
+    const spaces = recs.map((p, i) => Object.assign(spaceOf(slugs[i], p), { waiting: numOf(lens[i]) }, made.includes(slugs[i]) ? {} : { handed: true }))
+      .filter(s => (s.made || s.slug === HOME) && s.by === me.id).sort((a, b) => (a.made || a.given) - (b.made || b.given));
+    return answer(res, 200, { ok: true, max: SPACES_MAX, full: !isMod(me) && spaces.filter(s => !s.handed).length >= SPACES_MAX, spaces });
+  }
+  if (q.get('desk')) {                          // THE MASTER's desk: every page, whose it is, and whether a code for it is out
+    const me = await whoIs(req);
+    if (!master(me)) return answer(res, 403, { ok: false, code: 'role', error: 'the desk is the master\'s' });
+    const slugs = [HOME].concat(await db('ZRANGEBYSCORE', K.pages, '-inf', '+inf')), recs = await dbm(slugs.map(s => ['HGETALL', K.page(s)]));
+    const tags = await tagsOf(recs.map(p => p.by).filter(u => USER_RE.test(u || '')));
+    return answer(res, 200, { ok: true, me: me.id, days: HANDOFF_DAYS, pages: slugs.map((s, i) => {
+      const p = recs[i], hand = handOf(p);
+      return { slug: s, title: s === HOME ? 'TOEM 2' : p.title || s, by: p.by || '', tag: p.by ? tags[p.by] || '' : '', made: numOf(p.made), given: numOf(p.given),
+               code: hand ? { at: +hand.at || 0, expires: +hand.ex } : null };
+    }) });
   }
   if (q.get('audit')) {
     if (!isMod(await whoIs(req))) return answer(res, 403, { ok: false, code: 'role', error: 'the record is the moderators\'' });
@@ -1620,6 +1719,8 @@ async function handler(req, res) {
       case 'undo': return await opUndo(await pageOf(body.page), req, res, me, body);
       case 'role': return await opRole(req, res, me, body);
       case 'page': return await opPage(req, res, me, body);
+      case 'handoff': return await opHandoff(req, res, me, body);
+      case 'claim': return await opClaim(req, res, me, body);
       case 'settings': return await opSettings(await pageOf(body.page), req, res, me, body);
       case 'me': return answer(res, 200, Object.assign({ ok: true }, await rename(me.id, body.name, me.id)));
       default: return answer(res, 400, { ok: false, code: 'op', error: 'no such op' });
@@ -1638,5 +1739,5 @@ Object.assign(handler, { storeFor, useStore: s => { STORE = s; }, db, dbm, K, pa
                          CHAOS, PERIODS, MIN_OPEN_H, VOTE, FEATS_DEFAULT, NOTES_KEEP });
 // …and for api/auth.js (the accounts) and api/hill.js (a yard of one's own, and proposals to it): who
 // is asking, the session's two cookies, the names, and the checks a piece that other people's browsers will draw has to pass
-Object.assign(handler, { whoIs, isMod, sessionOf, sessOf, inGen, setSession, clearSession, sameSite, localPath, answer, readBody, Bad, bad, text, sha, ipHash,
+Object.assign(handler, { whoIs, isMod, master, titleOf, HANDOFF_DAYS, CLAIM_TRIES, sessionOf, sessOf, inGen, setSession, clearSession, sameSite, localPath, answer, readBody, Bad, bad, text, sha, ipHash,
                          rename, cleanName, tagOf, foldName, ensureTag, audit, tell, tellOnce, tellKeepers, tagsOf, habits, rulesOf, cleanRecord, cleanTracing, cleanPic, KINDS, GIF_RE, VID_RE, USER_RE, SLUG_RE, SESSION_DAYS });

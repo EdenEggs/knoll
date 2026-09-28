@@ -359,7 +359,7 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
     r = await GET('?spaces=1'); check('…to the account signed in, and nobody else', r.status === 401);
     r = await GET('?space=hollow'); check('?space answers anybody: the name, the look, and whose it is', r.json.ok && r.json.space.title === 'Mossy Hollow' && r.json.space.accent === '#c93b82' && /^sp#\d+$/.test(r.json.space.tag) && r.json.space.by === U.sp, j(r.json.space && r.json.space.tag));
     check('…kept at the edge ten seconds, like the log', /s-maxage=10/.test(r.headers['cache-control']));
-    r = await GET('?space=toem2'); check('the first page is not a space', r.status === 404);
+    r = await GET('?space=toem2'); check('the first page has a face too, since it may be handed on (2026-09-27): TOEM 2, and nobody\'s until it is', r.status === 200 && r.json.space.slug === 'toem2' && r.json.space.title === 'TOEM 2' && r.json.space.by === '' && r.json.space.made === 0, brief(r));
     r = await GET('?space=' + encodeURIComponent('../doc')); check('…nor is a path', r.status === 404);
     r = await GET('?page=hollow'); check("a space's wall opens blank, like any page's", r.json.rev === 1 && r.json.wall.items.length === 0, brief(r));
     r = await POST({ op: 'page', slug: 'hollow', title: 'Mine Now' }, 'mod'); check("a space's address is its maker's", r.status === 409 && r.json.code === 'taken');

@@ -28,6 +28,7 @@
 .town-tile{width:48px;height:48px;flex:none;box-sizing:border-box;background:#bdb8bf;color:#17120b;border:3px solid #17120b;
   border-radius:12px 10px 13px 11px;display:flex;align-items:center;justify-content:center}
 .town-tile svg{width:28px;height:28px}
+.town-plate{display:contents}   /* the name plate is a space's (corner-knoll.css); here the tile and the title stand in the head as they did */
 .town-title{flex:1;min-width:0}
 .town-title b{display:block;font-size:22px;line-height:1.1;font-variant-caps:small-caps;letter-spacing:.04em}
 .town-title small{display:block;font-size:13.5px;opacity:.75;margin-top:2px}

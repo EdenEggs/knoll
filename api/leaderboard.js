@@ -43,6 +43,7 @@ const METRICS = {
   hearts: { label: 'Most hearts', blurb: 'The most hearts on their photos' }
 };
 const DEFAULT = { tabs: ['edits', 'days', 'first'], title: 'Leaderboard', sub: 'Counted up every ten minutes', top: 10 };
+const NAME = slug => (slug === HOME ? DEFAULT.title : 'Hall of Fame');   // what a page's is called until its keepers call it another: a space's is Knoll's own (toem2/leaderboard.js: KNOLL'S OWN CORNER)
 const CAP = { title: 24, sub: 60, topMin: 3, topMax: 25 }, KEEP_S = 600;
 const RATE = 60;
 const hour = () => Math.floor(Date.now() / 36e5);
@@ -68,10 +69,10 @@ async function meOf(req, slug) {
 const said = me => me && { id: me.id, tag: me.tag, keeper: me.keeper, mod: me.mod };
 
 // ── the settings, off the page's hash ─────────────────────────────────────
-function settingsOf(p) {
+function settingsOf(p, slug) {
   const s = parse(p.ranks, null) || {};
   const tabs = Array.isArray(s.tabs) ? [...new Set(s.tabs.filter(m => METRICS[m]))] : [];
-  return { tabs: tabs.length ? tabs : DEFAULT.tabs, title: text(s.title, CAP.title) || DEFAULT.title, sub: s.sub == null ? DEFAULT.sub : text(s.sub, CAP.sub),
+  return { tabs: tabs.length ? tabs : DEFAULT.tabs, title: text(s.title, CAP.title) || NAME(slug), sub: s.sub == null ? DEFAULT.sub : text(s.sub, CAP.sub),
            top: Math.min(CAP.topMax, Math.max(CAP.topMin, Math.floor(+s.top) || DEFAULT.top)) };
 }
 function cleanSettings(b) {
@@ -112,7 +113,7 @@ async function count(slug) {
 }
 
 async function get(req, res) {
-  const q = new URL(req.url, 'http://x').searchParams, slug = await pageOf(q), settings = settingsOf(await db('HGETALL', K.page(slug)));
+  const q = new URL(req.url, 'http://x').searchParams, slug = await pageOf(q), settings = settingsOf(await db('HGETALL', K.page(slug)), slug);
   const me = await meOf(req, slug);
   let c = q.get('fresh') && me && me.keeper ? null : parse(await db('GET', K.lb(slug)), null);
   if (!c || !c.at || !c.ranks) { c = await count(slug); await db('SET', K.lb(slug), JSON.stringify(c), 'EX', KEEP_S); }

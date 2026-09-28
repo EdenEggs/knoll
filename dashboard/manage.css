@@ -64,6 +64,12 @@
 .cm-thumb{width:72px;height:72px;object-fit:cover;border:3px solid #17120b;background:#e9e4e8;display:block;box-sizing:border-box}
 .cm-photo-f{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-width:0}
 .cm-photo-a{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+/* THE MASTER'S DESK (master.js): a page's name, its doors at the row's end, and a code, large enough to read aloud */
+.md-name{font-family:'Rye',serif;font-weight:400;font-size:18px}
+.md-acts{display:inline-flex;gap:6px;margin-left:auto}
+.md-acts .cm-hit,.cm-row a.cm-chip{color:#17120b;text-decoration:none}
+.md-code{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 12px;background:#fff;border:3px dashed #17120b}
+.md-word{font-family:'VT323',monospace;font-size:30px;letter-spacing:3px;line-height:1;user-select:all;overflow-wrap:anywhere}
 @media (max-width:860px){
   .cm{grid-template-columns:1fr}
   .cm-card{transform:none}
