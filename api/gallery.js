@@ -26,14 +26,16 @@
    any section or none. Anyone else signed in, from the album on the bench,
    into a section the keepers have OPENED to them (`open` — off until it is
    turned on, a section at a time) and nowhere else: a photo of theirs is
-   not moved by them into a section that is shut. Anyone signed in gives a
-   heart.
+   not moved by them into a section that is shut, and they have twenty up
+   at a time (MINE_MAX) — the album keeps two hundred, and one account's
+   photos do not push everybody else's off the end of it. Anyone signed in
+   gives a heart.
 
      GET  ?page=<slug>
           → { ok, me: {id, tag, keeper, mod} | null, sections: [{id, title, desc, open}],
               photos: [{id, by, tag, at, cap, desc, sec, where, src, likes, liked}] }
      POST { op: 'post', cap, desc?, sec?, where?, src: 'data:image/(jpeg|png|webp);base64,…' }
-                                        → { ok, photo }        (a keeper; or anyone signed in, into an open section; twenty an hour; a picture ≤ 300 KB)
+                                        → { ok, photo }        (a keeper; or anyone signed in, into an open section, twenty up at a time; twenty an hour; a picture ≤ 300 KB)
           { op: 'edit', id, cap?, desc?, sec? } → { ok, photo } (your own, or a keeper's)
           { op: 'like', id, on? }       → { ok, likes, liked } (on: false takes the heart back)
           { op: 'drop', id }            → { ok }               (your own, or a keeper's to hide — audited)
@@ -50,6 +52,7 @@ const H = require('./hill.js');
 const { db, dbm, K, answer, readBody, Bad, bad, sameSite, whoIs, isMod, rulesOf, tagsOf, text, HOME, SLUG_RE } = W;
 
 const KEEP = 200;                             // photos a page keeps; the oldest fall off the end
+const MINE_MAX = 20;                          // …of which a visitor has this many up at a time, so one account cannot push the album off its own end (a moderator: as many as it keeps)
 const CAP = { cap: 20, desc: 100, where: 40, src: 400000, sec: 40, secDesc: 100 };
 const SECTIONS_MAX = 5, SEC_RE = /^[a-z0-9][a-z0-9-]{0,19}$/;
 const BYTES = 300 * 1024;                     // the picture, decoded
@@ -188,11 +191,14 @@ async function post(req, res) {
       if (!cap) throw bad(400, 'cap', 'give it a title');
       const pic = decode(body.src);
       if (!pictures) throw bad(503, 'no-store', 'this site has no store for pictures yet');
+      // ponytail: a count of the asker's own in the list as it stands — a quota a section if an album ever fills with visitors' photos
+      const all = await db('LRANGE', key, 0, -1);
+      if (!me.keeper && all.filter(s => (one(s) || {}).by === me.id).length >= MINE_MAX) throw bad(429, 'mine-full', 'you have ' + MINE_MAX + ' photos up here already — take one down to hang another');
       const pid = newId(), name = 'album/' + slug + '/' + pid + '.' + pic.ext;
       const src = await pictures.put(name, pic);
       const p = { id: pid, by: me.id, at: Date.now(), cap, desc: descOf(body.desc), sec: secOf(body.sec, sections), where: text(body.where, CAP.where), src, key: name };
       // the list keeps KEEP: what this one pushes off the end takes its picture and its hearts with it
-      const over = (await db('LRANGE', key, KEEP - 1, -1)), gone = over.map(one).filter(Boolean);
+      const over = all.slice(KEEP - 1), gone = over.map(one).filter(Boolean);
       if (over.length) {
         await dbm(over.map(s => ['LREM', key, 0, s]).concat(gone.map(g => ['DEL', K.albumLike(slug, g.id)])));
         await pictures.del(gone.map(g => g.key).filter(Boolean));
@@ -239,4 +245,4 @@ module.exports = async function handler(req, res) {
     answer(res, 500, { ok: false, code: 'server', error: 'the album is having trouble — try again in a moment' });
   }
 };
-module.exports.KEEP = KEEP;                   // for the probe
+Object.assign(module.exports, { KEEP, MINE_MAX });   // for the probe

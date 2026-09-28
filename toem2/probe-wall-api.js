@@ -520,6 +520,47 @@ const edit = async (who, put, del, more) => POST(Object.assign({ op: 'edit', bas
     const kn = (await API.db('LRANGE', API.K.notes(U.kp1), 0, -1)).map(x => JSON.parse(x));
     check("the keepers' bells rang for the ballot — once a round, not once a motion (twelve were filed)", kn.filter(x => x.kind === 'ballot').length >= 1 && kn.filter(x => x.kind === 'ballot').length < 12, j(kn.map(x => x.kind)));
 
+    // ── 20b · the clock, hardened (2026-09-28) ───────────────────────────
+    // a heart taken back is the taker's own; given, taken back and given again it is one vote cast; and who ever marked a motion is nobody's to read
+    const votesOf = async who => (await GET('?me=1', who)).json.votes, closesOf = async id => (await GET('?audit=400', 'mod')).json.audit.filter(e => e.what === 'close' && e.edit === id);
+    const toldOf = async (who, id) => (await API.db('LRANGE', API.K.notes(U[who]), 0, -1)).map(x => JSON.parse(x)).filter(x => x.edit === id && (x.kind === 'passed' || x.kind === 'failed'));
+    const spoil = async id => { const e = JSON.parse(await API.db('GET', API.K.edit(id))); e.put = { [nm(399)]: { k: 'i', f: 'a-tracing-long-gone', o: 0, x: 0, y: 0, z: 100 } }; e.del = []; e.prev = { [nm(399)]: null }; await API.db('SET', API.K.edit(id), JSON.stringify(e)); };
+    await breathe('st1'); await breathe('st2');
+    r = await pedit('st1', 'brook', { [nm(360)]: fresh('d') }); const ha = r.json.edit; r = await pedit('st2', 'brook', { [nm(361)]: fresh('d') }); const hb = r.json.edit;
+    const v5had = await votesOf('v5');
+    await POST({ op: 'heart', edit: ha }, 'v5'); r = await call('POST', '/api/wall', { op: 'heart', edit: ha, on: false }, T.v4, ipOf('v5'));
+    check("a heart taken back by somebody else at the address takes nobody's heart but their own", r.json.ok && r.json.hearts === 1, brief(r) + ' hearts ' + r.json.hearts);
+    await POST({ op: 'heart', edit: ha, on: false }, 'v5'); r = await POST({ op: 'heart', edit: ha }, 'v5');
+    check('a heart given, taken back and given again is one heart, and one vote cast on the account', r.json.hearts === 1 && (await votesOf('v5')) === v5had + 1, 'votes ' + (await votesOf('v5')) + ', ' + v5had + ' before');
+    r = await GET('?edit=' + ha); check('…and who ever marked a motion is nobody\'s to read', r.json.edit.ayes === 1 && r.json.edit.cast === undefined && r.json.edit.voters === undefined, j(Object.keys(r.json.edit)));
+    // ONE READER SETTLES A ROUND: every open ballot asks again when its clock runs out, so the readers of that moment arrive together
+    await POST({ op: 'heart', edit: hb }, 'v2'); await closeNow();
+    await Promise.all([GET('?ballot=1&page=brook'), GET('?ballot=1&page=brook'), GET('?queue=1&page=brook'), GET('?ballot=1&page=brook')]);
+    let sa = (await GET('?edit=' + ha)).json.edit, sb = (await GET('?edit=' + hb)).json.edit; bal = (await GET('?ballot=1&page=brook')).json;
+    check('four readers at the moment the clock runs out settle one round between them: the older of the two goes up, once, its proposer told once — and the other waits',
+          sa.status === 'live' && sb.status === 'motion' && (await closesOf(ha)).length === 1 && !(await closesOf(hb)).length && (await toldOf('st1', ha)).length === 1 && bal.last.carried === 1 && bal.closesAt > Date.now(),
+          j({ ha: sa.status, hb: sb.status, closes: (await closesOf(ha)).length, told: (await toldOf('st1', ha)).length, last: bal.last }));
+    check('…and the round\'s lock is let go', (await API.db('GET', API.K.lock('round:brook'))) == null);
+    await API.db('SET', API.K.lock('round:brook'), '1', 'NX', 'EX', 30); bal = await round(); sb = (await GET('?edit=' + hb)).json.edit;
+    check('a round somebody else is settling is left to them: the ballot reads, and nothing goes up twice', bal.ok && sb.status === 'motion' && bal.closesAt < Date.now(), j({ hb: sb.status }));
+    await API.dbm([['DEL', API.K.lock('round:brook')], ['HSET', API.K.page('brook'), 'closes', String(Date.now() + 3600e3)]]);   // (the clock an hour on again, so that nothing goes up before the next check has set its table)
+    // A MOTION THAT CANNOT GO UP is turned back with the reason — it does not stand in the way of every read after — and the next in line goes up
+    await breathe('st1'); r = await pedit('st1', 'brook', { [nm(362)]: fresh('d') }); const hc = r.json.edit;
+    await POST({ op: 'heart', edit: hc }, 'v4'); await POST({ op: 'heart', edit: hb }, 'v3'); await spoil(hb);
+    bal = await round(); sb = (await GET('?edit=' + hb)).json.edit; const sc = (await GET('?edit=' + hc)).json.edit;
+    check('the leader cannot go up (its tracing is gone): it is turned back with the reason, the ballot reads on, and the next in line goes up in its place',
+          bal.ok && sb.status === 'rejected' && /could not be put up/.test(sb.why) && sc.status === 'live' && bal.last.carried === 1 && (await toldOf('st2', hb)).some(x => x.kind === 'failed'), j({ hb: [sb.status, sb.why], hc: sc.status, last: bal.last }));
+    d = await doc(); await breathe('con2'); r = await edit('con2', {}, [canonOf(d)[0].n]); const mx = r.json.edit;
+    for (const v of ['tr2', 'tr4', 'tr5']) await POST({ op: 'vote', edit: mx, aye: true }, v);
+    await spoil(mx); await age(mx); r = await GET('?queue=1'); const sx = (await GET('?edit=' + mx)).json.edit;
+    check('…and so is one with a close of its own: three ayes, nothing to put up, and the queue reads on', r.status === 200 && r.json.ok && sx.status === 'rejected' && /could not be put up/.test(sx.why), j({ status: r.status, mx: [sx.status, sx.why] }));
+    d = await doc(); const vy = canonOf(d)[0]; await breathe('con2'); r = await edit('con2', {}, [vy.n]); const my = r.json.edit;
+    for (const v of ['tr2', 'tr4', 'tr5']) await POST({ op: 'vote', edit: my, aye: true }, v);
+    await age(my); await Promise.all([GET('?edit=' + my), GET('?queue=1'), GET('?edit=' + my), GET('?ballot=1')]);
+    const sy = (await GET('?edit=' + my)).json.edit; d = await doc();
+    check('a motion at its close, read by four at once, is put up once and its proposer told once', sy.status === 'live' && !at(d, vy.n) && (await closesOf(my)).length === 1 && (await toldOf('con2', my)).length === 1,
+          j({ my: sy.status, closes: (await closesOf(my)).length, told: (await toldOf('con2', my)).length }));
+
     // ── 21 · wild ─────────────────────────────────────────────────────────
     r = await POST({ op: 'settings', page: 'meadow', chaos: 3 }, 'mod'); check('a moderator turns their page wild', r.json.ok && r.json.rules.chaos === 3, brief(r));
     const heap = {}; for (let i = 0; i < 25; i++) heap[nm(500 + i)] = fresh('d', { x: i });

@@ -160,6 +160,22 @@ const file = src => path.join(tmp, src.replace(/^\/toem2\//, ''));
   check('a full album drops its oldest for the new one', r.json.ok && kept.length === API.KEEP && kept[0].id === r.json.photo.id && !kept.some(p => p.id === 'old0199') && kept.some(p => p.id === 'old0198'), kept.length);
   check('and the one that fell off takes its picture and its hearts', !fs.existsSync(path.join(tmp, 'album/toem2/old0199.png')) && fs.existsSync(path.join(tmp, 'album/toem2/old0198.png')) && (await W.db('SCARD', W.K.albumLike('toem2', 'old0199'))) === 0);
 
+  // A VISITOR'S SHARE (2026-09-28, the hardening): twenty up at a time for whoever is no moderator, so one account's photos do not push the album off its own end
+  console.log('a visitor\'s share of the album');
+  r = await POST({ op: 'post', cap: 'one more', sec: 'town', src: PNG }, 'nu2');   // nu2 has the old ones to their name
+  check('somebody with twenty up already hangs no more — and nothing is written for it', r.status === 429 && r.json.code === 'mine-full' && (await GET()).json.photos.length === API.KEEP && (await GET()).json.photos[0].cap === 'the one that tips it'
+        && fs.readdirSync(dir).filter(f => !/^old/.test(f)).length === 1, brief(r));
+  await W.db('DEL', W.K.album('toem2'));
+  for (let i = 0; i < API.MINE_MAX - 1; i++) await W.db('RPUSH', W.K.album('toem2'), JSON.stringify({ id: 'mine' + i, by: U.nu, at: 2000 - i, cap: 'mine ' + i, src: '/toem2/album/toem2/none.png' }));
+  r = await POST({ op: 'post', cap: 'the twentieth', sec: 'town', src: PNG }, 'nu');
+  const p20 = r.json.photo;
+  check('the twentieth goes up', r.json.ok && (await GET()).json.photos.length === API.MINE_MAX, brief(r));
+  check('the twenty-first does not', brief(await POST({ op: 'post', cap: 'x', sec: 'town', src: PNG }, 'nu')).code === 'mine-full');
+  check('one taken down makes room for one', (await POST({ op: 'drop', id: p20.id }, 'nu')).json.ok && (await POST({ op: 'post', cap: 'in its place', sec: 'town', src: PNG }, 'nu')).json.ok);
+  await W.db('DEL', W.K.album('toem2'));
+  for (let i = 0; i < API.MINE_MAX + 5; i++) await W.db('RPUSH', W.K.album('toem2'), JSON.stringify({ id: 'kept' + i, by: U.mod, at: 3000 - i, cap: 'kept ' + i, src: '/toem2/album/toem2/none.png' }));
+  check('a moderator has as many up as the album keeps', (await POST({ op: 'post', cap: 'and another', src: PNG }, 'mod')).json.ok && (await GET()).json.photos.length === API.MINE_MAX + 6);
+
   console.log('the rate');
   let last = null;
   for (let i = 0; i < 21; i++) last = await POST({ op: 'post', cap: 'p ' + i, sec: 'town', src: PNG }, 'nu2');

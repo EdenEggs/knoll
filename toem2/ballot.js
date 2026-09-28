@@ -336,9 +336,12 @@ window.Ballot = (function () {
     const s = Math.max(0, Math.ceil((data.closesAt - Date.now()) / 1000)), d = Math.floor(s / 86400);
     clockEl.textContent = (d ? d + 'd ' : '') + two(Math.floor(s % 86400 / 3600)) + ':' + two(Math.floor(s % 3600 / 60)) + ':' + two(s % 60);
     clockEl.setAttribute('datetime', new Date(data.closesAt).toISOString());
-    if (!s && !paintClock.asked) {
+    if (!s && !paintClock.asked) {            // every open ballot's clock runs out in the same second: each asks a moment after, not all at once — and not again for five seconds, should the round be slow to settle
       paintClock.asked = true;
-      fetchBallot().then(() => { paintClock.asked = false; if (window.Seed && Seed.pull) Seed.pull(true); if (window.Seed && Seed.readRules) Seed.readRules(true); if (open && phase !== 'counting') render(); });
+      setTimeout(() => fetchBallot().then(() => {
+        setTimeout(() => { paintClock.asked = false; }, 5000);
+        if (window.Seed && Seed.pull) Seed.pull(true); if (window.Seed && Seed.readRules) Seed.readRules(true); if (open && phase !== 'counting') render();
+      }), 200 + Math.random() * 1300);
     }
   }
   async function fetchBallot() {

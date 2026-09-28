@@ -164,7 +164,7 @@ const MOTION_HOURS = 72, MOTION_QUORUM = 3, CONTESTED_HOURS = 24;
    and FEATS — which kinds everyone may add live (ink · stickers · notes · tracings · embeds · others' pieces); off is the keepers' only */
 const CHAOS = [0, 1, 2, 3], EVERY = [1, 3, 6, 12, 24, 72, 168], CHAOS_DEFAULT = 1, EVERY_DEFAULT = 6, HOUR = 3600e3;
 const FEATS_DEFAULT = [true, true, true, false, false, false], KIND_SLOT = { s: 0, p: 0, b: 0, d: 1, k: 1, t: 2, i: 3, g: 4, v: 4 }, OTHERS_SLOT = 5;
-const LOCK_S = 5, NOTES_KEEP = 50;            // a vote's lock on its motion (seconds) · bell entries kept (api/friends.js reads them)
+const LOCK_S = 5, ROUND_LOCK_S = 30, NOTES_KEEP = 50;   // a vote's lock on its motion, a round's on its page (seconds) · bell entries kept (api/friends.js reads them)
 const VOTE = { id: 'vote', name: 'the vote' }; // the hand that closes a ballot
 const TAG_MAX = 1000000;                      // the most gnomes one name takes: Mossy#1 … Mossy#1000000
 const NAMES_KEEP = 50, AUDIT_KEEP = 1000;     // names kept per account; entries kept in the moderators' record
@@ -403,7 +403,8 @@ const dbm = cmds => storeFor().many(cmds);
                                a page's wall: bare for toem2 (toem2:doc), p:<slug>: before
                                the rest for any other (toem2:p:<slug>:doc) — pageKeys()
      edit:<id>         string  one edit, waiting or decided, naming its page (none: toem2), with prev why look; a motion: closes votes voters
-     lock:<edit>       string  a vote landing on a motion (LOCK_S seconds)
+     lock:<edit>       string  a vote landing on a motion, or its close being settled (LOCK_S seconds)
+     lock:round:<slug> string  a council's round being settled (ROUND_LOCK_S seconds): one reader takes it, the rest read on
    PROFILES — a profile is an account's name and its yard (api/hill.js)
      prop:<id>         string  a change somebody else proposes to a gnome's yard or name
      propdoc:<id>      string  …the yard it proposes, while it is open
@@ -972,8 +973,31 @@ async function credit(u, touched, standing) {   // the day's footprint, and — 
 // …a drastic one wants MOTION_QUORUM of them to be in the running at all: one friend's heart does not take fifty pieces off a wall
 const leads = eds => eds.map(e => Object.assign({ e }, tally(e))).filter(x => x.ayes >= (x.e.cls === 'drastic' ? MOTION_QUORUM : 1) && x.ayes > x.nays)
   .sort((a, b) => b.ayes - a.ayes || a.nays - b.nays || a.e.at - b.e.at)[0];
+/* A motion that has carried goes up — and one that cannot (the wall is full, its tracing is gone) is turned back with
+   the reason, so that it does not stand in the queue's way at every read after: a sweep that threw on it would throw
+   again at the next, and the ballot behind it would never be read. The store's own trouble (5xx) is not the motion's:
+   that is thrown on, and the next read tries again. */
+async function carry(ed, me) {
+  try { return await applyEdit(ed, me, 'motion'); }
+  catch (e) {
+    if (!(e instanceof Bad) || e.status >= 500) throw e;
+    await settle(ed, 'rejected', me, { why: 'it could not be put up: ' + e.message });
+    return { status: 'rejected', why: e.code };
+  }
+}
+/* ONE READER SETTLES A ROUND. Every open ballot asks again when its clock runs out, so the readers of that moment
+   arrive together: the first takes the round (a lock no longer than a function lives), reads the clock again under
+   it — the reader before may have settled this very round — and the rest sweep what is theirs to sweep and read on. */
 async function sweepQueue(pg) {
-  const rules = await rulesOf(pg), now = Date.now(), round = rules.chaos === 2 && rules.closes > 0 && rules.closes <= now;
+  const now = Date.now(), lock = K.lock('round:' + pg.slug), due = r => r.chaos === 2 && r.closes > 0 && r.closes <= now;
+  let rules = await rulesOf(pg);
+  const mine = due(rules) && !!(await db('SET', lock, '1', 'NX', 'EX', ROUND_LOCK_S));
+  try {
+    if (mine) rules = await rulesOf(pg);
+    await sweep(pg, rules, now, mine && due(rules));
+  } finally { if (mine) await db('DEL', lock); }
+}
+async function sweep(pg, rules, now, round) {
   const ids = await db('LRANGE', pg.queue, 0, -1);
   const raws = ids.length ? await dbm(ids.map(id => ['GET', K.edit(id)])) : [], cmds = [], count = { carried: 0, fell: 0, kept: 0 };
   const eds = raws.map(raw => raw && JSON.parse(raw)).filter(Boolean);
@@ -982,12 +1006,13 @@ async function sweepQueue(pg) {
     const out = await settleMotion(e, VOTE, rules);
     if (out) count[out.status === 'live' ? 'carried' : out.status === 'rejected' ? 'fell' : 'kept']++;
   }
-  if (round) {                               // the clock has come round: of the motions filed before it did, the one with the most hearts
-    const up = leads(eds.filter(e => e.status === 'motion' && e.tick && e.at <= rules.closes));
-    if (up) {
-      const out = await applyEdit(up.e, VOTE, 'motion');
-      count.carried++;
-      await audit(VOTE.id, 'close', { edit: up.e.id, page: pg.slug, of: up.e.by, result: 'passed', ayes: up.ayes, nays: up.nays, skipped: out.skipped || undefined });
+  if (round) {                               // the clock has come round: of the motions filed before it did, the one with the most hearts —
+    let runners = eds.filter(e => e.status === 'motion' && e.tick && e.at <= rules.closes), up;
+    while ((up = leads(runners))) {           // …and should that one not go up at all (carry), the next in line
+      const out = await carry(up.e, VOTE), passed = out.status === 'live';
+      await audit(VOTE.id, 'close', { edit: up.e.id, page: pg.slug, of: up.e.by, result: passed ? 'passed' : 'rejected', why: passed ? undefined : out.why, ayes: up.ayes, nays: up.nays, skipped: out.skipped || undefined });
+      if (passed) { count.carried++; break; }
+      runners = runners.filter(e => e !== up.e);
     }
   }
   const again = ids.length ? await dbm(ids.map(id => ['GET', K.edit(id)])) : [];
@@ -1200,12 +1225,16 @@ async function mark(req, me, id, v) {
   try {
     ed = JSON.parse(await db('GET', K.edit(id)));
     if (!open(ed)) throw shut(ed);
-    ed.votes = ed.votes || {}; ed.voters = ed.voters || {};
-    const prior = ed.voters[ip], first = ed.votes[me.id] === undefined && v !== null;
-    if (prior && prior !== me.id) delete ed.votes[prior];   // one vote per address: the later voter's is the one that counts
-    if (v === null) { delete ed.votes[me.id]; if (ed.voters[ip] === me.id) delete ed.voters[ip]; }
-    else { ed.voters[ip] = me.id; ed.votes[me.id] = v; }
-    await dbm([['SET', K.edit(id), JSON.stringify(ed)]].concat(first && ed.status === 'motion' ? [['HINCRBY', K.user(me.id), 'votes', 1]] : []));
+    ed.votes = ed.votes || {}; ed.voters = ed.voters || {}; ed.cast = ed.cast || [];
+    // counted on the account the first time it marks this motion — not again for a heart taken back and given anew (cast: who has, ever)
+    const prior = ed.voters[ip], first = v !== null && ed.status === 'motion' && ed.votes[me.id] === undefined && !ed.cast.includes(me.id);
+    if (v === null) { delete ed.votes[me.id]; if (prior === me.id) delete ed.voters[ip]; }   // taken back: their own, and nobody else's at the address
+    else {
+      if (prior && prior !== me.id) delete ed.votes[prior];   // one vote per address: the later voter's is the one that counts
+      ed.voters[ip] = me.id; ed.votes[me.id] = v;
+      if (ed.status === 'motion' && !ed.cast.includes(me.id)) ed.cast.push(me.id);
+    }
+    await dbm([['SET', K.edit(id), JSON.stringify(ed)]].concat(first ? [['HINCRBY', K.user(me.id), 'votes', 1]] : []));
   } finally { await db('DEL', K.lock(id)); }
   const out = ed.status === 'motion' ? await settleMotion(ed, me, rules) : null;
   if (ed.tick) rules = await rulesOf(pg, me);
@@ -1232,15 +1261,21 @@ async function settleMotion(ed, me, rules) {
   if (out) await audit(VOTE.id, 'close', Object.assign({ edit: ed.id, page: ed.page || HOME, of: ed.by, result: out.status === 'live' ? 'passed' : out.status }, tally(ed)));
   return out;
 }
-async function closeMotion(ed, me) {
-  const { ayes, nays } = tally(ed), total = ayes + nays;
-  if (ed.tick) return null;                   // the council's clock decides it, among the others (sweepQueue)
-  if (Date.now() < (ed.closes || ed.at + MOTION_HOURS * 3600e3)) return null;
-  if (total >= MOTION_QUORUM && ayes > nays) return applyEdit(ed, me, 'motion');
-  if (total >= MOTION_QUORUM) { await settle(ed, 'rejected', me, { why: 'the vote: ' + ayes + ' for, ' + nays + ' against' }); return { status: 'rejected', why: 'the vote' }; }
-  ed.status = 'queued'; ed.queued = Date.now();   // no quorum: a keeper decides (the queue keeps it, drastic as it is; its week starts now)
-  await db('SET', K.edit(ed.id), JSON.stringify(ed));
-  return { status: 'queued', why: 'no quorum' };
+async function closeMotion(ed0, me) {
+  if (ed0.tick) return null;                  // the council's clock decides it, among the others (sweepQueue)
+  if (Date.now() < (ed0.closes || ed0.at + MOTION_HOURS * 3600e3)) return null;
+  // DECIDED ONCE: two reads at its close would each have put it up, and told its proposer twice — so under the motion's lock, on what it is now
+  if (!(await db('SET', K.lock(ed0.id), '1', 'NX', 'EX', LOCK_S))) return null;
+  try {
+    const raw = await db('GET', K.edit(ed0.id)), ed = raw && JSON.parse(raw);
+    if (!ed || ed.status !== 'motion') return null;
+    const { ayes, nays } = tally(ed), total = ayes + nays;
+    if (total >= MOTION_QUORUM && ayes > nays) return await carry(ed, me);
+    if (total >= MOTION_QUORUM) { await settle(ed, 'rejected', me, { why: 'the vote: ' + ayes + ' for, ' + nays + ' against' }); return { status: 'rejected', why: 'the vote' }; }
+    ed.status = 'queued'; ed.queued = Date.now();   // no quorum: a keeper decides (the queue keeps it, drastic as it is; its week starts now)
+    await db('SET', K.edit(ed.id), JSON.stringify(ed));
+    return { status: 'queued', why: 'no quorum' };
+  } finally { await db('DEL', K.lock(ed0.id)); }
 }
 
 // a strike on a moderator's revision is the admin's to give, and nobody strikes the admin
@@ -1598,7 +1633,7 @@ async function get(req, res, q, op) {
     if (raw && JSON.parse(raw).status === 'motion') { await settleMotion(JSON.parse(raw), VOTE); raw = await db('GET', K.edit(id)); }
     if (!raw) return answer(res, 404, { ok: false, code: 'edit', error: 'no such edit (a decided one is kept ' + EDIT_DAYS + ' days)' });
     const e = JSON.parse(raw), t = e.votes ? tally(e) : {};
-    delete e.ip; delete e.voters;               // the author's address and the voters' are nobody's business
+    delete e.ip; delete e.voters; delete e.cast;   // the author's address and the voters' are nobody's business — nor who ever marked it
     if (e.votes && !isMod(await whoIs(req))) delete e.votes;   // …and who voted which way is the tally's to say, and a moderator's to see
     return answer(res, 200, { ok: true, edit: Object.assign(e, t) });
   }
